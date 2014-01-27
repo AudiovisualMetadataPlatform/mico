@@ -16,7 +16,7 @@
     </prerequisites>
 
     <properties>
-        <marmotta.version>3.2.0-incubating-SNAPSHOT</marmotta.version>
+        <marmotta.version>3.2.0-SNAPSHOT</marmotta.version>
     </properties>
 
     <inceptionYear>2013</inceptionYear>
