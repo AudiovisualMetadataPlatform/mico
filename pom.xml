@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>eu.mico-project.platform</groupId>
-    <artifactId>platform-reactor</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+
+    <parent>
+        <groupId>eu.mico-project.platform</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>parent</relativePath>
+    </parent>
+
+    <artifactId>mico-platform</artifactId>
     <packaging>pom</packaging>
 
     <name>MICO Platform</name>
     <description>MICO Platform Reactor</description>
     <url>http://mico-project.eu</url>
-
-    <prerequisites>
-        <maven>3.0.3</maven>
-    </prerequisites>
-
-    <properties>
-        <marmotta.version>3.2.0-SNAPSHOT</marmotta.version>
-    </properties>
 
     <inceptionYear>2013</inceptionYear>
 
@@ -90,23 +90,6 @@
         <system>Jira</system>
         <url>http://issues.mico-project.eu</url>
     </issueManagement>
-
-    <build>
-
-    </build>
-
-    <dependencyManagement>
-
-    </dependencyManagement>
-
-
-    <dependencies>
-
-    </dependencies>
-
-    <profiles>
-
-    </profiles>
 
     <modules>
         <module>parent</module>

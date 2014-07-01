@@ -4,9 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>eu.mico-project.platform</groupId>
-    <artifactId>event</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <parent>
+        <groupId>eu.mico-project.platform</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../parent</relativePath>
+    </parent>
 
+    <artifactId>event</artifactId>
+
+    <name>MICO Platform: Event</name>
     
 </project>
