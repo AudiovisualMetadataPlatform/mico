@@ -109,7 +109,9 @@
     </profiles>
 
     <modules>
-
+        <module>parent</module>
+        <module>event</module>
+        <module>platform</module>
     </modules>
 
 </project>
