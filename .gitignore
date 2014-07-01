@@ -1,0 +1,25 @@
+*~
+
+# autotools auto-generated
+configure
+autom4te.cache
+aclocal.m4
+config.guess
+config.h.in
+config.h
+config.sub
+config.log
+config.status
+Makefile.in
+compile
+install-sh
+ltmain.sh
+missing
+libtool
+stamp-h1
+m4/libtool.m4
+m4/ltoptions.m4
+m4/ltsugar.m4
+m4/ltversion.m4
+m4/lt~obsolete.m4
+Makefile
