@@ -4,11 +4,13 @@
 #include <string>
 #include <cstring>
 #include <cstdint>
+#include <cstdlib>
 
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/cpp_dec_float.hpp> 
 
 using std::string;
+using std::size_t;
 using namespace boost::multiprecision;
 
 /**
@@ -56,24 +58,27 @@ namespace org {
       private:
 	string uri;
 
+	// find split position according to algorithm in class description
+	size_t split() const;
+
       public:
 	
-	URI(const string& uri);
-	URI(const char* uri);
-	~URI();
+	URI(const string& uri) : uri(uri) {};
+	URI(const char* uri)   : uri(uri) {};
+	URI(const URI& uri)    : uri(uri.uri) {};
 	
 	/**
 	 * Gets the local name of this URI.
 	 */
-	string getLocalName() const;
+	string getLocalName() const { return uri.substr(split()); };
 
 	/**
 	 * Gets the namespace of this URI.
 	 */
-	string getNamespace() const;	
+	string getNamespace() const { return uri.substr(0,split()); };	
 
 
-	const string& stringValue() const;
+	inline const string& stringValue() const { return uri; } ;
       };
 
 
@@ -86,23 +91,23 @@ namespace org {
 	/**
 	 * Create a new BNode with a random ID.
 	 */
-	BNode();
+	BNode() : BNode(std::to_string(rand())) {};
 
 	/**
 	 * Create a new BNode with the given ID
 	 */
-	BNode(const string& id);
-	BNode(const char*   id);
+	BNode(const string& id) : id(id) {};
+	BNode(const char*   id) : id(id) {};
+	BNode(const BNode&  id) : id(id.id) {};
 
-	~BNode();
 
 	/**
 	 * retrieves this blank node's identifier.
 	 */
-	const string& getID() const;
+	inline const string& getID() const { return id; };
 	
 
-	const string& stringValue() const;
+	inline const string& stringValue() const { return id; };
 
       };
 
@@ -111,13 +116,19 @@ namespace org {
        */
       class Literal : public virtual Value {
       protected:
-	string value;
+	string label;
 
       public:
 
-	Literal(const string& label);
-	Literal(const char*   label);
-	~Literal();
+	Literal(const string& label) : label(label) {};
+	Literal(const char*   label) : label(label) {};
+	Literal(int8_t  i) : label(std::to_string((int)i)) {};
+	Literal(int16_t i) : label(std::to_string((int)i)) {};
+	Literal(int32_t i) : label(std::to_string((long int)i)) {};
+	Literal(int64_t i) : label(std::to_string((long long)i)) {};
+	Literal(double d) : label(std::to_string(d)) {};
+	Literal(float  d) : label(std::to_string(d)) {};
+	Literal(bool b) : label(b ? "true" : "false") {};
 
 	/**
 	 * Returns the boolean value of this literal.
@@ -168,9 +179,9 @@ namespace org {
 	/**
 	 * Gets the label of this literal.
 	 */
-	const string& getLabel() const;	
+	inline const string& getLabel() const { return label; };
 
-	const string& stringValue() const;
+	inline const string& stringValue() const { return label; };
       };
 
       /**
@@ -182,14 +193,13 @@ namespace org {
 
       public:
 
-	LanguageLiteral(const string& label, const string& language);
-	LanguageLiteral(const char*   label, const char*   language);
-	~LanguageLiteral();
+	LanguageLiteral(const string& label, const string& language) : Literal(label), lang(language) {};
+	LanguageLiteral(const char*   label, const char*   language) : Literal(label), lang(language) {};
 
 	/**
 	 * Gets the language tag for this literal, normalized to lower case.
 	 */
-	const string& getLanguage() const;
+	inline const string& getLanguage() const { return lang; };
 
       };
 
@@ -202,14 +212,20 @@ namespace org {
 	URI datatype;
 
       public:
-	DatatypeLiteral(const string& label, const URI& datatype);
-	DatatypeLiteral(const char*   label, const URI& datatype);
-	~DatatypeLiteral();
+	DatatypeLiteral(const string& label, const URI& datatype) : Literal(label), datatype(datatype) {};
+	DatatypeLiteral(const char*   label, const URI& datatype) : Literal(label), datatype(datatype) {};
+	DatatypeLiteral(int8_t  i) : Literal(std::to_string((int)i)), datatype("http://www.w3.org/2001/XMLSchema#byte") {};
+	DatatypeLiteral(int16_t i) : Literal(std::to_string((int)i)), datatype("http://www.w3.org/2001/XMLSchema#short") {};
+	DatatypeLiteral(int32_t i) : Literal(std::to_string((long int)i)), datatype("http://www.w3.org/2001/XMLSchema#int") {};
+	DatatypeLiteral(int64_t i) : Literal(std::to_string((long long)i)), datatype("http://www.w3.org/2001/XMLSchema#long") {};
+	DatatypeLiteral(double d) : Literal(std::to_string(d)), datatype("http://www.w3.org/2001/XMLSchema#double") {};
+	DatatypeLiteral(float  d) : Literal(std::to_string(d)), datatype("http://www.w3.org/2001/XMLSchema#float") {};
+	DatatypeLiteral(bool b) : Literal(b ? "true" : "false"), datatype("http://www.w3.org/2001/XMLSchema#boolean") {};
 
 	/**
 	 * Gets the datatype for this literal.
 	 */
-	const URI& getDatatype() const;
+	const URI& getDatatype() const { return datatype; };
 
       };
 

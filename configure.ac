@@ -39,6 +39,17 @@ AC_CHECK_HEADERS([boost/iterator/iterator_facade.hpp boost/multiprecision/cpp_in
 AC_LANG_POP([C++])
 
 
+# GTest
+AC_ARG_WITH(gtest, AS_HELP_STRING(--with-gtest,[enable GTest testing (path to GTest provided as argument)]), GTEST_DIR=$withval, with_gtest=no)
+AS_IF([test "x$with_gtest" != xno],
+  [
+  AC_CHECK_FILE($GTEST_DIR/lib/libgtest.la, , AC_MSG_ERROR("GTest not found in $GTEST_DIR"))
+  AM_CONDITIONAL(GTEST,true)
+  AC_SUBST([GTEST_DIR])
+  ], [
+  AM_CONDITIONAL(GTEST,false)
+  ])
+
 AC_ARG_ENABLE(profiling,AS_HELP_STRING(--enable-profiling,enable GNU gprof profiling support),[
 CFLAGS="$CFLAGS -g -pg"
 CXXFLAGS="$CXXFLAGS -g -pg"
