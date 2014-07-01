@@ -23,6 +23,8 @@
         <marmotta.home>${project.build.directory}${file.separator}marmotta</marmotta.home>
         <marmotta.version>3.3.0-SNAPSHOT</marmotta.version>
         <sesame.version>2.7.11</sesame.version>
+        <hadoop.version>2.4.1</hadoop.version>
+        <hadoop.home>${project.build.directory}${file.separator}hadoop</hadoop.home>
     </properties>
 
     <repositories>
@@ -41,6 +43,11 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>2.5</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -88,6 +95,16 @@
                     <groupId>org.apache.tomcat.maven</groupId>
                     <artifactId>tomcat7-maven-plugin</artifactId>
                     <version>2.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.googlecode.maven-download-plugin</groupId>
+                    <artifactId>download-maven-plugin</artifactId>
+                    <version>1.2.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.shyiko.hadoop-maven-plugin</groupId>
+                    <artifactId>hadoop-maven-plugin</artifactId>
+                    <version>1.0.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
