@@ -41,5 +41,5 @@ To launch the different webapps, run
 In parallel you may require some persistence infrastructure, for wich run
 
     cd persistence
-    mvn clean mvn clean compile hadoop:start
+    mvn clean compile hadoop:start
 
