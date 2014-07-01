@@ -95,6 +95,7 @@
         <module>parent</module>
         <module>event</module>
         <module>persistence</module>
+        <module>marmotta</module>
     </modules>
 
 </project>

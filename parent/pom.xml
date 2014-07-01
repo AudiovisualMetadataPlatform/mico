@@ -18,6 +18,7 @@
     </prerequisites>
 
     <properties>
+        <javaee.port>8080</javaee.port>
         <marmotta.version>3.3.0-SNAPSHOT</marmotta.version>
         <sesame.version>2.7.11</sesame.version>
     </properties>
