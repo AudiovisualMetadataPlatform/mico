@@ -1,5 +1,5 @@
 AC_INIT(mico-platform,1.0,sschaffert@apache.org)
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_MACRO_DIR(m4)
 AC_CONFIG_HEADERS([config.h])
 
@@ -33,6 +33,9 @@ AX_CHECK_COMPILE_FLAG([-std=c++11], [CXXFLAGS="$CXXFLAGS -std=c++11"],
 )
 
 
+AC_CHECK_HEADERS([boost/iterator/iterator_facade.hpp boost/multiprecision/cpp_int.hpp boost/multiprecision/cpp_dec_float.hpp], , AC_MSG_ERROR("required Boost headers missing"))
+
+
 AC_LANG_POP([C++])
 
 
@@ -48,4 +51,4 @@ CXXFLAGS="$CXXFLAGS -Wall -Wextra"
 ])
 
 
-AC_OUTPUT([Makefile persistence/Makefile event/Makefile])
+AC_OUTPUT([Makefile rdf/Makefile persistence/Makefile event/Makefile])

@@ -1,2 +1,2 @@
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = persistence event
+SUBDIRS = rdf persistence event
