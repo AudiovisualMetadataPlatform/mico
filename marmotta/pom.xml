@@ -17,11 +17,6 @@
 
     <name>MICO Platform: Marmotta Web Application</name>
 
-    <properties>
-        <marmotta.context>/${project.artifactId}</marmotta.context>
-        <marmotta.home>${project.build.directory}${file.separator}${project.artifactId}</marmotta.home>
-    </properties>
-
     <build>
         <finalName>${project.artifactId}</finalName>
         <pluginManagement>

@@ -83,13 +83,50 @@
         <connection>scm:git:https://code.mico-project.eu/platform.git</connection>
         <developerConnection>scm:git:https://code.mico-project.eu/platform.git</developerConnection>
         <url>http://code.mico-project.eu/platform</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <issueManagement>
         <system>Jira</system>
         <url>http://issues.mico-project.eu</url>
     </issueManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>tomcat7-run</id>
+                        <phase>run</phase>
+                        <goals><goal>run-war-only</goal></goals>
+                        <configuration>
+                            <port>${javaee.port}</port>
+                            <webapps>
+                                <webapp>
+                                    <contextPath>${marmotta.context}</contextPath>
+                                    <groupId>${project.groupId}}</groupId> 
+                                    <artifactId>marmotta</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>war</type>    
+                                    <asWebapp>true</asWebapp>
+                                    <warDirectory>marmotta/${project.build.directory}/marmotta/marmotta.war</warDirectory>
+                                    <warSourceDirectory>marmotta/${project.build.directory}/marmotta/marmotta</warSourceDirectory>
+                                </webapp>
+                                <!-- ... possibly more webapps ... -->
+                            </webapps> 
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tomcat7-shutdown</id>
+                        <phase>shutdown</phase>
+                        <goals><goal>shutdown</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <modules>
         <module>parent</module>
