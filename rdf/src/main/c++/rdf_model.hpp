@@ -23,6 +23,8 @@ namespace org {
   namespace openrdf {
     namespace model {
 
+      enum ValueTypes { TYPE_URI, TYPE_BNODE, TYPE_PLAIN_LITERAL, TYPE_LANGUAGE_LITERAL, TYPE_TYPED_LITERAL };
+
       /**
        * The supertype of all RDF model objects (URIs, blank nodes and literals).
        */
@@ -39,7 +41,7 @@ namespace org {
 	 */
 	virtual bool equals(const Value& other) const = 0;
 
-	virtual ostream& print(ostream& os) const = 0;
+	virtual ostream& print(ostream& os) const = 0;	
 
       public:
 
@@ -50,6 +52,10 @@ namespace org {
 	 */
 	virtual const string& stringValue() const = 0;
 
+	/**
+	 * Return type information (to avoid dynamic casts if possible)
+	 */
+	virtual const ValueTypes getType() const = 0;
       };
 
       /**
@@ -104,6 +110,8 @@ namespace org {
 	inline const string& stringValue() const { return uri; } ;
 
 
+	inline const ValueTypes getType() const { return TYPE_URI; };
+
 
 	inline bool operator==(const string& s) const { return uri == s; };
 	inline bool operator==(const char* s) const { return uri == s; };
@@ -145,6 +153,7 @@ namespace org {
 
 	inline const string& stringValue() const { return id; };
 
+	inline const ValueTypes getType() const { return TYPE_BNODE; };
 
 	inline bool operator==(const string& s) const { return id == s; };
 	inline bool operator==(const char* s) const { return id == s; };
@@ -233,6 +242,10 @@ namespace org {
 	inline const string& stringValue() const { return label; };
 
 
+	inline const ValueTypes getType() const { return TYPE_PLAIN_LITERAL; };
+
+
+
 	inline bool operator==(const string& s) const { return label == s; };
 	inline bool operator==(const char* s) const { return label == s; };
 	inline bool operator!=(const string& s) const { return label != s; };
@@ -271,6 +284,7 @@ namespace org {
 	 */
 	inline const string& getLanguage() const { return lang; };
 
+	inline const ValueTypes getType() const { return TYPE_LANGUAGE_LITERAL; };
 
       };
 
@@ -306,6 +320,7 @@ namespace org {
 	const URI& getDatatype() const { return datatype; };
 
 
+	inline const ValueTypes getType() const { return TYPE_TYPED_LITERAL; };
       };
 
 

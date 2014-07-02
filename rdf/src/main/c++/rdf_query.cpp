@@ -12,6 +12,53 @@ namespace org {
     namespace query {
 
 
+      /**
+       * Serialize query result data from the given argument into XML SPARQL protocol syntax.
+       */
+      std::ostream& operator<<(std::ostream& os, QueryResult& r) {
+	os << "<?xml version=\"1.0\"?>\n";
+	os << "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n";
+	  
+	os << "  <head>\n";
+	for(auto var : r.getBindingNames()) {
+	  os << "    <variable name=\"" << var << "\"/>\n";
+	}
+	os << "  </head>\n";
+
+	os << "  <results>\n";
+	for(auto bs : r) {
+	  os << "    <result>\n";
+	  for(auto b : bs) {
+	    os << "      <binding name=\"" << b.first << "\">\n";
+
+	    if(b.second->getType() == TYPE_URI) {
+	      URI* uri = dynamic_cast<URI*>(b.second);
+	      os << "        <uri>" << uri->stringValue() << "</uri>\n";
+	    } else if(b.second->getType() == TYPE_BNODE) {
+	      BNode* bnode = dynamic_cast<BNode*>(b.second);
+	      os << "        <bnode>" << bnode->stringValue() << "</bnode>\n";
+	    } else if(b.second->getType() == TYPE_PLAIN_LITERAL) {
+	      Literal* literal = dynamic_cast<Literal*>(b.second);
+	      os << "        <literal>" << literal->stringValue() << "</literal>\n";
+	    } else if(b.second->getType() == TYPE_LANGUAGE_LITERAL) {
+	      LanguageLiteral* literal = dynamic_cast<LanguageLiteral*>(b.second);
+	      os << "        <literal xml:lang=\"" << literal->getLanguage() << "\">" << literal->stringValue() << "</literal>\n";
+	    } else if(b.second->getType() == TYPE_TYPED_LITERAL) {
+	      DatatypeLiteral* literal = dynamic_cast<DatatypeLiteral*>(b.second);
+	      os << "        <literal datatype=\"" << literal->getDatatype().stringValue() << "\">" << literal->stringValue() << "</literal>\n";
+	    }
+
+	    os << "      </binding>\n";
+	  }
+	  os << "    </result>\n";
+	}
+	os << "  </results>\n";
+
+
+	os << "</sparql>\n";
+	return os;
+      }
+
 
 
       enum ParserMode {
@@ -220,13 +267,7 @@ namespace org {
 	return is;
       }
 
-
-      /**
-       * Serialize query result data from the given argument into XML SPARQL protocol syntax.
-       */
-      std::ostream& operator<<(std::ostream& os, QueryResult& r) {
-	  return os;
-      }
+      
 
     }
   }
