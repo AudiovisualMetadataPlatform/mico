@@ -64,7 +64,7 @@
         </dependency>
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-repository-api</artifactId>
+            <artifactId>sesame-query</artifactId>
         </dependency>
     </dependencies>
 

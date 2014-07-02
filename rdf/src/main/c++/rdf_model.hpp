@@ -1,5 +1,5 @@
 #ifndef HAVE_RDF_MODEL_H
-#define HAVE_RDF_MODEL_H
+#define HAVE_RDF_MODEL_H 1
 
 #include <string>
 #include <cstring>
@@ -11,6 +11,7 @@
 
 using std::string;
 using std::size_t;
+using std::ostream;
 using namespace boost::multiprecision;
 
 /**
@@ -27,8 +28,23 @@ namespace org {
        */
       class Value {
 
+	friend bool operator==(const Value& l, const Value& r);
+	friend bool operator!=(const Value& l, const Value& r);
+	friend std::ostream& operator<<(std::ostream&, Value&);
+	friend std::ostream& operator<<(std::ostream&, Value*);
+
+      protected:
+	/**
+	 * Internal polymorphic implementation of equals and print.
+	 */
+	virtual bool equals(const Value& other) const = 0;
+
+	virtual ostream& print(ostream& os) const = 0;
+
       public:
-	  
+
+	virtual ~Value() {};
+
 	/**
 	 * Returns the String-value of a Value object. This returns either a Literal's label, a URI's URI or a BNode's ID.
 	 */
@@ -61,6 +77,13 @@ namespace org {
 	// find split position according to algorithm in class description
 	size_t split() const;
 
+	/**
+	 * Internal polymorphic implementation of equals.
+	 */
+	bool equals(const Value& other) const;
+
+	ostream& print(ostream& os) const { os << "URI("<<uri<<")"; return os; } ;
+
       public:
 	
 	URI(const string& uri) : uri(uri) {};
@@ -79,6 +102,13 @@ namespace org {
 
 
 	inline const string& stringValue() const { return uri; } ;
+
+
+
+	inline bool operator==(const string& s) const { return uri == s; };
+	inline bool operator==(const char* s) const { return uri == s; };
+	inline bool operator!=(const string& s) const { return uri != s; };
+	inline bool operator!=(const char* s) const { return uri != s; };
       };
 
 
@@ -87,6 +117,12 @@ namespace org {
       private:
 	string id;
 
+	/**
+	 * Internal polymorphic implementation of equals.
+	 */
+	bool equals(const Value& other) const;
+
+	ostream& print(ostream& os) const { os << "BNode("<<id<<")"; return os; } ;
       public:
 	/**
 	 * Create a new BNode with a random ID.
@@ -109,6 +145,11 @@ namespace org {
 
 	inline const string& stringValue() const { return id; };
 
+
+	inline bool operator==(const string& s) const { return id == s; };
+	inline bool operator==(const char* s) const { return id == s; };
+	inline bool operator!=(const string& s) const { return id != s; };
+	inline bool operator!=(const char* s) const { return id != s; };
       };
 
       /**
@@ -118,6 +159,12 @@ namespace org {
       protected:
 	string label;
 
+	/**
+	 * Internal polymorphic implementation of equals.
+	 */
+	virtual bool equals(const Value& other) const;
+
+	virtual ostream& print(ostream& os) const { os << "Literal("<<label<<")"; return os; };
       public:
 
 	Literal(const string& label) : label(label) {};
@@ -129,6 +176,8 @@ namespace org {
 	Literal(double d) : label(std::to_string(d)) {};
 	Literal(float  d) : label(std::to_string(d)) {};
 	Literal(bool b) : label(b ? "true" : "false") {};
+
+	virtual ~Literal() {};
 
 	/**
 	 * Returns the boolean value of this literal.
@@ -182,6 +231,21 @@ namespace org {
 	inline const string& getLabel() const { return label; };
 
 	inline const string& stringValue() const { return label; };
+
+
+	inline bool operator==(const string& s) const { return label == s; };
+	inline bool operator==(const char* s) const { return label == s; };
+	inline bool operator!=(const string& s) const { return label != s; };
+	inline bool operator!=(const char* s) const { return label != s; };
+
+
+	inline operator bool() const { return booleanValue(); }
+	inline operator int() const { return intValue(); }
+	inline operator long int() const { return longValue(); }
+	inline operator long long int() const { return longValue(); }
+	inline operator float() const { return floatValue(); }
+	inline operator double() const { return doubleValue(); }
+
       };
 
       /**
@@ -191,6 +255,12 @@ namespace org {
       private:
 	string lang;
 
+	/**
+	 * Internal polymorphic implementation of equals.
+	 */
+	bool equals(const Value& other) const;
+
+	ostream& print(ostream& os) const { os << "LanguageLiteral("<<label<<","<<lang<<")"; return os; } ;
       public:
 
 	LanguageLiteral(const string& label, const string& language) : Literal(label), lang(language) {};
@@ -201,6 +271,7 @@ namespace org {
 	 */
 	inline const string& getLanguage() const { return lang; };
 
+
       };
 
 
@@ -209,7 +280,14 @@ namespace org {
        */
       class DatatypeLiteral : public virtual Literal {
       private:
-	URI datatype;
+	URI datatype;	
+
+	/**
+	 * Internal polymorphic implementation of equals.
+	 */
+	bool equals(const Value& other) const;
+
+	ostream& print(ostream& os) const { os << "DatatypeLiteral("<<label<<","<<datatype.stringValue()<<")"; return os; } ;
 
       public:
 	DatatypeLiteral(const string& label, const URI& datatype) : Literal(label), datatype(datatype) {};
@@ -227,17 +305,101 @@ namespace org {
 	 */
 	const URI& getDatatype() const { return datatype; };
 
+
       };
 
 
       class Statement {
+      private:
+	Resource& subject;
+	URI&      predicate;
+	Value&    object;
+
+      public:
+	// provide a copy constructor for every possible combination (for convenience)
+	Statement(Resource& s, URI& p, Value& o) : subject(s), predicate(p), object(o) {};
+	
+	/**
+	 * Gets the subject of this statement.
+	 */
+	inline const Resource& getSubject() const { return subject; };
+
+	/**
+	 * Gets the predicate of this statement.
+	 */
+	inline const URI& getPredicate() const { return predicate; };
+
+	
+	/**
+	 * Gets the object of this statement.
+	 */
+	inline const Value& getObject() const { return object; };
+
       };
 
 
-	bool operator==(URI,URI);
-	bool operator==(BNode,BNode);
-	bool operator==(Literal,Literal);
-	bool operator==(LanguageLiteral,LanguageLiteral);
+
+      inline bool operator==(const string& l,const URI& r) {
+	return r == l;
+      }
+
+      inline bool operator!=(const string& l,const URI& r) {
+	return r != l;
+      }
+
+      inline bool operator==(const string& l,const BNode& r) {
+	return r == l;
+      }
+
+      inline bool operator!=(const string& l,const BNode& r) {
+	return r != l;
+      }
+
+      inline bool operator==(const string& l,const Literal& r) {
+	return r == l;
+      }
+
+      inline bool operator!=(const string& l,const Literal& r) {
+	return r != l;
+      }
+
+
+      // convenience: test double value of a literal
+      inline bool operator==(const double d,const Literal& l) {
+	return l.doubleValue() == d;
+      }
+
+      inline bool operator==(const Literal& l,const double d) {
+	return l.doubleValue() == d;
+      }
+
+      inline bool operator!=(const double d,const Literal& l) {
+	return l.doubleValue() != d;
+      }
+
+      inline bool operator!=(const Literal& l,const double d) {
+	return l.doubleValue() != d;
+      }
+
+
+
+
+      inline bool operator==(const Value& l,const Value& r) {
+	return l.equals(r);
+      }
+
+      inline bool operator!=(const Value& l,const Value& r) {
+	return !l.equals(r);
+      }
+
+
+      inline std::ostream& operator<<(std::ostream& os, Value& v) {
+	return v.print(os);
+      }
+
+      inline std::ostream& operator<<(std::ostream& os, Value* v) {
+	return v->print(os);
+      }
 
     }
   }

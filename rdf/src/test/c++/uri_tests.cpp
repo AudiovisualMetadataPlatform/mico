@@ -49,3 +49,19 @@ TEST(URITest, Namespace) {
 }
 
 
+TEST(URITest, Equals) {
+  URI u1 = "http://localhost/resource/u1";
+  URI u2 = "http://localhost/resource/u1";
+  URI u3 = "http://localhost/resource/u3";
+
+  EXPECT_EQ(u1,u2);
+  EXPECT_NE(u1,u3);
+
+  // implicit casting
+  EXPECT_EQ(u1,"http://localhost/resource/u1");
+  EXPECT_EQ("http://localhost/resource/u1", u1);
+  EXPECT_NE(u1,"http://localhost/resource/u2");
+  EXPECT_NE("http://localhost/resource/u2", u1);
+}
+
+

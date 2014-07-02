@@ -24,6 +24,11 @@ AC_DEFINE(USE_THREADS, 1, [use threads])
 CFLAGS="$CFLAGS -pthread"
 CXXFLAGS="$CXXFLAGS -pthread"
 
+
+AC_CHECK_LIB(expat,XML_ParserCreate, xmllibs="-lexpat", AC_MSG_ERROR("required expat XML library is missing"))
+AC_CHECK_HEADER(expat.h, , AC_MSG_ERROR("required expat XML headers are missing"))
+AC_SUBST(xmllibs)
+
 # c++ headers and libraries
 AC_LANG_PUSH([C++])
 

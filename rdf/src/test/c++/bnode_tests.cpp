@@ -33,4 +33,13 @@ TEST(BNodeTest, BNodeAssignment) {
   EXPECT_NE(&b1,&b2);
 }
 
+TEST(BNodeTest, Equals) {
+  BNode u1 = "_u1";
+  BNode u2 = "_u1";
+  BNode u3;
+
+  EXPECT_EQ(u1,u2);
+  EXPECT_NE(u1,u3);
+}
+
 

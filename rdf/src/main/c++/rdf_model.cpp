@@ -27,6 +27,32 @@ namespace org {
 	
 
       /**
+       * Internal polymorphic implementation of equals.
+       */
+      bool URI::equals(const Value& v) const {
+	const URI* vp = dynamic_cast<const URI*>(&v);
+	return vp != NULL && vp->uri == this->uri;
+      }
+
+
+      /**
+       * Internal polymorphic implementation of equals.
+       */
+      bool BNode::equals(const Value& v) const {
+	const BNode* vp = dynamic_cast<const BNode*>(&v);
+	return vp != NULL && vp->id == this->id;
+      }
+
+
+      /**
+       * Internal polymorphic implementation of equals.
+       */
+      bool Literal::equals(const Value& v) const {
+	const Literal* vp = dynamic_cast<const Literal*>(&v);
+	return vp != NULL && vp->label == this->label;
+      }
+
+      /**
        * Returns the boolean value of this literal.
        */
       bool Literal::booleanValue() const {
@@ -90,6 +116,22 @@ namespace org {
 	return (int16_t)std::stoi(label);
       }
 
+
+      /**
+       * Internal polymorphic implementation of equals.
+       */
+      bool LanguageLiteral::equals(const Value& v) const {
+	const LanguageLiteral* vp = dynamic_cast<const LanguageLiteral*>(&v);
+	return vp != NULL && vp->label == label && vp->lang == this->lang;
+      }
+
+      /**
+       * Internal polymorphic implementation of equals.
+       */
+      bool DatatypeLiteral::equals(const Value& v) const {
+	const DatatypeLiteral* vp = dynamic_cast<const DatatypeLiteral*>(&v);
+	return vp != NULL && vp->label == this->label && vp->datatype == this->datatype;
+      }
 
 
 
