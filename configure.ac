@@ -29,6 +29,10 @@ AC_CHECK_LIB(expat,XML_ParserCreate, xmllibs="-lexpat", AC_MSG_ERROR("required e
 AC_CHECK_HEADER(expat.h, , AC_MSG_ERROR("required expat XML headers are missing"))
 AC_SUBST(xmllibs)
 
+# check for libcurl, we use it to access the Marmotta webservice API
+LIBCURL_CHECK_CONFIG(yes, ,  curllibs="-lcurl", AC_MSG_ERROR("required cURL HTTP library is missing"))
+AC_SUBST(curllibs)
+
 # c++ headers and libraries
 AC_LANG_PUSH([C++])
 
@@ -37,23 +41,22 @@ AX_CHECK_COMPILE_FLAG([-std=c++11], [CXXFLAGS="$CXXFLAGS -std=c++11"],
   AX_CHECK_COMPILE_FLAG([-std=c++0x], [CXXFLAGS="$CXXFLAGS -std=c++0x"], AC_MSG_ERROR("C++11 not supported by compiler"))
 )
 
-
-AC_CHECK_HEADERS([boost/iterator/iterator_facade.hpp boost/multiprecision/cpp_int.hpp boost/multiprecision/cpp_dec_float.hpp], , AC_MSG_ERROR("required Boost headers missing"))
+# check for some Boost header files, we use them in the data model
+AC_CHECK_HEADERS([boost/multiprecision/cpp_int.hpp boost/multiprecision/cpp_dec_float.hpp], , AC_MSG_ERROR("required Boost headers missing"))
 
 
 AC_LANG_POP([C++])
 
-
 # GTest
-AC_ARG_WITH(gtest, AS_HELP_STRING(--with-gtest,[enable GTest testing (path to GTest provided as argument)]), GTEST_DIR=$withval, with_gtest=no)
+
+AC_ARG_ENABLE(testing,AS_HELP_STRING(--enable-testing,[enable C++ unit testing (with Google Test)]), , with_gtest=no)
 AS_IF([test "x$with_gtest" != xno],
   [
-  AC_CHECK_FILE($GTEST_DIR/lib/libgtest.la, , AC_MSG_ERROR("GTest not found in $GTEST_DIR"))
   AM_CONDITIONAL(GTEST,true)
-  AC_SUBST([GTEST_DIR])
   ], [
   AM_CONDITIONAL(GTEST,false)
   ])
+
 
 AC_ARG_ENABLE(profiling,AS_HELP_STRING(--enable-profiling,enable GNU gprof profiling support),[
 CFLAGS="$CFLAGS -g -pg"

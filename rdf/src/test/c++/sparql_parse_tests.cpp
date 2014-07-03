@@ -1,6 +1,6 @@
 #include <iostream>
 #include <sstream>
-#include <gtest/gtest.h>
+#include "gtest.h"
 #include "../../main/c++/rdf_model.hpp"
 #include "../../main/c++/rdf_query.hpp"
 

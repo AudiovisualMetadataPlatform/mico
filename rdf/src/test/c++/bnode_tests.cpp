@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+#include "gtest.h"
 #include "../../main/c++/rdf_model.hpp"
 
 using namespace org::openrdf::model;
