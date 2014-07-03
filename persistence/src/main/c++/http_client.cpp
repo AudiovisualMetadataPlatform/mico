@@ -99,17 +99,31 @@ namespace eu {
 
       // read callback used by cURL to read request body, last argument is pointer to request object
       static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *request) {
-	return size * nmemb;
+	Request* req = static_cast<Request*>(request);
+
+	if(req->body->pos < req->body->length) {
+	  size_t len = req->body->length - req->body->pos;
+	  if(len > size*nmemb) {
+	    len = size*nmemb;
+          }
+	  memcpy(ptr, req->body->ptr + req->body->pos, len);
+	  req->body->pos += len;
+	  return len;
+        } else {
+	  return 0;
+        }
       }
 
       static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *response) {
-	Response* resp = (Response*)response;
+
+	Response* resp = static_cast<Response*>(response);
 	if(resp->body == NULL) {
 	   resp->body = new Body();
         }
-	resp->body->ptr = (char*)realloc(resp->body->ptr, size * nmemb);
-	memcpy(ptr, resp->body->ptr + resp->body->length, size * nmemb);
+	resp->body->ptr = (char*)realloc(resp->body->ptr, resp->body->length + size * nmemb);
+	memcpy(resp->body->ptr + resp->body->length, ptr, size * nmemb);
 	resp->body->length += size * nmemb;
+
 	return size * nmemb;
       }
 
@@ -126,12 +140,14 @@ namespace eu {
 	  string key(buffer,cpos);
 
 	  char* last = buffer + (size*nitems);
+
 	  while(*cpos == ':' || isspace(*cpos)) { cpos++; }
-	  while(isspace(*last) && last >= cpos) { last--; };
+	  while((isspace(*last) || *last == 0) && last >= cpos) { last--; };
 	  int clen = last - cpos;
-	  string value(cpos,clen);
+	  string value(cpos,clen+1);
 
 	  resp->headers[key] = value;
+
         }
 	return nitems*size;
       }
@@ -189,16 +205,19 @@ namespace eu {
 	  curl_easy_setopt(curl, CURLOPT_URL, req.getURL().c_str());
 
 	  Response* resp = new Response();
-	  curl_easy_setopt(curl, CURLOPT_READDATA, resp);
-	  curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&req);
-	  curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void *)&req);
+	  curl_easy_setopt(curl, CURLOPT_READDATA, (void *)&req);
+	  curl_easy_setopt(curl, CURLOPT_WRITEDATA, resp);
+	  curl_easy_setopt(curl, CURLOPT_HEADERDATA, resp);
 	  if(req.getBody()) {
+	    req.body->pos = 0; // init read position
   	    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)req.getBody()->getContentLength());
           } else {
   	    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)0);	  
           } 
 	  curl_easy_perform(curl);
+	  curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &resp->status);
 	  curl_easy_cleanup(curl);
+
 
 	  return resp;
         } else {
@@ -244,6 +263,7 @@ namespace eu {
 
 
       std::ostream& operator<<(std::ostream& os, const Response& resp) {
+	os << "Status: " << resp.getStatus() << "\n";
 	os << (Message&)resp;
 	return os;
       }

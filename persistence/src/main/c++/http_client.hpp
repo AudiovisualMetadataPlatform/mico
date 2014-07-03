@@ -26,6 +26,7 @@ namespace eu {
       class Body {	
 
 	friend class Request;
+	friend class HTTPClient;
 	friend size_t write_callback(void *ptr, size_t size, size_t nmemm, void *response);
 	friend size_t read_callback(void *ptr, size_t size, size_t nmemb, void *request);
 
@@ -34,12 +35,13 @@ namespace eu {
 	size_t      length;
 	std::string type;
 	bool        managed;
+	size_t      pos;    // internal use by read_callback
 
 	Body() : ptr(NULL), length(0), managed(false) {};
 
       public:
 
-	Body(char* ptr, size_t length, const std::string& content_type) : ptr(ptr), length(length), type(content_type), managed(false) {};
+	Body(char* ptr, size_t length, const std::string& content_type) : ptr(ptr), length(length), type(content_type), managed(false), pos(0) {};
 	Body(const std::string& data, const std::string& content_type);
 	~Body();
 
@@ -110,6 +112,8 @@ namespace eu {
 
 	friend std::ostream& operator<<(std::ostream& os, const Request& req);
 	friend std::istream& operator>>(std::istream& is, const Request& req);
+
+	friend size_t read_callback(void *ptr, size_t size, size_t nmemb, void *request);
 	
       private:
 	// request type to send
@@ -178,9 +182,16 @@ namespace eu {
 	friend size_t header_callback(char *buffer, size_t size, size_t nitems, void *response);
 	friend size_t write_callback(void *ptr, size_t size, size_t nmemm, void *response);
 
+	friend class HTTPClient;
+
+      private:
+	long status;
+
       public:
 	Response() : Message() {};
 
+
+	long getStatus() const { return status; };
 
       };
 
