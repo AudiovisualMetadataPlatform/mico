@@ -2,7 +2,7 @@
 #include "gtest.h"
 #include "../../main/c++/http_client.hpp"
 
-using namespace eu::mico::http;
+using namespace mico::http;
 
 TEST(HTTPRequestTest, TestBodyPtr) {
   char* data = "Hello, World!";

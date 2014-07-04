@@ -1,7 +1,7 @@
 #include "gtest.h"
 #include "../../main/c++/rdf_model.hpp"
 
-using namespace org::openrdf::model;
+using namespace mico::rdf::model;
 
 TEST(BNodeTest, Generated) {
   BNode b1;

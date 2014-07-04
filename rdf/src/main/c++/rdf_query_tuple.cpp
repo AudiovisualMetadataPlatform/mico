@@ -7,15 +7,15 @@
 
 
 
-namespace org {
-  namespace openrdf {
+namespace mico {
+  namespace rdf {
     namespace query {
 
 
       /**
        * Serialize query result data from the given argument into XML SPARQL protocol syntax.
        */
-      std::ostream& operator<<(std::ostream& os, QueryResult& r) {
+      std::ostream& operator<<(std::ostream& os, TupleResult& r) {
 	os << "<?xml version=\"1.0\"?>\n";
 	os << "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">\n";
 	  
@@ -66,7 +66,7 @@ namespace org {
       };
 
       struct ParserData {
-	QueryResult& result;  // the result we are currently building up
+	TupleResult& result;  // the result we are currently building up
 	ParserMode   mode;    // the current mode of the parser
 	string       name;    // multi-purpose use storage
 	string       attr;    // multi-purpose use storage
@@ -239,12 +239,13 @@ namespace org {
       }
 
 
+
       /**
        * Load query result data represented in the XML SPARQL protocol syntax into the query result
        * given as argument. http://www.w3.org/TR/rdf-sparql-XMLres/
        */
-      std::istream& operator>>(std::istream& is, QueryResult& r) {
-	ParserData data = { r, INIT };
+      void TupleResult::loadFrom(istream& is) {
+	ParserData data = { *this, INIT };
 
 	XML_Parser p = XML_ParserCreate("UTF-8");
 	XML_SetElementHandler(p, startElement, endElement);	
@@ -262,11 +263,36 @@ namespace org {
 	}
 	if(! XML_Parse(p,buf,is.gcount(),1) ) {
 	  std::cerr << "while parsing SPARQL XML result: parse error at line " << XML_GetCurrentLineNumber(p) << ", " << XML_ErrorString(XML_GetErrorCode(p)) << "\n";
-	}
-	
-	return is;
+	}	
       }
 
+
+      /**
+       * Load query result data represented in the XML SPARQL protocol syntax into the query result
+       * given as argument. http://www.w3.org/TR/rdf-sparql-XMLres/
+       */
+      void TupleResult::loadFrom(const char* ptr, size_t len) {
+	ParserData data = { *this, INIT };
+
+	XML_Parser p = XML_ParserCreate("UTF-8");
+	XML_SetElementHandler(p, startElement, endElement);	
+	XML_SetCharacterDataHandler(p, characterData);
+	XML_SetUserData(p, &data);
+
+	if(! XML_Parse(p,ptr,len,1) ) {
+	  std::cerr << "while parsing SPARQL XML result: parse error at line " << XML_GetCurrentLineNumber(p) << ", " << XML_ErrorString(XML_GetErrorCode(p)) << "\n";
+	}
+      }
+
+
+      /**
+       * Load query result data represented in the XML SPARQL protocol syntax into the query result
+       * given as argument. http://www.w3.org/TR/rdf-sparql-XMLres/
+       */
+      std::istream& operator>>(std::istream& is, TupleResult& r) {
+	r.loadFrom(is);
+	return is;
+      }
       
 
     }

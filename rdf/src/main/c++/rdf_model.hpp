@@ -19,8 +19,8 @@ using namespace boost::multiprecision;
  * of the MICO platform
  */
 
-namespace org {
-  namespace openrdf {
+namespace mico {
+  namespace rdf {
     namespace model {
 
       enum ValueTypes { TYPE_URI, TYPE_BNODE, TYPE_PLAIN_LITERAL, TYPE_LANGUAGE_LITERAL, TYPE_TYPED_LITERAL };

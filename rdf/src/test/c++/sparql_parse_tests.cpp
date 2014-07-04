@@ -38,15 +38,22 @@ const char* sample_result =
   "</sparql>";
 
 
-using namespace org::openrdf::query;
-using namespace org::openrdf::model;
+const char* bool_result =
+  "<?xml version=\"1.0\"?>"
+  "<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\">"
+  "  <boolean>true</boolean>"
+  "</sparql>";
 
-TEST(SPARQLParse,ParseTupleResult) {
+
+using namespace mico::rdf::query;
+using namespace mico::rdf::model;
+
+TEST(SPARQLParse,ParseTupleResultStream) {
   std::stringstream ss;
   ss << sample_result;
 
 
-  QueryResult r;
+  TupleResult r;
   ss>>r;
 
   const string vars[] = { "x", "hpage", "name", "age", "mbox", "friend" };
@@ -68,3 +75,49 @@ TEST(SPARQLParse,ParseTupleResult) {
     ASSERT_EQ(*((Value*)vals[i]),*((Value*)r[0][vars[i]]));
   }
 }
+
+
+TEST(SPARQLParse,ParseTupleResultMem) {
+
+  TupleResult r;
+  r.loadFrom(sample_result,strlen(sample_result));
+
+  const string vars[] = { "x", "hpage", "name", "age", "mbox", "friend" };
+  const Value*  vals[] = { 
+    new BNode("r2"), 
+    new URI("http://work.example.org/bob/"), 
+    new LanguageLiteral("Bob","en"), 
+    new DatatypeLiteral("30","http://www.w3.org/2001/XMLSchema#integer"), 
+    new URI("mailto:bob@work.example.org") 
+  };
+
+  ASSERT_EQ(6,r.getBindingNames().size());
+  for(int i=0; i<6; i++) {
+    ASSERT_EQ(vars[i],r.getBindingNames()[i]);
+  }
+
+  ASSERT_EQ(1, r.size());
+  for(int i=0; i<5; i++) {
+    ASSERT_EQ(*((Value*)vals[i]),*((Value*)r[0][vars[i]]));
+  }
+}
+
+
+TEST(SPARQLParse,ParseBooleanResultStream) {
+  std::stringstream ss;
+  ss << bool_result;
+
+  BooleanResult r;
+  ss >> r;
+
+  ASSERT_TRUE(r);
+}
+
+
+TEST(SPARQLParse,ParseBooleanResultMem) {
+  BooleanResult r;
+  r.loadFrom(bool_result,strlen(bool_result));
+
+  ASSERT_TRUE(r);
+}
+

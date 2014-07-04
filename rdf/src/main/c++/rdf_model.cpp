@@ -1,8 +1,8 @@
 #include "rdf_model.hpp"
 
 
-namespace org {
-  namespace openrdf {
+namespace mico {
+  namespace rdf {
     namespace model {
 
 

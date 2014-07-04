@@ -1,7 +1,7 @@
 #include "gtest.h"
 #include "../../main/c++/rdf_model.hpp"
 
-using namespace org::openrdf::model;
+using namespace mico::rdf::model;
 
 TEST(URITest, CSTRAssignment) {
   URI u1 = "http://localhost/resource/u1";
