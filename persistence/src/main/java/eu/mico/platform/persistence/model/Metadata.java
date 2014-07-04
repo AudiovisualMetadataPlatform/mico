@@ -33,6 +33,7 @@ public interface Metadata {
     public void dump(OutputStream out, RDFFormat format);
 
 
+
     /**
      * Execute a SPARQL update query on the metadata (see   http://www.w3.org/TR/sparql11-update/). This method can be
      * used for any kind of modification of the data.
@@ -43,11 +44,22 @@ public interface Metadata {
 
 
     /**
-     * Execute a SPARQL query on the metadata (see http://www.w3.org/TR/sparql11-query/). This method can be used for
+     * Execute a SPARQL SELECT query on the metadata (see http://www.w3.org/TR/sparql11-query/). This method can be used for
      * any kind of data access.
      *
      * @param sparqlQuery
      * @return
      */
     public TupleQueryResult query(String sparqlQuery);
+
+
+
+    /**
+     * Execute a SPARQL ASK query on the metadata (see http://www.w3.org/TR/sparql11-query/). This method can be used for
+     * any kind of data access.
+     *
+     * @param sparqlQuery
+     * @return
+     */
+    public boolean ask(String sparqlQuery);
 }

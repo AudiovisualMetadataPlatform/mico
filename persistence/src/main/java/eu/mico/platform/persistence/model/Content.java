@@ -1,5 +1,7 @@
 package eu.mico.platform.persistence.model;
 
+import org.openrdf.model.URI;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -10,6 +12,14 @@ import java.io.OutputStream;
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
 public interface Content {
+
+
+    /**
+     *  Return the URI uniquely identifying this content part. The URI should be either a UUID or constructed in a way
+     *  that it derives from the ContentItem this part belongs to.
+     * @return
+     */
+    public URI getID();
 
     /**
      * Return a new output stream for writing to the content. Any existing content will be overwritten.

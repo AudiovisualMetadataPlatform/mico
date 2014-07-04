@@ -78,6 +78,14 @@
     </build>
 
     <dependencies>
+        <!-- Servlet API -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+
         <!-- Backend-specific dependencies -->
         <dependency>
             <groupId>org.apache.marmotta</groupId>
@@ -96,6 +104,10 @@
         <dependency>
             <groupId>org.apache.marmotta</groupId>
             <artifactId>marmotta-sparql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.marmotta</groupId>
+            <artifactId>kiwi-caching-hazelcast</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.marmotta</groupId>
@@ -155,6 +167,11 @@
             <artifactId>postgresql</artifactId>
         </dependency>
 
-    </dependencies>
 
+        <!-- Sesame Extensions over Standard Marmotta -->
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-repository-contextaware</artifactId>
+        </dependency>
+    </dependencies>
 </project>

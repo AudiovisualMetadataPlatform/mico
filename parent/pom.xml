@@ -163,6 +163,11 @@
                 <version>${marmotta.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.marmotta</groupId>
+                <artifactId>kiwi-caching-hazelcast</artifactId>
+                <version>${marmotta.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.openrdf.sesame</groupId>
                 <artifactId>sesame-model</artifactId>
                 <version>${sesame.version}</version>
@@ -175,6 +180,11 @@
             <dependency>
                 <groupId>org.openrdf.sesame</groupId>
                 <artifactId>sesame-query</artifactId>
+                <version>${sesame.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openrdf.sesame</groupId>
+                <artifactId>sesame-repository-contextaware</artifactId>
                 <version>${sesame.version}</version>
             </dependency>
             <dependency>
@@ -197,6 +207,14 @@
                 <artifactId>cors-filter</artifactId>
                 <version>1.9</version>
             </dependency>
+
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>3.0.1</version>
+                <scope>provided</scope>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
     
