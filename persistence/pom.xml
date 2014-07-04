@@ -66,6 +66,12 @@
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-query</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.marmotta</groupId>
+            <artifactId>marmotta-client-java</artifactId>
+            <version>3.2.0</version>
+        </dependency>
+
     </dependencies>
 
 </project>

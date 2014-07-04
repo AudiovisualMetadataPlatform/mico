@@ -2,9 +2,12 @@ package eu.mico.platform.persistence.model;
 
 import org.openrdf.model.URI;
 
+import java.util.UUID;
+
 /**
  * Representation of a ContentItem. A ContentItem is a collection of ContentParts, e.g. an HTML page together with
- * its embedded images. ContentParts can be either original content or created during analysis.
+ * its embedded images. ContentParts can be either original content or created during analysis. For compatibility
+ * with the Linked Data platform, its RDF type is ldp:BasicContainer
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
@@ -12,20 +15,32 @@ public interface ContentItem {
 
 
     /**
-     * Return the identifier (a unique URI) for this content item.
+     * Return the unique identifier (UUID) for this content item. The UUID should be built in a way that it is globally
+     * unique.
      *
      * @return
      */
-    public URI getID();
+    public UUID getID();
+
 
     /**
-     * Return (read-only) content item metadata part of the initial content item, e.g. provenance information etc.
+     * Return the identifier (a unique URI) for this content item. This URI will be based on the internal UUID of the
+     * content item in the platform.
+     *
+     * @return
+     */
+    public URI getURI();
+
+    /**
+     * Return content item metadata part of the initial content item, e.g. provenance information etc. Particularly,
+     * whenever a new content part is added to the content item, the system will introduce a triple to the metadata
+     * relating the content part to the content item using the ldp:contains relation.
      *
      * TODO: could return a specialised Metadata object with fast access to commonly used properties once we know the
      *       schema
      *
      *
-     * @return a handle to a Metadata object that is suitable for reading
+     * @return a handle to a Metadata object that is suitable for reading and updating
      */
     public Metadata getMetadata();
 

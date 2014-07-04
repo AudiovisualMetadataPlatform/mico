@@ -43,7 +43,7 @@ public interface PersistenceService {
      *
      * @return a handle to the ContentItem with the given URI, or null if it does not exist
      */
-    public ContentItem getContentItem();
+    public ContentItem getContentItem(URI id);
 
     /**
      * Delete the content item with the given URI. If the content item does not exist, do nothing.
