@@ -38,9 +38,14 @@ public class ContextualMarmottaMetadata implements Metadata {
     public ContextualMarmottaMetadata(String baseUri, UUID context) throws RepositoryException {
         this.context = context;
 
-        baseUri    = baseUri + "/" + context.toString();
-        repository = new SPARQLRepository(baseUri + "/sparql/select", baseUri+"/sparql/update");
+        this.baseUri  = baseUri + "/" + context.toString();
+        repository    = new SPARQLRepository(this.baseUri + "/sparql/select", this.baseUri+"/sparql/update");
         repository.initialize();
+    }
+
+
+    public UUID getContext() {
+        return context;
     }
 
     /**
