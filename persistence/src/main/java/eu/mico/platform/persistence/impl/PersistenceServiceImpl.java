@@ -9,6 +9,7 @@ import org.openrdf.rio.RDFFormat;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.UUID;
 
 /**
  * An implementation of the persistence service using an HDFS file system and a Marmotta triple store for representing
@@ -90,67 +91,4 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
 
-    /**
-     * An implementation of metadata accessing a contextual marmotta with its webservices.
-     */
-    private class ContextualMarmottaMetadata implements Metadata {
-
-        /**
-         * Load RDF data of the given format into the metadata dataset. Can be used for preloading existing metadata.
-         *
-         * @param in     InputStream to load the data from
-         * @param format data format the RDF data is using (e.g. Turtle)
-         */
-        @Override
-        public void load(InputStream in, RDFFormat format) {
-
-        }
-
-        /**
-         * Dump the RDF data contained in the metadata dataset into the given output stream using the given serialization
-         * format. Can be used for exporting the metadata.
-         *
-         * @param out    OutputStream to export the data to
-         * @param format data format the RDF data is using (e.g. Turtle)
-         */
-        @Override
-        public void dump(OutputStream out, RDFFormat format) {
-
-        }
-
-        /**
-         * Execute a SPARQL update query on the metadata (see   http://www.w3.org/TR/sparql11-update/). This method can be
-         * used for any kind of modification of the data.
-         *
-         * @param sparqlUpdate
-         */
-        @Override
-        public void update(String sparqlUpdate) {
-
-        }
-
-        /**
-         * Execute a SPARQL SELECT query on the metadata (see http://www.w3.org/TR/sparql11-query/). This method can be used for
-         * any kind of data access.
-         *
-         * @param sparqlQuery
-         * @return
-         */
-        @Override
-        public TupleQueryResult query(String sparqlQuery) {
-            return null;
-        }
-
-        /**
-         * Execute a SPARQL ASK query on the metadata (see http://www.w3.org/TR/sparql11-query/). This method can be used for
-         * any kind of data access.
-         *
-         * @param sparqlQuery
-         * @return
-         */
-        @Override
-        public boolean ask(String sparqlQuery) {
-            return false;
-        }
-    }
 }

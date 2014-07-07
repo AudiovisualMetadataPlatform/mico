@@ -325,9 +325,10 @@ public class ContextualSparqlWebService extends ContextualWebServiceBase {
                     lockingService.unlockContextWrite(context);
                 }
                 return Response.ok().build();
-            } else {
-                return Response.status(Response.Status.BAD_REQUEST).entity("no SPARQL query specified").build();
+            } else { // else nothing to do
+                return Response.accepted("empty SPARQL update, nothing to do").build();
             }
+
         } catch (MalformedQueryException ex) {
             return Response.status(Response.Status.BAD_REQUEST).entity(WebServiceUtil.jsonErrorResponse(ex)).build();
         } catch (UpdateExecutionException e) {

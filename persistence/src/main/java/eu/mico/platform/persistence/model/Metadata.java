@@ -1,8 +1,15 @@
 package eu.mico.platform.persistence.model;
 
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
+import org.openrdf.query.UpdateExecutionException;
+import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.rio.RDFParseException;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -20,7 +27,7 @@ public interface Metadata {
      * @param in      InputStream to load the data from
      * @param format  data format the RDF data is using (e.g. Turtle)
      */
-    public void load(InputStream in, RDFFormat format);
+    public void load(InputStream in, RDFFormat format) throws IOException, RDFParseException, RepositoryException;
 
 
     /**
@@ -30,7 +37,7 @@ public interface Metadata {
      * @param out    OutputStream to export the data to
      * @param format data format the RDF data is using (e.g. Turtle)
      */
-    public void dump(OutputStream out, RDFFormat format);
+    public void dump(OutputStream out, RDFFormat format) throws RDFHandlerException, RepositoryException;
 
 
 
@@ -40,7 +47,7 @@ public interface Metadata {
      *
      * @param sparqlUpdate
      */
-    public void update(String sparqlUpdate);
+    public void update(String sparqlUpdate) throws MalformedQueryException, UpdateExecutionException, RepositoryException;
 
 
     /**
@@ -50,7 +57,7 @@ public interface Metadata {
      * @param sparqlQuery
      * @return
      */
-    public TupleQueryResult query(String sparqlQuery);
+    public TupleQueryResult query(String sparqlQuery) throws QueryEvaluationException, MalformedQueryException, RepositoryException;
 
 
 
@@ -61,5 +68,11 @@ public interface Metadata {
      * @param sparqlQuery
      * @return
      */
-    public boolean ask(String sparqlQuery);
+    public boolean ask(String sparqlQuery) throws MalformedQueryException, QueryEvaluationException, RepositoryException;
+
+
+    /**
+     * Close the metadata connection and clean up any open resources.
+     */
+    public void close() throws RepositoryException;
 }

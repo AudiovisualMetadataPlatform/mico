@@ -121,6 +121,7 @@
             <groupId>org.apache.marmotta</groupId>
             <artifactId>marmotta-versioning-common</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.apache.marmotta</groupId>
             <artifactId>marmotta-user</artifactId>
@@ -129,6 +130,7 @@
             <groupId>org.apache.marmotta</groupId>
             <artifactId>marmotta-security</artifactId>
         </dependency>
+        -->
 
         <!-- Optional
         <dependency>
