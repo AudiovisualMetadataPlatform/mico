@@ -3,6 +3,7 @@ package eu.mico.platform.persistence.api;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
 import org.openrdf.model.URI;
+import org.openrdf.repository.RepositoryException;
 
 /**
  * A service for creating, retrieving and deleting content items in the MICO platform.
@@ -18,7 +19,7 @@ public interface PersistenceService {
      *
      * @return
      */
-    public Metadata getMetadata();
+    public Metadata getMetadata() throws RepositoryException;
 
     /**
      * Create a new content item with a random URI and return it. The content item should be suitable for reading and
@@ -26,7 +27,7 @@ public interface PersistenceService {
      *
      * @return a handle to the newly created ContentItem
      */
-    public ContentItem createContentItem();
+    public ContentItem createContentItem() throws RepositoryException;
 
     /**
      * Create a new content item with the given URI and return it. The content item should be suitable for reading and
@@ -34,7 +35,7 @@ public interface PersistenceService {
      *
      * @return a handle to the newly created ContentItem
      */
-    public ContentItem createContentItem(URI id);
+    public ContentItem createContentItem(URI id) throws RepositoryException;
 
 
     /**
@@ -43,18 +44,18 @@ public interface PersistenceService {
      *
      * @return a handle to the ContentItem with the given URI, or null if it does not exist
      */
-    public ContentItem getContentItem(URI id);
+    public ContentItem getContentItem(URI id) throws RepositoryException;
 
     /**
      * Delete the content item with the given URI. If the content item does not exist, do nothing.
      */
-    public void deleteContentItem();
+    public void deleteContentItem(URI id) throws RepositoryException;
 
     /**
      * Return an iterator over all currently available content items.
      *
      * @return iterable
      */
-    public Iterable<ContentItem> getContentItems();
+    public Iterable<ContentItem> getContentItems() throws RepositoryException;
 
 }

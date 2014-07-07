@@ -1,5 +1,6 @@
 package eu.mico.platform.persistence.impl;
 
+import com.google.common.base.Preconditions;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
@@ -33,15 +34,23 @@ public class ContextualMarmottaContentItem implements ContentItem {
     // the content item's unique ID
     private UUID uuid;
 
-    private final String sparqlCreatePart    = "INSERT DATA { <%s> <http://www.w3.org/ns/ldp#contains> <%s> } ";
-    private final String sparqlAskPart       = "ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> } ";
-    private final String sparqlDeletePart    = "DELETE DATA { GRAPH <%s> { <%s> <http://www.w3.org/ns/ldp#contains> <%s> } } ";
-    private final String sparqlListParts     = "SELECT ?p WHERE { <%s> <http://www.w3.org/ns/ldp#contains> ?p } ";
+    protected static final String sparqlCreatePart    = "INSERT DATA { <%s> <http://www.w3.org/ns/ldp#contains> <%s> } ";
+    protected static final String sparqlAskPart       = "ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> } ";
+    protected static final String sparqlDeletePart    = "DELETE DATA { GRAPH <%s> { <%s> <http://www.w3.org/ns/ldp#contains> <%s> } } ";
+    protected static final String sparqlListParts     = "SELECT ?p WHERE { <%s> <http://www.w3.org/ns/ldp#contains> ?p } ";
 
 
     public ContextualMarmottaContentItem(String baseUrl, UUID uuid) {
         this.baseUrl = baseUrl;
         this.uuid = uuid;
+    }
+
+
+    protected ContextualMarmottaContentItem(String baseUrl, URI uri) {
+        Preconditions.checkArgument(uri.stringValue().startsWith(baseUrl), "the content part URI must match the baseUrl");
+
+        this.baseUrl = baseUrl;
+        this.uuid    = UUID.fromString(uri.stringValue().substring(baseUrl.length() + 1));
     }
 
     /**
@@ -263,5 +272,26 @@ public class ContextualMarmottaContentItem implements ContentItem {
             throw new RepositoryException("the SPARQL query could not be executed",e);
         }
 
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContextualMarmottaContentItem that = (ContextualMarmottaContentItem) o;
+
+        if (!baseUrl.equals(that.baseUrl)) return false;
+        if (!uuid.equals(that.uuid)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = baseUrl.hashCode();
+        result = 31 * result + uuid.hashCode();
+        return result;
     }
 }

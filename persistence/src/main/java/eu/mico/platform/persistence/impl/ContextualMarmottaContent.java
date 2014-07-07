@@ -27,7 +27,7 @@ public class ContextualMarmottaContent implements Content {
     }
 
 
-    public ContextualMarmottaContent(String baseUrl, URI uri) {
+    protected ContextualMarmottaContent(String baseUrl, URI uri) {
         Preconditions.checkArgument(uri.stringValue().startsWith(baseUrl), "the content part URI must match the baseUrl");
 
         this.baseUrl = baseUrl;
