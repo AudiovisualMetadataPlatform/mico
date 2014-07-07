@@ -24,7 +24,7 @@ public class ContextualMarmottaMetadata implements Metadata {
 
 
     private String baseUri;
-    private UUID context;
+    private String context;
 
     private Repository repository;
 
@@ -35,7 +35,7 @@ public class ContextualMarmottaMetadata implements Metadata {
      * @param baseUri base URI of the marmotta server, without the trailing slash, e.g. http://localhost:8080/marmotta
      * @param context UUID of the metadata object to access
      */
-    public ContextualMarmottaMetadata(String baseUri, UUID context) throws RepositoryException {
+    public ContextualMarmottaMetadata(String baseUri, String context) throws RepositoryException {
         this.context = context;
 
         this.baseUri  = baseUri + "/" + context.toString();
@@ -44,7 +44,7 @@ public class ContextualMarmottaMetadata implements Metadata {
     }
 
 
-    public UUID getContext() {
+    public String getContext() {
         return context;
     }
 

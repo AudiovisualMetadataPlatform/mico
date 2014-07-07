@@ -15,13 +15,6 @@ import java.util.UUID;
 public interface Content {
 
     /**
-     * Return the unique identifier identifying this content part. The UUID should be constructed so that it is globally
-     * unique and optionally derived from the UUID of the content item it belongs to.
-     * @return
-     */
-    public UUID getID();
-
-    /**
      *  Return the URI uniquely identifying this content part. The URI should be either a UUID or constructed in a way
      *  that it derives from the ContentItem this part belongs to.
      * @return

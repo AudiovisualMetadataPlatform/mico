@@ -1,6 +1,7 @@
 package eu.mico.platform.persistence.model;
 
 import org.openrdf.model.URI;
+import org.openrdf.repository.RepositoryException;
 
 import java.util.UUID;
 
@@ -42,7 +43,7 @@ public interface ContentItem {
      *
      * @return a handle to a Metadata object that is suitable for reading and updating
      */
-    public Metadata getMetadata();
+    public Metadata getMetadata() throws RepositoryException;
 
     /**
      * Return execution plan and metadata (e.g. dependencies, profiling information, execution information). Can be
@@ -52,7 +53,7 @@ public interface ContentItem {
      *
      * @return a handle to a Metadata object that is suitable for reading and updating
      */
-    public Metadata getExecution();
+    public Metadata getExecution() throws RepositoryException;
 
     /**
      * Return the current state of the analysis result (as RDF metadata). Can be updated by other components to extend
@@ -60,7 +61,7 @@ public interface ContentItem {
      *
      * @return a handle to a Metadata object that is suitable for reading and updating
      */
-    public Metadata getResult();
+    public Metadata getResult() throws RepositoryException;
 
 
     /**
@@ -69,7 +70,7 @@ public interface ContentItem {
      *
      * @return a handle to a ContentPart object that is suitable for reading and updating
      */
-    public Content createContentPart();
+    public Content createContentPart() throws RepositoryException;
 
     /**
      * Create a new content part with the given URI and return a handle. The handle can then be used for updating the
@@ -78,7 +79,7 @@ public interface ContentItem {
      * @param id the URI of the content part to create
      * @return a handle to a ContentPart object that is suitable for reading and updating
      */
-    public Content createContentPart(URI id);
+    public Content createContentPart(URI id) throws RepositoryException;
 
     /**
      * Return a handle to the ContentPart with the given URI, or null in case the content item does not have this
@@ -87,7 +88,7 @@ public interface ContentItem {
      * @param id the URI of the content part to return
      * @return a handle to a ContentPart object that is suitable for reading and updating
      */
-    public Content getContentPart(URI id);
+    public Content getContentPart(URI id) throws RepositoryException;
 
     /**
      * Remove the content part with the given URI in case it exists and is a part of this content item. Otherwise do
@@ -95,13 +96,13 @@ public interface ContentItem {
      *
      * @param id the URI of the content part to delete
      */
-    public void deleteContent(URI id);
+    public void deleteContent(URI id) throws RepositoryException;
 
     /**
      * Return an iterator over all content parts contained in this content item.
      *
      * @return an iterable that (lazily) iterates over the content parts
      */
-    public Iterable<Content> listContentParts();
+    public Iterable<Content> listContentParts() throws RepositoryException;
 
 }

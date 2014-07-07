@@ -63,7 +63,7 @@ public class ContextualMarmottaMetadataTest extends BaseMarmottaTest {
     @Test
     public void testUpdate() throws RepositoryException, MalformedQueryException, UpdateExecutionException {
 
-        ContextualMarmottaMetadata m = new ContextualMarmottaMetadata(baseUrl, UUID.randomUUID());
+        ContextualMarmottaMetadata m = new ContextualMarmottaMetadata(baseUrl, UUID.randomUUID().toString());
 
         m.update("INSERT DATA { <http://example.org/resource/R1> <http://example.org/property/P1> \"Value 1\" } ");
 
@@ -89,7 +89,7 @@ public class ContextualMarmottaMetadataTest extends BaseMarmottaTest {
 
     @Test
     public void testQuery() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
-        ContextualMarmottaMetadata m = new ContextualMarmottaMetadata(baseUrl, baseUuid);
+        ContextualMarmottaMetadata m = new ContextualMarmottaMetadata(baseUrl, baseUuid.toString());
 
         TupleQueryResult r = m.query("SELECT ?i WHERE { <http://localhost:8080/LMF/resource/hans_meier> <http://xmlns.com/foaf/0.1/interest> ?i }");
         Assert.assertEquals(1, r.getBindingNames().size());
@@ -106,7 +106,7 @@ public class ContextualMarmottaMetadataTest extends BaseMarmottaTest {
 
     @Test
     public void testAsk() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
-        ContextualMarmottaMetadata m = new ContextualMarmottaMetadata(baseUrl, baseUuid);
+        ContextualMarmottaMetadata m = new ContextualMarmottaMetadata(baseUrl, baseUuid.toString());
 
         Assert.assertTrue(m.ask("ASK { <http://localhost:8080/LMF/resource/hans_meier> <http://xmlns.com/foaf/0.1/interest> <http://rdf.freebase.com/ns/en.software_engineering> }"));
         Assert.assertFalse(m.ask("ASK { <http://localhost:8080/LMF/resource/hans_meier> <http://xmlns.com/foaf/0.1/interest> <http://rdf.freebase.com/ns/en.design> }"));
@@ -115,7 +115,7 @@ public class ContextualMarmottaMetadataTest extends BaseMarmottaTest {
 
     @Test
     public void testLoad() throws RepositoryException, IOException, RDFParseException, MarmottaException {
-        ContextualMarmottaMetadata m = new ContextualMarmottaMetadata(baseUrl, UUID.randomUUID());
+        ContextualMarmottaMetadata m = new ContextualMarmottaMetadata(baseUrl, UUID.randomUUID().toString());
         m.load(this.getClass().getResourceAsStream("/version-base.rdf"), RDFFormat.RDFXML);
 
         RepositoryConnection con = getFullConnection();
@@ -141,7 +141,7 @@ public class ContextualMarmottaMetadataTest extends BaseMarmottaTest {
 
     @Test
     public void testDump() throws RepositoryException, IOException, RDFParseException, MarmottaException, RDFHandlerException {
-        ContextualMarmottaMetadata m = new ContextualMarmottaMetadata(baseUrl, baseUuid);
+        ContextualMarmottaMetadata m = new ContextualMarmottaMetadata(baseUrl, baseUuid.toString());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         m.dump(out, RDFFormat.TURTLE);
 

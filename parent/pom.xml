@@ -22,7 +22,7 @@
         <marmotta.context>/marmotta</marmotta.context>
         <marmotta.home>${project.build.directory}${file.separator}marmotta</marmotta.home>
         <marmotta.version>3.3.0-SNAPSHOT</marmotta.version>
-        <sesame.version>2.7.11</sesame.version>
+        <sesame.version>2.7.12</sesame.version>
         <hadoop.version>2.4.1</hadoop.version>
         <hadoop.home>${project.build.directory}${file.separator}hadoop</hadoop.home>
         <jetty.version>9.2.1.v20140609</jetty.version>
@@ -113,6 +113,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>17.0</version>
+            </dependency>
+
+
             <dependency>
                 <groupId>org.apache.marmotta</groupId>
                 <artifactId>marmotta-core</artifactId>

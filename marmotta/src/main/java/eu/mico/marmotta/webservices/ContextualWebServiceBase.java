@@ -89,7 +89,7 @@ public abstract class ContextualWebServiceBase {
             contextId = contextId.split(",")[0];
         }
         try {
-            final URI context = contextService.createContext(configurationService.getBaseContext() + contextId);
+            final URI context = contextService.createContext(configurationService.getBaseUri() + contextId);
             if (context == null) {
                 throw new MarmottaException("context not resolved");
             }

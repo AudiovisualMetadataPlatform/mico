@@ -13,8 +13,11 @@ import org.apache.marmotta.platform.core.exception.MarmottaException;
 import org.apache.marmotta.platform.core.exception.io.MarmottaImportException;
 import org.apache.marmotta.platform.core.test.base.JettyMarmotta;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.openrdf.model.URI;
+import org.openrdf.query.*;
+import org.openrdf.query.impl.DatasetImpl;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
@@ -25,7 +28,9 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Add file description here!
@@ -69,7 +74,7 @@ public abstract class BaseMarmottaTest {
         try {
             ContextService contextService = marmotta.getService(ContextService.class);
             ConfigurationService configurationService = marmotta.getService(ConfigurationService.class);
-            final URI context = contextService.createContext(configurationService.getBaseContext() + contextId);
+            final URI context = contextService.createContext(configurationService.getBaseUri() + contextId);
             if (context == null) {
                 throw new MarmottaException("context not resolved");
             }
@@ -83,6 +88,70 @@ public abstract class BaseMarmottaTest {
     protected static RepositoryConnection getFullConnection() throws RepositoryException {
         SesameService sesameService = marmotta.getService(SesameService.class);
         return sesameService.getConnection();
+    }
+
+    protected static void assertAsk(String askQuery, final URI context) throws MalformedQueryException, QueryEvaluationException {
+        try {
+            RepositoryConnection con = getFullConnection();
+            try {
+                con.begin();
+
+
+                BooleanQuery q = con.prepareBooleanQuery(QueryLanguage.SPARQL,askQuery);
+
+                Dataset d = new DatasetImpl() {
+                    @Override
+                    public Set<URI> getDefaultGraphs() {
+                        return Collections.singleton(context);
+                    }
+                };
+
+
+                q.setDataset(d);
+
+                Assert.assertTrue(q.evaluate());
+
+                con.commit();
+            } catch(RepositoryException ex) {
+                con.rollback();
+            } finally {
+                con.close();
+            }
+        } catch(RepositoryException ex) {
+            ex.printStackTrace(); // TODO: handle error
+        }
+    }
+
+    protected static void assertAskNot(String askQuery, final URI context) throws MalformedQueryException, QueryEvaluationException {
+        try {
+            RepositoryConnection con = getFullConnection();
+            try {
+                con.begin();
+
+
+                BooleanQuery q = con.prepareBooleanQuery(QueryLanguage.SPARQL,askQuery);
+
+                Dataset d = new DatasetImpl() {
+                    @Override
+                    public Set<URI> getDefaultGraphs() {
+                        return Collections.singleton(context);
+                    }
+                };
+
+
+                q.setDataset(d);
+
+                Assert.assertTrue(!q.evaluate());
+
+                con.commit();
+            } catch(RepositoryException ex) {
+                con.rollback();
+            } finally {
+                con.close();
+            }
+        } catch(RepositoryException ex) {
+            ex.printStackTrace(); // TODO: handle error
+        }
     }
 
 }
