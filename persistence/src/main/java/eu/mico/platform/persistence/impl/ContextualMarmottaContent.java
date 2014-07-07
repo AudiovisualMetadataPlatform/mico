@@ -31,7 +31,7 @@ public class ContextualMarmottaContent implements Content {
         Preconditions.checkArgument(uri.stringValue().startsWith(baseUrl), "the content part URI must match the baseUrl");
 
         this.baseUrl = baseUrl;
-        this.id = uri.stringValue().substring(baseUrl.length());
+        this.id = uri.stringValue().substring(baseUrl.length() + 1);
     }
 
 
@@ -64,5 +64,34 @@ public class ContextualMarmottaContent implements Content {
     @Override
     public InputStream getInputStream() {
         return null;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ContextualMarmottaContent that = (ContextualMarmottaContent) o;
+
+        if (!baseUrl.equals(that.baseUrl)) return false;
+        if (!id.equals(that.id)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = baseUrl.hashCode();
+        result = 31 * result + id.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ContextualMarmottaContent{" +
+                "baseUrl='" + baseUrl + '\'' +
+                ", id='" + id + '\'' +
+                '}';
     }
 }

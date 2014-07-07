@@ -4,6 +4,7 @@ import eu.mico.platform.persistence.impl.ContextualMarmottaContentItem;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
+import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openrdf.model.impl.URIImpl;
@@ -84,5 +85,24 @@ public class ContextualMarmottaContentItemTest extends BaseMarmottaTest {
         Assert.assertFalse(item.listContentParts().iterator().hasNext());
 
     }
+
+
+    @Test
+    public void testListContentItem() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
+        ContentItem item = new ContextualMarmottaContentItem(baseUrl, UUID.randomUUID());
+
+        Assert.assertFalse(item.listContentParts().iterator().hasNext());
+
+        Content[] parts = new Content[5];
+        for(int i=0; i<5; i++) {
+            parts[i] = item.createContentPart();
+        }
+
+        for(Content c : item.listContentParts()) {
+            Assert.assertThat(c, Matchers.isIn(parts));
+        }
+
+    }
+
 
 }
