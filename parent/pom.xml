@@ -18,14 +18,16 @@
     </prerequisites>
 
     <properties>
+        <jetty.version>9.2.1.v20140609</jetty.version>
+        <sesame.version>2.7.12</sesame.version>
+        <java.home>/usr/lib/jvm/java-7-openjdk-amd64</java.home><!--TODO-->
         <javaee.port>8080</javaee.port>
         <marmotta.context>/marmotta</marmotta.context>
         <marmotta.home>${project.build.directory}${file.separator}marmotta</marmotta.home>
         <marmotta.version>3.3.0-SNAPSHOT</marmotta.version>
-        <sesame.version>2.7.12</sesame.version>
+        <hadoop.context>/hadoop</hadoop.context>
+        <hadoop.home>${project.build.directory}${file.separator}hadoop-${hadoop.version}</hadoop.home>
         <hadoop.version>2.4.1</hadoop.version>
-        <hadoop.home>${project.build.directory}${file.separator}hadoop</hadoop.home>
-        <jetty.version>9.2.1.v20140609</jetty.version>
     </properties>
 
     <repositories>
@@ -96,6 +98,11 @@
                     <groupId>org.apache.tomcat.maven</groupId>
                     <artifactId>tomcat7-maven-plugin</artifactId>
                     <version>2.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>1.3.1</version>
                 </plugin>
                 <plugin>
                     <groupId>com.googlecode.maven-download-plugin</groupId>
@@ -252,6 +259,7 @@
             </dependency>
 
         </dependencies>
+
     </dependencyManagement>
     
 </project>

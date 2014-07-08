@@ -29,18 +29,46 @@
                         </goals>
                         <configuration>
                             <url>http://archive.apache.org/dist/hadoop/common/hadoop-${hadoop.version}/hadoop-${hadoop.version}.tar.gz</url>
-                            <unpack>true</unpack>
-                            <outputDirectory>${hadoop.home}</outputDirectory>
                             <md5>0ce4cfd282002b7aa42cf71df4145150</md5>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <unpack>true</unpack>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-hadoop-src</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>http://archive.apache.org/dist/hadoop/common/hadoop-${hadoop.version}/hadoop-${hadoop.version}-src.tar.gz</url>
+                            <md5>75d396bc9f3e30cdf064b15170a2be07</md5>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <unpack>true</unpack>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.github.shyiko.hadoop-maven-plugin</groupId>
-                <artifactId>hadoop-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
-                    <hadoopHome>${hadoop.home}${file.separator}hadoop-${hadoop.version}</hadoopHome>
+                    <environmentVariables>
+                        <JAVA_HOME>${java.home}</JAVA_HOME>
+                        <HADOOP_HOME>${hadoop.home}</HADOOP_HOME>
+                    </environmentVariables>
+                    <executable>${basedir}${file.separator}prepare-hadoop.sh</executable>
+                    <arguments>
+                        <argument>${hadoop.version}</argument>
+                    </arguments>
                 </configuration>
             </plugin>
             <plugin>
@@ -74,7 +102,6 @@
             <version>2.4</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-model</artifactId>
@@ -91,8 +118,6 @@
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-repository-sparql</artifactId>
         </dependency>
-
-
 
         <!-- JUnit Testing Libraries -->
         <dependency>
@@ -119,6 +144,7 @@
             <groupId>eu.mico-project.platform</groupId>
             <artifactId>marmotta</artifactId>
             <version>1.0.0-SNAPSHOT</version>
+            <type>war</type>
             <scope>test</scope>
         </dependency>
         <dependency>
