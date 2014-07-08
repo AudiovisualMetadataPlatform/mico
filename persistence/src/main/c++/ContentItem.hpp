@@ -97,7 +97,7 @@ namespace mico {
        *
        * @return
        */
-      inline const URI getID() const { return URI(baseUrl + "/" + boost::uuids::to_string(id)); };
+      inline const URI getURI() const { return URI(baseUrl + "/" + boost::uuids::to_string(id)); };
 
       /**
        * Return (read-only) content item metadata part of the initial content item, e.g. provenance information etc.

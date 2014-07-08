@@ -88,7 +88,7 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
 
     @Test
-    public void testListContentItem() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
+    public void testListContentParts() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
         ContentItem item = new MarmottaContentItem(baseUrl, UUID.randomUUID());
 
         Assert.assertFalse(item.listContentParts().iterator().hasNext());

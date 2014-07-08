@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <map>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -10,11 +11,16 @@
 
 #include "http_client.hpp"
 
-#include "../../main/c++/ContentItem.hpp"
+#include "ContentItem.hpp"
+#include "SPARQLUtil.hpp"
 
+using namespace std;
 using namespace boost::uuids;
 using namespace mico::persistence;
 using namespace mico::http;
+using namespace mico::util;
+
+
 
 class ContentItemTest : public ::testing::Test {
 
@@ -44,6 +50,9 @@ protected:
   void assertAskM(std::string query) {
     ASSERT_TRUE(item->getMetadata().ask(query));
   }
+  void assertAskMN(std::string query) {
+    ASSERT_FALSE(item->getMetadata().ask(query));
+  }
 
   void assertAskE(std::string query) {
     ASSERT_TRUE(item->getExecution().ask(query));
@@ -52,8 +61,18 @@ protected:
   void assertAskR(std::string query) {
     ASSERT_TRUE(item->getResult().ask(query));
   }
+
 };
 
+template<typename T> 
+bool ptr_contains(T* ptr, T** arr, int len) {
+  for(int i=0; i<len; i++) {
+    if(*ptr == *arr[i]) {
+      return true;
+    }
+  }
+  return false;
+}
 
 TEST_F(ContentItemTest,ContentItemMetadata) {
   ContentItemMetadata& m = item->getMetadata();
@@ -82,6 +101,39 @@ TEST_F(ContentItemTest,CreateDeleteContentPart) {
   ASSERT_EQ(item->begin(), item->end());
 
   Content* part = item->createContentPart();
+
+  ASSERT_NE(item->begin(), item->end());
+
+  map<string,string> params;
+  params["ci"] = item->getURI().stringValue();
+  params["cp"] = part->getURI().stringValue();
+
+  assertAskM(sparql_format_query("ASK { <$(ci)> <http://www.w3.org/ns/ldp#contains> <$(cp)> }",params));
+
+  item->deleteContentPart(part->getURI());
+
+  ASSERT_EQ(item->begin(), item->end());
+  assertAskMN(sparql_format_query("ASK { <$(ci)> <http://www.w3.org/ns/ldp#contains> <$(cp)> }",params));
+
+  delete part;
+}
+
+
+TEST_F(ContentItemTest,ListContentParts) {
+  
+  ASSERT_EQ(item->begin(), item->end());
+
+
+  Content* parts[5];
+  for(int i=0; i<5; i++) {
+    parts[i] = item->createContentPart();
+  }
+
+  ASSERT_NE(item->begin(), item->end());
+
+  for(Content* part : *item) {
+    ASSERT_TRUE(ptr_contains(part,parts,5));
+  }
 
 
 }

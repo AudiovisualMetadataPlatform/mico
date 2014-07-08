@@ -1,12 +1,11 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/xpressive/xpressive.hpp>
-#include <boost/xpressive/regex_actions.hpp>
 
 #include <map>
 #include <string>
 
 #include "ContentItem.hpp"
+#include "SPARQLUtil.hpp"
 
 // these are automatically created and inlined by xxd
 extern unsigned char src_main_resources_sparql_askContentPart_sparql[];
@@ -20,8 +19,8 @@ extern unsigned int src_main_resources_sparql_listContentParts_sparql_len;
 
 using namespace std;
 using namespace boost;
-using namespace xpressive;
 using namespace uuids;
+using namespace mico::util;
  
 const std::string sparql_askContentPart((char*)src_main_resources_sparql_askContentPart_sparql, src_main_resources_sparql_askContentPart_sparql_len);
 const std::string sparql_createContentPart((char*)src_main_resources_sparql_createContentPart_sparql,src_main_resources_sparql_createContentPart_sparql_len);
@@ -33,15 +32,9 @@ const std::string sparql_listContentParts((char*)src_main_resources_sparql_listC
 namespace mico {
   namespace persistence {
 
-    static const sregex var = "$(" >> (s1 = +_w) >> ')';
-
     static random_generator rnd_gen;
     static string_generator str_gen;
 
-
-    static inline string format(string fmt, map<string,string>& parameters) {
-      return regex_replace(fmt, var, boost::xpressive::ref(parameters)[s1]);
-    }
 
 
     ContentItem::ContentItem(string baseUrl, uuid& id) 
@@ -82,7 +75,7 @@ namespace mico {
       params["ci"] = baseUrl + "/" + boost::uuids::to_string(id);
       params["cp"] = baseUrl + "/" + boost::uuids::to_string(id) + "/" + boost::uuids::to_string(contentUUID);
 
-      metadata.update(format(sparql_createContentPart, params));
+      metadata.update(sparql_format_query(sparql_createContentPart, params));
 
       return content;
     }
@@ -101,7 +94,7 @@ namespace mico {
       params["ci"] = baseUrl + "/" + boost::uuids::to_string(this->id);
       params["cp"] = id.stringValue();
 
-      metadata.update(format(sparql_createContentPart, params));
+      metadata.update(sparql_format_query(sparql_createContentPart, params));
 
       return content;
     }
@@ -118,7 +111,7 @@ namespace mico {
       params["ci"] = baseUrl + "/" + boost::uuids::to_string(this->id);
       params["cp"] = id.stringValue();
 
-      if(metadata.ask(format(sparql_askContentPart,params))) {
+      if(metadata.ask(sparql_format_query(sparql_askContentPart,params))) {
 	return new Content(baseUrl,id);
       } else {
 	return NULL;
@@ -137,7 +130,7 @@ namespace mico {
       params["ci"] = baseUrl + "/" + boost::uuids::to_string(this->id);
       params["cp"] = id.stringValue();
 
-      metadata.update(format(sparql_deleteContentPart, params));
+      metadata.update(sparql_format_query(sparql_deleteContentPart, params));
     }
 
 
@@ -163,7 +156,7 @@ namespace mico {
       map<string,string> params;
       params["ci"] = baseUrl + "/" + boost::uuids::to_string(id);
 
-      const TupleResult* r = metadata.query(format(sparql_listContentParts,params));
+      const TupleResult* r = metadata.query(sparql_format_query(sparql_listContentParts,params));
       if(r->size() > 0) {
 	return content_part_iterator(baseUrl,r);
       } else {

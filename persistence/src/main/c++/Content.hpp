@@ -13,6 +13,7 @@ namespace mico {
     using namespace mico::rdf::model;   
 
     class Content {
+      friend bool operator==(Content& c1, Content& c2);
 
     protected:
       string baseUrl;
@@ -44,6 +45,11 @@ namespace mico {
        */
       std::istream& getInputStream();
     };
+
+
+    inline bool operator==(Content& c1, Content& c2) {
+      return c1.baseUrl == c2.baseUrl && c1.id == c2.id;
+    }
   }
 }
 #endif
