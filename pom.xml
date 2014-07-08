@@ -106,7 +106,7 @@
                             <webapps>
                                 <webapp>
                                     <contextPath>${marmotta.context}</contextPath>
-                                    <groupId>${project.groupId}}</groupId> 
+                                    <groupId>${project.groupId}</groupId> 
                                     <artifactId>marmotta</artifactId>
                                     <version>${project.version}</version>
                                     <type>war</type>    
@@ -114,6 +114,18 @@
                                     <warDirectory>marmotta/${project.build.directory}/marmotta/marmotta.war</warDirectory>
                                     <warSourceDirectory>marmotta/${project.build.directory}/marmotta/marmotta</warSourceDirectory>
                                 </webapp>
+                                <!--
+                                <webapp>
+                                    <contextPath>${hadoop.context}</contextPath>
+                                    <groupId>org.apache.hadoop</groupId> 
+                                    <artifactId>hadoop-hdfs-httpfs</artifactId>
+                                    <version>${haddop.version}</version>
+                                    <type>war</type>    
+                                    <asWebapp>true</asWebapp>
+                                    <warDirectory>persistence/target/hadoop-${haddop.version}-src/hadoop-hdfs-project/hadoop-hdfs-httpfs/target/webhdfs.war</warDirectory>
+                                    <warSourceDirectory>persistence/target/hadoop-${haddop.version}-src/hadoop-hdfs-project/hadoop-hdfs-httpfs/target/webhdfs</warSourceDirectory>
+                                </webapp>
+                                -->
                                 <!-- ... possibly more webapps ... -->
                             </webapps> 
                         </configuration>
