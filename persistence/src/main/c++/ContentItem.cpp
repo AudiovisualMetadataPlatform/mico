@@ -7,7 +7,12 @@
 #include "ContentItem.hpp"
 #include "SPARQLUtil.hpp"
 
-// these are automatically created and inlined by xxd
+using namespace std;
+using namespace boost;
+using namespace uuids;
+using namespace mico::util;
+
+// extern references to constant SPARQL templates
 extern unsigned char src_main_resources_sparql_askContentPart_sparql[];
 extern unsigned int src_main_resources_sparql_askContentPart_sparql_len;
 extern unsigned char src_main_resources_sparql_createContentPart_sparql[];
@@ -17,27 +22,21 @@ extern unsigned int src_main_resources_sparql_deleteContentPart_sparql_len;
 extern unsigned char src_main_resources_sparql_listContentParts_sparql[];
 extern unsigned int src_main_resources_sparql_listContentParts_sparql_len;
 
-using namespace std;
-using namespace boost;
-using namespace uuids;
-using namespace mico::util;
  
 const std::string sparql_askContentPart((char*)src_main_resources_sparql_askContentPart_sparql, src_main_resources_sparql_askContentPart_sparql_len);
 const std::string sparql_createContentPart((char*)src_main_resources_sparql_createContentPart_sparql,src_main_resources_sparql_createContentPart_sparql_len);
 const std::string sparql_deleteContentPart((char*)src_main_resources_sparql_deleteContentPart_sparql,src_main_resources_sparql_deleteContentPart_sparql_len);
 const std::string sparql_listContentParts((char*)src_main_resources_sparql_listContentParts_sparql,src_main_resources_sparql_listContentParts_sparql_len);
 
-
+// UUID generators
+static random_generator rnd_gen;
+static string_generator str_gen;
 
 namespace mico {
   namespace persistence {
 
-    static random_generator rnd_gen;
-    static string_generator str_gen;
 
-
-
-    ContentItem::ContentItem(string baseUrl, uuid& id) 
+    ContentItem::ContentItem(const string baseUrl, const uuid& id) 
       : baseUrl(baseUrl), id(id)
       , metadata(baseUrl, boost::uuids::to_string(id) + SUFFIX_METADATA)
       , execution(baseUrl, boost::uuids::to_string(id) + SUFFIX_EXECUTION)
@@ -45,7 +44,7 @@ namespace mico {
     { };
 
 
-    ContentItem::ContentItem(string baseUrl, URI& uri) 
+    ContentItem::ContentItem(const string baseUrl, const URI& uri) 
       : baseUrl(baseUrl)
       , metadata(baseUrl, boost::uuids::to_string(id) + SUFFIX_METADATA)
       , execution(baseUrl, boost::uuids::to_string(id) + SUFFIX_EXECUTION)

@@ -78,6 +78,9 @@ namespace mico {
      * @author Sebastian Schaffert (sschaffert@apache.org)
      */
     class ContentItem {
+
+      friend bool operator==(const ContentItem& ci1, const ContentItem& ci2);
+
     protected:
       string baseUrl;
       uuid id;
@@ -87,9 +90,9 @@ namespace mico {
       ResultMetadata      result;
 
     public:
-      ContentItem(string baseUrl, uuid& id);
+      ContentItem(const string baseUrl, const uuid& id);
 
-      ContentItem(string baseUrl, URI& uri);
+      ContentItem(const string baseUrl, const URI& uri);
 
 
       /**
@@ -212,6 +215,10 @@ namespace mico {
 
     };
 
+
+    inline bool operator==(const ContentItem& ci1, const ContentItem& ci2) {
+      return ci1.baseUrl == ci2.baseUrl && ci1.id == ci2.id;
+    }
   }
 }
 #endif
