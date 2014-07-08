@@ -19,14 +19,22 @@ namespace mico {
     using namespace mico::rdf::query;
     using namespace mico::http;
 
+    /**
+     * A class offering access to RDF metadata through SPARQL. The Metadata class implements a
+     * wrapper around a SPARQL endpoint and can be used for any kind of RDF metadata
+     * representation. Together with a contextual Marmotta server, it is also context aware,
+     * i.e. when the ID of a named graph has been configured, all operations will only be executed
+     * on this graph.
+     */
     class Metadata {
 
     protected:
-      string baseUrl;
-      string contextUrl;
+      string baseUrl;     //!< the base URL of the server
+      string contextUrl;  //!< the URI of the context to use as named graph
 
-      SPARQLClient sparqlClient;
-      HTTPClient   httpClient;
+      SPARQLClient sparqlClient; //!< an instance of a SPARQL client, will be initialised to baseUrl + "/sparql"
+      HTTPClient   httpClient;   //!< an instance of an HTTP client, will be used for load/dump
+				 //!< using the baseUrl and the Marmotta import/export endpoints
 
     public:
 

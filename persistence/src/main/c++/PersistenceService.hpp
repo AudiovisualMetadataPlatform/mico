@@ -21,6 +21,10 @@ namespace mico {
 
     class content_item_iterator;
 
+    /**
+     * Specialised support for persistence service metadata. Might in the future be extended with
+     * additional methods for simplified use of certain vocabularies.
+     */
     class PersistenceMetadata : public Metadata {
       friend class PersistenceService;
 
@@ -30,6 +34,11 @@ namespace mico {
     };
 
 
+    /**
+     * Main service for accessing the MICO persistence API. The persistence service can be used for
+     * managing ContentItems stored in the peristence API of the MICO platform. Services working
+     * with ContentItems should only use instances of this class for accessing the persistence API.
+     */
     class PersistenceService {
 
     private:
@@ -39,6 +48,12 @@ namespace mico {
 
     public:
 
+      /**
+       * Initialise an instance of the PersistenceService using the Marmotta server with the given
+       * URL as backend.
+       *
+       * @param marmottaServerUrl the URL of the Apache Marmotta server, e.g. http://localhost:8080/marmotta
+       */
       PersistenceService(std::string marmottaServerUrl) : marmottaServerUrl(marmottaServerUrl), metadata(marmottaServerUrl) {};
 
 
@@ -88,6 +103,9 @@ namespace mico {
       content_item_iterator begin();
 
 
+      /**
+       * Return the end iterator for checking when iteration has completed.
+       */
       content_item_iterator end();
 
 
@@ -95,6 +113,9 @@ namespace mico {
     };
 
 
+    /**
+     * 	Internal implementation of iterators over the content items managed by a PersistenceService
+     */
     class content_item_iterator  : public boost::iterator_facade<content_item_iterator, ContentItem*, boost::forward_traversal_tag, ContentItem*> {
     private:
       int pos;

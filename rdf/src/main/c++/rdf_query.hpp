@@ -15,7 +15,10 @@ namespace mico {
   namespace rdf {
     namespace query {
 
-      // define a BindingSet simply as a map from binding name to value
+      /**
+       * A BindingSet is a single result row of a TupleResult. It maps from variable name to
+       * variable binding and is implemented as a simple map.
+       */
       class BindingSet : public map<string,Value*> {
 	
       };
@@ -23,6 +26,10 @@ namespace mico {
       static void startElement(void *data, const char *el, const char **attr);
       static void characterData(void *data, const char *chars, int len);
 
+      /**
+       * Abstract base class for query results. Defines methods for loading and parsing query results from
+       * different sorts of input.
+       */
       class QueryResult {
       public:
 
@@ -41,7 +48,9 @@ namespace mico {
 	
       };
 
-
+      /**
+       * The boolean result of a SPARQL ASK query. Can be used like the bool datatype.
+       */
       class BooleanResult : public QueryResult {
 
 	friend void characterData(void *data, const char *chars, int len);
@@ -74,7 +83,10 @@ namespace mico {
 
 
 
-      // define a QueryResult simply as list (vector) of BindingSets
+      /**
+       * The result of a SPARQL SELECT query. Implemented as a vector of BindingSet instances, each
+       * representing one row in the result.
+       */
       class TupleResult : public vector<BindingSet>, public QueryResult {
 
       private:
@@ -86,6 +98,9 @@ namespace mico {
 
       public:
 	
+	/**
+	 * Return the binding names (variable names) contained in the result.
+	 */
 	const vector<string>& getBindingNames() const { return bindingNames; };
 
 

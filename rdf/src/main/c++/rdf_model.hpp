@@ -14,7 +14,7 @@ using std::size_t;
 using std::ostream;
 using namespace boost::multiprecision;
 
-/**
+/*
  * This module contains an implementation of the Sesame data model in C++ for use in C++ components
  * of the MICO platform
  */
@@ -107,6 +107,9 @@ namespace mico {
 	string getNamespace() const { return uri.substr(0,split()); };	
 
 
+	/**
+	 * Returns the String-value of a Value object. This returns either a Literal's label, a URI's URI or a BNode's ID.
+	 */
 	inline const string& stringValue() const { return uri; } ;
 
 
@@ -120,6 +123,9 @@ namespace mico {
       };
 
 
+      /**
+       * RDF blank node, represented with an internal string identifier.
+       */
       class BNode : public virtual Resource {
 
       private:
@@ -151,6 +157,9 @@ namespace mico {
 	inline const string& getID() const { return id; };
 	
 
+	/**
+	 * Returns the String-value of a Value object. This returns either a Literal's label, a URI's URI or a BNode's ID.
+	 */
 	inline const string& stringValue() const { return id; };
 
 	inline const ValueTypes getType() const { return TYPE_BNODE; };
@@ -239,6 +248,9 @@ namespace mico {
 	 */
 	inline const string& getLabel() const { return label; };
 
+	/**
+	 * Returns the String-value of a Value object. This returns either a Literal's label, a URI's URI or a BNode's ID.
+	 */
 	inline const string& stringValue() const { return label; };
 
 
@@ -324,6 +336,9 @@ namespace mico {
       };
 
 
+      /**
+       * Representation of an RDF triple, consisting of subject, predicate and object.
+       */
       class Statement {
       private:
 	Resource& subject;

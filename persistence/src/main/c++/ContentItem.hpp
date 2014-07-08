@@ -90,15 +90,29 @@ namespace mico {
       ResultMetadata      result;
 
     public:
+      /**
+       * Create a new content item using the given server base URL and a unique UUID as content item
+       * identifier. The URI of the content item will be composed of the base URL and the id.
+       *
+       * @param baseUrl base URL of the marmotta server
+       * @param id      a unique UUID identifying the content item
+       */
       ContentItem(const string baseUrl, const uuid& id);
 
+      /**
+       * Create a new content item using the given server base URL and a URI as content item
+       * identifier. The base URL must be a prefix of the URI of the content item.
+       *
+       * @param baseUrl base URL of the marmotta server
+       * @param uri     a unique URI identifying the content item (must have baseUrl as prefix)
+       */
       ContentItem(const string baseUrl, const URI& uri);
 
 
       /**
        * Return the identifier (a unique URI) for this content item.
        *
-       * @return
+       * @return the URI identifying this content item
        */
       inline const URI getURI() const { return URI(baseUrl + "/" + boost::uuids::to_string(id)); };
 
@@ -182,13 +196,19 @@ namespace mico {
       content_part_iterator begin();
 
 
+      /**
+       * Return the end iterator for content parts. Can be used to check when iteration is completed.
+       */
       content_part_iterator end();
 
 
 
     };
 
-
+    /**
+     * Internal implementation of iterators over the parts of a content item. Uses Boost
+     * iterator_facade to simplify the implementation.
+     */
     class content_part_iterator  : public boost::iterator_facade<content_part_iterator, Content*, boost::forward_traversal_tag, Content*> {
     private:
       int pos;
