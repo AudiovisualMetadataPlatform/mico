@@ -1,0 +1,1 @@
+SELECT ?p WHERE { GRAPH <$(g)> { <$(g)> <http://www.w3.org/ns/ldp#contains> ?p } }

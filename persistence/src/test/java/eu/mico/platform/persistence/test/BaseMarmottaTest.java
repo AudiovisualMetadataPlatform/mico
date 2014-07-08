@@ -12,6 +12,7 @@ import org.apache.marmotta.platform.core.api.triplestore.SesameService;
 import org.apache.marmotta.platform.core.exception.MarmottaException;
 import org.apache.marmotta.platform.core.exception.io.MarmottaImportException;
 import org.apache.marmotta.platform.core.test.base.JettyMarmotta;
+import org.apache.marmotta.platform.sparql.webservices.SparqlWebService;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -49,7 +50,7 @@ public abstract class BaseMarmottaTest {
         cfg.setProperty(KiWiOptions.CLUSTERING_BACKEND,"HAZELCAST");
         cfg.setProperty(KiWiOptions.CLUSTERING_MODE,"LOCAL");
 
-        marmotta = new JettyMarmotta(cfg, "/marmotta", ImmutableSet.<Class<?>>of(ContextualSparqlWebService.class));
+        marmotta = new JettyMarmotta(cfg, "/marmotta", ImmutableSet.<Class<?>>of(ContextualSparqlWebService.class, SparqlWebService.class));
         baseUrl = UriBuilder.fromUri("http://localhost").port(marmotta.getPort()).path(marmotta.getContext()).build().toString();
     }
 

@@ -1,0 +1,5 @@
+ASK {
+  GRAPH <$(ci)-metadata> {
+    <$(ci)> <http://www.w3.org/ns/ldp#contains> <$(cp)>
+  }
+}

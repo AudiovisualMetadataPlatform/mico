@@ -1,0 +1,6 @@
+PREFIX ldp: <http://www.w3.org/ns/ldp#>
+DELETE DATA {
+  GRAPH <$(ci)-metadata> {
+    <$(ci)> ldp:contains <$(cp)>
+  }
+}

@@ -13,20 +13,35 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.UUID;
 
 /**
  * An implementation of metadata accessing a contextual marmotta with its webservices.
  */
-public class ContextualMarmottaMetadata implements Metadata {
+public class MarmottaMetadata implements Metadata {
 
-    private static Logger log = LoggerFactory.getLogger(ContextualMarmottaMetadata.class);
+    private static Logger log = LoggerFactory.getLogger(MarmottaMetadata.class);
 
 
     private String baseUri;
     private String context;
 
     private Repository repository;
+
+
+
+    /**
+     * Create a new contextual marmotta metadata instance connecting to the Marmotta instance with the given base URI
+     * using the main SPARQL endpoint.
+     *
+     * @param baseUri base URI of the marmotta server, without the trailing slash, e.g. http://localhost:8080/marmotta
+     */
+    public MarmottaMetadata(String baseUri) throws RepositoryException {
+        this.context = context;
+
+        this.baseUri  = baseUri;
+        repository    = new SPARQLRepository(this.baseUri + "/sparql/select", this.baseUri+"/sparql/update");
+        repository.initialize();
+    }
 
     /**
      * Create a new contextual marmotta metadata instance connecting to the Marmotta instance with the given base URI
@@ -35,7 +50,7 @@ public class ContextualMarmottaMetadata implements Metadata {
      * @param baseUri base URI of the marmotta server, without the trailing slash, e.g. http://localhost:8080/marmotta
      * @param context UUID of the metadata object to access
      */
-    public ContextualMarmottaMetadata(String baseUri, String context) throws RepositoryException {
+    public MarmottaMetadata(String baseUri, String context) throws RepositoryException {
         this.context = context;
 
         this.baseUri  = baseUri + "/" + context.toString();

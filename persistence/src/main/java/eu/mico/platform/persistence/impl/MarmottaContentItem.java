@@ -1,9 +1,11 @@
 package eu.mico.platform.persistence.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
+import eu.mico.platform.persistence.util.SPARQLUtil;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.*;
@@ -14,12 +16,15 @@ import org.slf4j.LoggerFactory;
 import java.util.Iterator;
 import java.util.UUID;
 
+import static com.google.common.collect.ImmutableMap.of;
+import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
+
 /**
  * Implementation of a ContentItem based on a backend contextual marmotta SPARQL webservice.
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
-public class ContextualMarmottaContentItem implements ContentItem {
+public class MarmottaContentItem implements ContentItem {
 
 
     public static final String SUFFIX_METADATA = "-metadata";
@@ -27,7 +32,7 @@ public class ContextualMarmottaContentItem implements ContentItem {
     public static final String SUFFIX_RESULT = "-result";
 
 
-    private static Logger log = LoggerFactory.getLogger(ContextualMarmottaContentItem.class);
+    private static Logger log = LoggerFactory.getLogger(MarmottaContentItem.class);
 
     private String baseUrl;
 
@@ -40,13 +45,13 @@ public class ContextualMarmottaContentItem implements ContentItem {
     protected static final String sparqlListParts     = "SELECT ?p WHERE { <%s> <http://www.w3.org/ns/ldp#contains> ?p } ";
 
 
-    public ContextualMarmottaContentItem(String baseUrl, UUID uuid) {
+    public MarmottaContentItem(String baseUrl, UUID uuid) {
         this.baseUrl = baseUrl;
         this.uuid = uuid;
     }
 
 
-    protected ContextualMarmottaContentItem(String baseUrl, URI uri) {
+    protected MarmottaContentItem(String baseUrl, URI uri) {
         Preconditions.checkArgument(uri.stringValue().startsWith(baseUrl), "the content part URI must match the baseUrl");
 
         this.baseUrl = baseUrl;
@@ -87,7 +92,7 @@ public class ContextualMarmottaContentItem implements ContentItem {
      */
     @Override
     public Metadata getMetadata() throws RepositoryException {
-        return new ContextualMarmottaMetadata(baseUrl, uuid.toString()+ SUFFIX_METADATA);
+        return new MarmottaMetadata(baseUrl, uuid.toString()+ SUFFIX_METADATA);
     }
 
     /**
@@ -100,7 +105,7 @@ public class ContextualMarmottaContentItem implements ContentItem {
      */
     @Override
     public Metadata getExecution() throws RepositoryException {
-        return new ContextualMarmottaMetadata(baseUrl, uuid.toString()+ SUFFIX_EXECUTION);
+        return new MarmottaMetadata(baseUrl, uuid.toString()+ SUFFIX_EXECUTION);
     }
 
     /**
@@ -111,7 +116,7 @@ public class ContextualMarmottaContentItem implements ContentItem {
      */
     @Override
     public Metadata getResult() throws RepositoryException {
-        return new ContextualMarmottaMetadata(baseUrl, uuid.toString()+ SUFFIX_RESULT);
+        return new MarmottaMetadata(baseUrl, uuid.toString()+ SUFFIX_RESULT);
     }
 
     /**
@@ -126,11 +131,11 @@ public class ContextualMarmottaContentItem implements ContentItem {
     public Content createContentPart() throws RepositoryException {
 
         UUID contentUUID = UUID.randomUUID();
-        Content content = new ContextualMarmottaContent(baseUrl,uuid.toString() + "/" + contentUUID);
+        Content content = new MarmottaContent(baseUrl,uuid.toString() + "/" + contentUUID);
 
         Metadata m = getMetadata();
         try {
-            m.update(String.format(sparqlCreatePart, getURI().stringValue(), content.getURI().stringValue()));
+            m.update(createNamed("createContentPart", of("ci", getURI().stringValue(), "cp", content.getURI().stringValue())));
 
             return content;
         } catch (MalformedQueryException e) {
@@ -154,11 +159,11 @@ public class ContextualMarmottaContentItem implements ContentItem {
      */
     @Override
     public Content createContentPart(URI id) throws RepositoryException {
-        Content content = new ContextualMarmottaContent(baseUrl,id);
+        Content content = new MarmottaContent(baseUrl,id);
 
         Metadata m = getMetadata();
         try {
-            m.update(String.format(sparqlCreatePart, getURI().stringValue(), content.getURI().stringValue()));
+            m.update(createNamed("createContentPart", of("ci", getURI().stringValue(), "cp", content.getURI().stringValue())));
 
             return content;
         } catch (MalformedQueryException e) {
@@ -185,8 +190,8 @@ public class ContextualMarmottaContentItem implements ContentItem {
         Metadata m = getMetadata();
 
         try {
-            if(m.ask(String.format(sparqlAskPart, getURI().stringValue(), id.stringValue()))) {
-                return new ContextualMarmottaContent(baseUrl, id);
+            if(m.ask(createNamed("askContentPart", of("ci", getURI().stringValue(), "cp", id.stringValue())))) {
+                return new MarmottaContent(baseUrl, id);
             } else {
                 return null;
             }
@@ -213,7 +218,7 @@ public class ContextualMarmottaContentItem implements ContentItem {
         Metadata m = getMetadata();
 
         try {
-            m.update(String.format(sparqlDeletePart, getURI().stringValue() + SUFFIX_METADATA, getURI().stringValue(), id.stringValue()));
+            m.update(createNamed("deleteContentPart", of("ci", getURI().stringValue(), "cp", id.stringValue())));
         } catch (MalformedQueryException e) {
             log.error("the SPARQL update was malformed:", e);
             throw new RepositoryException("the SPARQL update was malformed",e);
@@ -235,7 +240,7 @@ public class ContextualMarmottaContentItem implements ContentItem {
         Metadata m = getMetadata();
 
         try {
-            final TupleQueryResult r = m.query(String.format(sparqlListParts, getURI().stringValue()));
+            final TupleQueryResult r = m.query(createNamed("listContentParts", "ci", getURI().stringValue()));
 
             return new Iterable<Content>() {
                 @Override
@@ -255,7 +260,7 @@ public class ContextualMarmottaContentItem implements ContentItem {
                             try {
                                 BindingSet b = r.next();
                                 URI part = (URI) b.getValue("p");
-                                return new ContextualMarmottaContent(baseUrl, part);
+                                return new MarmottaContent(baseUrl, part);
                             } catch (QueryEvaluationException e) {
                                 return null;
                             }
@@ -280,7 +285,7 @@ public class ContextualMarmottaContentItem implements ContentItem {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ContextualMarmottaContentItem that = (ContextualMarmottaContentItem) o;
+        MarmottaContentItem that = (MarmottaContentItem) o;
 
         if (!baseUrl.equals(that.baseUrl)) return false;
         if (!uuid.equals(that.uuid)) return false;

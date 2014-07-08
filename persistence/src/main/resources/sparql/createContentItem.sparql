@@ -1,0 +1,10 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ldp: <http://www.w3.org/ns/ldp#>
+
+INSERT DATA {
+  GRAPH <$(g)> {
+    <$(g)> ldp:contains <$(ci)> .
+    <$(ci)> rdf:type ldp:BasicContainer .
+    <$(ci)> rdf:type <http://www.mico-project.eu/ns/mico/ContentItem>
+  }
+}

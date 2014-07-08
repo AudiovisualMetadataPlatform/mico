@@ -7,27 +7,26 @@ import org.openrdf.model.impl.URIImpl;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.UUID;
 
 /**
  * Add file description here!
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
-public class ContextualMarmottaContent implements Content {
+public class MarmottaContent implements Content {
 
 
     private String baseUrl;
     private String id;
 
 
-    public ContextualMarmottaContent(String baseUrl, String id) {
+    public MarmottaContent(String baseUrl, String id) {
         this.baseUrl = baseUrl;
         this.id = id;
     }
 
 
-    protected ContextualMarmottaContent(String baseUrl, URI uri) {
+    protected MarmottaContent(String baseUrl, URI uri) {
         Preconditions.checkArgument(uri.stringValue().startsWith(baseUrl), "the content part URI must match the baseUrl");
 
         this.baseUrl = baseUrl;
@@ -72,7 +71,7 @@ public class ContextualMarmottaContent implements Content {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ContextualMarmottaContent that = (ContextualMarmottaContent) o;
+        MarmottaContent that = (MarmottaContent) o;
 
         if (!baseUrl.equals(that.baseUrl)) return false;
         if (!id.equals(that.id)) return false;

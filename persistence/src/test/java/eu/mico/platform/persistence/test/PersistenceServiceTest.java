@@ -26,13 +26,13 @@ public class PersistenceServiceTest extends BaseMarmottaTest {
 
         ContentItem ci = db.createContentItem();
 
-        assertAsk(String.format("ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> }", baseUrl, ci.getURI()), new URIImpl(baseUrl + "/global"));
+        assertAsk(String.format("ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> }", baseUrl, ci.getURI()), new URIImpl(baseUrl));
 
         Assert.assertTrue(db.getContentItems().iterator().hasNext());
 
         db.deleteContentItem(ci.getURI());
 
-        assertAskNot(String.format("ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> }", baseUrl, ci.getURI()), new URIImpl(baseUrl + "/global"));
+        assertAskNot(String.format("ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> }", baseUrl, ci.getURI()), new URIImpl(baseUrl));
 
         Assert.assertFalse(db.getContentItems().iterator().hasNext());
 

@@ -6,14 +6,14 @@ import eu.mico.platform.persistence.model.Metadata;
 import org.openrdf.model.URI;
 import org.openrdf.query.*;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.UUID;
+
+import static com.google.common.collect.ImmutableMap.of;
+import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
 
 /**
  * An implementation of the persistence service using an HDFS file system and a Marmotta triple store for representing
@@ -28,28 +28,6 @@ public class PersistenceServiceImpl implements PersistenceService {
     private String marmottaServerUrl;
 
 
-    private static final String sparqlCreateCI =
-            "INSERT DATA { GRAPH <%s> { " +
-                    "<%s> <http://www.w3.org/ns/ldp#contains> <%s> . " +
-                    "<%s> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#BasicContainer> . " +
-                    "<%s> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.mico-project.eu/ns/mico/ContentItem> } }";
-
-    private final String sparqlAskCI =
-            "ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> } ";
-
-
-    private static final String sparqlDeleteCI =
-            "DELETE DATA { GRAPH <%s> { " +
-                    "<%s> <http://www.w3.org/ns/ldp#contains> <%s> . " +
-                    "<%s> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#BasicContainer> . " +
-                    "<%s> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.mico-project.eu/ns/mico/ContentItem> } }";
-
-
-    private static final String sparqlDropGraph =
-            "DROP GRAPH <%s>";
-
-    protected final String sparqlListCIs =
-            "SELECT ?p WHERE { <%s> <http://www.w3.org/ns/ldp#contains> ?p } ";
 
 
     // TODO: HDFS connection
@@ -67,13 +45,13 @@ public class PersistenceServiceImpl implements PersistenceService {
      */
     @Override
     public Metadata getMetadata() throws RepositoryException {
-        return new ContextualMarmottaMetadata(marmottaServerUrl, "global");
+        return new MarmottaMetadata(marmottaServerUrl);
 
     }
 
 
     private String getContext() {
-        return marmottaServerUrl + "/global";
+        return marmottaServerUrl;
     }
 
     /**
@@ -87,12 +65,12 @@ public class PersistenceServiceImpl implements PersistenceService {
 
         UUID uuid = UUID.randomUUID();
 
-        ContentItem ci = new ContextualMarmottaContentItem(marmottaServerUrl,uuid);
+        ContentItem ci = new MarmottaContentItem(marmottaServerUrl,uuid);
 
 
         Metadata m = getMetadata();
         try {
-            m.update(String.format(sparqlCreateCI, getContext(), marmottaServerUrl, ci.getURI().stringValue(), ci.getURI().stringValue(), ci.getURI().stringValue()));
+            m.update(createNamed("createContentItem", of("g", marmottaServerUrl, "ci", ci.getURI().stringValue())));
 
             return ci;
         } catch (MalformedQueryException e) {
@@ -113,12 +91,12 @@ public class PersistenceServiceImpl implements PersistenceService {
      */
     @Override
     public ContentItem createContentItem(URI id) throws RepositoryException {
-        ContentItem ci = new ContextualMarmottaContentItem(marmottaServerUrl,id);
+        ContentItem ci = new MarmottaContentItem(marmottaServerUrl,id);
 
 
         Metadata m = getMetadata();
         try {
-            m.update(String.format(sparqlCreateCI, getContext(), marmottaServerUrl, ci.getURI().stringValue(), ci.getURI().stringValue(), ci.getURI().stringValue()));
+            m.update(createNamed("createContentItem", of("g", marmottaServerUrl, "ci", ci.getURI().stringValue())));
 
             return ci;
         } catch (MalformedQueryException e) {
@@ -143,8 +121,8 @@ public class PersistenceServiceImpl implements PersistenceService {
         Metadata m = getMetadata();
 
         try {
-            if(m.ask(String.format(sparqlAskCI, marmottaServerUrl, id.stringValue()))) {
-                return new ContextualMarmottaContentItem(marmottaServerUrl, id);
+            if(m.ask(createNamed("askContentItem", of("g", marmottaServerUrl, "ci", id.stringValue())))) {
+                return new MarmottaContentItem(marmottaServerUrl, id);
             } else {
                 return null;
             }
@@ -170,12 +148,12 @@ public class PersistenceServiceImpl implements PersistenceService {
 
         try {
             // delete from global metadata first
-            m.update(String.format(sparqlDeleteCI, getContext(), marmottaServerUrl, id.stringValue(), id.stringValue(), id.stringValue()));
+            m.update(createNamed("deleteContentItem", of("g", marmottaServerUrl, "ci", id.stringValue())));
 
             // delete the metadata, execution, and results context for the content item
-            m.update(String.format(sparqlDropGraph, id.stringValue() + ContextualMarmottaContentItem.SUFFIX_METADATA));
-            m.update(String.format(sparqlDropGraph, id.stringValue() + ContextualMarmottaContentItem.SUFFIX_EXECUTION));
-            m.update(String.format(sparqlDropGraph, id.stringValue() + ContextualMarmottaContentItem.SUFFIX_RESULT));
+            m.update(createNamed("deleteGraph", of("g", id.stringValue() + MarmottaContentItem.SUFFIX_METADATA)));
+            m.update(createNamed("deleteGraph", of("g", id.stringValue() + MarmottaContentItem.SUFFIX_EXECUTION)));
+            m.update(createNamed("deleteGraph", of("g", id.stringValue() + MarmottaContentItem.SUFFIX_RESULT)));
 
         } catch (MalformedQueryException e) {
             log.error("the SPARQL update was malformed:", e);
@@ -197,7 +175,7 @@ public class PersistenceServiceImpl implements PersistenceService {
         Metadata m = getMetadata();
 
         try {
-            final TupleQueryResult r = m.query(String.format(sparqlListCIs, marmottaServerUrl));
+            final TupleQueryResult r = m.query(createNamed("listContentItems", of("g", marmottaServerUrl)));
 
 
             return new Iterable<ContentItem>() {
@@ -220,7 +198,7 @@ public class PersistenceServiceImpl implements PersistenceService {
 
                                 URI ci = (URI) s.getValue("p");
 
-                                return new ContextualMarmottaContentItem(marmottaServerUrl,ci);
+                                return new MarmottaContentItem(marmottaServerUrl,ci);
 
                             } catch (QueryEvaluationException e) {
                                 return null;
