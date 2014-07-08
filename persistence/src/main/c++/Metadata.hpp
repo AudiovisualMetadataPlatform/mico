@@ -3,8 +3,12 @@
 
 #include <string>
 #include <iostream>
+#include <sstream>
+
 #include "../../../../rdf/src/main/c++/rdf_model.hpp"
 #include "../../../../rdf/src/main/c++/rdf_query.hpp"
+#include "../../../../rdf/src/main/c++/sparql_client.hpp"
+#include "../../../../rdf/src/main/c++/http_client.hpp"
 
 
 namespace mico {
@@ -13,15 +17,41 @@ namespace mico {
     using std::string;
     using namespace mico::rdf::model;
     using namespace mico::rdf::query;
+    using namespace mico::http;
 
     class Metadata {
 
+    protected:
+      string baseUrl;
+      string contextUrl;
+
+      SPARQLClient sparqlClient;
+      HTTPClient   httpClient;
+
     public:
+
+      /**
+       * Create a new metadata object for the given server using the global SPARQL
+       * endpoint. Optional context must be given explicitly in SPARQL queries.
+       */
+      Metadata(string baseUrl) : baseUrl(baseUrl), contextUrl(baseUrl), sparqlClient(baseUrl + "/sparql") {};
+
+      /**
+       * Create a new metadata object for the given server base URL and context using the contextual
+       * SPARQL endpoint. All queries and updates will exclusively access this context.
+       */
+      Metadata(string baseUrl, string context) 
+	: baseUrl(baseUrl), contextUrl(baseUrl + "/" + context), sparqlClient(baseUrl + "/" + context + "/sparql") {};
+
+
+      virtual ~Metadata() {};
+
       /**
        * Load RDF data of the given format into the metadata dataset. Can be used for preloading existing metadata.
        *
        * @param in      InputStream to load the data from
-       * @param format  data format the RDF data is using (e.g. Turtle)
+       * @param format  data format the RDF data is using (e.g. text/turtle or application/rdf+xml;
+       *                defined shortcuts: "turtle" and "rdfxml")
        */
       void load(std::istream& in, const string format);
 
@@ -31,7 +61,8 @@ namespace mico {
        * format. Can be used for exporting the metadata.
        *
        * @param out    OutputStream to export the data to
-       * @param format data format the RDF data is using (e.g. Turtle)
+       * @param format data format the RDF data is using (e.g. (e.g. text/turtle or application/rdf+xml;
+       *                defined shortcuts: "turtle" and "rdfxml")
        */
       void dump(std::ostream& out, const string format);
 
@@ -64,13 +95,13 @@ namespace mico {
        * @param sparqlQuery
        * @return
        */
-      bool ask(const string sparqlQuery);
+      const bool ask(const string sparqlQuery);
 
 
       /**
        * Close the metadata connection and clean up any open resources.
        */
-      void close();
+      void close() {};
 
     };
   }

@@ -39,7 +39,7 @@ public class ContextLockingServiceImpl implements ContextLockingService {
     public void initialise() {
         KiWiStore s = findKiWiStore(sesameService.getRepository().getSail());
 
-        if(s != null) {
+        if(s != null && s.getPersistence().getCacheManager() instanceof HazelcastCacheManager) {
             hazelcast = ((HazelcastCacheManager) (s.getPersistence().getCacheManager())).getBackend();
         } else {
             // testing, local machine only

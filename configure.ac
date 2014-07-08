@@ -12,6 +12,8 @@ AC_PROG_CC_C99
 AC_PROG_CXX
 
 
+AC_PATH_PROG([XXD],[xxd])
+
 # C system headers and libraries
 AC_CHECK_HEADERS([stdio.h stdarg.h time.h])
 
@@ -42,7 +44,7 @@ AX_CHECK_COMPILE_FLAG([-std=c++11], [CXXFLAGS="$CXXFLAGS -std=c++11"],
 )
 
 # check for some Boost header files, we use them in the data model
-AC_CHECK_HEADERS([boost/multiprecision/cpp_int.hpp boost/multiprecision/cpp_dec_float.hpp], , AC_MSG_ERROR("required Boost headers missing"))
+AC_CHECK_HEADERS([boost/multiprecision/cpp_int.hpp boost/multiprecision/cpp_dec_float.hpp boost/uuid/uuid.hpp boost/uuid/uuid_generators.hpp boost/algorithm/string.hpp boost/xpressive/xpressive.hpp], , AC_MSG_ERROR("required Boost headers missing"))
 
 
 AC_LANG_POP([C++])

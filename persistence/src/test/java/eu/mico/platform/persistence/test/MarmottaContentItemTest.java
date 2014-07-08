@@ -60,7 +60,7 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
 
     @Test
-    public void testCreateDeleteContentItem() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
+    public void testCreateDeleteContentPart() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
         ContentItem item = new MarmottaContentItem(baseUrl, UUID.randomUUID());
 
         Assert.assertFalse(item.listContentParts().iterator().hasNext());

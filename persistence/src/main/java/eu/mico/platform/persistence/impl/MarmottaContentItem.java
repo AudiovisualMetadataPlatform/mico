@@ -39,12 +39,6 @@ public class MarmottaContentItem implements ContentItem {
     // the content item's unique ID
     private UUID uuid;
 
-    protected static final String sparqlCreatePart    = "INSERT DATA { <%s> <http://www.w3.org/ns/ldp#contains> <%s> } ";
-    protected static final String sparqlAskPart       = "ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> } ";
-    protected static final String sparqlDeletePart    = "DELETE DATA { GRAPH <%s> { <%s> <http://www.w3.org/ns/ldp#contains> <%s> } } ";
-    protected static final String sparqlListParts     = "SELECT ?p WHERE { <%s> <http://www.w3.org/ns/ldp#contains> ?p } ";
-
-
     public MarmottaContentItem(String baseUrl, UUID uuid) {
         this.baseUrl = baseUrl;
         this.uuid = uuid;

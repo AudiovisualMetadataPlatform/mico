@@ -54,7 +54,7 @@ namespace mico {
        */
       const void SPARQLClient::update(std::string sparqlUpdate) {
 	Request req(POST,base_url+"/update");
-	req.setBody(sparqlUpdate, "application/sparql-query");
+	req.setBody(sparqlUpdate, "application/sparql-update");
 
 	Response *resp = http_client.execute(req);
 	
