@@ -41,7 +41,9 @@ TEST(HTTPRequestTest, TestRequestHeaders) {
   
   curl_slist* cheaders = req.getCurlHeaders();
   ASSERT_TRUE(cheaders != NULL);
-  EXPECT_STREQ(cheaders->data,"X-MICO-Test: foo");
+  EXPECT_STREQ("Expect: ",cheaders->data);
+  ASSERT_TRUE(cheaders->next != NULL);
+  EXPECT_STREQ("X-MICO-Test: foo",cheaders->next->data);
 
 }
 
@@ -57,7 +59,9 @@ TEST(HTTPRequestTest, TestRequestCurlHeaders) {
   
   curl_slist* cheaders2 = req.getCurlHeaders();
   ASSERT_TRUE(cheaders2 != NULL);
-  EXPECT_STREQ(cheaders2->data,"X-MICO-Test: foo");
+  EXPECT_STREQ("Expect: ",cheaders2->data);
+  ASSERT_TRUE(cheaders2->next != NULL);
+  EXPECT_STREQ("X-MICO-Test: foo",cheaders2->next->data);
 
   curl_slist_free_all(cheaders);
   curl_slist_free_all(cheaders2);

@@ -77,7 +77,7 @@ namespace mico {
 
     public:
 
-      Message() : body(NULL) {};
+      Message() : body(NULL) { headers["Expect"]=""; };
       virtual ~Message();
 
       /**

@@ -7,8 +7,9 @@ libmico_marmotta_la_LIBADD = libmico_rdf.la @curllibs@
 include_HEADERS = src/main/c++/rdf_model.hpp src/main/c++/rdf_query.hpp src/main/c++/http_client.hpp src/main/c++/sparql_client.hpp
 
 
-AM_CXXFLAGS=
+AM_CXXFLAGS=-Isrc/main/c++
 noinst_PROGRAMS=
+TESTS=
 if GTEST
 noinst_LIBRARIES = libgtest.a
 libgtest_a_SOURCES = src/test/c++/gtest-all.cc
@@ -26,4 +27,5 @@ client_tests_LDADD = libmico_rdf.la libmico_marmotta.la libgtest.a @curllibs@
 sparql_tests_SOURCES = src/test/c++/rdf_tests.cpp src/test/c++/sparql_client_tests.cpp 
 sparql_tests_LDADD = libmico_rdf.la libmico_marmotta.la libgtest.a @curllibs@
 
+TESTS += model_tests query_tests client_tests sparql_tests
 endif

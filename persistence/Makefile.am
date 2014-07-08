@@ -16,9 +16,11 @@ include_HEADERS =
 
 
 noinst_PROGRAMS=
+TESTS =
 if GTEST
 AM_CXXFLAGS += -Isrc/main/c++
 noinst_PROGRAMS  += persistence_tests
+TESTS            += persistence_tests
 noinst_LIBRARIES = libgtest.a
 libgtest_a_SOURCES = src/test/c++/gtest-all.cc
 
@@ -26,3 +28,5 @@ persistence_tests_SOURCES = src/test/c++/persistence_tests.cpp src/test/c++/meta
 persistence_tests_LDADD = libmico_persistence.la ../rdf/libmico_rdf.la ../rdf/libmico_marmotta.la libgtest.a @curllibs@
 
 endif
+
+
