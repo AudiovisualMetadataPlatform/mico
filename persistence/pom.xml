@@ -102,7 +102,6 @@
             <version>2.4</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-model</artifactId>
@@ -119,8 +118,6 @@
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-repository-sparql</artifactId>
         </dependency>
-
-
 
         <!-- JUnit Testing Libraries -->
         <dependency>
