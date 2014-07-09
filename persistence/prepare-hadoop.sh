@@ -32,5 +32,5 @@ else
 fi
 
 cp src/main/resources/hadoop-core-site.xml $DIR/etc/hadoop/core-site.xml
-
+cp src/main/resources/hadoop-hdfs-site.xml $DIR/etc/hadoop/hdfs-site.xml
 

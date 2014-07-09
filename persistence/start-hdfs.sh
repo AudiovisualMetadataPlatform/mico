@@ -11,8 +11,10 @@ fi
 
 # Format the namenode
 hdfs namenode -format
+
 # Start the namenode
 hdfs namenode
-# Start a datanode
-hdfs datanode
+
+# Start a datanode is not required in this environment
+#hdfs datanode
 

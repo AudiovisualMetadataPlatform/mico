@@ -46,6 +46,8 @@ To launch the different webapps, run
 
 ### Persistence
 
+@@TODO@@: marmotta and all other subsystems
+
 In parallel you may require some persistence infrastructure, which uses HDFS.
 [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html)
 (Hadoop Distributed File System) is used int he MICO platform to store content. 
@@ -58,4 +60,8 @@ requires some particular details that we try to automatize as much as possible.
 And run the HDFS daemons:
 
     ./start-hdfs.sh
+
+And the you can access it at [localhost:50070](http://localhost:50070/)
+
+To shutdown HDFS just use Ctrl+C in the active terminal.
 
