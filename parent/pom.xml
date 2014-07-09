@@ -20,14 +20,12 @@
     <properties>
         <jetty.version>9.2.1.v20140609</jetty.version>
         <sesame.version>2.7.12</sesame.version>
-        <java.home>/usr/lib/jvm/java-7-openjdk-amd64</java.home><!--TODO-->
         <javaee.port>8080</javaee.port>
+        <marmotta.version>3.3.0-SNAPSHOT</marmotta.version>
         <marmotta.context>/marmotta</marmotta.context>
         <marmotta.home>${project.build.directory}${file.separator}marmotta</marmotta.home>
-        <marmotta.version>3.3.0-SNAPSHOT</marmotta.version>
-        <hadoop.context>/hadoop</hadoop.context>
-        <hadoop.home>${project.build.directory}${file.separator}hadoop-${hadoop.version}</hadoop.home>
         <hadoop.version>2.4.1</hadoop.version>
+        <hadoop.home>${project.build.directory}${file.separator}hadoop-${hadoop.version}</hadoop.home>
     </properties>
 
     <repositories>
