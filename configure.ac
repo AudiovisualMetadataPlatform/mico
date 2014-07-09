@@ -53,7 +53,7 @@ LDFLAGS="$LDFLAGS -L$HADOOP_PATH/lib/native"
 AC_CHECK_LIB([hdfs], [hdfsConnect], [hdfslibs="-lhdfs -L$HADOOP_PATH/lib/native"], [AC_MSG_ERROR([Hadoop HDFS native library could not be found, set the correct path to your hadoop installation using --with-hadoop=PATH])])
 AC_CHECK_HEADERS([hdfs.h], , [AC_MSG_ERROR([Hadoop HDFS headers could not be found, set the correct path to your hadoop installation using --with-hadoop=PATH])])
 AC_SUBST(hdfslibs)
-
+AC_SUBST(HADOOP_PATH)
 
 # c++ headers and libraries
 AC_LANG_PUSH([C++])

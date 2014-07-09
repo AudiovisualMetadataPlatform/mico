@@ -10,9 +10,10 @@ AM_CXXFLAGS=-I../rdf/src/main/c++
 
 # shared C++ libraries
 lib_LTLIBRARIES = libmico_persistence.la
-libmico_persistence_la_SOURCES = src/main/c++/createContentItem.sparql.cc src/main/c++/deleteContentItem.sparql.cc src/main/c++/askContentItem.sparql.cc src/main/c++/listContentItems.sparql.cc src/main/c++/createContentPart.sparql.cc src/main/c++/deleteContentPart.sparql.cc src/main/c++/askContentPart.sparql.cc src/main/c++/listContentParts.sparql.cc src/main/c++/deleteGraph.sparql.cc src/main/c++/SPARQLUtil.cpp src/main/c++/Metadata.cpp src/main/c++/Content.cpp src/main/c++/ContentItem.cpp src/main/c++/PersistenceService.cpp src/main/c++/HDFSStream.cpp
-libmico_persistence_la_LIBADD = ../rdf/libmico_rdf.la ../rdf/libmico_marmotta.la @hdfslibs@
-include_HEADERS = 
+libmico_persistence_la_LDFLAGS=-rpath '$(HADOOP_PATH)/lib/native'
+libmico_persistence_la_SOURCES=src/main/c++/createContentItem.sparql.cc src/main/c++/deleteContentItem.sparql.cc src/main/c++/askContentItem.sparql.cc src/main/c++/listContentItems.sparql.cc src/main/c++/createContentPart.sparql.cc src/main/c++/deleteContentPart.sparql.cc src/main/c++/askContentPart.sparql.cc src/main/c++/listContentParts.sparql.cc src/main/c++/deleteGraph.sparql.cc src/main/c++/SPARQLUtil.cpp src/main/c++/Metadata.cpp src/main/c++/Content.cpp src/main/c++/ContentItem.cpp src/main/c++/PersistenceService.cpp src/main/c++/HDFSStream.cpp
+libmico_persistence_la_LIBADD=../rdf/libmico_rdf.la ../rdf/libmico_marmotta.la @hdfslibs@
+include_HEADERS = src/main/c++/Content.hpp src/main/c++/ContentItem.hpp src/main/c++/Metadata.hpp src/main/c++/PersistenceService.hpp src/main/c++/HDFSStream.hpp
 
 
 noinst_PROGRAMS=

@@ -9,6 +9,25 @@ implementations for both Java and C++ (version 11).
 * Maven
 * ...
 
+### Prerequisites (C++)
+
+Building the C++ API has additional requirements for native libraries. In particular, these are:
+
+* GNU Autotools, GCC >= 4.8 with C++11 support
+* cURL library for HTTP requests (apt-get install libcurl4-gnutls-dev)
+* expat library for XML parsing (apt-get install libexpat1-dev)
+* Boost 1.55 libraries for additional C++ functionalities (apt-get install libboost1.55-dev)
+* xxd for inlining SPARQL queries in C++ (part of VIM, apt-get install vim-common)
+* Hadoop native libraries (manual install, see below)
+
+Building Hadoop Native:
+
+This process is described in detail on the [Hadoop Website](http://hadoop.apache.org/docs/r2.4.1/hadoop-project-dist/hadoop-common/NativeLibraries.html). 
+Quick summary:
+
+* download Hadoop 2.x source release and unpack in a custom directory
+* `mvn package -Pdist,native -DskipTests -Dtar`
+
 ## Building
 
 ### Building (Java)
@@ -31,12 +50,25 @@ so, please run:
 
 To configure the bindings for your platform, run:
 
-    ./configure --prefix=/usr/local
+    ./configure --prefix=/usr/local --enable-testing --with-hadoop=PATH
+
+Where PATH is the location where the Hadoop distribution has been 
 
 In case configuration succeeds (i.e. all dependencies are found), the C++ libraries can be built
-using GNU make as follows:
+and automatically tested using GNU make as follows:
 
-    make && make install
+    make
+
+To run C++ unit tests for the persistence API, startup the platform as described below and then call
+
+    make check
+
+To install the C++ libraries and headers to the predefined prefix, run
+
+    make install
+   
+In this case, you would probably also want to make sure that the Hadoop Native Libraries are properly 
+installed in the system before.
 
 ## Launching
 
