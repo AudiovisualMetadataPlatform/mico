@@ -40,6 +40,21 @@ AC_SUBST(xmllibs)
 LIBCURL_CHECK_CONFIG(yes, ,  curllibs="-lcurl", AC_MSG_ERROR("required cURL HTTP library is missing"))
 AC_SUBST(curllibs)
 
+
+# HDFS
+HADOOP_PATH=/usr/local/src/hadoop-2.4.1-src/hadoop-dist/target/hadoop-2.4.1
+AC_ARG_WITH(hadoop,[AS_HELP_STRING([--with-hadoop=PATH],[specify path to local Hadoop installation containing native libraries])],[HADOOP_PATH="$withval"])
+
+CFLAGS="$CFLAGS -I$HADOOP_PATH/include"
+CXXFLAGS="$CXXFLAGS -I$HADOOP_PATH/include"
+CPPFLAGS="$CPPFLAGS -I$HADOOP_PATH/include"
+LDFLAGS="$LDFLAGS -L$HADOOP_PATH/lib/native"
+
+AC_CHECK_LIB([hdfs], [hdfsConnect], [hdfslibs="-lhdfs -L$HADOOP_PATH/lib/native"], [AC_MSG_ERROR([Hadoop HDFS native library could not be found, set the correct path to your hadoop installation using --with-hadoop=PATH])])
+AC_CHECK_HEADERS([hdfs.h], , [AC_MSG_ERROR([Hadoop HDFS headers could not be found, set the correct path to your hadoop installation using --with-hadoop=PATH])])
+AC_SUBST(hdfslibs)
+
+
 # c++ headers and libraries
 AC_LANG_PUSH([C++])
 
@@ -49,13 +64,14 @@ AX_CHECK_COMPILE_FLAG([-std=c++11], [CXXFLAGS="$CXXFLAGS -std=c++11"],
 )
 
 # check for some Boost header files, we use them in the data model
-AC_CHECK_HEADERS([boost/multiprecision/cpp_int.hpp boost/multiprecision/cpp_dec_float.hpp boost/uuid/uuid.hpp boost/uuid/uuid_generators.hpp boost/algorithm/string.hpp boost/xpressive/xpressive.hpp boost/iostreams/stream.hpp boost/iostreams/stream_buffer.hpp], , AC_MSG_ERROR("required Boost headers missing"))
+AC_CHECK_HEADERS([boost/multiprecision/cpp_int.hpp boost/multiprecision/cpp_dec_float.hpp boost/uuid/uuid.hpp boost/uuid/uuid_generators.hpp boost/algorithm/string.hpp boost/xpressive/xpressive.hpp boost/iostreams/stream.hpp boost/iostreams/stream_buffer.hpp boost/iostreams/concepts.hpp], , [AC_MSG_ERROR([required Boost headers missing])])
 
 
 AC_LANG_POP([C++])
 
-# GTest
 
+
+# GTest
 AC_ARG_ENABLE(testing,AS_HELP_STRING(--enable-testing,[enable C++ unit testing (with Google Test)]), , with_gtest=no)
 AS_IF([test "x$with_gtest" != xno],
   [
