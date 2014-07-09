@@ -52,7 +52,7 @@ To configure the bindings for your platform, run:
 
     ./configure --prefix=/usr/local --enable-testing --with-hadoop=PATH
 
-Where PATH is the location where the Hadoop distribution has been 
+Where PATH is the location where the Hadoop distribution has been installed (e.g. `/usr/local/src/hadoop-2.4.1-src/hadoop-dist/target/hadoop-2.4.1`)
 
 In case configuration succeeds (i.e. all dependencies are found), the C++ libraries can be built
 and automatically tested using GNU make as follows:
