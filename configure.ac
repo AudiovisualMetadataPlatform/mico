@@ -41,20 +41,6 @@ LIBCURL_CHECK_CONFIG(yes, ,  curllibs="-lcurl", AC_MSG_ERROR("required cURL HTTP
 AC_SUBST(curllibs)
 
 
-# HDFS
-HADOOP_PATH=/usr/local/src/hadoop-2.4.1-src/hadoop-dist/target/hadoop-2.4.1
-AC_ARG_WITH(hadoop,[AS_HELP_STRING([--with-hadoop=PATH],[specify path to local Hadoop installation containing native libraries])],[HADOOP_PATH="$withval"])
-
-CFLAGS="$CFLAGS -I$HADOOP_PATH/include"
-CXXFLAGS="$CXXFLAGS -I$HADOOP_PATH/include"
-CPPFLAGS="$CPPFLAGS -I$HADOOP_PATH/include"
-LDFLAGS="$LDFLAGS -L$HADOOP_PATH/lib/native"
-
-AC_CHECK_LIB([hdfs], [hdfsConnect], [hdfslibs="-lhdfs -L$HADOOP_PATH/lib/native"], [AC_MSG_ERROR([Hadoop HDFS native library could not be found, set the correct path to your hadoop installation using --with-hadoop=PATH])])
-AC_CHECK_HEADERS([hdfs.h], , [AC_MSG_ERROR([Hadoop HDFS headers could not be found, set the correct path to your hadoop installation using --with-hadoop=PATH])])
-AC_SUBST(hdfslibs)
-AC_SUBST(HADOOP_PATH)
-
 # c++ headers and libraries
 AC_LANG_PUSH([C++])
 
