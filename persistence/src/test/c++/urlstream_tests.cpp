@@ -8,12 +8,21 @@
 
 using namespace mico::io;
 
-TEST(URLStreamTests,HTTPOpenStream) {
-	url_istream is("https://w2rqo92gnzay.runscope.net");
+TEST(URLStreamTests,HTTPReadStream) {
+	url_istream is("https://s36cuibb4qf5.runscope.net/");
 	
+	std::string r;
 	while(is) {
 		std::string s;
 		is >> s;
-		std::cout << s;
+		
+		r +=s;
 	}
+	ASSERT_TRUE(r.length() > 0);
+}
+
+TEST(URLStreamTests,HTTPWriteStream) {
+	url_ostream os("https://s36cuibb4qf5.runscope.net/");
+	
+	os << "Hello, World!\n";
 }

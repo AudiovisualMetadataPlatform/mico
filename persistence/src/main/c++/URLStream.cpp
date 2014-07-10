@@ -1,5 +1,9 @@
+#include <iosfwd>
 #include <cstring>
 #include <cstdio>
+#include <utility>
+#include <sys/time.h>
+#include <boost/log/trivial.hpp>
 
 #include "URLStream.hpp"
 
@@ -10,6 +14,21 @@ namespace mico
 namespace io
 {
 
+
+struct nullstream {};
+
+// Swallow all types
+template <typename T>
+nullstream & operator<<(nullstream & s, T const &) {return s;}
+
+// Swallow manipulator templates
+nullstream & operator<<(nullstream & s, std::ostream &(std::ostream&)) {return s;}
+
+static nullstream logstream;	
+	
+//#define LOG std::cout
+#define LOG if(0) logstream	
+	
 /**
  * Read callback used by cURL to read request body from memory. Whenever cURL requests more data, 
  * we first check if there is still more data in our device buffer, in which case we hand it over 
@@ -25,24 +44,34 @@ namespace io
 static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *_device)
 {	
 	URLDeviceBase* d = static_cast<URLDeviceBase*>(_device);
+	LOG << "CALLBACK: sending up to " << nmemb << " bytes (pos: "<<d->buffer_position<<", len: "<<d->buffer_length<<", size: "<<d->buffer_size<<")\n";
+
 	d->waiting = false;
-	if(d->buffer_position < d->buffer_length) {
+	if(d->finishing) {
+		LOG << "CALLBACK: sending finished!\n";
+		return 0;
+	} else if(d->buffer_position < d->buffer_length) {
 		// read either as many bytes as are still in the buffer or at most as many as indicated by the function parameters
 		int amount = MIN(size * nmemb, d->buffer_length-d->buffer_position);
 		memcpy(ptr, d->buffer + d->buffer_position, amount);
 		d->buffer_position += amount;
+
+		LOG << "CALLBACK: sending "<<amount<<" bytes of data...\n";
+
 		return amount;
-	} else if(!d->finishing) {
+	} else {
 		if(d->mode == URL_MODE_WRITE) {
+			LOG << "no more data, waiting for more...\n";
+			
 			// there is no more data in the buffer, wait for more data to be written by stream user
 			d->waiting = true;
+			d->buffer_position = 0;
+			d->buffer_length   = 0;
 			return CURL_READFUNC_PAUSE;
 		} else {
 			// we are in read mode, so we won't give cURL any more data anyways
 			return 0;
 		}
-	} else {
-		return 0;
 	}
 }
 
@@ -59,10 +88,14 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *_device)
  * @param _device pointer to the device we are handling data for
  */
 static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *_device)
-{
+{	
 	URLDeviceBase* d = static_cast<URLDeviceBase*>(_device);
+	LOG << "CALLBACK: receiving up to " << nmemb << " bytes (pos: "<<d->buffer_position<<", len: "<<d->buffer_length<<", size: "<<d->buffer_size<<")\n";
+
 	d->waiting = false;
 	if(d->buffer_position == d->buffer_length) {
+		LOG << "CALLBACK: adding data to buffer ...\n";
+		
 		// check if we need to reserve more room
 		if(size * nmemb > d->buffer_size) {
 			d->buffer = (char*)realloc(d->buffer, size*nmemb);
@@ -97,7 +130,7 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *_device
  *                   writing at the same time
  */
 URLDeviceBase::URLDeviceBase(const char* url, URLMode mode) 
-	: mode(mode), buffer(NULL), buffer_position(0), buffer_length(0), buffer_size(0), finishing(false), waiting(false)
+	: mode(mode), buffer(NULL), buffer_position(0), buffer_length(0), buffer_size(0), finishing(false), waiting(false), running_handles(0)
 {
 	if(strncmp("ftp://",url,6) == 0)  {
 		// FTP URL mode
@@ -139,9 +172,11 @@ URLDeviceBase::URLDeviceBase(const char* url, URLMode mode)
 			curl_easy_setopt(handle.curl, CURLOPT_UPLOAD, 1);
 			break;
 		}
+
+		multi_handle = curl_multi_init();
+		curl_multi_add_handle(multi_handle, handle.curl);
 		
-		// start execution, it will run into a pause immediately until data is read or written
-		curl_easy_perform(handle.curl);
+		LOG << "constructed NEW cURL stream\n";
 	} else if(type == URL_TYPE_FILE) {
 		switch(mode) {
 		case URL_MODE_READ:
@@ -163,12 +198,44 @@ URLDeviceBase::URLDeviceBase(const char* url, URLMode mode)
 URLDeviceBase::URLDeviceBase(const URLDeviceBase& other) 
   : mode(other.mode), type(other.type)
   , buffer(NULL), buffer_position(other.buffer_position), buffer_length(other.buffer_length), buffer_size(other.buffer_size)
-  , finishing(other.finishing), waiting(other.waiting)
+  , finishing(other.finishing), waiting(other.waiting), running_handles(0)
 {
 	if(other.buffer != NULL) {
 		// allocate new local buffer and copy all relevant data
 		buffer = (char*)malloc(buffer_length * sizeof(char));
 		memcpy(buffer, other.buffer, buffer_length * sizeof(char));
+	}
+	
+	if(type == URL_TYPE_HTTP || type == URL_TYPE_FTP) {
+		handle.curl = curl_easy_duphandle(other.handle.curl);
+
+		// register cURL callback user data
+		curl_easy_setopt(handle.curl, CURLOPT_READDATA,  this);
+		curl_easy_setopt(handle.curl, CURLOPT_WRITEDATA, this);
+
+		multi_handle = curl_multi_init();
+		curl_multi_add_handle(multi_handle, handle.curl);
+		
+	} else {
+		handle.file = other.handle.file; // TODO: necessary to duplicate?
+	}
+	
+	LOG << "copy constructor, pos: " <<buffer_position<< ", len: " <<buffer_length<< ", size: " <<buffer_size<< "\n";
+}
+
+
+/**
+ * Move constructor, as we wrap non-trivial memory allocation
+ */
+URLDeviceBase::URLDeviceBase(URLDeviceBase&& other) 
+  : mode(other.mode), type(other.type)
+  , buffer(NULL), buffer_position(other.buffer_position), buffer_length(other.buffer_length), buffer_size(other.buffer_size)
+  , finishing(other.finishing), waiting(other.waiting), running_handles(0)
+{
+	LOG << "move constructor called\n";
+	if(other.buffer != NULL) {
+		// swap buffers
+		std::swap(buffer,other.buffer);
 	}
 }
 
@@ -178,8 +245,88 @@ URLDeviceBase::URLDeviceBase(const URLDeviceBase& other)
  */
 URLDeviceBase::~URLDeviceBase() 
 {
+	LOG << "closing stream\n";
+	
+	// inidicate we are finishing and let cURL continue running
+	finishing = true;
+	
+
+	if(type == URL_TYPE_HTTP || type == URL_TYPE_FTP) {
+		if(waiting) {
+			loop();	
+		}
+
+
+		curl_multi_remove_handle(multi_handle, handle.curl);
+		curl_multi_cleanup(multi_handle);
+		curl_easy_cleanup(handle.curl);
+	} else if(type == URL_TYPE_FILE) {
+		fclose(handle.file);
+	}
+
+	// all data read or written, we don't need the buffer any more
+	if(buffer != NULL) {
+		free(buffer);
+	}	
 }
 
+
+void URLDeviceBase::loop() 
+{
+	// first, in case we are waiting, continue processing
+	if(waiting) {
+		curl_easy_pause(handle.curl, CURLPAUSE_CONT);					
+	}
+	do {
+		// then, loop until multi_perform finishes
+		int rc; /* select() return code */ 
+
+		struct timeval timeout;
+		
+		fd_set fdread;
+		fd_set fdwrite;
+		fd_set fdexcep;
+		int maxfd = -1;		
+
+		long curl_timeo = -1;
+		
+		FD_ZERO(&fdread);
+		FD_ZERO(&fdwrite);
+		FD_ZERO(&fdexcep);	
+	
+				
+	    /* set a suitable timeout to play around with */ 
+		timeout.tv_sec = 1;
+		timeout.tv_usec = 0;
+ 
+		curl_multi_timeout(multi_handle, &curl_timeo);
+		if(curl_timeo >= 0) {
+			timeout.tv_sec = curl_timeo / 1000;
+			if(timeout.tv_sec > 1)
+				timeout.tv_sec = 1;
+			else
+				timeout.tv_usec = (curl_timeo % 1000) * 1000;
+		}
+	
+		/* get file descriptors from the transfers */ 
+		curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
+		
+		rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+ 
+		switch(rc) {
+		case -1:
+			/* select error */ 
+			break;
+		case 0:
+		default:
+			/* timeout or readable/writable sockets */ 
+			curl_multi_perform(multi_handle, &running_handles);
+			break;
+		}	
+	} while(running_handles && !waiting);
+	
+	
+}
 
 /**
  * Read at most n characters from the file, starting at the current position. Returns number
@@ -188,10 +335,13 @@ URLDeviceBase::~URLDeviceBase()
 std::streamsize URLDeviceSource::read(char* s, std::streamsize n)
 {
 	if(type == URL_TYPE_HTTP || type == URL_TYPE_FTP) {
-		if(waiting && buffer_position == buffer_length) {
+		if(buffer_position == buffer_length) {
 			// no more data, signal cURL to continue receiving
-			curl_easy_pause(handle.curl, CURLPAUSE_CONT);			
+			LOG << "READ: no more data, retrieving ...\n";
+			loop();	
 		}
+		
+		LOG << "READ: there are " << buffer_length << " bytes in the buffer ("<< (buffer_length - buffer_position) << " unconsumed) ...\n";
 		
 		if(buffer_position < buffer_length) {
 			// there is still unconsumed data in the buffer, so we return it
@@ -218,7 +368,23 @@ std::streamsize URLDeviceSource::read(char* s, std::streamsize n)
  */
 std::streamsize URLDeviceSink::write(const char* s, std::streamsize n)
 {
-
+	if(type == URL_TYPE_HTTP || type == URL_TYPE_FTP) {
+		// append to write buffer at the end
+		if(buffer_length + n > buffer_size) {
+			buffer = (char*)realloc(buffer, sizeof(char) * (buffer_length + n));
+			buffer_size += n;
+		}
+		memcpy(buffer + buffer_length, s, n * sizeof(char));
+		buffer_length += n;
+		
+		
+		LOG << "WRITE: there are " << buffer_length << " bytes in the buffer ("<< (buffer_length - buffer_position) << " unconsumed) ...\n";
+		
+		// notify cURL that data is available
+		loop();
+	} else {
+		return fwrite(s, sizeof(char), n, handle.file);
+	}	
 }
 
 
@@ -227,19 +393,6 @@ std::streamsize URLDeviceSink::write(const char* s, std::streamsize n)
  */
 void URLDeviceBase::close()
 {
-	// inidicate we are finishing and let cURL continue running
-	finishing = true;
-	curl_easy_pause(handle.curl, CURLPAUSE_CONT);			
-
-	if(buffer != NULL) {
-		free(buffer);
-	}
-	
-	if(type == URL_TYPE_HTTP || type == URL_TYPE_FTP) {
-		curl_easy_cleanup(handle.curl);
-	} else if(type == URL_TYPE_FILE) {
-		fclose(handle.file);
-	}
 }
 
 

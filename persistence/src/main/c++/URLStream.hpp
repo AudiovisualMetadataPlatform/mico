@@ -55,6 +55,10 @@ protected:
 		FILE *file;
 	} handle;
 
+	CURLM *multi_handle;
+	
+	int running_handles;
+
 	char* buffer;           //!< internal buffer for storing data from last read
 
 	size_t buffer_position; //!< position in buffer as set by cURL 
@@ -63,7 +67,9 @@ protected:
 
 	bool finishing;         //!< indicate if device is already finishing transfer (i.e. no more reads/writes)
 	bool waiting;           //!< indicate if the device is still waiting for more data
-
+	
+	
+	void loop();            //!< loop to fetch/send more data
 public:
 	typedef char                          char_type;
 
@@ -80,6 +86,12 @@ public:
 	 * Copy constructor, as we wrap non-trivial memory allocation
 	 */
 	URLDeviceBase(const URLDeviceBase& other);
+
+	/**
+	 * Move constructor, as we wrap non-trivial memory allocation
+	 */
+	URLDeviceBase(URLDeviceBase&& other);
+
 
 	/**
 	 * Clean up resources occupied by device, e.g. remote or local file handles and connections.
@@ -107,6 +119,12 @@ public:
 	 * Copy constructor, as we wrap non-trivial memory allocation
 	 */
 	URLDeviceSource(const URLDeviceSource& other) : URLDeviceBase(other) {};
+
+	/**
+	 * Move constructor, as we wrap non-trivial memory allocation
+	 */
+	URLDeviceSource(URLDeviceSource&& other) : URLDeviceBase(other) {};
+
 	
 	/**
 	 * Read at most n characters from the file, starting at the current position. Returns number
@@ -132,6 +150,13 @@ public:
 	 * Copy constructor, as we wrap non-trivial memory allocation
 	 */
 	URLDeviceSink(const URLDeviceSink& other) : URLDeviceBase(other) {};
+
+
+	/**
+	 * Move constructor, as we wrap non-trivial memory allocation
+	 */
+	URLDeviceSink(URLDeviceSink&& other) : URLDeviceBase(other) {};
+
 		
 	/**
 	 * Write n characters to the file, starting at the current position. Returns number of

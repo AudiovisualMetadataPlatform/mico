@@ -34,7 +34,7 @@ content_item_tests_SOURCES = src/test/c++/persistence_tests.cpp src/test/c++/con
 content_item_tests_LDADD = libmico_persistence.la ../rdf/libmico_rdf.la ../rdf/libmico_marmotta.la libgtest.a @curllibs@ 
 
 urlstream_tests_SOURCES = src/test/c++/persistence_tests.cpp src/test/c++/urlstream_tests.cpp
-urlstream_tests_LDADD = libmico_persistence.la ../rdf/libmico_rdf.la ../rdf/libmico_marmotta.la libgtest.a @curllibs@ 
+urlstream_tests_LDADD = libmico_persistence.la ../rdf/libmico_rdf.la ../rdf/libmico_marmotta.la libgtest.a @curllibs@
 
 endif
 
