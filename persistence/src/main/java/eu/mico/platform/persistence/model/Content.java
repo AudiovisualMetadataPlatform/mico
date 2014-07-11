@@ -1,5 +1,6 @@
 package eu.mico.platform.persistence.model;
 
+import org.apache.commons.vfs2.FileSystemException;
 import org.openrdf.model.URI;
 
 import java.io.InputStream;
@@ -25,11 +26,11 @@ public interface Content {
      * Return a new output stream for writing to the content. Any existing content will be overwritten.
      * @return
      */
-    public OutputStream getOutputStream();
+    public OutputStream getOutputStream() throws FileSystemException;
 
     /**
      *  Return a new input stream for reading the content.
      * @return
      */
-    public InputStream getInputStream();
+    public InputStream getInputStream() throws FileSystemException;
 }

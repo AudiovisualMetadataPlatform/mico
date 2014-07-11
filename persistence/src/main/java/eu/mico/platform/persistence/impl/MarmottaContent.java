@@ -2,6 +2,10 @@ package eu.mico.platform.persistence.impl;
 
 import com.google.common.base.Preconditions;
 import eu.mico.platform.persistence.model.Content;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.FileSystemManager;
+import org.apache.commons.vfs2.VFS;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 
@@ -17,19 +21,22 @@ public class MarmottaContent implements Content {
 
 
     private String baseUrl;
+    private String contentUrl;
     private String id;
 
 
-    public MarmottaContent(String baseUrl, String id) {
-        this.baseUrl = baseUrl;
+    public MarmottaContent(String baseUrl, String contentUrl, String id) {
+        this.baseUrl    = baseUrl;
+        this.contentUrl = contentUrl;
         this.id = id;
     }
 
 
-    protected MarmottaContent(String baseUrl, URI uri) {
+    protected MarmottaContent(String baseUrl, String contentUrl, URI uri) {
         Preconditions.checkArgument(uri.stringValue().startsWith(baseUrl), "the content part URI must match the baseUrl");
 
-        this.baseUrl = baseUrl;
+        this.baseUrl    = baseUrl;
+        this.contentUrl = contentUrl;
         this.id = uri.stringValue().substring(baseUrl.length() + 1);
     }
 
@@ -51,8 +58,10 @@ public class MarmottaContent implements Content {
      * @return
      */
     @Override
-    public OutputStream getOutputStream() {
-        return null;
+    public OutputStream getOutputStream() throws FileSystemException {
+        FileSystemManager fsmgr = VFS.getManager();
+        FileObject f = fsmgr.resolveFile(contentUrl + "/" + id + ".bin");
+        return f.getContent().getOutputStream();
     }
 
     /**
@@ -61,8 +70,10 @@ public class MarmottaContent implements Content {
      * @return
      */
     @Override
-    public InputStream getInputStream() {
-        return null;
+    public InputStream getInputStream() throws FileSystemException {
+        FileSystemManager fsmgr = VFS.getManager();
+        FileObject f = fsmgr.resolveFile(contentUrl + "/" + id + ".bin");
+        return f.getContent().getInputStream();
     }
 
 

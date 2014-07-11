@@ -1,5 +1,6 @@
 package eu.mico.platform.persistence.model;
 
+import org.apache.commons.vfs2.FileSystemException;
 import org.openrdf.model.URI;
 import org.openrdf.repository.RepositoryException;
 
@@ -96,7 +97,7 @@ public interface ContentItem {
      *
      * @param id the URI of the content part to delete
      */
-    public void deleteContent(URI id) throws RepositoryException;
+    public void deleteContent(URI id) throws RepositoryException, FileSystemException;
 
     /**
      * Return an iterator over all content parts contained in this content item.

@@ -4,6 +4,8 @@ import eu.mico.platform.persistence.impl.MarmottaContentItem;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.vfs2.FileSystemException;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -13,6 +15,9 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.UpdateExecutionException;
 import org.openrdf.repository.RepositoryException;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.UUID;
 
 /**
@@ -24,7 +29,7 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
     @Test
     public void testContentItemMetadata() throws RepositoryException, UpdateExecutionException, MalformedQueryException, QueryEvaluationException {
-        ContentItem item = new MarmottaContentItem(baseUrl, UUID.randomUUID());
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl, UUID.randomUUID());
 
         Metadata m = item.getMetadata();
 
@@ -36,7 +41,7 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
     @Test
     public void testContentItemExecution() throws RepositoryException, UpdateExecutionException, MalformedQueryException, QueryEvaluationException {
-        ContentItem item = new MarmottaContentItem(baseUrl, UUID.randomUUID());
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl,UUID.randomUUID());
 
         Metadata m = item.getExecution();
 
@@ -48,7 +53,7 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
     @Test
     public void testContentItemResult() throws RepositoryException, UpdateExecutionException, MalformedQueryException, QueryEvaluationException {
-        ContentItem item = new MarmottaContentItem(baseUrl, UUID.randomUUID());
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl,UUID.randomUUID());
 
         Metadata m = item.getResult();
 
@@ -60,8 +65,8 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
 
     @Test
-    public void testCreateDeleteContentPart() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
-        ContentItem item = new MarmottaContentItem(baseUrl, UUID.randomUUID());
+    public void testCreateDeleteContentPart() throws RepositoryException, QueryEvaluationException, MalformedQueryException, FileSystemException {
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl,UUID.randomUUID());
 
         Assert.assertFalse(item.listContentParts().iterator().hasNext());
 
@@ -89,7 +94,7 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
     @Test
     public void testListContentParts() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
-        ContentItem item = new MarmottaContentItem(baseUrl, UUID.randomUUID());
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl,UUID.randomUUID());
 
         Assert.assertFalse(item.listContentParts().iterator().hasNext());
 
@@ -102,6 +107,25 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
             Assert.assertThat(c, Matchers.isIn(parts));
         }
 
+    }
+
+    @Test
+    public void testStreamContentPart() throws RepositoryException, QueryEvaluationException, MalformedQueryException, IOException {
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl,UUID.randomUUID());
+
+        Content content = item.createContentPart();
+
+
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(content.getOutputStream()));
+        out.println("Hello, World!");
+        out.close();
+
+        String result = IOUtils.toString(content.getInputStream());
+
+        Assert.assertEquals("Hello, World!\n", result);
+
+
+        item.deleteContent(content.getURI());
     }
 
 

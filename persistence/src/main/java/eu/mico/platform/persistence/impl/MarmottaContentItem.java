@@ -6,6 +6,10 @@ import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
 import eu.mico.platform.persistence.util.SPARQLUtil;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.FileSystemManager;
+import org.apache.commons.vfs2.VFS;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.*;
@@ -35,20 +39,23 @@ public class MarmottaContentItem implements ContentItem {
     private static Logger log = LoggerFactory.getLogger(MarmottaContentItem.class);
 
     private String baseUrl;
+    private String contentUrl;
 
     // the content item's unique ID
     private UUID uuid;
 
-    public MarmottaContentItem(String baseUrl, UUID uuid) {
+    public MarmottaContentItem(String baseUrl, String contentUrl, UUID uuid) {
         this.baseUrl = baseUrl;
         this.uuid = uuid;
+        this.contentUrl = contentUrl;
     }
 
 
-    protected MarmottaContentItem(String baseUrl, URI uri) {
+    protected MarmottaContentItem(String baseUrl, String contentUrl, URI uri) {
         Preconditions.checkArgument(uri.stringValue().startsWith(baseUrl), "the content part URI must match the baseUrl");
 
         this.baseUrl = baseUrl;
+        this.contentUrl = contentUrl;
         this.uuid    = UUID.fromString(uri.stringValue().substring(baseUrl.length() + 1));
     }
 
@@ -125,7 +132,7 @@ public class MarmottaContentItem implements ContentItem {
     public Content createContentPart() throws RepositoryException {
 
         UUID contentUUID = UUID.randomUUID();
-        Content content = new MarmottaContent(baseUrl,uuid.toString() + "/" + contentUUID);
+        Content content = new MarmottaContent(baseUrl,contentUrl,uuid.toString() + "/" + contentUUID);
 
         Metadata m = getMetadata();
         try {
@@ -153,7 +160,7 @@ public class MarmottaContentItem implements ContentItem {
      */
     @Override
     public Content createContentPart(URI id) throws RepositoryException {
-        Content content = new MarmottaContent(baseUrl,id);
+        Content content = new MarmottaContent(baseUrl,contentUrl,id);
 
         Metadata m = getMetadata();
         try {
@@ -185,7 +192,7 @@ public class MarmottaContentItem implements ContentItem {
 
         try {
             if(m.ask(createNamed("askContentPart", of("ci", getURI().stringValue(), "cp", id.stringValue())))) {
-                return new MarmottaContent(baseUrl, id);
+                return new MarmottaContent(baseUrl, contentUrl, id);
             } else {
                 return null;
             }
@@ -207,8 +214,15 @@ public class MarmottaContentItem implements ContentItem {
      * @param id the URI of the content part to delete
      */
     @Override
-    public void deleteContent(URI id) throws RepositoryException {
+    public void deleteContent(URI id) throws RepositoryException, FileSystemException {
 
+        // delete file data
+        String fileName =  id.stringValue().substring(baseUrl.length() + 1);
+        FileSystemManager fsmgr = VFS.getManager();
+        FileObject f = fsmgr.resolveFile(contentUrl + "/" + fileName + ".bin");
+        f.delete();
+
+        // delete metadata
         Metadata m = getMetadata();
 
         try {
@@ -254,7 +268,7 @@ public class MarmottaContentItem implements ContentItem {
                             try {
                                 BindingSet b = r.next();
                                 URI part = (URI) b.getValue("p");
-                                return new MarmottaContent(baseUrl, part);
+                                return new MarmottaContent(baseUrl,contentUrl, part);
                             } catch (QueryEvaluationException e) {
                                 return null;
                             }

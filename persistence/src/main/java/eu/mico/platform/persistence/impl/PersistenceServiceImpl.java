@@ -26,15 +26,16 @@ public class PersistenceServiceImpl implements PersistenceService {
     private static Logger log = LoggerFactory.getLogger(PersistenceServiceImpl.class);
 
     private String marmottaServerUrl;
-
+    private String contentUrl;
 
 
 
     // TODO: HDFS connection
 
 
-    public PersistenceServiceImpl(String marmottaServerUrl) {
+    public PersistenceServiceImpl(String marmottaServerUrl, String contentUrl) {
         this.marmottaServerUrl = marmottaServerUrl;
+        this.contentUrl        = contentUrl;
     }
 
     /**
@@ -65,7 +66,7 @@ public class PersistenceServiceImpl implements PersistenceService {
 
         UUID uuid = UUID.randomUUID();
 
-        ContentItem ci = new MarmottaContentItem(marmottaServerUrl,uuid);
+        ContentItem ci = new MarmottaContentItem(marmottaServerUrl,contentUrl,uuid);
 
 
         Metadata m = getMetadata();
@@ -91,7 +92,7 @@ public class PersistenceServiceImpl implements PersistenceService {
      */
     @Override
     public ContentItem createContentItem(URI id) throws RepositoryException {
-        ContentItem ci = new MarmottaContentItem(marmottaServerUrl,id);
+        ContentItem ci = new MarmottaContentItem(marmottaServerUrl,contentUrl,id);
 
 
         Metadata m = getMetadata();
@@ -122,7 +123,7 @@ public class PersistenceServiceImpl implements PersistenceService {
 
         try {
             if(m.ask(createNamed("askContentItem", of("g", marmottaServerUrl, "ci", id.stringValue())))) {
-                return new MarmottaContentItem(marmottaServerUrl, id);
+                return new MarmottaContentItem(marmottaServerUrl, contentUrl,id);
             } else {
                 return null;
             }
@@ -198,7 +199,7 @@ public class PersistenceServiceImpl implements PersistenceService {
 
                                 URI ci = (URI) s.getValue("p");
 
-                                return new MarmottaContentItem(marmottaServerUrl,ci);
+                                return new MarmottaContentItem(marmottaServerUrl,contentUrl, ci);
 
                             } catch (QueryEvaluationException e) {
                                 return null;

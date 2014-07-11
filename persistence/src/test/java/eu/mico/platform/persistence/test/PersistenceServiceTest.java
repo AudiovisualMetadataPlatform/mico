@@ -20,7 +20,7 @@ public class PersistenceServiceTest extends BaseMarmottaTest {
 
     @Test
     public void testCreateDeleteContentItem() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
-        PersistenceService db = new PersistenceServiceImpl(baseUrl);
+        PersistenceService db = new PersistenceServiceImpl(baseUrl, contentUrl);
 
         Assert.assertFalse(db.getContentItems().iterator().hasNext());
 
@@ -41,7 +41,7 @@ public class PersistenceServiceTest extends BaseMarmottaTest {
 
     @Test
     public void testListContentItems() throws RepositoryException {
-        PersistenceService db = new PersistenceServiceImpl(baseUrl);
+        PersistenceService db = new PersistenceServiceImpl(baseUrl, contentUrl);
 
         ContentItem[] items = new ContentItem[5];
         for(int i=0; i<5; i++) {

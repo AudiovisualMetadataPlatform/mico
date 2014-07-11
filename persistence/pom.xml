@@ -113,6 +113,14 @@
             <version>2.4</version>
         </dependency>
 
+        <!-- binary content access -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-vfs2</artifactId>
+            <version>2.0</version>
+        </dependency>
+
+        <!-- metadata content access -->
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-model</artifactId>
@@ -155,7 +163,6 @@
             <groupId>eu.mico-project.platform</groupId>
             <artifactId>marmotta</artifactId>
             <version>1.0.0-SNAPSHOT</version>
-            <type>war</type>
             <scope>test</scope>
         </dependency>
         <dependency>

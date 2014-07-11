@@ -43,6 +43,7 @@ public abstract class BaseMarmottaTest {
     protected static JettyMarmotta marmotta;
 
     protected static String baseUrl;
+    protected static String contentUrl;
 
     @BeforeClass
     public static void setup() throws MarmottaImportException, URISyntaxException, IOException, RDFParseException, RepositoryException {
@@ -52,6 +53,7 @@ public abstract class BaseMarmottaTest {
 
         marmotta = new JettyMarmotta(cfg, "/marmotta", ImmutableSet.<Class<?>>of(ContextualSparqlWebService.class, SparqlWebService.class));
         baseUrl = UriBuilder.fromUri("http://localhost").port(marmotta.getPort()).path(marmotta.getContext()).build().toString();
+        contentUrl = "file:///tmp/mico";
     }
 
     @AfterClass
