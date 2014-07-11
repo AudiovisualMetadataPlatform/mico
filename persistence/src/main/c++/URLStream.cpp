@@ -135,11 +135,15 @@ URLStreambufBase::URLStreambufBase(const char* url, URLMode mode, int bufsize)
 	setg(buffer, buffer+bufsize, buffer+bufsize);
 	setp(buffer, buffer+bufsize);	
 	
+	int url_offset = 0;
 	if(strncmp("ftp://",url,6) == 0)  {
 		// FTP URL mode
 		type = URL_TYPE_FTP;
 	} else if(strncmp("http://",url,7) == 0 || strncmp("https://",url,8) == 0) {
 		type = URL_TYPE_HTTP;
+	} else if(strncmp("file://",url,7) == 0) {
+		type = URL_TYPE_FILE;
+		url_offset = 7;
 	} else if(strstr(url, "://") != NULL) {
 		// unknown protocol
 		throw std::string("unsupported URL protocol: ") + url;
@@ -184,11 +188,11 @@ URLStreambufBase::URLStreambufBase(const char* url, URLMode mode, int bufsize)
 		switch(mode) {
 		case URL_MODE_READ:
 			// open file for reading
-			handle.file = fopen(url,"r");
+			handle.file = fopen(url+url_offset,"r");
 			break;
 		case URL_MODE_WRITE:
 			// open file for writing
-			handle.file = fopen(url,"w");
+			handle.file = fopen(url+url_offset,"w");
 			break;
 		}
 	}

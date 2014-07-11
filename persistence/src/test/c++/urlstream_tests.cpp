@@ -18,7 +18,7 @@ TEST(URLStreamTests,HTTPReadStream) {
 		
 		r +=s;
 	}
-	std::cout << "Data:\n" << r << "\n===\n";
+	//std::cout << "Data:\n" << r << "\n===\n";
 	ASSERT_TRUE(r.length() > 0);
 }
 
@@ -28,6 +28,15 @@ TEST(URLStreamTests,HTTPWriteStream) {
 	os << "Hello, World!\n";
 	os << "Sending through URLStream\n";
 	
-	std::cout << "flushing...\n";
+	os.flush();
+}
+
+
+TEST(URLStreamTests,FILEWriteStream) {
+	url_ostream os("file:///tmp/urlstream_test.txt");
+	
+	os << "Hello, World!\n";
+	os << "Sending through URLStream\n";
+	
 	os.flush();
 }
