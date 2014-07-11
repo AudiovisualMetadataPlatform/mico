@@ -82,7 +82,8 @@ namespace mico {
       friend bool operator==(const ContentItem& ci1, const ContentItem& ci2);
 
     protected:
-      string baseUrl;
+      const string& baseUrl;
+	  const string& contentDirectory;
       uuid id;
 
       ContentItemMetadata metadata;
@@ -97,7 +98,7 @@ namespace mico {
        * @param baseUrl base URL of the marmotta server
        * @param id      a unique UUID identifying the content item
        */
-      ContentItem(const string baseUrl, const uuid& id);
+      ContentItem(const string& baseUrl, const string& contentDirectory, const uuid& id);
 
       /**
        * Create a new content item using the given server base URL and a URI as content item
@@ -106,7 +107,7 @@ namespace mico {
        * @param baseUrl base URL of the marmotta server
        * @param uri     a unique URI identifying the content item (must have baseUrl as prefix)
        */
-      ContentItem(const string baseUrl, const URI& uri);
+      ContentItem(const string& baseUrl, const string& contentDirectory, const URI& uri);
 
 
       /**
@@ -212,12 +213,13 @@ namespace mico {
     class content_part_iterator  : public boost::iterator_facade<content_part_iterator, Content*, boost::forward_traversal_tag, Content*> {
     private:
       int pos;
-      string baseUrl;
+      const string& baseUrl;
+	  const string& contentDirectory;
       const TupleResult* result;
 
     public:
-      content_part_iterator() : baseUrl(""), pos(-1), result(NULL) {};
-      content_part_iterator(const string baseUrl, const TupleResult* r) : baseUrl(baseUrl), pos(0), result(r) {};
+      content_part_iterator(const string& baseUrl, const string& contentDirectory) : baseUrl(baseUrl), contentDirectory(contentDirectory), pos(-1), result(NULL) {};
+      content_part_iterator(const string& baseUrl, const string& contentDirectory, const TupleResult* r) : baseUrl(baseUrl), pos(0), result(r), contentDirectory(contentDirectory) {};
       ~content_part_iterator() { if(result) { delete result; } };
 
       
@@ -230,7 +232,7 @@ namespace mico {
       inline bool equal(content_part_iterator const& other) const { return this->pos == other.pos; };
 
       inline Content* dereference() const { 
-	return new Content(baseUrl, *dynamic_cast<const URI*>( result->at(pos).at("p") ) ); 
+		return new Content(baseUrl, contentDirectory, *dynamic_cast<const URI*>( result->at(pos).at("p") ) ); 
       }
 
     };

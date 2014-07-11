@@ -23,11 +23,12 @@ class PersistenceServiceTest : public ::testing::Test {
 
 protected:
   std::string base_url = "http://localhost:8080/marmotta";
+  std::string content_dir = "file:///tmp/mico";
   HTTPClient client;
   PersistenceService* svc;
 
   virtual void SetUp() {
-    svc = new PersistenceService(base_url);
+    svc = new PersistenceService(base_url, content_dir);
   }
 
 

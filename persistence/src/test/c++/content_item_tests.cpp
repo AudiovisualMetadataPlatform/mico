@@ -26,6 +26,7 @@ class ContentItemTest : public ::testing::Test {
 
 protected:
   std::string base_url = "http://localhost:8080/marmotta";
+  std::string content_dir = "file:///tmp/mico";
   uuid base_ctx;
   random_generator rnd_gen;
   HTTPClient client;
@@ -33,7 +34,7 @@ protected:
 
   virtual void SetUp() {
     base_ctx = rnd_gen();
-    item = new ContentItem(base_url, base_ctx);
+    item = new ContentItem(base_url, content_dir, base_ctx);
   }
 
 
@@ -136,4 +137,33 @@ TEST_F(ContentItemTest,ListContentParts) {
   }
 
 
+}
+
+
+TEST_F(ContentItemTest,StreamContentPart) {
+  
+  ASSERT_EQ(item->begin(), item->end());
+
+  Content* part = item->createContentPart();
+ 
+  // write some data
+  std::ostream* os = part->getOutputStream();
+  *os << "Hello World\n";
+  delete os;
+ 
+  // read data again
+  std::istream* is = part->getInputStream();
+  ASSERT_TRUE(*is);
+  std::string s_hello;
+  *is >> s_hello;
+  ASSERT_STREQ("Hello",s_hello.c_str());
+  std::string s_world;
+  *is >> s_world;
+  ASSERT_STREQ("World",s_world.c_str());
+  delete is;
+
+  item->deleteContentPart(part->getURI());
+
+
+  delete part;
 }

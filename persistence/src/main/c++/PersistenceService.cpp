@@ -46,7 +46,7 @@ namespace mico {
     ContentItem* PersistenceService::createContentItem() {
       uuid UUID = rnd_gen();
 
-      ContentItem* ci = new ContentItem(marmottaServerUrl,UUID);
+      ContentItem* ci = new ContentItem(marmottaServerUrl,contentDirectory,UUID);
 
       map<string,string> params;
       params["g"] = marmottaServerUrl;
@@ -64,7 +64,7 @@ namespace mico {
      * @return a handle to the newly created ContentItem
      */
     ContentItem* PersistenceService::createContentItem(const URI& id) {
-      ContentItem* ci = new ContentItem(marmottaServerUrl,id);
+      ContentItem* ci = new ContentItem(marmottaServerUrl, contentDirectory, id);
 
       map<string,string> params;
       params["g"] = marmottaServerUrl;
@@ -88,9 +88,9 @@ namespace mico {
       params["ci"] = id.stringValue();
 
       if(metadata.ask(sparql_format_query(sparql_askContentItem,params))) {
-	return new ContentItem(marmottaServerUrl,id);
+		return new ContentItem(marmottaServerUrl,contentDirectory,id);
       } else {
-	return NULL;
+		return NULL;
       }
     }
 
@@ -125,16 +125,16 @@ namespace mico {
 
       const TupleResult* r = metadata.query(sparql_format_query(sparql_listContentItems,params));
       if(r->size() > 0) {
-	return content_item_iterator(marmottaServerUrl,r);
+		return content_item_iterator(marmottaServerUrl,contentDirectory,r);
       } else {
-	delete r;
-	return content_item_iterator();
+		delete r;
+		return content_item_iterator(marmottaServerUrl,contentDirectory);
       }
     }
 
 
     content_item_iterator PersistenceService::end() {
-      return content_item_iterator();
+      return content_item_iterator(marmottaServerUrl,contentDirectory);
     }
 
   }

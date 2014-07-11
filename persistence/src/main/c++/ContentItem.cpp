@@ -36,19 +36,21 @@ namespace mico {
   namespace persistence {
 
 
-    ContentItem::ContentItem(const string baseUrl, const uuid& id) 
+    ContentItem::ContentItem(const string& baseUrl, const string& contentDirectory, const uuid& id) 
       : baseUrl(baseUrl), id(id)
       , metadata(baseUrl, boost::uuids::to_string(id) + SUFFIX_METADATA)
       , execution(baseUrl, boost::uuids::to_string(id) + SUFFIX_EXECUTION)
       , result(baseUrl, boost::uuids::to_string(id) + SUFFIX_RESULT)
+	  , contentDirectory(contentDirectory)
     { };
 
 
-    ContentItem::ContentItem(const string baseUrl, const URI& uri) 
+    ContentItem::ContentItem(const string& baseUrl, const string& contentDirectory, const URI& uri) 
       : baseUrl(baseUrl)
       , metadata(baseUrl, boost::uuids::to_string(id) + SUFFIX_METADATA)
       , execution(baseUrl, boost::uuids::to_string(id) + SUFFIX_EXECUTION)
       , result(baseUrl, boost::uuids::to_string(id) + SUFFIX_RESULT)
+	  , contentDirectory(contentDirectory)
     {
       if(!starts_with(uri.stringValue(),baseUrl)) {
 	throw string("the baseUrl is not a prefix of the URI, invalid argument");
@@ -68,7 +70,7 @@ namespace mico {
     Content* ContentItem::createContentPart() {
       uuid contentUUID = rnd_gen();
 
-      Content* content = new Content(baseUrl,boost::uuids::to_string(id) + "/" + boost::uuids::to_string(contentUUID));
+      Content* content = new Content(baseUrl, contentDirectory, boost::uuids::to_string(id) + "/" + boost::uuids::to_string(contentUUID));
 
       map<string,string> params;
       params["ci"] = baseUrl + "/" + boost::uuids::to_string(id);
@@ -87,7 +89,7 @@ namespace mico {
      * @return a handle to a ContentPart object that is suitable for reading and updating
      */
     Content* ContentItem::createContentPart(const URI& id) {
-      Content* content = new Content(baseUrl,id);
+      Content* content = new Content(baseUrl,contentDirectory, id);
 
       map<string,string> params;
       params["ci"] = baseUrl + "/" + boost::uuids::to_string(this->id);
@@ -111,9 +113,9 @@ namespace mico {
       params["cp"] = id.stringValue();
 
       if(metadata.ask(sparql_format_query(sparql_askContentPart,params))) {
-	return new Content(baseUrl,id);
+		return new Content(baseUrl,contentDirectory, id);
       } else {
-	return NULL;
+		return NULL;
       }
     }
 
@@ -157,16 +159,16 @@ namespace mico {
 
       const TupleResult* r = metadata.query(sparql_format_query(sparql_listContentParts,params));
       if(r->size() > 0) {
-	return content_part_iterator(baseUrl,r);
+	return content_part_iterator(baseUrl,contentDirectory,r);
       } else {
 	delete r;
-	return content_part_iterator();
+	return content_part_iterator(baseUrl,contentDirectory);
       }
     }
 
 
     content_part_iterator ContentItem::end() {
-      return content_part_iterator();
+      return content_part_iterator(baseUrl,contentDirectory);
     };
   }
 }

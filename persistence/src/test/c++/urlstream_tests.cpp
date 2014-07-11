@@ -32,8 +32,22 @@ TEST(URLStreamTests,HTTPWriteStream) {
 }
 
 
+TEST(URLStreamTests,FILEReadStream) {
+	url_istream is("file:///etc/profile");
+	
+	std::string r;
+	while(is) {
+		std::string s;
+		is >> s;
+		
+		r +=s;
+	}
+	ASSERT_TRUE(r.length() > 0);
+}
+
+
 TEST(URLStreamTests,FILEWriteStream) {
-	url_ostream os("file:///tmp/urlstream_test.txt");
+	url_ostream os("file:///tmp/urlstream/test.txt");
 	
 	os << "Hello, World!\n";
 	os << "Sending through URLStream\n";

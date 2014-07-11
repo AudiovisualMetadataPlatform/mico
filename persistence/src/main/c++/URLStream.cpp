@@ -1,9 +1,12 @@
+#include <iostream>
 #include <iosfwd>
 #include <cstring>
 #include <cstdio>
 #include <utility>
+#include <unistd.h>
 #include <sys/time.h>
-#include <boost/log/trivial.hpp>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "URLStream.hpp"
 
@@ -115,6 +118,38 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *_device
 	}
 }
 
+/**
+ * Create all directories in the path excluding the last (which is a file).
+ */ 
+static void mkdirs(const char* _path) {
+	char* path = strdup(_path); // temporary buffer which we can modify
+	char *last = 0, *cur = path;
+
+	if(*path == '/') {
+		chdir("/");		
+	}
+	while(*cur) {
+		if(*cur == '/') {
+			*cur = '\0';
+			
+			// create directory
+			if(last) {
+				if(chdir(last) != 0) {
+					if(mkdir(last,S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+						std::cerr << "could not create directory " << _path << ", exiting!\n";
+						exit(1);
+					}
+					chdir(last);
+				}
+			}
+			
+			last = cur+1;
+		}
+		cur++;
+	}
+	
+	free(path);
+}
 
 /**
  * Open URL device using the given URL and flags. Uses cURL internally to access a remote
@@ -168,7 +203,7 @@ URLStreambufBase::URLStreambufBase(const char* url, URLMode mode, int bufsize)
 
 		// set request URL
 		curl_easy_setopt(handle.curl, CURLOPT_URL, url);
-		
+				
 		switch(mode) {
 		case URL_MODE_READ:
 			// open file for reading
@@ -177,6 +212,9 @@ URLStreambufBase::URLStreambufBase(const char* url, URLMode mode, int bufsize)
 		case URL_MODE_WRITE:
 			// open file for writing
 			curl_easy_setopt(handle.curl, CURLOPT_UPLOAD, 1);
+			
+			// enable automatic creation of missing directories on FTP servers in write mode
+			curl_easy_setopt(handle.curl, CURLOPT_FTP_CREATE_MISSING_DIRS, CURLFTP_CREATE_DIR);
 			break;
 		}
 
@@ -191,6 +229,9 @@ URLStreambufBase::URLStreambufBase(const char* url, URLMode mode, int bufsize)
 			handle.file = fopen(url+url_offset,"r");
 			break;
 		case URL_MODE_WRITE:
+			// create missing intermediate directories
+			mkdirs(url+url_offset);
+			
 			// open file for writing
 			handle.file = fopen(url+url_offset,"w");
 			break;
@@ -210,9 +251,7 @@ URLStreambufBase::~URLStreambufBase()
 	finishing = true;
 	
 	if(type == URL_TYPE_HTTP || type == URL_TYPE_FTP) {
-		if(waiting) {
-			loop();	
-		}
+		loop();	
 
 		curl_multi_remove_handle(multi_handle, handle.curl);
 		curl_multi_cleanup(multi_handle);
@@ -342,14 +381,14 @@ int URLOStreambuf::overflow(int c) {
  * Explicit call to write out the buffer to the URL connection even when it is not full
  */ 
 int URLOStreambuf::sync() {
-	LOG << "SYNC: there are " << (int)(epptr()-buffer) << " bytes in the buffer ...\n";
+	LOG << "SYNC: there are " << (int)(pptr()-buffer) << " bytes in the buffer ...\n";
 	if(type == URL_TYPE_HTTP || type == URL_TYPE_FTP) {
 		// notify cURL that data is available
 		loop();
 	} else {
 		// write buffer data to file and reset pointers
 		int n = fwrite(buffer, sizeof(char), (int)(pptr()-buffer), handle.file);
-		if(n < (int)(epptr()-buffer)) {
+		if(n < (int)(pptr()-buffer)) {
 			return -1;
 		}
 		setp(buffer,buffer+buffer_size);

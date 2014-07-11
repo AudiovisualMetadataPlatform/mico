@@ -44,6 +44,7 @@ namespace mico {
     private:
 
       std::string marmottaServerUrl;
+	  std::string contentDirectory;
       PersistenceMetadata metadata;
 
     public:
@@ -54,7 +55,8 @@ namespace mico {
        *
        * @param marmottaServerUrl the URL of the Apache Marmotta server, e.g. http://localhost:8080/marmotta
        */
-      PersistenceService(std::string marmottaServerUrl) : marmottaServerUrl(marmottaServerUrl), metadata(marmottaServerUrl) {};
+      PersistenceService(std::string marmottaServerUrl, std::string contentDirectory) 
+		: marmottaServerUrl(marmottaServerUrl), metadata(marmottaServerUrl), contentDirectory(contentDirectory) {};
 
 
       /**
@@ -119,12 +121,13 @@ namespace mico {
     class content_item_iterator  : public boost::iterator_facade<content_item_iterator, ContentItem*, boost::forward_traversal_tag, ContentItem*> {
     private:
       int pos;
-      string baseUrl;
+      const string& baseUrl;
+	  const string& contentDirectory;
       const TupleResult* result;
 
     public:
-      content_item_iterator() : baseUrl(""), pos(-1), result(NULL) {};
-      content_item_iterator(const string baseUrl, const TupleResult* r) : baseUrl(baseUrl), pos(0), result(r) {};
+      content_item_iterator(const string& baseUrl, const string& contentDirectory) : baseUrl(baseUrl), contentDirectory(contentDirectory), pos(-1), result(NULL) {};
+      content_item_iterator(const string& baseUrl, const string& contentDirectory, const TupleResult* r) : baseUrl(baseUrl), contentDirectory(contentDirectory), pos(0), result(r) {};
       ~content_item_iterator() { if(result) { delete result; } };
 
       
@@ -137,7 +140,7 @@ namespace mico {
       inline bool equal(content_item_iterator const& other) const { return this->pos == other.pos; };
 
       inline ContentItem* dereference() const { 
-	return new ContentItem(baseUrl, *dynamic_cast<const URI*>( result->at(pos).at("p") ) ); 
+	return new ContentItem(baseUrl, contentDirectory, *dynamic_cast<const URI*>( result->at(pos).at("p") ) ); 
       }
 
     };

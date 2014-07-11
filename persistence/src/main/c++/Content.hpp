@@ -18,11 +18,12 @@ namespace mico {
     protected:
       string baseUrl;
       string id;
+	  const string& contentDirectory;
 
     public:
-      Content(const string baseUrl, const string id) : baseUrl(baseUrl), id(id) {};
+      Content(const string baseUrl, const string& contentDirectory, const string id) : baseUrl(baseUrl), id(id), contentDirectory(contentDirectory) {};
 
-      Content(const string baseUrl, const URI& uri);
+      Content(const string baseUrl, const string& contentDirectory, const URI& uri);
 
       virtual ~Content() {};
 
@@ -37,13 +38,13 @@ namespace mico {
        * Return a new output stream for writing to the content. Any existing content will be overwritten.
        * @return
        */
-      std::ostream& getOutputStream();
+      std::ostream* getOutputStream();
 
       /**
        *  Return a new input stream for reading the content.
        * @return
        */
-      std::istream& getInputStream();
+      std::istream* getInputStream();
     };
 
 

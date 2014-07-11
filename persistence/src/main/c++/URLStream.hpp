@@ -178,8 +178,10 @@ private:
 class url_ostream : public std::ostream {
 public:
 	url_ostream(const char* url) : std::ostream(new URLOStreambuf(url)) {};
+
+	url_ostream(std::string url) : std::ostream(new URLOStreambuf(url.c_str())) {};
 	
-	~url_ostream() { delete rdbuf(); };
+	~url_ostream() { rdbuf()->pubsync(); delete rdbuf(); };
 };
 
 
@@ -190,10 +192,14 @@ public:
 class url_istream : public std::istream {
 public:
 	url_istream(const char* url) : std::istream(new URLIStreambuf(url)) {};
+
+	url_istream(std::string url) : std::istream(new URLIStreambuf(url.c_str())) {};
 	
 	~url_istream() { delete rdbuf(); };
 };
 
+
+// TODO: deleting of content parts binary data from disk/FTP
 
 }
 }
