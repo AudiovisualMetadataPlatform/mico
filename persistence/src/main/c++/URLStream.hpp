@@ -2,13 +2,14 @@
 #define HAVE_URL_STREAM_H 1
 
 #include <cstdio>
-#include <fcntl.h>
 #include <iosfwd>
+#include <streambuf>
+#include <istream>
+#include <ostream>
+
+#include <fcntl.h>
 #include <curl/curl.h>
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/stream_buffer.hpp>
-#include <boost/iostreams/categories.hpp>
-#include <boost/iostreams/positioning.hpp>
+
 
 
 namespace mico
@@ -40,7 +41,7 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemm, void *device)
  * The class is implemented using the Boost IOStreams library and uses the cURL library in the
  * background to a access remote files.
  */
-class URLDeviceBase
+class URLStreambufBase : public std::streambuf
 {
 	friend size_t read_callback(void *ptr, size_t size, size_t nmemb, void *device);	
 	friend size_t write_callback(void *ptr, size_t size, size_t nmemm, void *device);
@@ -60,18 +61,18 @@ protected:
 	int running_handles;
 
 	char* buffer;           //!< internal buffer for storing data from last read
-
-	size_t buffer_position; //!< position in buffer as set by cURL 
-	size_t buffer_length;   //!< current data length of buffer
-	size_t buffer_size;     //!< allocated buffer size
+	int buffer_size;        //!< allocated buffer size
+	char* buffer_position;  //!< cURL position in buffer (when sending/receiving data)
 
 	bool finishing;         //!< indicate if device is already finishing transfer (i.e. no more reads/writes)
 	bool waiting;           //!< indicate if the device is still waiting for more data
 	
 	
 	void loop();            //!< loop to fetch/send more data
+
+
+	
 public:
-	typedef char                          char_type;
 
 	/**
 	 * Open URL device using the given URL and flags. Uses cURL internally to access a remote
@@ -80,57 +81,58 @@ public:
 	 * @param url        the full URL to the file on the local or remote server (either starting with file://, http:// or ftp://)
 	 * @param mode       open mode, like for fopen; supported modes: r, r+, w, w+
 	 */
-	URLDeviceBase(const char* url, URLMode mode);
-
-	/**
-	 * Copy constructor, as we wrap non-trivial memory allocation
-	 */
-	URLDeviceBase(const URLDeviceBase& other);
-
-	/**
-	 * Move constructor, as we wrap non-trivial memory allocation
-	 */
-	URLDeviceBase(URLDeviceBase&& other);
+	URLStreambufBase(const char* url, URLMode mode, int bufsize);
 
 
 	/**
 	 * Clean up resources occupied by device, e.g. remote or local file handles and connections.
 	 */ 
-	virtual ~URLDeviceBase();
+	virtual ~URLStreambufBase();
+
+	
+private:
 
 	/**
-	 * Close the opened URL file handle.
+	 * Copy constructor not implemented, copying not allowed.
 	 */
-	void close();
+	URLStreambufBase(const URLStreambufBase& other);
+
+
+	/**
+	 * Copy assignment operator not implemented, copying not allowed.
+	 */
+	URLStreambufBase& operator=(URLStreambufBase other);
+
 };
 
 
 /**
  * A Boost Device implementation allowing read access to local and remote URLs.
  */
-class URLDeviceSource : public URLDeviceBase {
+class URLIStreambuf : public URLStreambufBase {
 
 public:
-	typedef boost::iostreams::source_tag  category;  //!< support read operations
 
-	URLDeviceSource(const char* url) : URLDeviceBase(url, URL_MODE_READ) {};
-
-	/**
-	 * Copy constructor, as we wrap non-trivial memory allocation
-	 */
-	URLDeviceSource(const URLDeviceSource& other) : URLDeviceBase(other) {};
-
-	/**
-	 * Move constructor, as we wrap non-trivial memory allocation
-	 */
-	URLDeviceSource(URLDeviceSource&& other) : URLDeviceBase(other) {};
-
+	URLIStreambuf(const char* url) : URLStreambufBase(url, URL_MODE_READ, CURL_MAX_WRITE_SIZE) {};
 	
+	
+private:
+
 	/**
-	 * Read at most n characters from the file, starting at the current position. Returns number
-	 * of characters read, or -1 in case of EOF.
+	 * Underflow, so we need to fill the buffer again with more data.
+	 */ 
+	int underflow();
+
+	/**
+	 * Copy constructor not implemented, copying not allowed
 	 */
-	std::streamsize read(char* s, std::streamsize n);
+	URLIStreambuf(const URLIStreambuf& other);
+
+
+	/**
+	 * Copy assignment operator not implemented, copying not allowed
+	 */
+	URLIStreambuf& operator=(URLIStreambuf other);
 	
 };
 
@@ -138,55 +140,59 @@ public:
 /**
  * A Boost Device implementation allowing write access to local and remote URLs.
  */
-class URLDeviceSink : public URLDeviceBase {
+class URLOStreambuf : public URLStreambufBase {
 
 public:
-	typedef boost::iostreams::sink_tag  category;  //!< support write operations
 	
-	
-	URLDeviceSink(const char* url) : URLDeviceBase(url, URL_MODE_WRITE) {};
+	URLOStreambuf(const char* url) : URLStreambufBase(url, URL_MODE_WRITE, CURL_MAX_WRITE_SIZE) {};
+
+private:
 
 	/**
-	 * Copy constructor, as we wrap non-trivial memory allocation
+	 * Buffer overflow, so we need to write out the buffer to the URL connection.
+	 */ 
+	int overflow(int c);
+
+	/**
+	 * Explicit call to write out the buffer to the URL connection even when it is not full
+	 */ 
+	int sync();
+
+	/**
+	 * Copy constructor not implemented, copying not allowed
 	 */
-	URLDeviceSink(const URLDeviceSink& other) : URLDeviceBase(other) {};
+	URLOStreambuf(const URLOStreambuf& other);
 
 
 	/**
-	 * Move constructor, as we wrap non-trivial memory allocation
+	 * Copy assignment operator not implemented, copying not allowed
 	 */
-	URLDeviceSink(URLDeviceSink&& other) : URLDeviceBase(other) {};
-
-		
-	/**
-	 * Write n characters to the file, starting at the current position. Returns number of
-	 * characters written.
-	 */
-	std::streamsize write(const char* s, std::streamsize n);
-	
+	URLOStreambuf& operator=(URLOStreambuf other);
+					
 };
 
 /**
  * Main type for opening an output stream to an URL for writing. Use url_ostream(URL) to open a 
  * new stream, and normal stream operators for sending data (i.e. <<).
  */ 
-typedef boost::iostreams::stream<URLDeviceSink> url_ostream;
+class url_ostream : public std::ostream {
+public:
+	url_ostream(const char* url) : std::ostream(new URLOStreambuf(url)) {};
+	
+	~url_ostream() { delete rdbuf(); };
+};
 
-/**
- * Main type for opening an output streambuffer to an URL for writing.
- */ 
-typedef boost::iostreams::stream_buffer<URLDeviceSink> url_ostreambuf;
 
 /**
  * Main type for opening an input stream to an URL for reading. Use url_istream(URL) to open a 
  * new stream, and normal stream operators for receiving data (i.e. >>).
  */ 
-typedef boost::iostreams::stream<URLDeviceSource> url_istream;
-
-/**
- * Main type for opening an input streambuffer to an URL for reading.
- */ 
-typedef boost::iostreams::stream_buffer<URLDeviceSource> url_istreambuf;
+class url_istream : public std::istream {
+public:
+	url_istream(const char* url) : std::istream(new URLIStreambuf(url)) {};
+	
+	~url_istream() { delete rdbuf(); };
+};
 
 
 }
