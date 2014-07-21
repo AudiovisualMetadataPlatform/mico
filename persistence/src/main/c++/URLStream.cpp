@@ -17,7 +17,7 @@ namespace mico
 namespace io
 {
 
-
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 struct nullstream {};
 
 // Swallow all types
@@ -32,6 +32,8 @@ static nullstream logstream;
 //#define LOG std::cout
 #define LOG if(0) logstream	
 	
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
 /**
  * Read callback used by cURL to read request body from memory. Whenever cURL requests more data, 
  * we first check if there is still more data in our device buffer, in which case we hand it over 
@@ -155,7 +157,7 @@ static void mkdirs(const char* _path) {
  * Open URL device using the given URL and flags. Uses cURL internally to access a remote
  * server, and fstream to access local files.
  *
- * @param url        the full URL to the file on the local or remote server (either starting with file://, http:// or ftp://)
+ * @param url        the full URL to the file on the local or remote server (either starting with %file://, %http:// or %ftp://)
  * @param mode       open mode, like for fopen; supported modes: r, w; remote files cannot be opened for reading and 
  *                   writing at the same time
  */

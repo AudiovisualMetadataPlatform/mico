@@ -206,6 +206,7 @@ namespace mico {
 
     };
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     /**
      * Internal implementation of iterators over the parts of a content item. Uses Boost
      * iterator_facade to simplify the implementation.
@@ -236,7 +237,7 @@ namespace mico {
       }
 
     };
-
+#endif
 
     inline bool operator==(const ContentItem& ci1, const ContentItem& ci2) {
       return ci1.baseUrl == ci2.baseUrl && ci1.id == ci2.id;

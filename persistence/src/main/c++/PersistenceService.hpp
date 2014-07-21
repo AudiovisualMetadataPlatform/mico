@@ -115,6 +115,7 @@ namespace mico {
     };
 
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     /**
      * 	Internal implementation of iterators over the content items managed by a PersistenceService
      */
@@ -144,6 +145,7 @@ namespace mico {
       }
 
     };
+#endif
   }
 }
 

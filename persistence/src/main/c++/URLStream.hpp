@@ -30,12 +30,17 @@ enum URLMode {
 	URL_MODE_READ, URL_MODE_WRITE
 };
 
+typedef union {
+	CURL *curl;
+	FILE *file;
+} handle_t;
+
 // cURL callbacks; declared here so we can friend them
 static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *device);
 static size_t write_callback(void *ptr, size_t size, size_t nmemm, void *device);
 
 /**
- * Base class for Boost Device implementations allowing to access local (file://) and remote (ftp://, http://)
+ * Base class for Boost Device implementations allowing to access local (%file://) and remote (%ftp://, %http://)
  * URLs as stdio streams, similar to fstream. Remote files are partly buffered in main memory.
  *
  * The class is implemented using the Boost IOStreams library and uses the cURL library in the
@@ -51,10 +56,7 @@ protected:
 	URLType type;
 	URLMode mode;
 
-	union {
-		CURL *curl;
-		FILE *file;
-	} handle;
+	handle_t handle;
 
 	CURLM *multi_handle;
 	
@@ -78,8 +80,8 @@ public:
 	 * Open URL device using the given URL and flags. Uses cURL internally to access a remote
 	 * server, and fstream to access local files.
 	 *
-	 * @param url        the full URL to the file on the local or remote server (either starting with file://, http:// or ftp://)
-	 * @param mode       open mode, like for fopen; supported modes: r, r+, w, w+
+	 * @param url        the full URL to the file on the local or remote server (either starting with %file://, %http:// or %ftp://)
+	 * @param mode       open mode, like for fopen; supported modes: read, write
 	 */
 	URLStreambufBase(const char* url, URLMode mode, int bufsize);
 
@@ -173,7 +175,7 @@ private:
 
 /**
  * Main type for opening an output stream to an URL for writing. Use url_ostream(URL) to open a 
- * new stream, and normal stream operators for sending data (i.e. <<).
+ * new stream, and normal stream operators for sending data (i.e.  \<\<).
  */ 
 class url_ostream : public std::ostream {
 public:
@@ -187,7 +189,7 @@ public:
 
 /**
  * Main type for opening an input stream to an URL for reading. Use url_istream(URL) to open a 
- * new stream, and normal stream operators for receiving data (i.e. >>).
+ * new stream, and normal stream operators for receiving data (i.e. \>\>).
  */ 
 class url_istream : public std::istream {
 public:
