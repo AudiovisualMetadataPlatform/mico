@@ -1,0 +1,3 @@
+<Context docBase="/usr/share/marmotta/${project.build.finalName}.war" unpackWAR="false" useNaming="true">
+  <Parameter name="marmotta.home" value="/var/lib/marmotta" override="false" />
+</Context>

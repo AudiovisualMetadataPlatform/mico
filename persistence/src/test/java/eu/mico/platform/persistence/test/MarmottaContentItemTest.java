@@ -94,16 +94,16 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
     @Test
     public void testListContentParts() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
-        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl,UUID.randomUUID());
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl, UUID.randomUUID());
 
         Assert.assertFalse(item.listContentParts().iterator().hasNext());
 
         Content[] parts = new Content[5];
-        for(int i=0; i<5; i++) {
+        for (int i = 0; i < 5; i++) {
             parts[i] = item.createContentPart();
         }
 
-        for(Content c : item.listContentParts()) {
+        for (Content c : item.listContentParts()) {
             Assert.assertThat(c, Matchers.isIn(parts));
         }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -46,12 +46,17 @@
                         </systemProperties>
                     </configuration>
                 </plugin>
-             </plugins>
+            </plugins>
         </pluginManagement>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/deb/resources</directory>
+                <filtering>true</filtering>
+                <targetPath>${project.build.directory}/deb-resources</targetPath>
             </resource>
         </resources>
         <plugins>
@@ -164,4 +169,75 @@
             <artifactId>sesame-repository-contextaware</artifactId>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>debian</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>jdeb</artifactId>
+                        <groupId>org.vafer</groupId>
+                        <version>1.1.1</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jdeb</goal>
+                                </goals>
+                                <configuration>
+                                    <snapshotExpand>true</snapshotExpand>
+                                    <attach>false</attach>
+
+                                    <name>mico-marmotta</name>
+                                    <deb>${project.build.directory}/[[name]]_[[version]]_all.deb</deb>
+                                    <changesOut>${project.build.directory}/[[name]]_[[version]]_all.changes</changesOut>
+
+                                    <verbose>true</verbose>
+                                    <controlDir>${basedir}/src/deb/debian</controlDir>
+                                    <dataSet>
+
+                                        <data>
+                                            <src>${project.build.directory}/${project.build.finalName}.war</src>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/usr/share/marmotta</prefix>
+                                                <user>tomcat7</user>
+                                                <group>tomcat7</group>
+                                            </mapper>
+                                        </data>
+
+                                        <data>
+                                            <src>${project.build.directory}/deb-resources/</src>
+                                            <includes>*.xml</includes>
+                                            <type>directory</type>
+                                            <conffile>true</conffile>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/etc/tomcat7/Catalina/localhost</prefix>
+                                                <user>tomcat7</user>
+                                                <group>tomcat7</group>
+                                            </mapper>
+                                        </data>
+                                        <data>
+                                            <src>${basedir}/src/deb/doc</src>
+                                            <type>directory</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>usr/share/doc/mico-marmotta</prefix>
+                                                <user>root</user>
+                                                <group>root</group>
+                                            </mapper>
+                                        </data>
+
+                                    </dataSet>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
