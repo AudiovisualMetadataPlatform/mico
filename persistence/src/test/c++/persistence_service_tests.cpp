@@ -17,13 +17,14 @@ using namespace mico::persistence;
 using namespace mico::http;
 using namespace mico::util;
 
+#define VBOX_SERVER std::string("192.168.56.101")
 
 
 class PersistenceServiceTest : public ::testing::Test {
 
 protected:
-  std::string base_url = "http://localhost:8080/marmotta";
-  std::string content_dir = "file:///tmp/mico";
+  std::string base_url = "http://" + VBOX_SERVER + ":8080/marmotta";
+  std::string content_dir = "ftp://mico:mico@" + VBOX_SERVER;
   HTTPClient client;
   PersistenceService* svc;
 

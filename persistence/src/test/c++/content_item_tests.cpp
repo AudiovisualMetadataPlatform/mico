@@ -21,12 +21,14 @@ using namespace mico::http;
 using namespace mico::util;
 
 
+#define VBOX_SERVER std::string("192.168.56.101")
+
 
 class ContentItemTest : public ::testing::Test {
 
 protected:
-  std::string base_url = "http://localhost:8080/marmotta";
-  std::string content_dir = "file:///tmp/mico";
+  std::string base_url = "http://" + VBOX_SERVER + ":8080/marmotta";
+  std::string content_dir = "ftp://mico:mico@" + VBOX_SERVER;
   uuid base_ctx;
   random_generator rnd_gen;
   HTTPClient client;
