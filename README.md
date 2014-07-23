@@ -1,15 +1,49 @@
-# MICO Platform
+# MICO Platform Server
 
-This repository contains the source code of the MICO platform and modules. It provides
-implementations for both Java and C++ (version 11).
+The MICO Platform Server is a Linux installation providing the following services:
+
+* an installation of Apache Marmotta with contextual extensions (found in the marmotta/ directory), running at http://<host>:8080/marmotta
+* an installation of RabbitMQ, running at <host>:5672
+* an FTP server for serving and storing the binary content of content items
+
+All three services have to use the same user and password combination (for testing: "mico"/"mico"). 
+
+## VirtualBox Image
+
+A complete installation for development is currently provided as VirtualBox image. It only has a single user "mico" with
+password "mico". When starting, the server will get an IP address from VirtualBox (usually, the first IP address of the pool). 
+For convenience, you can access the following administration interfaces:
+
+* Marmotta: http://<host>:8080/marmotta
+* RabbitMQ: http://<host>:15672
+
+The FTP Server (ProFTPD) is configured to store binary data in the /data directory exclusively. We are currently working on
+providing a more easy-to-use "vagrant" version of this image.
+
+## Development Server
+
+A development server will be setup once the platform stabilizes.
+
+
+# MICO Platform API
+
+This repository contains the source code of the MICO platform API and modules. It provides
+implementations of the API for both Java and C++ (version 11). The API is used by analysis services to register with
+the platform and by other applications to interact with the platform (e.g. inject and export content items).
 
 ## Prerequisites
 
-* JDK (7 or 8?)
-* Maven
-* ...
 
-### Prerequisites (C++)
+### Java API
+
+The Java API is build using Maven and will therefore retrieve all its dependencies automatically. Therefore, only the 
+following prerequisites need to be satisfied:
+
+* JDK 7
+* Maven
+
+
+### C++ API
 
 Building the C++ API has additional requirements for native libraries. In particular, these are:
 
@@ -30,6 +64,12 @@ Quick summary:
 
 ## Building
 
+The API is built using the standard tools for the respective environment (i.e. Maven or GNU make). When running tests,
+make sure the MICO Platform Server installation is started, and point to its host name or IP address by setting the
+test.host environment variable appropriately:
+
+    export test.host="192.168.56.101"
+
 ### Building (Java)
 
 The complete platform is built using Maven. To build and install the current version, run
@@ -46,6 +86,7 @@ The C++ bindings of the platform are built using the GNU autotools. The reposito
 raw input files for autotools that can be transformed into the well-known configure scripts. To do
 so, please run:
 
+    cd api/c++
     aclocal && autoreconf --install
 
 To configure the bindings for your platform, run:
@@ -70,30 +111,4 @@ To install the C++ libraries and headers to the predefined prefix, run
 In this case, you would probably also want to make sure that the Hadoop Native Libraries are properly 
 installed in the system before.
 
-## Launching
-
-To launch the different webapps, run
-
-    mvn package tomcat7:run
-
-### Persistence
-
-@@TODO@@: marmotta and all other subsystems
-
-In parallel you may require some persistence infrastructure, which uses HDFS.
-[HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html)
-(Hadoop Distributed File System) is used int he MICO platform to store content. 
-A [development enviroment](http://wiki.apache.org/hadoop/HowToSetupYourDevelopmentEnvironment)
-requires some particular details that we try to automatize as much as possible.
-
-    cd persistence
-    mvn clean package -Phadoop
-
-And run the HDFS daemons:
-
-    ./start-hdfs.sh
-
-And the you can access it at [localhost:50070](http://localhost:50070/)
-
-To shutdown HDFS just use Ctrl+C in the active terminal.
 
