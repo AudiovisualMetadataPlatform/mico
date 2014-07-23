@@ -104,6 +104,11 @@ To run C++ unit tests for the persistence API, startup the platform as described
 
     make check
 
+
+To create a complete API documentation of the MICO Platform API in the api/c++/doc directory, run
+
+    make doxygen-doc
+
 To install the C++ libraries and headers to the predefined prefix, run
 
     make install
