@@ -91,7 +91,7 @@ so, please run:
 
 To configure the bindings for your platform, run:
 
-    ./configure --prefix=/usr/local --enable-testing --with-hadoop=PATH
+    ./configure --prefix=/usr/local --enable-testing 
 
 Where PATH is the location where the Hadoop distribution has been installed (e.g. `/usr/local/src/hadoop-2.4.1-src/hadoop-dist/target/hadoop-2.4.1`)
 
