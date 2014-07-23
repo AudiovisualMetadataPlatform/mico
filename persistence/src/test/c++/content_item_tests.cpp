@@ -21,7 +21,7 @@ using namespace mico::http;
 using namespace mico::util;
 
 
-#define VBOX_SERVER std::string("192.168.56.101")
+#define VBOX_SERVER std::string("192.168.56.102")
 
 
 class ContentItemTest : public ::testing::Test {
