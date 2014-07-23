@@ -1,10 +1,6 @@
 package eu.mico.platform.persistence.test;
 
-import eu.mico.marmotta.api.ContextualConnectionService;
-import eu.mico.marmotta.webservices.ContextualSparqlWebService;
 import eu.mico.platform.persistence.impl.MarmottaMetadata;
-import org.apache.marmotta.platform.core.exception.MarmottaException;
-import org.apache.marmotta.platform.core.exception.io.MarmottaImportException;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -33,16 +29,15 @@ public class MarmottaMetadataTest extends BaseMarmottaTest {
     private static UUID baseUuid;
 
     @BeforeClass
-    public static void setupLocal() throws MarmottaImportException, URISyntaxException, IOException, RDFParseException, RepositoryException, MarmottaException {
+    public static void setupLocal() throws URISyntaxException, IOException, RDFParseException, RepositoryException {
         baseUuid = UUID.randomUUID();
 
         // pre-load data
-        ContextualConnectionService sesameService = marmotta.getService(ContextualConnectionService.class);
-        RepositoryConnection con = sesameService.getContextualConnection(resolveContext(baseUuid.toString()));
+        RepositoryConnection con = repository.getConnection();
         try {
             con.begin();
 
-            con.add(BaseMarmottaTest.class.getResourceAsStream("/demo-data.foaf"), baseUrl, RDFFormat.RDFXML);
+            con.add(BaseMarmottaTest.class.getResourceAsStream("/demo-data.foaf"), baseUrl, RDFFormat.RDFXML, resolveContext(baseUuid.toString()));
 
             con.commit();
         } catch(RepositoryException ex) {
@@ -106,7 +101,7 @@ public class MarmottaMetadataTest extends BaseMarmottaTest {
 
 
     @Test
-    public void testLoad() throws RepositoryException, IOException, RDFParseException, MarmottaException {
+    public void testLoad() throws RepositoryException, IOException, RDFParseException {
         MarmottaMetadata m = new MarmottaMetadata(baseUrl, UUID.randomUUID().toString());
         m.load(this.getClass().getResourceAsStream("/version-base.rdf"), RDFFormat.RDFXML);
 
@@ -132,7 +127,7 @@ public class MarmottaMetadataTest extends BaseMarmottaTest {
 
 
     @Test
-    public void testDump() throws RepositoryException, IOException, RDFParseException, MarmottaException, RDFHandlerException {
+    public void testDump() throws RepositoryException, IOException, RDFParseException, RDFHandlerException {
         MarmottaMetadata m = new MarmottaMetadata(baseUrl, baseUuid.toString());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         m.dump(out, RDFFormat.TURTLE);

@@ -3,6 +3,8 @@ package eu.mico.platform.persistence.impl;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
+import org.apache.commons.vfs2.FileSystemOptions;
+import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
 import org.openrdf.model.URI;
 import org.openrdf.query.*;
 import org.openrdf.repository.RepositoryException;
@@ -29,8 +31,18 @@ public class PersistenceServiceImpl implements PersistenceService {
     private String contentUrl;
 
 
+    public PersistenceServiceImpl(String micoPlatformAddress) {
+        this(micoPlatformAddress,"mico","mico");
+    }
 
-    // TODO: HDFS connection
+    public PersistenceServiceImpl(String micoPlatformAddress, String user, String password) {
+        this.marmottaServerUrl = "http://" + micoPlatformAddress + ":8080/marmotta";
+        this.contentUrl        = "ftp://"+ user +":"+ password +"@" + micoPlatformAddress;
+
+        FileSystemOptions opts = new FileSystemOptions();
+        FtpFileSystemConfigBuilder.getInstance().setPassiveMode(opts, true);
+        FtpFileSystemConfigBuilder.getInstance().setUserDirIsRoot(opts,true);
+    }
 
 
     public PersistenceServiceImpl(String marmottaServerUrl, String contentUrl) {
@@ -204,6 +216,11 @@ public class PersistenceServiceImpl implements PersistenceService {
                             } catch (QueryEvaluationException e) {
                                 return null;
                             }
+                        }
+
+                        @Override
+                        public void remove() {
+                            throw new UnsupportedOperationException("removing elements not supported");
                         }
                     };
                 }

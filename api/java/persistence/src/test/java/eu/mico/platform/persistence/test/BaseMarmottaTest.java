@@ -1,36 +1,25 @@
 package eu.mico.platform.persistence.test;
 
-import com.google.common.collect.ImmutableSet;
-import eu.mico.marmotta.webservices.ContextualSparqlWebService;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.MapConfiguration;
-import org.apache.commons.io.IOUtils;
-import org.apache.marmotta.platform.backend.kiwi.KiWiOptions;
-import org.apache.marmotta.platform.core.api.config.ConfigurationService;
-import org.apache.marmotta.platform.core.api.triplestore.ContextService;
-import org.apache.marmotta.platform.core.api.triplestore.SesameService;
-import org.apache.marmotta.platform.core.exception.MarmottaException;
-import org.apache.marmotta.platform.core.exception.io.MarmottaImportException;
-import org.apache.marmotta.platform.core.test.base.JettyMarmotta;
-import org.apache.marmotta.platform.sparql.webservices.SparqlWebService;
+import org.apache.commons.vfs2.FileSystemOptions;
+import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.*;
 import org.openrdf.query.impl.DatasetImpl;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.rio.RDFFormat;
+import org.openrdf.repository.sparql.SPARQLRepository;
 import org.openrdf.rio.RDFParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Set;
 
 /**
@@ -40,26 +29,40 @@ import java.util.Set;
  */
 public abstract class BaseMarmottaTest {
 
-    protected static JettyMarmotta marmotta;
+    private static Logger log = LoggerFactory.getLogger(BaseMarmottaTest.class);
 
     protected static String baseUrl;
     protected static String contentUrl;
+    protected static String testHost;
+
+    protected static Repository repository;
+
 
     @BeforeClass
-    public static void setup() throws MarmottaImportException, URISyntaxException, IOException, RDFParseException, RepositoryException {
-        Configuration cfg = new MapConfiguration(new HashMap<String,Object>());
-        cfg.setProperty(KiWiOptions.CLUSTERING_BACKEND,"HAZELCAST");
-        cfg.setProperty(KiWiOptions.CLUSTERING_MODE,"LOCAL");
+    public static void setup() throws URISyntaxException, IOException, RDFParseException, RepositoryException {
+        testHost = System.getenv("test.host");
+        if(testHost == null) {
+            log.warn("test.host environment variable not defined, using default of 192.168.56.102");
+            testHost = "192.168.56.102";
+        }
 
-        marmotta = new JettyMarmotta(cfg, "/marmotta", ImmutableSet.<Class<?>>of(ContextualSparqlWebService.class, SparqlWebService.class));
-        baseUrl = UriBuilder.fromUri("http://localhost").port(marmotta.getPort()).path(marmotta.getContext()).build().toString();
-        contentUrl = "file:///tmp/mico";
+        baseUrl    = "http://" + testHost + ":8080/marmotta";
+        contentUrl = "ftp://mico:mico@" + testHost;
+
+        FileSystemOptions opts = new FileSystemOptions();
+        FtpFileSystemConfigBuilder.getInstance().setPassiveMode(opts, true);
+        FtpFileSystemConfigBuilder.getInstance().setUserDirIsRoot(opts,true);
+
+
+        repository    = new SPARQLRepository(baseUrl + "/sparql/select", baseUrl+"/sparql/update");
+        repository.initialize();
+
     }
 
+
     @AfterClass
-    public static void shutdown() {
-        marmotta.shutdown();
-        marmotta = null;
+    public static void teardown() throws RepositoryException {
+        repository.shutDown();
     }
 
 
@@ -69,28 +72,18 @@ public abstract class BaseMarmottaTest {
      * @param contextId
      * @return
      */
-    protected static URI resolveContext(String contextId) throws MarmottaException {
+    protected static URI resolveContext(String contextId) {
         if (contextId.contains(",")) {
             //forcing to resolve just the first one
             contextId = contextId.split(",")[0];
         }
-        try {
-            ContextService contextService = marmotta.getService(ContextService.class);
-            ConfigurationService configurationService = marmotta.getService(ConfigurationService.class);
-            final URI context = contextService.createContext(configurationService.getBaseUri() + contextId);
-            if (context == null) {
-                throw new MarmottaException("context not resolved");
-            }
-            return context;
-        } catch (URISyntaxException e) {
-            throw new MarmottaException(e.getMessage());
-        }
+
+        return new URIImpl(baseUrl + "/" + contextId);
     }
 
 
     protected static RepositoryConnection getFullConnection() throws RepositoryException {
-        SesameService sesameService = marmotta.getService(SesameService.class);
-        return sesameService.getConnection();
+        return repository.getConnection();
     }
 
     protected static void assertAsk(String askQuery, final URI context) throws MalformedQueryException, QueryEvaluationException {

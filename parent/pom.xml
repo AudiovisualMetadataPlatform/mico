@@ -112,6 +112,8 @@
                     <artifactId>hadoop-maven-plugin</artifactId>
                     <version>1.0.0</version>
                 </plugin>
+
+
             </plugins>
         </pluginManagement>
     </build>
@@ -217,6 +219,18 @@
                 <artifactId>sesame-sail-memory</artifactId>
                 <version>${sesame.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.openrdf.sesame</groupId>
+                <artifactId>sesame-rio-rdfxml</artifactId>
+                <version>${sesame.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openrdf.sesame</groupId>
+                <artifactId>sesame-rio-turtle</artifactId>
+                <version>${sesame.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.jboss.weld.servlet</groupId>
                 <artifactId>weld-servlet-core</artifactId>

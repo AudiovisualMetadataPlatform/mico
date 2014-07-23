@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>eu.mico-project.platform</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../../parent</relativePath>
+    </parent>
+
+    <artifactId>mico-api-reactor</artifactId>
+    <packaging>pom</packaging>
+
+    <name>MICO Platform API</name>
+    <description>MICO Platform API Reactor</description>
+    <url>http://mico-project.eu</url>
+
+    <inceptionYear>2013</inceptionYear>
+
+    <developers>
+        <developer>
+            <name>Sebastian Schaffert</name>
+            <email>sebastian.schaffert@salzburgresearch.at</email>
+            <organization>Salzburg Research</organization>
+        </developer>
+        <developer>
+            <name>Thomas Kurz</name>
+            <email>thomas.kurz@salzburgresearch.at</email>
+            <organization>Salzburg Research</organization>
+        </developer>
+        <developer>
+            <name>Jakob Frank</name>
+            <email>jakob.frank@salzburgresearch.at</email>
+            <organization>Salzburg Research</organization>
+        </developer>
+        <developer>
+            <name>Sergio Fernández</name>
+            <email>sergio.fernandez@salzburgresearch.at</email>
+            <organization>Salzburg Research</organization>
+        </developer>
+    </developers>
+
+    <organization>
+        <name>MICO</name>
+        <url>http://mico-project.eu</url>
+    </organization>
+    <!--
+    <organization>
+        <name>Salzburg Research</name>
+        <url>http://www.salzburgresearch.at</url>
+    </organization>
+    <organization>
+        <name>Fraunhofer</name>
+        <url>http://www.fraunhofer.de</url>
+    </organization>
+    <organization>
+        <name>Universität Passau</name>
+        <url>http://www.uni-passau.de</url>
+    </organization>
+    <organization>
+        <name>Umeå University</name>
+        <url>http://www.umu.se</url>
+    </organization>
+    <organization>
+        <name>University of Oxford</name>
+        <url>http://www.ox.ac.uk</url>
+    </organization>
+    <organization>
+        <name>Insideout10</name>
+        <url>http://insideout.io</url>
+    </organization>
+    <organization>
+        <name>Zaizi</name>
+        <url>http://www.zaizi.com</url>
+    </organization>
+    -->
+
+    <scm>
+        <connection>scm:git:https://code.mico-project.eu/platform.git</connection>
+        <developerConnection>scm:git:https://code.mico-project.eu/platform.git</developerConnection>
+        <url>http://code.mico-project.eu/platform</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <issueManagement>
+        <system>Jira</system>
+        <url>http://issues.mico-project.eu</url>
+    </issueManagement>
+
+
+    <modules>
+        <module>persistence</module>
+        <module>event</module>
+    </modules>
+
+</project>

@@ -220,7 +220,9 @@ public class MarmottaContentItem implements ContentItem {
         String fileName =  id.stringValue().substring(baseUrl.length() + 1);
         FileSystemManager fsmgr = VFS.getManager();
         FileObject f = fsmgr.resolveFile(contentUrl + "/" + fileName + ".bin");
-        f.delete();
+        if(f.getParent().exists() && f.exists()) {
+            f.delete();
+        }
 
         // delete metadata
         Metadata m = getMetadata();
@@ -272,6 +274,11 @@ public class MarmottaContentItem implements ContentItem {
                             } catch (QueryEvaluationException e) {
                                 return null;
                             }
+                        }
+
+                        @Override
+                        public void remove() {
+                            throw new UnsupportedOperationException("removing elements not supported");
                         }
                     };
                 }

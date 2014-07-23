@@ -60,7 +60,12 @@ public class MarmottaContent implements Content {
     @Override
     public OutputStream getOutputStream() throws FileSystemException {
         FileSystemManager fsmgr = VFS.getManager();
-        FileObject f = fsmgr.resolveFile(contentUrl + "/" + id + ".bin");
+        FileObject d = fsmgr.resolveFile(getContentItemPath());
+        FileObject f = fsmgr.resolveFile(getContentPartPath());
+        if(!d.exists()) {
+            d.createFolder();
+        }
+        f.createFile();
         return f.getContent().getOutputStream();
     }
 
@@ -72,8 +77,12 @@ public class MarmottaContent implements Content {
     @Override
     public InputStream getInputStream() throws FileSystemException {
         FileSystemManager fsmgr = VFS.getManager();
-        FileObject f = fsmgr.resolveFile(contentUrl + "/" + id + ".bin");
-        return f.getContent().getInputStream();
+        FileObject f = fsmgr.resolveFile(getContentPartPath());
+        if(f.getParent().exists() && f.exists()) {
+            return f.getContent().getInputStream();
+        } else {
+            return null;
+        }
     }
 
 
@@ -103,5 +112,14 @@ public class MarmottaContent implements Content {
                 "baseUrl='" + baseUrl + '\'' +
                 ", id='" + id + '\'' +
                 '}';
+    }
+
+
+    private String getContentItemPath() {
+        return contentUrl + "/" + id.substring(0, id.lastIndexOf('/'));
+    }
+
+    private String getContentPartPath() {
+        return contentUrl + "/" + id + ".bin";
     }
 }
