@@ -4,6 +4,8 @@ import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.model.ContentItem;
 import org.openrdf.model.URI;
 
+import java.io.IOException;
+
 /**
  * Interface to be implemented by services. Consists of some informational methods as well as a callback which is called
  * whenever a new event for this service has been received.
@@ -59,5 +61,5 @@ public interface AnalysisService {
      * @param ci     the content item to analyse
      * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
      */
-    public void call(AnalysisResponse resp, ContentItem ci, URI object) throws AnalysisException;
+    public void call(AnalysisResponse resp, ContentItem ci, URI object) throws AnalysisException, IOException;
 }

@@ -113,7 +113,7 @@ public class EventManagerImpl implements EventManager {
         services.put(service, new AnalysisConsumer(service, queueName));
 
 
-        // then send a registration message to the broker's "service_registry" exhange; all running brokers will
+        // then send a registration message to the broker's "service_registry" exchange; all running brokers will
         // receive this message, assuming that they bound their queue to the registry exchange
 
         Event.RegistrationEvent registrationEvent =

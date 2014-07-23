@@ -35,7 +35,7 @@ public abstract class BaseCommunicationTest {
 
 
     @BeforeClass
-    public static void setup() throws URISyntaxException, IOException, RDFParseException, RepositoryException {
+    public static void setupBase() throws URISyntaxException, IOException, RDFParseException, RepositoryException {
         testHost = System.getenv("test.host");
         if(testHost == null) {
             log.warn("test.host environment variable not defined, using default of 192.168.56.102");

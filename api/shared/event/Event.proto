@@ -1,0 +1,30 @@
+package mico.event.model;
+
+option java_package = "eu.mico.platform.event.model";
+
+
+/**
+ * Register a service with the message broker by sending its service identifier and input queue name.
+ */
+message RegistrationEvent {
+  required string serviceId      = 1; //!< service identifier of service, e.g. eu.mico.example.ExampleService
+  required string queueName      = 2; //!< input queue name used by service, e.g. exampleServiceQueue
+  required string provides       = 3; //!< type of output this service provides (MIME type, e.g. text/plain)
+  required string requires       = 4; //!< type of input this service provides (MIME type, e.g. text/html)
+}
+
+/**
+ * Notify a service that a analysis should continue using the given content item and object in that
+ * content item. The content item URI is the unique identifier of the content item (a URI). The
+ * object URI is the URI of an object that should be taken into account by the receiving service;
+ * this can be a content part (identified by its URI), a fragment identified and stored in the
+ * metadata, etc.
+ *
+ * AnalysisEvents are sent both, by the message broker to notify services that they should start
+ * analysing an object, and by services to notify the message broker that they added a new object.
+ */
+message AnalysisEvent {
+  required string serviceId      = 1; //!< service identifier of the service generating the event
+  required string contentItemUri = 2; //!< URI of the content item being processed
+  optional string objectUri      = 3; //!< URI of the object of that content item being processed
+}
