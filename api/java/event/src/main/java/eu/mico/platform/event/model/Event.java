@@ -2148,6 +2148,804 @@ public final class Event {
     // @@protoc_insertion_point(class_scope:mico.event.model.AnalysisEvent)
   }
 
+  public interface ContentEventOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required string contentItemUri = 1;
+    /**
+     * <code>required string contentItemUri = 1;</code>
+     */
+    boolean hasContentItemUri();
+    /**
+     * <code>required string contentItemUri = 1;</code>
+     */
+    java.lang.String getContentItemUri();
+    /**
+     * <code>required string contentItemUri = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getContentItemUriBytes();
+  }
+  /**
+   * Protobuf type {@code mico.event.model.ContentEvent}
+   *
+   * <pre>
+   **
+   * Notify the broker that a new content item is available in the system using the given URI.
+   * </pre>
+   */
+  public static final class ContentEvent extends
+      com.google.protobuf.GeneratedMessage
+      implements ContentEventOrBuilder {
+    // Use ContentEvent.newBuilder() to construct.
+    private ContentEvent(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private ContentEvent(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final ContentEvent defaultInstance;
+    public static ContentEvent getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public ContentEvent getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ContentEvent(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              contentItemUri_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ContentEvent_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ContentEvent_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              eu.mico.platform.event.model.Event.ContentEvent.class, eu.mico.platform.event.model.Event.ContentEvent.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<ContentEvent> PARSER =
+        new com.google.protobuf.AbstractParser<ContentEvent>() {
+      public ContentEvent parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ContentEvent(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ContentEvent> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required string contentItemUri = 1;
+    public static final int CONTENTITEMURI_FIELD_NUMBER = 1;
+    private java.lang.Object contentItemUri_;
+    /**
+     * <code>required string contentItemUri = 1;</code>
+     */
+    public boolean hasContentItemUri() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string contentItemUri = 1;</code>
+     */
+    public java.lang.String getContentItemUri() {
+      java.lang.Object ref = contentItemUri_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          contentItemUri_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string contentItemUri = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getContentItemUriBytes() {
+      java.lang.Object ref = contentItemUri_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        contentItemUri_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private void initFields() {
+      contentItemUri_ = "";
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasContentItemUri()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getContentItemUriBytes());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getContentItemUriBytes());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static eu.mico.platform.event.model.Event.ContentEvent parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static eu.mico.platform.event.model.Event.ContentEvent parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(eu.mico.platform.event.model.Event.ContentEvent prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code mico.event.model.ContentEvent}
+     *
+     * <pre>
+     **
+     * Notify the broker that a new content item is available in the system using the given URI.
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements eu.mico.platform.event.model.Event.ContentEventOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ContentEvent_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ContentEvent_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                eu.mico.platform.event.model.Event.ContentEvent.class, eu.mico.platform.event.model.Event.ContentEvent.Builder.class);
+      }
+
+      // Construct using eu.mico.platform.event.model.Event.ContentEvent.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        contentItemUri_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ContentEvent_descriptor;
+      }
+
+      public eu.mico.platform.event.model.Event.ContentEvent getDefaultInstanceForType() {
+        return eu.mico.platform.event.model.Event.ContentEvent.getDefaultInstance();
+      }
+
+      public eu.mico.platform.event.model.Event.ContentEvent build() {
+        eu.mico.platform.event.model.Event.ContentEvent result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public eu.mico.platform.event.model.Event.ContentEvent buildPartial() {
+        eu.mico.platform.event.model.Event.ContentEvent result = new eu.mico.platform.event.model.Event.ContentEvent(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.contentItemUri_ = contentItemUri_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof eu.mico.platform.event.model.Event.ContentEvent) {
+          return mergeFrom((eu.mico.platform.event.model.Event.ContentEvent)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(eu.mico.platform.event.model.Event.ContentEvent other) {
+        if (other == eu.mico.platform.event.model.Event.ContentEvent.getDefaultInstance()) return this;
+        if (other.hasContentItemUri()) {
+          bitField0_ |= 0x00000001;
+          contentItemUri_ = other.contentItemUri_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasContentItemUri()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        eu.mico.platform.event.model.Event.ContentEvent parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (eu.mico.platform.event.model.Event.ContentEvent) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required string contentItemUri = 1;
+      private java.lang.Object contentItemUri_ = "";
+      /**
+       * <code>required string contentItemUri = 1;</code>
+       */
+      public boolean hasContentItemUri() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string contentItemUri = 1;</code>
+       */
+      public java.lang.String getContentItemUri() {
+        java.lang.Object ref = contentItemUri_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          contentItemUri_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string contentItemUri = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getContentItemUriBytes() {
+        java.lang.Object ref = contentItemUri_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          contentItemUri_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string contentItemUri = 1;</code>
+       */
+      public Builder setContentItemUri(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        contentItemUri_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string contentItemUri = 1;</code>
+       */
+      public Builder clearContentItemUri() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        contentItemUri_ = getDefaultInstance().getContentItemUri();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string contentItemUri = 1;</code>
+       */
+      public Builder setContentItemUriBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        contentItemUri_ = value;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:mico.event.model.ContentEvent)
+    }
+
+    static {
+      defaultInstance = new ContentEvent(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:mico.event.model.ContentEvent)
+  }
+
+  public interface DiscoveryEventOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * Protobuf type {@code mico.event.model.DiscoveryEvent}
+   */
+  public static final class DiscoveryEvent extends
+      com.google.protobuf.GeneratedMessage
+      implements DiscoveryEventOrBuilder {
+    // Use DiscoveryEvent.newBuilder() to construct.
+    private DiscoveryEvent(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private DiscoveryEvent(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final DiscoveryEvent defaultInstance;
+    public static DiscoveryEvent getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public DiscoveryEvent getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private DiscoveryEvent(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return eu.mico.platform.event.model.Event.internal_static_mico_event_model_DiscoveryEvent_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return eu.mico.platform.event.model.Event.internal_static_mico_event_model_DiscoveryEvent_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              eu.mico.platform.event.model.Event.DiscoveryEvent.class, eu.mico.platform.event.model.Event.DiscoveryEvent.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<DiscoveryEvent> PARSER =
+        new com.google.protobuf.AbstractParser<DiscoveryEvent>() {
+      public DiscoveryEvent parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new DiscoveryEvent(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DiscoveryEvent> getParserForType() {
+      return PARSER;
+    }
+
+    private void initFields() {
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static eu.mico.platform.event.model.Event.DiscoveryEvent parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.mico.platform.event.model.Event.DiscoveryEvent parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.mico.platform.event.model.Event.DiscoveryEvent parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.mico.platform.event.model.Event.DiscoveryEvent parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.mico.platform.event.model.Event.DiscoveryEvent parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static eu.mico.platform.event.model.Event.DiscoveryEvent parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static eu.mico.platform.event.model.Event.DiscoveryEvent parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static eu.mico.platform.event.model.Event.DiscoveryEvent parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static eu.mico.platform.event.model.Event.DiscoveryEvent parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static eu.mico.platform.event.model.Event.DiscoveryEvent parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(eu.mico.platform.event.model.Event.DiscoveryEvent prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code mico.event.model.DiscoveryEvent}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements eu.mico.platform.event.model.Event.DiscoveryEventOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_DiscoveryEvent_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_DiscoveryEvent_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                eu.mico.platform.event.model.Event.DiscoveryEvent.class, eu.mico.platform.event.model.Event.DiscoveryEvent.Builder.class);
+      }
+
+      // Construct using eu.mico.platform.event.model.Event.DiscoveryEvent.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_DiscoveryEvent_descriptor;
+      }
+
+      public eu.mico.platform.event.model.Event.DiscoveryEvent getDefaultInstanceForType() {
+        return eu.mico.platform.event.model.Event.DiscoveryEvent.getDefaultInstance();
+      }
+
+      public eu.mico.platform.event.model.Event.DiscoveryEvent build() {
+        eu.mico.platform.event.model.Event.DiscoveryEvent result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public eu.mico.platform.event.model.Event.DiscoveryEvent buildPartial() {
+        eu.mico.platform.event.model.Event.DiscoveryEvent result = new eu.mico.platform.event.model.Event.DiscoveryEvent(this);
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof eu.mico.platform.event.model.Event.DiscoveryEvent) {
+          return mergeFrom((eu.mico.platform.event.model.Event.DiscoveryEvent)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(eu.mico.platform.event.model.Event.DiscoveryEvent other) {
+        if (other == eu.mico.platform.event.model.Event.DiscoveryEvent.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        eu.mico.platform.event.model.Event.DiscoveryEvent parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (eu.mico.platform.event.model.Event.DiscoveryEvent) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:mico.event.model.DiscoveryEvent)
+    }
+
+    static {
+      defaultInstance = new DiscoveryEvent(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:mico.event.model.DiscoveryEvent)
+  }
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_mico_event_model_RegistrationEvent_descriptor;
   private static
@@ -2158,6 +2956,16 @@ public final class Event {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_mico_event_model_AnalysisEvent_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_mico_event_model_ContentEvent_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_mico_event_model_ContentEvent_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_mico_event_model_DiscoveryEvent_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_mico_event_model_DiscoveryEvent_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -2172,7 +2980,9 @@ public final class Event {
       "Name\030\002 \002(\t\022\020\n\010provides\030\003 \002(\t\022\020\n\010requires" +
       "\030\004 \002(\t\"M\n\rAnalysisEvent\022\021\n\tserviceId\030\001 \002" +
       "(\t\022\026\n\016contentItemUri\030\002 \002(\t\022\021\n\tobjectUri\030" +
-      "\003 \001(\tB\036\n\034eu.mico.platform.event.model"
+      "\003 \001(\t\"&\n\014ContentEvent\022\026\n\016contentItemUri\030" +
+      "\001 \002(\t\"\020\n\016DiscoveryEventB\036\n\034eu.mico.platf" +
+      "orm.event.model"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -2191,6 +3001,18 @@ public final class Event {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_mico_event_model_AnalysisEvent_descriptor,
               new java.lang.String[] { "ServiceId", "ContentItemUri", "ObjectUri", });
+          internal_static_mico_event_model_ContentEvent_descriptor =
+            getDescriptor().getMessageTypes().get(2);
+          internal_static_mico_event_model_ContentEvent_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_mico_event_model_ContentEvent_descriptor,
+              new java.lang.String[] { "ContentItemUri", });
+          internal_static_mico_event_model_DiscoveryEvent_descriptor =
+            getDescriptor().getMessageTypes().get(3);
+          internal_static_mico_event_model_DiscoveryEvent_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_mico_event_model_DiscoveryEvent_descriptor,
+              new java.lang.String[] { });
           return null;
         }
       };

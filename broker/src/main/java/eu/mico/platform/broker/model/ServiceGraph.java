@@ -1,6 +1,11 @@
 package eu.mico.platform.broker.model;
 
+import eu.mico.platform.broker.exception.StateNotFoundException;
 import org.jgrapht.graph.DefaultDirectedGraph;
+import org.openrdf.model.URI;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Representation of a service dependency graph. The vertices are the symbolic representations of the input/output
@@ -21,9 +26,36 @@ import org.jgrapht.graph.DefaultDirectedGraph;
  */
 public class ServiceGraph extends DefaultDirectedGraph<TypeDescriptor,ServiceDescriptor> {
 
+    private Map<URI,ServiceDescriptor> services;
+
     public ServiceGraph() {
         super(ServiceDescriptor.class);
+        services = new HashMap<>();
     }
 
 
+    public TypeDescriptor getState(String type) throws StateNotFoundException {
+        TypeDescriptor d = new TypeDescriptor(type);
+        if(containsVertex(d)) {
+            return d;
+        } else {
+            throw new StateNotFoundException("the state with type '"+type+"' does not exist in the graph");
+        }
+    }
+
+    public TypeDescriptor getTargetState(URI serviceId) throws StateNotFoundException {
+        ServiceDescriptor svc = services.get(serviceId);
+        if(svc != null) {
+            return getEdgeTarget(svc);
+        } else {
+            throw new StateNotFoundException("the service with ID " + serviceId.stringValue() + " is not registered!");
+        }
+    }
+
+
+    @Override
+    public boolean addEdge(TypeDescriptor sourceVertex, TypeDescriptor targetVertex, ServiceDescriptor serviceDescriptor) {
+        services.put(serviceDescriptor.getUri(), serviceDescriptor);
+        return super.addEdge(sourceVertex, targetVertex, serviceDescriptor);
+    }
 }
