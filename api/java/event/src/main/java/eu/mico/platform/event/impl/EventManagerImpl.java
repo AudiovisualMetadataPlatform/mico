@@ -196,6 +196,7 @@ public class EventManagerImpl implements EventManager {
                 getChannel().basicPublish("", properties.getReplyTo(), replyProps, registrationEvent.toByteArray());
             }
 
+            getChannel().basicAck(envelope.getDeliveryTag(), false);
         }
     }
 
