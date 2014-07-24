@@ -1,0 +1,15 @@
+PREFIX dct: <http://purl.org/dc/terms/>
+DELETE {
+  GRAPH <$(ci)-metadata> {
+    <$(cp)> dct:type ?x
+  }
+} WHERE {
+  GRAPH <$(ci)-metadata> {
+    <$(cp)> dct:type ?x
+  }
+} ;
+INSERT DATA {
+  GRAPH <$(ci)-metadata> {
+    <$(cp)> dct:type "$(type)"
+  }
+}

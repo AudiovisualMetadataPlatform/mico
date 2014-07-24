@@ -2,15 +2,26 @@ package eu.mico.platform.persistence.impl;
 
 import com.google.common.base.Preconditions;
 import eu.mico.platform.persistence.model.Content;
+import eu.mico.platform.persistence.model.Metadata;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.TupleQueryResult;
+import org.openrdf.query.UpdateExecutionException;
+import org.openrdf.repository.RepositoryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import static com.google.common.collect.ImmutableMap.of;
+import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
 
 /**
  * Add file description here!
@@ -19,22 +30,27 @@ import java.io.OutputStream;
  */
 public class MarmottaContent implements Content {
 
+    private static Logger log = LoggerFactory.getLogger(MarmottaContent.class);
+
+    private MarmottaContentItem item;
 
     private String baseUrl;
     private String contentUrl;
     private String id;
 
 
-    public MarmottaContent(String baseUrl, String contentUrl, String id) {
+    public MarmottaContent(MarmottaContentItem item, String baseUrl, String contentUrl, String id) {
+        this.item       = item;
         this.baseUrl    = baseUrl;
         this.contentUrl = contentUrl;
         this.id = id;
     }
 
 
-    protected MarmottaContent(String baseUrl, String contentUrl, URI uri) {
+    protected MarmottaContent(MarmottaContentItem item, String baseUrl, String contentUrl, URI uri) {
         Preconditions.checkArgument(uri.stringValue().startsWith(baseUrl), "the content part URI must match the baseUrl");
 
+        this.item       = item;
         this.baseUrl    = baseUrl;
         this.contentUrl = contentUrl;
         this.id = uri.stringValue().substring(baseUrl.length() + 1);
@@ -50,6 +66,51 @@ public class MarmottaContent implements Content {
     @Override
     public URI getURI() {
         return new URIImpl(baseUrl + "/" + id);
+    }
+
+
+    /**
+     * Set the type of this content part using an arbitrary string identifier (e.g. a MIME type or another symbolic
+     * representation). Ideally, the type comes from a controlled vocabulary.
+     *
+     * @param type
+     */
+    @Override
+    public void setType(String type) throws RepositoryException {
+        Metadata m = item.getMetadata();
+
+        try {
+            m.update(createNamed("setContentType", of("ci", item.getURI().stringValue(), "cp", getURI().stringValue(), "type", type)));
+        } catch (MalformedQueryException e) {
+            log.error("the SPARQL update was malformed:", e);
+            throw new RepositoryException("the SPARQL update was malformed",e);
+        } catch (UpdateExecutionException e) {
+            log.error("the SPARQL update could not be executed:", e);
+            throw new RepositoryException("the SPARQL update could not be executed",e);
+        }
+    }
+
+    /**
+     * Return the type of this content part using an arbitrary string identifier (e.g. a MIME type or another symbolic
+     * representation). Ideally, the type comes from a controlled vocabulary.
+     */
+    @Override
+    public String getType() throws RepositoryException {
+        Metadata m = item.getMetadata();
+        try {
+            TupleQueryResult r = m.query(createNamed("getContentType", "ci", item.getURI().stringValue(), "cp", getURI().stringValue()));
+            if(r.hasNext()) {
+                return r.next().getValue("t").stringValue();
+            } else {
+                return null;
+            }
+        } catch (MalformedQueryException e) {
+            log.error("the SPARQL query was malformed:", e);
+            throw new RepositoryException("the SPARQL query was malformed",e);
+        } catch (QueryEvaluationException e) {
+            log.error("the SPARQL query could not be executed:", e);
+            throw new RepositoryException("the SPARQL query could not be executed",e);
+        }
     }
 
     /**

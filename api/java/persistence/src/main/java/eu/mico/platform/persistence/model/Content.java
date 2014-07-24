@@ -2,6 +2,7 @@ package eu.mico.platform.persistence.model;
 
 import org.apache.commons.vfs2.FileSystemException;
 import org.openrdf.model.URI;
+import org.openrdf.repository.RepositoryException;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -21,6 +22,21 @@ public interface Content {
      * @return
      */
     public URI getURI();
+
+    /**
+     * Set the type of this content part using an arbitrary string identifier (e.g. a MIME type or another symbolic
+     * representation). Ideally, the type comes from a controlled vocabulary.
+     *
+     * @param type
+     */
+    public void setType(String type) throws RepositoryException;
+
+
+    /**
+     * Return the type of this content part using an arbitrary string identifier (e.g. a MIME type or another symbolic
+     * representation). Ideally, the type comes from a controlled vocabulary.
+     */
+    public String getType() throws RepositoryException;
 
     /**
      * Return a new output stream for writing to the content. Any existing content will be overwritten.

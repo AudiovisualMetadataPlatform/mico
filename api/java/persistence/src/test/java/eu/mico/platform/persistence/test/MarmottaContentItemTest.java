@@ -93,6 +93,24 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
 
     @Test
+    public void testContentPartType() throws RepositoryException, QueryEvaluationException, MalformedQueryException, FileSystemException {
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl,UUID.randomUUID());
+
+        Assert.assertFalse(item.listContentParts().iterator().hasNext());
+
+        Content content = item.createContentPart();
+
+        content.setType("text/plain");
+
+        Assert.assertEquals("text/plain", content.getType());
+
+        item.deleteContent(content.getURI());
+
+
+    }
+
+
+    @Test
     public void testListContentParts() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
         ContentItem item = new MarmottaContentItem(baseUrl, contentUrl, UUID.randomUUID());
 

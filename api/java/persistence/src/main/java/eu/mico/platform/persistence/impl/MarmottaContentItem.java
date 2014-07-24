@@ -132,7 +132,7 @@ public class MarmottaContentItem implements ContentItem {
     public Content createContentPart() throws RepositoryException {
 
         UUID contentUUID = UUID.randomUUID();
-        Content content = new MarmottaContent(baseUrl,contentUrl,uuid.toString() + "/" + contentUUID);
+        Content content = new MarmottaContent(this, baseUrl,contentUrl,uuid.toString() + "/" + contentUUID);
 
         Metadata m = getMetadata();
         try {
@@ -160,7 +160,7 @@ public class MarmottaContentItem implements ContentItem {
      */
     @Override
     public Content createContentPart(URI id) throws RepositoryException {
-        Content content = new MarmottaContent(baseUrl,contentUrl,id);
+        Content content = new MarmottaContent(this, baseUrl,contentUrl,id);
 
         Metadata m = getMetadata();
         try {
@@ -192,7 +192,7 @@ public class MarmottaContentItem implements ContentItem {
 
         try {
             if(m.ask(createNamed("askContentPart", of("ci", getURI().stringValue(), "cp", id.stringValue())))) {
-                return new MarmottaContent(baseUrl, contentUrl, id);
+                return new MarmottaContent(this, baseUrl, contentUrl, id);
             } else {
                 return null;
             }
@@ -270,7 +270,7 @@ public class MarmottaContentItem implements ContentItem {
                             try {
                                 BindingSet b = r.next();
                                 URI part = (URI) b.getValue("p");
-                                return new MarmottaContent(baseUrl,contentUrl, part);
+                                return new MarmottaContent(MarmottaContentItem.this, baseUrl,contentUrl, part);
                             } catch (QueryEvaluationException e) {
                                 return null;
                             }
