@@ -26,6 +26,19 @@ import java.util.*;
  */
 public class EventManagerImpl implements EventManager {
 
+    /**
+     * Name of service registry exchange where brokers bind their registration queues. The event manager will send
+     * a registration event to this exchange every time a new service is registered.
+     */
+    public static final String EXCHANGE_SERVICE_REGISTRY  = "service_registry";
+
+    /**
+     * Name of service discovery exchange where brokers send discovery requests. The event manager binds its own
+     * discovery queue to this exchange and reacts on any incoming discovery events by sending its service list to
+     * the replyTo queue provided by the requester.
+     */
+    public static final String EXCHANGE_SERVICE_DISCOVERY = "service_discovery";
+
     private static Logger log = LoggerFactory.getLogger(EventManagerImpl.class);
 
     private String host;
@@ -38,8 +51,11 @@ public class EventManagerImpl implements EventManager {
     private PersistenceService persistenceService;
 
     private Connection connection;
+    private Channel    registryChannel;
 
     private Map<AnalysisService, AnalysisConsumer> services;
+
+    private DiscoveryConsumer discovery;
 
     public EventManagerImpl(String host) throws IOException {
         this(host, "mico", "mico");
@@ -80,9 +96,14 @@ public class EventManagerImpl implements EventManager {
 
         connection = factory.newConnection();
 
-        Channel chan = connection.createChannel();
-        chan.exchangeDeclarePassive("service_registry");
-        chan.close();
+        registryChannel = connection.createChannel();
+
+        // make sure the service registry and discovery channels exists
+        registryChannel.exchangeDeclarePassive(EXCHANGE_SERVICE_REGISTRY);
+        registryChannel.exchangeDeclarePassive(EXCHANGE_SERVICE_DISCOVERY);
+
+        // register a listener queue for this event manager on the discovery exchange so we can react to discovery requests
+        discovery = new DiscoveryConsumer();
     }
 
     /**
@@ -94,6 +115,7 @@ public class EventManagerImpl implements EventManager {
             svc.getValue().getChannel().close();
         }
 
+        registryChannel.close();
         connection.close();
     }
 
@@ -123,11 +145,59 @@ public class EventManagerImpl implements EventManager {
                         .setProvides(service.getProvides())
                         .setRequires(service.getRequires()).build();
 
-        chan.basicPublish("service_registry", "", null, registrationEvent.toByteArray());
+        chan.basicPublish(EXCHANGE_SERVICE_REGISTRY, "", null, registrationEvent.toByteArray());
 
         chan.close();
     }
 
+
+    /**
+     * A consumer reacting to service discovery requests. Upon initialisation, it creates its own queue and binds it to
+     * the service discovery exchange. Upon a discovery event, it simply sends back its list of services to the replyTo
+     * queue provided in the discovery request.
+     */
+    private class DiscoveryConsumer extends DefaultConsumer {
+        public DiscoveryConsumer() throws IOException {
+            super(registryChannel);
+
+            String queueName = getChannel().queueDeclare().getQueue();
+            getChannel().queueBind(queueName, EXCHANGE_SERVICE_DISCOVERY, "");
+            getChannel().basicConsume(queueName, true, this);
+        }
+
+        /**
+         * Called when a discovery event has been received on the discovery exchange. In this case, we send back our local
+         * list of analysis services via the replyTo queue provided in the request. The request payload is currently ignored.
+         *
+         * @param consumerTag
+         * @param envelope
+         * @param properties
+         * @param body
+         */
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+
+            // construct reply properties, use the same correlation ID as in the request
+            final AMQP.BasicProperties replyProps = new AMQP.BasicProperties
+                    .Builder()
+                    .correlationId(properties.getCorrelationId())
+                    .build();
+
+
+            for(Map.Entry<AnalysisService, AnalysisConsumer> svc : services.entrySet()) {
+                Event.RegistrationEvent registrationEvent =
+                        Event.RegistrationEvent.newBuilder()
+                                .setServiceId(svc.getKey().getServiceID().stringValue())
+                                .setQueueName(svc.getValue().getQueueName())
+                                .setProvides(svc.getKey().getProvides())
+                                .setRequires(svc.getKey().getRequires()).build();
+
+
+                getChannel().basicPublish("", properties.getReplyTo(), replyProps, registrationEvent.toByteArray());
+            }
+
+        }
+    }
 
 
     private class AnalysisConsumer extends DefaultConsumer {
@@ -145,6 +215,9 @@ public class EventManagerImpl implements EventManager {
             getChannel().basicConsume(queueName, false, this);
         }
 
+        public String getQueueName() {
+            return queueName;
+        }
 
         /**
          * Called when a <code><b>basic.deliver</b></code> is received for this consumer.
