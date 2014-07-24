@@ -34,4 +34,10 @@ public class TypeDescriptor {
     public int hashCode() {
         return symbol.hashCode();
     }
+
+
+    @Override
+    public String toString() {
+        return symbol;
+    }
 }

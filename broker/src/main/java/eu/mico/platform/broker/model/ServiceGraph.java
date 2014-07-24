@@ -56,6 +56,8 @@ public class ServiceGraph extends DefaultDirectedGraph<TypeDescriptor,ServiceDes
     @Override
     public boolean addEdge(TypeDescriptor sourceVertex, TypeDescriptor targetVertex, ServiceDescriptor serviceDescriptor) {
         services.put(serviceDescriptor.getUri(), serviceDescriptor);
+        addVertex(sourceVertex);
+        addVertex(targetVertex);
         return super.addEdge(sourceVertex, targetVertex, serviceDescriptor);
     }
 }

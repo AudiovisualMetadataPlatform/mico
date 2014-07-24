@@ -4,7 +4,7 @@ import com.rabbitmq.client.*;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.exception.StateNotFoundException;
 import eu.mico.platform.broker.model.*;
-import eu.mico.platform.event.impl.EventManagerImpl;
+import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceImpl;
@@ -46,9 +46,6 @@ import java.util.*;
  */
 public class MICOBrokerImpl implements MICOBroker {
 
-    public static final String QUEUE_CONTENT_INPUT  = "content_input";
-    public static final String QUEUE_CONTENT_OUTPUT = "content_output";
-
     private static Logger log = LoggerFactory.getLogger(MICOBrokerImpl.class);
 
     private String host;
@@ -72,6 +69,17 @@ public class MICOBrokerImpl implements MICOBroker {
 
     // map from content item URIs to channels
     private Map<String,Channel> channels;
+
+
+    public MICOBrokerImpl(String host) throws IOException {
+        this(host, "mico", "mico");
+    }
+
+
+    public MICOBrokerImpl(String host, String user, String password) throws IOException {
+        this(host, user, password,5672, 8080);
+    }
+
 
     public MICOBrokerImpl(String host, String user, String password, int rabbitPort, int marmottaPort) throws IOException {
         this.host = host;
@@ -100,17 +108,35 @@ public class MICOBrokerImpl implements MICOBroker {
     }
 
 
+    @Override
+    public ServiceGraph getDependencies() {
+        return dependencies;
+    }
+
+
+    @Override
+    public Map<String, ContentItemState> getStates() {
+        return states;
+    }
+
+    @Override
+    public PersistenceService getPersistenceService() {
+        return persistenceService;
+    }
+
+
+
     private void initRegistryQueue() throws IOException {
         log.info("setting up service registration queue ...");
         registryChannel = connection.createChannel();
 
         // create the exchange in case it does not exist
-        registryChannel.exchangeDeclare(EventManagerImpl.EXCHANGE_SERVICE_REGISTRY, "fanout", true);
+        registryChannel.exchangeDeclare(EventManager.EXCHANGE_SERVICE_REGISTRY, "fanout", true);
 
         // create a temporary queue, bind it to the exchange, and register a service listener that updates our dependencies
         // graph whenever a new service is registered
         String queueName = registryChannel.queueDeclare().getQueue();
-        registryChannel.queueBind(queueName, EventManagerImpl.EXCHANGE_SERVICE_REGISTRY, "");
+        registryChannel.queueBind(queueName, EventManager.EXCHANGE_SERVICE_REGISTRY, "");
         registryChannel.basicConsume(queueName, false, new RegistrationConsumer(registryChannel));
     }
 
@@ -118,18 +144,21 @@ public class MICOBrokerImpl implements MICOBroker {
     private void initDiscoveryQueue() throws IOException {
         log.info("setting up service discovery queue ...");
         discoveryChannel = connection.createChannel();
+        discoveryChannel.confirmSelect();
 
         // create the exchange in case it does not exist
-        discoveryChannel.exchangeDeclare(EventManagerImpl.EXCHANGE_SERVICE_DISCOVERY, "fanout", true);
+        discoveryChannel.exchangeDeclare(EventManager.EXCHANGE_SERVICE_DISCOVERY, "fanout", true);
 
         // send a discovery request to all event managers
-        log.info("sending service discovery request ...");
         String queueName = discoveryChannel.queueDeclare().getQueue();
+
+        log.info("- sending service discovery request with reply queue {}...", queueName);
         discoveryChannel.basicConsume(queueName, false, new RegistrationConsumer(discoveryChannel));
 
         AMQP.BasicProperties props = new AMQP.BasicProperties.Builder().replyTo(queueName).correlationId(UUID.randomUUID().toString()).build();
-        discoveryChannel.basicPublish(EventManagerImpl.EXCHANGE_SERVICE_DISCOVERY,"",props,Event.DiscoveryEvent.newBuilder().build().toByteArray());
+        discoveryChannel.basicPublish(EventManager.EXCHANGE_SERVICE_DISCOVERY,"",props,Event.DiscoveryEvent.newBuilder().build().toByteArray());
 
+/*
         try {
             discoveryChannel.waitForConfirms();
             log.info("service discovery finished!");
@@ -137,6 +166,7 @@ public class MICOBrokerImpl implements MICOBroker {
             log.warn("service discovery was interrupted");
         }
         discoveryChannel.close();
+*/
     }
 
 
@@ -145,11 +175,11 @@ public class MICOBrokerImpl implements MICOBroker {
         contentChannel = connection.createChannel();
 
         // create the input and output queue with a defined name
-        contentChannel.queueDeclare(QUEUE_CONTENT_INPUT,true,false,false,null);
-        contentChannel.queueDeclare(QUEUE_CONTENT_OUTPUT,true,false,false,null);
+        contentChannel.queueDeclare(EventManager.QUEUE_CONTENT_INPUT,true,false,false,null);
+        contentChannel.queueDeclare(EventManager.QUEUE_CONTENT_OUTPUT,true,false,false,null);
 
         // register a content item consumer with the queue
-        contentChannel.basicConsume(QUEUE_CONTENT_INPUT,false, new ContentItemConsumer(contentChannel));
+        contentChannel.basicConsume(EventManager.QUEUE_CONTENT_INPUT,false, new ContentItemConsumer(contentChannel));
     }
 
 
@@ -172,13 +202,18 @@ public class MICOBrokerImpl implements MICOBroker {
             TypeDescriptor    tout = new TypeDescriptor(registrationEvent.getProvides());
 
             if(!dependencies.containsEdge(svc)) {
-                log.info("- adding service {} to dependency graph, as it does not exist yet");
+                log.info("- adding service {} to dependency graph, as it does not exist yet", svc.getUri());
                 dependencies.addEdge(tin,tout,svc);
             } else {
-                log.info("- not adding service {} to dependency graph, it already exists");
+                log.info("- not adding service {} to dependency graph, it already exists", svc.getUri());
             }
 
             getChannel().basicAck(envelope.getDeliveryTag(), false);
+
+            // in case someone is waiting for a notification, send it now
+            synchronized (MICOBrokerImpl.this) {
+                MICOBrokerImpl.this.notifyAll();
+            }
         }
     }
 
@@ -254,23 +289,35 @@ public class MICOBrokerImpl implements MICOBroker {
 
         private void executeStateTransitions() throws IOException {
             log.info("looking for possible state transitions ...");
-            for (Transition t : state.getPossibleTransitions()) {
-                log.debug("- transition: {}", t);
+            if(state.isFinalState()) {
+                synchronized (this) {
+                    this.notifyAll();
+                }
 
-                AMQP.BasicProperties ciProps = new AMQP.BasicProperties.Builder()
-                        .correlationId(UUID.randomUUID().toString())
-                        .replyTo(queue)
-                        .build();
+                // send finish event
+                getChannel().basicPublish("", EventManager.QUEUE_CONTENT_OUTPUT, null, Event.ContentEvent.newBuilder().setContentItemUri(item.getURI().stringValue()).build().toByteArray());
+            } else {
+                for (Transition t : state.getPossibleTransitions()) {
+                    log.debug("- transition: {}", t);
 
-                Event.AnalysisEvent analysisEvent = Event.AnalysisEvent.newBuilder()
-                        .setContentItemUri(item.getURI().stringValue())
-                        .setObjectUri(t.getObject().stringValue())
-                        .setServiceId(t.getService().getUri().stringValue()).build();
+                    String correlationId = UUID.randomUUID().toString();
+                    state.addProgress(correlationId);
 
-                getChannel().basicPublish("", t.getService().getQueueName(), ciProps, analysisEvent.toByteArray());
+                    AMQP.BasicProperties ciProps = new AMQP.BasicProperties.Builder()
+                            .correlationId(correlationId)
+                            .replyTo(queue)
+                            .build();
 
-                // remove transition, as it is being processed
-                state.removeState(t.getObject());
+                    Event.AnalysisEvent analysisEvent = Event.AnalysisEvent.newBuilder()
+                            .setContentItemUri(item.getURI().stringValue())
+                            .setObjectUri(t.getObject().stringValue())
+                            .setServiceId(t.getService().getUri().stringValue()).build();
+
+                    getChannel().basicPublish("", t.getService().getQueueName(), ciProps, analysisEvent.toByteArray());
+
+                    // remove transition, as it is being processed
+                    state.removeState(t.getObject());
+                }
             }
 
         }
@@ -285,6 +332,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
             try {
                 state.addState(new URIImpl(analysisResponse.getObjectUri()), dependencies.getTargetState(new URIImpl(analysisResponse.getServiceId())));
+                state.removeProgress(properties.getCorrelationId());
 
                 executeStateTransitions();
             } catch (StateNotFoundException e) {
@@ -295,8 +343,15 @@ public class MICOBrokerImpl implements MICOBroker {
         @Override
         public void run() {
             try {
+                getChannel().confirmSelect();
                 executeStateTransitions();
-                getChannel().waitForConfirms();
+
+                if(!state.isFinalState()) {
+                    // wait until executeStateTransitions notifies us of being finished
+                    synchronized (this) {
+                        this.wait();
+                    }
+                }
             } catch (IOException ex) {
                 log.error("could not start processing of content item {} (message: {})", item.getURI().stringValue(), ex.getMessage());
                 log.debug("Exception:",ex);

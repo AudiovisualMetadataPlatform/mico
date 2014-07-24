@@ -24,7 +24,9 @@ public class ContentItemState {
 
     private ContentItem contentItem;
 
-    private Map<URI, TypeDescriptor> states;
+    private Map<URI, TypeDescriptor> states;   // contains the currently non-processed states
+    private Set<String>              progress; // contains the correlation IDs currently in progress, used to indicate when we are finished
+
     private ServiceGraph             graph;
 
     public ContentItemState(ServiceGraph graph, ContentItem contentItem) {
@@ -32,6 +34,7 @@ public class ContentItemState {
         this.contentItem = contentItem;
 
         this.states = new HashMap<>();
+        this.progress = new HashSet<>();
 
         initState();
     }
@@ -61,6 +64,10 @@ public class ContentItemState {
      * @return
      */
     public boolean isFinalState() {
+        if(!progress.isEmpty()) {
+            return false;
+        }
+
         for(TypeDescriptor d : states.values()) {
             if(graph.outDegreeOf(d) > 0) {
                 return false;
@@ -106,5 +113,24 @@ public class ContentItemState {
      */
     public void removeState(URI part) {
         states.remove(part);
+    }
+
+
+    /**
+     * Indicate that the transaction with the given ID is currently still in progress.
+     *
+     * @param correlationId
+     */
+    public void addProgress(String correlationId) {
+        progress.add(correlationId);
+    }
+
+    /**
+     * Indicate that the transaction with the given ID has been finished.
+     *
+     * @param correlationId
+     */
+    public void removeProgress(String correlationId) {
+        progress.remove(correlationId);
     }
 }

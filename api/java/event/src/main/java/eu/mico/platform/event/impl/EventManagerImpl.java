@@ -26,19 +26,6 @@ import java.util.*;
  */
 public class EventManagerImpl implements EventManager {
 
-    /**
-     * Name of service registry exchange where brokers bind their registration queues. The event manager will send
-     * a registration event to this exchange every time a new service is registered.
-     */
-    public static final String EXCHANGE_SERVICE_REGISTRY  = "service_registry";
-
-    /**
-     * Name of service discovery exchange where brokers send discovery requests. The event manager binds its own
-     * discovery queue to this exchange and reacts on any incoming discovery events by sending its service list to
-     * the replyTo queue provided by the requester.
-     */
-    public static final String EXCHANGE_SERVICE_DISCOVERY = "service_discovery";
-
     private static Logger log = LoggerFactory.getLogger(EventManagerImpl.class);
 
     private String host;
@@ -115,8 +102,13 @@ public class EventManagerImpl implements EventManager {
             svc.getValue().getChannel().close();
         }
 
-        registryChannel.close();
-        connection.close();
+        if(registryChannel.isOpen()) {
+            registryChannel.close();
+        }
+
+        if(connection.isOpen()) {
+            connection.close();
+        }
     }
 
     /**
@@ -126,6 +118,8 @@ public class EventManagerImpl implements EventManager {
      */
     @Override
     public void registerService(AnalysisService service) throws IOException {
+        log.info("registering new service {} with message brokers ...", service.getServiceID());
+
         Channel chan = connection.createChannel();
 
         // first declare a new input queue for this service using the service queue name, and register a callback
@@ -150,6 +144,18 @@ public class EventManagerImpl implements EventManager {
         chan.close();
     }
 
+    /**
+     * Trigger analysis of the given content item.
+     *
+     * @param item content item to analyse
+     * @throws java.io.IOException
+     */
+    @Override
+    public void injectContentItem(ContentItem item) throws IOException {
+        Channel chan = connection.createChannel();
+        chan.basicPublish("", EventManager.QUEUE_CONTENT_INPUT, null, Event.ContentEvent.newBuilder().setContentItemUri(item.getURI().stringValue()).build().toByteArray());
+        chan.close();
+    }
 
     /**
      * A consumer reacting to service discovery requests. Upon initialisation, it creates its own queue and binds it to
@@ -162,7 +168,7 @@ public class EventManagerImpl implements EventManager {
 
             String queueName = getChannel().queueDeclare().getQueue();
             getChannel().queueBind(queueName, EXCHANGE_SERVICE_DISCOVERY, "");
-            getChannel().basicConsume(queueName, true, this);
+            getChannel().basicConsume(queueName, false, this);
         }
 
         /**
@@ -176,6 +182,7 @@ public class EventManagerImpl implements EventManager {
          */
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+            log.info("received service discovery request for reply queue {} ...", properties.getReplyTo());
 
             // construct reply properties, use the same correlation ID as in the request
             final AMQP.BasicProperties replyProps = new AMQP.BasicProperties
@@ -185,6 +192,7 @@ public class EventManagerImpl implements EventManager {
 
 
             for(Map.Entry<AnalysisService, AnalysisConsumer> svc : services.entrySet()) {
+                log.info("- discover service {} ...", svc.getKey().getServiceID());
                 Event.RegistrationEvent registrationEvent =
                         Event.RegistrationEvent.newBuilder()
                                 .setServiceId(svc.getKey().getServiceID().stringValue())

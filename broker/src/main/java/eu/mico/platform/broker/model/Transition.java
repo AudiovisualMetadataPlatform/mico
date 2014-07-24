@@ -49,11 +49,11 @@ public class Transition {
     @Override
     public String toString() {
         return "Transition{" +
-                "item=" + item +
+                "item=" + item.getURI() +
                 ", object=" + object +
                 ", stateStart=" + stateStart +
                 ", stateEnd=" + stateEnd +
-                ", service=" + service +
+                ", service=" + service.getUri() +
                 '}';
     }
 }
