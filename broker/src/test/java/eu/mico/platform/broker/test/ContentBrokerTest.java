@@ -57,6 +57,7 @@ public class ContentBrokerTest extends BaseBrokerTest {
 
             eventManager.injectContentItem(item);
 
+            // wait for result notification and verify it contains what we expect
             QueueingConsumer.Delivery delivery = consumer.nextDelivery(1000);
             Assert.assertNotNull(delivery);
 
@@ -68,6 +69,8 @@ public class ContentBrokerTest extends BaseBrokerTest {
             Set<Content> parts = ImmutableSet.copyOf(item.listContentParts());
             Assert.assertEquals(4, parts.size());
             Assert.assertThat(parts, Matchers.<Content>hasItem(hasProperty("type", equalTo("A"))));
+            Assert.assertThat(parts, Matchers.<Content>hasItem(hasProperty("type", equalTo("B"))));
+            Assert.assertThat(parts, Matchers.<Content>hasItem(hasProperty("type", equalTo("C"))));
 
         } finally {
             svc.deleteContentItem(item.getURI());

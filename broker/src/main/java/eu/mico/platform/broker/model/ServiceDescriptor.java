@@ -13,6 +13,9 @@ public class ServiceDescriptor {
     private URI uri;
     private String queueName;
 
+    public ServiceDescriptor() {
+    }
+
     public ServiceDescriptor(URI uri, String queueName) {
         this.uri = uri;
         this.queueName = queueName;
@@ -33,16 +36,21 @@ public class ServiceDescriptor {
 
         ServiceDescriptor that = (ServiceDescriptor) o;
 
-        if (!queueName.equals(that.queueName)) return false;
-        if (!uri.equals(that.uri)) return false;
+        if (queueName != null ? !queueName.equals(that.queueName) : that.queueName != null) return false;
+        if (uri != null ? !uri.equals(that.uri) : that.uri != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = uri.hashCode();
-        result = 31 * result + queueName.hashCode();
+        int result = uri != null ? uri.hashCode() : 0;
+        result = 31 * result + (queueName != null ? queueName.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return uri.stringValue().substring(uri.stringValue().lastIndexOf("/")+1);
     }
 }
