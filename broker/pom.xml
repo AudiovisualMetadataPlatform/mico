@@ -237,7 +237,7 @@
                                     <snapshotExpand>true</snapshotExpand>
                                     <attach>false</attach>
 
-                                    <name>mico-marmotta</name>
+                                    <name>mico-broker</name>
                                     <deb>${project.build.directory}/[[name]]_[[version]]_all.deb</deb>
                                     <changesOut>${project.build.directory}/[[name]]_[[version]]_all.changes</changesOut>
 
@@ -250,7 +250,7 @@
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
-                                                <prefix>/usr/share/marmotta</prefix>
+                                                <prefix>/usr/share/mico</prefix>
                                                 <user>tomcat7</user>
                                                 <group>tomcat7</group>
                                             </mapper>
@@ -273,7 +273,7 @@
                                             <type>directory</type>
                                             <mapper>
                                                 <type>perm</type>
-                                                <prefix>usr/share/doc/mico-marmotta</prefix>
+                                                <prefix>usr/share/doc/mico-broker</prefix>
                                                 <user>root</user>
                                                 <group>root</group>
                                             </mapper>

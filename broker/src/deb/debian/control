@@ -1,0 +1,10 @@
+Section: mico
+Priority: optional
+Maintainer: Sebastian Schaffert <sschaffert@apache.org>
+Homepage: https://bitbucket.org/mico-project/platform
+Package: [[name]]
+Architecture: all
+Version: [[version]]
+Depends: tomcat7 (>= 7.0.52), openjdk-7-jre | openjdk-7-jre-headless
+Description: MICO Broker
+ This package contains the distribution of the MICO Broker Web Application.

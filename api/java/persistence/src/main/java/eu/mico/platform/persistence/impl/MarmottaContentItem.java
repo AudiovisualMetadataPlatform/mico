@@ -52,7 +52,7 @@ public class MarmottaContentItem implements ContentItem {
 
 
     protected MarmottaContentItem(String baseUrl, String contentUrl, URI uri) {
-        Preconditions.checkArgument(uri.stringValue().startsWith(baseUrl), "the content part URI must match the baseUrl");
+        Preconditions.checkArgument(uri.stringValue().startsWith(baseUrl), "the content part URI ("+uri.stringValue()+") must match the baseUrl ("+baseUrl+")");
 
         this.baseUrl = baseUrl;
         this.contentUrl = contentUrl;

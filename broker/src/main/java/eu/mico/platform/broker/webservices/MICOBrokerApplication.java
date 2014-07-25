@@ -2,6 +2,7 @@ package eu.mico.platform.broker.webservices;
 
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
+import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,14 @@ public class MICOBrokerApplication extends Application {
         String host = context.getInitParameter("mico.host") != null ? context.getInitParameter("mico.host") : "localhost";
         String user = context.getInitParameter("mico.user") != null ? context.getInitParameter("mico.user") : "mico";
         String pass = context.getInitParameter("mico.pass") != null ? context.getInitParameter("mico.pass") : "mico";
+
+        if("localhost".equals(host)) {
+            try {
+                host = FileUtils.fileRead("/var/run/mico-ip").trim();
+            } catch (IOException e) {
+                log.warn("could not read MICO virtual server IP address");
+            }
+        }
 
         log.info("initialising new MICO broker for host {}", host);
 

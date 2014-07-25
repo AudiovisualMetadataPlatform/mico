@@ -24,7 +24,7 @@
 
     <context-param>
         <param-name>mico.host</param-name>
-        <param-value>192.168.56.102</param-value>
+        <param-value>localhost</param-value>
     </context-param>
     <context-param>
         <param-name>mico.user</param-name>

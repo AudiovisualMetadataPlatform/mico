@@ -1,0 +1,2 @@
+<Context docBase="/usr/share/mico/${project.build.finalName}.war" unpackWAR="false" useNaming="true">
+</Context>
