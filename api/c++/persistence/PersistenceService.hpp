@@ -59,6 +59,18 @@ namespace mico {
 		, metadata("http://" + serverAddress + ":8080/marmotta")
 		, contentDirectory("htp://mico:mico@" + serverAddress) {};
 
+
+	  /**
+	   * Initialise persistence service with the address of a server running the standard installation of
+	   * the MICO platform with Marmotta at port 8080 under context /marmotta, RabbitMQ at port 5672, and
+	   * an FTP server, all with login/password mico/mico.
+	   */ 
+	  PersistenceService(std::string serverAddress, int marmottaPort, std::string user, std::string password) 
+		: marmottaServerUrl("http://" + serverAddress + ":" + std::to_string(marmottaPort) + "/marmotta")
+		, metadata("http://" + serverAddress + ":" + std::to_string(marmottaPort) + "/marmotta")
+		, contentDirectory("htp://" + user + ":" + password + "@" + serverAddress) {};
+
+
       /**
        * Initialise an instance of the PersistenceService using the Marmotta server with the given
        * URL as backend.
