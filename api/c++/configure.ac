@@ -87,4 +87,4 @@ CXXFLAGS="$CXXFLAGS -Wall -Wextra"
 ])
 
 
-AC_OUTPUT([Makefile rdf/Makefile persistence/Makefile event/Makefile test/Makefile])
+AC_OUTPUT([Makefile rdf/Makefile persistence/Makefile amqp/Makefile event/Makefile test/Makefile])

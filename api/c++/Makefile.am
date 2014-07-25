@@ -1,4 +1,4 @@
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = rdf persistence event test
+SUBDIRS = rdf persistence amqp event test
 
 include $(top_srcdir)/m4/doxygen.am
