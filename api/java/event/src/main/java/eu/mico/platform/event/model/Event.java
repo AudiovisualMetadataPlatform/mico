@@ -8,6 +8,179 @@ public final class Event {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
+  /**
+   * Protobuf enum {@code mico.event.model.Implementation}
+   */
+  public enum Implementation
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>JAVA = 1;</code>
+     */
+    JAVA(0, 1),
+    /**
+     * <code>CPP = 2;</code>
+     */
+    CPP(1, 2),
+    /**
+     * <code>PYTHON = 3;</code>
+     */
+    PYTHON(2, 3),
+    ;
+
+    /**
+     * <code>JAVA = 1;</code>
+     */
+    public static final int JAVA_VALUE = 1;
+    /**
+     * <code>CPP = 2;</code>
+     */
+    public static final int CPP_VALUE = 2;
+    /**
+     * <code>PYTHON = 3;</code>
+     */
+    public static final int PYTHON_VALUE = 3;
+
+
+    public final int getNumber() { return value; }
+
+    public static Implementation valueOf(int value) {
+      switch (value) {
+        case 1: return JAVA;
+        case 2: return CPP;
+        case 3: return PYTHON;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Implementation>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static com.google.protobuf.Internal.EnumLiteMap<Implementation>
+        internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Implementation>() {
+            public Implementation findValueByNumber(int number) {
+              return Implementation.valueOf(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(index);
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return eu.mico.platform.event.model.Event.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final Implementation[] VALUES = values();
+
+    public static Implementation valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int index;
+    private final int value;
+
+    private Implementation(int index, int value) {
+      this.index = index;
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:mico.event.model.Implementation)
+  }
+
+  /**
+   * Protobuf enum {@code mico.event.model.RegistrationType}
+   */
+  public enum RegistrationType
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>REGISTER = 1;</code>
+     */
+    REGISTER(0, 1),
+    /**
+     * <code>UNREGISTER = 2;</code>
+     */
+    UNREGISTER(1, 2),
+    ;
+
+    /**
+     * <code>REGISTER = 1;</code>
+     */
+    public static final int REGISTER_VALUE = 1;
+    /**
+     * <code>UNREGISTER = 2;</code>
+     */
+    public static final int UNREGISTER_VALUE = 2;
+
+
+    public final int getNumber() { return value; }
+
+    public static RegistrationType valueOf(int value) {
+      switch (value) {
+        case 1: return REGISTER;
+        case 2: return UNREGISTER;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<RegistrationType>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static com.google.protobuf.Internal.EnumLiteMap<RegistrationType>
+        internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<RegistrationType>() {
+            public RegistrationType findValueByNumber(int number) {
+              return RegistrationType.valueOf(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(index);
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return eu.mico.platform.event.model.Event.getDescriptor().getEnumTypes().get(1);
+    }
+
+    private static final RegistrationType[] VALUES = values();
+
+    public static RegistrationType valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int index;
+    private final int value;
+
+    private RegistrationType(int index, int value) {
+      this.index = index;
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:mico.event.model.RegistrationType)
+  }
+
   public interface RegistrationEventOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
@@ -118,6 +291,26 @@ public final class Event {
      */
     com.google.protobuf.ByteString
         getRequiresBytes();
+
+    // optional .mico.event.model.Implementation language = 5 [default = JAVA];
+    /**
+     * <code>optional .mico.event.model.Implementation language = 5 [default = JAVA];</code>
+     */
+    boolean hasLanguage();
+    /**
+     * <code>optional .mico.event.model.Implementation language = 5 [default = JAVA];</code>
+     */
+    eu.mico.platform.event.model.Event.Implementation getLanguage();
+
+    // optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];
+    /**
+     * <code>optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];</code>
+     */
+    boolean hasType();
+    /**
+     * <code>optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];</code>
+     */
+    eu.mico.platform.event.model.Event.RegistrationType getType();
   }
   /**
    * Protobuf type {@code mico.event.model.RegistrationEvent}
@@ -193,6 +386,28 @@ public final class Event {
             case 34: {
               bitField0_ |= 0x00000008;
               requires_ = input.readBytes();
+              break;
+            }
+            case 40: {
+              int rawValue = input.readEnum();
+              eu.mico.platform.event.model.Event.Implementation value = eu.mico.platform.event.model.Event.Implementation.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(5, rawValue);
+              } else {
+                bitField0_ |= 0x00000010;
+                language_ = value;
+              }
+              break;
+            }
+            case 48: {
+              int rawValue = input.readEnum();
+              eu.mico.platform.event.model.Event.RegistrationType value = eu.mico.platform.event.model.Event.RegistrationType.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(6, rawValue);
+              } else {
+                bitField0_ |= 0x00000020;
+                type_ = value;
+              }
               break;
             }
           }
@@ -455,11 +670,45 @@ public final class Event {
       }
     }
 
+    // optional .mico.event.model.Implementation language = 5 [default = JAVA];
+    public static final int LANGUAGE_FIELD_NUMBER = 5;
+    private eu.mico.platform.event.model.Event.Implementation language_;
+    /**
+     * <code>optional .mico.event.model.Implementation language = 5 [default = JAVA];</code>
+     */
+    public boolean hasLanguage() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional .mico.event.model.Implementation language = 5 [default = JAVA];</code>
+     */
+    public eu.mico.platform.event.model.Event.Implementation getLanguage() {
+      return language_;
+    }
+
+    // optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];
+    public static final int TYPE_FIELD_NUMBER = 6;
+    private eu.mico.platform.event.model.Event.RegistrationType type_;
+    /**
+     * <code>optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];</code>
+     */
+    public boolean hasType() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];</code>
+     */
+    public eu.mico.platform.event.model.Event.RegistrationType getType() {
+      return type_;
+    }
+
     private void initFields() {
       serviceId_ = "";
       queueName_ = "";
       provides_ = "";
       requires_ = "";
+      language_ = eu.mico.platform.event.model.Event.Implementation.JAVA;
+      type_ = eu.mico.platform.event.model.Event.RegistrationType.REGISTER;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -501,6 +750,12 @@ public final class Event {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeBytes(4, getRequiresBytes());
       }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeEnum(5, language_.getNumber());
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeEnum(6, type_.getNumber());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -525,6 +780,14 @@ public final class Event {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(4, getRequiresBytes());
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(5, language_.getNumber());
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(6, type_.getNumber());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -655,6 +918,10 @@ public final class Event {
         bitField0_ = (bitField0_ & ~0x00000004);
         requires_ = "";
         bitField0_ = (bitField0_ & ~0x00000008);
+        language_ = eu.mico.platform.event.model.Event.Implementation.JAVA;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        type_ = eu.mico.platform.event.model.Event.RegistrationType.REGISTER;
+        bitField0_ = (bitField0_ & ~0x00000020);
         return this;
       }
 
@@ -699,6 +966,14 @@ public final class Event {
           to_bitField0_ |= 0x00000008;
         }
         result.requires_ = requires_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.language_ = language_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.type_ = type_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -734,6 +1009,12 @@ public final class Event {
           bitField0_ |= 0x00000008;
           requires_ = other.requires_;
           onChanged();
+        }
+        if (other.hasLanguage()) {
+          setLanguage(other.getLanguage());
+        }
+        if (other.hasType()) {
+          setType(other.getType());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1166,6 +1447,78 @@ public final class Event {
   }
   bitField0_ |= 0x00000008;
         requires_ = value;
+        onChanged();
+        return this;
+      }
+
+      // optional .mico.event.model.Implementation language = 5 [default = JAVA];
+      private eu.mico.platform.event.model.Event.Implementation language_ = eu.mico.platform.event.model.Event.Implementation.JAVA;
+      /**
+       * <code>optional .mico.event.model.Implementation language = 5 [default = JAVA];</code>
+       */
+      public boolean hasLanguage() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional .mico.event.model.Implementation language = 5 [default = JAVA];</code>
+       */
+      public eu.mico.platform.event.model.Event.Implementation getLanguage() {
+        return language_;
+      }
+      /**
+       * <code>optional .mico.event.model.Implementation language = 5 [default = JAVA];</code>
+       */
+      public Builder setLanguage(eu.mico.platform.event.model.Event.Implementation value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000010;
+        language_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .mico.event.model.Implementation language = 5 [default = JAVA];</code>
+       */
+      public Builder clearLanguage() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        language_ = eu.mico.platform.event.model.Event.Implementation.JAVA;
+        onChanged();
+        return this;
+      }
+
+      // optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];
+      private eu.mico.platform.event.model.Event.RegistrationType type_ = eu.mico.platform.event.model.Event.RegistrationType.REGISTER;
+      /**
+       * <code>optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];</code>
+       */
+      public boolean hasType() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];</code>
+       */
+      public eu.mico.platform.event.model.Event.RegistrationType getType() {
+        return type_;
+      }
+      /**
+       * <code>optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];</code>
+       */
+      public Builder setType(eu.mico.platform.event.model.Event.RegistrationType value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000020;
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];</code>
+       */
+      public Builder clearType() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        type_ = eu.mico.platform.event.model.Event.RegistrationType.REGISTER;
         onChanged();
         return this;
       }
@@ -2975,14 +3328,19 @@ public final class Event {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\013Event.proto\022\020mico.event.model\"]\n\021Regis" +
-      "trationEvent\022\021\n\tserviceId\030\001 \002(\t\022\021\n\tqueue" +
-      "Name\030\002 \002(\t\022\020\n\010provides\030\003 \002(\t\022\020\n\010requires" +
-      "\030\004 \002(\t\"M\n\rAnalysisEvent\022\021\n\tserviceId\030\001 \002" +
-      "(\t\022\026\n\016contentItemUri\030\002 \002(\t\022\021\n\tobjectUri\030" +
-      "\003 \001(\t\"&\n\014ContentEvent\022\026\n\016contentItemUri\030" +
-      "\001 \002(\t\"\020\n\016DiscoveryEventB\036\n\034eu.mico.platf" +
-      "orm.event.model"
+      "\n\013Event.proto\022\020mico.event.model\"\323\001\n\021Regi" +
+      "strationEvent\022\021\n\tserviceId\030\001 \002(\t\022\021\n\tqueu" +
+      "eName\030\002 \002(\t\022\020\n\010provides\030\003 \002(\t\022\020\n\010require" +
+      "s\030\004 \002(\t\0228\n\010language\030\005 \001(\0162 .mico.event.m" +
+      "odel.Implementation:\004JAVA\022:\n\004type\030\006 \001(\0162" +
+      "\".mico.event.model.RegistrationType:\010REG" +
+      "ISTER\"M\n\rAnalysisEvent\022\021\n\tserviceId\030\001 \002(" +
+      "\t\022\026\n\016contentItemUri\030\002 \002(\t\022\021\n\tobjectUri\030\003" +
+      " \001(\t\"&\n\014ContentEvent\022\026\n\016contentItemUri\030\001" +
+      " \002(\t\"\020\n\016DiscoveryEvent*/\n\016Implementation",
+      "\022\010\n\004JAVA\020\001\022\007\n\003CPP\020\002\022\n\n\006PYTHON\020\003*0\n\020Regis" +
+      "trationType\022\014\n\010REGISTER\020\001\022\016\n\nUNREGISTER\020" +
+      "\002B\036\n\034eu.mico.platform.event.model"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -2994,7 +3352,7 @@ public final class Event {
           internal_static_mico_event_model_RegistrationEvent_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_mico_event_model_RegistrationEvent_descriptor,
-              new java.lang.String[] { "ServiceId", "QueueName", "Provides", "Requires", });
+              new java.lang.String[] { "ServiceId", "QueueName", "Provides", "Requires", "Language", "Type", });
           internal_static_mico_event_model_AnalysisEvent_descriptor =
             getDescriptor().getMessageTypes().get(1);
           internal_static_mico_event_model_AnalysisEvent_fieldAccessorTable = new

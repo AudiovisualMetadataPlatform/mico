@@ -1,6 +1,7 @@
 package eu.mico.platform.event.api;
 
 import eu.mico.platform.persistence.model.ContentItem;
+import org.openrdf.model.URI;
 
 import java.io.IOException;
 
@@ -40,6 +41,13 @@ public interface EventManager {
      */
     public void registerService(AnalysisService service) throws IOException;
 
+
+    /**
+     * Unregister the service with the given ID.
+     * @param service
+     * @throws IOException
+     */
+    public void unregisterService(AnalysisService service) throws IOException;
 
     /**
      * Trigger analysis of the given content item.

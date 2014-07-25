@@ -84,20 +84,23 @@ public class SwingImageCreator {
         BufferedImage img = new BufferedImage(size.width,size.height,BufferedImage.TYPE_INT_RGB);
         Graphics2D grap = img.createGraphics();
         grap.fillRect(0,0,img.getWidth(),img.getHeight());
-        graph.paint(grap);
+
+        if(g.edgeSet().size() > 0) {
+            graph.paint(grap);
 
 
-        graph.setBackground(Color.white);
-        graph.setEditable(false);
-        graph.setGridVisible(false);
+            graph.setBackground(Color.white);
+            graph.setEditable(false);
+            graph.setGridVisible(false);
 
-        JGraphFacade facade = new JGraphFacade(graph);
-        JGraphFastOrganicLayout layout = new JGraphFastOrganicLayout();
-        layout.run(facade);
-        facade.scale(new Rectangle(size.width, size.height));
-        graph.getGraphLayoutCache().edit(facade.createNestedMap(true,true));
+            JGraphFacade facade = new JGraphFacade(graph);
+            JGraphFastOrganicLayout layout = new JGraphFastOrganicLayout();
+            layout.run(facade);
+            facade.scale(new Rectangle(size.width, size.height));
+            graph.getGraphLayoutCache().edit(facade.createNestedMap(true, true));
 
-        graph.paint(grap);
+            graph.paint(grap);
+        }
 
         ImageIO.write(img, type, out);
     }

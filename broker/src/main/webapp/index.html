@@ -1,0 +1,101 @@
+<html ng-app="brokerApp">
+<head>
+    <title>MICO Broker</title>
+
+    <link rel="stylesheet" href="webjars/bootstrap/3.1.1/css/bootstrap.css"/>
+    <script src="webjars/angularjs/1.2.15/angular.js"></script>
+    <script src="webjars/angular-ui-bootstrap/0.10.0/ui-bootstrap-tpls.js"></script>
+    <script src="js/controllers.js"></script>
+
+    <!-- fix Bootstrap CSS for AngularJS -->
+    <style type="text/css">
+        .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+        body {
+            margin-left: 10%;
+            margin-right: 10%;
+        }
+
+        .colorpick, .colorpick:hover {
+            border: 1px solid #000000;
+            color: #000000;
+        }
+
+        .infobox {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body ng-controller="StatusCtrl">
+
+
+<div class="container-fluid">
+    <h1>MICO Broker Status</h1>
+</div>
+
+<div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
+    <h2>Service Registry</h2>
+
+    <table style="width: 100%">
+        <tr>
+            <th>Name</th><th>Language</th><th>Service ID</th><th>Requires</th><th>Provides</th><th>Registration Date</th><th>Calls</th>
+        </tr>
+        <tr ng-repeat="svc in services">
+            <td>{{svc.name}}</td><td>{{svc.language}}</td><td>{{svc.uri}}</td><td>{{svc.requires}}</td><td>{{svc.provides}}</td><td>{{svc.time}}</td><td>{{svc.calls}}</td>
+
+        </tr>
+    </table>
+</div>
+
+
+<div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
+    <h2>Service Dependency Graph</h2>
+
+    <img ng-src="status/dependencies?width=800&height=300"/>
+</div>
+
+
+
+
+<div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
+    <h2>Content Items</h2>
+
+    <table style="width: 100%">
+        <tr>
+            <th>URI</th><th>States and Transitions</th>
+        </tr>
+        <tr ng-repeat="item in items">
+            <td>{{item.uri}}</td>
+            <td>
+                <strong>States:</strong>
+                <table style="width: 100%">
+                    <tr>
+                        <th>Part</th><th>State</th>
+                    </tr>
+                    <tr ng-repeat="state in item.states">
+                        <td>{{state.object}}: </td>
+                        <td>{{state.state}}</td>
+                    </tr>
+                </table>
+                <strong>Transitions:</strong>
+                <table style="width: 100%">
+                    <tr>
+                        <th>ID</th><th>Part</th><th>Start</th><th>End</th><th>Service</th>
+                    </tr>
+                    <tr ng-repeat="transition in item.transitions">
+                        <td>{{transition.correlation}}</td>
+                        <td>{{transition.object}}: </td>
+                        <td>{{transition.start_state}}</td>
+                        <td>{{transition.end_state}}</td>
+                        <td>{{transition.service}}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+</div>
+
+</body>
+</html>

@@ -21,6 +21,20 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 
+
+    <context-param>
+        <param-name>mico.host</param-name>
+        <param-value>192.168.56.102</param-value>
+    </context-param>
+    <context-param>
+        <param-name>mico.user</param-name>
+        <param-value>mico</param-value>
+    </context-param>
+    <context-param>
+        <param-name>mico.password</param-name>
+        <param-value>mico</param-value>
+    </context-param>
+
     <!-- RESTeasy Webservices -->
     <listener>
         <listener-class>org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap</listener-class>
@@ -50,15 +64,15 @@
     </filter-mapping>
 
     <filter>
-        <filter-name>RDFDotWebservices</filter-name>
+        <filter-name>BrokerWebservices</filter-name>
         <filter-class>org.jboss.resteasy.plugins.server.servlet.FilterDispatcher</filter-class>
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
-            <param-value>net.wastl.rdfdot.web.RDFDotApplication</param-value>
+            <param-value>eu.mico.platform.broker.webservices.MICOBrokerApplication</param-value>
         </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>RDFDotWebservices</filter-name>
+        <filter-name>BrokerWebservices</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 

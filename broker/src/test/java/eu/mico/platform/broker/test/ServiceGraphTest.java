@@ -23,9 +23,9 @@ public class ServiceGraphTest {
         TypeDescriptor b = new TypeDescriptor("B");
         TypeDescriptor c = new TypeDescriptor("C");
 
-        ServiceDescriptor ab = new ServiceDescriptor(new URIImpl("http://example.org/services/ABService"), "A-B-queue");
-        ServiceDescriptor bc = new ServiceDescriptor(new URIImpl("http://example.org/services/BCService"), "B-C-queue");
-        ServiceDescriptor ac = new ServiceDescriptor(new URIImpl("http://example.org/services/ACService"), "A-C-queue");
+        ServiceDescriptor ab = new ServiceDescriptor(new URIImpl("http://example.org/services/ABService"), "A-B-queue","A","B");
+        ServiceDescriptor bc = new ServiceDescriptor(new URIImpl("http://example.org/services/BCService"), "B-C-queue","B","C");
+        ServiceDescriptor ac = new ServiceDescriptor(new URIImpl("http://example.org/services/ACService"), "A-C-queue","A","C");
 
         g.addEdge(a,b,ab);
         g.addEdge(b,c,bc);

@@ -2,16 +2,30 @@ package mico.event.model;
 
 option java_package = "eu.mico.platform.event.model";
 
+enum Implementation {
+  JAVA   = 1;
+  CPP    = 2;
+  PYTHON = 3;
+}
+
+enum RegistrationType {
+  REGISTER   = 1;
+  UNREGISTER = 2;
+}
 
 /**
  * Register a service with the message broker by sending its service identifier and input queue name.
  */
 message RegistrationEvent {
-  required string serviceId      = 1; //!< service identifier of service, e.g. eu.mico.example.ExampleService
-  required string queueName      = 2; //!< input queue name used by service, e.g. exampleServiceQueue
-  required string provides       = 3; //!< type of output this service provides (MIME type, e.g. text/plain)
-  required string requires       = 4; //!< type of input this service provides (MIME type, e.g. text/html)
+  required string serviceId        = 1; //!< service identifier of service, e.g. eu.mico.example.ExampleService
+  required string queueName        = 2; //!< input queue name used by service, e.g. exampleServiceQueue
+  required string provides         = 3; //!< type of output this service provides (MIME type, e.g. text/plain)
+  required string requires         = 4; //!< type of input this service provides (MIME type, e.g. text/html)
+  optional Implementation language = 5 [default = JAVA];
+  optional RegistrationType type   = 6 [default = REGISTER];
 }
+
+
 
 /**
  * Notify a service that a analysis should continue using the given content item and object in that

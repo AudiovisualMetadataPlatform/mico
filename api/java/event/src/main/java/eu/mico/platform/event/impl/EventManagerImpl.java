@@ -99,6 +99,7 @@ public class EventManagerImpl implements EventManager {
     @Override
     public void shutdown() throws IOException {
         for(Map.Entry<AnalysisService, AnalysisConsumer> svc : services.entrySet()) {
+            unregisterService(svc.getKey());
             svc.getValue().getChannel().close();
         }
 
@@ -134,6 +135,7 @@ public class EventManagerImpl implements EventManager {
 
         Event.RegistrationEvent registrationEvent =
                 Event.RegistrationEvent.newBuilder()
+                        .setType(Event.RegistrationType.REGISTER)
                         .setServiceId(service.getServiceID().stringValue())
                         .setQueueName(queueName)
                         .setProvides(service.getProvides())
@@ -143,6 +145,41 @@ public class EventManagerImpl implements EventManager {
 
         chan.close();
     }
+
+    /**
+     * Register the given service with the event manager.
+     *
+     * @param service
+     */
+    @Override
+    public void unregisterService(AnalysisService service) throws IOException {
+        log.info("unregistering new service {} with message brokers ...", service.getServiceID());
+
+        Channel chan = connection.createChannel();
+
+        // first declare a new input queue for this service using the service queue name, and register a callback
+        String queueName = service.getQueueName() != null ? service.getQueueName() : UUID.randomUUID().toString();
+
+        // then create a new analysis consumer (auto-registered to its queue name)
+        services.put(service, new AnalysisConsumer(service, queueName));
+
+
+        // then send a registration message to the broker's "service_registry" exchange; all running brokers will
+        // receive this message, assuming that they bound their queue to the registry exchange
+
+        Event.RegistrationEvent registrationEvent =
+                Event.RegistrationEvent.newBuilder()
+                        .setType(Event.RegistrationType.UNREGISTER)
+                        .setServiceId(service.getServiceID().stringValue())
+                        .setQueueName(queueName)
+                        .setProvides(service.getProvides())
+                        .setRequires(service.getRequires()).build();
+
+        chan.basicPublish(EXCHANGE_SERVICE_REGISTRY, "", null, registrationEvent.toByteArray());
+
+        chan.close();
+    }
+
 
     /**
      * Trigger analysis of the given content item.

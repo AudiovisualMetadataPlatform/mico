@@ -92,7 +92,11 @@ public class MICOBrokerImpl implements MICOBroker {
         states       = new HashMap<>();
         channels     = new HashMap<>();
 
+        log.info("initialising persistence service ...");
+
         persistenceService = new PersistenceServiceImpl(host,user,password);
+
+        log.info("initialising RabbitMQ connection ...");
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(host);
@@ -195,19 +199,32 @@ public class MICOBrokerImpl implements MICOBroker {
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
             Event.RegistrationEvent registrationEvent = Event.RegistrationEvent.parseFrom(body);
 
-            log.info("service registration of service {} (in: {}, out: {}, queue: {})", registrationEvent.getServiceId(), registrationEvent.getRequires(), registrationEvent.getProvides(), registrationEvent.getQueueName());
+            if(registrationEvent.getType() == Event.RegistrationType.REGISTER) {
+                log.info("service registration of service {} (in: {}, out: {}, queue: {})", registrationEvent.getServiceId(), registrationEvent.getRequires(), registrationEvent.getProvides(), registrationEvent.getQueueName());
 
-            ServiceDescriptor svc  = new ServiceDescriptor(new URIImpl(registrationEvent.getServiceId()), registrationEvent.getQueueName());
-            TypeDescriptor    tin  = new TypeDescriptor(registrationEvent.getRequires());
-            TypeDescriptor    tout = new TypeDescriptor(registrationEvent.getProvides());
+                ServiceDescriptor svc = new ServiceDescriptor(registrationEvent);
+                TypeDescriptor tin = new TypeDescriptor(registrationEvent.getRequires());
+                TypeDescriptor tout = new TypeDescriptor(registrationEvent.getProvides());
 
-            if(!dependencies.containsEdge(svc)) {
-                log.info("- adding service {} to dependency graph, as it does not exist yet", svc.getUri());
-                dependencies.addEdge(tin,tout,svc);
+                if (!dependencies.containsEdge(svc)) {
+                    log.info("- adding service {} to dependency graph, as it does not exist yet", svc.getUri());
+                    dependencies.addEdge(tin, tout, svc);
+                } else {
+                    log.info("- not adding service {} to dependency graph, it already exists", svc.getUri());
+                }
+
             } else {
-                log.info("- not adding service {} to dependency graph, it already exists", svc.getUri());
-            }
+                log.info("service unregistration of service {} (in: {}, out: {}, queue: {})", registrationEvent.getServiceId(), registrationEvent.getRequires(), registrationEvent.getProvides(), registrationEvent.getQueueName());
 
+                ServiceDescriptor svc = new ServiceDescriptor(registrationEvent);
+
+                if (dependencies.containsEdge(svc)) {
+                    log.info("- removing service {} from dependency graph", svc.getUri());
+                    dependencies.removeEdge(svc);
+                } else {
+                    log.info("- not removing service {} from dependency graph, it does not exists", svc.getUri());
+                }
+            }
             getChannel().basicAck(envelope.getDeliveryTag(), false);
 
             // in case someone is waiting for a notification, send it now
@@ -301,7 +318,7 @@ public class MICOBrokerImpl implements MICOBroker {
                     log.debug("- transition: {}", t);
 
                     String correlationId = UUID.randomUUID().toString();
-                    state.addProgress(correlationId);
+                    state.addProgress(correlationId, t);
 
                     AMQP.BasicProperties ciProps = new AMQP.BasicProperties.Builder()
                             .correlationId(correlationId)
