@@ -13,23 +13,6 @@ using std::string;
 using namespace mico::rdf::model;
 using namespace mico::persistence;
 
-/**
- * An object passed to the AnalysisService callback method to interact with the message broker using the proper channel.
- *
- * @author Sebastian Schaffert (sschaffert@apache.org)
- */
-class AnalysisResponse {
-public:
-    /**
-     * Send a message to the broker's callback queue that the given content item and object have been updated. Can be
-     * used e,g, to notify the message broker that a new content part has been created or an object or entity has been
-     * identified by the analysis service.
-     *
-     * @param ci     the updated content item
-     * @param object the updated object
-     */
-    virtual void sendMessage(ContentItem& ci, URI& object) = 0;
-};
 
 /**
  * Interface to be implemented by services. Consists of some informational methods as well as a callback which is called
@@ -87,7 +70,7 @@ public:
      * @param ci     the content item to analyse
      * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
      */
-    virtual void call(AnalysisResponse& resp, ContentItem& ci, URI& object) = 0;
+    virtual void call(std::function<void(ContentItem& ci, URI& object)> resp, ContentItem& ci, URI& object) = 0;
 	
 };	
 	

@@ -4,6 +4,8 @@
 #include <string>
 #include <map>
 
+#include <pthread.h>
+
 #include "amqpcpp.h"
 #include "rdf_model.hpp"
 #include "ContentItem.hpp"
@@ -47,9 +49,19 @@ class AnalysisConsumer;
 class DiscoveryConsumer;
 class RabbitConnectionHandler;
 
-class EventManager
+static void* event_loop(void *event_manager);
+
+class EventManager : public AMQP::ConnectionHandler
 {
+	friend void* event_loop(void *event_manager);
+	
 private:
+	int sock;            //!< Unix socket file descriptor for network connection
+	size_t recv_len;
+	char*  recv_buf;
+	
+	pthread_t receiver;  //!< receiver thread, started when new Event Manager is constructed and terminated when it is deleted
+
 	string host;         //!< host name to connect to
 	int    rabbitPort;   //!< port number of RabbitMQ server
 	int    marmottaPort; //!< port number of Marmotta server
@@ -80,6 +92,16 @@ public:
 	 * Shut down the event manager, cleaning up and closing any registered channels, services and connections.
 	 */
 	~EventManager();
+
+
+    /**
+     *  Method that is called by the AMQP library every time it has data
+     *  available that should be sent to RabbitMQ.
+     *  @param  connection  pointer to the main connection object
+     *  @param  data        memory buffer with the data that should be sent to RabbitMQ
+     *  @param  size        size of the buffer
+     */
+    void onData(AMQP::Connection *connection, const char *data, size_t size);
 
 	/**
 	 * Register the given service with the event manager.
