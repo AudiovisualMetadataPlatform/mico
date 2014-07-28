@@ -53,6 +53,12 @@ AX_CHECK_COMPILE_FLAG([-std=c++11], [CXXFLAGS="$CXXFLAGS -std=c++11"],
 AC_CHECK_HEADERS([boost/multiprecision/cpp_int.hpp boost/multiprecision/cpp_dec_float.hpp boost/uuid/uuid.hpp boost/uuid/uuid_generators.hpp boost/algorithm/string.hpp boost/xpressive/xpressive.hpp boost/iostreams/stream.hpp boost/iostreams/stream_buffer.hpp boost/iostreams/concepts.hpp], , [AC_MSG_ERROR([required Boost headers missing])])
 
 
+AC_CHECK_HEADERS([google/protobuf/stubs/common.h google/protobuf/generated_message_util.h google/protobuf/message.h google/protobuf/repeated_field.h], protobuf_libs="-lprotobuf", AC_MSG_ERROR("protobuf library is missing"))
+AC_SUBST(protobuf_libs)
+AC_PATH_PROG(PROTOC,protoc)
+AC_SUBST(PROTOC)
+
+
 AC_LANG_POP([C++])
 
 
