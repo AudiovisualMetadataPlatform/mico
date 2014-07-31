@@ -264,14 +264,14 @@ namespace mico {
 	DECLARE_FOAF(accountServiceHomepage);
 	DECLARE_FOAF(age);
 	DECLARE_FOAF(aimChatID);
-	DECLARE_FOAF(based)_near;
+	DECLARE_FOAF(based_near);
 	DECLARE_FOAF(birthday);
 	DECLARE_FOAF(currentProject);
 	DECLARE_FOAF(depiction);
 	DECLARE_FOAF(depicts);
 	DECLARE_FOAF(dnaChecksum);
 	DECLARE_FOAF(familyName);
-	DECLARE_FOAF(family)_name;
+	DECLARE_FOAF(family_name);
 	DECLARE_FOAF(firstName);
 	DECLARE_FOAF(focus);
 	DECLARE_FOAF(fundedBy);
@@ -292,7 +292,7 @@ namespace mico {
 	DECLARE_FOAF(made);
 	DECLARE_FOAF(maker);
 	DECLARE_FOAF(mbox);
-	DECLARE_FOAF(mbox)_sha1sum;
+	DECLARE_FOAF(mbox_sha1sum);
 	DECLARE_FOAF(member);
 	DECLARE_FOAF(membershipClass);
 	DECLARE_FOAF(msnChatID);
@@ -316,7 +316,7 @@ namespace mico {
 	DECLARE_FOAF(tipjar);
 	DECLARE_FOAF(title);
 	DECLARE_FOAF(topic);
-	DECLARE_FOAF(topic)_interest;
+	DECLARE_FOAF(topic_interest);
 	DECLARE_FOAF(weblog);
 	DECLARE_FOAF(workInfoHomepage);
 	DECLARE_FOAF(workplaceHomepage);

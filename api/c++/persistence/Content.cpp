@@ -14,6 +14,8 @@ SPARQL_INCLUDE(setContentType);
 SPARQL_INCLUDE(getContentType);
 SPARQL_INCLUDE(setContentProperty);
 SPARQL_INCLUDE(getContentProperty);
+SPARQL_INCLUDE(setContentRelation);
+SPARQL_INCLUDE(getContentRelation);
 
 
 namespace mico {
@@ -57,7 +59,10 @@ namespace mico {
 		
 		const TupleResult* r = metadata.query(SPARQL_FORMAT(getContentType,params));
 		if(r->size() > 0) {
-			string ret = r->at(0).at("t")->stringValue(); // TODO: check if we need to manually delete all values in the binding set!
+			string ret = r->at(0).at("t")->stringValue();
+			for(int i=0; i<r->size(); i++) {				
+				delete r->at(i).at("t");
+			}
 			delete r;
 			return ret;
 		} else {
@@ -70,7 +75,7 @@ namespace mico {
 	/**
 	 * Set the property with the given URI to the given value. Use e.g. in combination with fixed vocabularies.
 	 */
-	void Content::setProperty(const URI property, const string value) {
+	void Content::setProperty(const URI& property, const string value) {
 		Metadata metadata = item.getMetadata();
 		
 		map<string,string> params;
@@ -85,7 +90,7 @@ namespace mico {
 	/**
 	 * Return the property value of this content part for the given property. Use e.g. in combination with fixed vocabularies.
 	 */
-	string Content::getProperty(const URI property) {
+	string Content::getProperty(const URI& property) {
 		Metadata metadata = item.getMetadata();
 		
 		map<string,string> params;
@@ -95,7 +100,10 @@ namespace mico {
 		
 		const TupleResult* r = metadata.query(SPARQL_FORMAT(getContentProperty,params));
 		if(r->size() > 0) {
-			string ret = r->at(0).at("t")->stringValue(); // TODO: check if we need to manually delete all values in the binding set!
+			string ret = r->at(0).at("t")->stringValue(); 
+			for(int i=0; i<r->size(); i++) {				
+				delete r->at(i).at("t");
+			}
 			delete r;
 			return ret;
 		} else {
@@ -103,6 +111,48 @@ namespace mico {
 			return "";
 		}		
 	}
+
+
+	/**
+	 * Set the relation with the given URI to the given target resource. Use e.g. in combination with fixed vocabularies.
+	 */
+	void Content::setRelation(const URI& property, const URI& value) {
+		Metadata metadata = item.getMetadata();
+		
+		map<string,string> params;
+		params["ci"] = item.getURI().stringValue();
+		params["cp"] = baseUrl + "/" + id;
+		params["p"]  = property.stringValue();
+		params["value"] = value.stringValue();
+
+		metadata.update(SPARQL_FORMAT(setContentRelation, params));				
+	}
+
+	/**
+	 * Return the relation target of this content part for the given property. Use e.g. in combination with fixed vocabularies.
+	 */
+	Value* Content::getRelation(const URI& property) {
+		Metadata metadata = item.getMetadata();
+		
+		map<string,string> params;
+		params["ci"] = item.getURI().stringValue();
+		params["p"]  = property.stringValue();
+		params["cp"] = baseUrl + "/" + id;
+		
+		const TupleResult* r = metadata.query(SPARQL_FORMAT(getContentRelation,params));
+		if(r->size() > 0) {
+			Value* ret = r->at(0).at("t"); 
+			for(int i=1; i<r->size(); i++) {				
+				delete r->at(i).at("t");
+			}
+			delete r;
+			return ret;
+		} else {
+			delete r;
+			return NULL;
+		}		
+	}
+
 
     /**
      * Return a new output stream for writing to the content. Any existing content will be overwritten.

@@ -18,10 +18,15 @@
  * libleptonica-dev
  */ 
 
+#include <ctime>
+
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
 
 #include "EventManager.hpp"
+
+// for constant RDF property definitions of common vocabularies
+#include "vocabularies.hpp"
 
 // for configuring logging levels
 #include "../logging.h"
@@ -31,6 +36,19 @@ using namespace mico::event;
 
 // this namespace contains Content, ContentItem, etc
 using namespace mico::persistence;
+
+// define dublin core vocabulary shortcut
+namespace DC = mico::rdf::vocabularies::DC;
+
+
+// helper function to get time stamp
+std::string getTimestamp() {
+	time_t now;
+	time(&now);
+	char buf[sizeof "2011-10-08T07:07:09Z"];
+	strftime(buf, sizeof buf, "%FT%TZ", gmtime(&now));				
+	return std::string(buf);
+}
 
 /**
  * The base implementation of the OCR service. Since the service is capable of handling different image formats,
@@ -87,6 +105,12 @@ public:
 			// write plain text to a new content part
 			Content *txtPart = ci.createContentPart();
 			txtPart->setType("text/plain");
+			
+			// set some metadata properties (provenance information etc)
+			txtPart->setRelation(DC::creator, getServiceID());
+			txtPart->setRelation(DC::provenance, getServiceID());
+			txtPart->setProperty(DC::created, getTimestamp());
+			txtPart->setRelation(DC::source, object.stringValue());
 			
 			std::ostream* out = txtPart->getOutputStream();
 			*out << plainText;
