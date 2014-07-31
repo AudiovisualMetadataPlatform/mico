@@ -37,7 +37,7 @@ urlstream_tests_SOURCES = persistence_tests.cpp urlstream_tests.cpp
 urlstream_tests_LDADD = $(LIBPERSISTENCE) $(LIBRDF) $(LIBMARMOTTA) libgtest.a @curllibs@
 
 event_manager_tests_SOURCES = persistence_tests.cpp event_manager_tests.cpp
-event_manager_tests_LDADD = $(LIBPERSISTENCE) $(LIBRDF) $(LIBMARMOTTA) $(LIBAMQP) $(LIBEVENT) libgtest.a @curllibs@ @protobuf_libs@ -lboost_system
+event_manager_tests_LDADD = $(LIBPERSISTENCE) $(LIBRDF) $(LIBMARMOTTA) $(LIBAMQP) $(LIBEVENT) libgtest.a @curllibs@ @protobuf_libs@ -lboost_system -lboost_log -lboost_log_setup
 
 
 TESTS += model_tests query_tests client_tests sparql_tests metadata_tests content_item_tests persistence_service_tests urlstream_tests event_manager_tests

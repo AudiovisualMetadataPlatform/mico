@@ -114,6 +114,11 @@ public:
 	 */
 	~EventManager();
 
+	/**
+	 * Return a reference to the persistence service used by this event manager, e.g. for creating or managing
+	 * content items.
+	 */
+	PersistenceService& getPersistenceService() { return persistence; };
 
 	/**
 	 *  Method that is called by the AMQP library every time it has data

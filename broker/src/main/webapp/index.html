@@ -66,8 +66,8 @@
         <tr>
             <th>URI</th><th>States and Transitions</th>
         </tr>
-        <tr ng-repeat="item in items">
-            <td>{{item.uri}}</td>
+        <tr ng-repeat="item in items" style="border: 1px solid black;">
+            <td style="vert-align: top"><a href="/marmotta/resource?uri={{item.uri}}">{{item.uri}}</a></td>
             <td>
                 <strong>States:</strong>
                 <table style="width: 100%">

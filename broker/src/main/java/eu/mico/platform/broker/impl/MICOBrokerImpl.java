@@ -352,6 +352,7 @@ public class MICOBrokerImpl implements MICOBroker {
                 state.removeProgress(properties.getCorrelationId());
 
                 executeStateTransitions();
+                getChannel().basicAck(envelope.getDeliveryTag(), false);
             } catch (StateNotFoundException e) {
                 log.warn("could not proceed analysing content item {}, part {}; next state unknown because service was not registered", analysisResponse.getContentItemUri(), analysisResponse.getObjectUri());
             }

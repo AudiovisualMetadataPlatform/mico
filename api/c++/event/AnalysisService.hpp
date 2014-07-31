@@ -70,7 +70,7 @@ public:
      * @param ci     the content item to analyse
      * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
      */
-    virtual void call(std::function<void(ContentItem& ci, URI& object)> resp, ContentItem& ci, URI& object) = 0;
+    virtual void call(std::function<void(const ContentItem& ci, const URI& object)> resp, ContentItem& ci, URI& object) = 0;
 	
 };	
 	
