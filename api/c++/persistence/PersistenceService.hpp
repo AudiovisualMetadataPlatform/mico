@@ -57,7 +57,7 @@ namespace mico {
 	  PersistenceService(std::string serverAddress) 
 		: marmottaServerUrl("http://" + serverAddress + ":8080/marmotta")
 		, metadata("http://" + serverAddress + ":8080/marmotta")
-		, contentDirectory("htp://mico:mico@" + serverAddress) {};
+		, contentDirectory("ftp://mico:mico@" + serverAddress) {};
 
 
 	  /**
@@ -68,7 +68,7 @@ namespace mico {
 	  PersistenceService(std::string serverAddress, int marmottaPort, std::string user, std::string password) 
 		: marmottaServerUrl("http://" + serverAddress + ":" + std::to_string(marmottaPort) + "/marmotta")
 		, metadata("http://" + serverAddress + ":" + std::to_string(marmottaPort) + "/marmotta")
-		, contentDirectory("htp://" + user + ":" + password + "@" + serverAddress) {};
+		, contentDirectory("ftp://" + user + ":" + password + "@" + serverAddress) {};
 
 
       /**

@@ -29,8 +29,8 @@ nullstream & operator<<(nullstream & s, std::ostream &(std::ostream&)) {return s
 
 static nullstream logstream;	
 	
-//#define LOG std::cout
-#define LOG if(0) logstream	
+#define LOG std::cout
+//#define LOG if(0) logstream	
 	
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
@@ -248,6 +248,7 @@ URLStreambufBase::URLStreambufBase(const char* url, URLMode mode, int bufsize)
 URLStreambufBase::~URLStreambufBase() 
 {
 	LOG << "closing stream\n";
+	sync();
 	
 	// inidicate we are finishing and let cURL continue running
 	finishing = true;
@@ -376,6 +377,10 @@ int URLOStreambuf::overflow(int c) {
 		}
 		setp(buffer,buffer+buffer_size);
 	}
+	
+	// add character to buffer
+	*pptr()=c;
+	pbump(1);	
 	return c;
 }
 

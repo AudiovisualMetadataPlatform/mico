@@ -40,6 +40,9 @@ AC_SUBST(xmllibs)
 LIBCURL_CHECK_CONFIG(yes, ,  curllibs="-lcurl", AC_MSG_ERROR("required cURL HTTP library is missing"))
 AC_SUBST(curllibs)
 
+AC_CHECK_LIB(magic,magic_open, [magiclibs="-lmagic"; AM_CONDITIONAL(TOOL_INJECT,true)], AM_CONDITIONAL(TOOL_INJECT,false))
+AC_CHECK_HEADER(magic.h,AM_CONDITIONAL(TOOL_INJECT,true), AM_CONDITIONAL(TOOL_INJECT,false))
+AC_SUBST(magiclibs)
 
 # c++ headers and libraries
 AC_LANG_PUSH([C++])
@@ -93,4 +96,4 @@ CXXFLAGS="$CXXFLAGS -Wall -Wextra"
 ])
 
 
-AC_OUTPUT([Makefile rdf/Makefile persistence/Makefile amqp/Makefile event/Makefile test/Makefile])
+AC_OUTPUT([Makefile rdf/Makefile persistence/Makefile amqp/Makefile event/Makefile tools/Makefile test/Makefile])

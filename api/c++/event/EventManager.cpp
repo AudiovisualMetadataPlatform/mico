@@ -124,7 +124,14 @@ EventManager::EventManager(string host, int rabbitPort, int marmottaPort, string
 	tcp::resolver::query query(host, std::to_string(rabbitPort));
 	tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
-	async_connect(socket, endpoint_iterator, [this](boost::system::error_code ec, tcp::resolver::iterator) { doConnect(); });
+	async_connect(socket, endpoint_iterator, [this](boost::system::error_code ec, tcp::resolver::iterator) { 
+		if(!ec) {
+			doConnect(); 			
+		} else {
+			LOG_ERROR << "network error '" << ec.category().name() << "': " << ec.category().message(ec.value()) << std::endl;
+			unavailable = true;
+		}
+	});
 
 			
 	// start the TCP socket operation
@@ -154,6 +161,7 @@ EventManager::EventManager(string host, int rabbitPort, int marmottaPort, string
 		LOG_INFO << "event manager initialization finished!\n";
 	} else {
 		LOG_ERROR << "AMQP connection unavailable\n";
+		receiver.join();
 		throw EventManagerException("AMQP connection unavailable");
 	}	
 }
