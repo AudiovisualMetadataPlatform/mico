@@ -54,12 +54,20 @@ class AnalysisConsumer;
 class DiscoveryConsumer;
 class RabbitConnectionHandler;
 
-static void* event_loop(void *event_manager);
+/**
+ * This exception is thrown by the event manager in case a method call failed.
+ */ 
+class EventManagerException {
+private:
+	std::string message;
+public:
+	EventManagerException(std::string message) : message(message) {};
+	
+	const std::string& getMessage() { return message; };	
+};
 
 class EventManager : public AMQP::ConnectionHandler
 {
-	friend void* event_loop(void *event_manager);
-	
 private:
 	boost::asio::io_service io_service;   //!< Boost I/O service for network connection
 	tcp::socket             socket;       //!< Boost socket for connecting with RabbitMQ
@@ -88,6 +96,7 @@ private:
 	bool connected;              //!< true when connection is finished
 	bool unavailable;            //!< indicate connection failure
 	
+	void doConnect();            //!< internal method called when TCP connection is established
 	void doRead();               //!< internal method for reading data from network
 public:
 
@@ -170,7 +179,7 @@ public:
 	 * @param service
 	 * @throws IOException
 	 */
-	void unregisterService(const AnalysisService* service);
+	void unregisterService(AnalysisService* service);
 
 	/**
 	 * Trigger analysis of the given content item.
