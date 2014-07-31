@@ -7,6 +7,7 @@
 #define DECLARE_DC(property) const mico::rdf::model::URI property("http://purl.org/dc/terms/" #property)
 #define DECLARE_LDP(property) const mico::rdf::model::URI property("http://www.w3.org/ns/ldp#" #property)
 #define DECLARE_MA(property) const mico::rdf::model::URI property("http://www.w3.org/ns/ma-ont#" #property)
+#define DECLARE_FOAF(property) const mico::rdf::model::URI property("http://xmlns.com/foaf/0.1/" #property)
 
 
 namespace mico {
@@ -240,6 +241,86 @@ namespace mico {
 	DECLARE_MA(samplingRate);
 	DECLARE_MA(title);
 	DECLARE_MA(trackName);
+
+      }
+
+      namespace FOAF {
+
+	DECLARE_FOAF(Agent);
+	DECLARE_FOAF(Document);
+	DECLARE_FOAF(Group);
+	DECLARE_FOAF(Image);
+	DECLARE_FOAF(LabelProperty);
+	DECLARE_FOAF(OnlineAccount);
+	DECLARE_FOAF(OnlineChatAccount);
+	DECLARE_FOAF(OnlineEcommerceAccount);
+	DECLARE_FOAF(OnlineGamingAccount);
+	DECLARE_FOAF(Organization);
+	DECLARE_FOAF(Person);
+	DECLARE_FOAF(PersonalProfileDocument);
+	DECLARE_FOAF(Project);
+	DECLARE_FOAF(account);
+	DECLARE_FOAF(accountName);
+	DECLARE_FOAF(accountServiceHomepage);
+	DECLARE_FOAF(age);
+	DECLARE_FOAF(aimChatID);
+	DECLARE_FOAF(based)_near;
+	DECLARE_FOAF(birthday);
+	DECLARE_FOAF(currentProject);
+	DECLARE_FOAF(depiction);
+	DECLARE_FOAF(depicts);
+	DECLARE_FOAF(dnaChecksum);
+	DECLARE_FOAF(familyName);
+	DECLARE_FOAF(family)_name;
+	DECLARE_FOAF(firstName);
+	DECLARE_FOAF(focus);
+	DECLARE_FOAF(fundedBy);
+	DECLARE_FOAF(geekcode);
+	DECLARE_FOAF(gender);
+	DECLARE_FOAF(givenName);
+	DECLARE_FOAF(givenname);
+	DECLARE_FOAF(holdsAccount);
+	DECLARE_FOAF(homepage);
+	DECLARE_FOAF(icqChatID);
+	DECLARE_FOAF(img);
+	DECLARE_FOAF(interest);
+	DECLARE_FOAF(isPrimaryTopicOf);
+	DECLARE_FOAF(jabberID);
+	DECLARE_FOAF(knows);
+	DECLARE_FOAF(lastName);
+	DECLARE_FOAF(logo);
+	DECLARE_FOAF(made);
+	DECLARE_FOAF(maker);
+	DECLARE_FOAF(mbox);
+	DECLARE_FOAF(mbox)_sha1sum;
+	DECLARE_FOAF(member);
+	DECLARE_FOAF(membershipClass);
+	DECLARE_FOAF(msnChatID);
+	DECLARE_FOAF(myersBriggs);
+	DECLARE_FOAF(name);
+	DECLARE_FOAF(nick);
+	DECLARE_FOAF(openid);
+	DECLARE_FOAF(page);
+	DECLARE_FOAF(pastProject);
+	DECLARE_FOAF(phone);
+	DECLARE_FOAF(plan);
+	DECLARE_FOAF(primaryTopic);
+	DECLARE_FOAF(publications);
+	DECLARE_FOAF(schoolHomepage);
+	DECLARE_FOAF(sha1);
+	DECLARE_FOAF(skypeID);
+	DECLARE_FOAF(status);
+	DECLARE_FOAF(surname);
+	DECLARE_FOAF(theme);
+	DECLARE_FOAF(thumbnail);
+	DECLARE_FOAF(tipjar);
+	DECLARE_FOAF(title);
+	DECLARE_FOAF(topic);
+	DECLARE_FOAF(topic)_interest;
+	DECLARE_FOAF(weblog);
+	DECLARE_FOAF(workInfoHomepage);
+	DECLARE_FOAF(workplaceHomepage);
+	DECLARE_FOAF(yahooChatID);
 
       }
     }

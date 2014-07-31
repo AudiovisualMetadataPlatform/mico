@@ -98,6 +98,7 @@ public:
 			// clean up
 			delete imgPart;
 			delete txtPart;
+			delete pic;
 			delete [] plainText;		
 		} else {
 			std::cerr << "content item part " << object.stringValue() << " of content item " << ci.getURI().stringValue() << " does not exist!\n";

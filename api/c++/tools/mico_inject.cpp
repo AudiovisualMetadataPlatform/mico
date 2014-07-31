@@ -79,10 +79,6 @@ int main(int argc, char **argv) {
 				
 				std::cout << "content part URI: " << c->getURI().stringValue() << std::endl;
 				
-				std::istream* in = c->getInputStream();
-				std::vector<char> testBuf = std::vector<char>(std::istreambuf_iterator<char>(*in), std::istreambuf_iterator<char>());
-				delete in;
-				
 				delete c;
 				munmap(buffer, len);
 			} else {
