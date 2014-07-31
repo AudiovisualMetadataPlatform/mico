@@ -10,6 +10,8 @@
 
 #include "URLStream.hpp"
 
+#include "../logging.h"
+
 #define MIN(a,b) a < b ? a : b
 
 namespace mico
@@ -17,22 +19,8 @@ namespace mico
 namespace io
 {
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-struct nullstream {};
-
-// Swallow all types
-template <typename T>
-nullstream & operator<<(nullstream & s, T const &) {return s;}
-
-// Swallow manipulator templates
-nullstream & operator<<(nullstream & s, std::ostream &(std::ostream&)) {return s;}
-
-static nullstream logstream;	
+#define LOG LOG_DEBUG
 	
-#define LOG std::cout
-//#define LOG if(0) logstream	
-	
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 /**
  * Read callback used by cURL to read request body from memory. Whenever cURL requests more data, 

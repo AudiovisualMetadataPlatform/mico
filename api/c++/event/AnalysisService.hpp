@@ -21,14 +21,22 @@ using namespace mico::persistence;
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */	
 class AnalysisService {
-
+protected:
+	URI serviceID;
+	string provides;
+	string requires;
+	string queue;	
+	
 public:
+	AnalysisService(const std::string serviceID, const std::string requires, const std::string provides, const std::string queue) 
+		: serviceID(serviceID), provides(provides), requires(requires), queue(queue) {};
+
     /**
      * Return a unique ID (URI) that identifies this service and its functionality.
      *
      * @return a unique ID identifying this service globally
      */
-    virtual const URI& getServiceID() const = 0;
+    virtual const URI& getServiceID() const { return serviceID; };
 
 
     /**
@@ -37,7 +45,7 @@ public:
      *
      * @return a symbolic identifier representing the output type of this service
      */
-    virtual const string& getProvides() const = 0;
+    virtual const string& getProvides() const { return provides; };
 
 
     /**
@@ -46,7 +54,7 @@ public:
      *
      * @return  a symbolic identifier representing the input type of this service
      */
-    virtual const string& getRequires() const = 0;
+    virtual const string& getRequires() const { return requires; };
 
 
     /**
@@ -58,7 +66,7 @@ public:
      *
      * @return a string identifying the queue name this service wants to use
      */
-    virtual const string& getQueueName() const = 0;
+    virtual const string& getQueueName() const { return queue; };
 
 
     /**

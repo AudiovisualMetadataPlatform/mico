@@ -13,7 +13,7 @@
 #include "SPARQLUtil.hpp"
 
 #include "../config.h"
-
+#include "../logging.h"
 
 using namespace mico::event;
 
@@ -38,6 +38,12 @@ void usage() {
 }
 
 int main(int argc, char **argv) {
+    boost::log::core::get()->set_filter
+    (
+        boost::log::trivial::severity >= boost::log::trivial::warning
+    );
+
+	
 	if(argc < 3) {
 		usage();
 	}
@@ -66,6 +72,13 @@ int main(int argc, char **argv) {
 				std::ostream* os = c->getOutputStream();
 				os->write(buffer, len);
 				delete os;
+				
+				std::cout << "content part URI: " << c->getURI().stringValue() << std::endl;
+				
+				std::istream* in = c->getInputStream();
+				std::vector<char> testBuf = std::vector<char>(std::istreambuf_iterator<char>(*in), std::istreambuf_iterator<char>());
+				delete in;
+				
 				delete c;
 				munmap(buffer, len);
 			} else {

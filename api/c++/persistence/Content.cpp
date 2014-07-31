@@ -5,6 +5,8 @@
 #include "URLStream.hpp"
 #include "SPARQLUtil.hpp"
 
+#include "../logging.h"
+
 using namespace std;
 using namespace boost;
 
@@ -68,6 +70,7 @@ namespace mico {
      * @return
      */
     std::ostream* Content::getOutputStream() {
+		LOG_DEBUG << "new output stream connection to " << std::string(contentDirectory + "/" + id + ".bin") << std::endl;
 		return new mico::io::url_ostream(contentDirectory + "/" + id + ".bin");
     }
 
@@ -76,6 +79,7 @@ namespace mico {
      * @return
      */
     std::istream* Content::getInputStream() {
+		LOG_DEBUG << "new input stream connection to " << std::string(contentDirectory + "/" + id + ".bin") << std::endl;
 		return new mico::io::url_istream(contentDirectory + "/" + id + ".bin");
     }
 

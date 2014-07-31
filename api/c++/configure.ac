@@ -44,6 +44,16 @@ AC_CHECK_LIB(magic,magic_open, [magiclibs="-lmagic"; AM_CONDITIONAL(TOOL_INJECT,
 AC_CHECK_HEADER(magic.h,AM_CONDITIONAL(TOOL_INJECT,true), AM_CONDITIONAL(TOOL_INJECT,false))
 AC_SUBST(magiclibs)
 
+AM_CONDITIONAL(SAMPLE_OCR,false)
+AC_CHECK_LIB(tesseract,TessBaseAPICreate, [
+	AC_CHECK_LIB(lept,pixReadMem, [
+		tesseract_libs="-ltesseract -llept"
+		AC_CHECK_HEADERS([tesseract/capi.h leptonica/allheaders.h],AM_CONDITIONAL(SAMPLE_OCR,true))
+	])
+])
+AC_SUBST(tesseract_libs)
+
+
 # c++ headers and libraries
 AC_LANG_PUSH([C++])
 
@@ -96,4 +106,4 @@ CXXFLAGS="$CXXFLAGS -Wall -Wextra"
 ])
 
 
-AC_OUTPUT([Makefile rdf/Makefile persistence/Makefile amqp/Makefile event/Makefile tools/Makefile test/Makefile])
+AC_OUTPUT([Makefile rdf/Makefile persistence/Makefile amqp/Makefile event/Makefile tools/Makefile test/Makefile samples/Makefile])

@@ -7,6 +7,8 @@
 #include "ContentItem.hpp"
 #include "SPARQLUtil.hpp"
 
+#include "../logging.h"
+
 using namespace std;
 using namespace boost;
 using namespace uuids;
@@ -38,17 +40,16 @@ ContentItem::ContentItem(const string& baseUrl, const string& contentDirectory, 
 
 
 ContentItem::ContentItem(const string& baseUrl, const string& contentDirectory, const URI& uri)
-	: baseUrl(baseUrl)
-	, metadata(baseUrl, boost::uuids::to_string(id) + SUFFIX_METADATA)
-	, execution(baseUrl, boost::uuids::to_string(id) + SUFFIX_EXECUTION)
-	, result(baseUrl, boost::uuids::to_string(id) + SUFFIX_RESULT)
+	: baseUrl(baseUrl), id(str_gen(uri.stringValue().substr(baseUrl.length() + 1)))
+	, metadata(baseUrl, uri.stringValue().substr(baseUrl.length() + 1) + SUFFIX_METADATA)
+	, execution(baseUrl, uri.stringValue().substr(baseUrl.length() + 1) + SUFFIX_EXECUTION)
+	, result(baseUrl, uri.stringValue().substr(baseUrl.length() + 1) + SUFFIX_RESULT)
 	, contentDirectory(contentDirectory)
 {
 	if(!starts_with(uri.stringValue(),baseUrl)) {
 		throw string("the baseUrl is not a prefix of the URI, invalid argument");
 	}
 
-	id = str_gen(uri.stringValue().substr(baseUrl.length() + 1));
 }
 
 
