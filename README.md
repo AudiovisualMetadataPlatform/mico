@@ -50,17 +50,19 @@ Building the C++ API has additional requirements for native libraries. In partic
 * GNU Autotools, GCC >= 4.8 with C++11 support
 * cURL library for HTTP requests (apt-get install libcurl4-gnutls-dev)
 * expat library for XML parsing (apt-get install libexpat1-dev)
-* Boost 1.55 libraries for additional C++ functionalities (apt-get install libboost1.55-dev)
+* Boost 1.55 libraries for additional C++ functionalities (apt-get install libboost1.55-dev libboost-log1.55-dev libboost-system1.55-dev)
 * xxd for inlining SPARQL queries in C++ (part of VIM, apt-get install vim-common)
-* Hadoop native libraries (manual install, see below)
+* protobuf for the event communication protocol (manual install, the Debian/Ubuntu version is outdated)
+* Doxygen for building the documentation
 
-Building Hadoop Native:
+For building the C++ binary tools (mico_inject etc.), there are the following additional dependencies:
 
-This process is described in detail on the [Hadoop Website](http://hadoop.apache.org/docs/r2.4.1/hadoop-project-dist/hadoop-common/NativeLibraries.html). 
-Quick summary:
+* magic library for guessing MIME type (apt-get install libmagic-dev)
 
-* download Hadoop 2.x source release and unpack in a custom directory
-* `mvn package -Pdist,native -DskipTests -Dtar`
+For building the C++ sample analyzers (mico_ocr_service etc.), there are the following additional dependencies:
+
+* tesseract library for OCR with English database (apt-get install libtesseract-dev tesseract-ocr-eng)
+* leptonica library for image processing (apt-get install libleptonica-dev)
 
 ## Building
 
