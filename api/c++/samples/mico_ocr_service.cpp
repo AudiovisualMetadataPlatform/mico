@@ -7,7 +7,8 @@
  * ./mico_ocr_service SERVER_IP
  * 
  * It will then automatically connect to the MICO platform running at the given IP and offer its functionality to content items
- * which are injected.
+ * which are injected. Note that this is a sample only. A proper implementation would probably better be started as Unix daemon
+ * and detached from the tty console.
  * 
  * Go to http://SERVER_IP:8080/broker/ to get a simple overview over the registered services. Use the mico_inject tool to inject
  * an image into the platform and let it be analysed.

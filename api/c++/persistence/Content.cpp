@@ -12,6 +12,8 @@ using namespace boost;
 
 SPARQL_INCLUDE(setContentType);
 SPARQL_INCLUDE(getContentType);
+SPARQL_INCLUDE(setContentProperty);
+SPARQL_INCLUDE(getContentProperty);
 
 
 namespace mico {
@@ -64,6 +66,43 @@ namespace mico {
 		}
 	}
 
+
+	/**
+	 * Set the property with the given URI to the given value. Use e.g. in combination with fixed vocabularies.
+	 */
+	void Content::setProperty(const URI property, const string value) {
+		Metadata metadata = item.getMetadata();
+		
+		map<string,string> params;
+		params["ci"] = item.getURI().stringValue();
+		params["cp"] = baseUrl + "/" + id;
+		params["p"]  = property.stringValue();
+		params["value"] = value;
+
+		metadata.update(SPARQL_FORMAT(setContentProperty, params));				
+	}
+
+	/**
+	 * Return the property value of this content part for the given property. Use e.g. in combination with fixed vocabularies.
+	 */
+	string Content::getProperty(const URI property) {
+		Metadata metadata = item.getMetadata();
+		
+		map<string,string> params;
+		params["ci"] = item.getURI().stringValue();
+		params["p"]  = property.stringValue();
+		params["cp"] = baseUrl + "/" + id;
+		
+		const TupleResult* r = metadata.query(SPARQL_FORMAT(getContentProperty,params));
+		if(r->size() > 0) {
+			string ret = r->at(0).at("t")->stringValue(); // TODO: check if we need to manually delete all values in the binding set!
+			delete r;
+			return ret;
+		} else {
+			delete r;
+			return "";
+		}		
+	}
 
     /**
      * Return a new output stream for writing to the content. Any existing content will be overwritten.

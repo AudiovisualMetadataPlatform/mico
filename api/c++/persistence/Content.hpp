@@ -57,6 +57,17 @@ public:
      */
     string getType();
 
+
+	/**
+	 * Set the property with the given URI to the given value. Use e.g. in combination with fixed vocabularies.
+	 */
+	void setProperty(const URI property, const string value);
+
+	/**
+	 * Return the property value of this content part for the given property. Use e.g. in combination with fixed vocabularies.
+	 */
+	string getProperty(const URI property);
+
 	/**
 	 * Return a new output stream for writing to the content. Any existing content will be overwritten.
 	 * @return

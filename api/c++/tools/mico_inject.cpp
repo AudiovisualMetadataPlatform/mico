@@ -11,11 +11,14 @@
 #include "EventManager.hpp"
 #include "ContentItem.hpp"
 #include "SPARQLUtil.hpp"
+#include "vocabularies.hpp"
 
 #include "../config.h"
 #include "../logging.h"
 
 using namespace mico::event;
+
+namespace DC = mico::rdf::vocabularies::DC;
 
 std::string getMimeType(const void* buffer, size_t length) {
 	magic_t cookie = magic_open(MAGIC_MIME_TYPE);
@@ -69,6 +72,7 @@ int main(int argc, char **argv) {
 				
 				Content* c = item->createContentPart();
 				c->setType(getMimeType(buffer,len));
+				c->setProperty(DC::source, argv[i]);
 				std::ostream* os = c->getOutputStream();
 				os->write(buffer, len);
 				delete os;
