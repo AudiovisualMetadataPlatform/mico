@@ -8,8 +8,6 @@
 #include "rdf_query.hpp"
 
 
-using mico::http::HTTPClient;
-
 namespace mico {
   namespace rdf {
     namespace query {
@@ -37,7 +35,7 @@ namespace mico {
       private:
 	std::string base_url;
 	
-	HTTPClient  http_client;
+	mico::http::HTTPClient  http_client;
 	
       public:
 

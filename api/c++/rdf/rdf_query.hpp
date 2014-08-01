@@ -6,22 +6,21 @@
 #include <vector>
 #include <string>
 
-#include "rdf_model.hpp"
 
-using namespace std;
-using namespace mico::rdf::model;
 
 namespace mico {
   namespace rdf {
+    namespace model {
+      class Value;
+    }
+
     namespace query {
 
       /**
        * A BindingSet is a single result row of a TupleResult. It maps from variable name to
        * variable binding and is implemented as a simple map.
        */
-      class BindingSet : public map<string,Value*> {
-	
-      };
+      typedef std::map<std::string,mico::rdf::model::Value*> BindingSet;
 
       static void startElement(void *data, const char *el, const char **attr);
       static void characterData(void *data, const char *chars, int len);
@@ -37,7 +36,7 @@ namespace mico {
 	 * Load query result data represented in the XML SPARQL protocol syntax into the query result
 	 * given as argument. http://www.w3.org/TR/rdf-sparql-XMLres/
 	 */
-	virtual void loadFrom(istream& is) = 0;
+	virtual void loadFrom(std::istream& is) = 0;
 
 
 	/**
@@ -66,7 +65,7 @@ namespace mico {
 	 * Load query result data represented in the XML SPARQL protocol syntax into the query result
 	 * given as argument. http://www.w3.org/TR/rdf-sparql-XMLres/
 	 */
-	void loadFrom(istream& is);
+	void loadFrom(std::istream& is);
 
 
 	/**
@@ -87,28 +86,28 @@ namespace mico {
        * The result of a SPARQL SELECT query. Implemented as a vector of BindingSet instances, each
        * representing one row in the result.
        */
-      class TupleResult : public vector<BindingSet>, public QueryResult {
+      class TupleResult : public std::vector<BindingSet>, public QueryResult {
 
       private:
-	friend istream& operator>>(istream& is, TupleResult& r);
-	friend ostream& operator<<(ostream& is, TupleResult& r);
+	friend std::istream& operator>>(std::istream& is, TupleResult& r);
+	friend std::ostream& operator<<(std::ostream& is, TupleResult& r);
 	friend void startElement(void *data, const char *el, const char **attr);
 
-	vector<string> bindingNames;
+	std::vector<std::string> bindingNames;
 
       public:
 	
 	/**
 	 * Return the binding names (variable names) contained in the result.
 	 */
-	const vector<string>& getBindingNames() const { return bindingNames; };
+	const std::vector<std::string>& getBindingNames() const { return bindingNames; };
 
 
 	/**
 	 * Load query result data represented in the XML SPARQL protocol syntax into the query result
 	 * given as argument. http://www.w3.org/TR/rdf-sparql-XMLres/
 	 */
-	void loadFrom(istream& is);
+	void loadFrom(std::istream& is);
 
 
 	/**
@@ -126,15 +125,15 @@ namespace mico {
        * Load query result data represented in the XML SPARQL protocol syntax into the query result
        * given as argument. http://www.w3.org/TR/rdf-sparql-XMLres/
        */
-      istream& operator>>(istream& is, TupleResult& r);
-      istream& operator>>(istream& is, BooleanResult& r);
+      std::istream& operator>>(std::istream& is, TupleResult& r);
+      std::istream& operator>>(std::istream& is, BooleanResult& r);
 
 
       /**
        * Serialize query result data from the given argument into XML SPARQL protocol syntax.
        */
-      ostream& operator<<(ostream& is, TupleResult& r);
-      ostream& operator<<(ostream& is, BooleanResult& r);
+      std::ostream& operator<<(std::ostream& is, TupleResult& r);
+      std::ostream& operator<<(std::ostream& is, BooleanResult& r);
 
 
     }

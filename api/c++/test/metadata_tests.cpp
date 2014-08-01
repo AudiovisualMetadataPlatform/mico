@@ -9,12 +9,16 @@
 
 #include "http_client.hpp"
 #include "Metadata.hpp"
+#include "rdf_model.hpp"
+#include "rdf_query.hpp"
 
 #include "../config.h"
 
 using namespace boost::uuids;
 using namespace mico::persistence;
 using namespace mico::http;
+using namespace mico::rdf::query;
+using namespace mico::rdf::model;
 
 #define VBOX_SERVER std::string(TEST_HOST)
 

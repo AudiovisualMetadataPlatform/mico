@@ -1,10 +1,12 @@
 #ifndef HAVE_HTTP_CLIENT_H
 #define HAVE_HTTP_CLIENT_H 1
 
-#include <curl/curl.h>
 #include <string>
 #include <map>
 #include <iostream>
+
+
+struct curl_slist;
 
 namespace mico {
   namespace http {

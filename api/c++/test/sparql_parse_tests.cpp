@@ -45,6 +45,7 @@ const char* bool_result =
   "</sparql>";
 
 
+using namespace std;
 using namespace mico::rdf::query;
 using namespace mico::rdf::model;
 

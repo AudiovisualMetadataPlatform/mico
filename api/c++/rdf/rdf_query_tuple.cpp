@@ -1,11 +1,13 @@
 #include <cstring>
 #include <expat.h>
 #include "rdf_query.hpp"
+#include "rdf_model.hpp"
 
 #define BUFFSIZE	8192
 
 
-
+using namespace std;
+using namespace mico::rdf::model;
 
 namespace mico {
   namespace rdf {

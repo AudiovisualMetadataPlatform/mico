@@ -1,5 +1,6 @@
 #include "rdf_model.hpp"
 
+using namespace std;
 
 namespace mico {
   namespace rdf {

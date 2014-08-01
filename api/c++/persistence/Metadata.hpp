@@ -3,21 +3,22 @@
 
 #include <string>
 #include <iostream>
-#include <sstream>
-
-#include "rdf_model.hpp"
-#include "rdf_query.hpp"
-#include "sparql_client.hpp"
-#include "http_client.hpp"
 
 
 namespace mico {
+  // forward declarations
+  namespace http {
+    class HTTPClient;
+  }
+  namespace rdf {
+    namespace query {
+      class SPARQLClient;
+      class TupleResult;
+    }
+  }
+
   namespace persistence {
 
-    using std::string;
-    using namespace mico::rdf::model;
-    using namespace mico::rdf::query;
-    using namespace mico::http;
 
     /**
      * A class offering access to RDF metadata through SPARQL. The Metadata class implements a
@@ -29,11 +30,14 @@ namespace mico {
     class Metadata {
 
     protected:
-      string baseUrl;     //!< the base URL of the server
-      string contextUrl;  //!< the URI of the context to use as named graph
+      std::string baseUrl;     //!< the base URL of the server
+      std::string contextUrl;  //!< the URI of the context to use as named graph
 
-      SPARQLClient sparqlClient; //!< an instance of a SPARQL client, will be initialised to baseUrl + "/sparql"
-      HTTPClient   httpClient;   //!< an instance of an HTTP client, will be used for load/dump
+      mico::rdf::query::
+      SPARQLClient* sparqlClient; //!< an instance of a SPARQL client, will be initialised to baseUrl + "/sparql"
+
+      mico::http::
+      HTTPClient*   httpClient;   //!< an instance of an HTTP client, will be used for load/dump
 				 //!< using the baseUrl and the Marmotta import/export endpoints
 
     public:
@@ -42,17 +46,16 @@ namespace mico {
        * Create a new metadata object for the given server using the global SPARQL
        * endpoint. Optional context must be given explicitly in SPARQL queries.
        */
-      Metadata(string baseUrl) : baseUrl(baseUrl), contextUrl(baseUrl), sparqlClient(baseUrl + "/sparql") {};
+      Metadata(std::string baseUrl);
 
       /**
        * Create a new metadata object for the given server base URL and context using the contextual
        * SPARQL endpoint. All queries and updates will exclusively access this context.
        */
-      Metadata(string baseUrl, string context) 
-	: baseUrl(baseUrl), contextUrl(baseUrl + "/" + context), sparqlClient(baseUrl + "/" + context + "/sparql") {};
+      Metadata(std::string baseUrl, std::string context);
 
 
-      virtual ~Metadata() {};
+      virtual ~Metadata();
 
       /**
        * Load RDF data of the given format into the metadata dataset. Can be used for preloading existing metadata.
@@ -61,7 +64,7 @@ namespace mico {
        * @param format  data format the RDF data is using (e.g. text/turtle or application/rdf+xml;
        *                defined shortcuts: "turtle" and "rdfxml")
        */
-      void load(std::istream& in, const string format);
+      void load(std::istream& in, const std::string format);
 
 
       /**
@@ -72,7 +75,7 @@ namespace mico {
        * @param format data format the RDF data is using (e.g. (e.g. text/turtle or application/rdf+xml;
        *                defined shortcuts: "turtle" and "rdfxml")
        */
-      void dump(std::ostream& out, const string format);
+      void dump(std::ostream& out, const std::string format);
 
 
 
@@ -82,7 +85,7 @@ namespace mico {
        *
        * @param sparqlUpdate
        */
-      void update(const string sparqlUpdate);
+      void update(const std::string sparqlUpdate);
 
 
       /**
@@ -92,7 +95,7 @@ namespace mico {
        * @param sparqlQuery
        * @return
        */
-      const TupleResult* query(const string sparqlQuery);
+      const mico::rdf::query::TupleResult* query(const std::string sparqlQuery);
 
 
 
@@ -103,7 +106,7 @@ namespace mico {
        * @param sparqlQuery
        * @return
        */
-      const bool ask(const string sparqlQuery);
+      const bool ask(const std::string sparqlQuery);
 
 
       /**

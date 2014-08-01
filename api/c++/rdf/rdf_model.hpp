@@ -2,17 +2,13 @@
 #define HAVE_RDF_MODEL_H 1
 
 #include <string>
-#include <cstring>
-#include <cstdint>
-#include <cstdlib>
+#include <iostream>
 
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/cpp_dec_float.hpp> 
 
-using std::string;
-using std::size_t;
-using std::ostream;
-using namespace boost::multiprecision;
+using boost::multiprecision::cpp_int;
+using boost::multiprecision::cpp_dec_float_50;
 
 /*
  * This module contains an implementation of the Sesame data model in C++ for use in C++ components
@@ -41,7 +37,7 @@ namespace mico {
 	 */
 	virtual bool equals(const Value& other) const = 0;
 
-	virtual ostream& print(ostream& os) const = 0;	
+	virtual std::ostream& print(std::ostream& os) const = 0;	
 
       public:
 
@@ -50,7 +46,7 @@ namespace mico {
 	/**
 	 * Returns the String-value of a Value object. This returns either a Literal's label, a URI's URI or a BNode's ID.
 	 */
-	virtual const string& stringValue() const = 0;
+	virtual const std::string& stringValue() const = 0;
 
 	/**
 	 * Return type information (to avoid dynamic casts if possible)
@@ -78,47 +74,47 @@ namespace mico {
       class URI : public virtual Resource {
 
       private:
-	string uri;
+	std::string uri;
 
 	// find split position according to algorithm in class description
-	size_t split() const;
+	std::size_t split() const;
 
 	/**
 	 * Internal polymorphic implementation of equals.
 	 */
 	bool equals(const Value& other) const;
 
-	ostream& print(ostream& os) const { os << "URI("<<uri<<")"; return os; } ;
+	std::ostream& print(std::ostream& os) const { os << "URI("<<uri<<")"; return os; } ;
 
       public:
 	
-	URI(const string& uri) : uri(uri) {};
+	URI(const std::string& uri) : uri(uri) {};
 	URI(const char* uri)   : uri(uri) {};
 	URI(const URI& uri)    : uri(uri.uri) {};
 	
 	/**
 	 * Gets the local name of this URI.
 	 */
-	string getLocalName() const { return uri.substr(split()); };
+	std::string getLocalName() const { return uri.substr(split()); };
 
 	/**
 	 * Gets the namespace of this URI.
 	 */
-	string getNamespace() const { return uri.substr(0,split()); };	
+	std::string getNamespace() const { return uri.substr(0,split()); };	
 
 
 	/**
 	 * Returns the String-value of a Value object. This returns either a Literal's label, a URI's URI or a BNode's ID.
 	 */
-	inline const string& stringValue() const { return uri; } ;
+	inline const std::string& stringValue() const { return uri; } ;
 
 
 	inline const ValueTypes getType() const { return TYPE_URI; };
 
 
-	inline bool operator==(const string& s) const { return uri == s; };
+	inline bool operator==(const std::string& s) const { return uri == s; };
 	inline bool operator==(const char* s) const { return uri == s; };
-	inline bool operator!=(const string& s) const { return uri != s; };
+	inline bool operator!=(const std::string& s) const { return uri != s; };
 	inline bool operator!=(const char* s) const { return uri != s; };
       };
 
@@ -129,14 +125,14 @@ namespace mico {
       class BNode : public virtual Resource {
 
       private:
-	string id;
+	std::string id;
 
 	/**
 	 * Internal polymorphic implementation of equals.
 	 */
 	bool equals(const Value& other) const;
 
-	ostream& print(ostream& os) const { os << "BNode("<<id<<")"; return os; } ;
+	std::ostream& print(std::ostream& os) const { os << "BNode("<<id<<")"; return os; } ;
       public:
 	/**
 	 * Create a new BNode with a random ID.
@@ -146,7 +142,7 @@ namespace mico {
 	/**
 	 * Create a new BNode with the given ID
 	 */
-	BNode(const string& id) : id(id) {};
+	BNode(const std::string& id) : id(id) {};
 	BNode(const char*   id) : id(id) {};
 	BNode(const BNode&  id) : id(id.id) {};
 
@@ -154,19 +150,19 @@ namespace mico {
 	/**
 	 * retrieves this blank node's identifier.
 	 */
-	inline const string& getID() const { return id; };
+	inline const std::string& getID() const { return id; };
 	
 
 	/**
 	 * Returns the String-value of a Value object. This returns either a Literal's label, a URI's URI or a BNode's ID.
 	 */
-	inline const string& stringValue() const { return id; };
+	inline const std::string& stringValue() const { return id; };
 
 	inline const ValueTypes getType() const { return TYPE_BNODE; };
 
-	inline bool operator==(const string& s) const { return id == s; };
+	inline bool operator==(const std::string& s) const { return id == s; };
 	inline bool operator==(const char* s) const { return id == s; };
-	inline bool operator!=(const string& s) const { return id != s; };
+	inline bool operator!=(const std::string& s) const { return id != s; };
 	inline bool operator!=(const char* s) const { return id != s; };
       };
 
@@ -175,17 +171,17 @@ namespace mico {
        */
       class Literal : public virtual Value {
       protected:
-	string label;
+	std::string label;
 
 	/**
 	 * Internal polymorphic implementation of equals.
 	 */
 	virtual bool equals(const Value& other) const;
 
-	virtual ostream& print(ostream& os) const { os << "Literal("<<label<<")"; return os; };
+	virtual std::ostream& print(std::ostream& os) const { os << "Literal("<<label<<")"; return os; };
       public:
 
-	Literal(const string& label) : label(label) {};
+	Literal(const std::string& label) : label(label) {};
 	Literal(const char*   label) : label(label) {};
 	Literal(int8_t  i) : label(std::to_string((int)i)) {};
 	Literal(int16_t i) : label(std::to_string((int)i)) {};
@@ -246,21 +242,21 @@ namespace mico {
 	/**
 	 * Gets the label of this literal.
 	 */
-	inline const string& getLabel() const { return label; };
+	inline const std::string& getLabel() const { return label; };
 
 	/**
 	 * Returns the String-value of a Value object. This returns either a Literal's label, a URI's URI or a BNode's ID.
 	 */
-	inline const string& stringValue() const { return label; };
+	inline const std::string& stringValue() const { return label; };
 
 
 	inline const ValueTypes getType() const { return TYPE_PLAIN_LITERAL; };
 
 
 
-	inline bool operator==(const string& s) const { return label == s; };
+	inline bool operator==(const std::string& s) const { return label == s; };
 	inline bool operator==(const char* s) const { return label == s; };
-	inline bool operator!=(const string& s) const { return label != s; };
+	inline bool operator!=(const std::string& s) const { return label != s; };
 	inline bool operator!=(const char* s) const { return label != s; };
 
 
@@ -278,23 +274,23 @@ namespace mico {
        */
       class LanguageLiteral : public virtual Literal {
       private:
-	string lang;
+	std::string lang;
 
 	/**
 	 * Internal polymorphic implementation of equals.
 	 */
 	bool equals(const Value& other) const;
 
-	ostream& print(ostream& os) const { os << "LanguageLiteral("<<label<<","<<lang<<")"; return os; } ;
+	std::ostream& print(std::ostream& os) const { os << "LanguageLiteral("<<label<<","<<lang<<")"; return os; } ;
       public:
 
-	LanguageLiteral(const string& label, const string& language) : Literal(label), lang(language) {};
+	LanguageLiteral(const std::string& label, const std::string& language) : Literal(label), lang(language) {};
 	LanguageLiteral(const char*   label, const char*   language) : Literal(label), lang(language) {};
 
 	/**
 	 * Gets the language tag for this literal, normalized to lower case.
 	 */
-	inline const string& getLanguage() const { return lang; };
+	inline const std::string& getLanguage() const { return lang; };
 
 	inline const ValueTypes getType() const { return TYPE_LANGUAGE_LITERAL; };
 
@@ -313,10 +309,10 @@ namespace mico {
 	 */
 	bool equals(const Value& other) const;
 
-	ostream& print(ostream& os) const { os << "DatatypeLiteral("<<label<<","<<datatype.stringValue()<<")"; return os; } ;
+	std::ostream& print(std::ostream& os) const { os << "DatatypeLiteral("<<label<<","<<datatype.stringValue()<<")"; return os; } ;
 
       public:
-	DatatypeLiteral(const string& label, const URI& datatype) : Literal(label), datatype(datatype) {};
+	DatatypeLiteral(const std::string& label, const URI& datatype) : Literal(label), datatype(datatype) {};
 	DatatypeLiteral(const char*   label, const URI& datatype) : Literal(label), datatype(datatype) {};
 	DatatypeLiteral(int8_t  i) : Literal(std::to_string((int)i)), datatype("http://www.w3.org/2001/XMLSchema#byte") {};
 	DatatypeLiteral(int16_t i) : Literal(std::to_string((int)i)), datatype("http://www.w3.org/2001/XMLSchema#short") {};
@@ -369,27 +365,27 @@ namespace mico {
 
 
 
-      inline bool operator==(const string& l,const URI& r) {
+      inline bool operator==(const std::string& l,const URI& r) {
 	return r == l;
       }
 
-      inline bool operator!=(const string& l,const URI& r) {
+      inline bool operator!=(const std::string& l,const URI& r) {
 	return r != l;
       }
 
-      inline bool operator==(const string& l,const BNode& r) {
+      inline bool operator==(const std::string& l,const BNode& r) {
 	return r == l;
       }
 
-      inline bool operator!=(const string& l,const BNode& r) {
+      inline bool operator!=(const std::string& l,const BNode& r) {
 	return r != l;
       }
 
-      inline bool operator==(const string& l,const Literal& r) {
+      inline bool operator==(const std::string& l,const Literal& r) {
 	return r == l;
       }
 
-      inline bool operator!=(const string& l,const Literal& r) {
+      inline bool operator!=(const std::string& l,const Literal& r) {
 	return r != l;
       }
 

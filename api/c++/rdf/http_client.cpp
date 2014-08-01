@@ -1,3 +1,4 @@
+#include <curl/curl.h>
 #include <cstdlib>
 #include <cstring>
 #include <cctype>

@@ -5,7 +5,7 @@
 #define BUFFSIZE	8192
 
 
-
+using namespace std;
 
 namespace mico {
   namespace rdf {
