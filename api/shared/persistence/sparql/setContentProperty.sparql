@@ -1,0 +1,14 @@
+DELETE {
+  GRAPH <$(ci)-metadata> {
+    <$(cp)> <$(p)> ?x
+  }
+} WHERE {
+  GRAPH <$(ci)-metadata> {
+    <$(cp)> <$(p)> ?x
+  }
+} ;
+INSERT DATA {
+  GRAPH <$(ci)-metadata> {
+    <$(cp)> <$(p)> "$(value)"
+  }
+}

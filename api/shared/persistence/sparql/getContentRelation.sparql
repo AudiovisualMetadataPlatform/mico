@@ -1,0 +1,5 @@
+SELECT ?t  WHERE {
+  GRAPH <$(ci)-metadata> {
+    <$(cp)> <$(p)> ?t
+  }
+}
