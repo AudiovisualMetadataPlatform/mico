@@ -23,26 +23,20 @@ namespace mico {
      * Create a new metadata object for the given server using the global SPARQL
      * endpoint. Optional context must be given explicitly in SPARQL queries.
      */
-    Metadata::Metadata(std::string baseUrl) : baseUrl(baseUrl), contextUrl(baseUrl) {
-      sparqlClient = new SPARQLClient(baseUrl + "/sparql");
-      httpClient   = new HTTPClient();
-    };
+    Metadata::Metadata(std::string baseUrl) 
+      : baseUrl(baseUrl), contextUrl(baseUrl)
+      , sparqlClient(baseUrl + "/sparql") 
+    { };
 
     /**
      * Create a new metadata object for the given server base URL and context using the contextual
      * SPARQL endpoint. All queries and updates will exclusively access this context.
      */
     Metadata::Metadata(std::string baseUrl, std::string context) 
-      : baseUrl(baseUrl), contextUrl(baseUrl + "/" + context) {
-      sparqlClient = new SPARQLClient(baseUrl + "/" + context + "/sparql");
-      httpClient   = new HTTPClient();
-    };
+      : baseUrl(baseUrl), contextUrl(baseUrl + "/" + context)
+      , sparqlClient(baseUrl + "/" + context + "/sparql") 
+    { };
 
-
-    Metadata::~Metadata() {
-      delete sparqlClient;
-      delete httpClient;
-    }
 
 
     /**
@@ -68,7 +62,7 @@ namespace mico {
 	  req.setBody(buffer.str(),"application/rdf+xml");
 	}
   
-	Response* resp = httpClient->execute(req);
+	Response* resp = httpClient.execute(req);
 	delete resp;
       } else {
 	std::cerr << "error loading data: input stream was empty" << std::endl;
@@ -95,7 +89,7 @@ namespace mico {
       
       Request req(GET,baseUrl+"/export/download?context="+contextUrl+"&format="+_format);
 
-      Response* resp = httpClient->execute(req);
+      Response* resp = httpClient.execute(req);
 
       if(resp->getStatus() >= 200 && resp->getStatus() < 300) {
 	const Body* b = resp->getBody();
@@ -114,7 +108,7 @@ namespace mico {
      * @param sparqlUpdate
      */
     void Metadata::update(const string sparqlUpdate) {
-      sparqlClient->update(sparqlUpdate);
+      sparqlClient.update(sparqlUpdate);
     }
 
 
@@ -126,7 +120,7 @@ namespace mico {
      * @return
      */
     const TupleResult* Metadata::query(const string sparqlQuery) {
-      return sparqlClient->query(sparqlQuery);
+      return sparqlClient.query(sparqlQuery);
     }
 
 
@@ -139,7 +133,7 @@ namespace mico {
      * @return
      */
     const bool Metadata::ask(const string sparqlQuery) {
-      return sparqlClient->ask(sparqlQuery);
+      return sparqlClient.ask(sparqlQuery);
     }
 
 

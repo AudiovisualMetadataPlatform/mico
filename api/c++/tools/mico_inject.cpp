@@ -17,6 +17,7 @@
 #include "../logging.h"
 
 using namespace mico::event;
+using namespace mico::persistence;
 
 namespace DC = mico::rdf::vocabularies::DC;
 

@@ -4,15 +4,13 @@
 #include <string>
 #include <iostream>
 
+#include "http_client.hpp"
+#include "sparql_client.hpp"
 
 namespace mico {
   // forward declarations
-  namespace http {
-    class HTTPClient;
-  }
   namespace rdf {
     namespace query {
-      class SPARQLClient;
       class TupleResult;
     }
   }
@@ -34,10 +32,10 @@ namespace mico {
       std::string contextUrl;  //!< the URI of the context to use as named graph
 
       mico::rdf::query::
-      SPARQLClient* sparqlClient; //!< an instance of a SPARQL client, will be initialised to baseUrl + "/sparql"
+      SPARQLClient sparqlClient; //!< an instance of a SPARQL client, will be initialised to baseUrl + "/sparql"
 
       mico::http::
-      HTTPClient*   httpClient;   //!< an instance of an HTTP client, will be used for load/dump
+      HTTPClient   httpClient;   //!< an instance of an HTTP client, will be used for load/dump
 				 //!< using the baseUrl and the Marmotta import/export endpoints
 
     public:
@@ -54,8 +52,6 @@ namespace mico {
        */
       Metadata(std::string baseUrl, std::string context);
 
-
-      virtual ~Metadata();
 
       /**
        * Load RDF data of the given format into the metadata dataset. Can be used for preloading existing metadata.

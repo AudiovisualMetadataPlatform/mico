@@ -10,6 +10,8 @@ using namespace std;
 using namespace boost;
 using namespace uuids;
 using namespace mico::util;
+using namespace mico::rdf::model;
+using namespace mico::rdf::query;
 
 // extern references to constant SPARQL templates
 SPARQL_INCLUDE(askContentItem);
@@ -77,9 +79,9 @@ namespace mico {
       params["ci"] = id.stringValue();
 
       if(metadata.ask(SPARQL_FORMAT(askContentItem,params))) {
-		return new ContentItem(marmottaServerUrl,contentDirectory,id);
+	return new ContentItem(marmottaServerUrl,contentDirectory,id);
       } else {
-		return NULL;
+	return NULL;
       }
     }
 
@@ -114,16 +116,30 @@ namespace mico {
 
       const TupleResult* r = metadata.query(SPARQL_FORMAT(listContentItems,params));
       if(r->size() > 0) {
-		return content_item_iterator(marmottaServerUrl,contentDirectory,r);
+	return content_item_iterator(marmottaServerUrl,contentDirectory,r);
       } else {
-		delete r;
-		return content_item_iterator(marmottaServerUrl,contentDirectory);
+	delete r;
+	return content_item_iterator(marmottaServerUrl,contentDirectory);
       }
     }
 
 
     content_item_iterator PersistenceService::end() {
       return content_item_iterator(marmottaServerUrl,contentDirectory);
+    }
+
+
+
+    void content_item_iterator::increment() { 
+      pos = pos+1 == result->size() ? -1 : pos + 1; 
+    };
+
+    bool content_item_iterator::equal(content_item_iterator const& other) const { 
+      return this->pos == other.pos; 
+    };
+
+    ContentItem* content_item_iterator::dereference() const { 
+      return new ContentItem(baseUrl, contentDirectory, *dynamic_cast<const URI*>( result->at(pos).at("p") ) ); 
     }
 
   }

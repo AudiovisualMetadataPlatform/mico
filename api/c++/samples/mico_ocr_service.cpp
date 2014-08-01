@@ -31,11 +31,16 @@
 // for configuring logging levels
 #include "../logging.h"
 
+using std::string;
+
 // this namespace contains EventManager and AnalysisService
 using namespace mico::event;
 
 // this namespace contains Content, ContentItem, etc
 using namespace mico::persistence;
+
+// this namespace contains the RDF data model
+using namespace mico::rdf::model;
 
 // define dublin core vocabulary shortcut
 namespace DC = mico::rdf::vocabularies::DC;

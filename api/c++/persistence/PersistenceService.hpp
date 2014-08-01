@@ -16,7 +16,6 @@
 namespace mico {
   namespace persistence {
 
-    using namespace mico::rdf::model;   
     using namespace mico::rdf::query;   
 
     class content_item_iterator;
@@ -29,7 +28,7 @@ namespace mico {
       friend class PersistenceService;
 
     protected:
-      PersistenceMetadata(string baseUrl) : Metadata(baseUrl)  {};
+      PersistenceMetadata(std::string baseUrl) : Metadata(baseUrl)  {};
 
     };
 
@@ -44,31 +43,31 @@ namespace mico {
     private:
 
       std::string marmottaServerUrl;
-	  std::string contentDirectory;
+      std::string contentDirectory;
       PersistenceMetadata metadata;
 
-	public:
+    public:
 
-	  /**
-	   * Initialise persistence service with the address of a server running the standard installation of
-	   * the MICO platform with Marmotta at port 8080 under context /marmotta, RabbitMQ at port 5672, and
-	   * an FTP server, all with login/password mico/mico.
-	   */ 
-	  PersistenceService(std::string serverAddress) 
-		: marmottaServerUrl("http://" + serverAddress + ":8080/marmotta")
-		, metadata("http://" + serverAddress + ":8080/marmotta")
-		, contentDirectory("ftp://mico:mico@" + serverAddress) {};
+      /**
+       * Initialise persistence service with the address of a server running the standard installation of
+       * the MICO platform with Marmotta at port 8080 under context /marmotta, RabbitMQ at port 5672, and
+       * an FTP server, all with login/password mico/mico.
+       */ 
+      PersistenceService(std::string serverAddress) 
+	: marmottaServerUrl("http://" + serverAddress + ":8080/marmotta")
+	, metadata("http://" + serverAddress + ":8080/marmotta")
+	, contentDirectory("ftp://mico:mico@" + serverAddress) {};
 
 
-	  /**
-	   * Initialise persistence service with the address of a server running the standard installation of
-	   * the MICO platform with Marmotta at port 8080 under context /marmotta, RabbitMQ at port 5672, and
-	   * an FTP server, all with login/password mico/mico.
-	   */ 
-	  PersistenceService(std::string serverAddress, int marmottaPort, std::string user, std::string password) 
-		: marmottaServerUrl("http://" + serverAddress + ":" + std::to_string(marmottaPort) + "/marmotta")
-		, metadata("http://" + serverAddress + ":" + std::to_string(marmottaPort) + "/marmotta")
-		, contentDirectory("ftp://" + user + ":" + password + "@" + serverAddress) {};
+      /**
+       * Initialise persistence service with the address of a server running the standard installation of
+       * the MICO platform with Marmotta at port 8080 under context /marmotta, RabbitMQ at port 5672, and
+       * an FTP server, all with login/password mico/mico.
+       */ 
+      PersistenceService(std::string serverAddress, int marmottaPort, std::string user, std::string password) 
+	: marmottaServerUrl("http://" + serverAddress + ":" + std::to_string(marmottaPort) + "/marmotta")
+	, metadata("http://" + serverAddress + ":" + std::to_string(marmottaPort) + "/marmotta")
+	, contentDirectory("ftp://" + user + ":" + password + "@" + serverAddress) {};
 
 
       /**
@@ -78,7 +77,7 @@ namespace mico {
        * @param marmottaServerUrl the URL of the Apache Marmotta server, e.g. http://localhost:8080/marmotta
        */
       PersistenceService(std::string marmottaServerUrl, std::string contentDirectory) 
-		: marmottaServerUrl(marmottaServerUrl), metadata(marmottaServerUrl), contentDirectory(contentDirectory) {};
+	: marmottaServerUrl(marmottaServerUrl), metadata(marmottaServerUrl), contentDirectory(contentDirectory) {};
 
 
       /**
@@ -103,7 +102,7 @@ namespace mico {
        *
        * @return a handle to the newly created ContentItem
        */
-      ContentItem* createContentItem(const URI& id);
+      ContentItem* createContentItem(const mico::rdf::model::URI& id);
 
 
       /**
@@ -112,12 +111,12 @@ namespace mico {
        *
        * @return a handle to the ContentItem with the given URI, or null if it does not exist
        */
-      ContentItem* getContentItem(const URI& id);
+      ContentItem* getContentItem(const mico::rdf::model::URI& id);
 
       /**
        * Delete the content item with the given URI. If the content item does not exist, do nothing.
        */
-      void deleteContentItem(const URI& id);
+      void deleteContentItem(const mico::rdf::model::URI& id);
 
       /**
        * Return an iterator over all currently available content items.
@@ -144,13 +143,17 @@ namespace mico {
     class content_item_iterator  : public boost::iterator_facade<content_item_iterator, ContentItem*, boost::forward_traversal_tag, ContentItem*> {
     private:
       int pos;
-      const string& baseUrl;
-	  const string& contentDirectory;
-      const TupleResult* result;
+      const std::string& baseUrl;
+      const std::string& contentDirectory;
+      const mico::rdf::query::TupleResult* result;
 
     public:
-      content_item_iterator(const string& baseUrl, const string& contentDirectory) : baseUrl(baseUrl), contentDirectory(contentDirectory), pos(-1), result(NULL) {};
-      content_item_iterator(const string& baseUrl, const string& contentDirectory, const TupleResult* r) : baseUrl(baseUrl), contentDirectory(contentDirectory), pos(0), result(r) {};
+      content_item_iterator(const std::string& baseUrl, const std::string& contentDirectory) 
+	: baseUrl(baseUrl), contentDirectory(contentDirectory), pos(-1), result(NULL) {};
+
+      content_item_iterator(const std::string& baseUrl, const std::string& contentDirectory, const mico::rdf::query::TupleResult* r) 
+	: baseUrl(baseUrl), contentDirectory(contentDirectory), pos(0), result(r) {};
+
       ~content_item_iterator() { if(result) { delete result; } };
 
       
@@ -158,13 +161,9 @@ namespace mico {
 
       friend class boost::iterator_core_access;
 
-      inline void increment() { pos = pos+1 == result->size() ? -1 : pos + 1; };
-
-      inline bool equal(content_item_iterator const& other) const { return this->pos == other.pos; };
-
-      inline ContentItem* dereference() const { 
-	return new ContentItem(baseUrl, contentDirectory, *dynamic_cast<const URI*>( result->at(pos).at("p") ) ); 
-      }
+      void increment();
+      bool equal(content_item_iterator const& other) const;
+      ContentItem* dereference() const;
 
     };
 #endif

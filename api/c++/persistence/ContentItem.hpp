@@ -17,10 +17,6 @@
 namespace mico {
   namespace persistence {
 
-    using std::string;
-    using namespace boost::uuids;
-    using namespace mico::rdf::model;   
-
 
     /**
      * Specialised support for content item metadata of content item processing. Currently just an
@@ -31,7 +27,7 @@ namespace mico {
       friend class ContentItem;
 
     protected:
-      ContentItemMetadata(string baseUrl, string context) : Metadata(baseUrl, context)  {};
+      ContentItemMetadata(std::string baseUrl, std::string context) : Metadata(baseUrl, context)  {};
 
     };
 
@@ -45,7 +41,7 @@ namespace mico {
       friend class ContentItem;
 
     protected:
-      ExecutionMetadata(string baseUrl, string context) : Metadata(baseUrl, context)  {};
+      ExecutionMetadata(std::string baseUrl, std::string context) : Metadata(baseUrl, context)  {};
 
     };
 
@@ -59,7 +55,7 @@ namespace mico {
       friend class ContentItem;
 
     protected:
-      ResultMetadata(string baseUrl, string context) : Metadata(baseUrl, context)  {};
+      ResultMetadata(std::string baseUrl, std::string context) : Metadata(baseUrl, context)  {};
 
     };
 
@@ -67,9 +63,9 @@ namespace mico {
     class content_part_iterator;
 
     // suffixes for named graph URIs of a content item
-    const string SUFFIX_METADATA  = "-metadata";
-    const string SUFFIX_EXECUTION = "-execution";
-    const string SUFFIX_RESULT    = "-result";
+    const std::string SUFFIX_METADATA  = "-metadata";
+    const std::string SUFFIX_EXECUTION = "-execution";
+    const std::string SUFFIX_RESULT    = "-result";
 
     /**
      * Representation of a ContentItem. A ContentItem is a collection of ContentParts, e.g. an HTML page together with
@@ -82,9 +78,9 @@ namespace mico {
       friend bool operator==(const ContentItem& ci1, const ContentItem& ci2);
 
     protected:
-      const string& baseUrl;
-      const string& contentDirectory;
-      uuid id;
+      const std::string& baseUrl;
+      const std::string& contentDirectory;
+      boost::uuids::uuid id;
 
       ContentItemMetadata metadata;
       ExecutionMetadata   execution;
@@ -98,7 +94,7 @@ namespace mico {
        * @param baseUrl base URL of the marmotta server
        * @param id      a unique UUID identifying the content item
        */
-      ContentItem(const string& baseUrl, const string& contentDirectory, const uuid& id);
+      ContentItem(const std::string& baseUrl, const std::string& contentDirectory, const boost::uuids::uuid& id);
 
       /**
        * Create a new content item using the given server base URL and a URI as content item
@@ -107,7 +103,7 @@ namespace mico {
        * @param baseUrl base URL of the marmotta server
        * @param uri     a unique URI identifying the content item (must have baseUrl as prefix)
        */
-      ContentItem(const string& baseUrl, const string& contentDirectory, const URI& uri);
+      ContentItem(const std::string& baseUrl, const std::string& contentDirectory, const mico::rdf::model::URI& uri);
 
 
       /**
@@ -115,7 +111,7 @@ namespace mico {
        *
        * @return the URI identifying this content item
        */
-      inline const URI getURI() const { return URI(baseUrl + "/" + boost::uuids::to_string(id)); };
+      inline const mico::rdf::model::URI getURI() const { return mico::rdf::model::URI(baseUrl + "/" + boost::uuids::to_string(id)); };
 
       /**
        * Return (read-only) content item metadata part of the initial content item, e.g. provenance information etc.
@@ -161,7 +157,7 @@ namespace mico {
        * @param id the URI of the content part to create
        * @return a handle to a ContentPart object that is suitable for reading and updating
        */
-      Content* createContentPart(const URI& id);
+      Content* createContentPart(const mico::rdf::model::URI& id);
 
       /**
        * Return a handle to the ContentPart with the given URI, or null in case the content item does not have this
@@ -170,7 +166,7 @@ namespace mico {
        * @param id the URI of the content part to return
        * @return a handle to a ContentPart object that is suitable for reading and updating
        */
-      Content* getContentPart(const URI& id);
+      Content* getContentPart(const mico::rdf::model::URI& id);
 
 
       /**
@@ -179,14 +175,14 @@ namespace mico {
        *
        * @param id the URI of the content part to delete
        */
-      void deleteContentPart(const URI& id);
+      void deleteContentPart(const mico::rdf::model::URI& id);
 
 
       /**
        * Convenient C++ style operator for accessing and constructing content parts. Returns
        * the content part with the given ID if found or a newly created content part if not found.
        */
-      Content* operator[](const URI& id);
+      Content* operator[](const mico::rdf::model::URI& id);
 
 
       /**
