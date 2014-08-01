@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <iostream>
 
+#include <ctime>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -18,6 +19,7 @@
 
 using namespace mico::event;
 using namespace mico::persistence;
+using namespace mico::rdf::model;
 
 namespace DC = mico::rdf::vocabularies::DC;
 
@@ -34,6 +36,15 @@ std::string getMimeType(const void* buffer, size_t length) {
 	std::string result(magic_buffer(cookie,buffer,length));
 	magic_close(cookie);
 	return result;
+}
+
+// helper function to get time stamp
+std::string getTimestamp() {
+	time_t now;
+	time(&now);
+	char buf[sizeof "2011-10-08T07:07:09Z"];
+	strftime(buf, sizeof buf, "%FT%TZ", gmtime(&now));				
+	return std::string(buf);
 }
 
 
@@ -74,6 +85,8 @@ int main(int argc, char **argv) {
 				Content* c = item->createContentPart();
 				c->setType(getMimeType(buffer,len));
 				c->setProperty(DC::source, argv[i]);
+				c->setRelation(DC::creator, URI("http://www.mico-project.org/tools/mico_inject"));
+				c->setProperty(DC::created, getTimestamp());
 				std::ostream* os = c->getOutputStream();
 				os->write(buffer, len);
 				delete os;

@@ -1,0 +1,71 @@
+<html ng-app="brokerApp">
+<head>
+    <title>MICO Broker</title>
+
+    <link rel="stylesheet" href="webjars/bootstrap/3.1.1/css/bootstrap.css"/>
+    <script src="webjars/angularjs/1.2.15/angular.js"></script>
+    <script src="webjars/angular-ui-bootstrap/0.10.0/ui-bootstrap-tpls.js"></script>
+    <script src="js/controllers.js"></script>
+
+    <!-- fix Bootstrap CSS for AngularJS -->
+    <style type="text/css">
+        .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+        body {
+            margin-left: 10%;
+            margin-right: 10%;
+        }
+
+        td {
+            padding: 5px;
+        }
+
+    </style>
+</head>
+
+<body ng-controller="ShowItemCtrl">
+
+
+<div class="container-fluid">
+    <h1>MICO Content Item Status</h1>
+</div>
+
+<div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
+    <h3>Metadata</h3>
+
+    <table>
+        <tr><th>URI</th><td>{{itemUri}}</td></tr>
+        <tr>
+            <th>State</th>
+            <td>
+                <div style="background-color: #006318; color: lightgreen; text-align: center;" ng-show="itemData.finished == 'true'">Finished</div>
+                <div style="background-color: darkred; color: lightcoral; text-align: center;" ng-show="itemData.finished == 'false'">In Progress</div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+
+<div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px; border: 1px solid darkgray;" ng-repeat="part in itemData.parts">
+    <h3>Content Part {{$index}}</h3>
+
+    <table>
+        <tr><th>URI</th><td><a href="/marmotta/resource?uri={{part.uri}}">{{part.uri}}</a></td></tr>
+        <tr><th>Source</th><td>{{part.source}}</td></tr>
+        <tr><th>Type</th><td>{{part.type}}</td></tr>
+        <tr><th>Created</th><td>{{part.created}}</td></tr>
+        <tr><th>Creator</th><td>{{part.creator}}</td></tr>
+        <tr ng-show="part.transitions.length > 0">
+            <th>Transitions</th>
+            <td>
+                <span ng-repeat="t in part.transitions">{{t.start_state}} -> {{t.end_state}} ({{t.service}}) ,</span>
+            </td>
+        </tr>
+        <tr><th>Actions</th><td><a href="/marmotta/resource?uri={{part.uri}}">Metadata</a> - <a href="status/download?partUri={{part.uri}}&itemUri={{itemUri}}">Download</a></td></tr>
+    </table>
+</div>
+
+
+
+</body>
+</html>

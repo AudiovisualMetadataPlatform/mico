@@ -64,34 +64,20 @@
 
     <table style="width: 100%">
         <tr>
-            <th>URI</th><th>States and Transitions</th>
+            <th>URI</th><th>Actions</th><th>Registration</th><th>State</th>
         </tr>
         <tr ng-repeat="item in items" style="border: 1px solid black;">
             <td style="vert-align: top"><a href="/marmotta/resource?uri={{item.uri}}">{{item.uri}}</a></td>
             <td>
-                <strong>States:</strong>
-                <table style="width: 100%">
-                    <tr>
-                        <th>Part</th><th>State</th>
-                    </tr>
-                    <tr ng-repeat="state in item.states">
-                        <td>{{state.object}}: </td>
-                        <td>{{state.state}}</td>
-                    </tr>
-                </table>
-                <strong>Transitions:</strong>
-                <table style="width: 100%">
-                    <tr>
-                        <th>ID</th><th>Part</th><th>Start</th><th>End</th><th>Service</th>
-                    </tr>
-                    <tr ng-repeat="transition in item.transitions">
-                        <td>{{transition.correlation}}</td>
-                        <td>{{transition.object}}: </td>
-                        <td>{{transition.start_state}}</td>
-                        <td>{{transition.end_state}}</td>
-                        <td>{{transition.service}}</td>
-                    </tr>
-                </table>
+                <a href="inspect.html?uri={{item.uri}}">Inspect</a> -
+                <a href="/marmotta/resource?uri={{item.uri}}">Metadata</a>
+            </td>
+            <td>
+                {{item.time}}
+            </td>
+            <td>
+                <div style="background-color: #006318; color: lightgreen; text-align: center;" ng-show="item.finished == 'true'">Finished</div>
+                <div style="background-color: darkred; color: lightcoral; text-align: center;" ng-show="item.finished == 'false'">In Progress</div>
             </td>
         </tr>
 

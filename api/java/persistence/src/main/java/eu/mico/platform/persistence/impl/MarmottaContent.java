@@ -8,6 +8,7 @@ import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -112,6 +113,94 @@ public class MarmottaContent implements Content {
             throw new RepositoryException("the SPARQL query could not be executed",e);
         }
     }
+
+
+
+    /**
+     * Set the property value for the given property of this content part using an arbitrary string identifier;
+     *
+     * @param value
+     */
+    @Override
+    public void setProperty(URI property, String value) throws RepositoryException {
+        Metadata m = item.getMetadata();
+
+        try {
+            m.update(createNamed("setContentProperty", of("ci", item.getURI().stringValue(), "p", property.stringValue(), "cp", getURI().stringValue(), "value", value)));
+        } catch (MalformedQueryException e) {
+            log.error("the SPARQL update was malformed:", e);
+            throw new RepositoryException("the SPARQL update was malformed",e);
+        } catch (UpdateExecutionException e) {
+            log.error("the SPARQL update could not be executed:", e);
+            throw new RepositoryException("the SPARQL update could not be executed",e);
+        }
+    }
+
+    /**
+     * Return the property value of this content part for the given property.
+     */
+    @Override
+    public String getProperty(URI property) throws RepositoryException {
+        Metadata m = item.getMetadata();
+        try {
+            TupleQueryResult r = m.query(createNamed("getContentProperty", "ci", item.getURI().stringValue(), "p", property.stringValue(), "cp", getURI().stringValue()));
+            if(r.hasNext()) {
+                return r.next().getValue("t").stringValue();
+            } else {
+                return null;
+            }
+        } catch (MalformedQueryException e) {
+            log.error("the SPARQL query was malformed:", e);
+            throw new RepositoryException("the SPARQL query was malformed",e);
+        } catch (QueryEvaluationException e) {
+            log.error("the SPARQL query could not be executed:", e);
+            throw new RepositoryException("the SPARQL query could not be executed",e);
+        }
+    }
+
+
+    /**
+     * Set the property relation for the given property of this content part using another resource.
+     *
+     * @param value
+     */
+    @Override
+    public void setRelation(URI property, URI value) throws RepositoryException {
+        Metadata m = item.getMetadata();
+
+        try {
+            m.update(createNamed("setContentProperty", of("ci", item.getURI().stringValue(), "p", property.stringValue(), "cp", getURI().stringValue(), "value", value.stringValue())));
+        } catch (MalformedQueryException e) {
+            log.error("the SPARQL update was malformed:", e);
+            throw new RepositoryException("the SPARQL update was malformed",e);
+        } catch (UpdateExecutionException e) {
+            log.error("the SPARQL update could not be executed:", e);
+            throw new RepositoryException("the SPARQL update could not be executed",e);
+        }
+    }
+
+    /**
+     * Return the property value of this content part for the given property.
+     */
+    @Override
+    public Value getRelation(URI property) throws RepositoryException {
+        Metadata m = item.getMetadata();
+        try {
+            TupleQueryResult r = m.query(createNamed("getContentProperty", "ci", item.getURI().stringValue(), "p", property.stringValue(), "cp", getURI().stringValue()));
+            if(r.hasNext()) {
+                return r.next().getValue("t");
+            } else {
+                return null;
+            }
+        } catch (MalformedQueryException e) {
+            log.error("the SPARQL query was malformed:", e);
+            throw new RepositoryException("the SPARQL query was malformed",e);
+        } catch (QueryEvaluationException e) {
+            log.error("the SPARQL query could not be executed:", e);
+            throw new RepositoryException("the SPARQL query could not be executed",e);
+        }
+    }
+
 
     /**
      * Return a new output stream for writing to the content. Any existing content will be overwritten.

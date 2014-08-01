@@ -5,7 +5,14 @@ import eu.mico.platform.broker.model.ContentItemState;
 import eu.mico.platform.broker.model.ServiceDescriptor;
 import eu.mico.platform.broker.model.Transition;
 import eu.mico.platform.broker.model.TypeDescriptor;
+import eu.mico.platform.persistence.model.Content;
+import eu.mico.platform.persistence.model.ContentItem;
+import org.apache.commons.io.IOUtils;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.vocabulary.DCTERMS;
+import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,37 +83,95 @@ public class StatusWebService {
     @GET
     @Path("/items")
     @Produces("application/json")
-    public List<Map<String,Object>> getItems()  {
+    public List<Map<String,Object>> getItems(@QueryParam("uri") String itemUri, @QueryParam("parts") boolean showParts) throws RepositoryException {
         List<Map<String,Object>> result = new ArrayList<>();
-        for(Map.Entry<String, ContentItemState> state : broker.getStates().entrySet()) {
-            Map<String,Object> sprops = new HashMap<>();
-            sprops.put("uri", state.getKey());
-
-            List<Map<String,String>> transitions = new ArrayList<>();
-            for(Map.Entry<String,Transition> t : state.getValue().getProgress().entrySet()) {
-                Map<String,String> tprops = new HashMap<>();
-                tprops.put("correlation", t.getKey());
-                tprops.put("start_state", t.getValue().getStateStart().getSymbol());
-                tprops.put("end_state", t.getValue().getStateEnd().getSymbol());
-                tprops.put("service", t.getValue().getService().getUri().stringValue());
-                tprops.put("object", t.getValue().getObject().stringValue());
-                transitions.add(tprops);
+        if(itemUri == null) {
+            // retrieve a list of all items
+            for(Map.Entry<String, ContentItemState> state : broker.getStates().entrySet()) {
+                result.add(wrapContentItemStatus(state.getKey(),state.getValue(),showParts));
             }
-            sprops.put("transitions", transitions);
-
-            List<Map<String,String>> states = new ArrayList<>();
-            for(Map.Entry<URI,TypeDescriptor> s : state.getValue().getStates().entrySet()) {
-                Map<String,String> tprops = new HashMap<>();
-                tprops.put("state", s.getValue().getSymbol());
-                tprops.put("object", s.getKey().stringValue());
-                states.add(tprops);
-            }
-            sprops.put("states", states);
-
-
-            result.add(sprops);
+        } else if(broker.getStates().containsKey(itemUri)) {
+            result.add(wrapContentItemStatus(itemUri, broker.getStates().get(itemUri),showParts));
+        } else {
+            throw new NotFoundException("item with uri " + itemUri + " not found in broker");
         }
         return result;
+    }
+
+    private Map<String,Object> wrapContentItemStatus(String uri, ContentItemState state, boolean showParts) throws RepositoryException {
+        Map<String,Object> sprops = new HashMap<>();
+        sprops.put("uri", uri);
+        sprops.put("finished", state.isFinalState() ? "true" : "false");
+        sprops.put("time", ISO8601FORMAT.format(state.getCreated()));
+
+        if(showParts) {
+            List<Map<String, Object>> parts = new ArrayList<>();
+            ContentItem item = broker.getPersistenceService().getContentItem(new URIImpl(uri));
+            for (Content part : item.listContentParts()) {
+                parts.add(wrapContentStatus(state, part));
+            }
+            sprops.put("parts", parts);
+        }
+
+        return sprops;
+    }
+
+    private Map<String,Object> wrapContentStatus(ContentItemState state, Content part) throws RepositoryException {
+        Map<String,Object> sprops = new HashMap<>();
+        sprops.put("uri", part.getURI().stringValue());
+        sprops.put("title", part.getProperty(DCTERMS.TITLE));
+        sprops.put("type",  part.getType());
+        sprops.put("creator",  stringValue(part.getRelation(DCTERMS.CREATOR)));
+        sprops.put("created",  part.getProperty(DCTERMS.CREATED));
+        sprops.put("source",  stringValue(part.getRelation(DCTERMS.SOURCE)));
+
+        if(state != null) {
+            if(state.getStates().get(part.getURI()) != null) {
+                sprops.put("state", state.getStates().get(part.getURI()).getSymbol());
+            }
+
+            List<Map<String, String>> transitions = new ArrayList<>();
+            for (Map.Entry<String, Transition> t : state.getProgress().entrySet()) {
+                if(t.getValue().getObject().equals(part.getURI())) {
+                    Map<String, String> tprops = new HashMap<>();
+                    tprops.put("correlation", t.getKey());
+                    tprops.put("start_state", t.getValue().getStateStart().getSymbol());
+                    tprops.put("end_state", t.getValue().getStateEnd().getSymbol());
+                    tprops.put("service", t.getValue().getService().getUri().stringValue());
+                    transitions.add(tprops);
+                }
+            }
+            sprops.put("transitions", transitions);
+        }
+
+        return sprops;
+    }
+
+    private static String stringValue(Value v) {
+        return v != null ? v.stringValue() : null;
+    }
+
+
+    @GET
+    @Path("/download")
+    public Response downloadPart(@QueryParam("itemUri") String itemUri, @QueryParam("partUri") String partUri) throws RepositoryException {
+        final ContentItem item = broker.getPersistenceService().getContentItem(new URIImpl(itemUri));
+        if(item == null) {
+            throw new NotFoundException("Content Item with URI " + itemUri + " not found in system");
+        }
+        final Content     part = item.getContentPart(new URIImpl(partUri));
+        if(part == null) {
+            throw new NotFoundException("Content Part with URI " + partUri + " not found in system");
+        }
+
+        StreamingOutput entity = new StreamingOutput() {
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+                IOUtils.copy(part.getInputStream(), output);
+            }
+        };
+
+        return Response.ok(entity, part.getType()).build();
     }
 
 

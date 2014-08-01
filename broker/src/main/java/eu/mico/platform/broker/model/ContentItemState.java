@@ -8,10 +8,7 @@ import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Represent the current processing states of a content item
@@ -23,6 +20,7 @@ public class ContentItemState {
     private static Logger log = LoggerFactory.getLogger(ContentItemState.class);
 
     private ContentItem contentItem;
+    private Date        created;
 
     private Map<URI, TypeDescriptor> states;   // contains the currently non-processed states
     private Map<String,Transition>   progress; // contains the correlation IDs currently in progress, used to indicate when we are finished
@@ -35,6 +33,7 @@ public class ContentItemState {
 
         this.states = new HashMap<>();
         this.progress = new HashMap<>();
+        this.created  = new Date();
 
         initState();
     }
@@ -141,5 +140,9 @@ public class ContentItemState {
 
     public Map<URI, TypeDescriptor> getStates() {
         return states;
+    }
+
+    public Date getCreated() {
+        return created;
     }
 }

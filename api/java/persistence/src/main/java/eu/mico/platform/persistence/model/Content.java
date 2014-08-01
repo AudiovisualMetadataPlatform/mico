@@ -2,6 +2,7 @@ package eu.mico.platform.persistence.model;
 
 import org.apache.commons.vfs2.FileSystemException;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.repository.RepositoryException;
 
 import java.io.InputStream;
@@ -37,6 +38,30 @@ public interface Content {
      * representation). Ideally, the type comes from a controlled vocabulary.
      */
     public String getType() throws RepositoryException;
+
+    /**
+     * Set the property value for the given property of this content part using an arbitrary string identifier;
+     *
+     * @param value
+     */
+    void setProperty(URI property, String value) throws RepositoryException;
+
+    /**
+     * Return the property value of this content part for the given property.
+     */
+    String getProperty(URI property) throws RepositoryException;
+
+    /**
+     * Set the property relation for the given property of this content part using another resource.
+     *
+     * @param value
+     */
+    void setRelation(URI property, URI value) throws RepositoryException;
+
+    /**
+     * Return the property value of this content part for the given property.
+     */
+    Value getRelation(URI property) throws RepositoryException;
 
     /**
      * Return a new output stream for writing to the content. Any existing content will be overwritten.
