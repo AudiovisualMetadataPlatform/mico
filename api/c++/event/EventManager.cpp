@@ -250,7 +250,7 @@ namespace mico {
 		LOG_ERROR << "could not access service discovery exchange: " << message << std::endl;
 	      });
 
-	  // register delivery consumer
+	  // register discovery consumer
 	  channel->declareQueue(AMQP::durable + AMQP::autodelete)
 	    .onSuccess([this](const std::string &name, uint32_t messageCount, uint32_t consumerCount) {
 		LOG_INFO << "starting to listen for discovery requests on queue " << name << std::endl;

@@ -67,6 +67,10 @@ public class EventManagerImpl implements EventManager {
         services = new HashMap<>();
     }
 
+    public PersistenceService getPersistenceService() {
+        return persistenceService;
+    }
+
     /**
      * Initialise the event manager, setting up any necessary channels and connections
      */
