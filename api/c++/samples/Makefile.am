@@ -11,5 +11,5 @@ bin_PROGRAMS=
 if SAMPLE_OCR
 bin_PROGRAMS += mico_ocr_service
 mico_ocr_service_SOURCES = mico_ocr_service.cpp
-mico_ocr_service_LDADD = $(LIBPERSISTENCE) $(LIBRDF) $(LIBMARMOTTA) $(LIBAMQP) $(LIBEVENT) @curllibs@ @protobuf_libs@ @tesseract_libs@ -lboost_system -lboost_log -lboost_log_setup
+mico_ocr_service_LDADD = $(LIBPERSISTENCE) $(LIBRDF) $(LIBEVENT) @tesseract_libs@ -lboost_system -lboost_log -lboost_log_setup
 endif
