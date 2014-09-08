@@ -98,4 +98,125 @@
         <module>api-spring</module>
     </modules>
 
+
+
+
+
+
+    <profiles>
+        <profile>
+            <id>debian</id>
+
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/deb/resources</directory>
+                        <filtering>true</filtering>
+                        <targetPath>${project.build.directory}/deb-resources</targetPath>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+                        <artifactId>jdeb</artifactId>
+                        <groupId>org.vafer</groupId>
+                        <version>1.3</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jdeb</goal>
+                                </goals>
+                                <configuration>
+                                    <snapshotExpand>true</snapshotExpand>
+                                    <attach>false</attach>
+                                    <skipPOMs>false</skipPOMs>
+
+                                    <name>libmico-api-java</name>
+                                    <deb>${project.build.directory}/[[name]]_[[version]]_all.deb</deb>
+                                    <changesOut>${project.build.directory}/[[name]]_[[version]]_all.changes</changesOut>
+
+                                    <verbose>true</verbose>
+                                    <controlDir>${basedir}/src/deb/debian</controlDir>
+                                    <dataSet>
+
+                                        <data>
+                                            <src>event/target/event-${project.version}.jar</src>
+                                            <dst>mico-event-${project.version}.jar</dst>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/usr/share/java</prefix>
+                                                <user>root</user>
+                                                <group>root</group>
+                                            </mapper>
+                                        </data>
+                                        <data>
+                                            <src>event/target/site/apidocs</src>
+                                            <type>directory</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/usr/share/doc/libmico-api-java/event</prefix>
+                                                <user>root</user>
+                                                <group>root</group>
+                                            </mapper>
+                                        </data>
+
+
+                                        <data>
+                                            <src>persistence/target/persistence-${project.version}.jar</src>
+                                            <dst>mico-persistence-${project.version}.jar</dst>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/usr/share/java</prefix>
+                                                <user>root</user>
+                                                <group>root</group>
+                                            </mapper>
+                                        </data>
+                                        <data>
+                                            <src>persistence/target/site/apidocs</src>
+                                            <type>directory</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/usr/share/doc/libmico-api-java/persistence</prefix>
+                                                <user>root</user>
+                                                <group>root</group>
+                                            </mapper>
+                                        </data>
+
+                                        <data>
+                                            <src>api-spring/target/api-spring-${project.version}.jar</src>
+                                            <dst>mico-api-spring-${project.version}.jar</dst>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/usr/share/java</prefix>
+                                                <user>root</user>
+                                                <group>root</group>
+                                            </mapper>
+                                        </data>
+                                        <data>
+                                            <src>api-spring/target/site/apidocs</src>
+                                            <type>directory</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/usr/share/doc/libmico-api-java/spring</prefix>
+                                                <user>root</user>
+                                                <group>root</group>
+                                            </mapper>
+                                        </data>
+
+
+                                    </dataSet>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+
+        </profile>
+    </profiles>
+
+
 </project>

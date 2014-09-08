@@ -1,0 +1,15 @@
+Source: libmico-api
+Priority: optional
+Maintainer: Sebastian Schaffert <sebastian.schaffert@gmail.com>
+Section: java
+Homepage: https://bitbucket.org/mico-project/platform/overview
+Vcs-Git: https://bitbucket.org/mico-project/platform.git
+Vcs-Browser: https://bitbucket.org/mico-project/platform/overview
+Package: [[name]]
+Architecture: all
+Version: [[version]]
+Depends: openjdk-7-jdk,  libguava-java, libcommons-lang3-java,  libcommons-io-java,  libcommons-vfs-java,  libcommons-net2-java, liblogback-java, libcglib3-java, libspring-context-java
+Recommends: mico-platform
+Description: MICO client library - Java implementation
+ This package contains the compiled libraries of the MICO Java API. They are needed by all Java-based implementations
+ of MICO services. Note that the libraries can also be installed via Maven.
