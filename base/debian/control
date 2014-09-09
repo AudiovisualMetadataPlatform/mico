@@ -1,0 +1,15 @@
+Source: mico-base
+Section: unknown
+Priority: optional
+Maintainer: Sebastian Schaffert <sebastian.schaffert@gmail.com>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.5
+Homepage: https://bitbucket.org/mico-project/platform
+
+Package: mico-base
+Architecture: any
+Pre-Depends: debconf
+Depends: ${shlibs:Depends}, ${misc:Depends}, pwgen
+Description: base MICO configuration package
+ This package contains some base configurations used by the MICO platform.
+ Configuration options will be asked interactively when installing this package.

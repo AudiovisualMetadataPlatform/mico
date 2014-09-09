@@ -1,0 +1,15 @@
+Source: mico-persistence
+Section: mico
+Priority: optional
+Maintainer: Sebastian Schaffert <sebastian.schaffert@redlink.co>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.5
+Homepage: https://bitbucket.org/mico-project/platform
+
+Package: mico-persistence
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, proftpd-basic, mico-base
+Description: Configure FTP server as MICO persistence server
+ This package is a configuration-only package setting up ProFTPD as persistence
+ server for the MICO platform.
+

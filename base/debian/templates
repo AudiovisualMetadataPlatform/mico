@@ -1,0 +1,20 @@
+Template: mico-base/title
+Type: title
+Description: MICO Platform Configuration
+
+Template: mico-base/username
+Type: string
+Default: mico
+Description: MICO user name:
+ Enter the name of the user that is used for accessing various MICO components.
+ The user will be created as Unix user if it does not exist yet. It will also
+ be used for accessing RabbitMQ, Apache Marmotta, and PostgreSQL.
+
+Template: mico-base/password
+Type: password
+Description: MICO user password:
+ Enter the password of the mico user that is used for accessing various MICO
+ components. The password will be set for the MICO Unix user, as well as in
+ RabbitMQ, Apache Marmotta, and PostgreSQL. If you leave this value empty and
+ the password has not previously been set, a random password is generated.
+

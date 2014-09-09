@@ -10,20 +10,6 @@ Description: Name of PostgreSQL database to use for Marmotta:
  to automatically create it (select "Yes" in the respective question). Marmotta will automatically create its tables
  when starting up.
 
-Template: mico-marmotta/database-user
-Type: string
-Default: marmotta
-Description: Name of PostgreSQL user to use for Marmotta:
- Configure the database user used by Marmotta to access the PostgreSQL database. In case the user does not exist,
- the setup script allows to automatically create it (select "Yes" in the respective question).
-
-Template: mico-marmotta/database-password
-Type: password
-Description: Password of PostgreSQL user to use for Marmotta:
- Configure the database password used by Marmotta to access the PostgreSQL database. In case the user does not exist,
- the setup script allows to automatically create it (select "Yes" in the respective question). If you leave the password
- empty, a random password will be generated.
-
 Template: mico-marmotta/create-database
 Type: boolean
 Default: true
