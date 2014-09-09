@@ -20,6 +20,31 @@ case "$1" in
         # home directories for every cluster
         mkdir -p /var/lib/marmotta
         chown tomcat7:tomcat7 -R /var/lib/marmotta
+
+        db_get mico-marmotta/database-name
+        DB_NAME="$RET"
+
+        db_get mico-marmotta/database-user
+        DB_USER="$RET"
+
+        db_get mico-marmotta/database-password
+        DB_PASS="$RET"
+
+        db_get mico-marmotta/create-database
+        CREATE_DATABASE="$RET"
+
+        if [ "$CREATE_DATABASE" = "true" ]; then
+            sudo -u postgres /usr/bin/psql  postgres -c "CREATE USER $DB_USER PASSWORD '$DB_PASS'" >/dev/null 2>&1
+            sudo -u postgres /usr/bin/psql  postgres -c "CREATE DATABASE $DB_NAME OWNER $DB_USER" >/dev/null 2>&1
+        fi
+
+        cat >/var/lib/marmotta/system-config.properties <<EOF
+database.type = postgres
+database.url = jdbc:postgresql://localhost:5432/$DB_NAME?prepareThreshold=3
+database.user = $DB_USER
+database.password = $DB_PASS
+EOF
+
         service tomcat7 start
     ;;
 

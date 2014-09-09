@@ -1,0 +1,35 @@
+Template: mico-marmotta/title
+Type: title
+Description: MICO Marmotta Configuration
+
+
+Template: mico-marmotta/database-name
+Type: string
+Default: marmotta
+Description: Name of PostgreSQL database to use for Marmotta:
+ Configure the name of the database to use for Marmotta. In case the database does not exist, the setup script allows
+ to automatically create it (select "Yes" in the respective question). Marmotta will automatically create its tables
+ when starting up.
+
+Template: mico-marmotta/database-user
+Type: string
+Default: marmotta
+Description: Name of PostgreSQL user to use for Marmotta:
+ Configure the database user used by Marmotta to access the PostgreSQL database. In case the user does not exist,
+ the setup script allows to automatically create it (select "Yes" in the respective question).
+
+Template: mico-marmotta/database-password
+Type: password
+Default: ${dbpass}
+Description: Name of PostgreSQL user to use for Marmotta:
+ Configure the database password used by Marmotta to access the PostgreSQL database. In case the user does not exist,
+ the setup script allows to automatically create it (select "Yes" in the respective question).
+
+
+Template: mico-marmotta/create-database
+Type: boolean
+Default: true
+Description: Create Marmotta database and user?
+ If you select "Yes" here, the setup script will automatically create the PostgreSQL database and user configured in
+ the previous steps. If you select "No", the setup script will only update the Marmotta configuration with the values
+ you provided; in this case you need to make sure the database exists and is accessible.

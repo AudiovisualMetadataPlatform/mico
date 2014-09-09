@@ -5,7 +5,7 @@ Homepage: https://bitbucket.org/mico-project/platform
 Package: [[name]]
 Architecture: all
 Version: [[version]]
-Depends: tomcat7 (>= 7.0.52), openjdk-7-jre | openjdk-7-jre-headless
+Depends: tomcat7 (>= 7.0.52), openjdk-7-jre | openjdk-7-jre-headless, postgresql-9.4, pwgen, debconf
 Description: Apache Marmotta
  This package contains the distribution of Apache Marmotta used by the
  MICO Platform.
