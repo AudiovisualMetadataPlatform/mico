@@ -13,7 +13,7 @@ set -e
 
 case "$1" in
     install|upgrade)
-        service tomcat7 stop
+        service tomcat7 stop || true
     ;;
 
     abort-upgrade)

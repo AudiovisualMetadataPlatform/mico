@@ -2,7 +2,6 @@ Template: mico-marmotta/title
 Type: title
 Description: MICO Marmotta Configuration
 
-
 Template: mico-marmotta/database-name
 Type: string
 Default: marmotta
@@ -20,11 +19,10 @@ Description: Name of PostgreSQL user to use for Marmotta:
 
 Template: mico-marmotta/database-password
 Type: password
-Default: ${dbpass}
-Description: Name of PostgreSQL user to use for Marmotta:
+Description: Password of PostgreSQL user to use for Marmotta:
  Configure the database password used by Marmotta to access the PostgreSQL database. In case the user does not exist,
- the setup script allows to automatically create it (select "Yes" in the respective question).
-
+ the setup script allows to automatically create it (select "Yes" in the respective question). If you leave the password
+ empty, a random password will be generated.
 
 Template: mico-marmotta/create-database
 Type: boolean
@@ -33,3 +31,10 @@ Description: Create Marmotta database and user?
  If you select "Yes" here, the setup script will automatically create the PostgreSQL database and user configured in
  the previous steps. If you select "No", the setup script will only update the Marmotta configuration with the values
  you provided; in this case you need to make sure the database exists and is accessible.
+
+Template: mico-marmotta/host-name
+Type: string
+Description: Server host name:
+ Provide the host name or IP address this server will be accessed with. This setting is important for Marmotta to
+ create the correct resource URLs.
+

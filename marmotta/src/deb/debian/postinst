@@ -15,8 +15,14 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+# Source debconf library.
+. /usr/share/debconf/confmodule
+
+
 case "$1" in
     configure)
+        service tomcat7 stop || true
+
         # home directories for every cluster
         mkdir -p /var/lib/marmotta
         chown tomcat7:tomcat7 -R /var/lib/marmotta
@@ -33,6 +39,9 @@ case "$1" in
         db_get mico-marmotta/create-database
         CREATE_DATABASE="$RET"
 
+        db_get mico-marmotta/host-name
+        HOSTNAME="$RET"
+
         if [ "$CREATE_DATABASE" = "true" ]; then
             sudo -u postgres /usr/bin/psql  postgres -c "CREATE USER $DB_USER PASSWORD '$DB_PASS'" >/dev/null 2>&1
             sudo -u postgres /usr/bin/psql  postgres -c "CREATE DATABASE $DB_NAME OWNER $DB_USER" >/dev/null 2>&1
@@ -43,9 +52,13 @@ database.type = postgres
 database.url = jdbc:postgresql://localhost:5432/$DB_NAME?prepareThreshold=3
 database.user = $DB_USER
 database.password = $DB_PASS
+kiwi.host = http://$HOSTNAME:8080/marmotta/
+kiwi.context = http://$HOSTNAME:8080/marmotta/
 EOF
+        db_stop
 
-        service tomcat7 start
+        service tomcat7 start || true
+
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

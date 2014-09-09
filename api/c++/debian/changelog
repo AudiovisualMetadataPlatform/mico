@@ -1,3 +1,9 @@
+libmico-api (1.0.1) unstable; urgency=medium
+
+  * fix dependency to protobuf
+
+ -- Sebastian Schaffert <sebastian.schaffert@redlink.co>  Tue, 09 Sep 2014 15:15:16 +0200
+
 libmico-api (1.0.0) unstable; urgency=low
 
   * Initial Release.
