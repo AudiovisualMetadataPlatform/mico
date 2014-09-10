@@ -11,7 +11,7 @@ All three services have to use the same user and password combination (for testi
 ## Debian Repository
 
 A complete binary installation for development can be setup using custom-built packages that we offer in the MICO Debian
-repository.
+repository. If you want to setup a development server or virtual image, this is the easiest way to get up and running.
 
 ### 1. Setup Debian Jessie
 
