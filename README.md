@@ -4,11 +4,11 @@
 
 The MICO Platform Server is a Linux installation providing the following services:
 
-* an installation of Apache Marmotta with contextual extensions (found in the marmotta/ directory), running at http://<host>:8080/marmotta
-* an installation of RabbitMQ, running at <host>:5672
+* an installation of Apache Marmotta with contextual extensions (found in the marmotta/ directory), running at `http://<host>:8080/marmotta`
+* an installation of RabbitMQ, running at `<host>:5672`
 * an FTP server for serving and storing the binary content of content items
 
-All three services have to use the same user and password combination (for testing: "mico"/"mico"). 
+All three services have to use the same user and password combination (for testing: `mico:mico`). 
 
 ## Debian Repository
 
@@ -21,7 +21,7 @@ To install these packages, first setup a basic installation of Debian Jessie (te
 can start with the latest [Debian Network Installation Image](http://cdimage.debian.org/cdimage/daily-builds/daily/arch-latest/amd64/iso-cd/).
 For MICO, a plain installation is sufficient, i.e. no special package preselection is needed.
 
-Note: please do not use the username "mico", as it will later be created by the setup process.
+Note: please do not use the username `mico`, as it will later be created by the setup process.
 
 
 ### 2. Add MICO Repository
@@ -30,16 +30,16 @@ Add
 
     deb http://apt.mico-project.eu/ mico main non-free contrib
 
-in your sources.list
+to your `/etc/apt/sources.list` file.
 
-All packages are signed with a with a gpg-key (Key-ID: AD261C57), to avoid warnings by apt-get either install the mico-apt-key package or fetch the key from http://apt.mico-project.eu/apt-repo.key yourself:
+All packages are signed with a with a gpg-key (Key-ID: `AD261C57`). To avoid warnings by apt-get either install the `mico-apt-key` package or fetch the key from http://apt.mico-project.eu/apt-repo.key yourself:
 
     wget -O- http://apt.mico-project.eu/apt-repo.key | sudo apt-key add -
 
 
 ### 3. Install MICO Platform
 
-To install the MICO platform, fetch the most recent package list and install the package "mico-platform" as follows:
+To install the MICO platform, fetch the most recent package list and install the package `mico-platform` as follows:
 
     apt-get update
     apt-get install mico-platform
@@ -53,7 +53,7 @@ the MICO password you entered.
 Web Interface:
 
 The Debian installation comes with a single entry-point for accessing the Web interfaces of those services that provide it.
-It is available at http://<host>/. If the server is accessible from outside the development environment, please make sure
+It is available at `http://<host>/`. If the server is accessible from outside the development environment, please make sure
 to further protect this page by e.g. a firewall or changes to the lighttpd configuration, as it contains the login details
 for the MICO user.
 
@@ -78,18 +78,17 @@ where <files...> is one or more paths to files in the local file system. The cal
 a content part for each file given as argument.
 
 
-
 ## VirtualBox Image
 
 A complete installation for development is currently provided as VirtualBox image. It only has a single user "mico" with
 password "mico". When starting, the server will get an IP address from VirtualBox (usually, the first IP address of the pool). 
 For convenience, you can access the following administration interfaces:
 
-* Marmotta: http://<host>:8080/marmotta
-* RabbitMQ: http://<host>:15672
+* Marmotta: `http://<host>:8080/marmotta`
+* RabbitMQ: `http://<host>:15672`
 
-The FTP Server (ProFTPD) is configured to store binary data in the /data directory exclusively. We are currently working on
-providing a more easy-to-use "vagrant" version of this image.
+The FTP Server (ProFTPD) is configured to store binary data in the `/data` directory exclusively. We are currently working on
+providing a more easy-to-use [vagrant](https://www.vagrantup.com) version of this image.
 
 ## Development Server
 
