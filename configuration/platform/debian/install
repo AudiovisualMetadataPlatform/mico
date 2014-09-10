@@ -1,0 +1,2 @@
+90-mico.conf /etc/lighttpd/conf-available
+index.tmpl.html /usr/share/mico-platform

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>MICO Prototype Platform</title>
+</head>
+<body>
+
+    <h1>MICO Prototype Platform</h1>
+
+
+    <p>
+        This server has been configured with an installation of the MICO Prototype Platform for development purposes. This page gives basic information
+        and entry points for the installation:
+    </p>
+
+    <h3>Login</h3>
+    <p>
+        Use the following login details for accessing the server:
+    </p>
+    <table>
+        <tr>
+            <th>User</th><td>$USERNAME</td>
+        </tr>
+        <tr>
+            <th>Password</th><td>$PASSWORD</td>
+        </tr>
+    </table>
+
+
+    <h3>Services</h3>
+    <p>
+        The following services are accessible via a web browser:
+    </p>
+
+    <ul>
+        <li><a href="http://$HOSTNAME:8080/marmotta/">Apache Marmotta</a> (Metadata Storage): <a href="http://$HOSTNAME:8080/marmotta/">http://$HOSTNAME:8080/marmotta/</a></li>
+        <li><a href="http://$HOSTNAME:8080/broker/">MICO Broker</a> (Service Orchestration): <a href="http://$HOSTNAME:8080/broker/">http://$HOSTNAME:8080/broker/</a></li>
+        <li><a href="http://$HOSTNAME:15672/">RabbitMQ</a> (Event Communication): <a href="http://$HOSTNAME:15672/">http://$HOSTNAME:15672/</a></li>
+    </ul>
+
+
+    <h3>Documentation</h3>
+    <p>
+        The following documentation is available:
+    </p>
+
+    <ul>
+        <li><a href="/cgi-bin/dwww/usr/share/doc/libmico-api/html/annotated.html">MICO C++ Client API</a></li>
+    </ul>
+
+</body>
+</html>

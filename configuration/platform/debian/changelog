@@ -1,0 +1,17 @@
+mico-platform (1.0.2) unstable; urgency=medium
+
+  * fix substitution of hostname in entry page
+
+ -- Sebastian Schaffert <sebastian.schaffert@gmail.com>  Wed, 10 Sep 2014 15:16:56 +0200
+
+mico-platform (1.0.1) unstable; urgency=medium
+
+  * fix dependency
+
+ -- Sebastian Schaffert <sebastian.schaffert@gmail.com>  Wed, 10 Sep 2014 15:03:06 +0200
+
+mico-platform (1.0.0) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Sebastian Schaffert <sebastian.schaffert@gmail.com>  Wed, 10 Sep 2014 12:24:41 +0200
