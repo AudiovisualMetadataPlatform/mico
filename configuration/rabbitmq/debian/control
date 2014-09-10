@@ -1,0 +1,16 @@
+Source: mico-rabbitmq
+Section: unknown
+Priority: optional
+Maintainer: Sebastian Schaffert <sebastian.schaffert@redlink.co>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.5
+Homepage: https://bitbucket.org/mico-project/platform
+Vcs-Git: https://bitbucket.org/mico-project/platform.git
+Vcs-Browser: https://bitbucket.org/mico-project/platform
+
+Package: mico-rabbitmq
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, rabbitmq-server, mico-base
+Description: configuration package to setup RabbitMQ for the MICO platform
+ This is a configuration package setting up RabbitMQ for the MICO platform. It configures the necessary RabbitMQ extensions and
+ user permissions.

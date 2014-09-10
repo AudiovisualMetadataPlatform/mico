@@ -1,0 +1,11 @@
+mico-rabbitmq (1.0.1) UNRELEASED; urgency=medium
+
+  * restart RabbitMQ server after applying changes
+
+ -- Sebastian Schaffert <sebastian.schaffert@redlink.co>  Wed, 10 Sep 2014 11:24:44 +0200
+
+mico-rabbitmq (1.0.0) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Sebastian Schaffert <sebastian.schaffert@redlink.co>  Wed, 10 Sep 2014 09:59:31 +0200

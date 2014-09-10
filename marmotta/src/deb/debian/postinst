@@ -25,7 +25,6 @@ case "$1" in
 
         # home directories for every cluster
         mkdir -p /var/lib/marmotta
-        chown tomcat7:tomcat7 -R /var/lib/marmotta
 
         db_get mico-marmotta/database-name
         DB_NAME="$RET"
@@ -56,6 +55,8 @@ kiwi.host = http://$HOSTNAME:8080/marmotta/
 kiwi.context = http://$HOSTNAME:8080/marmotta/
 EOF
         db_stop
+
+        chown tomcat7:tomcat7 -R /var/lib/marmotta
 
         service tomcat7 start || true
 

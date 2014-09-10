@@ -21,11 +21,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 
-
+    <!-- comment out for production! -->
+    <!--
     <context-param>
         <param-name>mico.host</param-name>
-        <param-value>192.168.56.102</param-value>       <!-- comment out for production! -->
-        <!--<param-value>localhost</param-value>-->
+        <param-value>192.168.56.102</param-value>
     </context-param>
     <context-param>
         <param-name>mico.user</param-name>
@@ -35,6 +35,7 @@
         <param-name>mico.password</param-name>
         <param-value>mico</param-value>
     </context-param>
+    -->
 
     <!-- RESTeasy Webservices -->
     <listener>

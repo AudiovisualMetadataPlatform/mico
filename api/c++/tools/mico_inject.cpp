@@ -49,7 +49,7 @@ std::string getTimestamp() {
 
 
 void usage() {
-	std::cout << "Usage: mico_inject SERVER_IP FILENAMES" << std::endl;
+	std::cout << "Usage: mico_inject SERVER_IP USER PASSWORD FILENAMES" << std::endl;
 }
 
 int main(int argc, char **argv) {
@@ -59,17 +59,21 @@ int main(int argc, char **argv) {
     );
 
 	
-	if(argc < 3) {
+	if(argc < 5) {
 		usage();
 	}
 
+    char *mico_user = argv[2];
+    char *mico_pass = argv[3];
+
+
 	// initialise event manager; throws an exception on failure
 	try {
-		EventManager eventManager(argv[1]);
+		EventManager eventManager(argv[1], mico_user, mico_pass);
 		
 		ContentItem* item = eventManager.getPersistenceService().createContentItem();
 		
-		for(int i=2; i<argc; i++) {
+		for(int i=4; i<argc; i++) {
 			int fd = open(argv[i], O_RDONLY);
 
 			

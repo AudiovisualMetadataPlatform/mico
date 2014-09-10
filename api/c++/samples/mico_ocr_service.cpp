@@ -138,7 +138,7 @@ public:
 
 
 void usage() {
-	std::cerr << "Usage: mico_ocr_service SERVER_IP" << std::endl;
+	std::cerr << "Usage: mico_ocr_service SERVER_IP [USER PASSWORD]" << std::endl;
 }
 
 
@@ -164,10 +164,21 @@ void signal_handler(int signum) {
 }
 
 int main(int argc, char **argv) {
-	if(argc != 2) {
+	if(argc != 2 && argc != 4) {
 		usage();
 		exit(1);
 	}
+
+    char *mico_user;
+    char *mico_pass;
+
+    if(argc == 4) {
+        mico_user = argv[2];
+        mico_pass = argv[3];
+    } else {
+        mico_user = "mico";
+        mico_pass = "mico";
+    }
 	
 	// configure Boost logging (only messages of level INFO or above)
     boost::log::core::get()->set_filter
@@ -180,7 +191,7 @@ int main(int argc, char **argv) {
 	const char* server_name = argv[1];
 	
 	// initialise an instance of EventManager 
-	mgr = new EventManager(server_name);
+	mgr = new EventManager(server_name, mico_user, mico_pass);
 	
 	// register several instances of the OCR analysis service for different types
 	pngAnalyser = new OCRAnalysisService("png","image/png","eng");

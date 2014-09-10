@@ -256,6 +256,7 @@
                                             </mapper>
                                         </data>
 
+                                        <!--
                                         <data>
                                             <src>${project.build.directory}/deb-resources/</src>
                                             <includes>*.xml</includes>
@@ -268,6 +269,7 @@
                                                 <group>tomcat7</group>
                                             </mapper>
                                         </data>
+                                        -->
                                         <data>
                                             <src>${basedir}/src/deb/doc</src>
                                             <type>directory</type>
