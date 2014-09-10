@@ -1,3 +1,5 @@
+[TOC]
+
 # MICO Platform Server
 
 The MICO Platform Server is a Linux installation providing the following services:
