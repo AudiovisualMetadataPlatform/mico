@@ -1,8 +1,14 @@
+libmico-api (1.0.2) unstable; urgency=medium
+
+  * allow sample tools to provide user/password on command line
+
+ -- Sebastian Schaffert <sebastian.schaffert@gmail.com>  Wed, 10 Sep 2014 15:39:20 +0200
+
 libmico-api (1.0.1) unstable; urgency=medium
 
   * fix dependency to protobuf
 
- -- Sebastian Schaffert <sebastian.schaffert@redlink.co>  Tue, 09 Sep 2014 15:15:16 +0200
+ -- Sebastian Schaffert <sebastian.schaffert@gmail.com>  Tue, 09 Sep 2014 15:15:16 +0200
 
 libmico-api (1.0.0) unstable; urgency=low
 

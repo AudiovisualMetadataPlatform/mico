@@ -8,6 +8,75 @@ The MICO Platform Server is a Linux installation providing the following service
 
 All three services have to use the same user and password combination (for testing: "mico"/"mico"). 
 
+## Debian Repository
+
+A complete binary installation for development can be setup using custom-built packages that we offer in the MICO Debian
+repository.
+
+### 1. Setup Debian Jessie
+
+To install these packages, first setup a basic installation of Debian Jessie (testing). For example, you
+can start with the latest [Debian Network Installation Image](http://cdimage.debian.org/cdimage/daily-builds/daily/arch-latest/amd64/iso-cd/).
+For MICO, a plain installation is sufficient, i.e. no special package preselection is needed.
+
+Note: please do not use the username "mico", as it will later be created by the setup process.
+
+
+### 2. Add MICO Repository
+
+Add
+
+    deb http://apt.mico-project.eu/ mico main non-free contrib
+
+in your sources.list
+
+All packages are signed with a with a gpg-key (Key-ID: AD261C57), to avoid warnings by apt-get either install the mico-apt-key package or fetch the key from http://apt.mico-project.eu/apt-repo.key yourself:
+
+    wget -O- http://apt.mico-project.eu/apt-repo.key | sudo apt-key add -
+
+
+### 3. Install MICO Platform
+
+To install the MICO platform, fetch the most recent package list and install the package "mico-platform" as follows:
+
+    apt-get update
+    apt-get install mico-platform
+
+The installation will interactively ask you a few questions regarding a MICO user to be created and the hostname to use
+for accessing the system. Please take your time to carefully configure these values. Especially, make sure you remember
+the MICO password you entered.
+
+### 4. Access MICO Platform
+
+Web Interface:
+
+The Debian installation comes with a single entry-point for accessing the Web interfaces of those services that provide it.
+It is available at http://<host>/. If the server is accessible from outside the development environment, please make sure
+to further protect this page by e.g. a firewall or changes to the lighttpd configuration, as it contains the login details
+for the MICO user.
+
+Sample Service:
+
+The Debian installation also includes a sample service implemented in C++ that is used for demonstrating the platform
+functionality. This service is capable of transforming text contained in JPEG and PNG images into plain text using the
+tesseract OCR library. Try it out as follows:
+
+    mico_ocr_service <host> <user> <password>
+
+starts the service in the current terminal session. Replace <host>, <user>, and <password> with the values you provided
+in the configuration phase. If you then access the broker web interface, the service and its dependencies should be shown.
+
+Inject Content:
+
+A simple C++ command line tool is also provided for injecting content into the platform for analysis. It can be used as follows:
+
+    mico_inject <host> <user> <password> <files...>
+
+where <files...> is one or more paths to files in the local file system. The call will inject a single content item, with
+a content part for each file given as argument.
+
+
+
 ## VirtualBox Image
 
 A complete installation for development is currently provided as VirtualBox image. It only has a single user "mico" with
