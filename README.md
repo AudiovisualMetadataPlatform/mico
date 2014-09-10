@@ -17,7 +17,7 @@ repository. If you want to setup a development server or virtual image, this is 
 
 ### 1. Setup Debian Jessie
 
-To install these packages, first setup a basic installation of Debian Jessie (testing). For example, you
+To install these packages, first setup a basic installation of Debian **Jessie** (testing). For example, you
 can start with the latest [Debian Network Installation Image](http://cdimage.debian.org/cdimage/daily-builds/daily/arch-latest/amd64/iso-cd/).
 For MICO, a plain installation is sufficient, i.e. no special package preselection is needed.
 
