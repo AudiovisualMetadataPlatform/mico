@@ -1,5 +1,6 @@
 package eu.mico.platform.event.api;
 
+import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.ContentItem;
 import org.openrdf.model.URI;
 
@@ -57,6 +58,8 @@ public interface EventManager {
      */
     public void injectContentItem(ContentItem item) throws IOException;
 
+
+    PersistenceService getPersistenceService();
 
     /**
      * Initialise the event manager, setting up any necessary channels and connections

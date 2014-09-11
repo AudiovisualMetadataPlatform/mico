@@ -5,6 +5,7 @@ import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.exception.StateNotFoundException;
 import eu.mico.platform.broker.model.*;
 import eu.mico.platform.event.api.EventManager;
+import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceImpl;

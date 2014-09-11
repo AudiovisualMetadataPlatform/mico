@@ -67,6 +67,7 @@ public class EventManagerImpl implements EventManager {
         services = new HashMap<>();
     }
 
+    @Override
     public PersistenceService getPersistenceService() {
         return persistenceService;
     }

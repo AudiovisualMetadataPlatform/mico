@@ -1,4 +1,4 @@
-var brokerApp = angular.module('brokerApp', ['ui.bootstrap']);
+var brokerApp = angular.module('brokerApp', ['ui.bootstrap','angularFileUpload']);
 
 function getParameterByName(name) {
     name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
@@ -35,6 +35,74 @@ brokerApp.controller("ShowItemCtrl", function($scope,$http) {
         $http.get("status/items?parts=true&uri=" + $scope.itemUri).success(function (data) {
             $scope.itemData = data[0];
         });
+    });
+
+});
+
+
+brokerApp.controller("InjectItemCtrl", function($scope,$http,$upload) {
+
+    $scope.itemUri;
+
+    $scope.itemData;
+
+    $scope.state = "Created";
+
+    $scope.files;
+
+    $scope.type="";
+
+    $scope.updateItem = function() {
+        if($scope.itemUri) {
+            $http.get("inject/items?parts=true&uri=" + $scope.itemUri).success(function (data) {
+                $scope.itemData = data[0];
+            });
+        }
+
+        $scope.type="";
+        $scope.files=[];
+        document.getElementById("file").value = '';
+    };
+
+    $scope.createContentItem = function() {
+        $http.post("inject/create").success(function(data) {
+            $scope.itemUri = data["uri"];
+        });
+    };
+
+    $scope.onFileSelect = function($files) {
+        $scope.files = $files;
+        if($files.length > 0) {
+            $scope.type = $files[0].type;
+        }
+    };
+
+    $scope.addContentPart = function(){
+        for (var i = 0; i < $scope.files.length; i++) {
+            var file = $scope.files[i];
+            var fileReader = new FileReader();
+            fileReader.readAsArrayBuffer(file);
+            fileReader.onload = function(e) {
+                $upload.http({
+                    url: "inject/add?ci=" + $scope.itemUri + "&type=" + $scope.type + "&name=" + file.name,
+                    method: 'POST',
+                    data: e.target.result
+                }).success(function (data) {
+                    $scope.updateItem();
+                });
+            }
+        }
+
+    };
+
+    $scope.submitContentItem = function() {
+        $http.post("inject/submit?ci=" + $scope.itemUri).success(function() {
+            $scope.state = "Submitted";
+        });
+    };
+
+    $scope.$watch('itemUri', function(newValue, oldValue) {
+        $scope.updateItem();
     });
 
 });

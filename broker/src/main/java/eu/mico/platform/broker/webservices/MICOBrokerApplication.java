@@ -2,6 +2,8 @@ package eu.mico.platform.broker.webservices;
 
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
+import eu.mico.platform.event.api.EventManager;
+import eu.mico.platform.event.impl.EventManagerImpl;
 import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,7 @@ public class MICOBrokerApplication extends Application {
     Set<Object> services;
 
     private MICOBroker broker;
+    private EventManager manager;
 
     public MICOBrokerApplication(@Context ServletContext context) {
         super();
@@ -44,10 +47,13 @@ public class MICOBrokerApplication extends Application {
         log.info("initialising new MICO broker for host {}", host);
 
         try {
-            broker = new MICOBrokerImpl(host, user, pass);
+            broker  = new MICOBrokerImpl(host, user, pass);
+            manager = new EventManagerImpl(host, user, pass);
+            manager.init();
 
             services = new HashSet<>();
             services.add(new StatusWebService(broker));
+            services.add(new InjectionWebService(manager));
         } catch (IOException ex) {
             log.error("could not initialise MICO broker, services not available (message: {})", ex.getMessage());
             log.debug("Exception:",ex);
@@ -60,4 +66,11 @@ public class MICOBrokerApplication extends Application {
         return services;
     }
 
+
+    @Override
+    protected void finalize() throws Throwable {
+        manager.shutdown();
+
+        super.finalize();
+    }
 }
