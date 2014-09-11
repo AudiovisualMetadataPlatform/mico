@@ -96,6 +96,7 @@
         <module>persistence</module>
         <module>event</module>
         <module>api-spring</module>
+        <module>samples</module>
     </modules>
 
 
