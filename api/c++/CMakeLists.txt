@@ -11,6 +11,6 @@ add_subdirectory(rdf)
 add_subdirectory(persistence)
 add_subdirectory(event)
 add_subdirectory(samples)
-#add_subdirectory(test)
+add_subdirectory(test)
 add_subdirectory(tools)
 
