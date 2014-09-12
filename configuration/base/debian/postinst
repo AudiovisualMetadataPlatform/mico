@@ -15,7 +15,7 @@ set -e
 #          <failed-install-package> <version> `removing'
 #          <conflicting-package> <version>
 # for details, see http://www.debian.org/doc/debian-policy/ or
-# the debian-policy package
+# the debian-policy packag
 
 
 case "$1" in
@@ -34,8 +34,8 @@ case "$1" in
 	    db_set mico-base/password $MICO_PASS 
 	fi
 
-	addgroup $MICO_USER || true
-	adduser $MICO_USER $MICO_USER --no-create-home || true
+	groupadd $MICO_USER || true
+	useradd -d /tmp -g $MICO_USER -M $MICO_USER || true
 
 	chpasswd <<EOF
 $MICO_USER:$MICO_PASS

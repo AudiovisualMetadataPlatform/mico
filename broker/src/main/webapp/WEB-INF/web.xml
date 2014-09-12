@@ -22,6 +22,7 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 
     <!-- comment out for production! -->
+    <!--
     <context-param>
         <param-name>mico.host</param-name>
         <param-value>192.168.56.101</param-value>
@@ -34,6 +35,7 @@
         <param-name>mico.pass</param-name>
         <param-value>pass123</param-value>
     </context-param>
+    -->
 
     <!-- RESTeasy Webservices -->
     <listener>

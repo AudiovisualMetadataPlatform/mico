@@ -1,5 +1,23 @@
+mico-base (1.0.3) unstable; urgency=medium
+
+  * use useradd instead of adduser
+
+ -- Sebastian Schaffert <sebastian.schaffert@gmail.com>  Fri, 12 Sep 2014 11:57:43 +0200
+
+mico-base (1.0.2) unstable; urgency=medium
+
+  * another try to fix adduser
+
+ -- Sebastian Schaffert <sebastian.schaffert@gmail.com>  Fri, 12 Sep 2014 11:47:28 +0200
+
+mico-base (1.0.1) unstable; urgency=medium
+
+  * fix adduser command
+
+ -- Sebastian Schaffert <sebastian.schaffert@gmail.com>  Fri, 12 Sep 2014 11:23:48 +0200
+
 mico-base (1.0.0) unstable; urgency=low
 
   * Initial Release.
 
- -- Sebastian Schaffert <sebastian.schaffert@redlink.co>  Tue, 09 Sep 2014 16:40:09 +0200
+ -- Sebastian Schaffert <sebastian.schaffert@gmail.com>  Tue, 09 Sep 2014 16:40:09 +0200
