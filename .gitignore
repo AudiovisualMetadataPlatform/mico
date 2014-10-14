@@ -35,3 +35,5 @@ Makefile
 .idea
 
 doc/
+
+kiwi-test.log
