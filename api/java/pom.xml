@@ -88,26 +88,19 @@
 
     <issueManagement>
         <system>Jira</system>
-        <url>http://issues.mico-project.eu</url>
+        <url>https://issues.mico-project.eu/browse/FRAMEWORK/</url>
     </issueManagement>
-
 
     <modules>
         <module>persistence</module>
         <module>event</module>
-        <module>api-spring</module>
+        <module>spring</module>
         <module>samples</module>
     </modules>
-
-
-
-
-
 
     <profiles>
         <profile>
             <id>debian</id>
-
             <build>
                 <resources>
                     <resource>

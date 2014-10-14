@@ -32,5 +32,6 @@ Makefile
 .dirstamp
 
 *.iml
+.idea
 
 doc/
