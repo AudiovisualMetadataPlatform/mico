@@ -1,3 +1,15 @@
+libmico-api (1.0.4) unstable; urgency=medium
+
+  * update protobuf dependency
+
+ -- Sebastian Schaffert <sebastian.schaffert@redlink.co>  Mon, 22 Sep 2014 14:31:19 +0200
+
+libmico-api (1.0.3) unstable; urgency=medium
+
+  * bugfix release (FRAMEWORK-56)
+
+ -- Sebastian Schaffert <sebastian.schaffert@redlink.co>  Fri, 12 Sep 2014 14:55:47 +0200
+
 libmico-api (1.0.2) unstable; urgency=medium
 
   * allow sample tools to provide user/password on command line

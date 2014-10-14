@@ -26,121 +26,121 @@ static string_generator str_gen;
 
 
 namespace mico {
-  namespace persistence {
+    namespace persistence {
 
-    /**
-     * Create a new content item with a random URI and return it. The content item should be suitable for reading and
-     * updating and write all updates to the underlying low-level persistence layer.
-     *
-     * @return a handle to the newly created ContentItem
-     */
-    ContentItem* PersistenceService::createContentItem() {
-      uuid UUID = rnd_gen();
+        /**
+        * Create a new content item with a random URI and return it. The content item should be suitable for reading and
+        * updating and write all updates to the underlying low-level persistence layer.
+        *
+        * @return a handle to the newly created ContentItem
+        */
+        ContentItem* PersistenceService::createContentItem() {
+            uuid UUID = rnd_gen();
 
-      ContentItem* ci = new ContentItem(marmottaServerUrl,contentDirectory,UUID);
+            ContentItem* ci = new ContentItem(marmottaServerUrl,contentDirectory,UUID);
 
-      map<string,string> params;
-      params["g"] = marmottaServerUrl;
-      params["ci"] = marmottaServerUrl + "/" + boost::uuids::to_string(UUID);
+            map<string,string> params;
+            params["g"] = marmottaServerUrl;
+            params["ci"] = marmottaServerUrl + "/" + boost::uuids::to_string(UUID);
 
-      metadata.update(SPARQL_FORMAT(createContentItem, params));
+            metadata.update(SPARQL_FORMAT(createContentItem, params));
 
-      return ci;
+            return ci;
+        }
+
+        /**
+        * Create a new content item with the given URI and return it. The content item should be suitable for reading and
+        * updating and write all updates to the underlying low-level persistence layer.
+        *
+        * @return a handle to the newly created ContentItem
+        */
+        ContentItem* PersistenceService::createContentItem(const URI& id) {
+            ContentItem* ci = new ContentItem(marmottaServerUrl, contentDirectory, id);
+
+            map<string,string> params;
+            params["g"] = marmottaServerUrl;
+            params["ci"] = id.stringValue();
+
+            metadata.update(SPARQL_FORMAT(createContentItem, params));
+
+            return ci;
+        }
+
+
+        /**
+        * Return the content item with the given URI if it exists. The content item should be suitable for reading and
+        * updating and write all updates to the underlying low-level persistence layer.
+        *
+        * @return a handle to the ContentItem with the given URI, or null if it does not exist
+        */
+        ContentItem* PersistenceService::getContentItem(const URI& id) {
+            map<string,string> params;
+            params["g"]  = marmottaServerUrl;
+            params["ci"] = id.stringValue();
+
+            if(metadata.ask(SPARQL_FORMAT(askContentItem,params))) {
+                return new ContentItem(marmottaServerUrl,contentDirectory,id);
+            } else {
+                return NULL;
+            }
+        }
+
+        /**
+        * Delete the content item with the given URI. If the content item does not exist, do nothing.
+        */
+        void PersistenceService::deleteContentItem(const URI& id) {
+            map<string,string> params;
+            params["g"] = marmottaServerUrl;
+            params["ci"] = id.stringValue();
+
+            metadata.update(SPARQL_FORMAT(deleteContentItem, params));
+
+            params["g"] = id.stringValue() + SUFFIX_METADATA;
+            metadata.update(SPARQL_FORMAT(deleteGraph, params));
+
+            params["g"] = id.stringValue() + SUFFIX_EXECUTION;
+            metadata.update(SPARQL_FORMAT(deleteGraph, params));
+
+            params["g"] = id.stringValue() + SUFFIX_RESULT;
+            metadata.update(SPARQL_FORMAT(deleteGraph, params));
+        }
+
+        /**
+        * Return an iterator over all currently available content items.
+        *
+        * @return iterable
+        */
+        content_item_iterator PersistenceService::begin() {
+            map<string,string> params;
+            params["g"] = marmottaServerUrl;
+
+            const TupleResult* r = metadata.query(SPARQL_FORMAT(listContentItems,params));
+            if(r->size() > 0) {
+                return content_item_iterator(marmottaServerUrl,contentDirectory,r);
+            } else {
+                delete r;
+                return content_item_iterator(marmottaServerUrl,contentDirectory);
+            }
+        }
+
+
+        content_item_iterator PersistenceService::end() {
+            return content_item_iterator(marmottaServerUrl,contentDirectory);
+        }
+
+
+
+        void content_item_iterator::increment() {
+            pos = pos+1 == result->size() ? -1 : pos + 1;
+        };
+
+        bool content_item_iterator::equal(content_item_iterator const& other) const {
+            return this->pos == other.pos;
+        };
+
+        ContentItem* content_item_iterator::dereference() const {
+            return new ContentItem(baseUrl, contentDirectory, *dynamic_cast<const URI*>( result->at(pos).at("p") ) );
+        }
+
     }
-
-    /**
-     * Create a new content item with the given URI and return it. The content item should be suitable for reading and
-     * updating and write all updates to the underlying low-level persistence layer.
-     *
-     * @return a handle to the newly created ContentItem
-     */
-    ContentItem* PersistenceService::createContentItem(const URI& id) {
-      ContentItem* ci = new ContentItem(marmottaServerUrl, contentDirectory, id);
-
-      map<string,string> params;
-      params["g"] = marmottaServerUrl;
-      params["ci"] = id.stringValue();
-
-      metadata.update(SPARQL_FORMAT(createContentItem, params));
-
-      return ci;
-    }
-
-
-    /**
-     * Return the content item with the given URI if it exists. The content item should be suitable for reading and
-     * updating and write all updates to the underlying low-level persistence layer.
-     *
-     * @return a handle to the ContentItem with the given URI, or null if it does not exist
-     */
-    ContentItem* PersistenceService::getContentItem(const URI& id) {
-      map<string,string> params;
-      params["g"]  = marmottaServerUrl;
-      params["ci"] = id.stringValue();
-
-      if(metadata.ask(SPARQL_FORMAT(askContentItem,params))) {
-	return new ContentItem(marmottaServerUrl,contentDirectory,id);
-      } else {
-	return NULL;
-      }
-    }
-
-    /**
-     * Delete the content item with the given URI. If the content item does not exist, do nothing.
-     */
-    void PersistenceService::deleteContentItem(const URI& id) {
-      map<string,string> params;
-      params["g"] = marmottaServerUrl;
-      params["ci"] = id.stringValue();
-
-      metadata.update(SPARQL_FORMAT(deleteContentItem, params));
-
-      params["g"] = id.stringValue() + SUFFIX_METADATA;
-      metadata.update(SPARQL_FORMAT(deleteGraph, params));
-
-      params["g"] = id.stringValue() + SUFFIX_EXECUTION;
-      metadata.update(SPARQL_FORMAT(deleteGraph, params));
-
-      params["g"] = id.stringValue() + SUFFIX_RESULT;
-      metadata.update(SPARQL_FORMAT(deleteGraph, params));
-    }
-
-    /**
-     * Return an iterator over all currently available content items.
-     *
-     * @return iterable
-     */
-    content_item_iterator PersistenceService::begin() {
-      map<string,string> params;
-      params["g"] = marmottaServerUrl;
-
-      const TupleResult* r = metadata.query(SPARQL_FORMAT(listContentItems,params));
-      if(r->size() > 0) {
-	return content_item_iterator(marmottaServerUrl,contentDirectory,r);
-      } else {
-	delete r;
-	return content_item_iterator(marmottaServerUrl,contentDirectory);
-      }
-    }
-
-
-    content_item_iterator PersistenceService::end() {
-      return content_item_iterator(marmottaServerUrl,contentDirectory);
-    }
-
-
-
-    void content_item_iterator::increment() { 
-      pos = pos+1 == result->size() ? -1 : pos + 1; 
-    };
-
-    bool content_item_iterator::equal(content_item_iterator const& other) const { 
-      return this->pos == other.pos; 
-    };
-
-    ContentItem* content_item_iterator::dereference() const { 
-      return new ContentItem(baseUrl, contentDirectory, *dynamic_cast<const URI*>( result->at(pos).at("p") ) ); 
-    }
-
-  }
 }

@@ -25,7 +25,7 @@ Description: MICO client library - development headers and documentation
 
 Package: libmico-api1
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libexpat1, libcurl3, libcurl3-gnutls, libprotobuf8, libstdc++6, libboost-log1.55.0
+Depends: ${shlibs:Depends}, ${misc:Depends}, libexpat1, libcurl3, libcurl3-gnutls, libprotobuf9, libstdc++6, libboost-log1.55.0
 Description: MICO client library - shared binary files
  This package contains the compiled shared libraries of the MICO C++ API. They are needed by all binary implementations
  of MICO C++ services.
