@@ -14,8 +14,6 @@
 #include "ContentItem.hpp"
 #include "SPARQLUtil.hpp"
 
-#include "../config.h"
-
 using namespace std;
 using namespace boost::uuids;
 using namespace mico::persistence;
@@ -29,8 +27,6 @@ extern std::string mico_user;
 extern std::string mico_pass;
 
 
-
-#define VBOX_SERVER std::string(TEST_HOST)
 
 
 class ContentItemTest : public ::testing::Test

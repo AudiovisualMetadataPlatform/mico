@@ -12,21 +12,21 @@
 #include "ContentItem.hpp"
 #include "SPARQLUtil.hpp"
 
-#include "../config.h"
-
 using namespace std;
 using namespace mico::persistence;
 using namespace mico::http;
 using namespace mico::util;
 
-#define VBOX_SERVER std::string(TEST_HOST)
+extern std::string mico_host;
+extern std::string mico_user;
+extern std::string mico_pass;
 
 
 class PersistenceServiceTest : public ::testing::Test {
 
 protected:
-  std::string base_url = "http://" + VBOX_SERVER + ":8080/marmotta";
-  std::string content_dir = "ftp://mico:mico@" + VBOX_SERVER;
+  std::string base_url = "http://" + mico_host + ":8080/marmotta";
+  std::string content_dir = "ftp://" + mico_user + ":" + mico_pass + "@" + mico_host;
   HTTPClient client;
   PersistenceService* svc;
 

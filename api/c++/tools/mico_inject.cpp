@@ -14,7 +14,6 @@
 #include "SPARQLUtil.hpp"
 #include "vocabularies.hpp"
 
-#include "../config.h"
 #include "../logging.h"
 
 using namespace mico::event;

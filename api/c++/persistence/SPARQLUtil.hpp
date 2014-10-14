@@ -8,9 +8,9 @@
  * Include an external SPARQL named query with parameters. The query must have been transformed into a C byte array using xxd -i and compiled and linked separately.
  */ 
 #define SPARQL_INCLUDE(NAME) \
-	extern unsigned char ______shared_persistence_sparql_ ## NAME ## _sparql []; \
-	extern unsigned int  ______shared_persistence_sparql_ ## NAME ## _sparql_len ; \
-	const std::string sparql_ ## NAME ((char*)______shared_persistence_sparql_ ## NAME ## _sparql,______shared_persistence_sparql_ ## NAME ## _sparql_len);
+	extern unsigned char NAME ## _sparql []; \
+	extern unsigned int  NAME ## _sparql_len ; \
+	const std::string sparql_ ## NAME ((char*) NAME ## _sparql, NAME ## _sparql_len);
 
 #define SPARQL_QUERY(NAME) sparql_ ## NAME
 

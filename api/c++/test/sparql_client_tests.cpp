@@ -7,18 +7,18 @@
 #include "sparql_client.hpp"
 #include "http_client.hpp"
 
-#include "../config.h"
-
 using namespace mico::rdf::query;
 using namespace mico::rdf::model;
 using namespace mico::http;
 
-#define VBOX_SERVER std::string(TEST_HOST)
+extern std::string mico_host;
+extern std::string mico_user;
+extern std::string mico_pass;
 
 class SPARQLClientTest : public ::testing::Test {
 
 protected:
-  std::string base_url = "http://" + VBOX_SERVER + ":8080/marmotta";
+  std::string base_url = "http://" + mico_host + ":8080/marmotta";
 
   HTTPClient   httpClient;
   SPARQLClient* sparqlClient;
