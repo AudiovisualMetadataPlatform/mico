@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>eu.mico-project.platform</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../../parent</relativePath>
+    </parent>
+
+    <artifactId>marmotta-mico</artifactId>
+    <packaging>jar</packaging>
+
+    <name>MICO Platform: Marmotta MICO Extensions</name>
+
+    <dependencies>
+        <!-- Backend-specific dependencies -->
+        <dependency>
+            <groupId>org.apache.marmotta</groupId>
+            <artifactId>marmotta-backend-kiwi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.marmotta</groupId>
+            <artifactId>marmotta-ldcache-file</artifactId>
+        </dependency>
+
+        <!-- Marmotta Modules, include the ones needed by the application -->
+        <dependency>
+            <groupId>org.apache.marmotta</groupId>
+            <artifactId>marmotta-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.marmotta</groupId>
+            <artifactId>marmotta-sparql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.marmotta</groupId>
+            <artifactId>kiwi-caching-hazelcast</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.marmotta</groupId>
+            <artifactId>marmotta-ldpath</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.marmotta</groupId>
+            <artifactId>marmotta-ldcache-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.marmotta</groupId>
+            <artifactId>marmotta-versioning-common</artifactId>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>org.apache.marmotta</groupId>
+            <artifactId>marmotta-user</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.marmotta</groupId>
+            <artifactId>marmotta-security</artifactId>
+        </dependency>
+        -->
+
+        <!-- Optional
+        <dependency>
+            <groupId>org.apache.marmotta</groupId>
+            <artifactId>marmotta-zookeeper</artifactId>
+            <version>${marmotta.version}</version>
+        </dependency>
+        -->
+
+        <!-- Sesame Extensions over Standard Marmotta -->
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-repository-contextaware</artifactId>
+        </dependency>
+
+        <!-- JavaEE / Servlet / CDI Environment -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+
+</project>

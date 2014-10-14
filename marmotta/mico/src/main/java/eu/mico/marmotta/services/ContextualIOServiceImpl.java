@@ -3,14 +3,12 @@ package eu.mico.marmotta.services;
 import com.google.common.base.Preconditions;
 import eu.mico.marmotta.api.ContextualConnectionService;
 import eu.mico.marmotta.api.ContextualIOService;
-import org.apache.marmotta.kiwi.sail.KiWiStore;
 import org.apache.marmotta.platform.core.api.config.ConfigurationService;
 import org.apache.marmotta.platform.core.api.triplestore.SesameService;
 import org.openrdf.model.URI;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.*;
-import org.openrdf.sail.Sail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

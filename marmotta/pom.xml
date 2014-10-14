@@ -19,6 +19,7 @@
     <description>MICO Platform Marmotta Reactor</description>
 
     <modules>
+        <module>mico</module>
         <module>webapp</module>
     </modules>
 
