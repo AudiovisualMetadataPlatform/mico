@@ -15,7 +15,7 @@
     <artifactId>mico-api-reactor</artifactId>
     <packaging>pom</packaging>
 
-    <name>MICO Platform API</name>
+    <name>MICO Platform: API</name>
     <description>MICO Platform API Reactor</description>
     <url>http://mico-project.eu</url>
 
