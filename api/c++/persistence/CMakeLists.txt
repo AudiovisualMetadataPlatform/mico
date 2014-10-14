@@ -12,3 +12,6 @@ ENDFOREACH()
 include_directories(../rdf)
 add_library(mico_persistence SHARED ${COMPILED_RESOURCES} SPARQLUtil.cpp Metadata.cpp Content.cpp ContentItem.cpp PersistenceService.cpp URLStream.cpp)
 target_link_libraries(mico_persistence mico_marmotta mico_rdf)
+
+install (TARGETS mico_persistence DESTINATION lib)
+install (FILES Content.hpp ContentItem.hpp Metadata.hpp PersistenceService.hpp SPARQLUtil.hpp URLStream.hpp DESTINATION include)
