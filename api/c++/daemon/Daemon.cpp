@@ -28,6 +28,7 @@ namespace mico {
 
         Daemon::Daemon(const char* name, const char *server, const char *user, const char *password, std::vector<mico::event::AnalysisService*> svcs)
                 : name(name), eventManager(server,user,password), services(svcs) {
+
         }
 
         Daemon::~Daemon() {
@@ -36,7 +37,34 @@ namespace mico {
             }
         }
 
-        int Daemon::start() {
+        void Daemon::start() {
+            for (AnalysisService *s : services) {
+                eventManager.registerService(s);
+            }
+        }
+
+        void Daemon::stop() {
+            for (AnalysisService *s : services) {
+                eventManager.unregisterService(s);
+            }
+
+        }
+
+
+        int start(const char* name, const char* server, const char* user, const char* password, std::initializer_list<mico::event::AnalysisService*> svcs) {
+            std::vector<AnalysisService*> services;
+            for (AnalysisService *s : svcs) {
+                services.push_back(s);
+            }
+
+            start(name, server, user, password, services);
+        }
+
+
+        int start(const char* name, const char* server, const char* user, const char* password, std::vector<mico::event::AnalysisService*> svcs) {
+
+            pid_t pid;
+
             daemon_log(LOG_INFO, "starting daemon and registering services ...");
 
 
@@ -81,11 +109,14 @@ namespace mico {
                     daemon_log(LOG_ERR, "Could not receive return value from daemon process: %s", strerror(errno));
                     return 255;
                 }
-                daemon_log(ret != 0 ? LOG_ERR : LOG_INFO, "Daemon returned %i as return value.", ret);
+                daemon_log(ret != 0 ? LOG_ERR : LOG_DEBUG, "Daemon returned %i as return value.", ret);
                 return ret;
             } else { /* The daemon */
                 int fd, quit = 0;
                 fd_set fds;
+
+                Daemon d(name,server,user,password, svcs);
+
                 /* Close FDs */
                 if (daemon_close_all(-1) < 0) {
                     daemon_log(LOG_ERR, "Failed to close all file descriptors: %s", strerror(errno));
@@ -107,13 +138,12 @@ namespace mico {
                 }
 
 
-                for (AnalysisService *s : services) {
-                    eventManager.registerService(s);
-                }
+                d.start();
+
 
                 /* Send OK to parent process */
                 daemon_retval_send(0);
-                daemon_log(LOG_INFO, "Sucessfully started");
+                daemon_log(LOG_INFO, "MICO daemon %s sucessfully started", name);
 
 
                 /* Prepare for select() on the signal fd */
@@ -130,7 +160,7 @@ namespace mico {
                         daemon_log(LOG_ERR, "select(): %s", strerror(errno));
                         break;
                     }
-                    /* Check if a signal has been recieved */
+                    /* Check if a signal has been received */
                     if (FD_ISSET(fd, &fds2)) {
                         int sig;
                         /* Get signal */
@@ -152,9 +182,7 @@ namespace mico {
 
                 }
 
-                for (AnalysisService *s : services) {
-                    eventManager.unregisterService(s);
-                }
+                d.stop();
                 daemon_log(LOG_INFO, "MICO analysis services unregistered");
 
             finish:
@@ -163,22 +191,39 @@ namespace mico {
                 daemon_signal_done();
                 daemon_pid_file_remove();
 
-                daemon_log(LOG_INFO, "MICO daemon %s stopped", name);
+                daemon_log(LOG_INFO, "MICO daemon %s stopped", d.name);
 
                 free(_name);
                 return 0;
             }
         }
 
-        int Daemon::stop() {
+        int stop(const char* name) {
             int ret;
+
+            /* Reset signal handlers */
+            if (daemon_reset_sigs(-1) < 0) {
+                daemon_log(LOG_ERR, "Failed to reset all signal handlers: %s", strerror(errno));
+                return 1;
+            }
+            /* Unblock signals */
+            if (daemon_unblock_sigs(-1) < 0) {
+                daemon_log(LOG_ERR, "Failed to unblock all signals: %s", strerror(errno));
+                return 1;
+            }
+            /* Set indetification string for the daemon for both syslog and PID file */
+            char* _name= strdup(name);
+            daemon_pid_file_ident = daemon_log_ident = daemon_ident_from_argv0(_name);
 
             /* Kill daemon with SIGTERM */
             /* Check if the new function daemon_pid_file_kill_wait() is available, if it is, use it. */
             if ((ret = daemon_pid_file_kill_wait(SIGTERM, 5)) < 0)
                 daemon_log(LOG_WARNING, "Failed to kill daemon: %s", strerror(errno));
 
-            return ret;
+
+            free(_name);
+
+            return ret < 0 ? 1 : 0;
         }
     }
 }

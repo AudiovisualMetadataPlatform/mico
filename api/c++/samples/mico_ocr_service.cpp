@@ -23,13 +23,13 @@
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
 
-#include "EventManager.hpp"
+#include "AnalysisService.hpp"
+#include "Daemon.hpp"
+
 
 // for constant RDF property definitions of common vocabularies
 #include "vocabularies.hpp"
 
-// for configuring logging levels
-#include "../logging.h"
 
 using std::string;
 
@@ -41,6 +41,7 @@ using namespace mico::persistence;
 
 // this namespace contains the RDF data model
 using namespace mico::rdf::model;
+
 
 // define dublin core vocabulary shortcut
 namespace DC = mico::rdf::vocabularies::DC;
@@ -139,29 +140,9 @@ public:
 
 void usage() {
     std::cerr << "Usage: mico_ocr_service SERVER_IP [USER PASSWORD]" << std::endl;
+    std::cerr << "Usage: mico_ocr_service -k" << std::endl;
 }
 
-
-// declare global scope services, because signal handler needs access to them
-EventManager* mgr;
-OCRAnalysisService* pngAnalyser;
-OCRAnalysisService* jpgAnalyser;
-
-// indicate if we should continue looping
-bool loop = true;
-
-void signal_handler(int signum) {
-    std::cout << "shutting down OCR analysers ... " << std::endl;
-
-    mgr->unregisterService(pngAnalyser);
-    mgr->unregisterService(jpgAnalyser);
-
-    delete pngAnalyser;
-    delete jpgAnalyser;
-    delete mgr;
-
-    loop = false;
-}
 
 int main(int argc, char **argv) {
     if(argc != 2 && argc != 4) {
@@ -180,33 +161,11 @@ int main(int argc, char **argv) {
         mico_pass = "mico";
     }
 
-    // configure Boost logging (only messages of level INFO or above)
-    boost::log::core::get()->set_filter
-            (
-                    boost::log::trivial::severity >= boost::log::trivial::info
-            );
+    if(!strcmp(argv[1], "-k")) {
+        return mico::daemon::stop(argv[0]);
+    } else {
+        // create a new instance of a MICO daemon, auto-registering two instances of the OCR analysis service
+        return mico::daemon::start(argv[0], argv[1], mico_user, mico_pass, {new OCRAnalysisService("png", "image/png", "eng"), new OCRAnalysisService("jpeg", "image/jpeg", "eng")});
 
-
-
-    const char* server_name = argv[1];
-
-    // initialise an instance of EventManager
-    mgr = new EventManager(server_name, mico_user, mico_pass);
-
-    // register several instances of the OCR analysis service for different types
-    pngAnalyser = new OCRAnalysisService("png","image/png","eng");
-    jpgAnalyser = new OCRAnalysisService("jpeg","image/jpeg","eng");
-
-    mgr->registerService(pngAnalyser);
-    mgr->registerService(jpgAnalyser);
-
-
-    signal(SIGINT,  &signal_handler);
-    signal(SIGTERM, &signal_handler);
-    signal(SIGHUP,  &signal_handler);
-
-    // go into an endless loop; the event manager has its own threads for running the services
-    while(loop) {
-        sleep(1);
     }
 }

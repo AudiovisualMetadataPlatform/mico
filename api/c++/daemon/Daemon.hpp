@@ -17,13 +17,15 @@ namespace mico {
             typedef mico::event::EventManager EventManager;
             typedef std::vector<mico::event::AnalysisService*> ServiceList;
 
+            friend int start(const char* name, const char* server, const char* user, const char* password, std::vector<mico::event::AnalysisService*> svcs);
         private:
             const char* name;
 
             EventManager eventManager;
             ServiceList  services;
 
-            pid_t pid;
+            void start();
+            void stop();
 
         public:
 
@@ -32,11 +34,13 @@ namespace mico {
 
             ~Daemon();
 
-            int start();
 
-            int stop();
         };
 
+
+        int start(const char* name, const char* server, const char* user, const char* password, std::initializer_list<mico::event::AnalysisService*> svcs);
+        int start(const char* name, const char* server, const char* user, const char* password, std::vector<mico::event::AnalysisService*> svcs);
+        int stop(const char* name);
     }
 }
 
