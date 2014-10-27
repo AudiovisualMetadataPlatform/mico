@@ -9,6 +9,7 @@
 #include "protocolheaderframe.h"
 #include "connectioncloseokframe.h"
 #include "connectioncloseframe.h"
+#include "reducedbuffer.h"
 
 /**
  *  set namespace
@@ -44,7 +45,7 @@ ConnectionImpl::~ConnectionImpl()
     close();
 
     // invalidate all channels, so they will no longer call methods on this channel object
-    for (auto iter = _channels.begin(); iter != _channels.end(); iter++) iter->second->invalidate();
+    for (auto iter = _channels.begin(); iter != _channels.end(); iter++) iter->second->detach();
 }
 
 /**
@@ -53,7 +54,7 @@ ConnectionImpl::~ConnectionImpl()
  *  @param  channel
  *  @return uint16_t
  */
-uint16_t ConnectionImpl::add(ChannelImpl *channel)
+uint16_t ConnectionImpl::add(const std::shared_ptr<ChannelImpl> &channel)
 {
     // check if we have exceeded the limit already
     if (_maxChannels > 0 && _channels.size() >= _maxChannels) return 0;
@@ -79,7 +80,7 @@ uint16_t ConnectionImpl::add(ChannelImpl *channel)
  *  Remove a channel
  *  @param  channel
  */
-void ConnectionImpl::remove(ChannelImpl *channel)
+void ConnectionImpl::remove(const ChannelImpl *channel)
 {
     // skip zero channel
     if (channel->id() == 0) return;
@@ -101,10 +102,9 @@ void ConnectionImpl::remove(ChannelImpl *channel)
  *  later call.
  *
  *  @param  buffer      buffer to decode
- *  @param  size        size of the buffer to decode
  *  @return             number of bytes that were processed
  */
-size_t ConnectionImpl::parse(const char *buffer, size_t size)
+size_t ConnectionImpl::parse(const Buffer &buffer)
 {
     // do not parse if already in an error state
     if (_state == state_closed) return 0;
@@ -117,13 +117,13 @@ size_t ConnectionImpl::parse(const char *buffer, size_t size)
 
     // keep looping until we have processed all bytes, and the monitor still
     // indicates that the connection is in a valid state
-    while (size > 0 && monitor.valid())
+    while (processed < buffer.size() && monitor.valid())
     {
         // prevent protocol exceptions
         try
         {
             // try to recognize the frame
-            ReceivedFrame receivedFrame(buffer, size, _maxFrame);
+            ReceivedFrame receivedFrame(ReducedBuffer(buffer, processed), _maxFrame);
             if (!receivedFrame.complete()) return processed;
 
             // process the frame
@@ -133,7 +133,7 @@ size_t ConnectionImpl::parse(const char *buffer, size_t size)
             size_t bytes = receivedFrame.totalSize();
 
             // add bytes
-            processed += bytes; size -= bytes; buffer += bytes;
+            processed += bytes;
         }
         catch (const ProtocolException &exception)
         {
@@ -144,6 +144,13 @@ size_t ConnectionImpl::parse(const char *buffer, size_t size)
             return processed;
         }
     }
+
+    // leap out if the connection object no longer exists
+    if (!monitor.valid() || !_closed || _state != state_connected) return processed;
+
+    // the close() function was called, but if the close frame was not yet sent
+    // if there are no waiting channels, we can do that right now
+    if (!waiting()) sendClose();
 
     // done
     return processed;
@@ -162,10 +169,29 @@ bool ConnectionImpl::close()
     // mark that the object is closed
     _closed = true;
 
-    // if still busy with handshake, we delay closing for a while
-    if (_state == state_handshake || _state == state_protocol) return true;
+    // after the send operation the object could be dead
+    Monitor monitor(this);
 
-    // perform the close operation
+    // number of channels that is waiting for an answer and that has further data
+    int waiters = 0;
+
+    // loop over all channels, and close them
+    for (auto iter = _channels.begin(); iter != _channels.end(); iter++)
+    {
+        // close the channel
+        iter->second->close();
+
+        // we could be dead now
+        if (!monitor.valid()) return true;
+
+        // is this channel waiting for an answer
+        if (iter->second->waiting()) waiters++;
+    }
+
+    // if still busy with handshake, we delay closing for a while
+    if (waiters > 0 || _state != state_connected) return true;
+
+    // perform the close frame
     sendClose();
 
     // done
@@ -181,16 +207,6 @@ bool ConnectionImpl::sendClose()
 {
     // after the send operation the object could be dead
     Monitor monitor(this);
-
-    // loop over all channels
-    for (auto iter = _channels.begin(); iter != _channels.end(); iter++)
-    {
-        // close the channel
-        iter->second->close();
-
-        // we could be dead now
-        if (!monitor.valid()) return false;
-    }
 
     // send the close frame
     send(ConnectionCloseFrame(0, "shutdown"));
@@ -213,11 +229,6 @@ void ConnectionImpl::setConnected()
     // store connected state
     _state = state_connected;
 
-    // if the close method was called before, the frame was not
-    // sent. append it to the end of the queue to make sure we
-    // are correctly closed down.
-    if (_closed && !sendClose()) return;
-
     // we're going to call the handler, which can destruct the connection,
     // so we must monitor if the queue object is still valid after calling
     Monitor monitor(this);
@@ -237,6 +248,30 @@ void ConnectionImpl::setConnected()
         // send it
         _handler->onData(_parent, buffer.data(), buffer.size());
     }
+
+    // leap out if object is dead
+    if (!monitor.valid()) return;
+
+    // if the close method was called before, and no channel is waiting
+    // for an answer, we can now safely send out the close frame
+    if (_closed && _state == state_connected && !waiting()) sendClose();
+}
+
+/**
+ *  Is any channel waiting for an answer on a synchronous call?
+ *  @return bool
+ */
+bool ConnectionImpl::waiting() const
+{
+    // loop through the channels
+    for (auto &iter : _channels)
+    {
+        // is this a waiting channel
+        if (iter.second->waiting()) return true;
+    }
+
+    // no waiting channel found
+    return false;
 }
 
 /**
@@ -248,6 +283,9 @@ bool ConnectionImpl::send(const Frame &frame)
 {
     // its not possible to send anything if closed or closing down
     if (_state == state_closing || _state == state_closed) return false;
+
+    // some frames can be sent _after_ the close() function was called
+    if (_closed && !frame.partOfShutdown()) return false;
 
     // we need an output buffer
     OutBuffer buffer(frame.buffer());

@@ -25,12 +25,14 @@
 // base C include files
 #include <stdint.h>
 #include <math.h>
-#include <endian.h>
 
 // forward declarations
 #include <amqpcpp/classes.h>
 
 // utility classes
+#include <amqpcpp/endian.h>
+#include <amqpcpp/buffer.h>
+#include <amqpcpp/bytebuffer.h>
 #include <amqpcpp/receivedframe.h>
 #include <amqpcpp/outbuffer.h>
 #include <amqpcpp/watchable.h>
@@ -60,6 +62,7 @@
 #include <amqpcpp/deferredqueue.h>
 #include <amqpcpp/deferreddelete.h>
 #include <amqpcpp/deferredcancel.h>
+#include <amqpcpp/deferredget.h>
 #include <amqpcpp/channelimpl.h>
 #include <amqpcpp/channel.h>
 #include <amqpcpp/login.h>

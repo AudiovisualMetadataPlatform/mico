@@ -55,7 +55,7 @@ protected:
      *  All channels that are active
      *  @var    map
      */
-    std::map<uint16_t, ChannelImpl*> _channels;
+    std::map<uint16_t, std::shared_ptr<ChannelImpl>> _channels;
 
     /**
      *  The last unused channel ID
@@ -100,6 +100,13 @@ protected:
      */
     bool sendClose();
 
+    /**
+     *  Is any channel waiting for an answer on a synchronous call?
+     *  @return bool
+     */
+    bool waiting() const;
+
+
 private:
     /**
      *  Construct an AMQP object based on full login data
@@ -118,9 +125,22 @@ private:
 
 public:
     /**
+     *  Copy'ing connections is impossible
+     *  @param  connection
+     */
+    ConnectionImpl(const ConnectionImpl &connection) = delete;
+
+    /**
      *  Destructor
      */
     virtual ~ConnectionImpl();
+
+    /**
+     *  No assignments of other connections
+     *  @param  connection
+     *  @return ConnectionImpl
+     */
+    ConnectionImpl &operator=(const ConnectionImpl &connection) = delete;
 
     /**
      *  What is the state of the connection - is the protocol handshake completed?
@@ -145,7 +165,7 @@ public:
      *  Are we fully connected?
      *  @return bool
      */
-    bool connected()
+    bool connected() const
     {
         // state must be connected
         return _state == state_connected;
@@ -160,7 +180,7 @@ public:
      *  Retrieve the login data
      *  @return Login
      */
-    Login &login()
+    const Login &login() const
     {
         return _login;
     }
@@ -169,7 +189,7 @@ public:
      *  Retrieve the vhost
      *  @return string
      */
-    std::string &vhost()
+    const std::string &vhost() const
     {
         return _vhost;
     }
@@ -210,13 +230,13 @@ public:
      *  @param  channel
      *  @return uint16_t
      */
-    uint16_t add(ChannelImpl *channel);
+    uint16_t add(const std::shared_ptr<ChannelImpl> &channel);
 
     /**
      *  Remove a channel
      *  @param  channel
      */
-    void remove(ChannelImpl *channel);
+    void remove(const ChannelImpl *channel);
 
     /**
      *  Parse the buffer into a recognized frame
@@ -231,10 +251,9 @@ public:
      *  later call.
      *
      *  @param  buffer      buffer to decode
-     *  @param  size        size of the buffer to decode
      *  @return             number of bytes that were processed
      */
-    size_t parse(const char *buffer, size_t size);
+    size_t parse(const Buffer &buffer);
 
     /**
      *  Close the connection
@@ -270,7 +289,7 @@ public:
      *  @param  number          channel identifier
      *  @return channel         the channel object, or nullptr if not yet created
      */
-    ChannelImpl *channel(int number)
+    std::shared_ptr<ChannelImpl> channel(int number)
     {
         auto iter = _channels.find(number);
         return iter == _channels.end() ? nullptr : iter->second;

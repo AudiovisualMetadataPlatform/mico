@@ -17,7 +17,7 @@ namespace AMQP {
  *  @param  name            Consumer tag that is started
  *  @return Deferred
  */
-Deferred *DeferredConsumer::reportSuccess(const std::string &name) const
+const std::shared_ptr<Deferred> &DeferredConsumer::reportSuccess(const std::string &name) const
 {
     // we now know the name, so we can install the message callback on the channel
     _channel->install(name, _messageCallback);
@@ -27,9 +27,6 @@ Deferred *DeferredConsumer::reportSuccess(const std::string &name) const
     
     // call the callback
     _consumeCallback(name);
-    
-    // call finalize callback
-    if (_finalizeCallback) _finalizeCallback();
     
     // return next object
     return _next;

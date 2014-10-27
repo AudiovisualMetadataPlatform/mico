@@ -17,7 +17,7 @@ namespace AMQP {
  *  @param  name            Consumer tag that is cancelled
  *  @return Deferred
  */
-Deferred *DeferredCancel::reportSuccess(const std::string &name) const
+const std::shared_ptr<Deferred> &DeferredCancel::reportSuccess(const std::string &name) const
 {
     // in the channel, we should uninstall the consumer
     _channel->uninstall(name);
@@ -27,9 +27,6 @@ Deferred *DeferredCancel::reportSuccess(const std::string &name) const
     
     // call the callback
     _cancelCallback(name);
-    
-    // call finalize callback
-    if (_finalizeCallback) _finalizeCallback();
     
     // return next object
     return _next;

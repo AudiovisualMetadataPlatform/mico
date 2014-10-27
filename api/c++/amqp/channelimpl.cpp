@@ -7,6 +7,7 @@
  */
 #include "includes.h"
 #include "basicdeliverframe.h"
+#include "basicgetokframe.h"
 #include "basicreturnframe.h"
 #include "messageimpl.h"
 #include "consumedmessage.h"
@@ -37,40 +38,13 @@
 #include "basicnackframe.h"
 #include "basicrecoverframe.h"
 #include "basicrejectframe.h"
+#include "basicgetframe.h"
+
 
 /**
  *  Set up namespace
  */
 namespace AMQP {
-
-/**
- *  Construct a channel object
- *  @param  parent
- *  @param  connection
- *  @param  handler
- */
-ChannelImpl::ChannelImpl(Channel *parent, Connection *connection) :
-    _parent(parent),
-    _connection(&connection->_implementation)
-{
-    // add the channel to the connection
-    _id = _connection->add(this);
-
-    // check if the id is valid
-    if (_id == 0)
-    {
-        // this is invalid
-        _state = state_closed;
-    }
-    else
-    {
-        // busy connecting
-        _state = state_connected;
-
-        // valid id, send a channel open frame
-        send(ChannelOpenFrame(_id));
-    }
-}
 
 /**
  *  Destructor
@@ -83,22 +57,47 @@ ChannelImpl::~ChannelImpl()
 
     // remove this channel from the connection (but not if the connection is already destructed)
     if (_connection) _connection->remove(this);
-
-    // close the channel now
-    close();
-
-    // destruct deferred results
-    while (_oldestCallback) _oldestCallback.reset(_oldestCallback->next());
 }
+
+/**
+ *  Initialize the object with an connection
+ *  @param  connection
+ */
+void ChannelImpl::attach(Connection *connection)
+{
+    // get connection impl
+    _connection = &connection->_implementation;
+    
+    // retrieve an ID
+    _id = _connection->add(shared_from_this());
+    
+    // check if the id is valid
+    if (_id == 0)
+    {
+        // this is invalid
+        _state = state_closed;
+    }
+    else 
+    {
+        // assume channel is connected
+        _state = state_connected;
+    
+        // send the open frame
+        if (send(ChannelOpenFrame(_id))) return;
+
+        // report an error
+        reportError("Channel could not be initialized", true);
+    }
+}    
 
 /**
  *  Push a deferred result
  *  @param  result          The deferred object to push
  */
-Deferred &ChannelImpl::push(Deferred *deferred)
+Deferred &ChannelImpl::push(const std::shared_ptr<Deferred> &deferred)
 {
     // do we already have an oldest?
-    if (!_oldestCallback) _oldestCallback.reset(deferred);
+    if (!_oldestCallback) _oldestCallback = deferred;
 
     // do we already have a newest?
     if (_newestCallback) _newestCallback->add(deferred);
@@ -117,7 +116,7 @@ Deferred &ChannelImpl::push(Deferred *deferred)
 Deferred &ChannelImpl::push(const Frame &frame)
 {
     // send the frame, and push the result
-    return push(new Deferred(send(frame)));
+    return push(std::make_shared<Deferred>(!send(frame)));
 }
 
 /**
@@ -192,6 +191,9 @@ Deferred &ChannelImpl::rollbackTransaction()
  */
 Deferred &ChannelImpl::close()
 {
+    // this is completely pointless if not connected
+    if (_state != state_connected) return push(std::make_shared<Deferred>(_state == state_closing));
+    
     // send a channel close frame
     auto &handler = push(ChannelCloseFrame(_id));
 
@@ -290,7 +292,7 @@ DeferredQueue &ChannelImpl::declareQueue(const std::string &name, int flags, con
     QueueDeclareFrame frame(_id, name, flags & passive, flags & durable, flags & exclusive, flags & autodelete, false, arguments);
 
     // send the queuedeclareframe
-    auto *result = new DeferredQueue(send(frame));
+    auto result = std::make_shared<DeferredQueue>(!send(frame));
 
     // add the deferred result
     push(result);
@@ -356,7 +358,7 @@ DeferredDelete &ChannelImpl::purgeQueue(const std::string &name)
     QueuePurgeFrame frame(_id, name, false);
 
     // send the frame, and create deferred object
-    auto *deferred = new DeferredDelete(send(frame));
+    auto deferred = std::make_shared<DeferredDelete>(!send(frame));
 
     // push to list
     push(deferred);
@@ -389,7 +391,7 @@ DeferredDelete &ChannelImpl::removeQueue(const std::string &name, int flags)
     QueueDeleteFrame frame(_id, name, flags & ifunused, flags & ifempty, false);
 
     // send the frame, and create deferred object
-    auto *deferred = new DeferredDelete(send(frame));
+    auto deferred = std::make_shared<DeferredDelete>(!send(frame));
 
     // push to list
     push(deferred);
@@ -462,11 +464,14 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
  *
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
+ * 
+ *  @param  prefetchCount       number of messages to fetch
+ *  @param  global              share counter between all consumers on the same channel
  */
-Deferred &ChannelImpl::setQos(uint16_t prefetchCount)
+Deferred &ChannelImpl::setQos(uint16_t prefetchCount, bool global)
 {
     // send a qos frame
-    return push(BasicQosFrame(_id, prefetchCount, false));
+    return push(BasicQosFrame(_id, prefetchCount, global));
 }
 
 /**
@@ -495,7 +500,7 @@ DeferredConsumer& ChannelImpl::consume(const std::string &queue, const std::stri
     BasicConsumeFrame frame(_id, queue, tag, flags & nolocal, flags & noack, flags & exclusive, false, arguments);
 
     // send the frame, and create deferred object
-    auto *deferred = new DeferredConsumer(this, send(frame));
+    auto deferred = std::make_shared<DeferredConsumer>(this, !send(frame));
 
     // push to list
     push(deferred);
@@ -513,9 +518,9 @@ DeferredConsumer& ChannelImpl::consume(const std::string &queue, const std::stri
  *
  *  The onSuccess() callback that you can install should have the following signature:
  *
- *      void myCallback(AMQP::Channel *channel, const std::string& tag);
+ *      void myCallback(const std::string& tag);
  *
- *  For example: channel.declareQueue("myqueue").onSuccess([](AMQP::Channel *channel, const std::string& tag) {
+ *  For example: channel.declareQueue("myqueue").onSuccess([](const std::string& tag) {
  *
  *      std::cout << "Started consuming under tag " << tag << std::endl;
  *
@@ -527,7 +532,54 @@ DeferredCancel &ChannelImpl::cancel(const std::string &tag)
     BasicCancelFrame frame(_id, tag, false);
 
     // send the frame, and create deferred object
-    auto *deferred = new DeferredCancel(this, send(frame));
+    auto deferred = std::make_shared<DeferredCancel>(this, !send(frame));
+
+    // push to list
+    push(deferred);
+
+    // done
+    return *deferred;
+}
+
+/**
+ *  Retrieve a single message from RabbitMQ
+ * 
+ *  When you call this method, you can get one single message from the queue (or none
+ *  at all if the queue is empty). The deferred object that is returned, should be used
+ *  to install a onEmpty() and onSuccess() callback function that will be called
+ *  when the message is consumed and/or when the message could not be consumed.
+ * 
+ *  The following flags are supported:
+ * 
+ *      -   noack               if set, consumed messages do not have to be acked, this happens automatically
+ * 
+ *  @param  queue               name of the queue to consume from
+ *  @param  flags               optional flags
+ * 
+ *  The object returns a deferred handler. Callbacks can be installed 
+ *  using onSuccess(), onEmpty(), onError() and onFinalize() methods.
+ * 
+ *  The onSuccess() callback has the following signature:
+ * 
+ *      void myCallback(const Message &message, uint64_t deliveryTag, bool redelivered);
+ * 
+ *  For example: channel.get("myqueue").onSuccess([](const Message &message, uint64_t deliveryTag, bool redelivered) {
+ * 
+ *      std::cout << "Message fetched" << std::endl;
+ * 
+ *  }).onEmpty([]() {
+ * 
+ *      std::cout << "Queue is empty" << std::endl;
+ * 
+ *  });
+ */
+DeferredGet &ChannelImpl::get(const std::string &queue, int flags)
+{
+    // the get frame to send
+    BasicGetFrame frame(_id, queue, flags & noack);
+    
+    // send the frame, and create deferred object
+    auto deferred = std::make_shared<DeferredGet>(this, !send(frame));
 
     // push to list
     push(deferred);
@@ -590,7 +642,13 @@ Deferred &ChannelImpl::recover(int flags)
 bool ChannelImpl::send(const Frame &frame)
 {
     // skip if channel is not connected
-    if (_state != state_connected || !_connection) return false;
+    if (_state == state_closed || !_connection) return false;
+
+    // if we're busy closing, we pretend that the send operation was a
+    // success. this causes the deferred object to be created, and to be
+    // added to the list of deferred objects. it will be notified about
+    // the error when the close operation succeeds
+    if (_state == state_closing) return true;
 
     // are we currently in synchronous mode or are there
     // other frames waiting for their turn to be sent?
@@ -605,19 +663,21 @@ bool ChannelImpl::send(const Frame &frame)
         return true;
     }
 
-    // enter synchronous mode if necessary
-    _synchronous = frame.synchronous();
-
     // send to tcp connection
-    return _connection->send(frame);
+    if (!_connection->send(frame)) return false;
+    
+    // frame was sent, if this was a synchronous frame, we now have to wait
+    _synchronous = frame.synchronous();
+    
+    // done
+    return true;
 }
 
 /**
- *  Signal the channel that a synchronous operation
- *  was completed. After this operation, waiting
- *  frames can be sent out.
+ *  Signal the channel that a synchronous operation was completed. After 
+ *  this operation, waiting frames can be sent out.
  */
-void ChannelImpl::synchronized()
+void ChannelImpl::onSynchronized()
 {
     // we are no longer waiting for synchronous operations
     _synchronous = false;
@@ -626,7 +686,7 @@ void ChannelImpl::synchronized()
     Monitor monitor(this);
 
     // send all frames while not in synchronous mode
-    while (monitor.valid() && !_synchronous && !_queue.empty())
+    while (monitor.valid() && _connection && !_synchronous && !_queue.empty())
     {
         // retrieve the first buffer and synchronous
         auto pair = std::move(_queue.front());
@@ -650,15 +710,21 @@ void ChannelImpl::reportMessage()
     // skip if there is no message
     if (!_message) return;
 
+    // after the report the channel may be destructed, monitor that
+    Monitor monitor(this);
+
+    // synchronize the channel if this comes from a basic.get frame
+    if (_message->consumer().empty()) onSynchronized();
+
+    // syncing the channel may destruct the channel
+    if (!monitor.valid()) return;
+
     // look for the consumer
     auto iter = _consumers.find(_message->consumer());
     if (iter == _consumers.end()) return;
 
     // is this a valid callback method
     if (!iter->second) return;
-
-    // after the report the channel may be destructed, monitor that
-    Monitor monitor(this);
 
     // call the callback
     _message->report(iter->second);
@@ -671,7 +737,74 @@ void ChannelImpl::reportMessage()
 }
 
 /**
- *  Create an incoming message
+ *  Report an error message on a channel
+ *  @param  message             the error message
+ *  @param  notifyhandler       should the channel-wide handler also be called?
+ */
+void ChannelImpl::reportError(const char *message, bool notifyhandler)
+{
+    // change state
+    _state = state_closed;
+    _synchronous = false;
+    
+    // the queue of messages that still have to sent can be emptied now
+    // (we do this by moving the current queue into an unused variable)
+    auto queue(std::move(_queue));
+
+    // we are going to call callbacks that could destruct the channel
+    Monitor monitor(this);
+
+    // call the oldest
+    if (_oldestCallback)
+    {
+        // copy the callback (so that it can not be destructed during
+        // the "reportError" call
+        auto cb = _oldestCallback;
+        
+        // call the callback
+        auto next = cb->reportError(message);
+
+        // leap out if channel no longer exists
+        if (!monitor.valid()) return;
+
+        // set the oldest callback
+        _oldestCallback = next;
+    }
+
+    // clean up all deferred other objects
+    while (_oldestCallback)
+    {
+        // copy the callback (so that it can not be destructed during
+        // the "reportError" call
+        auto cb = _oldestCallback;
+
+        // call the callback
+        auto next = cb->reportError("Channel is in error state");
+
+        // leap out if channel no longer exists
+        if (!monitor.valid()) return;
+
+        // set the oldest callback
+        _oldestCallback = next;
+    }
+
+    // all callbacks have been processed, so we also can reset the pointer to the newest
+    _newestCallback = nullptr;
+
+    // inform handler
+    if (notifyhandler && _errorCallback) _errorCallback(message);
+
+    // leap out if object no longer exists
+    if (!monitor.valid()) return;
+
+    // the connection now longer has to know that this channel exists,
+    // because the channel ID is no longer in use
+    if (_connection) _connection->remove(this);
+}
+
+
+/**
+ *  Create an incoming message from a consume call
  *  @param  frame
  *  @return ConsumedMessage
  */
@@ -681,6 +814,20 @@ ConsumedMessage *ChannelImpl::message(const BasicDeliverFrame &frame)
     if (_message) delete _message;
 
     // construct a message
+    return _message = new ConsumedMessage(frame);
+}
+
+/**
+ *  Create an incoming message from a get call
+ *  @param  frame
+ *  @return ConsumedMessage
+ */
+ConsumedMessage *ChannelImpl::message(const BasicGetOKFrame &frame)
+{
+    // destruct if message is already set
+    if (_message) delete _message;
+    
+    // construct message
     return _message = new ConsumedMessage(frame);
 }
 

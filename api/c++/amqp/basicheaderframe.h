@@ -109,7 +109,7 @@ public:
     virtual bool process(ConnectionImpl *connection) override
     {
         // we need the appropriate channel
-        ChannelImpl *channel = connection->channel(this->channel());
+        auto channel = connection->channel(this->channel());
         
         // channel does not exist
         if (!channel) return false;    
@@ -119,10 +119,13 @@ public:
         if (!message) return false;
         
         // store size
-        message->setBodySize(bodySize());
+        message->setBodySize(_bodySize);
         
         // and copy the meta data
         message->set(_metadata);
+        
+        // for empty bodies we're ready now
+        if (_bodySize == 0) channel->reportMessage();
         
         // done
         return true;
