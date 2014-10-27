@@ -11,13 +11,6 @@ struct curl_slist;
 namespace mico {
     namespace http {
 
-        // cURL callbacks; declared here so we can friend them
-        /*
-        static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *request);
-        static size_t write_callback(void *ptr, size_t size, size_t nmemm, void *response);
-        static size_t header_callback(char *buffer, size_t size, size_t nitems, void *response);
-        */
-
         /**
         * The different types of requests supported by the library.
         */

@@ -61,6 +61,9 @@ namespace mico {
         class EventManager : public AMQP::ConnectionHandler
         {
         private:
+            boost::asio::
+            io_service io_service; //!< Boost I/O service for network connection
+
             std::string host;    //!< host name to connect to
             int    rabbitPort;   //!< port number of RabbitMQ server
             int    marmottaPort; //!< port number of Marmotta server
@@ -76,9 +79,6 @@ namespace mico {
 
             boost::asio::ip::tcp::
             socket socket;         //!< Boost socket for connecting with RabbitMQ
-
-            boost::asio::
-            io_service io_service; //!< Boost I/O service for network connection
 
             size_t recv_len;
             char*  recv_buf;

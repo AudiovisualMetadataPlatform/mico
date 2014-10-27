@@ -23,6 +23,7 @@ add_library(mico_amqp SHARED basicheaderframe.h exchangedeleteokframe.h basicack
                              framecheck.h channelflowframe.h amqpcpp.h)
 
 
+target_link_libraries(mico_amqp ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties(mico_amqp PROPERTIES SOVERSION 1)
 
 install(TARGETS mico_amqp LIBRARY DESTINATION lib)

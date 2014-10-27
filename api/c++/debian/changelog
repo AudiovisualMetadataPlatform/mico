@@ -1,3 +1,9 @@
+libmico-api (1.0.6) unstable; urgency=medium
+
+  * fix segmentation fault in event manager
+
+ -- Sebastian Schaffert <sebastian.schaffert@redlink.co>  Mon, 27 Oct 2014 15:50:49 +0100
+
 libmico-api (1.0.5) unstable; urgency=medium
 
   * change build to cmake
