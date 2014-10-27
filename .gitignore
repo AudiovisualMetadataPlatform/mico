@@ -32,5 +32,8 @@ Makefile
 .dirstamp
 
 *.iml
+.idea
 
 doc/
+
+kiwi-test.log

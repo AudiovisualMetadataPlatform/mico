@@ -52,6 +52,7 @@ public class ContextualSparqlWebService extends ContextualWebServiceBase {
     public static final String PATH = "sparql";
     public static final String SELECT = "/select";
     public static final String UPDATE = "/update";
+    public static final int TIMEOUT = 60;
 
     @Inject
     private Logger log;
@@ -124,9 +125,8 @@ public class ContextualSparqlWebService extends ContextualWebServiceBase {
             @PathParam("contexts") String contexts,
             @QueryParam("query") String query,
             @QueryParam(OUT) String out,
-            @HeaderParam("X-Redlink-Timeout") int timeout,
             @Context HttpServletRequest request) {
-        return select(query, checkInOutParameter(out), timeout, request, resolveContexts(contexts));
+        return select(query, checkInOutParameter(out), TIMEOUT, request, resolveContexts(contexts));
     }
 
     /**
@@ -148,9 +148,8 @@ public class ContextualSparqlWebService extends ContextualWebServiceBase {
             @PathParam("contexts") String contexts,
             @FormParam("query") String query,
             @QueryParam(OUT) String out,
-            @HeaderParam("X-Redlink-Timeout") int timeout,
             @Context HttpServletRequest request) {
-        return select(query, checkInOutParameter(out), timeout, request, resolveContexts(contexts));
+        return select(query, checkInOutParameter(out), TIMEOUT, request, resolveContexts(contexts));
     }
 
     /**
@@ -170,11 +169,10 @@ public class ContextualSparqlWebService extends ContextualWebServiceBase {
     public Response selectPost(
             @PathParam("contexts") String contexts,
             @QueryParam(OUT) String out,
-            @HeaderParam("X-Redlink-Timeout") int timeout,
             @Context HttpServletRequest request) {
         try {
             String query = CharStreams.toString(request.getReader());
-            return select(query, checkInOutParameter(out), timeout, request, resolveContexts(contexts));
+            return select(query, checkInOutParameter(out), TIMEOUT, request, resolveContexts(contexts));
         } catch (IOException e) {
             log.error("body not found", e);
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
