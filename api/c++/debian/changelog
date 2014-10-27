@@ -1,3 +1,10 @@
+libmico-api (1.0.5) unstable; urgency=medium
+
+  * change build to cmake
+  * fix unclean code
+
+ -- Sebastian Schaffert <sebastian.schaffert@redlink.co>  Mon, 27 Oct 2014 13:18:55 +0100
+
 libmico-api (1.0.4) unstable; urgency=medium
 
   * update protobuf dependency

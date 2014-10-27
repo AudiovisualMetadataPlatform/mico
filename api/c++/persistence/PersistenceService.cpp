@@ -22,7 +22,6 @@ SPARQL_INCLUDE(deleteGraph);
 
 // UUID generators
 static random_generator rnd_gen;
-static string_generator str_gen;
 
 
 namespace mico {

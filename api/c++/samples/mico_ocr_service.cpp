@@ -169,8 +169,8 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    char *mico_user;
-    char *mico_pass;
+    const char *mico_user;
+    const char *mico_pass;
 
     if(argc == 4) {
         mico_user = argv[2];

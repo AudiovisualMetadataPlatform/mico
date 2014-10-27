@@ -26,6 +26,9 @@ namespace mico {
             AnalysisService(const std::string serviceID, const std::string requires, const std::string provides, const std::string queue)
                     : serviceID(serviceID), provides(provides), requires(requires), queue(queue) {};
 
+
+            virtual ~AnalysisService() {};
+
             /**
             * Return a unique ID (URI) that identifies this service and its functionality.
             *

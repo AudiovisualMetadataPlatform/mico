@@ -55,8 +55,8 @@ namespace mico {
             */
             PersistenceService(std::string serverAddress)
                     : marmottaServerUrl("http://" + serverAddress + ":8080/marmotta")
-                    , metadata("http://" + serverAddress + ":8080/marmotta")
-                    , contentDirectory("ftp://mico:mico@" + serverAddress) {};
+                    , contentDirectory("ftp://mico:mico@" + serverAddress)
+                    , metadata("http://" + serverAddress + ":8080/marmotta") {};
 
 
             /**
@@ -66,8 +66,8 @@ namespace mico {
             */
             PersistenceService(std::string serverAddress, int marmottaPort, std::string user, std::string password)
                     : marmottaServerUrl("http://" + serverAddress + ":" + std::to_string(marmottaPort) + "/marmotta")
-                    , metadata("http://" + serverAddress + ":" + std::to_string(marmottaPort) + "/marmotta")
-                    , contentDirectory("ftp://" + user + ":" + password + "@" + serverAddress) {};
+                    , contentDirectory("ftp://" + user + ":" + password + "@" + serverAddress)
+                    , metadata("http://" + serverAddress + ":" + std::to_string(marmottaPort) + "/marmotta") {};
 
 
             /**
@@ -77,7 +77,7 @@ namespace mico {
             * @param marmottaServerUrl the URL of the Apache Marmotta server, e.g. http://localhost:8080/marmotta
             */
             PersistenceService(std::string marmottaServerUrl, std::string contentDirectory)
-                    : marmottaServerUrl(marmottaServerUrl), metadata(marmottaServerUrl), contentDirectory(contentDirectory) {};
+                    : marmottaServerUrl(marmottaServerUrl), contentDirectory(contentDirectory), metadata(marmottaServerUrl) {};
 
 
             /**
@@ -149,10 +149,10 @@ namespace mico {
 
         public:
             content_item_iterator(const std::string& baseUrl, const std::string& contentDirectory)
-                    : baseUrl(baseUrl), contentDirectory(contentDirectory), pos(-1), result(NULL) {};
+                    : pos(-1), baseUrl(baseUrl), contentDirectory(contentDirectory), result(NULL) {};
 
             content_item_iterator(const std::string& baseUrl, const std::string& contentDirectory, const mico::rdf::query::TupleResult* r)
-                    : baseUrl(baseUrl), contentDirectory(contentDirectory), pos(0), result(r) {};
+                    : pos(0), baseUrl(baseUrl), contentDirectory(contentDirectory), result(r) {};
 
             ~content_item_iterator() { if(result) { delete result; } };
 

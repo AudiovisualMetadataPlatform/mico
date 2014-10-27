@@ -76,7 +76,7 @@ namespace mico {
             const TupleResult* r = metadata.query(SPARQL_FORMAT(getContentType,params));
             if(r->size() > 0) {
                 string ret = r->at(0).at("t")->stringValue();
-                for(int i=0; i<r->size(); i++) {
+                for(size_t i=0; i<r->size(); i++) {
                     delete r->at(i).at("t");
                 }
                 delete r;
@@ -117,7 +117,7 @@ namespace mico {
             const TupleResult* r = metadata.query(SPARQL_FORMAT(getContentProperty,params));
             if(r->size() > 0) {
                 string ret = r->at(0).at("t")->stringValue();
-                for(int i=0; i<r->size(); i++) {
+                for(size_t i=0; i<r->size(); i++) {
                     delete r->at(i).at("t");
                 }
                 delete r;
@@ -158,7 +158,7 @@ namespace mico {
             const TupleResult* r = metadata.query(SPARQL_FORMAT(getContentRelation,params));
             if(r->size() > 0) {
                 Value* ret = r->at(0).at("t");
-                for(int i=1; i<r->size(); i++) {
+                for(size_t i=1; i<r->size(); i++) {
                     delete r->at(i).at("t");
                 }
                 delete r;

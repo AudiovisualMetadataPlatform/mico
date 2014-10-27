@@ -35,20 +35,18 @@ namespace mico
 
 
         ContentItem::ContentItem(const string& baseUrl, const string& contentDirectory, const uuid& id)
-                : baseUrl(baseUrl), id(id)
+                : baseUrl(baseUrl), contentDirectory(contentDirectory), id(id)
                 , metadata(baseUrl, boost::uuids::to_string(id) + SUFFIX_METADATA)
                 , execution(baseUrl, boost::uuids::to_string(id) + SUFFIX_EXECUTION)
                 , result(baseUrl, boost::uuids::to_string(id) + SUFFIX_RESULT)
-                , contentDirectory(contentDirectory)
         { };
 
 
         ContentItem::ContentItem(const string& baseUrl, const string& contentDirectory, const URI& uri)
-                : baseUrl(baseUrl), id(str_gen(uri.stringValue().substr(baseUrl.length() + 1)))
+                : baseUrl(baseUrl), contentDirectory(contentDirectory), id(str_gen(uri.stringValue().substr(baseUrl.length() + 1)))
                 , metadata(baseUrl, uri.stringValue().substr(baseUrl.length() + 1) + SUFFIX_METADATA)
                 , execution(baseUrl, uri.stringValue().substr(baseUrl.length() + 1) + SUFFIX_EXECUTION)
                 , result(baseUrl, uri.stringValue().substr(baseUrl.length() + 1) + SUFFIX_RESULT)
-                , contentDirectory(contentDirectory)
         {
             if(!starts_with(uri.stringValue(),baseUrl)) {
                 throw string("the baseUrl is not a prefix of the URI, invalid argument");

@@ -217,10 +217,10 @@ namespace mico {
 
         public:
             content_part_iterator(ContentItem& item, const std::string& baseUrl, const std::string& contentDirectory)
-                    : item(item), baseUrl(baseUrl), contentDirectory(contentDirectory), pos(-1), result(NULL) {};
+                    : pos(-1), item(item), baseUrl(baseUrl), contentDirectory(contentDirectory), result(NULL) {};
 
             content_part_iterator(ContentItem& item, const std::string& baseUrl, const std::string& contentDirectory, const mico::rdf::query::TupleResult* r)
-                    : item(item), baseUrl(baseUrl), pos(0), result(r), contentDirectory(contentDirectory) {};
+                    :  pos(0), item(item), baseUrl(baseUrl), contentDirectory(contentDirectory), result(r) {};
 
             ~content_part_iterator() { if(result) { delete result; } };
 

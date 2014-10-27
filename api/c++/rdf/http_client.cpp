@@ -98,7 +98,7 @@ namespace mico {
 
 
         // read callback used by cURL to read request body, last argument is pointer to request object
-        static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *request) {
+        size_t read_callback(void *ptr, size_t size, size_t nmemb, void *request) {
             Request* req = static_cast<Request*>(request);
 
             if(req->body->pos < req->body->length) {
@@ -114,7 +114,7 @@ namespace mico {
             }
         }
 
-        static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *response) {
+        size_t write_callback(void *ptr, size_t size, size_t nmemb, void *response) {
 
             Response* resp = static_cast<Response*>(response);
             if(resp->body == NULL) {
@@ -128,14 +128,14 @@ namespace mico {
         }
 
 
-        static size_t header_callback(char *buffer, size_t size, size_t nitems, void *response) {
+        size_t header_callback(char *buffer, size_t size, size_t nitems, void *response) {
 
             Response* resp = static_cast<Response*>(response);
 
             char* cpos = buffer;
-            while(*cpos != ':' && cpos - buffer < size*nitems) cpos++;
+            while(*cpos != ':' && (size_t)(cpos - buffer) < size*nitems) cpos++;
 
-            if(cpos - buffer < size*nitems) {
+            if((size_t)(cpos - buffer) < size*nitems) {
                 // header found
                 string key(buffer,cpos);
 
