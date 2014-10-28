@@ -171,28 +171,6 @@ namespace mico {
             */
             void onClosed(AMQP::Connection *connection);
 
-
-            /**
-            * Prepare forking (parent and child). Prepares I/O connection cleanups. Called in daemon mode,
-            */
-            void preFork() {
-                io_service.notify_fork(boost::asio::io_service::fork_prepare);
-            }
-
-            /**
-            * Finish forking in parent. Cleans up any I/O resources not needed.
-            */
-            void postForkParent() {
-                io_service.notify_fork(boost::asio::io_service::fork_parent);
-            }
-
-            /**
-            * Finish forking in child. Cleans up any I/O resources not needed.
-            */
-            void postForkChild() {
-                io_service.notify_fork(boost::asio::io_service::fork_child);
-            }
-
             /**
             * Register the given service with the event manager.
             *

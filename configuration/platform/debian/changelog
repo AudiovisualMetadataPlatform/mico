@@ -1,3 +1,9 @@
+mico-platform (1.0.3) unstable; urgency=medium
+
+  * fix location of documentation
+
+ -- Sebastian Schaffert <sebastian.schaffert@redlink.co>  Tue, 28 Oct 2014 17:54:40 +0100
+
 mico-platform (1.0.2) unstable; urgency=medium
 
   * fix substitution of hostname in entry page
