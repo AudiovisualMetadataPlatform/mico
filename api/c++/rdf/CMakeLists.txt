@@ -8,4 +8,4 @@ set_target_properties(mico_rdf PROPERTIES SOVERSION 1)
 set_target_properties(mico_marmotta PROPERTIES SOVERSION 1)
 
 install (TARGETS mico_rdf mico_marmotta DESTINATION lib)
-install (FILES http_client.hpp rdf_model.hpp sparql_client.hpp DESTINATION include)
+install (FILES vocabularies.hpp http_client.hpp rdf_model.hpp rdf_query.hpp sparql_client.hpp DESTINATION include)
