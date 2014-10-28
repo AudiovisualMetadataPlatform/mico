@@ -153,6 +153,21 @@ The complete platform is built using Maven. To build and install the current ver
 on the command line. This will compile all Java source code, run existing unit tests, build JAR
 artifacts, and install them in the local Maven repository.
 
+Binary Maven artifacts are periodically published to our development repositories:
+
+    <repositories>
+       ...
+        <repository>
+            <id>mico.releases</id>
+            <name>MICO Relesases Repository</name>
+            <url>http://mvn.mico-project.eu/content/repositories/releases/</url>
+        </repository>
+        <repository>
+            <id>mico.snapshots</id>
+            <name>MICO Snapshots Repository</name>
+            <url>http://mvn.mico-project.eu/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
 
 ### Building (C++)
 
@@ -189,5 +204,3 @@ To install the C++ libraries and headers to the predefined prefix, run
    
 In this case, you would probably also want to make sure that the Hadoop Native Libraries are properly 
 installed in the system before.
-
-
