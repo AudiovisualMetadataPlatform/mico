@@ -37,7 +37,6 @@ if(BUILD_DOCUMENTATION)
         VERBATIM)
 
     install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc)
-
 endif()
 
 
