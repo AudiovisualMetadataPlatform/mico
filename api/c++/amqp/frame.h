@@ -1,12 +1,16 @@
 /**
- *  Frame.h
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  Base class for frames. This base class can not be constructed from outside
- *  the library, and is only used internally.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  @copyright 2014 Copernica BV
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 /**
  *  Set up namespace
  */
@@ -47,6 +51,12 @@ public:
      *  @return bool
      */
     virtual bool partOfHandshake() const { return false; }
+
+    /**
+     *  Is this a frame that is part of the connection close operation?
+     *  @return bool
+     */
+    virtual bool partOfShutdown() const { return false; }
 
     /**
      *  Does this frame need an end-of-frame seperator?

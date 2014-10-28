@@ -1,7 +1,7 @@
 Source: libmico-api
 Priority: optional
 Maintainer: Sebastian Schaffert <sebastian.schaffert@gmail.com>
-Build-Depends: debhelper (>= 9), autotools-dev, libstdc++-4.9-dev, libboost1.55-dev, libexpat1-dev, libprotobuf-dev, libleptonica-dev, libmagic-dev, libtesseract-dev, doxygen
+Build-Depends: debhelper (>= 9), autotools-dev, libstdc++-4.9-dev, libboost1.55-dev, libexpat1-dev, libprotobuf-dev, libleptonica-dev, libmagic-dev, libtesseract-dev, doxygen, cdbs
 Standards-Version: 3.9.5
 Section: libs
 Homepage: https://bitbucket.org/mico-project/platform/overview

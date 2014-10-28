@@ -1,4 +1,17 @@
 /**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
  *  AMQP.h
  *
  *  Starting point for all includes of the Copernica AMQP library
@@ -25,12 +38,14 @@
 // base C include files
 #include <stdint.h>
 #include <math.h>
-#include <endian.h>
 
 // forward declarations
 #include <amqpcpp/classes.h>
 
 // utility classes
+#include <amqpcpp/endian.h>
+#include <amqpcpp/buffer.h>
+#include <amqpcpp/bytebuffer.h>
 #include <amqpcpp/receivedframe.h>
 #include <amqpcpp/outbuffer.h>
 #include <amqpcpp/watchable.h>
@@ -60,6 +75,7 @@
 #include <amqpcpp/deferredqueue.h>
 #include <amqpcpp/deferreddelete.h>
 #include <amqpcpp/deferredcancel.h>
+#include <amqpcpp/deferredget.h>
 #include <amqpcpp/channelimpl.h>
 #include <amqpcpp/channel.h>
 #include <amqpcpp/login.h>

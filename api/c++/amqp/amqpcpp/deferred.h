@@ -1,13 +1,16 @@
 /**
- *  Deferred.h
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  Class describing a set of actions that could
- *  possibly happen in the future that can be
- *  caught.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  @copyright 2014 Copernica BV
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 /**
  *  Set up namespace
  */
@@ -15,13 +18,19 @@ namespace AMQP {
 
 // forward declaration
 class ChannelImpl;
-class Callbacks;
 
 /**
  *  Class definition
  */
 class Deferred
 {
+private:
+    /**
+     *  Callback to execute either way
+     *  @var    FinalizeCallback
+     */
+    FinalizeCallback _finalizeCallback;
+
 protected:
     /**
      *  Callback to execute on success
@@ -36,16 +45,10 @@ protected:
     ErrorCallback _errorCallback;
 
     /**
-     *  Callback to execute either way
-     *  @var    FinalizeCallback
-     */
-    FinalizeCallback _finalizeCallback;
-
-    /**
      *  Pointer to the next deferred object
      *  @var    Deferred
      */
-    Deferred *_next = nullptr;
+    std::shared_ptr<Deferred> _next;
 
     /**
      *  Do we already know we failed?
@@ -58,7 +61,7 @@ protected:
      *  The next deferred object
      *  @return Deferred
      */
-    Deferred *next() const
+    const std::shared_ptr<Deferred> &next() const
     {
         return _next;
     }
@@ -67,11 +70,10 @@ protected:
      *  Indicate success
      *  @return Deferred        Next deferred result
      */
-    Deferred *reportSuccess() const
+    virtual const std::shared_ptr<Deferred> &reportSuccess() const
     {
         // execute callbacks if registered
-        if (_successCallback)   _successCallback();
-        if (_finalizeCallback)  _finalizeCallback();
+        if (_successCallback) _successCallback();
 
         // return the next deferred result
         return _next;
@@ -84,7 +86,7 @@ protected:
      *  @param  consumercount   Number of consumers linked to the queue
      *  @return Deferred        Next deferred result
      */
-    virtual Deferred *reportSuccess(const std::string &name, uint32_t messagecount, uint32_t consumercount) const
+    virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name, uint32_t messagecount, uint32_t consumercount) const
     {
         // this is the same as a regular success message
         return reportSuccess();
@@ -95,7 +97,7 @@ protected:
      *  @param  messagecount    Number of messages that were deleted
      *  @return Deferred
      */
-    virtual Deferred *reportSuccess(uint32_t messagecount) const
+    virtual const std::shared_ptr<Deferred> &reportSuccess(uint32_t messagecount) const
     {
         // this is the same as a regular success message
         return reportSuccess();
@@ -106,25 +108,24 @@ protected:
      *  @param  name            Consumer tag that is cancelled
      *  @return Deferred
      */
-    virtual Deferred *reportSuccess(const std::string &name) const
+    virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name) const
     {
         // this is the same as a regular success message
         return reportSuccess();
     }
-
+    
     /**
      *  Indicate failure
      *  @param  error           Description of the error that occured
      *  @return Deferred        Next deferred result
      */
-    Deferred *reportError(const char *error)
+    const std::shared_ptr<Deferred> &reportError(const char *error)
     {
         // from this moment on the object should be listed as failed
         _failed = true;
 
         // execute callbacks if registered
-        if (_errorCallback)     _errorCallback(error);
-        if (_finalizeCallback)  _finalizeCallback();
+        if (_errorCallback) _errorCallback(error);
 
         // return the next deferred result
         return _next;
@@ -134,7 +135,7 @@ protected:
      *  Add a pointer to the next deferred result
      *  @param  deferred
      */
-    void add(Deferred *deferred)
+    void add(const std::shared_ptr<Deferred> &deferred)
     {
         // store pointer
         _next = deferred;
@@ -145,17 +146,20 @@ protected:
      *  private members and construct us
      */
     friend class ChannelImpl;
-    friend class Callbacks;
 
-protected:
+public:
     /**
      *  Protected constructor that can only be called
      *  from within the channel implementation
+     * 
+     *  Note: this constructor _should_ be protected, but because make_shared
+     *  will then not work, we have decided to make it public after all,
+     *  because the work-around would result in not-so-easy-to-read code.
      *
      *  @param  failed  are we already failed?
      */
     Deferred(bool failed = false) : _failed(failed) {}
-
+    
 public:
     /**
      *  Deleted copy and move constructors
@@ -166,7 +170,11 @@ public:
     /**
      *  Destructor
      */
-    virtual ~Deferred() {}
+    virtual ~Deferred() 
+    {
+        // report to the finalize callback
+        if (_finalizeCallback) _finalizeCallback();
+    }
 
     /**
      *  Cast to a boolean
@@ -237,9 +245,6 @@ public:
     {
         // store callback
         _finalizeCallback = callback;
-
-        // if the object is already in a failed state, we call the callback right away
-        if (_failed) callback();
 
         // allow chaining
         return *this;

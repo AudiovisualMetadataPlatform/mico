@@ -11,11 +11,6 @@ struct curl_slist;
 namespace mico {
     namespace http {
 
-        // cURL callbacks; declared here so we can friend them
-        static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *request);
-        static size_t write_callback(void *ptr, size_t size, size_t nmemm, void *response);
-        static size_t header_callback(char *buffer, size_t size, size_t nitems, void *response);
-
         /**
         * The different types of requests supported by the library.
         */
@@ -142,13 +137,13 @@ namespace mico {
             * Add an HTTP header to the request. Note that Content-Type and Content-Length are already
             * set by addBody().
             */
-            inline Request& setHeader(const std::string hdr, const std::string value) { headers[hdr] = value; };
+            inline Request& setHeader(const std::string hdr, const std::string value) { headers[hdr] = value; return *this; };
 
 
             /**
             * Remove an HTTP header from the request. Use with care.
             */
-            inline Request& delHeader(const std::string hdr) { headers.erase(hdr); };
+            inline Request& delHeader(const std::string hdr) { headers.erase(hdr); return *this; };
 
             /**
             * Set the request body for the request, starting at the given memory location and counting
@@ -171,7 +166,7 @@ namespace mico {
             * Set the request body for the request, using the given body object. The memory needs to be managed by
             * the caller and is NOT free'd when the request is cleaned up.
             */
-            Request& setBody(Body& body) { setBody(body.ptr, body.length, body.type); };
+            inline Request& setBody(Body& body) { return setBody(body.ptr, body.length, body.type); };
 
 
 

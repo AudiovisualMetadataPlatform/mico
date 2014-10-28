@@ -1,12 +1,16 @@
 /**
- *  DeferredDelete.h
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  Deferred callback for instructions that delete or purge queues, and that
- *  want to report the number of deleted messages.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  @copyright 2014 Copernica BV
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 /**
  *  Set up namespace
  */
@@ -29,16 +33,13 @@ private:
      *  @param  messagecount    Number of messages that were deleted
      *  @return Deferred        Next deferred result
      */
-    virtual Deferred *reportSuccess(uint32_t messagecount) const override
+    virtual const std::shared_ptr<Deferred> &reportSuccess(uint32_t messagecount) const override
     {
         // skip if no special callback was installed
         if (!_deleteCallback) return Deferred::reportSuccess();
         
         // call the callback
         _deleteCallback(messagecount);
-        
-        // call finalize callback
-        if (_finalizeCallback) _finalizeCallback();
         
         // return next object
         return _next;
@@ -52,10 +53,14 @@ private:
     friend class ChannelImpl;
     friend class ConsumedMessage;
     
-protected:
+public:
     /**
      *  Protected constructor that can only be called
      *  from within the channel implementation
+     * 
+     *  Note: this constructor _should_ be protected, but because make_shared
+     *  will then not work, we have decided to make it public after all,
+     *  because the work-around would result in not-so-easy-to-read code.
      *
      *  @param  boolean     are we already failed?
      */

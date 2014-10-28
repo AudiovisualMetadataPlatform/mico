@@ -1,9 +1,16 @@
 /**
- *  Class describing a basic QOS frame
- * 
- *  @copyright 2014 Copernica BV
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 /**
  *  Set up namespace
  */
@@ -55,7 +62,7 @@ public:
      *
      * @param   channel         channel we're working on
      * @param   prefetchCount   specifies a prefetch window in terms of whole messages
-     * @param   global          apply QoS settings to entire connection
+     * @param   global          share prefetch count with all consumers on the same channel
      * @default false
      */
     BasicQosFrame(uint16_t channel, int16_t prefetchCount = 0, bool global = false) :

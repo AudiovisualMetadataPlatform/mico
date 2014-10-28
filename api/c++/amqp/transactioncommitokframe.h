@@ -1,9 +1,16 @@
 /**
- *  Class describing an AMQP transaction commit ok frame
- * 
- *  @copyright 2014 Copernica BV
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 /**
  *  Set up namespace
  */
@@ -68,13 +75,13 @@ public:
     virtual bool process(ConnectionImpl *connection) override
     {
         // we need the appropriate channel
-        ChannelImpl *channel = connection->channel(this->channel());
+        auto channel = connection->channel(this->channel());
 
         // channel does not exist
         if(!channel) return false;
 
         // report that the channel is open
-        if (channel->reportSuccess()) channel->synchronized();
+        if (channel->reportSuccess()) channel->onSynchronized();
 
         // done
         return true;

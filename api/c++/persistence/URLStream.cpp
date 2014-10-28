@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include <iostream>
 #include <iosfwd>
 #include <cstring>
@@ -34,7 +47,7 @@ namespace io
  * @param nmemb   maxmimum number of members of given size we can move into the buffer
  * @param _device pointer to the device we are handling data for
  */
-static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *_device)
+size_t URLStreambufBase::read_callback(void *ptr, size_t size, size_t nmemb, void *_device)
 {	
 	URLStreambufBase* d = static_cast<URLStreambufBase*>(_device);
 	LOG << "CALLBACK (0x"<<(long)_device<<"): sending up to " << nmemb << " bytes (pos: "<< (int)(d->buffer_position - d->buffer)<< ", len: "<< (int)(d->pptr()-d->buffer) <<")\n";
@@ -79,7 +92,7 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *_device)
  * @param nmemb   maxmimum number of members of given size we can move from the buffer
  * @param _device pointer to the device we are handling data for
  */
-static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *_device)
+size_t URLStreambufBase::write_callback(void *ptr, size_t size, size_t nmemb, void *_device)
 {	
 	URLStreambufBase* d = static_cast<URLStreambufBase*>(_device);
 	LOG << "CALLBACK (0x"<<(long)_device<<"): receiving up to " << nmemb << " bytes (pos: "<< (int)(d->gptr()-d->buffer)<< ", len: "<< (int)(d->egptr()-d->buffer) <<", size: "<<d->buffer_size<<")\n";
@@ -115,8 +128,9 @@ static void mkdirs(const char* _path) {
 	char* path = strdup(_path); // temporary buffer which we can modify
 	char *last = 0, *cur = path;
 
-	if(*path == '/') {
-		chdir("/");		
+	if(*path == '/' && chdir("/") != 0) {
+        std::cerr << "could not change into root directory, exiting!\n";
+        exit(1);
 	}
 	while(*cur) {
 		if(*cur == '/') {
@@ -129,7 +143,10 @@ static void mkdirs(const char* _path) {
 						std::cerr << "could not create directory " << _path << ", exiting!\n";
 						exit(1);
 					}
-					chdir(last);
+					if(chdir(last) != 0) {
+                        std::cerr << "could not change into created directory " << _path << ", exiting!\n";
+                        exit(1);
+                    }
 				}
 			}
 			
@@ -183,8 +200,8 @@ URLStreambufBase::URLStreambufBase(const char* url, URLMode mode, int bufsize)
 		handle.curl = curl_easy_init();
 
 		// register cURL callbacks
-		curl_easy_setopt(handle.curl, CURLOPT_READFUNCTION, read_callback);
-		curl_easy_setopt(handle.curl, CURLOPT_WRITEFUNCTION, write_callback);
+		curl_easy_setopt(handle.curl, CURLOPT_READFUNCTION, URLStreambufBase::read_callback);
+		curl_easy_setopt(handle.curl, CURLOPT_WRITEFUNCTION, URLStreambufBase::write_callback);
 		curl_easy_setopt(handle.curl, CURLOPT_USERAGENT, "mico-client/1.0");
 
 		// register cURL callback user data

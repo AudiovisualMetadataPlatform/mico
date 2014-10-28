@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #pragma once
 /**
  *  ChannelImpl.h
@@ -22,20 +35,14 @@ class ConsumedMessage;
 /**
  *  Class definition
  */
-class ChannelImpl : public Watchable
+class ChannelImpl : public Watchable, public std::enable_shared_from_this<ChannelImpl>
 {
 private:
-    /**
-     *  The actual channel object
-     *  @var    Channel
-     */
-    Channel *_parent;
-
     /**
      *  Pointer to the connection
      *  @var    ConnectionImpl
      */
-    ConnectionImpl *_connection;
+    ConnectionImpl *_connection = nullptr;
 
     /**
      *  Callback when the channel is ready
@@ -61,20 +68,20 @@ private:
      *
      *  @var    Deferred
      */
-    std::unique_ptr<Deferred> _oldestCallback = nullptr;
+    std::shared_ptr<Deferred> _oldestCallback;
 
     /**
      *  Pointer to the newest deferred result (the last one to be added).
      *
      *  @var    Deferred
      */
-    Deferred *_newestCallback = nullptr;
+    std::shared_ptr<Deferred> _newestCallback;
 
     /**
      *  The channel number
      *  @var uint16_t
      */
-    uint16_t _id;
+    uint16_t _id = 0;
 
     /**
      *  State of the channel object
@@ -84,18 +91,21 @@ private:
         state_connected,
         state_closing,
         state_closed
-    } _state = state_connected;
+    } _state = state_closed;
 
     /**
      *  The frames that still need to be send out
      *
      *  We store the data as well as whether they
      *  should be handled synchronously.
+     * 
+     *  @var std::queue
      */
     std::queue<std::pair<bool, OutBuffer>> _queue;
 
     /**
      *  Are we currently operating in synchronous mode?
+     *  @var bool
      */
     bool _synchronous = false;
 
@@ -106,23 +116,17 @@ private:
     ConsumedMessage *_message = nullptr;
 
     /**
-     *  Construct a channel object
-     *
-     *  Note that the constructor is private, and that the Channel class is
-     *  a friend. By doing this we ensure that nobody can instantiate this
-     *  object, and that it can thus only be used inside the library.
-     *
-     *  @param  parent          the public channel object
-     *  @param  connection      pointer to the connection
+     *  Attach the connection
+     *  @param  connection
      */
-    ChannelImpl(Channel *parent, Connection *connection);
+    void attach(Connection *connection);
 
     /**
      *  Push a deferred result
      *  @param  result          The deferred result
      *  @return Deferred        The object just pushed
      */
-    Deferred &push(Deferred *deferred);
+    Deferred &push(const std::shared_ptr<Deferred> &deferred);
 
     /**
      *  Send a framen and push a deferred result
@@ -131,20 +135,73 @@ private:
      */
     Deferred &push(const Frame &frame);
 
+protected:
+    /**
+     *  Construct a channel object
+     *
+     *  Note that the constructor is private, and that the Channel class is
+     *  a friend. By doing this we ensure that nobody can instantiate this
+     *  object, and that it can thus only be used inside the library.
+     */
+    ChannelImpl() {}
 
 public:
+    /**
+     *  Copy'ing of channel objects is not supported
+     *  @param  channel
+     */
+    ChannelImpl(const ChannelImpl &channel) = delete;
+
     /**
      *  Destructor
      */
     virtual ~ChannelImpl();
 
     /**
+     *  No assignments of other channels
+     *  @param  channel
+     *  @return Channel
+     */
+    ChannelImpl &operator=(const ChannelImpl &channel) = delete;
+
+    /**
      *  Invalidate the channel
      *  This method is called when the connection is destructed
      */
-    void invalidate()
+    void detach()
     {
+        // connection is gone
         _connection = nullptr;
+    }
+
+    /**
+     *  Callback that is called when the channel was succesfully created.
+     *  @param  callback    the callback to execute
+     */
+    void onReady(const SuccessCallback &callback)
+    {
+        // store callback
+        _readyCallback = callback;
+        
+        // direct call if channel is already ready
+        if (_state == state_connected) callback();
+    }
+
+    /**
+     *  Callback that is called when an error occurs.
+     *
+     *  Only one error callback can be registered. Calling this function
+     *  multiple times will remove the old callback.
+     *
+     *  @param  callback    the callback to execute
+     */
+    void onError(const ErrorCallback &callback)
+    {
+        // store callback
+        _errorCallback = callback;
+        
+        // direct call if channel is already in error state
+        if (_state != state_connected) callback("Channel is in error state");
     }
 
     /**
@@ -344,8 +401,11 @@ public:
      *
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
+     * 
+     *  @param  count       number of messages to pre-fetch
+     *  @param  global      share count between all consumers on the same channel
      */
-    Deferred &setQos(uint16_t prefetchCount);
+    Deferred &setQos(uint16_t prefetchCount, bool global = false);
 
     /**
      *  Tell the RabbitMQ server that we're ready to consume messages
@@ -378,15 +438,49 @@ public:
      *
      *  The onSuccess() callback that you can install should have the following signature:
      *
-     *      void myCallback(AMQP::Channel *channel, const std::string& tag);
+     *      void myCallback(const std::string& tag);
      *
-     *  For example: channel.declareQueue("myqueue").onSuccess([](AMQP::Channel *channel, const std::string& tag) {
+     *  For example: channel.declareQueue("myqueue").onSuccess([](const std::string& tag) {
      *
      *      std::cout << "Started consuming under tag " << tag << std::endl;
      *
      *  });
      */
     DeferredCancel &cancel(const std::string &tag);
+
+    /**
+     *  Retrieve a single message from RabbitMQ
+     * 
+     *  When you call this method, you can get one single message from the queue (or none
+     *  at all if the queue is empty). The deferred object that is returned, should be used
+     *  to install a onEmpty() and onSuccess() callback function that will be called
+     *  when the message is consumed and/or when the message could not be consumed.
+     * 
+     *  The following flags are supported:
+     * 
+     *      -   noack               if set, consumed messages do not have to be acked, this happens automatically
+     * 
+     *  @param  queue               name of the queue to consume from
+     *  @param  flags               optional flags
+     * 
+     *  The object returns a deferred handler. Callbacks can be installed 
+     *  using onSuccess(), onEmpty(), onError() and onFinalize() methods.
+     * 
+     *  The onSuccess() callback has the following signature:
+     * 
+     *      void myCallback(const Message &message, uint64_t deliveryTag, bool redelivered);
+     * 
+     *  For example: channel.get("myqueue").onSuccess([](const Message &message, uint64_t deliveryTag, bool redelivered) {
+     * 
+     *      std::cout << "Message fetched" << std::endl;
+     * 
+     *  }).onEmpty([]() {
+     * 
+     *      std::cout << "Queue is empty" << std::endl;
+     * 
+     *  });
+     */
+    DeferredGet &get(const std::string &queue, int flags = 0);
 
     /**
      *  Acknowledge a message
@@ -438,11 +532,19 @@ public:
     bool send(const Frame &frame);
 
     /**
-     *  Signal the channel that a synchronous operation
-     *  was completed. After this operation, waiting
-     *  frames can be sent out.
+     *  Is this channel waiting for an answer before it can send furher instructions
+     *  @return bool
      */
-    void synchronized();
+    bool waiting() const
+    {
+        return _synchronous || !_queue.empty();
+    }
+
+    /**
+     *  Signal the channel that a synchronous operation was completed. 
+     *  After this operation, waiting frames can be sent out.
+     */
+    void onSynchronized();
 
     /**
      *  Report to the handler that the channel is opened
@@ -456,36 +558,48 @@ public:
         if (_readyCallback) _readyCallback();
 
         // if the monitor is still valid, we exit synchronous mode now
-        if (monitor.valid()) synchronized();
+        if (monitor.valid()) onSynchronized();
     }
 
     /**
      *  Report to the handler that the channel is closed
      *
      *  Returns whether the channel object is still valid
+     * 
+     *  @return bool
      */
     bool reportClosed()
     {
         // change state
         _state = state_closed;
+        _synchronous = false;
+
+        // create a monitor, because the callbacks could destruct the current object
+        Monitor monitor(this);
 
         // and pass on to the reportSuccess() method which will call the
         // appropriate deferred object to report the successful operation
-        return reportSuccess();
-
-        // technically, we should exit synchronous method now
-        // since the synchronous channel close frame has been
-        // acknowledged by the server.
-        //
-        // but since the channel was just closed, there is no
-        // real point in doing this, as we cannot send frames
-        // out anymore.
+        bool result = reportSuccess();
+        
+        // leap out if object no longer exists
+        if (!monitor.valid()) return result;
+        
+        // all later deferred objects should report an error, because it
+        // was not possible to complete the instruction as the channel is
+        // now closed
+        reportError("Channel has been closed", false);
+        
+        // done
+        return result;
     }
 
     /**
      *  Report success
      *
      *  Returns whether the channel object is still valid
+     * 
+     *  @param  mixed
+     *  @return bool
      */
     template <typename... Arguments>
     bool reportSuccess(Arguments ...parameters)
@@ -495,15 +609,19 @@ public:
 
         // we are going to call callbacks that could destruct the channel
         Monitor monitor(this);
+        
+        // copy the callback (so that it will not be destructed during
+        // the "reportSuccess" call, if the channel is destructed during the call)
+        auto cb = _oldestCallback;
 
         // call the callback
-        auto *next = _oldestCallback->reportSuccess(std::forward<Arguments>(parameters)...);
+        auto next = cb->reportSuccess(std::forward<Arguments>(parameters)...);
 
         // leap out if channel no longer exists
         if (!monitor.valid()) return false;
 
         // set the oldest callback
-        _oldestCallback.reset(next);
+        _oldestCallback = next;
 
         // if there was no next callback, the newest callback was just used
         if (!next) _newestCallback = nullptr;
@@ -517,46 +635,7 @@ public:
      *  @param  message             the error message
      *  @param  notifyhandler       should the channel-wide handler also be called?
      */
-    void reportError(const char *message, bool notifyhandler = true)
-    {
-        // change state
-        _state = state_closed;
-
-        // we are going to call callbacks that could destruct the channel
-        Monitor monitor(this);
-
-        // call the oldest
-        if (_oldestCallback)
-        {
-            // call the callback
-            auto *next = _oldestCallback->reportError(message);
-
-            // leap out if channel no longer exists
-            if (!monitor.valid()) return;
-
-            // set the oldest callback
-            _oldestCallback.reset(next);
-        }
-
-        // clean up all deferred other objects
-        while (_oldestCallback)
-        {
-            // call the callback
-            auto *next = _oldestCallback->reportError("Channel is in error state");
-
-            // leap out if channel no longer exists
-            if (!monitor.valid()) return;
-
-            // set the oldest callback
-            _oldestCallback.reset(next);
-        }
-
-        // all callbacks have been processed, so we also can reset the pointer to the newest
-        _newestCallback = nullptr;
-
-        // inform handler
-        if (notifyhandler && _errorCallback) _errorCallback(message);
-    }
+    void reportError(const char *message, bool notifyhandler = true);
 
     /**
      *  Install a consumer callback
@@ -593,6 +672,7 @@ public:
      *  @return ConsumedMessage
      */
     ConsumedMessage *message(const BasicDeliverFrame &frame);
+    ConsumedMessage *message(const BasicGetOKFrame &frame);
 
     /**
      *  Retrieve the current incoming message
@@ -607,7 +687,6 @@ public:
      *  The channel class is its friend, thus can it instantiate this object
      */
     friend class Channel;
-
 };
 
 /**

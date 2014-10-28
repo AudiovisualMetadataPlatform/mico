@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include <cstring>
 #include <expat.h>
 #include "rdf_query.hpp"
@@ -63,9 +76,9 @@ namespace mico {
 
 
 
-            enum ParserMode {
+            typedef enum {
                 INIT, HEAD, RESULTS, RESULT, BINDING, MODE_URI, MODE_LITERAL_PLAIN, MODE_LITERAL_TYPED, MODE_LITERAL_LANG, MODE_BNODE
-            };
+            } ParserMode;
 
             struct ParserData {
                 TupleResult& result;  // the result we are currently building up
@@ -75,7 +88,7 @@ namespace mico {
                 void*        data;    // multi-purpose use storage
             };
 
-            static void startElement(void *data, const char *el, const char **attr) {
+            void TupleResult::startElement(void *data, const char *el, const char **attr) {
                 ParserData *r = (ParserData*)data;
 
 
@@ -99,7 +112,7 @@ namespace mico {
                     case RESULTS:
                         if(strncmp("result",el,6) == 0) {
                             r->mode = RESULT;
-                            r->result.push_back(BindingSet());
+                            r->result.data.push_back(BindingSet());
                         }
                         break;
                     case RESULT:
@@ -136,12 +149,15 @@ namespace mico {
                             }
                         }
                         break;
+                    default:
+                        // do nothing
+                        break;
 
                 }
             }
 
 
-            static void endElement(void *data, const char *el) {
+            void TupleResult::endElement(void *data, const char *el) {
                 ParserData *r = (ParserData*)data;
 
                 switch(r->mode) {
@@ -178,7 +194,7 @@ namespace mico {
                     case MODE_URI:
                         if(strncmp("uri",el,3) == 0) {
                             r->mode = BINDING;
-                            r->result.back()[r->name]=static_cast<URI*>(r->data);
+                            r->result.data.back()[r->name]=static_cast<URI*>(r->data);
                         } else {
                             std::cerr << "invalid close element tag (expected </uri>): "<<el<<"\n";
                         }
@@ -186,7 +202,7 @@ namespace mico {
                     case MODE_LITERAL_PLAIN:
                         if(strncmp("literal",el,7) == 0) {
                             r->mode = BINDING;
-                            r->result.back()[r->name]=static_cast<Literal*>(r->data);
+                            r->result.data.back()[r->name]=static_cast<Literal*>(r->data);
                         } else {
                             std::cerr << "invalid close element tag (expected </literal>): "<<el<<"\n";
                         }
@@ -194,7 +210,7 @@ namespace mico {
                     case MODE_LITERAL_TYPED:
                         if(strncmp("literal",el,7) == 0) {
                             r->mode = BINDING;
-                            r->result.back()[r->name]=static_cast<DatatypeLiteral*>(r->data);
+                            r->result.data.back()[r->name]=static_cast<DatatypeLiteral*>(r->data);
                         } else {
                             std::cerr << "invalid close element tag (expected </literal>): "<<el<<"\n";
                         }
@@ -202,7 +218,7 @@ namespace mico {
                     case MODE_LITERAL_LANG:
                         if(strncmp("literal",el,7) == 0) {
                             r->mode = BINDING;
-                            r->result.back()[r->name]=static_cast<LanguageLiteral*>(r->data);
+                            r->result.data.back()[r->name]=static_cast<LanguageLiteral*>(r->data);
                         } else {
                             std::cerr << "invalid close element tag (expected </literal>): "<<el<<"\n";
                         }
@@ -210,16 +226,19 @@ namespace mico {
                     case MODE_BNODE:
                         if(strncmp("bnode",el,5) == 0) {
                             r->mode = BINDING;
-                            r->result.back()[r->name]=static_cast<BNode*>(r->data);
+                            r->result.data.back()[r->name]=static_cast<BNode*>(r->data);
                         } else {
                             std::cerr << "invalid close element tag (expected </bnode>): "<<el<<"\n";
                         }
+                        break;
+                    default:
+                        // do nothing
                         break;
                 }
             }
 
 
-            static void characterData(void *data, const char *chars, int len) {
+            void TupleResult::characterData(void *data, const char *chars, int len) {
                 ParserData *r = (ParserData*)data;
                 switch(r->mode) {
                     case MODE_URI:
@@ -237,6 +256,9 @@ namespace mico {
                     case MODE_LITERAL_LANG:
                         r->data = new LanguageLiteral(std::string(chars,len), r->attr);
                         break;
+                    default:
+                        // do nothing
+                        break;
                 }
             }
 
@@ -250,8 +272,8 @@ namespace mico {
                 ParserData data = { *this, INIT };
 
                 XML_Parser p = XML_ParserCreate("UTF-8");
-                XML_SetElementHandler(p, startElement, endElement);
-                XML_SetCharacterDataHandler(p, characterData);
+                XML_SetElementHandler(p, TupleResult::startElement, TupleResult::endElement);
+                XML_SetCharacterDataHandler(p, TupleResult::characterData);
                 XML_SetUserData(p, &data);
 
                 char buf[BUFFSIZE];

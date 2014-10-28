@@ -1,13 +1,16 @@
 /**
- *  DeferredCancel.h
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  Deferred callback for instructions that cancel a running consumer. This
- *  deferred object allows one to register a callback that also gets the
- *  consumer tag as one of its parameters.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  @copyright 2014 Copernica BV
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 /**
  *  Set up namespace
  */
@@ -36,7 +39,7 @@ private:
      *  @param  name            Consumer tag that is cancelled
      *  @return Deferred
      */
-    virtual Deferred *reportSuccess(const std::string &name) const override;
+    virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name) const override;
 
     /**
      *  The channel implementation may call our
@@ -45,11 +48,15 @@ private:
     friend class ChannelImpl;
     friend class ConsumedMessage;
     
-protected:
+public:
     /**
      *  Protected constructor that can only be called
      *  from within the channel implementation
      *
+     *  Note: this constructor _should_ be protected, but because make_shared
+     *  will then not work, we have decided to make it public after all,
+     *  because the work-around would result in not-so-easy-to-read code.
+     * 
      *  @param  channel     Pointer to the channel
      *  @param  failed      Are we already failed?
      */

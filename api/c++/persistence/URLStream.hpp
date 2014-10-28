@@ -30,14 +30,6 @@ namespace mico
             URL_MODE_READ, URL_MODE_WRITE
         };
 
-        typedef union {
-            CURL *curl;
-            FILE *file;
-        } handle_t;
-
-        // cURL callbacks; declared here so we can friend them
-        static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *device);
-        static size_t write_callback(void *ptr, size_t size, size_t nmemm, void *device);
 
         /**
         * Base class for Boost Device implementations allowing to access local (%file://) and remote (%ftp://, %http://)
@@ -48,10 +40,17 @@ namespace mico
         */
         class URLStreambufBase : public std::streambuf
         {
-            friend size_t read_callback(void *ptr, size_t size, size_t nmemb, void *device);
-            friend size_t write_callback(void *ptr, size_t size, size_t nmemm, void *device);
+
+            // cURL callbacks; declared here so we can friend them
+            static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *device);
+            static size_t write_callback(void *ptr, size_t size, size_t nmemm, void *device);
 
         protected:
+
+            typedef union {
+                CURL *curl;
+                FILE *file;
+            } handle_t;
 
             URLType type;
             URLMode mode;

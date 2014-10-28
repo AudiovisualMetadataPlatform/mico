@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include <curl/curl.h>
 #include <cstdlib>
 #include <cstring>
@@ -98,7 +111,7 @@ namespace mico {
 
 
         // read callback used by cURL to read request body, last argument is pointer to request object
-        static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *request) {
+        size_t read_callback(void *ptr, size_t size, size_t nmemb, void *request) {
             Request* req = static_cast<Request*>(request);
 
             if(req->body->pos < req->body->length) {
@@ -114,7 +127,7 @@ namespace mico {
             }
         }
 
-        static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *response) {
+        size_t write_callback(void *ptr, size_t size, size_t nmemb, void *response) {
 
             Response* resp = static_cast<Response*>(response);
             if(resp->body == NULL) {
@@ -128,14 +141,14 @@ namespace mico {
         }
 
 
-        static size_t header_callback(char *buffer, size_t size, size_t nitems, void *response) {
+        size_t header_callback(char *buffer, size_t size, size_t nitems, void *response) {
 
             Response* resp = static_cast<Response*>(response);
 
             char* cpos = buffer;
-            while(*cpos != ':' && cpos - buffer < size*nitems) cpos++;
+            while(*cpos != ':' && (size_t)(cpos - buffer) < size*nitems) cpos++;
 
-            if(cpos - buffer < size*nitems) {
+            if((size_t)(cpos - buffer) < size*nitems) {
                 // header found
                 string key(buffer,cpos);
 

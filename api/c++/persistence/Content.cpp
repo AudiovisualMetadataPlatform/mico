@@ -1,3 +1,16 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include <boost/algorithm/string.hpp>
 #include <curl/curl.h>
 
@@ -76,7 +89,7 @@ namespace mico {
             const TupleResult* r = metadata.query(SPARQL_FORMAT(getContentType,params));
             if(r->size() > 0) {
                 string ret = r->at(0).at("t")->stringValue();
-                for(int i=0; i<r->size(); i++) {
+                for(size_t i=0; i<r->size(); i++) {
                     delete r->at(i).at("t");
                 }
                 delete r;
@@ -117,7 +130,7 @@ namespace mico {
             const TupleResult* r = metadata.query(SPARQL_FORMAT(getContentProperty,params));
             if(r->size() > 0) {
                 string ret = r->at(0).at("t")->stringValue();
-                for(int i=0; i<r->size(); i++) {
+                for(size_t i=0; i<r->size(); i++) {
                     delete r->at(i).at("t");
                 }
                 delete r;
@@ -158,7 +171,7 @@ namespace mico {
             const TupleResult* r = metadata.query(SPARQL_FORMAT(getContentRelation,params));
             if(r->size() > 0) {
                 Value* ret = r->at(0).at("t");
-                for(int i=1; i<r->size(); i++) {
+                for(size_t i=1; i<r->size(); i++) {
                     delete r->at(i).at("t");
                 }
                 delete r;
