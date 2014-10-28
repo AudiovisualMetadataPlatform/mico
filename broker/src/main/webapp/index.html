@@ -32,6 +32,24 @@
         body {
             margin-left: 10%;
             margin-right: 10%;
+            font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+        }
+
+        .page-header {
+            padding-right: 300px;
+            background-image: url('http://www.mico-project.eu/wp-content/uploads/2014/04/mico_logo.png');
+            background-repeat: no-repeat;
+            background-position: right top;
+            border-bottom: 2px solid #ACCD6C;
+        }
+
+        .page-header h1 {
+            font-size: 3.2em;
+            color: #3a6548;
+        }
+
+        .page-header h1 small {
+            color: #ACCD6C
         }
 
         .colorpick, .colorpick:hover {
@@ -48,9 +66,8 @@
 
 <body ng-controller="StatusCtrl">
 
-
-<div class="container-fluid">
-    <h1>MICO Broker Status</h1>
+<div class="container-fluid page-header">
+    <h1>MICO <small>Broker Status</small></h1>
 </div>
 
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
@@ -67,15 +84,11 @@
     </table>
 </div>
 
-
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
     <h2>Service Dependency Graph</h2>
 
     <img ng-src="status/dependencies?width=800&height=300"/>
 </div>
-
-
-
 
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
     <h2>Content Items</h2>
