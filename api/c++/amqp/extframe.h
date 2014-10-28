@@ -1,16 +1,16 @@
 /**
- *  ExtFrame.h
- * 
- *  Class describing an AMQP frame. A frame can be encoded into the AMQP 
- *  wireframe format, so that it can be sent over an open socket, or it can be 
- *  constructed from a buffer containing AMQP wireframe format.
- * 
- *  The ExtFrame is the base class for all other frames, apart from the
- *  protocol-header-frame
- * 
- *  @copyright 2014 Copernica BV
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
 /**
  *  Set up namespace
  */
