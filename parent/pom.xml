@@ -43,6 +43,17 @@
         <hadoop.home>${project.build.directory}${file.separator}hadoop-${hadoop.version}</hadoop.home>
     </properties>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>mico</id>
+            <url>http://mvn.mico-project.eu/content/repositories/snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>mico</id>
+            <url>http://mvn.mico-project.eu/content/repositories/releases/</url>
+        </repository>
+    </distributionManagement>
+
     <repositories>
         <repository>
             <id>apache.releases</id>
