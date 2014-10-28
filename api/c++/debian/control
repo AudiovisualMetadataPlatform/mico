@@ -1,7 +1,7 @@
 Source: libmico-api
 Priority: optional
 Maintainer: Sebastian Schaffert <sebastian.schaffert@gmail.com>
-Build-Depends: debhelper (>= 9), autotools-dev, libstdc++-4.9-dev, libboost1.55-dev, libexpat1-dev, libprotobuf-dev, libleptonica-dev, libmagic-dev, libtesseract-dev, doxygen, cdbs
+Build-Depends: debhelper (>= 9), libstdc++-4.9-dev, libboost1.55-dev, libexpat1-dev, libprotobuf-dev, libleptonica-dev, libmagic-dev, libtesseract-dev, doxygen, cdbs, cmake (>=3)
 Standards-Version: 3.9.5
 Section: libs
 Homepage: https://bitbucket.org/mico-project/platform/overview
@@ -11,7 +11,7 @@ Vcs-Browser: https://bitbucket.org/mico-project/platform/overview
 Package: mico-service-ocr
 Section: misc
 Architecture: any
-Depends: libmico-api1, liblept4, libmagic1, libtesseract3, libboost-thread1.55.0, tesseract-ocr-eng
+Depends: libmico-api1, liblept4, libmagic1, libtesseract3, libboost-thread1.55.0, tesseract-ocr-eng, libdaemon0
 Description: OCR service for the MICO platform
  This package contains a binary version of the sample OCR service implemented in C++ to use with the MICO platform.
 
@@ -25,7 +25,7 @@ Description: MICO client library - development headers and documentation
 
 Package: libmico-api1
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libexpat1, libcurl3, libcurl3-gnutls, libprotobuf9, libstdc++6, libboost-log1.55.0
+Depends: ${shlibs:Depends}, ${misc:Depends}, libexpat1, libcurl3, libcurl3-gnutls, libprotobuf9, libstdc++6
 Description: MICO client library - shared binary files
  This package contains the compiled shared libraries of the MICO C++ API. They are needed by all binary implementations
  of MICO C++ services.

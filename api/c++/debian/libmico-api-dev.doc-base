@@ -1,13 +1,9 @@
-Document: libmico-api
-Title: Debian libmico-api Manual
+Document: libmico-api1
+Title: Debian libmico-api1 Manual
 Author: Sebastian Schaffert <sebastian.schaffert@gmail.com>
-Abstract: This manual contains the API documentation of the libmico-api.
+Abstract: This manual contains the API documentation of the libmico-api1.
 Section: unknown
 
-
-Format: text
-Files: /usr/share/doc/libmico-api/libmico-api.text.gz
-
 Format: HTML
-Index: /usr/share/doc/libmico-api/html/index.html
-Files: /usr/share/doc/libmico-api/html/*.html
+Index: /usr/share/doc/libmico-api1/html/index.html
+Files: /usr/share/doc/libmico-api1/html/*.html
