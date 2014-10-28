@@ -81,6 +81,7 @@
                             <exclude>COPYING.txt</exclude>
                             <exclude>NOTICE.txt</exclude>
                             <exclude>README.txt</exclude>
+                            <exclude>*.md</exclude>
                             <exclude>target/**</exclude>
                             <exclude>data/**</exclude>
                             <exclude>doc/**</exclude>
@@ -88,7 +89,7 @@
                             <exclude>**/*.rdf</exclude>
                             <exclude>**/*.ttl</exclude>
                             <exclude>**/*.nt</exclude>
-                            <exclude>**/test/**</exclude>
+                            <exclude>src/test/resources/**</exclude>
                         </excludes>
                     </configuration>
                 </plugin>
