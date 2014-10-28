@@ -55,27 +55,28 @@
     </distributionManagement>
 
     <repositories>
+        <!--
+            If you need any additional repository, file an issue in
+            https://issues.mico-project.eu/browse/FRAMEWORK
+            to have it added to the MICO Maven Proxy
+        -->
         <repository>
-            <id>mico.releases</id>
-            <name>MICO Relesases Repository</name>
-            <url>http://mvn.mico-project.eu/content/repositories/releases/</url>
-        </repository>
-        <repository>
-            <id>mico.snapshots</id>
-            <name>MICO Snapshots Repository</name>
-            <url>http://mvn.mico-project.eu/content/repositories/snapshots/</url>
-        </repository>
-        <repository>
-            <id>apache.releases</id>
-            <name>Apache Relesases Repository</name>
-            <url>https://repository.apache.org/content/repositories/releases/</url>
-        </repository>
-        <repository>
-            <id>apache.snapshots</id>
-            <name>Apache Snapshots Repository</name>
-            <url>https://repository.apache.org/content/repositories/snapshots/</url>
+            <id>mico.public</id>
+            <name>MICO Maven Proxy</name>
+            <url>http://mvn.mico-project.eu/content/groups/public/</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>mico.public</id>
+            <name>MICO Maven Proxy</name>
+            <url>http://mvn.mico-project.eu/content/groups/public/</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
     <build>
         <pluginManagement>
