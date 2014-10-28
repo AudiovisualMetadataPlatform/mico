@@ -1,3 +1,7 @@
+# MICO Platform
+
+![MICO](http://www.mico-project.eu/wp-content/uploads/2014/04/mico_logo.png)
+
 [TOC]
 
 # MICO Platform Server
