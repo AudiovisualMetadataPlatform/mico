@@ -1,3 +1,9 @@
+libmico-api (1.0.8) unstable; urgency=medium
+
+  * implement services as Linux Daemon
+
+ -- Sebastian Schaffert <sebastian.schaffert@redlink.co>  Tue, 28 Oct 2014 17:37:58 +0100
+
 libmico-api (1.0.7) unstable; urgency=medium
 
   * upgrade AMQP library for C++
