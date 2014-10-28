@@ -1,3 +1,5 @@
+find_package(Protobuf)
+
 include_directories(../rdf ../persistence ../event ../amqp)
 
 add_library(gtest STATIC gtest-all.cc)
@@ -27,6 +29,6 @@ add_executable(urlstream_tests  persistence_tests.cpp urlstream_tests.cpp )
 target_link_libraries(urlstream_tests gtest mico_rdf mico_marmotta mico_persistence curl boost_system boost_log boost_log_setup)
 
 add_executable(event_manager_tests  persistence_tests.cpp event_manager_tests.cpp )
-target_link_libraries(event_manager_tests gtest mico_rdf mico_marmotta mico_persistence mico_amqp mico_event curl protobuf boost_system boost_log boost_log_setup)
+target_link_libraries(event_manager_tests gtest mico_rdf mico_marmotta mico_persistence mico_amqp mico_event curl ${PROTOBUF_LIBRARIES} boost_system boost_log boost_log_setup)
 
 
