@@ -44,17 +44,27 @@
     </properties>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>mico</id>
-            <url>http://mvn.mico-project.eu/content/repositories/snapshots/</url>
-        </snapshotRepository>
         <repository>
             <id>mico</id>
             <url>http://mvn.mico-project.eu/content/repositories/releases/</url>
         </repository>
+        <snapshotRepository>
+            <id>mico</id>
+            <url>http://mvn.mico-project.eu/content/repositories/snapshots/</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <repositories>
+        <repository>
+            <id>mico.releases</id>
+            <name>MICO Relesases Repository</name>
+            <url>http://mvn.mico-project.eu/content/repositories/releases/</url>
+        </repository>
+        <repository>
+            <id>mico.snapshots</id>
+            <name>MICO Snapshots Repository</name>
+            <url>http://mvn.mico-project.eu/content/repositories/snapshots/</url>
+        </repository>
         <repository>
             <id>apache.releases</id>
             <name>Apache Relesases Repository</name>
