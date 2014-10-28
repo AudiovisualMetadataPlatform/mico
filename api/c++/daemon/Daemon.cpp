@@ -5,12 +5,19 @@
 
 #include <cstdlib>
 
+#include "Daemon.hpp"
+#include "Logging.hpp"
+
+#undef LOG_DEBUG
+#undef LOG_INFO
+#undef LOG_WARN
+#undef LOG_ERROR
+
 #include <libdaemon/dfork.h>
 #include <libdaemon/dsignal.h>
 #include <libdaemon/dlog.h>
 #include <libdaemon/dpid.h>
 
-#include "Daemon.hpp"
 
 namespace mico {
     namespace daemon {
@@ -18,37 +25,71 @@ namespace mico {
 
         using mico::event::AnalysisService;
 
-        Daemon::Daemon(const char* name, const char *server, const char *user, const char *password, std::initializer_list<mico::event::AnalysisService*> svcs)
-                : name(name), eventManager(server,user,password) {
+        class DaemonLogBackend : public log::LoggingBackend {
 
-            for (AnalysisService *s : svcs) {
-                services.push_back(s);
+
+        public:
+            virtual void log(log::LoggingLevel level, const char *message, va_list args) {
+                switch(level) {
+                    case log::LoggingLevel::DEBUG:
+                        daemon_logv(LOG_DEBUG, message, args);
+                        break;
+                    case log::LoggingLevel::INFO:
+                        daemon_logv(LOG_INFO, message, args);
+                        break;
+                    case log::LoggingLevel::WARN:
+                        daemon_logv(LOG_WARNING, message, args);
+                        break;
+                    case log::LoggingLevel::ERROR:
+                        daemon_logv(LOG_ERR, message, args);
+                        break;
+                }
             }
-        }
+        };
 
-        Daemon::Daemon(const char* name, const char *server, const char *user, const char *password, std::vector<mico::event::AnalysisService*> svcs)
-                : name(name), eventManager(server,user,password), services(svcs) {
+        class Daemon {
 
-        }
+            typedef mico::event::EventManager EventManager;
+            typedef std::vector<mico::event::AnalysisService*> ServiceList;
 
-        Daemon::~Daemon() {
-            for (AnalysisService *s : services) {
-                delete s;
-            }
-        }
+            friend int start(const char* name, const char* server, const char* user, const char* password, std::vector<mico::event::AnalysisService*> svcs);
+        private:
+            EventManager eventManager;
+            ServiceList  services;
 
-        void Daemon::start() {
-            for (AnalysisService *s : services) {
-                eventManager.registerService(s);
-            }
-        }
+            void start() {
+                for (AnalysisService *s : services) {
+                    eventManager.registerService(s);
+                }
+            };
 
-        void Daemon::stop() {
-            for (AnalysisService *s : services) {
-                eventManager.unregisterService(s);
-            }
+            void stop() {
+                for (AnalysisService *s : services) {
+                    eventManager.unregisterService(s);
+                }
 
-        }
+            };
+
+        public:
+
+            Daemon(const std::string name, const std::string& server, const std::string& user, const std::string& password, const std::vector<mico::event::AnalysisService*>& svcs)
+                : eventManager(server,user,password) {
+
+                for (AnalysisService *s : svcs) {
+                    services.push_back(s);
+                }
+            };
+
+            ~Daemon() {
+                for (AnalysisService *s : services) {
+                    delete s;
+                }
+            };
+
+
+        };
+
+
 
 
         int start(const char* name, const char* server, const char* user, const char* password, std::initializer_list<mico::event::AnalysisService*> svcs) {
@@ -61,12 +102,19 @@ namespace mico {
         }
 
 
-        int start(const char* name, const char* server, const char* user, const char* password, std::vector<mico::event::AnalysisService*> svcs) {
+        int start(const char* _name, const char* _server, const char* _user, const char* _password, std::vector<mico::event::AnalysisService*> svcs) {
 
             pid_t pid;
 
             daemon_log(LOG_INFO, "starting daemon and registering services ...");
 
+            log::set_log_backend(new DaemonLogBackend());
+            log::set_log_level(log::LoggingLevel::INFO);
+
+            std::string name(_name);
+            std::string server(_server);
+            std::string user(_user);
+            std::string password(_password);
 
             /* Reset signal handlers */
             if (daemon_reset_sigs(-1) < 0) {
@@ -80,8 +128,8 @@ namespace mico {
             }
 
             /* Set identification string for the daemon for both syslog and PID file */
-            char* _name= strdup(name);
-            daemon_pid_file_ident = daemon_log_ident = daemon_ident_from_argv0(_name);
+            char* logname = strdup(_name);
+            daemon_pid_file_ident = daemon_log_ident = daemon_ident_from_argv0(logname);
 
 
             /* Check that the daemon is not rung twice a the same time */
@@ -115,7 +163,10 @@ namespace mico {
                 int fd, quit = 0;
                 fd_set fds;
 
-                Daemon d(name,server,user,password, svcs);
+                daemon_log(LOG_INFO, "MICO daemon %s starting up ...", name.c_str());
+
+
+                Daemon* d;
 
                 /* Close FDs */
                 if (daemon_close_all(-1) < 0) {
@@ -138,13 +189,15 @@ namespace mico {
                 }
 
 
-                d.start();
 
 
                 /* Send OK to parent process */
                 daemon_retval_send(0);
-                daemon_log(LOG_INFO, "MICO daemon %s sucessfully started", name);
+                daemon_log(LOG_INFO, "MICO daemon %s sucessfully started", name.c_str());
 
+
+                d = new Daemon(name,server,user,password, svcs);
+                d->start();
 
                 /* Prepare for select() on the signal fd */
                 FD_ZERO(&fds);
@@ -182,18 +235,19 @@ namespace mico {
 
                 }
 
-                d.stop();
+                d->stop();
+                delete d;
+
                 daemon_log(LOG_INFO, "MICO analysis services unregistered");
 
-            finish:
+                finish:
 
                 daemon_retval_send(255);
                 daemon_signal_done();
                 daemon_pid_file_remove();
 
-                daemon_log(LOG_INFO, "MICO daemon %s stopped", d.name);
+                daemon_log(LOG_INFO, "MICO daemon %s stopped", name.c_str());
 
-                free(_name);
                 return 0;
             }
         }
@@ -225,5 +279,7 @@ namespace mico {
 
             return ret < 0 ? 1 : 0;
         }
+
+
     }
 }

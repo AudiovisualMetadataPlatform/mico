@@ -1,16 +1,12 @@
 #include <iostream>
-#include <iosfwd>
 #include <cstring>
-#include <cstdio>
 #include <utility>
 #include <unistd.h>
-#include <sys/time.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 
 #include "URLStream.hpp"
 
-#include "../logging.h"
+#include "Logging.hpp"
 
 #define MIN(a,b) a < b ? a : b
 
@@ -19,8 +15,6 @@ namespace mico
 namespace io
 {
 
-#define LOG LOG_DEBUG
-	
 
 /**
  * Read callback used by cURL to read request body from memory. Whenever cURL requests more data, 
@@ -37,15 +31,15 @@ namespace io
 size_t URLStreambufBase::read_callback(void *ptr, size_t size, size_t nmemb, void *_device)
 {	
 	URLStreambufBase* d = static_cast<URLStreambufBase*>(_device);
-	LOG << "CALLBACK (0x"<<(long)_device<<"): sending up to " << nmemb << " bytes (pos: "<< (int)(d->buffer_position - d->buffer)<< ", len: "<< (int)(d->pptr()-d->buffer) <<")\n";
+    LOG_DEBUG("CALLBACK (0x%ld): sending up to %d bytes (pos: %d, len: %d)", (long)_device, nmemb, (int)(d->buffer_position - d->buffer), (int)(d->pptr()-d->buffer));
 	d->waiting = false;
 	if(d->mode == URL_MODE_READ) {
 		// we are in read mode, so we won't give cURL any more data anyways
-		LOG << "CALLBACK: read mode, not sending any data!\n";
+        LOG_DEBUG("CALLBACK: read mode, not sending any data!");
 		return 0;		
 	} else if(d->finishing) {
 		// we are finishing the connection, no need to send any more data
-		LOG << "CALLBACK: sending finished!\n";
+		LOG_DEBUG("CALLBACK: sending finished!");
 		return 0;
 	} else if(d->buffer_position < d->pptr()) {
 		// read either as many bytes as are still in the buffer or at most as many as indicated by the function parameters
@@ -53,11 +47,11 @@ size_t URLStreambufBase::read_callback(void *ptr, size_t size, size_t nmemb, voi
 		memcpy(ptr, d->buffer_position, amount);
 		d->buffer_position += amount;
 
-		LOG << "CALLBACK: sending "<<amount<<" bytes of data...\n";
+		LOG_DEBUG("CALLBACK: sending %d bytes of data...", amount);
 
 		return amount;
 	} else {
-		LOG << "no more data, waiting for more...\n";
+		LOG_DEBUG("no more data, waiting for more...");
 		
 		// there is no more data in the buffer, wait for more data to be written by stream user
 		d->waiting = true;
@@ -82,16 +76,16 @@ size_t URLStreambufBase::read_callback(void *ptr, size_t size, size_t nmemb, voi
 size_t URLStreambufBase::write_callback(void *ptr, size_t size, size_t nmemb, void *_device)
 {	
 	URLStreambufBase* d = static_cast<URLStreambufBase*>(_device);
-	LOG << "CALLBACK (0x"<<(long)_device<<"): receiving up to " << nmemb << " bytes (pos: "<< (int)(d->gptr()-d->buffer)<< ", len: "<< (int)(d->egptr()-d->buffer) <<", size: "<<d->buffer_size<<")\n";
+    LOG_DEBUG("CALLBACK (0x%ld): receiving up to %d bytes (pos: %d, len: %d, size: %d)", (long)_device, nmemb, (int)(d->gptr()-d->buffer), (int)(d->egptr()-d->buffer), d->buffer_size);
 
 	d->waiting = false;
 	if(d->mode == URL_MODE_WRITE) {
 		// we are not interested in receiving any data, because we are in write mode, so we 
 		// just ignore the data
-		LOG << "CALLBACK: write mode, ignoring received data!\n";
+		LOG_DEBUG("CALLBACK: write mode, ignoring received data!");
 		return nmemb*size;			
 	} else if(d->gptr() == d->egptr()) {
-		LOG << "CALLBACK: adding data to buffer ...\n";
+		LOG_DEBUG("CALLBACK: adding data to buffer ...");
 		
 		memcpy(d->buffer, ptr, size*nmemb);
 		
@@ -116,7 +110,7 @@ static void mkdirs(const char* _path) {
 	char *last = 0, *cur = path;
 
 	if(*path == '/' && chdir("/") != 0) {
-        std::cerr << "could not change into root directory, exiting!\n";
+        LOG_ERROR("could not change into root directory, exiting!");
         exit(1);
 	}
 	while(*cur) {
@@ -127,11 +121,11 @@ static void mkdirs(const char* _path) {
 			if(last) {
 				if(chdir(last) != 0) {
 					if(mkdir(last,S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
-						std::cerr << "could not create directory " << _path << ", exiting!\n";
+                        LOG_ERROR("could not create directory %s, exiting!", _path);
 						exit(1);
 					}
 					if(chdir(last) != 0) {
-                        std::cerr << "could not change into created directory " << _path << ", exiting!\n";
+                        LOG_ERROR("could not change into created directory %s, exiting!", _path);
                         exit(1);
                     }
 				}
@@ -214,8 +208,8 @@ URLStreambufBase::URLStreambufBase(const char* url, URLMode mode, int bufsize)
 
 		multi_handle = curl_multi_init();
 		curl_multi_add_handle(multi_handle, handle.curl);
-		
-		LOG << "constructed NEW cURL stream\n";
+
+        LOG_DEBUG("constructed NEW cURL stream");
 	} else if(type == URL_TYPE_FILE) {
 		switch(mode) {
 		case URL_MODE_READ:
@@ -239,7 +233,7 @@ URLStreambufBase::URLStreambufBase(const char* url, URLMode mode, int bufsize)
  */
 URLStreambufBase::~URLStreambufBase() 
 {
-	LOG << "closing stream\n";
+    LOG_DEBUG("closing stream");
 	sync();
 	
 	// inidicate we are finishing and let cURL continue running
@@ -329,7 +323,7 @@ int URLIStreambuf::underflow() {
 		return traits_type::to_int_type(*gptr());
 	}
 
-	LOG << "READ: no more data, retrieving ...\n";
+	LOG_DEBUG("READ: no more data, retrieving ...");
 	if(type == URL_TYPE_HTTP || type == URL_TYPE_FTP) {
 		// try reading more data from URL by triggering retrieval
 		loop();	
@@ -343,7 +337,7 @@ int URLIStreambuf::underflow() {
 		}		
 	}
 
-	LOG << "READ: there are " << (int)(egptr()-buffer) << " bytes in the buffer ("<< (int)(egptr() - gptr()) << " unconsumed) ...\n";
+	LOG_DEBUG("READ: there are %d bytes in the buffer (%d unconsumed) ...", (int)(egptr()-buffer), (int)(egptr() - gptr()));
 	if(gptr() < egptr()) {
 		// buffer not exhausted, return current byte
 		return traits_type::to_int_type(*gptr());
@@ -357,7 +351,7 @@ int URLIStreambuf::underflow() {
  * Buffer overflow, so we need to write out the buffer to the URL connection.
  */ 
 int URLOStreambuf::overflow(int c) {
-	LOG << "OVERFLOW: there are " << (int)(epptr()-buffer) << " bytes in the buffer ...\n";
+	LOG_DEBUG("OVERFLOW: there are %d bytes in the buffer ...", (int)(epptr()-buffer));
 	if(type == URL_TYPE_HTTP || type == URL_TYPE_FTP) {
 		// notify cURL that data is available
 		loop();
@@ -380,7 +374,7 @@ int URLOStreambuf::overflow(int c) {
  * Explicit call to write out the buffer to the URL connection even when it is not full
  */ 
 int URLOStreambuf::sync() {
-	LOG << "SYNC: there are " << (int)(pptr()-buffer) << " bytes in the buffer ...\n";
+	LOG_DEBUG("SYNC: there are %d bytes in the buffer ...", (int)(pptr()-buffer));
 	if(type == URL_TYPE_HTTP || type == URL_TYPE_FTP) {
 		// notify cURL that data is available
 		loop();

@@ -1,4 +1,4 @@
-include_directories(../event ../rdf ../persistence ../amqp)
+include_directories(../event ../rdf ../persistence ../amqp ../logging)
 
 add_library(mico_daemon SHARED Daemon.cpp)
 

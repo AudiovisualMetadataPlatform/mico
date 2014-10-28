@@ -64,6 +64,9 @@ namespace mico {
             boost::asio::
             io_service io_service; //!< Boost I/O service for network connection
 
+            boost::asio::ip::tcp::
+            socket socket;         //!< Boost socket for connecting with RabbitMQ
+
             std::string host;    //!< host name to connect to
             int    rabbitPort;   //!< port number of RabbitMQ server
             int    marmottaPort; //!< port number of Marmotta server
@@ -76,9 +79,6 @@ namespace mico {
 
             mico::persistence::
             PersistenceService persistence;  //!< instance of persistence service to resolve content items
-
-            boost::asio::ip::tcp::
-            socket socket;         //!< Boost socket for connecting with RabbitMQ
 
             size_t recv_len;
             char*  recv_buf;
@@ -99,14 +99,14 @@ namespace mico {
             void doRead();               //!< internal method for reading data from network
         public:
 
-            EventManager(std::string host) : EventManager(host, "mico", "mico") {};
+            EventManager(const std::string& host) : EventManager(host, "mico", "mico") {};
 
-            EventManager(std::string host, std::string user, std::string password) : EventManager(host, 5672, 8080, user, password) {};
+            EventManager(const std::string& host, const std::string& user, const std::string& password) : EventManager(host, 5672, 8080, user, password) {};
 
             /**
             * Initialise the event manager, setting up any necessary channels and connections
             */
-            EventManager(std::string host, int rabbitPort, int marmottaPort, std::string user, std::string password);
+            EventManager(const std::string& host, int rabbitPort, int marmottaPort, const std::string& user, const std::string& password);
 
             /**
             * Shut down the event manager, cleaning up and closing any registered channels, services and connections.
@@ -170,6 +170,28 @@ namespace mico {
             * @param connection The connection that was closed and that is now unusable
             */
             void onClosed(AMQP::Connection *connection);
+
+
+            /**
+            * Prepare forking (parent and child). Prepares I/O connection cleanups. Called in daemon mode,
+            */
+            void preFork() {
+                io_service.notify_fork(boost::asio::io_service::fork_prepare);
+            }
+
+            /**
+            * Finish forking in parent. Cleans up any I/O resources not needed.
+            */
+            void postForkParent() {
+                io_service.notify_fork(boost::asio::io_service::fork_parent);
+            }
+
+            /**
+            * Finish forking in child. Cleans up any I/O resources not needed.
+            */
+            void postForkChild() {
+                io_service.notify_fork(boost::asio::io_service::fork_child);
+            }
 
             /**
             * Register the given service with the event manager.

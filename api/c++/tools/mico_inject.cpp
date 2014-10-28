@@ -2,7 +2,6 @@
 #include <iostream>
 
 #include <ctime>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <fcntl.h>
@@ -10,11 +9,10 @@
 #include <magic.h>
 
 #include "EventManager.hpp"
-#include "ContentItem.hpp"
 #include "SPARQLUtil.hpp"
 #include "vocabularies.hpp"
 
-#include "../logging.h"
+#include "Logging.hpp"
 
 using namespace mico::event;
 using namespace mico::persistence;
@@ -52,14 +50,11 @@ void usage() {
 }
 
 int main(int argc, char **argv) {
-    boost::log::core::get()->set_filter
-    (
-        boost::log::trivial::severity >= boost::log::trivial::warning
-    );
+    mico::log::set_log_level(mico::log::LoggingLevel::INFO);
 
-	
 	if(argc < 5) {
 		usage();
+        exit(1);
 	}
 
     char *mico_user = argv[2];

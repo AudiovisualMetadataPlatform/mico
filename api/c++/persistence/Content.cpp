@@ -9,7 +9,7 @@
 #include "rdf_query.hpp"
 
 
-#include "../logging.h"
+#include "Logging.hpp"
 
 using namespace std;
 using namespace boost;
@@ -175,7 +175,7 @@ namespace mico {
         * @return
         */
         std::ostream* Content::getOutputStream() {
-            LOG_DEBUG << "new output stream connection to " << std::string(contentDirectory + "/" + id + ".bin") << std::endl;
+            LOG_DEBUG("new output stream connection to %s/%s.bin", contentDirectory.c_str(), id.c_str());
             return new mico::io::url_ostream(contentDirectory + "/" + id + ".bin");
         }
 
@@ -184,7 +184,7 @@ namespace mico {
         * @return
         */
         std::istream* Content::getInputStream() {
-            LOG_DEBUG << "new input stream connection to " << std::string(contentDirectory + "/" + id + ".bin") << std::endl;
+            LOG_DEBUG("new input stream connection to %s/%s.bin", contentDirectory.c_str(), id.c_str());
             return new mico::io::url_istream(contentDirectory + "/" + id + ".bin");
         }
 
@@ -197,7 +197,7 @@ namespace mico {
         void Content::deleteContent() {
             std::string path(contentDirectory + "/" + id + ".bin");
 
-            LOG_DEBUG << "deleting binary content from " << path << std::endl;
+            LOG_DEBUG("deleting binary content from %s", path.c_str());
 
 
             if(strncmp("ftp://",path.c_str(),6) == 0)  {
@@ -227,7 +227,7 @@ namespace mico {
                     res = curl_easy_perform(curl);
                     curl_easy_cleanup(curl);
                     if(CURLE_OK != res) {
-                        std::cerr << "could not delete resource: " << res << std::endl;
+                        LOG_ERROR("could not delete resource: %d", res);
                     }
 
                     curl_slist_free_all(commands);
@@ -236,7 +236,7 @@ namespace mico {
 
 
             } else if(strncmp("http://",path.c_str(),7) == 0 || strncmp("https://",path.c_str(),8) == 0) {
-                std::cerr << "deleting HTTP data not yet supportedd ..." << std::endl;
+                LOG_ERROR("deleting HTTP data not yet supported ...");
             } else if(strncmp("file://",path.c_str(),7) == 0) {
                 unlink(path.c_str()+7);
             } else if(strstr(path.c_str(), "://") != NULL) {

@@ -12,35 +12,25 @@ namespace mico {
     namespace daemon {
 
 
-        class Daemon {
 
-            typedef mico::event::EventManager EventManager;
-            typedef std::vector<mico::event::AnalysisService*> ServiceList;
-
-            friend int start(const char* name, const char* server, const char* user, const char* password, std::vector<mico::event::AnalysisService*> svcs);
-        private:
-            const char* name;
-
-            EventManager eventManager;
-            ServiceList  services;
-
-            void start();
-            void stop();
-
-        public:
-
-            Daemon(const char* name, const char* server, const char* user, const char* password, std::initializer_list<mico::event::AnalysisService*> svcs);
-            Daemon(const char* name, const char* server, const char* user, const char* password, std::vector<mico::event::AnalysisService*> svcs);
-
-            ~Daemon();
-
-
-        };
-
-
+        /*
+        * Start a MICO daemon of the given name, connecting to the given server with the given user and password. The list of analysis services passed as last argument
+        * is automatically registered/unregistered by the daemon
+        */
         int start(const char* name, const char* server, const char* user, const char* password, std::initializer_list<mico::event::AnalysisService*> svcs);
+
+        /*
+        * Start a MICO daemon of the given name, connecting to the given server with the given user and password. The list of analysis services passed as last argument
+        * is automatically registered/unregistered by the daemon
+        */
         int start(const char* name, const char* server, const char* user, const char* password, std::vector<mico::event::AnalysisService*> svcs);
+
+        /*
+        * Start a MICO daemon of the given name, connecting to the given server with the given user and password. The list of analysis services passed as last argument
+        * is automatically registered/unregistered by the daemon
+        */
         int stop(const char* name);
+
     }
 }
 

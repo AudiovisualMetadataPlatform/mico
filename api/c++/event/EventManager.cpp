@@ -1,15 +1,9 @@
 #include "EventManager.hpp"
 #include "Event.pb.h"
 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
-#include "../logging.h"
+#include "Logging.hpp"
 
 using std::string;
 using boost::asio::ip::tcp;
@@ -59,7 +53,7 @@ namespace mico {
                 channel->onReady([this, channel, queue]() {
                     channel->declareQueue(queue, AMQP::durable + AMQP::autodelete)
                             .onSuccess([this,channel, queue]() {
-                                LOG_INFO << "starting to consume data for analysis service " << this->service.getServiceID().stringValue() << " on queue " << this->queue << std::endl;
+                                LOG_INFO("starting to consume data for analysis service %s on queue %s", this->service.getServiceID().stringValue().c_str(), this->queue.c_str());
                                 channel->consume(queue).onReceived([this](const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
                                     this->handleDelivery(message,deliveryTag,redelivered);
                                 });
@@ -68,7 +62,7 @@ namespace mico {
             }
 
             virtual ~AnalysisConsumer() {
-                std::cout << "stopping to consume data for analysis service " << this->service.getServiceID().stringValue() << " on queue " << queue << std::endl;
+                LOG_INFO("stopping to consume data for analysis service %s on queue %s",this->service.getServiceID().stringValue().c_str(), this->queue.c_str());
             }
 
 
@@ -76,7 +70,8 @@ namespace mico {
                 mico::event::model::AnalysisEvent event;
                 event.ParseFromArray(message.body(), message.bodySize());
 
-                LOG_DEBUG << "received analysis event (content item " << event.contentitemuri() << ", object " << event.objecturi() << ", replyTo " << message.replyTo() << ")" << std::endl;
+
+                LOG_DEBUG("received analysis event (content item %s, object %s, replyTo %s)", event.contentitemuri().c_str(), event.objecturi().c_str(), message.replyTo().c_str());
 
                 ContentItem *ci = persistence.getContentItem(URI(event.contentitemuri()));
                 URI object(event.objecturi());
@@ -105,17 +100,18 @@ namespace mico {
         /**
         * Initialise the event manager, setting up any necessary channels and connections
         */
-        EventManager::EventManager(string host, int rabbitPort, int marmottaPort, string user, string password)
-                : host(host), rabbitPort(rabbitPort), marmottaPort(marmottaPort), user(user), password(password), connected(false), unavailable(false)
-                , persistence(host, marmottaPort, user, password), socket(io_service) {
+        EventManager::EventManager(const string& host, int rabbitPort, int marmottaPort, const string& user, const string& password)
+                : host(host), rabbitPort(rabbitPort), marmottaPort(marmottaPort)
+                , user(user), password(password), connected(false), unavailable(false)
+                , persistence(host, marmottaPort, user, password), socket(io_service)  {
 
             recv_len = 8192;
             recv_buf = (char*)malloc(recv_len * sizeof(char));
 
-            LOG_INFO << "connecting to RabbitMQ server running on host " << host <<", port " << rabbitPort << "\n";
+            LOG_INFO ("connecting to RabbitMQ server running on host %s, port %d", host.c_str(), rabbitPort);
 
             // establish RabbitMQ connection and channel
-            tcp::resolver resolver(io_service);
+            tcp::resolver resolver(this->io_service);
             tcp::resolver::query query(host, std::to_string(rabbitPort));
             tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
@@ -123,7 +119,7 @@ namespace mico {
                 if(!ec) {
                     doConnect();
                 } else {
-                    LOG_ERROR << "network error '" << ec.category().name() << "': " << ec.category().message(ec.value()) << std::endl;
+                    LOG_ERROR("network error '%s': %s", ec.category().name(), ec.category().message(ec.value()).c_str());
                     unavailable = true;
                 }
             });
@@ -131,9 +127,9 @@ namespace mico {
 
             // start the TCP socket operation
             receiver = std::thread([this]() {
-                LOG_DEBUG << "starting I/O operations ...\n";
+                LOG_DEBUG("starting I/O operations ...");
                 io_service.run();
-                LOG_DEBUG << "stopped I/O operations ...\n";
+                LOG_DEBUG("stopped I/O operations ...");
 
                 {
                     std::lock_guard<std::mutex> lk(m);
@@ -146,16 +142,16 @@ namespace mico {
 
 
             // wait until connected (conditional lock released either via established AMQP connection or io_service end)
-            LOG_DEBUG << "waiting until connection is established ...\n";
+            LOG_DEBUG("waiting until connection is established ...");
             {
                 std::unique_lock<std::mutex> lk(m);
                 cv.wait(lk, [this] { return connected; });
             }
 
             if(!unavailable) {
-                LOG_INFO << "event manager initialization finished!\n";
+                LOG_INFO("event manager initialization finished!");
             } else {
-                LOG_ERROR << "AMQP connection unavailable\n";
+                LOG_ERROR("AMQP connection unavailable");
                 receiver.join();
                 throw EventManagerException("AMQP connection unavailable");
             }
@@ -166,7 +162,7 @@ namespace mico {
         */
         EventManager::~EventManager() {
             // close AMQP connections
-            LOG_INFO << "closing AMQP connection ..." << std::endl;
+            LOG_INFO("closing AMQP connection ...");
             channel->close();
             connection->close();
 
@@ -187,7 +183,7 @@ namespace mico {
         void EventManager::doConnect() {
 
             // establish connection and channel, the rest is done in their callbacks
-            LOG_DEBUG << "establishing AMQP connection ... \n";
+            LOG_DEBUG("establishing AMQP connection ... ");
             connection = new AMQP::Connection(this, AMQP::Login(user, password), "/");
 
             // start reading data in a loop
@@ -229,40 +225,40 @@ namespace mico {
 
 
         void EventManager::onError(AMQP::Connection *connection, const char *message) {
-            LOG_ERROR << "error in connection handler: "<<message<<std::endl;
+            LOG_ERROR ("error in connection handler: %s", message);
         }
 
 
         void EventManager::onConnected(AMQP::Connection *connection) {
 
 
-            LOG_DEBUG << "establishing AMQP channel ... \n";
+            LOG_DEBUG("establishing AMQP channel ... ");
             channel    = new AMQP::Channel(connection);
             channel->onReady([this]() {
                 // check for the two exchanges we are making use of
                 channel->declareExchange(EXCHANGE_SERVICE_REGISTRY, AMQP::fanout, AMQP::passive)
                         .onError([](const char* message) {
-                            LOG_ERROR << "could not access service registry exchange: " << message << std::endl;
+                            LOG_ERROR ("could not access service registry exchange: %s", message);
                         });
 
                 channel->declareExchange(EXCHANGE_SERVICE_DISCOVERY, AMQP::fanout, AMQP::passive)
                         .onError([](const char* message) {
-                            LOG_ERROR << "could not access service discovery exchange: " << message << std::endl;
+                            LOG_ERROR ("could not access service discovery exchange: %s", message);
                         });
 
                 // register discovery consumer
                 channel->declareQueue(AMQP::durable + AMQP::autodelete)
                         .onSuccess([this](const std::string &name, uint32_t messageCount, uint32_t consumerCount) {
-                            LOG_INFO << "starting to listen for discovery requests on queue " << name << std::endl;
+                            LOG_INFO ("starting to listen for discovery requests on queue %s", name.c_str());
                             channel->bindQueue(EXCHANGE_SERVICE_DISCOVERY, name, "");
                             channel->consume(name).onReceived([this](const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
-                                LOG_INFO << "received discovery request, sending service list to broker ... \n";
+                                LOG_INFO ("received discovery request, sending service list to broker ... ");
 
                                 for(auto entry : services) {
                                     AnalysisService* service = entry.first;
                                     AnalysisConsumer* consumer = entry.second;
 
-                                    LOG_INFO << "registering analysis service " << service->getServiceID().stringValue() << "..." << std::endl;
+                                    LOG_INFO ("registering analysis service %s...", service->getServiceID().stringValue().c_str());
 
                                     mico::event::model::RegistrationEvent registrationEvent;
                                     registrationEvent.set_type(mico::event::model::REGISTER);
@@ -290,7 +286,7 @@ namespace mico {
                 {
                     std::lock_guard<std::mutex> lk(m);
                     connected = true;
-                    LOG_DEBUG << "RabbitMQ connection established!\n";
+                    LOG_DEBUG("RabbitMQ connection established!");
                 }
                 cv.notify_one();
             });
@@ -298,7 +294,7 @@ namespace mico {
         }
 
         void EventManager::onClosed(AMQP::Connection *connection) {
-            LOG_DEBUG << "RabbitMQ connection closed!\n";
+            LOG_DEBUG("RabbitMQ connection closed!");
         }
 
 
@@ -312,7 +308,7 @@ namespace mico {
                 throw EventManagerException("event manager unavailable");
             }
 
-            LOG_INFO << "registering analysis service " << service->getServiceID().stringValue() << "..." << std::endl;
+            LOG_INFO ("registering analysis service %s...", service->getServiceID().stringValue().c_str());
 
             boost::uuids::uuid UUID = rnd_gen();
             std::string queue = service->getQueueName() != "" ? service->getQueueName() : boost::uuids::to_string(UUID);
@@ -344,7 +340,7 @@ namespace mico {
         */
         void EventManager::unregisterService(AnalysisService* service) {
 
-            LOG_INFO << "unregistering analysis service " << service->getServiceID().stringValue() << "..." << std::endl;
+            LOG_INFO ("unregistering analysis service %s", service->getServiceID().stringValue().c_str());
 
             AnalysisConsumer* consumer = services[service];
 
@@ -374,7 +370,7 @@ namespace mico {
         * @throws IOException
         */
         void EventManager::injectContentItem(const ContentItem& item) {
-            LOG_INFO << "injecting content item " << item.getURI().stringValue() << "..." << std::endl;
+            LOG_INFO ("injecting content item %s...", item.getURI().stringValue().c_str());
 
             mico::event::model::ContentEvent contentEvent;
             contentEvent.set_contentitemuri(item.getURI().stringValue());

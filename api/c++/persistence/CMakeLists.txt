@@ -12,9 +12,9 @@ ENDFOREACH()
 
 #set_source_files_properties(${COMPILED_RESOURCES} PROPERTIES GENERATED TRUE)
 
-include_directories(../rdf)
+include_directories(../rdf ../logging)
 add_library(mico_persistence SHARED ${COMPILED_RESOURCES} SPARQLUtil.cpp Metadata.cpp Content.cpp ContentItem.cpp PersistenceService.cpp URLStream.cpp)
-target_link_libraries(mico_persistence mico_marmotta mico_rdf ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LOG_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(mico_persistence mico_marmotta mico_rdf mico_logging ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_THREAD_LIBS_INIT})
 
 set_target_properties(mico_persistence PROPERTIES SOVERSION 1)
 

@@ -9,8 +9,6 @@
 #include "rdf_model.hpp"
 #include "rdf_query.hpp"
 
-#include "../logging.h"
-
 using namespace std;
 using namespace boost;
 using namespace uuids;
