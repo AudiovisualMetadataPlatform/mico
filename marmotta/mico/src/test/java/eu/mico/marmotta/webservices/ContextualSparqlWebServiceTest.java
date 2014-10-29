@@ -39,15 +39,10 @@ public class ContextualSparqlWebServiceTest {
 
     @BeforeClass
     public static void setUp() throws MarmottaImportException, URISyntaxException {
-        try {
-            marmotta = new JettyMarmotta("/marmotta", ContextualSparqlWebService.class);
-            RestAssured.baseURI = "http://localhost";
-            RestAssured.port = marmotta.getPort();
-            RestAssured.basePath = marmotta.getContext();
-        } catch (Exception e) {
-            log.error("Error starting marmotta: {}", e.getMessage());
-        }
-        Assume.assumeNotNull(marmotta);
+        marmotta = new JettyMarmotta("/marmotta", ContextualSparqlWebService.class);
+        RestAssured.baseURI = "http://localhost";
+        RestAssured.port = marmotta.getPort();
+        RestAssured.basePath = marmotta.getContext();
     }
 
     @AfterClass
@@ -64,7 +59,6 @@ public class ContextualSparqlWebServiceTest {
         RestAssured.expect().
             log().ifError().
             statusCode(200).
-            contentType("application/sparql-results+xml").
         given().
             queryParam("query", "SELECT * WHERE { ?s ?p ?o }").
         when().

@@ -164,13 +164,13 @@ public class ContextualSparqlServiceImpl implements ContextualSparqlService {
             future.cancel(true);
             throw new TimeoutException("SPARQL query execution aborted due to timeout (" + configurationService.getIntConfiguration("sparql.timeout",60)+"s)");
         } catch (ExecutionException e) {
-            log.info("SPARQL query execution aborted due to exception");
+            log.info("SPARQL query execution aborted due to exception: {}", e.getMessage());
             if(e.getCause() instanceof MarmottaException) {
                 throw (MarmottaException)e.getCause();
             } else if(e.getCause() instanceof MalformedQueryException) {
                 throw (MalformedQueryException)e.getCause();
             } else {
-                throw new MarmottaException("unknown exception while evaluating SPARQL query",e.getCause());
+                throw new MarmottaException("unknown exception while evaluating SPARQL query", e.getCause());
             }
         }
     }
