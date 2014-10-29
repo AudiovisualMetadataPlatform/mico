@@ -50,12 +50,11 @@ case "$1" in
         db_get mico-marmotta/host-name
         HOSTNAME="$RET"
 
-        if [ "$CREATE_DATABASE" = "true" && ! exists_pg_database $DB_NAME ]; then
+        if [ "$CREATE_DATABASE" = "true" ] && ! exists_pg_database $DB_NAME; then
             sudo -u postgres /usr/bin/psql postgres -c "CREATE USER $DB_USER PASSWORD '$DB_PASS'" >/dev/null 2>&1
             sudo -u postgres /usr/bin/psql postgres -c "CREATE DATABASE $DB_NAME OWNER $DB_USER" >/dev/null 2>&1
-        fi
 
-        cat >/var/lib/marmotta/system-config.properties <<EOF
+            cat >/var/lib/marmotta/system-config.properties <<EOF
 database.type = postgres
 database.url = jdbc:postgresql://localhost:5432/$DB_NAME?prepareThreshold=3
 database.user = $DB_USER
@@ -63,6 +62,8 @@ database.password = $DB_PASS
 kiwi.host = http://$HOSTNAME:8080/marmotta/
 kiwi.context = http://$HOSTNAME:8080/marmotta/
 EOF
+        fi
+
         db_stop
 
         chown tomcat7:tomcat7 -R /var/lib/marmotta
