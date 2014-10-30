@@ -171,36 +171,21 @@ Binary Maven artifacts are periodically published to our development repositorie
 
 ### Building (C++)
 
-The C++ bindings of the platform are built using the GNU autotools. The repository only contains the
-raw input files for autotools that can be transformed into the well-known configure scripts. To do
-so, please run:
+The C++ bindings of the platform are built using the CMake. To configure a build directory and create the Makefiles necessary to build the platform, create a new directory (can be located anywhere) and in that directory run 
 
-    cd api/c++
-    aclocal && autoreconf --install
-
-To configure the bindings for your platform, run:
-
-    ./configure --prefix=/usr/local --enable-testing 
-
-Where PATH is the location where the Hadoop distribution has been installed (e.g. `/usr/local/src/hadoop-2.4.1-src/hadoop-dist/target/hadoop-2.4.1`)
+    cmake /path/to/repository/api/c++
 
 In case configuration succeeds (i.e. all dependencies are found), the C++ libraries can be built
 and automatically tested using GNU make as follows:
 
     make
 
-To run C++ unit tests for the persistence API, startup the platform as described below and then call
-
-    make check
-
 
 To create a complete API documentation of the MICO Platform API in the api/c++/doc directory, run
 
-    make doxygen-doc
+    make doc
 
 To install the C++ libraries and headers to the predefined prefix, run
 
     make install
    
-In this case, you would probably also want to make sure that the Hadoop Native Libraries are properly 
-installed in the system before.
