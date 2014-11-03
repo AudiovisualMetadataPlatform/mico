@@ -1,3 +1,9 @@
+mico-platform (1.0.4) unstable; urgency=medium
+
+  * templates for welcome page
+
+ -- Sebastian Schaffert <sebastian.schaffert@redlink.co>  Mon, 03 Nov 2014 15:49:47 +0100
+
 mico-platform (1.0.3) unstable; urgency=medium
 
   * fix location of documentation
