@@ -20,6 +20,7 @@ import org.apache.marmotta.platform.core.api.config.ConfigurationService;
 import org.apache.marmotta.platform.core.api.triplestore.ContextService;
 import org.apache.marmotta.platform.core.exception.MarmottaException;
 import org.openrdf.model.URI;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -43,9 +44,6 @@ public abstract class ContextualWebServiceBase {
 
     @Inject
     protected ConfigurationService configurationService;
-
-    @Inject
-    protected ContextService contextService;
 
     protected Map<String, String> outputMapper;
 
@@ -101,15 +99,7 @@ public abstract class ContextualWebServiceBase {
             //forcing to resolve just the first one
             contextId = contextId.split(",")[0];
         }
-        try {
-            final URI context = contextService.createContext(configurationService.getBaseUri() + contextId);
-            if (context == null) {
-                throw new MarmottaException("context not resolved");
-            }
-            return context;
-        } catch (URISyntaxException e) {
-            throw new MarmottaException(e.getMessage());
-        }
+        return new ValueFactoryImpl().createURI(configurationService.getBaseUri() + contextId);
     }
 
     protected String checkInOutParameter(String out) {

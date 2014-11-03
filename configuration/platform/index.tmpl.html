@@ -18,51 +18,176 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>MICO Prototype Platform</title>
+    <link rel="stylesheet" href="http://$HOSTNAME:8080/broker/webjars/bootstrap/3.1.1/css/bootstrap.css"/>
+    <style type="text/css">
+
+        body {
+            margin-left: 20%;
+            margin-right: 20%;
+            font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+        }
+
+        .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+        .page-header {
+            padding-right: 300px;
+            background-image: url('http://www.mico-project.eu/wp-content/uploads/2014/04/mico_logo.png');
+            background-repeat: no-repeat;
+            background-position: right top; 
+            border-bottom: 2px solid #ACCD6C;
+        }
+
+        .page-header h1 {
+            font-size: 3.2em;
+            color: #3a6548;
+        } 
+
+        .page-header h1 small {
+            color: #ACCD6C
+        }
+
+        a {
+            outline: none;
+            text-decoration: underline;
+            color: #494949;
+        }
+
+        a:hover {
+            color: #accd6c;
+        }
+
+        .container-fluid {
+            margin-top: 10px; 
+            margin-bottom: 10px;
+        }
+
+        td {
+            padding-left: 1em;
+        }
+
+        footer[role="contentinfo"] {
+            margin-top: 5em;
+            padding: 1em 2em 12em 2em;
+            background: #000;
+            color: #fff;
+            font-size: 0.8em;
+        }
+
+        footer[role="contentinfo"] a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        footer[role="contentinfo"] #menu-footer {
+            float: right;
+        }
+
+        footer[role="contentinfo"] li {
+            display: inline-block;
+            padding: 0 0.5rem;
+        }
+
+    </style>
+
 </head>
 <body>
 
-    <h1>MICO Prototype Platform</h1>
+    <div class="container page-header">
 
+        <h1>MICO <small>Prototype Platform</small></h1>
 
-    <p>
-        This server has been configured with an installation of the MICO Prototype Platform for development purposes. This page gives basic information
-        and entry points for the installation:
-    </p>
+        <p>
+            This server has been configured with an installation of the MICO Prototype Platform for research and development purposes.
+            This page gives basic information and entry points for the installation.
+        </p>
 
-    <h3>Login</h3>
-    <p>
-        Use the following login details for accessing the server:
-    </p>
-    <table>
-        <tr>
-            <th>User</th><td>$USERNAME</td>
-        </tr>
-        <tr>
-            <th>Password</th><td>$PASSWORD</td>
-        </tr>
-    </table>
+    </div>
 
+    <div class="container-fluid">
 
-    <h3>Services</h3>
-    <p>
-        The following services are accessible via a web browser:
-    </p>
+        <h3>Login</h3>
 
-    <ul>
-        <li><a href="http://$HOSTNAME:8080/marmotta/">Apache Marmotta</a> (Metadata Storage): <a href="http://$HOSTNAME:8080/marmotta/">http://$HOSTNAME:8080/marmotta/</a></li>
-        <li><a href="http://$HOSTNAME:8080/broker/">MICO Broker</a> (Service Orchestration): <a href="http://$HOSTNAME:8080/broker/">http://$HOSTNAME:8080/broker/</a></li>
-        <li><a href="http://$HOSTNAME:15672/">RabbitMQ</a> (Event Communication): <a href="http://$HOSTNAME:15672/">http://$HOSTNAME:15672/</a></li>
-    </ul>
+        <p>
+            Use the following login details for accessing the server:
+        </p>
 
+        <table>
+            <tr>
+                <th>Username:</th>
+                <td> $USERNAME</td>
+            </tr>
+            <tr>
+                <th>Password:</th>
+                <td> <input type="password" value="$PASSWORD" title="$PASSWORD" readonly style="border:0" /></td>
+            </tr>
+        </table>
 
-    <h3>Documentation</h3>
-    <p>
-        The following documentation is available:
-    </p>
+    </div>
 
-    <ul>
-        <li><a href="/cgi-bin/dwww/usr/share/doc/libmico-api1/html/annotated.html">MICO C++ Client API</a></li>
-    </ul>
+    <div class="container-fluid">
+
+        <h3>Services</h3>
+
+        <p>
+            The following services are accessible via a web browser:
+        </p>
+
+        <ul>
+            <li><a href="http://$HOSTNAME:8080/marmotta/">Apache Marmotta</a> (Metadata Storage): <a href="http://$HOSTNAME:8080/marmotta/">http://$HOSTNAME:8080/marmotta/</a></li>
+            <li><a href="http://$HOSTNAME:8080/broker/">MICO Broker</a> (Service Orchestration): <a href="http://$HOSTNAME:8080/broker/">http://$HOSTNAME:8080/broker/</a></li>
+            <li><a href="http://$HOSTNAME:15672/">RabbitMQ</a> (Event Communication): <a href="http://$HOSTNAME:15672/">http://$HOSTNAME:15672/</a></li>
+        </ul>
+
+    </div>
+
+    <div class="container-fluid">
+
+        <h3>Documentation</h3>
+
+        <p>
+            The following documentation is available:
+        </p>
+
+        <ul>
+            <li><a href="#">MICO Java Client API</a></li>
+            <li><a href="/cgi-bin/dwww/usr/share/doc/libmico-api1/html/annotated.html">MICO C++ Client API</a></li>
+        </ul>
+
+    </div>
+
+    <div class="container-fluid">
+
+        <h3>Source code</h3>
+
+        <p>
+            The source code is available <a href="https://bitbucket.org/mico-project/platform">at bitbucket</a>:
+        </p>
+
+        <pre>git clone https://bitbucket.org/mico-project/platform.git mico-platform</pre>
+
+        <p>
+            under <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache License, Version 2.0</a>.
+        </p>
+
+    </div>
+
+    <footer id="colophon" role="contentinfo">
+		<div class="fp7">			
+			MICO (Media in Context) is a research project partially funded by the European Commission  7th Framework Programme (grant agreement no: 610480).<br/><br/>
+			<a href="http://cordis.europa.eu/fp7/home_en.html"><img src="http://www.mico-project.eu/wp-content/themes/mico/images/fp7logo.png"></a>
+		</div>
+        <div class="menu-footer-container">
+            <ul id="menu-footer" class="nav-menu">
+                <li class="menu-item"><a title="About MICO" href="http://www.mico-project.eu/about-mico/">About MICO</a></li>
+                <li class="menu-item"><a href="http://www.mico-project.eu/blog/">News</a></li>
+                <li class="menu-item"><a href="http://www.mico-project.eu/legal-notice/">Legal Notice</a></li>
+                <li class="menu-item"><a href="https://plus.google.com/116317110237114971072">Google+</a></li>
+                <li class="menu-item"><a href="https://twitter.com/mico_project">Twitter</a></li>
+                <li class="menu-item"><a href="https://www.facebook.com/MICOProject">Facebook</a></li>
+                <li class="menu-item"><a href="http://www.slideshare.net/tag/micoproject">Slideshare</a></li>
+            </ul>
+        </div>
+	</footer>
 
 </body>
 </html>

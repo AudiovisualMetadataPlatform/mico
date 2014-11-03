@@ -16,7 +16,6 @@ package eu.mico.marmotta.webservices;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.io.CharStreams;
-import eu.mico.marmotta.api.ContextLockingService;
 import eu.mico.marmotta.api.ContextualConnectionService;
 import eu.mico.marmotta.api.ContextualSparqlService;
 import eu.mico.marmotta.api.QueryType;
@@ -54,7 +53,7 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Add file description here!
+ * Contextual SPARQL Web Service
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
@@ -75,9 +74,6 @@ public class ContextualSparqlWebService extends ContextualWebServiceBase {
 
     @Inject
     private ContextualSparqlService sparqlService;
-
-    @Inject
-    private ContextLockingService lockingService;
 
     public ContextualSparqlWebService() {
         super();
@@ -329,12 +325,7 @@ public class ContextualSparqlWebService extends ContextualWebServiceBase {
     private Response update(URI context, String update, String resultType, HttpServletRequest request) {
         try {
             if (StringUtils.isNotBlank(update)) {
-                lockingService.lockContextWrite(context);
-                try {
-                    sparqlService.update(context, update);
-                } finally {
-                    lockingService.unlockContextWrite(context);
-                }
+                sparqlService.update(context, update);
                 return Response.ok().build();
             } else { // else nothing to do
                 return Response.accepted("empty SPARQL update, nothing to do").build();
@@ -400,7 +391,6 @@ public class ContextualSparqlWebService extends ContextualWebServiceBase {
         final StreamingOutput entity = new StreamingOutput() {
             @Override
             public void write(OutputStream output) throws IOException, WebApplicationException {
-                lockingService.lockContextsRead(contexts);
                 try {
                     sparqlService.query(query, output, format.getMime(), timeout > 0 ? timeout : configurationService.getIntConfiguration("sparql.timeout", 120), contexts);
                 } catch (MarmottaException ex) {
@@ -409,8 +399,6 @@ public class ContextualSparqlWebService extends ContextualWebServiceBase {
                     throw new WebApplicationException(e.getCause(), Response.status(Response.Status.BAD_REQUEST).entity(WebServiceUtil.jsonErrorResponse(e)).build());
                 } catch (TimeoutException e) {
                     throw new WebApplicationException(e.getCause(), Response.status(Response.Status.GATEWAY_TIMEOUT).entity(WebServiceUtil.jsonErrorResponse(e)).build());
-                } finally {
-                    lockingService.unlockContextsRead(contexts);
                 }
             }
         };
