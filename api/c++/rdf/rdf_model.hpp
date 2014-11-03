@@ -255,9 +255,9 @@ namespace mico {
 
 
                 inline bool operator==(const std::string& s) const { return label == s; };
-                inline bool operator==(const char* s) const { return label == s; };
+                //inline bool operator==(const char* s) const { return label == s; };
                 inline bool operator!=(const std::string& s) const { return label != s; };
-                inline bool operator!=(const char* s) const { return label != s; };
+                //inline bool operator!=(const char* s) const { return label != s; };
 
 
                 inline operator bool() const { return booleanValue(); }
@@ -266,6 +266,7 @@ namespace mico {
                 inline operator long long int() const { return longValue(); }
                 inline operator float() const { return floatValue(); }
                 inline operator double() const { return doubleValue(); }
+                inline operator const char*() const { return label.c_str(); }
 
             };
 
@@ -391,6 +392,7 @@ namespace mico {
 
 
             // convenience: test double value of a literal
+            /*
             inline bool operator==(const double d,const Literal& l) {
                 return l.doubleValue() == d;
             }
@@ -406,7 +408,7 @@ namespace mico {
             inline bool operator!=(const Literal& l,const double d) {
                 return l.doubleValue() != d;
             }
-
+*/
 
 
 

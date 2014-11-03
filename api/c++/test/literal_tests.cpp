@@ -108,8 +108,8 @@ TEST(LiteralTest, PlainLiteralEquals) {
   EXPECT_EQ(u1,u2);
   EXPECT_NE(u1,u3);
 
-  EXPECT_EQ(u1, "Hello, World!");
-  EXPECT_EQ("Hello, World!", u1);
+  EXPECT_STREQ((const char*)u1, "Hello, World!");
+  EXPECT_STREQ("Hello, World!", (const char*)u1);
 }
 
 TEST(LiteralTest, LanguageLiteralEquals) {
@@ -120,8 +120,8 @@ TEST(LiteralTest, LanguageLiteralEquals) {
   EXPECT_EQ(u1,u2);
   EXPECT_NE(u1,u3);
 
-  EXPECT_EQ(u1, "Hello, World!");
-  EXPECT_EQ("Hello, World!", u1);
+  EXPECT_STREQ((const char*)u1, "Hello, World!");
+  EXPECT_STREQ("Hello, World!", (const char*)u1);
 }
 
 
@@ -133,12 +133,12 @@ TEST(LiteralTest, DatatypeLiteralEquals) {
   EXPECT_EQ(l1,l2);
   EXPECT_NE(l1,l3);
 
-  EXPECT_EQ(l1, "10");
-  EXPECT_EQ("10", l1);
+  EXPECT_STREQ((const char*)l1, "10");
+  EXPECT_STREQ("10", (const char*)l1);
 
-  EXPECT_EQ(l1, 10);
-  EXPECT_EQ(10, l1);
+  EXPECT_EQ((int)l1, 10);
+  EXPECT_EQ(10, (int)l1);
 
-  EXPECT_EQ(l1, 10.0);
-  EXPECT_EQ(10.0, l1);
+  EXPECT_EQ((double)l1, 10.0);
+  EXPECT_EQ(10.0, (double)l1);
 }
