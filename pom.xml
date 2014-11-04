@@ -159,6 +159,30 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <goals>deploy</goals>
+
+                    <!-- don't ask for every submodule -->
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+
+                    <!-- do not fetch over the Internet the whole repository -->
+                    <localCheckout>true</localCheckout>
+
+                    <!-- the name of the tag of a release in GIT -->
+                    <tagNameFormat>@{version}</tagNameFormat>
+
+                    <!-- make sure all dependencies are available -->
+                    <preparationGoals>clean install</preparationGoals>
+
+                    <pushChanges>false</pushChanges>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
