@@ -16,7 +16,7 @@ include_directories(../rdf ../logging)
 add_library(mico_persistence SHARED ${COMPILED_RESOURCES} SPARQLUtil.cpp Metadata.cpp Content.cpp ContentItem.cpp PersistenceService.cpp URLStream.cpp)
 target_link_libraries(mico_persistence mico_marmotta mico_rdf mico_logging ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_THREAD_LIBS_INIT})
 
-set_target_properties(mico_persistence PROPERTIES SOVERSION 1)
+set_target_properties(mico_persistence PROPERTIES SOVERSION ${VERSION_MAJOR})
 
 
 install (TARGETS mico_persistence DESTINATION lib)
