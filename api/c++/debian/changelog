@@ -1,3 +1,21 @@
+libmico-api (1.0.12) unstable; urgency=medium
+
+  * use parameterized mico user
+
+ -- Sebastian Schaffert <sebastian.schaffert@redlink.co>  Wed, 12 Nov 2014 18:14:56 +0100
+
+libmico-api (1.0.11) unstable; urgency=medium
+
+  * change UID of daemon after start
+
+ -- Sebastian Schaffert <sebastian.schaffert@redlink.co>  Wed, 12 Nov 2014 18:02:24 +0100
+
+libmico-api (1.0.10) unstable; urgency=medium
+
+  * add symlinks to shared libraries
+
+ -- Sebastian Schaffert <sebastian.schaffert@redlink.co>  Wed, 12 Nov 2014 15:35:13 +0100
+
 libmico-api (1.0.9) unstable; urgency=medium
 
   * fix documentation location

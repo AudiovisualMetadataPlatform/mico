@@ -17,6 +17,7 @@
 #include <libdaemon/dsignal.h>
 #include <libdaemon/dlog.h>
 #include <libdaemon/dpid.h>
+#include <pwd.h>
 
 
 namespace mico {
@@ -167,6 +168,7 @@ namespace mico {
 
 
                 Daemon* d;
+                struct passwd* pwentry;
 
                 /* Close FDs */
                 if (daemon_close_all(-1) < 0) {
@@ -188,7 +190,14 @@ namespace mico {
                     goto finish;
                 }
 
-
+                // change privileges
+                pwentry = getpwnam(_user);
+                if(pwentry == NULL) {
+                    daemon_log(LOG_ERR, "Could not resolve ID of mico user (user=%s, error=%s)", _user, strerror(errno));
+                    daemon_retval_send(4);
+                    goto finish;
+                }
+                setuid(pwentry->pw_uid);
 
 
                 /* Send OK to parent process */
