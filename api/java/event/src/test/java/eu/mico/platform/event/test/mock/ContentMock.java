@@ -1,0 +1,80 @@
+package eu.mico.platform.event.test.mock;
+
+import eu.mico.platform.persistence.model.Content;
+import eu.mico.platform.persistence.model.ContentItem;
+import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.vfs2.FileSystemException;
+import org.openrdf.model.URI;
+import org.openrdf.model.Value;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.repository.RepositoryException;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+public class ContentMock implements Content {
+
+    private final ContentItem ci;
+    private final String id;
+    private final Map<URI, String> properties;
+    private final Map<URI, URI> relations;
+    private String type;
+    private ByteArrayOutputStream outputstream;
+
+    public ContentMock(ContentItem ci, String id) {
+        this.ci = ci;
+        this.id = id;
+        this.properties = new HashMap<>();
+        this.relations = new HashMap<>();
+    }
+
+    @Override
+    public URI getURI() {
+        return new URIImpl("http://example.org/content/" + id);
+    }
+
+    @Override
+    public void setType(String type) throws RepositoryException {
+        this.type = type;
+    }
+
+    @Override
+    public String getType() throws RepositoryException {
+        return type;
+    }
+
+    @Override
+    public void setProperty(URI property, String value) throws RepositoryException {
+        properties.put(property, value);
+    }
+
+    @Override
+    public String getProperty(URI property) throws RepositoryException {
+        return properties.get(property);
+    }
+
+    @Override
+    public void setRelation(URI property, URI value) throws RepositoryException {
+        relations.put(property, value);
+    }
+
+    @Override
+    public Value getRelation(URI property) throws RepositoryException {
+        return relations.get(property);
+    }
+
+    @Override
+    public OutputStream getOutputStream() throws FileSystemException {
+        outputstream = new ByteArrayOutputStream();
+        return outputstream;
+    }
+
+    @Override
+    public InputStream getInputStream() throws FileSystemException {
+        return new ByteArrayInputStream(outputstream.toByteArray());
+    }
+
+}
