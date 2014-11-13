@@ -34,13 +34,10 @@ public class MarmottaMetadata implements Metadata {
 
     private static Logger log = LoggerFactory.getLogger(MarmottaMetadata.class);
 
-
     private String baseUri;
     private String context;
 
     private Repository repository;
-
-
 
     /**
      * Create a new contextual marmotta metadata instance connecting to the Marmotta instance with the given base URI
@@ -146,7 +143,6 @@ public class MarmottaMetadata implements Metadata {
             RepositoryConnection con = repository.getConnection();
             try {
                 con.begin();
-
 
                 Update u = con.prepareUpdate(QueryLanguage.SPARQL, sparqlUpdate, baseUri);
                 u.execute();

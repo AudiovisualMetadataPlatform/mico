@@ -75,8 +75,6 @@ public class EventManagerImpl implements EventManager {
 
         Preconditions.checkArgument(marmottaPort == 8080, "changing the marmotta port is currently not supported");
 
-
-
         services = new HashMap<>();
     }
 
