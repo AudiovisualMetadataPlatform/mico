@@ -236,7 +236,6 @@ public class EventManagerMock implements EventManager {
         @Override
         public void sendMessage(ContentItem ci, URI object) throws IOException {
             try {
-                System.out.println("foooooooooooooooo: " + object.stringValue());
                 log.debug("sent message about {}", object.stringValue());
                 final Content content = ci.getContentPart(object);
                 responses.put(object, IOUtils.toString(content.getInputStream()));
