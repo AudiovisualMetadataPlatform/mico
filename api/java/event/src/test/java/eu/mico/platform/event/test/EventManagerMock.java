@@ -245,6 +245,10 @@ public class EventManagerMock implements EventManager {
             }
         }
 
+        public Map<URI, String> getResponses() {
+            return Collections.unmodifiableMap(responses);
+        }
+
     }
 
     private class PersistenceServiceMock implements PersistenceService {
