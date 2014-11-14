@@ -53,7 +53,7 @@ public class PersistenceServiceImpl implements PersistenceService {
         this.contentUrl        = "ftp://"+ user +":"+ password +"@" + micoPlatformAddress;
 
         FileSystemOptions opts = new FileSystemOptions();
-        FtpFileSystemConfigBuilder.getInstance().setPassiveMode(opts, true);
+        //FtpFileSystemConfigBuilder.getInstance().setPassiveMode(opts, true);
         FtpFileSystemConfigBuilder.getInstance().setUserDirIsRoot(opts,true);
     }
 
