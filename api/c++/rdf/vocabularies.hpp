@@ -8,6 +8,8 @@
 #define DECLARE_LDP(property) const mico::rdf::model::URI property("http://www.w3.org/ns/ldp#" #property)
 #define DECLARE_MA(property) const mico::rdf::model::URI property("http://www.w3.org/ns/ma-ont#" #property)
 #define DECLARE_FOAF(property) const mico::rdf::model::URI property("http://xmlns.com/foaf/0.1/" #property)
+#define DECLARE_RDF(property) const mico::rdf::model::URI property("http://www.w3.org/1999/02/22-rdf-syntax-ns#" #property)
+#define DECLARE_RDFS(property) const mico::rdf::model::URI property("http://www.w3.org/2000/01/rdf-schema#" #property)
 
 
 namespace mico {
@@ -322,6 +324,44 @@ namespace mico {
                 DECLARE_FOAF(workplaceHomepage);
                 DECLARE_FOAF(yahooChatID);
 
+            }
+
+            namespace RDF {
+                DECLARE_RDF(Property);
+                DECLARE_RDF(Statement);
+                DECLARE_RDF(Bag);
+                DECLARE_RDF(Seq);
+                DECLARE_RDF(Alt);
+                DECLARE_RDF(List);
+                DECLARE_RDF(type);
+                DECLARE_RDF(subject);
+                DECLARE_RDF(predicate);
+                DECLARE_RDF(object);
+                DECLARE_RDF(nil);
+                DECLARE_RDF(first);
+                DECLARE_RDF(rest);
+                DECLARE_RDF(langString);
+                DECLARE_RDF(PlainLiteral);
+                DECLARE_RDF(XMLLiteral);
+                DECLARE_RDF(HTML);
+            }
+
+            namespace RDFS {
+                DECLARE_RDFS(Resource);
+                DECLARE_RDFS(Class);
+                DECLARE_RDFS(subClassOf);
+                DECLARE_RDFS(subPropertyOf);
+                DECLARE_RDFS(comment);
+                DECLARE_RDFS(label);
+                DECLARE_RDFS(domain);
+                DECLARE_RDFS(range);
+                DECLARE_RDFS(seeAlso);
+                DECLARE_RDFS(isDefinedBy);
+                DECLARE_RDFS(Literal);
+                DECLARE_RDFS(Container);
+                DECLARE_RDFS(ContainerMembershipProperty);
+                DECLARE_RDFS(member);
+                DECLARE_RDFS(Datatype);
             }
         }
     }

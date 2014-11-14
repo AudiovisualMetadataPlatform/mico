@@ -199,6 +199,8 @@ namespace mico {
                 }
                 setuid(pwentry->pw_uid);
 
+                // change working directory to /tmp
+                chdir(P_tmpdir);
 
                 /* Send OK to parent process */
                 daemon_retval_send(0);
