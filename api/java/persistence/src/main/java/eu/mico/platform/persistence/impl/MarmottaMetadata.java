@@ -14,6 +14,7 @@
 package eu.mico.platform.persistence.impl;
 
 import eu.mico.platform.persistence.model.Metadata;
+import org.openrdf.model.Model;
 import org.openrdf.query.*;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
@@ -93,6 +94,25 @@ public class MarmottaMetadata implements Metadata {
                 con.rollback();
             } finally {
                 con.close();
+            }
+        } catch(RepositoryException ex) {
+            log.error("error while loading data into repository",ex);
+            throw ex;
+        }
+    }
+
+    @Override
+    public void load(Model metadata) throws RepositoryException {
+        try {
+            RepositoryConnection conn = repository.getConnection();
+            try {
+                conn.begin();
+                conn.add(metadata);
+                conn.commit();
+            } catch(RepositoryException ex) {
+                conn.rollback();
+            } finally {
+                conn.close();
             }
         } catch(RepositoryException ex) {
             log.error("error while loading data into repository",ex);

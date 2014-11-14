@@ -14,6 +14,7 @@
 package eu.mico.platform.persistence.model;
 
 import org.apache.commons.vfs2.FileSystemException;
+import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.repository.RepositoryException;
@@ -26,7 +27,8 @@ import java.util.UUID;
  * Binary content, offered through inputstreams and outputstreams. Can be used for representing any kind of non-RDF
  * content.
  *
- * @author Sebastian Schaffert (sschaffert@apache.org)
+ * @author Sebastian Schaffert
+ * @author Sergio Fernández
  */
 public interface Content {
 
@@ -35,7 +37,7 @@ public interface Content {
      *  that it derives from the ContentItem this part belongs to.
      * @return
      */
-    public URI getURI();
+    URI getURI();
 
     /**
      * Set the type of this content part using an arbitrary string identifier (e.g. a MIME type or another symbolic
@@ -43,14 +45,13 @@ public interface Content {
      *
      * @param type
      */
-    public void setType(String type) throws RepositoryException;
-
+    void setType(String type) throws RepositoryException;
 
     /**
      * Return the type of this content part using an arbitrary string identifier (e.g. a MIME type or another symbolic
      * representation). Ideally, the type comes from a controlled vocabulary.
      */
-    public String getType() throws RepositoryException;
+    String getType() throws RepositoryException;
 
     /**
      * Set the property value for the given property of this content part using an arbitrary string identifier;
@@ -63,6 +64,14 @@ public interface Content {
      * Return the property value of this content part for the given property.
      */
     String getProperty(URI property) throws RepositoryException;
+
+    /**
+     * Add metadata in a single batch
+     *
+     * @param metadata
+     * @throws RepositoryException
+     */
+    void addMetadata(Model metadata) throws RepositoryException;
 
     /**
      * Set the property relation for the given property of this content part using another resource.
@@ -80,11 +89,12 @@ public interface Content {
      * Return a new output stream for writing to the content. Any existing content will be overwritten.
      * @return
      */
-    public OutputStream getOutputStream() throws FileSystemException;
+    OutputStream getOutputStream() throws FileSystemException;
 
     /**
      *  Return a new input stream for reading the content.
      * @return
      */
-    public InputStream getInputStream() throws FileSystemException;
+    InputStream getInputStream() throws FileSystemException;
+
 }

@@ -20,6 +20,7 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
+import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
@@ -171,6 +172,10 @@ public class MarmottaContent implements Content {
         }
     }
 
+    @Override
+    public void addMetadata(Model metadata) throws RepositoryException {
+        item.getMetadata().load(metadata);
+    }
 
     /**
      * Set the property relation for the given property of this content part using another resource.

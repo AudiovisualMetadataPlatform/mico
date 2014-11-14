@@ -13,6 +13,7 @@
  */
 package eu.mico.platform.persistence.model;
 
+import org.openrdf.model.Model;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
@@ -40,8 +41,15 @@ public interface Metadata {
      * @param in      InputStream to load the data from
      * @param format  data format the RDF data is using (e.g. Turtle)
      */
-    public void load(InputStream in, RDFFormat format) throws IOException, RDFParseException, RepositoryException;
+    void load(InputStream in, RDFFormat format) throws IOException, RDFParseException, RepositoryException;
 
+    /**
+     * Load RDF data into the metadata dataset. Can be used for preloading existing metadata.
+     *
+     * @param metadata
+     * @throws RepositoryException
+     */
+    void load(Model metadata) throws RepositoryException;
 
     /**
      * Dump the RDF data contained in the metadata dataset into the given output stream using the given serialization
@@ -50,9 +58,7 @@ public interface Metadata {
      * @param out    OutputStream to export the data to
      * @param format data format the RDF data is using (e.g. Turtle)
      */
-    public void dump(OutputStream out, RDFFormat format) throws RDFHandlerException, RepositoryException;
-
-
+    void dump(OutputStream out, RDFFormat format) throws RDFHandlerException, RepositoryException;
 
     /**
      * Execute a SPARQL update query on the metadata (see   http://www.w3.org/TR/sparql11-update/). This method can be
@@ -60,8 +66,7 @@ public interface Metadata {
      *
      * @param sparqlUpdate
      */
-    public void update(String sparqlUpdate) throws MalformedQueryException, UpdateExecutionException, RepositoryException;
-
+    void update(String sparqlUpdate) throws MalformedQueryException, UpdateExecutionException, RepositoryException;
 
     /**
      * Execute a SPARQL SELECT query on the metadata (see http://www.w3.org/TR/sparql11-query/). This method can be used for
@@ -70,9 +75,7 @@ public interface Metadata {
      * @param sparqlQuery
      * @return
      */
-    public TupleQueryResult query(String sparqlQuery) throws QueryEvaluationException, MalformedQueryException, RepositoryException;
-
-
+    TupleQueryResult query(String sparqlQuery) throws QueryEvaluationException, MalformedQueryException, RepositoryException;
 
     /**
      * Execute a SPARQL ASK query on the metadata (see http://www.w3.org/TR/sparql11-query/). This method can be used for
@@ -81,11 +84,11 @@ public interface Metadata {
      * @param sparqlQuery
      * @return
      */
-    public boolean ask(String sparqlQuery) throws MalformedQueryException, QueryEvaluationException, RepositoryException;
-
+    boolean ask(String sparqlQuery) throws MalformedQueryException, QueryEvaluationException, RepositoryException;
 
     /**
      * Close the metadata connection and clean up any open resources.
      */
-    public void close() throws RepositoryException;
+    void close() throws RepositoryException;
+
 }
