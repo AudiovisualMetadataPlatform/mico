@@ -1,11 +1,13 @@
-package eu.mico.platform.event.test.mock;
+package eu.mico.platform.persistence.test.mock;
 
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.vfs2.FileSystemException;
+import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.model.impl.TreeModel;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 
@@ -23,12 +25,14 @@ public class ContentMock implements Content {
     private final Map<URI, URI> relations;
     private String type;
     private ByteArrayOutputStream outputstream;
+    private Model metadata;
 
     public ContentMock(ContentItem ci, String id) {
         this.ci = ci;
         this.id = id;
         this.properties = new HashMap<>();
         this.relations = new HashMap<>();
+        this.metadata = new TreeModel();
     }
 
     @Override
@@ -54,6 +58,11 @@ public class ContentMock implements Content {
     @Override
     public String getProperty(URI property) throws RepositoryException {
         return properties.get(property);
+    }
+
+    @Override
+    public void addMetadata(Model metadata) throws RepositoryException {
+        this.metadata.addAll(metadata);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package eu.mico.platform.event.test.mock;
+package eu.mico.platform.persistence.test.mock;
 
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
