@@ -169,7 +169,6 @@
                 <version>2.4</version>
             </dependency>
 
-
             <dependency>
                 <groupId>org.apache.marmotta</groupId>
                 <artifactId>marmotta-core</artifactId>
@@ -232,6 +231,7 @@
                 <artifactId>kiwi-caching-hazelcast</artifactId>
                 <version>${marmotta.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.openrdf.sesame</groupId>
                 <artifactId>sesame-model</artifactId>
@@ -262,7 +262,11 @@
                 <artifactId>sesame-sail-memory</artifactId>
                 <version>${sesame.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.openrdf.sesame</groupId>
+                <artifactId>sesame-repository-sail</artifactId>
+                <version>${sesame.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.openrdf.sesame</groupId>
                 <artifactId>sesame-rio-rdfxml</artifactId>
