@@ -30,7 +30,7 @@ Note: please do not use the username `mico`, as it will later be created by the 
 
 Add
 
-    deb http://apt.mico-project.eu/ mico main non-free contrib
+    deb http://apt.mico-project.eu/ mico main contrib
 
 to your `/etc/apt/sources.list` file.
 
