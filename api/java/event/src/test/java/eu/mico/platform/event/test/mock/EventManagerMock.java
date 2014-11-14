@@ -6,6 +6,7 @@ import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.test.mock.PersistenceServiceMock;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
