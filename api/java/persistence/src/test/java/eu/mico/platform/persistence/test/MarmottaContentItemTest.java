@@ -142,10 +142,9 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
     @Test
     public void testStreamContentPart() throws RepositoryException, QueryEvaluationException, MalformedQueryException, IOException {
-        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl,UUID.randomUUID());
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl, UUID.randomUUID());
 
         Content content = item.createContentPart();
-
 
         PrintWriter out = new PrintWriter(new OutputStreamWriter(content.getOutputStream()));
         out.println("Hello, World!");

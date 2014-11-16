@@ -145,7 +145,7 @@ public class MarmottaContentItem implements ContentItem {
     public Content createContentPart() throws RepositoryException {
 
         UUID contentUUID = UUID.randomUUID();
-        Content content = new MarmottaContent(this, baseUrl,contentUrl,uuid.toString() + "/" + contentUUID);
+        Content content = new MarmottaContent(this, baseUrl, contentUrl, uuid.toString() + "/" + contentUUID);
 
         Metadata m = getMetadata();
         try {

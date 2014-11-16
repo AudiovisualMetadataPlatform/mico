@@ -28,7 +28,6 @@ import java.util.UUID;
  */
 public interface ContentItem {
 
-
     /**
      * Return the unique identifier (UUID) for this content item. The UUID should be built in a way that it is globally
      * unique.
@@ -36,7 +35,6 @@ public interface ContentItem {
      * @return
      */
     public UUID getID();
-
 
     /**
      * Return the identifier (a unique URI) for this content item. This URI will be based on the internal UUID of the

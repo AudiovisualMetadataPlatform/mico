@@ -75,7 +75,6 @@ public class PersistenceServiceImpl implements PersistenceService {
 
     }
 
-
     private String getContext() {
         return marmottaServerUrl;
     }

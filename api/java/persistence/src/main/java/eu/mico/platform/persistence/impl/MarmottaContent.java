@@ -72,6 +72,11 @@ public class MarmottaContent implements Content {
     }
 
 
+    @Override
+    public String getId() {
+        return id;
+    }
+
     /**
      * Return the URI uniquely identifying this content part. The URI should be either a UUID or constructed in a way
      * that it derives from the ContentItem this part belongs to.
@@ -282,7 +287,6 @@ public class MarmottaContent implements Content {
                 '}';
     }
 
-
     private String getContentItemPath() {
         return contentUrl + "/" + id.substring(0, id.lastIndexOf('/'));
     }
@@ -290,4 +294,5 @@ public class MarmottaContent implements Content {
     private String getContentPartPath() {
         return contentUrl + "/" + id + ".bin";
     }
+
 }

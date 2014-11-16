@@ -36,6 +36,11 @@ public class ContentMock implements Content {
     }
 
     @Override
+    public String getId() {
+        return  id;
+    }
+
+    @Override
     public URI getURI() {
         return new URIImpl("http://example.org/content/" + id);
     }

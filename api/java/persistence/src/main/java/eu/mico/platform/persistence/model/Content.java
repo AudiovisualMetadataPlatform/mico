@@ -33,6 +33,13 @@ import java.util.UUID;
 public interface Content {
 
     /**
+     * Return the internal id
+     *
+     * @return
+     */
+    String getId();
+
+    /**
      *  Return the URI uniquely identifying this content part. The URI should be either a UUID or constructed in a way
      *  that it derives from the ContentItem this part belongs to.
      * @return
