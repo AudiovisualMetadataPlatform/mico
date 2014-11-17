@@ -54,8 +54,11 @@ public abstract class BaseMarmottaTest {
     public static void setup() throws URISyntaxException, IOException, RDFParseException, RepositoryException {
         testHost = System.getenv("test.host");
         if(testHost == null) {
-            testHost = "192.168.56.102";
-            log.warn("test.host environment variable not defined, using default of {}", testHost);
+            testHost = System.getProperty("test.host");
+            if(testHost == null) {
+                testHost = "192.168.56.102";
+                log.warn("test.host environment variable not defined, using default of {}", testHost);
+            }
         }
 
         baseUrl    = "http://" + testHost + ":8080/marmotta";
