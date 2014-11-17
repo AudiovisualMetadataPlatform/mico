@@ -21,6 +21,7 @@ import eu.mico.platform.broker.model.TypeDescriptor;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.vfs2.FileSystemException;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
@@ -34,6 +35,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.awt.Dimension;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -176,15 +178,26 @@ public class StatusWebService {
         if(part == null) {
             throw new NotFoundException("Content Part with URI " + partUri + " not found in system");
         }
+        try {
+            final InputStream is = part.getInputStream();
+            if(is != null) {
+                StreamingOutput entity = new StreamingOutput() {
+                    @Override
+                    public void write(OutputStream output) throws IOException, WebApplicationException {
+                        IOUtils.copy(is, output);
+                    }
+                };
 
-        StreamingOutput entity = new StreamingOutput() {
-            @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
-                IOUtils.copy(part.getInputStream(), output);
+                return Response.ok(entity, part.getType()).build();
+            } else {
+                throw new NotFoundException("Content Part with URI " + partUri + " has no binary content");
             }
-        };
+        } catch (FileSystemException e) {
+            return Response.serverError().entity(e.getMessage()).build();
+        }
 
-        return Response.ok(entity, part.getType()).build();
+
+
     }
 
 
