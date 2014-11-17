@@ -159,7 +159,7 @@ namespace mico {
                     return 255;
                 }
                 daemon_log(ret != 0 ? LOG_ERR : LOG_DEBUG, "Daemon returned %i as return value.", ret);
-                return ret;
+                return 0;
             } else { /* The daemon */
                 int fd, quit = 0;
                 fd_set fds;
