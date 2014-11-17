@@ -54,8 +54,8 @@ public abstract class BaseMarmottaTest {
     public static void setup() throws URISyntaxException, IOException, RDFParseException, RepositoryException {
         testHost = System.getenv("test.host");
         if(testHost == null) {
-            log.warn("test.host environment variable not defined, using default of 192.168.56.101");
-            testHost = "192.168.56.101";
+            testHost = "192.168.56.102";
+            log.warn("test.host environment variable not defined, using default of {}", testHost);
         }
 
         baseUrl    = "http://" + testHost + ":8080/marmotta";
@@ -64,7 +64,6 @@ public abstract class BaseMarmottaTest {
         FileSystemOptions opts = new FileSystemOptions();
         FtpFileSystemConfigBuilder.getInstance().setPassiveMode(opts, true);
         FtpFileSystemConfigBuilder.getInstance().setUserDirIsRoot(opts,true);
-
 
         repository    = new SPARQLRepository(baseUrl + "/sparql/select", baseUrl+"/sparql/update");
         repository.initialize();
