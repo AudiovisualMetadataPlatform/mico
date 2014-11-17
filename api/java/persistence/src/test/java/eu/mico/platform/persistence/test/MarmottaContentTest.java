@@ -51,42 +51,41 @@ public class MarmottaContentTest extends BaseMarmottaTest {
         final String id = content.getId();
         final String contentPath = contentUrl + "/" + id + ".bin";
         final String contentItemPath = contentUrl + "/" + id.substring(0, id.lastIndexOf('/'));
-        System.out.println("path: " + contentPath);
+        log.info("Using {} as path for testing", contentPath);
 
         long pivot = System.currentTimeMillis();
         FileSystemManager fsmgr = VFS.getManager();
-        System.out.println(System.currentTimeMillis() - pivot + "ms");
+        log.debug("initializing VFS Manager: {}ms", System.currentTimeMillis() - pivot);
 
         pivot = System.currentTimeMillis();
         FileObject d = fsmgr.resolveFile(contentItemPath);
-        System.out.println(System.currentTimeMillis() - pivot + "ms");
+        log.debug("resolving content item path: {}ms", System.currentTimeMillis() - pivot);
 
         pivot = System.currentTimeMillis();
         if(!d.exists()) {
-            System.out.println(System.currentTimeMillis() - pivot + "ms");
+            log.debug("checking parent directory: {}ms", System.currentTimeMillis() - pivot);
 
             pivot = System.currentTimeMillis();
             d.createFolder();
-            System.out.println(System.currentTimeMillis() - pivot + "ms");
+            log.debug("creating parent directory: {}ms", System.currentTimeMillis() - pivot);
         }
 
         pivot = System.currentTimeMillis();
         FileObject f = fsmgr.resolveFile(contentPath);
-        System.out.println(System.currentTimeMillis() - pivot + "ms");
+        log.debug("resolving content part path: {}ms", System.currentTimeMillis() - pivot);
 
         pivot = System.currentTimeMillis();
         f.createFile();
-        System.out.println(System.currentTimeMillis() - pivot + "ms");
+        log.debug("creating content part file: {}ms", System.currentTimeMillis() - pivot);
 
         pivot = System.currentTimeMillis();
         OutputStream out = f.getContent().getOutputStream();
-        System.out.println(System.currentTimeMillis() - pivot + "ms");
+        log.debug("getting output stream: {}ms", System.currentTimeMillis() - pivot);
 
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("FRAMEWORK-105.mp4");
         pivot = System.currentTimeMillis();
         IOUtils.copy(in, out);
-        System.out.println(System.currentTimeMillis() - pivot + "ms");
-
+        log.debug("writing content to the stream: {}ms", System.currentTimeMillis() - pivot);
 
     }
 

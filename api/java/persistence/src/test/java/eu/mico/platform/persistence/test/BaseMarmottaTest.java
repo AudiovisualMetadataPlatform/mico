@@ -42,7 +42,7 @@ import java.util.Set;
  */
 public abstract class BaseMarmottaTest {
 
-    private static Logger log = LoggerFactory.getLogger(BaseMarmottaTest.class);
+    protected static Logger log = LoggerFactory.getLogger(BaseMarmottaTest.class);
 
     protected static String baseUrl;
     protected static String contentUrl;
