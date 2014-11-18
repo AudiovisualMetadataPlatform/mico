@@ -203,7 +203,7 @@ URLStreambufBase::URLStreambufBase(const char* url, URLMode mode, int bufsize)
 		curl_easy_setopt(handle.curl, CURLOPT_WRITEDATA, this);
 
         // disable connection reuse so resources are freed when idle
-        curl_easy_setopt(handle.curl, CURLOPT_FORBID_REUSE, this);
+        //curl_easy_setopt(handle.curl, CURLOPT_FORBID_REUSE, this);
 
 		// set request URL
 		curl_easy_setopt(handle.curl, CURLOPT_URL, url);
