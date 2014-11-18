@@ -105,6 +105,8 @@ namespace mico {
                 }, *ci, object);
 
                 channel->ack(deliveryTag);
+
+                LOG_DEBUG("acknowledged finished processing of analysis event (content item %s, object %s, replyTo %s)", event.contentitemuri().c_str(), event.objecturi().c_str(), message.replyTo().c_str());
             }
         };
 
