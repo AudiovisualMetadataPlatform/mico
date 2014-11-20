@@ -16,6 +16,8 @@ package eu.mico.platform.persistence.impl;
 import com.google.common.base.Preconditions;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.Metadata;
+import org.apache.commons.io.input.ProxyInputStream;
+import org.apache.commons.io.output.ProxyOutputStream;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
@@ -32,6 +34,7 @@ import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -233,13 +236,20 @@ public class MarmottaContent implements Content {
     @Override
     public OutputStream getOutputStream() throws FileSystemException {
         FileSystemManager fsmgr = VFS.getManager();
-        FileObject d = fsmgr.resolveFile(getContentItemPath());
-        FileObject f = fsmgr.resolveFile(getContentPartPath());
+        final FileObject d = fsmgr.resolveFile(getContentItemPath());
+        final FileObject f = fsmgr.resolveFile(getContentPartPath());
         if(!d.exists()) {
             d.createFolder();
         }
         f.createFile();
-        return f.getContent().getOutputStream();
+        return new ProxyOutputStream(f.getContent().getOutputStream()) {
+            @Override
+            public void close() throws IOException {
+                super.close();
+                f.close();
+                d.close();
+            }
+        };
     }
 
     /**
@@ -250,9 +260,15 @@ public class MarmottaContent implements Content {
     @Override
     public InputStream getInputStream() throws FileSystemException {
         FileSystemManager fsmgr = VFS.getManager();
-        FileObject f = fsmgr.resolveFile(getContentPartPath());
+        final FileObject f = fsmgr.resolveFile(getContentPartPath());
         if(f.getParent().exists() && f.exists()) {
-            return f.getContent().getInputStream();
+            return new ProxyInputStream(f.getContent().getInputStream()) {@Override
+                public void close() throws IOException {
+                    super.close();
+                    f.close();
+                }
+            }
+            ;
         } else {
             return null;
         }
