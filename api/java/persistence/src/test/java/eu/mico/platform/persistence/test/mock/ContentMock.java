@@ -91,4 +91,8 @@ public class ContentMock implements Content {
         return new ByteArrayInputStream(outputstream.toByteArray());
     }
 
+    public Model getMetadata() {
+        return new TreeModel(metadata);
+    }
+
 }
