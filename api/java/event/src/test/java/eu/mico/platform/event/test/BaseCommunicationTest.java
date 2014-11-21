@@ -13,6 +13,7 @@
  */
 package eu.mico.platform.event.test;
 
+import eu.mico.platform.persistence.util.VFSUtils;
 import org.apache.commons.vfs2.FileSystemOptions;
 import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
 import org.junit.AfterClass;
@@ -51,15 +52,14 @@ public abstract class BaseCommunicationTest {
     public static void setupBase() throws URISyntaxException, IOException, RDFParseException, RepositoryException {
         testHost = System.getenv("test.host");
         if(testHost == null) {
-            log.warn("test.host environment variable not defined, using default of 192.168.56.102");
-            testHost = "192.168.56.102";
+            testHost = System.getProperty("test.host");
+            if(testHost == null) {
+                testHost = "192.168.56.102";
+                log.warn("test.host variable not defined, falling back to default one: {}", testHost);
+            }
         }
 
-        FileSystemOptions opts = new FileSystemOptions();
-        FtpFileSystemConfigBuilder.getInstance().setPassiveMode(opts, true);
-        FtpFileSystemConfigBuilder.getInstance().setUserDirIsRoot(opts,true);
-
-
+        VFSUtils.configure();
     }
 
 }

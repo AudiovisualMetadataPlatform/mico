@@ -13,6 +13,7 @@
  */
 package eu.mico.platform.persistence.test;
 
+import eu.mico.platform.persistence.util.VFSUtils;
 import org.apache.commons.vfs2.FileSystemOptions;
 import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
 import org.junit.AfterClass;
@@ -57,28 +58,24 @@ public abstract class BaseMarmottaTest {
             testHost = System.getProperty("test.host");
             if(testHost == null) {
                 testHost = "192.168.56.102";
-                log.warn("test.host environment variable not defined, using default of {}", testHost);
+                log.warn("test.host variable not defined, falling back to default one: {}", testHost);
             }
         }
 
         baseUrl    = "http://" + testHost + ":8080/marmotta";
         contentUrl = "ftp://mico:mico@" + testHost;
 
-        FileSystemOptions opts = new FileSystemOptions();
-        FtpFileSystemConfigBuilder.getInstance().setPassiveMode(opts, true);
-        FtpFileSystemConfigBuilder.getInstance().setUserDirIsRoot(opts,true);
+        VFSUtils.configure();
 
-        repository    = new SPARQLRepository(baseUrl + "/sparql/select", baseUrl+"/sparql/update");
+        repository = new SPARQLRepository(baseUrl + "/sparql/select", baseUrl+"/sparql/update");
         repository.initialize();
 
     }
-
 
     @AfterClass
     public static void teardown() throws RepositoryException {
         repository.shutDown();
     }
-
 
     /**
      * Resolve the URI of the context with the given ID.
@@ -95,19 +92,17 @@ public abstract class BaseMarmottaTest {
         return new URIImpl(baseUrl + "/" + contextId);
     }
 
-
     protected static RepositoryConnection getFullConnection() throws RepositoryException {
         return repository.getConnection();
     }
 
     protected static void assertAsk(String askQuery, final URI context) throws MalformedQueryException, QueryEvaluationException {
         try {
-            RepositoryConnection con = getFullConnection();
+            RepositoryConnection conn = getFullConnection();
             try {
-                con.begin();
+                conn.begin();
 
-
-                BooleanQuery q = con.prepareBooleanQuery(QueryLanguage.SPARQL,askQuery);
+                BooleanQuery q = conn.prepareBooleanQuery(QueryLanguage.SPARQL,askQuery);
 
                 Dataset d = new DatasetImpl() {
                     @Override
@@ -116,16 +111,15 @@ public abstract class BaseMarmottaTest {
                     }
                 };
 
-
                 q.setDataset(d);
 
                 Assert.assertTrue(q.evaluate());
 
-                con.commit();
+                conn.commit();
             } catch(RepositoryException ex) {
-                con.rollback();
+                conn.rollback();
             } finally {
-                con.close();
+                conn.close();
             }
         } catch(RepositoryException ex) {
             ex.printStackTrace(); // TODO: handle error
@@ -134,12 +128,11 @@ public abstract class BaseMarmottaTest {
 
     protected static void assertAskNot(String askQuery, final URI context) throws MalformedQueryException, QueryEvaluationException {
         try {
-            RepositoryConnection con = getFullConnection();
+            RepositoryConnection conn = getFullConnection();
             try {
-                con.begin();
+                conn.begin();
 
-
-                BooleanQuery q = con.prepareBooleanQuery(QueryLanguage.SPARQL,askQuery);
+                BooleanQuery q = conn.prepareBooleanQuery(QueryLanguage.SPARQL,askQuery);
 
                 Dataset d = new DatasetImpl() {
                     @Override
@@ -148,16 +141,15 @@ public abstract class BaseMarmottaTest {
                     }
                 };
 
-
                 q.setDataset(d);
 
                 Assert.assertTrue(!q.evaluate());
 
-                con.commit();
+                conn.commit();
             } catch(RepositoryException ex) {
-                con.rollback();
+                conn.rollback();
             } finally {
-                con.close();
+                conn.close();
             }
         } catch(RepositoryException ex) {
             ex.printStackTrace(); // TODO: handle error

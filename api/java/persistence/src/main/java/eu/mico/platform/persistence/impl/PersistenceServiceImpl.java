@@ -16,8 +16,7 @@ package eu.mico.platform.persistence.impl;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
-import org.apache.commons.vfs2.FileSystemOptions;
-import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
+import eu.mico.platform.persistence.util.VFSUtils;
 import org.openrdf.model.URI;
 import org.openrdf.query.*;
 import org.openrdf.repository.RepositoryException;
@@ -31,10 +30,11 @@ import static com.google.common.collect.ImmutableMap.of;
 import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
 
 /**
- * An implementation of the persistence service using an HDFS file system and a Marmotta triple store for representing
- * content item data.
+ * An implementation of the persistence service using an FTP file system
+ * and a Marmotta triple store for representing content item data.
  *
- * @author Sebastian Schaffert (sschaffert@apache.org)
+ * @author Sebastian Schaffert
+ * @author Sergio Fernández
  */
 public class PersistenceServiceImpl implements PersistenceService {
 
@@ -43,24 +43,38 @@ public class PersistenceServiceImpl implements PersistenceService {
     private String marmottaServerUrl;
     private String contentUrl;
 
-
-    public PersistenceServiceImpl(String micoPlatformAddress) {
-        this(micoPlatformAddress,"mico","mico");
+    /**
+     * Persistence service over localhost with the default credentials
+     */
+    public PersistenceServiceImpl() {
+        this("127.0.0.1");
     }
 
-    public PersistenceServiceImpl(String micoPlatformAddress, String user, String password) {
-        this.marmottaServerUrl = "http://" + micoPlatformAddress + ":8080/marmotta";
-        this.contentUrl        = "ftp://"+ user +":"+ password +"@" + micoPlatformAddress;
-
-        FileSystemOptions opts = new FileSystemOptions();
-        //FtpFileSystemConfigBuilder.getInstance().setPassiveMode(opts, true);
-        FtpFileSystemConfigBuilder.getInstance().setUserDirIsRoot(opts,true);
+    /**
+     * Persistence service the default credentials
+     *
+     * @param host mico platform address
+     */
+    public PersistenceServiceImpl(String host) {
+        this(host, "mico", "mico");
     }
 
+    /**
+     * Persistence service
+     *
+     * @param host mico platform address
+     * @param user
+     * @param password
+     */
+    public PersistenceServiceImpl(String host, String user, String password) {
+        this("http://" + host + ":8080/marmotta", "ftp://" + user + ":" + password + "@" + host);
+    }
 
     public PersistenceServiceImpl(String marmottaServerUrl, String contentUrl) {
         this.marmottaServerUrl = marmottaServerUrl;
         this.contentUrl        = contentUrl;
+
+        VFSUtils.configure();
     }
 
     /**
@@ -91,7 +105,6 @@ public class PersistenceServiceImpl implements PersistenceService {
         UUID uuid = UUID.randomUUID();
 
         ContentItem ci = new MarmottaContentItem(marmottaServerUrl,contentUrl,uuid);
-
 
         Metadata m = getMetadata();
         try {
