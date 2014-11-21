@@ -6,12 +6,24 @@ import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
 /**
  * Basic VFS utilities
  *
+ * @author Sergio Fernández
  */
 public class VFSUtils {
 
-    public static void configure() {
+    /**
+     * Default VFS configuration
+     *
+     * @return file system options
+     */
+    public static FileSystemOptions configure() {
         FileSystemOptions opts = new FileSystemOptions();
-        //FtpFileSystemConfigBuilder.getInstance().setPassiveMode(opts, true);
-        FtpFileSystemConfigBuilder.getInstance().setUserDirIsRoot(opts, true);
+        final FtpFileSystemConfigBuilder configBuilder = FtpFileSystemConfigBuilder.getInstance();
+
+        //configBuilder.setPassiveMode(opts, true);
+        configBuilder.setUserDirIsRoot(opts, true);
+        configBuilder.setUserDirIsRoot(opts, true);
+
+        return opts;
     }
+
 }

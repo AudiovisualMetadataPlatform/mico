@@ -16,11 +16,9 @@ package eu.mico.platform.persistence.test;
 import eu.mico.platform.persistence.impl.MarmottaContentItem;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.util.VFSUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileSystemManager;
-import org.apache.commons.vfs2.VFS;
+import org.apache.commons.vfs2.*;
 import org.junit.Test;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -53,12 +51,14 @@ public class MarmottaContentTest extends BaseMarmottaTest {
         final String contentItemPath = contentUrl + "/" + id.substring(0, id.lastIndexOf('/'));
         log.info("Using {} as path for testing", contentPath);
 
+        final FileSystemOptions opts = VFSUtils.configure();
+
         long pivot = System.currentTimeMillis();
         FileSystemManager fsmgr = VFS.getManager();
         log.debug("initializing VFS Manager: {}ms", System.currentTimeMillis() - pivot);
 
         pivot = System.currentTimeMillis();
-        FileObject d = fsmgr.resolveFile(contentItemPath);
+        FileObject d = fsmgr.resolveFile(contentItemPath, opts);
         log.debug("resolving content item path: {}ms", System.currentTimeMillis() - pivot);
 
         pivot = System.currentTimeMillis();
@@ -71,7 +71,7 @@ public class MarmottaContentTest extends BaseMarmottaTest {
         }
 
         pivot = System.currentTimeMillis();
-        FileObject f = fsmgr.resolveFile(contentPath);
+        FileObject f = fsmgr.resolveFile(contentPath, opts);
         log.debug("resolving content part path: {}ms", System.currentTimeMillis() - pivot);
 
         pivot = System.currentTimeMillis();
