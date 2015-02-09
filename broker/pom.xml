@@ -55,7 +55,7 @@
                     <configuration>
                         <contextFile>src/main/webapp/META-INF/context.xml</contextFile>
                         <port>${javaee.port}</port>
-                        <path>broker</path>
+                        <path>/broker</path>
                     </configuration>
                 </plugin>
             </plugins>

@@ -14,8 +14,6 @@
 package eu.mico.platform.persistence.test;
 
 import eu.mico.platform.persistence.util.VFSUtils;
-import org.apache.commons.vfs2.FileSystemOptions;
-import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
