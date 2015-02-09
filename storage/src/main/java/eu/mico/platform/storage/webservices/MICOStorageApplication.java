@@ -48,13 +48,12 @@ public class MICOStorageApplication extends Application {
 
         services = new HashSet<>();
         try {
-            storageService  = new StorageServiceHDFS(host, user, pass); //TODO configuration
+            storageService  = new StorageServiceHDFS(host, user, pass); //TODO configuration for the storage impl
             services.add(new StorageWebService(storageService));
         } catch (Exception e) {
             log.error("could not initialise MICO storage, services not available (message: {})", e.getMessage(), e);
         }
     }
-
 
     @Override
     public Set<Object> getSingletons() {

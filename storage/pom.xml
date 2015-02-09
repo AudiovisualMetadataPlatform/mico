@@ -177,6 +177,18 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Storage systems -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-vfs2</artifactId>
+            <version>2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.2</version>
+        </dependency>
+
     </dependencies>
 
 </project>
