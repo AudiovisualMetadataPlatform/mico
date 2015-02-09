@@ -13,8 +13,12 @@ import java.util.UUID;
  */
 public class IDUtils {
 
+    public static UUID generatedRandomUuid() {
+        return UUID.randomUUID();
+    }
+
     public static String generatedRandomId() {
-        return UUID.randomUUID().toString();
+        return generatedRandomUuid().toString();
     }
 
     public static URI generatedRandomUri(ContentItem item) {
