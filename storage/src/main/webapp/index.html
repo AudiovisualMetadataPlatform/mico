@@ -1,0 +1,94 @@
+<!--
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html ng-app="storageApp">
+<head>
+    <title>MICO Storage</title>
+
+    <link rel="stylesheet" href="webjars/bootstrap/3.1.1/css/bootstrap.css"/>
+
+    <script src="webjars/angular-file-upload/1.6.5/angular-file-upload-shim.min.js"></script>
+    <script src="webjars/angularjs/1.2.15/angular.js"></script>
+    <script src="webjars/angular-ui-bootstrap/0.10.0/ui-bootstrap-tpls.js"></script>
+    <script src="js/controllers.js"></script>
+
+    <!-- fix Bootstrap CSS for AngularJS -->
+    <style type="text/css">
+        .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+        body {
+            margin-left: 10%;
+            margin-right: 10%;
+            font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+        }
+
+        .page-header {
+            padding-right: 300px;
+            background-image: url('http://www.mico-project.eu/wp-content/uploads/2014/04/mico_logo.png');
+            background-repeat: no-repeat;
+            background-position: right top;
+            border-bottom: 2px solid #ACCD6C;
+        }
+
+        .page-header h1 {
+            font-size: 3.2em;
+            color: #3a6548;
+        }
+
+        .page-header h1 small {
+            color: #ACCD6C
+        }
+
+        .colorpick, .colorpick:hover {
+            border: 1px solid #000000;
+            color: #000000;
+        }
+
+        .infobox {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body ng-controller="StorageCtrl">
+
+<div class="container-fluid page-header">
+    <h1>MICO <small>Storage</small></h1>
+</div>
+
+<div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
+
+    <h2>Content Items ({{items.length}})</h2>
+
+    <table style="width: 100%">
+        <tr>
+            <th>URI</th>
+            <th>More</th>
+        </tr>
+        <tr ng-repeat="item in items" style="border: 1px solid black;">
+            <td style="vert-align: top">
+                {{item.uri}}
+            </td>
+            <td>
+                ...
+            </td>
+        </tr>
+    </table>
+
+</div>
+
+</body>
+</html>

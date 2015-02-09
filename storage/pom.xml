@@ -51,7 +51,7 @@
                     <artifactId>tomcat7-maven-plugin</artifactId>
                     <configuration>
                         <port>${javaee.port}</port>
-                        <path>broker</path>
+                        <path>/storage</path>
                     </configuration>
                 </plugin>
             </plugins>

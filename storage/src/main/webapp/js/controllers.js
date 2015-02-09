@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,16 +11,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.mico.platform.broker.exception;
+var storageApp = angular.module('storageApp', ['ui.bootstrap']);
 
-/**
- * Thrown when a state is not found in the service graph.
- *
- * @author Sebastian Schaffert (sschaffert@apache.org)
- */
-public class StateNotFoundException extends Exception {
+storageApp.controller("StorageCtrl", function($scope,$http) {
 
-    public StateNotFoundException(String message) {
-        super(message);
-    }
-}
+    $scope.items = [];
+    $http.get("rest/items").success(function(data) {
+        $scope.items = data;
+    });
+
+});
