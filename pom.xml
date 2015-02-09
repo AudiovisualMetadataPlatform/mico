@@ -190,6 +190,7 @@
         <module>api/java</module>
         <module>marmotta</module>
         <module>broker</module>
+        <module>storage</module>
     </modules>
 
 </project>
