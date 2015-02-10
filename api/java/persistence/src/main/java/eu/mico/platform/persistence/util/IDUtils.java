@@ -14,18 +14,40 @@ import java.util.UUID;
  */
 public class IDUtils {
 
+    /**
+     * Generate random UUID
+     *
+     * @return uuid
+     */
     public static UUID generatedRandomUuid() {
         return UUID.randomUUID();
     }
 
+    /**
+     * Generate random ID
+     *
+     * @return id
+     */
     public static String generatedRandomId() {
         return generatedRandomUuid().toString();
     }
 
+    /**
+     * Generate random URI using the Content Item as base
+     *
+     * @param item parent content item
+     * @return uri
+     */
     public static URI generatedRandomUri(ContentItem item) {
         return new URIImpl(item.getURI().stringValue() + "/" + generatedRandomId());
     }
 
+    /**
+     * Generate random URI using the Content Part as base
+     *
+     * @param part parent content part
+     * @return uri
+     */
     public static URI generatedRandomUri(Content part) {
         return new URIImpl(part.getURI().stringValue() + "/" + generatedRandomId());
     }
