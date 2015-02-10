@@ -88,6 +88,4 @@ public class MarmottaContentTest extends BaseMarmottaTest {
         log.debug("writing content to the stream: {}ms", System.currentTimeMillis() - pivot);
 
     }
-
-
 }

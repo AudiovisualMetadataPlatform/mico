@@ -1,0 +1,9 @@
+PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>
+PREFIX ldp: <http://www.w3.org/ns/ldp#>
+
+INSERT DATA {
+  GRAPH <$(cp)-metadata> {
+    <$(cp)> mico:hasContent <$(an)> .
+    <$(cp)> ldp:contains <$(an)> .
+  }
+}

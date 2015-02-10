@@ -1,5 +1,8 @@
 package eu.mico.platform.persistence.test.mock;
 
+import eu.mico.platform.persistence.impl.AnnotationImpl;
+import eu.mico.platform.persistence.metadata.IBody;
+import eu.mico.platform.persistence.metadata.ISelection;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -10,6 +13,7 @@ import org.openrdf.model.Value;
 import org.openrdf.model.impl.TreeModel;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryConfigException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -89,6 +93,21 @@ public class ContentMock implements Content {
     @Override
     public InputStream getInputStream() throws FileSystemException {
         return new ByteArrayInputStream(outputstream.toByteArray());
+    }
+
+    @Override
+    public ContentItem getContentItem() {
+        return null;
+    }
+
+    @Override
+    public AnnotationImpl createAnnotation(IBody body, Content source, ISelection selection) throws RepositoryException, RepositoryConfigException {
+        return null;
+    }
+
+    @Override
+    public AnnotationImpl createAnnotation(IBody body, Content source) throws RepositoryException, RepositoryConfigException {
+        return null;
     }
 
     public Model getMetadata() {

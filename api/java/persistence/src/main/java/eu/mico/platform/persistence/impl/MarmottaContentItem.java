@@ -14,11 +14,9 @@
 package eu.mico.platform.persistence.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
-import eu.mico.platform.persistence.util.SPARQLUtil;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
@@ -306,7 +304,6 @@ public class MarmottaContentItem implements ContentItem {
         }
 
     }
-
 
     @Override
     public boolean equals(Object o) {

@@ -14,15 +14,22 @@
 package eu.mico.platform.persistence.impl;
 
 import com.google.common.base.Preconditions;
+import eu.mico.platform.persistence.metadata.IAnnotation;
+import eu.mico.platform.persistence.metadata.IBody;
+import eu.mico.platform.persistence.metadata.ISelection;
 import eu.mico.platform.persistence.model.Content;
+import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
+import eu.mico.platform.persistence.util.Ontology;
 import org.apache.commons.io.input.ProxyInputStream;
 import org.apache.commons.io.output.ProxyOutputStream;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
+import org.openrdf.annotations.Iri;
 import org.openrdf.model.Model;
+import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
@@ -30,7 +37,12 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.UpdateExecutionException;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryConfigException;
+import org.openrdf.repository.object.ObjectConnection;
+import org.openrdf.repository.object.ObjectRepository;
+import org.openrdf.repository.object.config.ObjectRepositoryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +63,7 @@ public class MarmottaContent implements Content {
     private static Logger log = LoggerFactory.getLogger(MarmottaContent.class);
 
     private MarmottaContentItem item;
-
+    
     private String baseUrl;
     private String contentUrl;
     private String id;
@@ -274,6 +286,59 @@ public class MarmottaContent implements Content {
         }
     }
 
+    @Override
+    public ContentItem getContentItem() {
+        return item;
+    }
+
+    @Override
+    public AnnotationImpl createAnnotation(IBody body, Content source, ISelection selection) throws RepositoryException, RepositoryConfigException {
+        // create annotation object
+        AnnotationImpl annotation = new AnnotationImpl();
+
+        // add body, selection and content to the annotation object
+        annotation.setBody(body);
+
+        TargetImpl target = new TargetImpl();
+        target.setSelection(selection);
+        target.setSource(source.getURI());
+        
+        annotation.setTarget(target);
+        
+
+        // get the repository
+        Repository store = item.getMetadata().getRepository();
+
+        // wrap in an object repository
+        ObjectRepositoryFactory factory = new ObjectRepositoryFactory();
+        ObjectRepository repository = factory.createRepository(store);
+        ObjectConnection con = repository.getConnection();
+
+        // add the annotation to the repository
+        con.addObject(annotation);
+
+        // Link content part to annotation
+        Metadata m = item.getMetadata();
+        try {
+            m.update(createNamed("createAnnotation", of("cp", getURI().stringValue(), "an", annotation.getResource().toString())));
+        } catch (MalformedQueryException e) {
+            log.error("the SPARQL update was malformed:",e);
+            throw new RepositoryException("the SPARQL update was malformed",e);
+        } catch (UpdateExecutionException e) {
+            log.error("the SPARQL update could not be executed:",e);
+            throw new RepositoryException("the SPARQL update could not be executed",e);
+        }
+        
+        // close connection
+        con.close();
+
+        return annotation;
+    }
+
+    @Override
+    public AnnotationImpl createAnnotation(IBody body, Content source) throws RepositoryException, RepositoryConfigException {
+       return createAnnotation(body, source, null);
+    }
 
     @Override
     public boolean equals(Object o) {
