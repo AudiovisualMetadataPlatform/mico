@@ -14,22 +14,19 @@
 package eu.mico.platform.persistence.impl;
 
 import com.google.common.base.Preconditions;
-import eu.mico.platform.persistence.metadata.IAnnotation;
+import eu.mico.platform.persistence.exception.ConceptNotFoundException;
 import eu.mico.platform.persistence.metadata.IBody;
 import eu.mico.platform.persistence.metadata.ISelection;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
-import eu.mico.platform.persistence.util.Ontology;
 import org.apache.commons.io.input.ProxyInputStream;
 import org.apache.commons.io.output.ProxyOutputStream;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
-import org.openrdf.annotations.Iri;
 import org.openrdf.model.Model;
-import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
@@ -46,6 +43,7 @@ import org.openrdf.repository.object.config.ObjectRepositoryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -61,6 +59,8 @@ import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
 public class MarmottaContent implements Content {
 
     private static Logger log = LoggerFactory.getLogger(MarmottaContent.class);
+    
+    private final String CONCEPT_PATH = "META-INF/org.openrdf.concepts";
 
     private MarmottaContentItem item;
     
@@ -292,7 +292,19 @@ public class MarmottaContent implements Content {
     }
 
     @Override
-    public AnnotationImpl createAnnotation(IBody body, Content source, ISelection selection) throws RepositoryException, RepositoryConfigException {
+    public AnnotationImpl createAnnotation(IBody body, Content source, ISelection selection) throws RepositoryException, RepositoryConfigException, ConceptNotFoundException {
+
+        /*
+         * Check if the extractor has created the org.openrdf.concepts file. Alibaba requires this file (can be empty), 
+         * to persist the annotated objects. If the file was not found, a ConceptNotFoundException will be thrown.
+         */
+        String conceptURL = body.getClass().getClassLoader().getResource(CONCEPT_PATH).getFile();
+        File file = new File(conceptURL);
+
+        if(!file.isFile()) {
+            throw new ConceptNotFoundException("Please create an empty org.openrdf.conpepts file inside your META-INF folder.");
+        }
+        
         // create annotation object
         AnnotationImpl annotation = new AnnotationImpl();
 
@@ -336,7 +348,7 @@ public class MarmottaContent implements Content {
     }
 
     @Override
-    public AnnotationImpl createAnnotation(IBody body, Content source) throws RepositoryException, RepositoryConfigException {
+    public AnnotationImpl createAnnotation(IBody body, Content source) throws RepositoryException, RepositoryConfigException, ConceptNotFoundException {
        return createAnnotation(body, source, null);
     }
 

@@ -13,6 +13,7 @@
  */
 package eu.mico.platform.persistence.model;
 
+import eu.mico.platform.persistence.exception.ConceptNotFoundException;
 import eu.mico.platform.persistence.impl.AnnotationImpl;
 import eu.mico.platform.persistence.metadata.IBody;
 import eu.mico.platform.persistence.metadata.ISelection;
@@ -23,6 +24,7 @@ import org.openrdf.model.Value;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.config.RepositoryConfigException;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -116,10 +118,10 @@ public interface Content {
     /**
      * Creates and persists the metadata annotation for the content part.
     */
-    AnnotationImpl createAnnotation(IBody body, Content source, ISelection selection) throws RepositoryException, RepositoryConfigException;
+    AnnotationImpl createAnnotation(IBody body, Content source, ISelection selection) throws RepositoryException, RepositoryConfigException, ConceptNotFoundException;
 
     /**
      * Creates and persists the metadata annotation for the content part.
      */
-    AnnotationImpl createAnnotation(IBody body, Content source) throws RepositoryException, RepositoryConfigException;
+    AnnotationImpl createAnnotation(IBody body, Content source) throws RepositoryException, RepositoryConfigException, ConceptNotFoundException;
 }
