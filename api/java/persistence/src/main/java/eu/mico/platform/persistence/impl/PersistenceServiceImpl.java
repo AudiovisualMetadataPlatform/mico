@@ -17,6 +17,7 @@ import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
 import eu.mico.platform.persistence.util.PathUtil;
+import eu.mico.platform.persistence.util.IDUtils;
 import eu.mico.platform.persistence.util.VFSUtils;
 import org.openrdf.model.URI;
 import org.openrdf.query.*;
@@ -105,7 +106,7 @@ public class PersistenceServiceImpl implements PersistenceService {
     @Override
     public ContentItem createContentItem() throws RepositoryException {
 
-        UUID uuid = UUID.randomUUID();
+        UUID uuid = IDUtils.generatedRandomUuid();
 
         ContentItem ci = new MarmottaContentItem(marmottaServerUrl,contentUrl,uuid);
 

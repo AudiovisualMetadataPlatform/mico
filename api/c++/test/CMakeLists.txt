@@ -31,4 +31,7 @@ target_link_libraries(urlstream_tests gtest mico_rdf mico_marmotta mico_persiste
 add_executable(event_manager_tests  persistence_tests.cpp event_manager_tests.cpp )
 target_link_libraries(event_manager_tests gtest mico_rdf mico_marmotta mico_persistence mico_amqp mico_event curl ${PROTOBUF_LIBRARIES} boost_system boost_log boost_log_setup)
 
+add_executable(uuid_tests uuid_tests.cpp)
+target_link_libraries(uuid_tests gtest pthread)
+
 

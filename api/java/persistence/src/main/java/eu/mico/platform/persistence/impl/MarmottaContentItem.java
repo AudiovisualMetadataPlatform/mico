@@ -17,6 +17,8 @@ import com.google.common.base.Preconditions;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
+import eu.mico.platform.persistence.util.IDUtils;
+import eu.mico.platform.persistence.util.SPARQLUtil;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
@@ -142,7 +144,7 @@ public class MarmottaContentItem implements ContentItem {
     @Override
     public Content createContentPart() throws RepositoryException {
 
-        UUID contentUUID = UUID.randomUUID();
+        String contentUUID = IDUtils.generatedRandomId();
         Content content = new MarmottaContent(this, baseUrl, contentUrl, uuid.toString() + "/" + contentUUID);
 
         Metadata m = getMetadata();

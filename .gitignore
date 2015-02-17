@@ -27,6 +27,7 @@ Makefile
 *.a
 *.la
 *.lo
+*.user
 .deps/
 .libs/
 .dirstamp
