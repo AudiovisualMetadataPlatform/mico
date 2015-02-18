@@ -16,7 +16,6 @@ package eu.mico.platform.persistence.impl;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
-import eu.mico.platform.persistence.util.PathUtil;
 import eu.mico.platform.persistence.util.IDUtils;
 import eu.mico.platform.persistence.util.VFSUtils;
 import org.openrdf.model.URI;
@@ -58,7 +57,7 @@ public class PersistenceServiceImpl implements PersistenceService {
      * @param host mico platform address
      */
     public PersistenceServiceImpl(String host) {
-        this(host, "mico", "mico");
+        this(host, "mico", "pass123");
     }
 
     /**
@@ -73,8 +72,8 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     public PersistenceServiceImpl(String marmottaServerUrl, String contentUrl) {
-        PathUtil.marmottaServerUrl = marmottaServerUrl;
-        
+        System.setProperty("marmottaServerUrl", marmottaServerUrl);
+
         this.marmottaServerUrl = marmottaServerUrl;
         this.contentUrl        = contentUrl;
 

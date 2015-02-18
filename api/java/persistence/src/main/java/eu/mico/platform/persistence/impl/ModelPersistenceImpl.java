@@ -1,6 +1,5 @@
 package eu.mico.platform.persistence.impl;
 
-import eu.mico.platform.persistence.util.PathUtil;
 import org.openrdf.model.Resource;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.object.ObjectConnection;
@@ -11,7 +10,7 @@ import java.util.UUID;
 public abstract class ModelPersistenceImpl implements RDFObject {
 
     // This unique resource identifier is needed to avoid black nodes
-    private Resource resource = new URIImpl(PathUtil.marmottaServerUrl + "/" + UUID.randomUUID());
+    private Resource resource = new URIImpl(System.getProperty("marmottaServerUrl") + "/" + UUID.randomUUID());
 
     @Override
     public ObjectConnection getObjectConnection() {
