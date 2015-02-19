@@ -5,8 +5,8 @@ import eu.mico.platform.storage.model.Content;
 import eu.mico.platform.storage.model.ContentItem;
 import org.apache.commons.io.input.ProxyInputStream;
 import org.apache.commons.io.output.ProxyOutputStream;
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
 
@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.HashMap;
 
 /**
  * FTP-based storage implementation, port of the first API implementation
@@ -31,9 +32,16 @@ public class StorageServiceFTP implements StorageService {
         this.contentUrl = "ftp://" + user + ":" + pass + "@" + host;
     }
 
+    public StorageServiceFTP(HashMap<String, String> params) {
+        this(params.get("host") != null ? params.get("host") : "localhost",
+             params.get("user") != null ? params.get("user") : "mico",
+             params.get("pass") != null ? params.get("pass") : "mico"
+        );
+    }
+
     @Override
     public Collection<ContentItem> list() {
-        return null; //TODO
+        throw new NotImplementedException(); //TODO
     }
 
     @Override

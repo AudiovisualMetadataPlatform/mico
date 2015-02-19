@@ -22,15 +22,19 @@
     <!-- comment out for production! -->
     <!--
     <context-param>
-        <param-name>mico.host</param-name>
+        <param-name>mico.storage.provider</param-name>
+        <param-value>eu.mico.platform.storage.impl.StorageServiceFTP</param-value>
+    </context-param>
+    <context-param>
+        <param-name>mico.storage.host</param-name>
         <param-value>192.168.56.101</param-value>
     </context-param>
     <context-param>
-        <param-name>mico.user</param-name>
+        <param-name>mico.storage.user</param-name>
         <param-value>mico</param-value>
     </context-param>
     <context-param>
-        <param-name>mico.pass</param-name>
+        <param-name>mico.storage.pass</param-name>
         <param-value>pass123</param-value>
     </context-param>
     -->

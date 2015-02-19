@@ -14,20 +14,19 @@
 package eu.mico.platform.storage.webservices;
 
 import eu.mico.platform.storage.api.StorageService;
-import eu.mico.platform.storage.impl.StorageServiceHDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * MICO Storage Application
  *
  * @author Sergio Fernández
+ * @author Horst Stadler
  */
 public class MICOStorageApplication extends Application {
 
@@ -37,21 +36,38 @@ public class MICOStorageApplication extends Application {
 
     private StorageService storageService;
 
-    public MICOStorageApplication(@Context ServletContext context) {
+    public MICOStorageApplication(@Context ServletContext context) throws Exception{
         super();
 
-        String host = context.getInitParameter("mico.host") != null ? context.getInitParameter("mico.host") : "localhost";
-        String user = context.getInitParameter("mico.user") != null ? context.getInitParameter("mico.user") : "mico";
-        String pass = context.getInitParameter("mico.pass") != null ? context.getInitParameter("mico.pass") : "mico";
+        String storageProviderName = getInitParameter(context, "mico.storage.provider", "eu.mico.platform.storage.impl.StorageServiceHDFS");
 
-        log.info("initialising new MICO storage over {}...", host);
+        HashMap<String, String> params = filterInitParameters(context, "mico.storage.");
+        log.info("Initialising new MICO storage {} with parameters: {}", storageProviderName, params.toString());
+
+        try {
+            Class storageProviderClass = Class.forName(storageProviderName);
+            storageService = (StorageService)storageProviderClass.getDeclaredConstructor(params.getClass()).newInstance(params);
+        }catch (ClassNotFoundException cnfe)
+        {
+            log.error("MICO storage initialization error: Could not find storage provider class {}", storageProviderName);
+            throw cnfe;
+        }
+        catch (NoSuchMethodException nsme)
+        {
+            log.error("MICO storage initialization error: Could not instance storage provider class {}, as it does not provide a proper constructor", storageProviderName);
+            throw nsme;
+        }
+        catch (Exception e) {
+            log.error("MICO storage initialization error: Could not instance storage provider class {} (message: {})", storageProviderName, e.getMessage());
+            throw e;
+        }
 
         services = new HashSet<>();
         try {
-            storageService  = new StorageServiceHDFS(host, user, pass); //TODO configuration for the storage impl
             services.add(new StorageWebService(storageService));
         } catch (Exception e) {
-            log.error("could not initialise MICO storage, services not available (message: {})", e.getMessage(), e);
+            log.error("Could not initialise MICO storage, services not available (message: {})", e.getMessage(), e);
+            throw e;
         }
     }
 
@@ -63,6 +79,24 @@ public class MICOStorageApplication extends Application {
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
+    }
+
+    private String getInitParameter(ServletContext context, String parameterName, String defaultValue) {
+        return context.getInitParameter(parameterName) != null ? context.getInitParameter(parameterName) : defaultValue;
+    }
+
+    private HashMap<String, String> filterInitParameters(ServletContext context, String parameterPrefix) {
+        HashMap<String, String> parameterList = new HashMap<String, String>();
+        Enumeration<String> parameterNames = context.getInitParameterNames();
+        while(parameterNames.hasMoreElements()) {
+            String parameterName = parameterNames.nextElement();
+            if (parameterName.startsWith(parameterPrefix)) {
+                if (context.getInitParameter(parameterName) != null) {
+                    parameterList.put(parameterName.substring(parameterPrefix.length()), context.getInitParameter(parameterName));
+                }
+            }
+        }
+        return parameterList;
     }
 
 }
