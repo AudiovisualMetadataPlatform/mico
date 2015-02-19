@@ -14,17 +14,25 @@
 package eu.mico.platform.storage.webservices;
 
 import eu.mico.platform.storage.api.StorageService;
+import eu.mico.platform.storage.model.Content;
 import eu.mico.platform.storage.model.ContentItem;
+import java.io.InputStream;
+
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 
 /**
  * Storage Web Service
  *
  * @author Sergio Fernández
+ * @author Horst Stadler
  */
 @Path("/rest")
 public class StorageWebService {
@@ -45,6 +53,25 @@ public class StorageWebService {
     @Produces("application/json")
     public Collection<ContentItem> getItems() {
         return storageService.list();
+    }
+
+
+    //TODO: RESTeasy does not support HTTP Range header in combination with streams.
+    @GET
+    @Path("/item/{contentId:.*}")
+    public InputStream getItem(@PathParam("contentId") String contentId) throws IOException{
+        return storageService.getInputStream(new Content(contentId));
+    }
+
+    @PUT
+    @Path("/item/{contentId:.*}")
+    @Consumes("application/octet-stream")
+    public Response storeItem(@PathParam("contentId") String contentId, InputStream is) throws  IOException {
+        OutputStream os = storageService.getOutputStream(new Content(contentId));
+        IOUtils.copy(is, os);
+        is.close();
+        os.close();
+        return Response.noContent().build();
     }
 
 }
