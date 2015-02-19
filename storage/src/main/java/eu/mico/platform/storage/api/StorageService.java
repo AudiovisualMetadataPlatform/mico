@@ -2,7 +2,6 @@ package eu.mico.platform.storage.api;
 
 import eu.mico.platform.storage.model.Content;
 import eu.mico.platform.storage.model.ContentItem;
-import org.apache.commons.vfs2.FileSystemException;
 
 import java.io.IOException;
 import java.io.InputStream;
