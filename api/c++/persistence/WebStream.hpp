@@ -1,5 +1,5 @@
-#ifndef HAVE_URL_STREAM_H
-#define HAVE_URL_STREAM_H 1
+#ifndef HAVE_WEB_STREAM_H
+#define HAVE_WEB_STREAM_H 1
 
 #include <cstdio>
 #include <iosfwd>
@@ -20,25 +20,19 @@ namespace mico
         /**
         * Type of stream managed by the URLDevice. Internal Use Only.
         */
-        enum URLType {
-            URL_TYPE_FILE = 1,
-            URL_TYPE_HTTP = 2,
-            URL_TYPE_FTP  = 3
-        };
-
         enum URLMode {
             URL_MODE_READ, URL_MODE_WRITE
         };
 
 
         /**
-        * Base class for Boost Device implementations allowing to access local (%file://) and remote (%ftp://, %http://)
+        * Base class for Boost Device implementations allowing to access remote (%ftp://, %http://, %https://)
         * URLs as stdio streams, similar to fstream. Remote files are partly buffered in main memory.
         *
         * The class is implemented using the Boost IOStreams library and uses the cURL library in the
         * background to a access remote files.
         */
-        class URLStreambufBase : public std::streambuf
+        class WebStreambufBase : public std::streambuf
         {
 
             // cURL callbacks; declared here so we can friend them
@@ -52,7 +46,6 @@ namespace mico
                 FILE *file;
             } handle_t;
 
-            URLType type;
             URLMode mode;
 
             handle_t handle;
@@ -76,19 +69,18 @@ namespace mico
         public:
 
             /**
-            * Open URL device using the given URL and flags. Uses cURL internally to access a remote
-            * server, and fstream to access local files.
+            * Open URL device using the given URL and flags. Uses cURL internally to access the server.
             *
-            * @param url        the full URL to the file on the local or remote server (either starting with %file://, %http:// or %ftp://)
+            * @param url        the full URL to the file (either starting with %http://, %https:// or %ftp://)
             * @param mode       open mode, like for fopen; supported modes: read, write
             */
-            URLStreambufBase(const char* url, URLMode mode, int bufsize);
+            WebStreambufBase(const char* url, URLMode mode, int bufsize);
 
 
             /**
-            * Clean up resources occupied by device, e.g. remote or local file handles and connections.
+            * Clean up resources occupied by device, e.g. file handles and connections.
             */
-            virtual ~URLStreambufBase();
+            virtual ~WebStreambufBase();
 
 
         private:
@@ -96,25 +88,25 @@ namespace mico
             /**
             * Copy constructor not implemented, copying not allowed.
             */
-            URLStreambufBase(const URLStreambufBase& other);
+            WebStreambufBase(const WebStreambufBase & other);
 
 
             /**
             * Copy assignment operator not implemented, copying not allowed.
             */
-            URLStreambufBase& operator=(URLStreambufBase other);
+            WebStreambufBase & operator=(WebStreambufBase other);
 
         };
 
 
         /**
-        * A Boost Device implementation allowing read access to local and remote URLs.
+        * A Boost Device implementation allowing read access.
         */
-        class URLIStreambuf : public URLStreambufBase {
+        class WebIStreambuf : public WebStreambufBase {
 
         public:
 
-            URLIStreambuf(const char* url) : URLStreambufBase(url, URL_MODE_READ, CURL_MAX_WRITE_SIZE) {};
+            WebIStreambuf(const char* url) : WebStreambufBase(url, URL_MODE_READ, CURL_MAX_WRITE_SIZE) {};
 
 
         private:
@@ -122,37 +114,37 @@ namespace mico
             /**
             * Underflow, so we need to fill the buffer again with more data.
             */
-            int underflow();
+            std::streambuf::int_type underflow();
 
             /**
             * Copy constructor not implemented, copying not allowed
             */
-            URLIStreambuf(const URLIStreambuf& other);
+            WebIStreambuf(const WebIStreambuf & other);
 
 
             /**
             * Copy assignment operator not implemented, copying not allowed
             */
-            URLIStreambuf& operator=(URLIStreambuf other);
+            WebIStreambuf & operator=(WebIStreambuf other);
 
         };
 
 
         /**
-        * A Boost Device implementation allowing write access to local and remote URLs.
+        * A Boost Device implementation allowing write access.
         */
-        class URLOStreambuf : public URLStreambufBase {
+        class WebOStreambuf : public WebStreambufBase {
 
         public:
 
-            URLOStreambuf(const char* url) : URLStreambufBase(url, URL_MODE_WRITE, CURL_MAX_WRITE_SIZE) {};
+            WebOStreambuf(const char* url) : WebStreambufBase(url, URL_MODE_WRITE, CURL_MAX_WRITE_SIZE) {};
 
         private:
 
             /**
             * Buffer overflow, so we need to write out the buffer to the URL connection.
             */
-            int overflow(int c);
+            std::streambuf::int_type overflow(std::streambuf::int_type c);
 
             /**
             * Explicit call to write out the buffer to the URL connection even when it is not full
@@ -162,13 +154,13 @@ namespace mico
             /**
             * Copy constructor not implemented, copying not allowed
             */
-            URLOStreambuf(const URLOStreambuf& other);
+            WebOStreambuf(const WebOStreambuf & other);
 
 
             /**
             * Copy assignment operator not implemented, copying not allowed
             */
-            URLOStreambuf& operator=(URLOStreambuf other);
+            WebOStreambuf & operator=(WebOStreambuf other);
 
         };
 
@@ -176,13 +168,13 @@ namespace mico
         * Main type for opening an output stream to an URL for writing. Use url_ostream(URL) to open a
         * new stream, and normal stream operators for sending data (i.e.  \<\<).
         */
-        class url_ostream : public std::ostream {
+        class web_ostream : public std::ostream {
         public:
-            url_ostream(const char* url) : std::ostream(new URLOStreambuf(url)) {};
+            web_ostream(const char* url) : std::ostream(new WebOStreambuf(url)) {};
 
-            url_ostream(std::string url) : std::ostream(new URLOStreambuf(url.c_str())) {};
+            web_ostream(std::string url) : std::ostream(new WebOStreambuf(url.c_str())) {};
 
-            ~url_ostream() { rdbuf()->pubsync(); delete rdbuf(); };
+            ~web_ostream() { rdbuf()->pubsync(); delete rdbuf(); };
         };
 
 
@@ -190,13 +182,13 @@ namespace mico
         * Main type for opening an input stream to an URL for reading. Use url_istream(URL) to open a
         * new stream, and normal stream operators for receiving data (i.e. \>\>).
         */
-        class url_istream : public std::istream {
+        class web_istream : public std::istream {
         public:
-            url_istream(const char* url) : std::istream(new URLIStreambuf(url)) {};
+            web_istream(const char* url) : std::istream(new WebIStreambuf(url)) {};
 
-            url_istream(std::string url) : std::istream(new URLIStreambuf(url.c_str())) {};
+            web_istream(std::string url) : std::istream(new WebIStreambuf(url.c_str())) {};
 
-            ~url_istream() { delete rdbuf(); };
+            ~web_istream() { delete rdbuf(); };
         };
 
 
