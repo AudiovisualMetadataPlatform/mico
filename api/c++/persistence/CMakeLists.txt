@@ -13,11 +13,11 @@ ENDFOREACH()
 #set_source_files_properties(${COMPILED_RESOURCES} PROPERTIES GENERATED TRUE)
 
 include_directories(../rdf ../logging)
-add_library(mico_persistence SHARED ${COMPILED_RESOURCES} SPARQLUtil.cpp Metadata.cpp Content.cpp ContentItem.cpp PersistenceService.cpp URLStream.cpp HDFSStream.cpp)
+add_library(mico_persistence SHARED ${COMPILED_RESOURCES} SPARQLUtil.cpp Metadata.cpp Content.cpp ContentItem.cpp PersistenceService.cpp URLStream.cpp FileStream.cpp WebStream.cpp HDFSStream.cpp)
 target_link_libraries(mico_persistence mico_marmotta mico_rdf mico_logging ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_THREAD_LIBS_INIT})
 
 set_target_properties(mico_persistence PROPERTIES SOVERSION ${VERSION_MAJOR})
 
 
 install (TARGETS mico_persistence DESTINATION lib)
-install (FILES Content.hpp ContentItem.hpp Metadata.hpp PersistenceService.hpp SPARQLUtil.hpp URLStream.hpp HDFSStream.hpp DESTINATION include)
+install (FILES Content.hpp ContentItem.hpp Metadata.hpp PersistenceService.hpp SPARQLUtil.hpp URLStream.hpp FileStream.hpp WebStream.hpp HDFSStream.hpp DESTINATION include)
