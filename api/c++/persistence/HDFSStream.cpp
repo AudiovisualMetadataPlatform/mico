@@ -29,7 +29,9 @@ namespace mico {
             //Connect to HDFS
             struct hdfsBuilder *builder = hdfsNewBuilder();
             hdfsBuilderSetNameNode(builder, address);
-            hdfsBuilderSetNameNodePort(builder, port);
+            if (port != 0) {
+                hdfsBuilderSetNameNodePort(builder, port);
+            }
             fs = hdfsBuilderConnect(builder);
             hdfsFreeBuilder(builder);
 
@@ -43,7 +45,7 @@ namespace mico {
                     char* dir = dirname(path_dup);
                     if(hdfsExists(fs, dir) != 0) {
                         if(hdfsCreateDirectory(fs, dir) != 0) {
-                            //TODO:Error
+                            throw std::string("Error creating directory: ") + dir;
                         }
                     }
                     free(path_dup);
