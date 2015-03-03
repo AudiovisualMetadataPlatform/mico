@@ -14,7 +14,7 @@ ENDFOREACH()
 
 include_directories(../rdf ../logging)
 add_library(mico_persistence SHARED ${COMPILED_RESOURCES} SPARQLUtil.cpp Metadata.cpp Content.cpp ContentItem.cpp PersistenceService.cpp URLStream.cpp FileStream.cpp WebStream.cpp HDFSStream.cpp)
-target_link_libraries(mico_persistence mico_marmotta mico_rdf mico_logging ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(mico_persistence mico_marmotta mico_rdf mico_logging ${CURL_LIBRARIES} ${HDFS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_THREAD_LIBS_INIT})
 
 set_target_properties(mico_persistence PROPERTIES SOVERSION ${VERSION_MAJOR})
 
