@@ -29,9 +29,10 @@ namespace mico {
             //Connect to HDFS
             struct hdfsBuilder *builder = hdfsNewBuilder();
             hdfsBuilderSetNameNode(builder, address);
-            if (port != 0) {
-                hdfsBuilderSetNameNodePort(builder, port);
+            if (port == 0) {
+                port = HDFS_DEFAULT_PORT;
             }
+            hdfsBuilderSetNameNodePort(builder, port);
             fs = hdfsBuilderConnect(builder);
             hdfsFreeBuilder(builder);
 
