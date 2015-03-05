@@ -13,7 +13,6 @@
 */
 
 #include <cstring>
-#include <utility>
 #include <unistd.h>
 #include <sys/stat.h>
 #include "Logging.hpp"
