@@ -1,0 +1,16 @@
+# Inputs:
+#   $(body) : The uri of the body
+#   $(chars) : A piece of text
+PREFIX dytypes: <http://purl.org/dc/dcmitype/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX dc: <http://purl.org/dc/terms/>
+PREFIX cnt: <http://www.w3.org/2011/content#>
+
+INSERT DATA {
+  GRAPH <$(body)> {
+    <$(body)> rdf:type dytypes:Text .
+    <$(body)> rdf:type cnt:ContentAsText .
+    <$(body)> cnt:chars "$(chars)" .
+    <$(body)> dc:format "text/plain" .
+  }
+}

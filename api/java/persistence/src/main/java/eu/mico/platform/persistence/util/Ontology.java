@@ -189,7 +189,7 @@ public class Ontology {
     public final static String NAME_FOAF = NS_FOAF + "name";
 
     /**
-     * Representing Content (cnt:( 
+     * Representing Content (cnt:)
      */
     
     public final static String NS_CNT = "http://www.w3.org/2011/content#";
