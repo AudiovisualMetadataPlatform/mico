@@ -298,10 +298,7 @@ public class MarmottaContent implements Content {
          * Check if the extractor has created the org.openrdf.concepts file. Alibaba requires this file (can be empty), 
          * to persist the annotated objects. If the file was not found, a ConceptNotFoundException will be thrown.
          */
-        String conceptURL = body.getClass().getClassLoader().getResource(CONCEPT_PATH).getFile();
-        File file = new File(conceptURL);
-
-        if(!file.isFile()) {
+        if(!new File(body.getClass().getClassLoader().getResource(CONCEPT_PATH).getFile()).isFile()) {
             throw new ConceptNotFoundException("Please create an empty org.openrdf.conpepts file inside your META-INF folder.");
         }
         
@@ -313,10 +310,9 @@ public class MarmottaContent implements Content {
 
         TargetImpl target = new TargetImpl();
         target.setSelection(selection);
-        target.setSource(source.getURI());
+        target.setSource(source.getURI().toString());
         
         annotation.setTarget(target);
-        
 
         // get the repository
         Repository store = item.getMetadata().getRepository();
@@ -332,7 +328,14 @@ public class MarmottaContent implements Content {
         // Link content part to annotation
         Metadata m = item.getMetadata();
         try {
-            m.update(createNamed("createAnnotation", of("cp", getURI().stringValue(), "an", annotation.getResource().toString())));
+            m.update(
+                    createNamed("createAnnotation",
+                            of(
+                                "cp", getURI().stringValue(),
+                                "an", annotation.getResource().toString()
+                            )
+                    )
+            );
         } catch (MalformedQueryException e) {
             log.error("the SPARQL update was malformed:",e);
             throw new RepositoryException("the SPARQL update was malformed",e);

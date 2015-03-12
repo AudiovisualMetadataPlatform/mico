@@ -1,6 +1,5 @@
 package eu.mico.platform.persistence.metadata;
 
-import org.openrdf.model.URI;
 import org.openrdf.repository.object.RDFObject;
 
 public interface ITarget extends RDFObject {
@@ -9,7 +8,7 @@ public interface ITarget extends RDFObject {
     
     public void setSelection(ISelection selection);
     
-    public void setSource(URI source);
+    public void setSource(String source);
     
-    public URI getSource();
+    public String getSource();
 }

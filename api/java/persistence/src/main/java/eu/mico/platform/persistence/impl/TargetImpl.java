@@ -4,7 +4,6 @@ import eu.mico.platform.persistence.metadata.ISelection;
 import eu.mico.platform.persistence.metadata.ITarget;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
-import org.openrdf.model.URI;
 
 @Iri(Ontology.SPECIFIC_RESOURCE_OA)
 public class TargetImpl extends ModelPersistenceImpl implements ITarget {
@@ -13,7 +12,7 @@ public class TargetImpl extends ModelPersistenceImpl implements ITarget {
     private ISelection selection = null;
     
     @Iri(Ontology.HAS_SOURCE_OA)
-    private URI source;
+    private String source;
 
     @Override
     public ISelection getSelection() {
@@ -26,12 +25,12 @@ public class TargetImpl extends ModelPersistenceImpl implements ITarget {
     }
 
     @Override
-    public void setSource(URI source) {
+    public void setSource(String source) {
         this.source = source;
     }
 
     @Override
-    public URI getSource() {
+    public String getSource() {
         return source;
     }
 }
