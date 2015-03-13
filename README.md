@@ -125,6 +125,7 @@ Building the C++ API has additional requirements for native libraries. In partic
 * Boost 1.55 libraries for additional C++ functionalities (apt-get install libboost1.55-dev libboost-log1.55-dev libboost-system1.55-dev)
 * xxd for inlining SPARQL queries in C++ (part of VIM, apt-get install vim-common)
 * protobuf for the event communication protocol (manual install, the Debian/Ubuntu version is outdated)
+* AMQP-CPP for communication with RabbitMQ (manual install)
 * Doxygen for building the documentation
 
 For building the C++ binary tools (mico_inject etc.), there are the following additional dependencies:
@@ -188,4 +189,3 @@ To create a complete API documentation of the MICO Platform API in the api/c++/d
 To install the C++ libraries and headers to the predefined prefix, run
 
     make install
-   
