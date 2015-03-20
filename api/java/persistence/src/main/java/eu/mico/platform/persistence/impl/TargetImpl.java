@@ -6,7 +6,7 @@ import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 
 @Iri(Ontology.SPECIFIC_RESOURCE_OA)
-public class TargetImpl extends ModelPersistenceImpl implements ITarget {
+public class TargetImpl extends ModelPersistenceBodyImpl implements ITarget {
     
     @Iri(Ontology.HAS_SELECTOR_OA)
     private ISelection selection = null;

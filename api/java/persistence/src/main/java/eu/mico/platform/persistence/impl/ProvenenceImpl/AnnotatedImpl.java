@@ -1,7 +1,7 @@
 package eu.mico.platform.persistence.impl.ProvenenceImpl;
 
 
-import eu.mico.platform.persistence.impl.ModelPersistenceImpl;
+import eu.mico.platform.persistence.impl.ModelPersistenceBodyImpl;
 import eu.mico.platform.persistence.metadata.IProvenance;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
@@ -9,7 +9,7 @@ import org.openrdf.annotations.Iri;
 import java.util.Date;
 
 @Iri(Ontology.ANNOTATION_OA)
-public class AnnotatedImpl extends ModelPersistenceImpl implements IProvenance {
+public class AnnotatedImpl extends ModelPersistenceBodyImpl implements IProvenance {
     
     @Iri(Ontology.ANNOTATED_AT_OA)
     private Date annotatedAt;

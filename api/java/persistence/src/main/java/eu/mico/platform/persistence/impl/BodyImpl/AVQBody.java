@@ -1,13 +1,13 @@
 package eu.mico.platform.persistence.impl.BodyImpl;
 
 
-import eu.mico.platform.persistence.impl.ModelPersistenceImpl;
+import eu.mico.platform.persistence.impl.ModelPersistenceBodyImpl;
 import eu.mico.platform.persistence.metadata.IBody;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 
 @Iri(Ontology.AVQ_BODY_MICO)
-public class AVQBody extends ModelPersistenceImpl implements IBody {
+public class AVQBody extends ModelPersistenceBodyImpl {
 
     @Iri(Ontology.HAS_REDEFINED_TYPE_MICO)
     private String type;

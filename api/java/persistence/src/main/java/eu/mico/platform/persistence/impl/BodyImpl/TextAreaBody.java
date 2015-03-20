@@ -1,12 +1,12 @@
 package eu.mico.platform.persistence.impl.BodyImpl;
 
-import eu.mico.platform.persistence.impl.ModelPersistenceImpl;
+import eu.mico.platform.persistence.impl.ModelPersistenceBodyImpl;
 import eu.mico.platform.persistence.metadata.IBody;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 
 @Iri(Ontology.TEXT_DCTYPES)
-public class TextAreaBody extends ModelPersistenceImpl implements IBody {
+public class TextAreaBody extends ModelPersistenceBodyImpl {
 
     @Iri(Ontology.FORMAT_DCTERMS)
     private String format;

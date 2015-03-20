@@ -1,12 +1,11 @@
 package eu.mico.platform.persistence.impl.SelectorImpl;
 
-import eu.mico.platform.persistence.impl.ModelPersistenceImpl;
-import eu.mico.platform.persistence.metadata.ISelection;
+import eu.mico.platform.persistence.impl.ModelPersistenceSelectionImpl;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 
 @Iri(Ontology.FRAGMENT_SELECTOR_OA)
-public class FragmentSelector extends ModelPersistenceImpl implements ISelection {
+public class FragmentSelector extends ModelPersistenceSelectionImpl {
 
     // The x-coordinate of the fragment
     private int xCoord;

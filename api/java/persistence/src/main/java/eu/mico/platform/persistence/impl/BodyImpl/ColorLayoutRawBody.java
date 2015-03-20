@@ -1,12 +1,12 @@
 package eu.mico.platform.persistence.impl.BodyImpl;
 
-import eu.mico.platform.persistence.impl.ModelPersistenceImpl;
+import eu.mico.platform.persistence.impl.ModelPersistenceBodyImpl;
 import eu.mico.platform.persistence.metadata.IBody;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 
 @Iri(Ontology.COLOR_LAYOUT_RAW_BODY)
-public class ColorLayoutRawBody extends ModelPersistenceImpl implements IBody {
+public class ColorLayoutRawBody extends ModelPersistenceBodyImpl {
     
     @Iri(Ontology.HAS_LOCATION_MICO)
     private String layoutLocation;

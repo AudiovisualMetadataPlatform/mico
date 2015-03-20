@@ -1,5 +1,5 @@
 package eu.mico.platform.persistence.metadata;
 
-public interface ISelection extends IModelPersistence {
+public interface ISelection {
 
 }

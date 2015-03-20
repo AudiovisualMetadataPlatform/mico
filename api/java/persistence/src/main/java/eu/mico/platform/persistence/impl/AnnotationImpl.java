@@ -2,13 +2,12 @@ package eu.mico.platform.persistence.impl;
 
 import eu.mico.platform.persistence.metadata.IAnnotation;
 import eu.mico.platform.persistence.metadata.IBody;
-import eu.mico.platform.persistence.metadata.ISelection;
 import eu.mico.platform.persistence.metadata.ITarget;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 
 @Iri(Ontology.NS_OA + "Annotation")
-public class AnnotationImpl extends ModelPersistenceImpl implements IAnnotation {
+public class AnnotationImpl extends ModelPersistenceBodyImpl implements IAnnotation {
 
     @Iri(Ontology.HAS_BODY_OA)
     private IBody body;
