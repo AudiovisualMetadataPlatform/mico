@@ -43,8 +43,8 @@ All packages are signed with a with a gpg-key (Key-ID: `AD261C57`). To avoid war
 
 To install the MICO platform, fetch the most recent package list and install the package `mico-platform` as follows:
 
-    apt-get update
-    apt-get install mico-platform
+    sudo apt-get update
+    sudo apt-get install mico-platform
 
 The installation will interactively ask you a few questions regarding a MICO user to be created and the hostname to use
 for accessing the system. Please take your time to carefully configure these values. Especially, make sure you remember
