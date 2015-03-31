@@ -16,6 +16,7 @@ package eu.mico.platform.persistence.model;
 import eu.mico.platform.persistence.exception.ConceptNotFoundException;
 import eu.mico.platform.persistence.impl.AnnotationImpl;
 import eu.mico.platform.persistence.metadata.IBody;
+import eu.mico.platform.persistence.metadata.IProvenance;
 import eu.mico.platform.persistence.metadata.ISelection;
 import org.apache.commons.vfs2.FileSystemException;
 import org.openrdf.model.Model;
@@ -34,6 +35,7 @@ import java.io.OutputStream;
  *
  * @author Sebastian Schaffert
  * @author Sergio Fernández
+ * @author Andreas Eisenkolb
  */
 public interface Content {
 
@@ -116,12 +118,14 @@ public interface Content {
     ContentItem getContentItem();
 
     /**
-     * Creates and persists the metadata annotation for the content part.
+     * Creates and persists the annotation object for the content part.
+     * @return
     */
-    AnnotationImpl createAnnotation(IBody body, Content source, ISelection selection) throws RepositoryException, RepositoryConfigException, ConceptNotFoundException;
+    AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance, ISelection selection) throws RepositoryException, RepositoryConfigException, ConceptNotFoundException;
 
     /**
-     * Creates and persists the metadata annotation for the content part.
+     * Creates and persists the annotation object for the content part.
+     * @return
      */
-    AnnotationImpl createAnnotation(IBody body, Content source) throws RepositoryException, RepositoryConfigException, ConceptNotFoundException;
+    AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance) throws RepositoryException, RepositoryConfigException, ConceptNotFoundException;
 }

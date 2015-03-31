@@ -1,11 +1,18 @@
+# Inputs:
+#   $(ci) : The uri of the content itemd
+#   $(cp) : The uri of the content part
+#   $(date) : The date and time the content was serialized ("yyyy-MM-dd'T'hh:mm:ss'Z'")
+#
 PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>
-PREFIX ldp: <http://www.w3.org/ns/ldp#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+ PREFIX ldp: <http://www.w3.org/ns/ldp#>
+ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+ PREFIX oa: <http://www.w3.org/ns/oa#>
 
-INSERT DATA {
-  GRAPH <$(ci)-metadata> {
-    <$(ci)> mico:hasContentPart <$(cp)> .
-    <$(ci)> ldp:contains <$(cp)> .
-    <$(cp)> rdf:type mico:ContentPart .
-  }
-}
+ INSERT DATA {
+   GRAPH <$(ci)-metadata> {
+     <$(ci)> mico:hasContentPart <$(cp)> .
+     <$(ci)> ldp:contains <$(cp)> .
+     <$(cp)> rdf:type mico:ContentPart .
+     <$(cp)> oa:serializedAt "$(date)" .
+   }
+ }

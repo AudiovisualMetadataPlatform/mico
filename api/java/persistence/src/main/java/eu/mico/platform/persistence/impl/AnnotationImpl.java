@@ -2,9 +2,11 @@ package eu.mico.platform.persistence.impl;
 
 import eu.mico.platform.persistence.metadata.IAnnotation;
 import eu.mico.platform.persistence.metadata.IBody;
+import eu.mico.platform.persistence.metadata.IProvenance;
 import eu.mico.platform.persistence.metadata.ITarget;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
+
 
 @Iri(Ontology.NS_OA + "Annotation")
 public class AnnotationImpl extends ModelPersistenceBodyImpl implements IAnnotation {
@@ -14,6 +16,10 @@ public class AnnotationImpl extends ModelPersistenceBodyImpl implements IAnnotat
 
     @Iri(Ontology.HAS_TARGET_OA)
     private ITarget target;
+
+    @Iri(Ontology.ANNOTATED_BY_OA)
+    private IProvenance provenance;
+
 
     @Override
     public void setBody(IBody body) {
@@ -34,4 +40,16 @@ public class AnnotationImpl extends ModelPersistenceBodyImpl implements IAnnotat
     public ITarget getTarget() {
         return target;
     }
+
+    @Override
+    public void setProvenance(IProvenance provenance) {
+        this.provenance = provenance;
+    }
+
+    @Override
+    public IProvenance getProvenance() {
+        return provenance;
+    }
+
+
 }

@@ -24,7 +24,7 @@ public class Ontology {
 
     public final static String HAS_REDEFINED_TYPE_MICO = NS_MICO + "hasRefinedType";
 
-    public final static String HAS_VERSION_TYPE = NS_MICO + "hasVersion";
+    public final static String HAS_VERSION_TYPE_MICO = NS_MICO + "hasVersion";
 
     public final static String PROVIDES_MICO = NS_MICO + "provides";
 
@@ -174,11 +174,11 @@ public class Ontology {
     
     public final static String SOFTWARE_AGENT_PROV = NS_PROV + "SoftwareAgent";
     
-    public final static String GENERATED_AT_TIME = NS_PROV + "generatedAtTime";
+    public final static String GENERATED_AT_TIME_POV = NS_PROV + "generatedAtTime";
     
-    public final static String WAS_GENERATED_BY = NS_PROV + "wasGeneratedBy";
+    public final static String WAS_GENERATED_BY_POV = NS_PROV + "wasGeneratedBy";
     
-    public final static String INVALIDATED_AT_TIME = NS_PROV + "invalidatedAtTime";
+    public final static String INVALIDATED_AT_TIME_POV = NS_PROV + "invalidatedAtTime";
 
     /**
      * Friend of a Friend (foaf:) 

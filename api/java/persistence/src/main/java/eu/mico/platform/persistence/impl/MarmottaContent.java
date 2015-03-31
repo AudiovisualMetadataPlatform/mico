@@ -16,16 +16,19 @@ package eu.mico.platform.persistence.impl;
 import com.google.common.base.Preconditions;
 import eu.mico.platform.persistence.exception.ConceptNotFoundException;
 import eu.mico.platform.persistence.metadata.IBody;
+import eu.mico.platform.persistence.metadata.IProvenance;
 import eu.mico.platform.persistence.metadata.ISelection;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
+import eu.mico.platform.persistence.util.Ontology;
 import org.apache.commons.io.input.ProxyInputStream;
 import org.apache.commons.io.output.ProxyOutputStream;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
+import org.openrdf.annotations.Iri;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -47,6 +50,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
@@ -59,17 +64,16 @@ import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
 public class MarmottaContent implements Content {
 
     private static Logger log = LoggerFactory.getLogger(MarmottaContent.class);
-    
+
     private final String CONCEPT_PATH = "META-INF/org.openrdf.concepts";
 
     private MarmottaContentItem item;
-    
+
     private String baseUrl;
     private String contentUrl;
     private String id;
 
-
-    public MarmottaContent(MarmottaContentItem item, String baseUrl, String contentUrl, String id) {
+    public MarmottaContent(MarmottaContentItem item, String baseUrl, String contentUrl, String id) throws RepositoryException {
         this.item       = item;
         this.baseUrl    = baseUrl;
         this.contentUrl = contentUrl;
@@ -292,7 +296,7 @@ public class MarmottaContent implements Content {
     }
 
     @Override
-    public AnnotationImpl createAnnotation(IBody body, Content source, ISelection selection) throws RepositoryException, RepositoryConfigException, ConceptNotFoundException {
+    public AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance, ISelection selection) throws RepositoryException, RepositoryConfigException, ConceptNotFoundException {
 
         /*
          * Check if the extractor has created the org.openrdf.concepts file. Alibaba requires this file (can be empty), 
@@ -313,6 +317,9 @@ public class MarmottaContent implements Content {
         target.setSource(source.getURI().toString());
         
         annotation.setTarget(target);
+
+        // Setting the provenance information
+        annotation.setProvenance(provenance);
 
         // get the repository
         Repository store = item.getMetadata().getRepository();
@@ -351,8 +358,8 @@ public class MarmottaContent implements Content {
     }
 
     @Override
-    public AnnotationImpl createAnnotation(IBody body, Content source) throws RepositoryException, RepositoryConfigException, ConceptNotFoundException {
-       return createAnnotation(body, source, null);
+    public AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance) throws RepositoryException, RepositoryConfigException, ConceptNotFoundException {
+       return createAnnotation(body, source, provenance, null);
     }
 
     @Override

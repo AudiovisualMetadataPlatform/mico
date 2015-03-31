@@ -7,29 +7,42 @@ public interface IAnnotation {
 
     /**
      * Setter for the body.
-     *  
+     *
      * @param body
      */
-    public void setBody(IBody body);
+    void setBody(IBody body);
 
     /**
      * Setter for the selection.
-     *  
+     *
      * @param target
      */
-    public void setTarget(ITarget target);
+    void setTarget(ITarget target);
 
     /**
      * Getter for the body.
-     *  
+     *
      * @return
      */
-    public IBody getBody();
+    IBody getBody();
 
     /**
      * Getter for the selection.
-     *  
+     *
      * @return
      */
-    public ITarget getTarget();
+    ITarget getTarget();
+
+    /**
+     * Setter for the provenance information.
+     *
+     * @param provenance
+     */
+    void setProvenance(IProvenance provenance);
+
+    /**
+     * Getter for the provenance information.
+     * @return
+     */
+    IProvenance getProvenance();
 }

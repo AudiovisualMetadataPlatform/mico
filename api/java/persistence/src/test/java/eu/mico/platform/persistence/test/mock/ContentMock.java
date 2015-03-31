@@ -2,6 +2,7 @@ package eu.mico.platform.persistence.test.mock;
 
 import eu.mico.platform.persistence.impl.AnnotationImpl;
 import eu.mico.platform.persistence.metadata.IBody;
+import eu.mico.platform.persistence.metadata.IProvenance;
 import eu.mico.platform.persistence.metadata.ISelection;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
@@ -101,12 +102,12 @@ public class ContentMock implements Content {
     }
 
     @Override
-    public AnnotationImpl createAnnotation(IBody body, Content source, ISelection selection) throws RepositoryException, RepositoryConfigException {
+    public AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance, ISelection selection) throws RepositoryException, RepositoryConfigException {
         return null;
     }
 
     @Override
-    public AnnotationImpl createAnnotation(IBody body, Content source) throws RepositoryException, RepositoryConfigException {
+    public AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance) throws RepositoryException, RepositoryConfigException {
         return null;
     }
 
