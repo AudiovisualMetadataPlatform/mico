@@ -19,8 +19,7 @@ public class VFSUtils {
         FileSystemOptions opts = new FileSystemOptions();
         final FtpFileSystemConfigBuilder configBuilder = FtpFileSystemConfigBuilder.getInstance();
 
-        //configBuilder.setPassiveMode(opts, true);
-        configBuilder.setUserDirIsRoot(opts, true);
+        configBuilder.setPassiveMode(opts, true);
         configBuilder.setUserDirIsRoot(opts, true);
 
         return opts;
