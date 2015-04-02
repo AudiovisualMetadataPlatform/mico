@@ -1,5 +1,6 @@
 package eu.mico.platform.persistence.impl;
 
+import eu.mico.platform.persistence.impl.ModelPersistenceImpl.ModelPersistenceBodyImpl;
 import eu.mico.platform.persistence.metadata.ISelection;
 import eu.mico.platform.persistence.metadata.ITarget;
 import eu.mico.platform.persistence.util.Ontology;

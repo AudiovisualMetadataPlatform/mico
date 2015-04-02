@@ -1,4 +1,4 @@
-package eu.mico.platform.persistence.impl;
+package eu.mico.platform.persistence.impl.ModelPersistenceImpl;
 
 import eu.mico.platform.persistence.metadata.IBody;
 import org.openrdf.model.Resource;

@@ -1,6 +1,6 @@
 package eu.mico.platform.persistence.impl.SelectorImpl;
 
-import eu.mico.platform.persistence.impl.ModelPersistenceSelectionImpl;
+import eu.mico.platform.persistence.impl.ModelPersistenceImpl.ModelPersistenceSelectionImpl;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 

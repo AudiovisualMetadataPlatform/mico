@@ -1,6 +1,6 @@
-package eu.mico.platform.persistence.impl;
+package eu.mico.platform.persistence.impl.ModelPersistenceImpl;
 
-import eu.mico.platform.persistence.metadata.ISelection;
+import eu.mico.platform.persistence.metadata.IProvenance;
 import org.openrdf.model.Resource;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.object.ObjectConnection;
@@ -8,7 +8,7 @@ import org.openrdf.repository.object.RDFObject;
 
 import java.util.UUID;
 
-public abstract class ModelPersistenceSelectionImpl implements RDFObject, ISelection {
+public abstract class ModelPersistenceProvenanceImpl implements RDFObject, IProvenance {
 
     // This unique resource identifier is needed to avoid black nodes
     private Resource resource = new URIImpl(System.getProperty("marmottaServerUrl") + "/" + UUID.randomUUID());

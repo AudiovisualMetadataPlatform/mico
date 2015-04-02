@@ -1,6 +1,6 @@
 package eu.mico.platform.persistence.impl.ProvenanceImpl;
 
-import eu.mico.platform.persistence.impl.ModelPersistenceProvenanceImpl;
+import eu.mico.platform.persistence.impl.ModelPersistenceImpl.ModelPersistenceProvenanceImpl;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 
