@@ -102,12 +102,12 @@ public class ContentMock implements Content {
     }
 
     @Override
-    public AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance, ISelection selection) throws RepositoryException, RepositoryConfigException {
+    public AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance, ISelection selection) throws RepositoryException {
         return null;
     }
 
     @Override
-    public AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance) throws RepositoryException, RepositoryConfigException {
+    public AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance) throws RepositoryException {
         return null;
     }
 
