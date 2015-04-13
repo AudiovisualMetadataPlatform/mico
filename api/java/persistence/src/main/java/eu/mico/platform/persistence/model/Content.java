@@ -121,11 +121,10 @@ public interface Content {
      * Creates and persists the annotation object for the content part.
      * @return
     */
-    AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance, ISelection selection) throws ConceptNotFoundException, RepositoryException;
-
+    AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance, ISelection selection) throws RepositoryException;
     /**
      * Creates and persists the annotation object for the content part.
      * @return
      */
-    AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance) throws ConceptNotFoundException, RepositoryException;
+    AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance) throws RepositoryException;
 }

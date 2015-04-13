@@ -296,7 +296,7 @@ public class MarmottaContent implements Content {
     }
 
     @Override
-    public AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance, ISelection selection) throws ConceptNotFoundException, RepositoryException {
+    public AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance, ISelection selection) throws RepositoryException {
 
         /*
          * Check if the extractor has created the org.openrdf.concepts file. Alibaba requires this file (can be empty), 
