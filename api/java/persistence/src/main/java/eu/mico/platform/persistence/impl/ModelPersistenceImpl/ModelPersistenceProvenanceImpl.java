@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public abstract class ModelPersistenceProvenanceImpl implements RDFObject, IProvenance {
 
-    // This unique resource identifier is needed to avoid black nodes
+    // This unique resource identifier is needed to avoid blank nodes
     private Resource resource = new URIImpl(System.getProperty("marmottaServerUrl") + "/" + UUID.randomUUID());
 
     @Override
