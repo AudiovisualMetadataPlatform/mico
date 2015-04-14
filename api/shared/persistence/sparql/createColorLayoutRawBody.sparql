@@ -1,0 +1,14 @@
+# Inputs:
+#   $(body) : The uri of the body
+#   $(location) : The location (url) of the xml file
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX dc: <http://purl.org/dc/terms/>
+PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>
+
+INSERT DATA {
+  GRAPH <$(body)> {
+    <$(body)> mico:hasLocation "$(location)" .
+    <$(body)> rdf:type mico:CLraw .
+    <$(body)> dc:format "application/xml+mpeg7-color-layout" .
+  }
+}

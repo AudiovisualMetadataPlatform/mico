@@ -1,0 +1,22 @@
+# Inputs:
+#   $(body) : The uri of the body
+#   $(YDCCoeff) : The YDC coefficient
+#   $(CbACCoeff) : The CbAC coefficient
+#   $(CbDCCoeff) : The CbDC coefficient
+#   $(CrACCoeff) : The CrAC coefficient
+#   $(CrDCCoeff) : The CrDC coefficient
+#   $(YACCoeff) : The YAC coefficient
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>
+
+INSERT DATA {
+  GRAPH <$(body)> {
+    <$(body)> rdf:type mico:ColorLayoutBody .
+    <$(body)> mico:YDCCoeff "$(YDCCoeff)" .
+    <$(body)> mico:CbACCoeff "$(CbACCoeff)" .
+    <$(body)> mico:CbDCCoeff "$(CbDCCoeff)" .
+    <$(body)> mico:CrACCoeff "$(CrACCoeff)" .
+    <$(body)> mico:CrDCCoeff "$(CrDCCoeff)" .
+    <$(body)> mico:YACCoeff "$(YACCoeff)" .
+  }
+}

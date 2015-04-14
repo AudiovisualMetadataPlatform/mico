@@ -14,10 +14,10 @@
 package eu.mico.platform.persistence.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
+import eu.mico.platform.persistence.util.IDUtils;
 import eu.mico.platform.persistence.util.SPARQLUtil;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
@@ -30,6 +30,8 @@ import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
 
@@ -143,23 +145,9 @@ public class MarmottaContentItem implements ContentItem {
      */
     @Override
     public Content createContentPart() throws RepositoryException {
-
-        UUID contentUUID = UUID.randomUUID();
-        Content content = new MarmottaContent(this, baseUrl, contentUrl, uuid.toString() + "/" + contentUUID);
-
-        Metadata m = getMetadata();
-        try {
-            m.update(createNamed("createContentPart", of("ci", getURI().stringValue(), "cp", content.getURI().stringValue())));
-
-            return content;
-        } catch (MalformedQueryException e) {
-            log.error("the SPARQL update was malformed:",e);
-            throw new RepositoryException("the SPARQL update was malformed",e);
-        } catch (UpdateExecutionException e) {
-            log.error("the SPARQL update could not be executed:",e);
-            throw new RepositoryException("the SPARQL update could not be executed",e);
-        }
-
+        Content content = new MarmottaContent(this, baseUrl, contentUrl, uuid.toString() + "/" + IDUtils.generatedRandomId());
+        persistContentPart(content);
+        return content;
     }
 
     /**
@@ -174,12 +162,23 @@ public class MarmottaContentItem implements ContentItem {
     @Override
     public Content createContentPart(URI id) throws RepositoryException {
         Content content = new MarmottaContent(this, baseUrl,contentUrl,id);
+        persistContentPart(content);
+        return content;
+    }
 
+    private void persistContentPart(Content content) throws RepositoryException{
         Metadata m = getMetadata();
         try {
-            m.update(createNamed("createContentPart", of("ci", getURI().stringValue(), "cp", content.getURI().stringValue())));
-
-            return content;
+            m.update(
+                    createNamed(
+                            "createContentPart",
+                            of(
+                                    "ci", getURI().stringValue(),
+                                    "cp", content.getURI().stringValue(),
+                                    "date", new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'").format(new Date())
+                            )
+                    )
+            );
         } catch (MalformedQueryException e) {
             log.error("the SPARQL update was malformed:",e);
             throw new RepositoryException("the SPARQL update was malformed",e);
@@ -306,7 +305,6 @@ public class MarmottaContentItem implements ContentItem {
         }
 
     }
-
 
     @Override
     public boolean equals(Object o) {

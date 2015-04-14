@@ -13,15 +13,21 @@
  */
 package eu.mico.platform.persistence.model;
 
+import eu.mico.platform.persistence.exception.ConceptNotFoundException;
+import eu.mico.platform.persistence.impl.AnnotationImpl;
+import eu.mico.platform.persistence.metadata.IBody;
+import eu.mico.platform.persistence.metadata.IProvenance;
+import eu.mico.platform.persistence.metadata.ISelection;
 import org.apache.commons.vfs2.FileSystemException;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryConfigException;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.UUID;
 
 /**
  * Binary content, offered through inputstreams and outputstreams. Can be used for representing any kind of non-RDF
@@ -29,6 +35,7 @@ import java.util.UUID;
  *
  * @author Sebastian Schaffert
  * @author Sergio Fernández
+ * @author Andreas Eisenkolb
  */
 public interface Content {
 
@@ -104,4 +111,20 @@ public interface Content {
      */
     InputStream getInputStream() throws FileSystemException;
 
+    /**
+     * Return the parent content item.
+     * @return
+     */
+    ContentItem getContentItem();
+
+    /**
+     * Creates and persists the annotation object for the content part.
+     * @return
+    */
+    AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance, ISelection selection) throws RepositoryException;
+    /**
+     * Creates and persists the annotation object for the content part.
+     * @return
+     */
+    AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance) throws RepositoryException;
 }
