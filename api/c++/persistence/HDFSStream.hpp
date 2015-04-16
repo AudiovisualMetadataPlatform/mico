@@ -192,6 +192,9 @@ namespace mico
             hdfs_ostream(std::string path, std::string address, uint16_t port) : hdfs_ostream(path.c_str(), address.c_str(), port) {};
             ~hdfs_ostream() { rdbuf()->pubsync(); delete rdbuf(); };
         };
+
+        int removeHdfsFile(const char* path, const char* address, uint16_t port);
+        int removeHdfsFile(const char* path);
     }
 }
 

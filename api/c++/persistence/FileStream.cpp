@@ -32,6 +32,10 @@ namespace mico {
             //close gets called by the destructor of the parent class.
         }
 
+        int removeLocalFile(const char* path) {
+            return std::remove(path);
+        }
+
         namespace {
             /*
             * Create all directories in the path excluding the last (which is a file).

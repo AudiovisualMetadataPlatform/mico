@@ -136,12 +136,27 @@ namespace mico {
 
                 return retval;
             }
-
-
-
-
         }
 
+        int remove(const char* url) {
+            url_components url_parsed = getURLComponents(url);
+            URLType url_type = getType(url_parsed);
 
+            switch (url_type) {
+                case URL_TYPE_FILE:
+                    return removeLocalFile(url_parsed.path.c_str());
+                case URL_TYPE_HTTP:
+                    throw std::string("remove not supported for HTTP(S): ") + url;
+                case URL_TYPE_FTP:
+                    return removeFtpFile(url_parsed.path.c_str());
+                case URL_TYPE_HDFS:
+                    return removeHdfsFile(url_parsed.path.c_str());
+            }
+            throw std::string("Invalid URL: ") + url;
+        }
+
+        int remove(std::string url) {
+            return remove(url.c_str());
+        }
     }
 }

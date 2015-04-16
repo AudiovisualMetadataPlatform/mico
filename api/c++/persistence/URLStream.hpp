@@ -80,6 +80,13 @@ namespace mico {
         private:
             static std::streambuf* getStreamHandler(const char* url);
         };
+
+        /**
+        * Remove file from storage.
+        * TODO: Also remove empty directories
+        */
+        int remove(const char* url);
+        int remove(std::string url);
     }
 }
 

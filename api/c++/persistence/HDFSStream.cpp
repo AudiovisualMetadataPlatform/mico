@@ -193,6 +193,30 @@ namespace mico {
             return 0;
         }
 
+        int removeHdfsFile(const char* path, const char* address, uint16_t port) {
+            //Connect to HDFS
+            struct hdfsBuilder *builder = hdfsNewBuilder();
+            hdfsBuilderSetNameNode(builder, address);
+            if (port == 0) {
+                port = HDFS_DEFAULT_PORT;
+            }
+            hdfsBuilderSetNameNodePort(builder, port);
+            hdfsFS fs = hdfsBuilderConnect(builder);
+            hdfsFreeBuilder(builder);
+
+            int status = hdfsDelete(fs, path, 0);
+
+            //HDFS: disconnect.
+            if (fs != NULL) {
+                hdfsDisconnect(fs);
+            }
+
+            return status;
+        }
+
+        int removeHdfsFile(const char* path) {
+            return removeHdfsFile(path, HDFS_DEFAULT_ADDRESS, HDFS_DEFAULT_PORT);
+        }
     }
 }
 

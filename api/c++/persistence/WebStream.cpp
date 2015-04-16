@@ -314,7 +314,54 @@ int WebOStreambuf::sync() {
 	return 0;
 }
 
+int removeFtpFile(const char* url) {
+	if(strncmp("ftp://",url,6) == 0)  {
+		// FTP URL mode
+		CURL *curl;
+		CURLcode res;
 
+		curl_global_init(CURL_GLOBAL_DEFAULT);
+		curl = curl_easy_init();
+		if(curl) {
+			// TODO: need to split URL at least into path and filename
+			std::string url_s(url);
+			int pathSep = url_s.find('/', 7);
+			std::string host = url_s.substr(0, pathSep);
+			std::string file = url_s.substr(pathSep +1);
+
+			//std::string command1 = "CD " + dir;
+			std::string command2 = "DELE " + file;
+
+			curl_slist* commands = NULL;
+			commands = curl_slist_append(commands,command2.c_str());
+
+			curl_easy_setopt(curl, CURLOPT_URL, host.c_str());
+			curl_easy_setopt(curl, CURLOPT_POSTQUOTE, commands);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+
+			res = curl_easy_perform(curl);
+			curl_easy_cleanup(curl);
+			if(CURLE_OK != res) {
+				LOG_ERROR("could not delete resource: %d", res);
+			}
+
+			curl_slist_free_all(commands);
+		}
+		curl_global_cleanup();
+
+
+	} else {
+		throw std::string("unsupported URL protocol: ") + url;
+	}
+
+}
+
+namespace {
+// needed to suppress libcurl output
+static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *_device) {
+	return size*nmemb;
+}
+}
 
 }
 }

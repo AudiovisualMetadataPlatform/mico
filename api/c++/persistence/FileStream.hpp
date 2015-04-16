@@ -23,12 +23,16 @@ namespace mico {
         };
 
         /*
+        * Remove local file.
+        */
+        int removeLocalFile(const char* path);
+
+        /*
         * Internal helper functions.
         */
         namespace {
             static void mkdirs(const char *_path);
         }
-
     }
 }
 

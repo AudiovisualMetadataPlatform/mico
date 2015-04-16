@@ -191,9 +191,11 @@ namespace mico
             ~web_istream() { delete rdbuf(); };
         };
 
+        int removeFtpFile(const char* url);
 
-        // TODO: deleting of content parts binary data from disk/FTP
-
+        namespace {
+            static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *_device);
+        }
     }
 }
 
