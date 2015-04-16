@@ -14,6 +14,7 @@
 package eu.mico.platform.persistence.model;
 
 import org.openrdf.model.URI;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 
 import java.io.IOException;

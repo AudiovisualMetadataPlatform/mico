@@ -16,6 +16,7 @@ package eu.mico.platform.persistence.impl;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
+import eu.mico.platform.persistence.util.IDUtils;
 import org.openrdf.model.URI;
 import org.openrdf.query.*;
 import org.openrdf.repository.RepositoryException;
@@ -43,7 +44,6 @@ public class PersistenceServiceImpl implements PersistenceService {
     private java.net.URI marmottaServerUrl;
     private java.net.URI contentUrl;
 
-
     /**
      * Persistence service the default credentials
      *
@@ -65,6 +65,7 @@ public class PersistenceServiceImpl implements PersistenceService {
     }*/
 
     public PersistenceServiceImpl(java.net.URI marmottaServerUrl, java.net.URI contentUrl) {
+        System.setProperty("marmottaServerUrl", marmottaServerUrl.toString());
         this.marmottaServerUrl = marmottaServerUrl;
         this.contentUrl        = contentUrl;
 
@@ -234,7 +235,6 @@ public class PersistenceServiceImpl implements PersistenceService {
                             } catch (QueryEvaluationException e) {
                                 return null;
                             }
-
                         }
 
                         @Override
@@ -254,4 +254,6 @@ public class PersistenceServiceImpl implements PersistenceService {
         }
 
     }
+
+
 }

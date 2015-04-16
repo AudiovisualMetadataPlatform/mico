@@ -1,8 +1,8 @@
-include_directories(../event ../rdf ../persistence ../amqp ../logging)
+include_directories(../event ../rdf ../persistence ../logging)
 
 add_library(mico_daemon SHARED Daemon.cpp)
 
-target_link_libraries(mico_daemon mico_event ${CMAKE_THREAD_LIBS_INIT} ${LIBDAEMON_LIBRARY} )
+target_link_libraries(mico_daemon mico_event ${CMAKE_THREAD_LIBS_INIT} ${LIBDAEMON_LIBRARY} ${AMQPCPP_LIBRARIES})
 
 set_target_properties(mico_daemon PROPERTIES SOVERSION 1)
 

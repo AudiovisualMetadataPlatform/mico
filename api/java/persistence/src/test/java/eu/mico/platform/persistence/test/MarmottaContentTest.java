@@ -87,7 +87,8 @@ public class MarmottaContentTest extends BaseMarmottaTest {
 
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("FRAMEWORK-105.mp4");
         pivot = System.currentTimeMillis();
-        IOUtils.copy(in, out);
+        //Without a dedicated buffer the transfer rate is lower by a factor of 10.
+        IOUtils.copyLarge(in, out, new byte[1*1024*1024]);
         log.debug("writing content to the stream: {}ms", System.currentTimeMillis() - pivot);
 
     }

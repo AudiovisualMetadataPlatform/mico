@@ -14,10 +14,17 @@
 package eu.mico.platform.persistence.impl;
 
 import com.google.common.base.Preconditions;
+import eu.mico.platform.persistence.exception.ConceptNotFoundException;
+import eu.mico.platform.persistence.metadata.IBody;
+import eu.mico.platform.persistence.metadata.IProvenance;
+import eu.mico.platform.persistence.metadata.ISelection;
 import eu.mico.platform.storage.api.StorageService;
 import eu.mico.platform.storage.impl.StorageServiceBuilder;
 import eu.mico.platform.persistence.model.Content;
+import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
+import eu.mico.platform.persistence.util.Ontology;
+import org.openrdf.annotations.Iri;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -26,15 +33,22 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.UpdateExecutionException;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryConfigException;
+import org.openrdf.repository.object.ObjectConnection;
+import org.openrdf.repository.object.ObjectRepository;
+import org.openrdf.repository.object.config.ObjectRepositoryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.net.URL;
-
 
 import static com.google.common.collect.ImmutableMap.of;
 import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
@@ -47,6 +61,8 @@ import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
 public class MarmottaContent implements Content {
 
     private static Logger log = LoggerFactory.getLogger(MarmottaContent.class);
+
+    private final String CONCEPT_PATH = "META-INF/org.openrdf.concepts";
 
     private MarmottaContentItem item;
 
@@ -112,10 +128,10 @@ public class MarmottaContent implements Content {
             m.update(createNamed("setContentType", of("ci", item.getURI().stringValue(), "cp", getURI().stringValue(), "type", type)));
         } catch (MalformedQueryException e) {
             log.error("the SPARQL update was malformed:", e);
-            throw new RepositoryException("the SPARQL update was malformed",e);
+            throw new RepositoryException("the SPARQL update was malformed", e);
         } catch (UpdateExecutionException e) {
             log.error("the SPARQL update could not be executed:", e);
-            throw new RepositoryException("the SPARQL update could not be executed",e);
+            throw new RepositoryException("the SPARQL update could not be executed", e);
         }
     }
 
@@ -128,17 +144,17 @@ public class MarmottaContent implements Content {
         Metadata m = item.getMetadata();
         try {
             TupleQueryResult r = m.query(createNamed("getContentType", "ci", item.getURI().stringValue(), "cp", getURI().stringValue()));
-            if(r.hasNext()) {
+            if (r.hasNext()) {
                 return r.next().getValue("t").stringValue();
             } else {
                 return null;
             }
         } catch (MalformedQueryException e) {
             log.error("the SPARQL query was malformed:", e);
-            throw new RepositoryException("the SPARQL query was malformed",e);
+            throw new RepositoryException("the SPARQL query was malformed", e);
         } catch (QueryEvaluationException e) {
             log.error("the SPARQL query could not be executed:", e);
-            throw new RepositoryException("the SPARQL query could not be executed",e);
+            throw new RepositoryException("the SPARQL query could not be executed", e);
         }
     }
 
@@ -157,10 +173,10 @@ public class MarmottaContent implements Content {
             m.update(createNamed("setContentProperty", of("ci", item.getURI().stringValue(), "p", property.stringValue(), "cp", getURI().stringValue(), "value", value)));
         } catch (MalformedQueryException e) {
             log.error("the SPARQL update was malformed:", e);
-            throw new RepositoryException("the SPARQL update was malformed",e);
+            throw new RepositoryException("the SPARQL update was malformed", e);
         } catch (UpdateExecutionException e) {
             log.error("the SPARQL update could not be executed:", e);
-            throw new RepositoryException("the SPARQL update could not be executed",e);
+            throw new RepositoryException("the SPARQL update could not be executed", e);
         }
     }
 
@@ -172,17 +188,17 @@ public class MarmottaContent implements Content {
         Metadata m = item.getMetadata();
         try {
             TupleQueryResult r = m.query(createNamed("getContentProperty", "ci", item.getURI().stringValue(), "p", property.stringValue(), "cp", getURI().stringValue()));
-            if(r.hasNext()) {
+            if (r.hasNext()) {
                 return r.next().getValue("t").stringValue();
             } else {
                 return null;
             }
         } catch (MalformedQueryException e) {
             log.error("the SPARQL query was malformed:", e);
-            throw new RepositoryException("the SPARQL query was malformed",e);
+            throw new RepositoryException("the SPARQL query was malformed", e);
         } catch (QueryEvaluationException e) {
             log.error("the SPARQL query could not be executed:", e);
-            throw new RepositoryException("the SPARQL query could not be executed",e);
+            throw new RepositoryException("the SPARQL query could not be executed", e);
         }
     }
 
@@ -262,6 +278,86 @@ public class MarmottaContent implements Content {
         }
     }
 
+    @Override
+    public ContentItem getContentItem() {
+        return item;
+    }
+
+    @Override
+    public AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance, ISelection selection) throws RepositoryException {
+
+        /*
+         * Check if the extractor has created the org.openrdf.concepts file. Alibaba requires this file (can be empty), 
+         * to persist the annotated objects. If the file was not found, a ConceptNotFoundException will be thrown.
+         */
+        if (!new File(body.getClass().getClassLoader().getResource(CONCEPT_PATH).getFile()).isFile()) {
+            throw new ConceptNotFoundException("Please create an empty org.openrdf.conpepts file inside your META-INF folder.");
+        }
+
+        // create annotation object
+        AnnotationImpl annotation = new AnnotationImpl();
+
+        // add body, selection and content to the annotation object
+        annotation.setBody(body);
+
+        TargetImpl target = new TargetImpl();
+        target.setSelection(selection);
+        target.setSource(source.getURI().toString());
+
+        annotation.setTarget(target);
+
+        // Setting the provenance information
+        annotation.setProvenance(provenance);
+
+        ObjectConnection con = null;
+
+        try {
+            // get the repository
+            Repository store = item.getMetadata().getRepository();
+
+            // wrap in an object repository
+            ObjectRepositoryFactory factory = new ObjectRepositoryFactory();
+
+            ObjectRepository repository = factory.createRepository(store);
+            con = repository.getConnection();
+
+            // add the annotation to the repository
+            con.addObject(annotation);
+        } catch (RepositoryConfigException e) {
+            log.error("Unable to create the repository: ", e);
+            throw new RepositoryException("Unable to create the repository: ", e);
+        }
+
+
+        // Link content part to annotation
+        Metadata m = item.getMetadata();
+        try {
+            m.update(
+                    createNamed("createAnnotation",
+                            of(
+                                    "cp", getURI().stringValue(),
+                                    "an", annotation.getResource().toString()
+                            )
+                    )
+            );
+        } catch (MalformedQueryException e) {
+            log.error("the SPARQL update was malformed:", e);
+            throw new RepositoryException("the SPARQL update was malformed", e);
+        } catch (UpdateExecutionException e) {
+            log.error("the SPARQL update could not be executed:", e);
+            throw new RepositoryException("the SPARQL update could not be executed", e);
+        }
+
+        // close connection
+        con.close();
+
+        return annotation;
+    }
+
+    @Override
+    public AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance) throws ConceptNotFoundException, RepositoryException {
+        return createAnnotation(body, source, provenance, null);
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -137,7 +137,6 @@
                     <plugin>
                         <artifactId>jdeb</artifactId>
                         <groupId>org.vafer</groupId>
-                        <version>1.1.1</version>
                         <executions>
                             <execution>
                                 <phase>package</phase>
@@ -145,14 +144,10 @@
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
-                                    <snapshotExpand>true</snapshotExpand>
-                                    <attach>false</attach>
-
                                     <name>mico-marmotta</name>
                                     <deb>${project.build.directory}/[[name]]_[[version]]_all.deb</deb>
                                     <changesOut>${project.build.directory}/[[name]]_[[version]]_all.changes</changesOut>
 
-                                    <verbose>true</verbose>
                                     <controlDir>${basedir}/src/deb/debian</controlDir>
                                     <dataSet>
 
@@ -179,17 +174,18 @@
                                                 <group>tomcat7</group>
                                             </mapper>
                                         </data>
+                                        <!--
                                         <data>
                                             <src>${basedir}/src/deb/doc</src>
                                             <type>directory</type>
                                             <mapper>
                                                 <type>perm</type>
-                                                <prefix>usr/share/doc/mico-marmotta</prefix>
+                                                <prefix>/usr/share/doc/mico-marmotta</prefix>
                                                 <user>root</user>
                                                 <group>root</group>
                                             </mapper>
                                         </data>
-
+                                        -->
                                     </dataSet>
                                 </configuration>
                             </execution>

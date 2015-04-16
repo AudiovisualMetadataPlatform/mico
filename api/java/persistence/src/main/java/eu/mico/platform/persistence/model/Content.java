@@ -13,10 +13,16 @@
  */
 package eu.mico.platform.persistence.model;
 
+import eu.mico.platform.persistence.exception.ConceptNotFoundException;
+import eu.mico.platform.persistence.impl.AnnotationImpl;
+import eu.mico.platform.persistence.metadata.IBody;
+import eu.mico.platform.persistence.metadata.IProvenance;
+import eu.mico.platform.persistence.metadata.ISelection;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryConfigException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +34,7 @@ import java.io.OutputStream;
  *
  * @author Sebastian Schaffert
  * @author Sergio Fernández
+ * @author Andreas Eisenkolb
  * @author Horst Stadler
  */
 public interface Content {
@@ -104,4 +111,20 @@ public interface Content {
      */
     InputStream getInputStream() throws IOException;
 
+    /**
+     * Return the parent content item.
+     * @return
+     */
+    ContentItem getContentItem();
+
+    /**
+     * Creates and persists the annotation object for the content part.
+     * @return
+    */
+    AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance, ISelection selection) throws RepositoryException;
+    /**
+     * Creates and persists the annotation object for the content part.
+     * @return
+     */
+    AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance) throws RepositoryException;
 }

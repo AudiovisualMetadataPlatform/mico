@@ -18,6 +18,7 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.UpdateExecutionException;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
@@ -90,5 +91,11 @@ public interface Metadata {
      * Close the metadata connection and clean up any open resources.
      */
     void close() throws RepositoryException;
+
+    /**
+     *  Return the repository.
+     * @return
+     */
+    public Repository getRepository();
 
 }

@@ -249,4 +249,9 @@ public class MarmottaMetadata implements Metadata {
     public void close() throws RepositoryException {
         repository.shutDown();
     }
+
+    @Override
+    public Repository getRepository() {
+        return repository;
+    }
 }
