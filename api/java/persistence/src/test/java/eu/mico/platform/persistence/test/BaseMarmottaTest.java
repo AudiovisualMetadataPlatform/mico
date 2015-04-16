@@ -13,7 +13,7 @@
  */
 package eu.mico.platform.persistence.test;
 
-import eu.mico.platform.persistence.util.VFSUtils;
+import eu.mico.platform.storage.util.VFSUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
 
@@ -43,8 +44,9 @@ public abstract class BaseMarmottaTest {
 
     protected static Logger log = LoggerFactory.getLogger(BaseMarmottaTest.class);
 
-    protected static String baseUrl;
-    protected static String contentUrl;
+    protected static java.net.URI baseUrl;
+    protected static java.net.URI contentUrlFtp;
+    protected static java.net.URI contentUrlHdfs;
     protected static String testHost;
 
     protected static Repository repository;
@@ -55,13 +57,15 @@ public abstract class BaseMarmottaTest {
         if(testHost == null) {
             testHost = System.getProperty("test.host");
             if(testHost == null) {
-                testHost = "192.168.56.102";
+                testHost = "127.0.0.1";
                 log.warn("test.host variable not defined, falling back to default one: {}", testHost);
             }
         }
 
-        baseUrl    = "http://" + testHost + ":8080/marmotta";
-        contentUrl = "ftp://mico:mico@" + testHost;
+        baseUrl = new java.net.URI("http://" + testHost + ":8080/marmotta");
+        contentUrlFtp = new java.net.URI("ftp://mico:mico@" + testHost);
+        contentUrlHdfs = new java.net.URI("hdfs://" + testHost);
+
 
         VFSUtils.configure();
 

@@ -1,4 +1,4 @@
-package eu.mico.platform.persistence.util;
+package eu.mico.platform.storage.util;
 
 import org.apache.commons.vfs2.FileSystemOptions;
 import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;

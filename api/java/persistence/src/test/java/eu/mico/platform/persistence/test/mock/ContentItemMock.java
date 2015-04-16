@@ -28,8 +28,8 @@ public class ContentItemMock implements ContentItem {
     }
 
     @Override
-    public UUID getID() {
-        return UUID.fromString(id);
+    public String getID() {
+        return id;
     }
 
     @Override
@@ -60,19 +60,19 @@ public class ContentItemMock implements ContentItem {
     }
 
     @Override
-    public Content createContentPart(URI id) throws RepositoryException {
-        final ContentMock content = new ContentMock(this, id.stringValue());
+    public Content createContentPart(String id) throws RepositoryException {
+        final ContentMock content = new ContentMock(this, id);
         contentParts.put(content.getURI(), content);
         return content;
     }
 
     @Override
-    public Content getContentPart(URI id) throws RepositoryException {
+    public Content getContentPart(String id) throws RepositoryException {
         return contentParts.get(id);
     }
 
     @Override
-    public void deleteContent(URI id) throws RepositoryException, FileSystemException {
+    public void deleteContent(String id) throws RepositoryException, FileSystemException {
         contentParts.remove(id);
     }
 

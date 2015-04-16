@@ -23,11 +23,19 @@
     <!--
     <context-param>
         <param-name>mico.storage.provider</param-name>
-        <param-value>eu.mico.platform.storage.impl.StorageServiceFTP</param-value>
+        <param-value>eu.mico.platform.storage.impl.StorageServiceHDFS</param-value>
     </context-param>
     <context-param>
         <param-name>mico.storage.host</param-name>
         <param-value>192.168.56.101</param-value>
+    </context-param>
+    <context-param>
+        <param-name>mico.storage.port</param-name>
+        <param-value>-1</param-value>
+    </context-param>
+    <context-param>
+        <param-name>mico.storage.basePath</param-name>
+        <param-value>/</param-value>
     </context-param>
     <context-param>
         <param-name>mico.storage.user</param-name>

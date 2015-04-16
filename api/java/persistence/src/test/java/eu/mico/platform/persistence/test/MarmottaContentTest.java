@@ -16,9 +16,11 @@ package eu.mico.platform.persistence.test;
 import eu.mico.platform.persistence.impl.MarmottaContentItem;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
-import eu.mico.platform.persistence.util.VFSUtils;
+import eu.mico.platform.storage.util.VFSUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.*;
+import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -42,13 +44,14 @@ public class MarmottaContentTest extends BaseMarmottaTest {
      *
      * @see <a href="https://issues.mico-project.eu/browse/FRAMEWORK-105">FRAMEWORK-105</a>
      */
+    @Ignore ("Just for debugging")
     @Test
-    public void testFramework105() throws RepositoryException, UpdateExecutionException, MalformedQueryException, QueryEvaluationException, IOException {
-        final ContentItem item = new MarmottaContentItem(baseUrl, contentUrl, UUID.randomUUID());
+    public void testFramework105FtpIndividualCalls() throws RepositoryException, UpdateExecutionException, MalformedQueryException, QueryEvaluationException, IOException {
+        final ContentItem item = new MarmottaContentItem(baseUrl, contentUrlFtp, UUID.randomUUID().toString());
         final Content content = item.createContentPart();
-        final String id = content.getId();
-        final String contentPath = contentUrl + "/" + id + ".bin";
-        final String contentItemPath = contentUrl + "/" + id.substring(0, id.lastIndexOf('/'));
+        final String contentId = content.getId();
+        final String contentPath = contentUrlFtp + "/" + item.getID() + "/" + content.getId() + ".bin";
+        final String contentItemPath = contentUrlFtp + "/" + item.getID();
         log.info("Using {} as path for testing", contentPath);
 
         final FileSystemOptions opts = VFSUtils.configure();
@@ -87,6 +90,34 @@ public class MarmottaContentTest extends BaseMarmottaTest {
         IOUtils.copy(in, out);
         log.debug("writing content to the stream: {}ms", System.currentTimeMillis() - pivot);
 
+    }
+
+    @Test
+    public void testFramework105Ftp() throws RepositoryException, IOException {
+        Assert.assertTrue("Transfer took too long (when storage is local)", uploadFile(contentUrlFtp) < 2000);
+    }
+
+    @Test
+    public void testFramework105Hdfs() throws RepositoryException, IOException {
+        Assert.assertTrue("Transfer took too long (when storage is local)", uploadFile(contentUrlHdfs) < 2000);
+    }
+
+    private long uploadFile(java.net.URI storageURL) throws RepositoryException, IOException {
+        final ContentItem item = new MarmottaContentItem(baseUrl, storageURL, UUID.randomUUID().toString());
+        final Content content = item.createContentPart();
+
+        log.debug("ID: {}/{}", item.getID(), content.getId());
+
+        OutputStream out = content.getOutputStream();
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream("FRAMEWORK-105.mp4");
+
+        long pivot = System.currentTimeMillis();
+        IOUtils.copy(in, out);
+        in.close();
+        out.close();
+        long duration = System.currentTimeMillis() - pivot;
+        log.debug("Writing content to stream took {}ms", duration);
+        return duration;
     }
 
 

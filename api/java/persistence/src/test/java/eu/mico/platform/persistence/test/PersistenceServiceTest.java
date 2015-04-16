@@ -24,6 +24,8 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 
+import java.net.MalformedURLException;
+
 /**
  * Add file description here!
  *
@@ -32,20 +34,20 @@ import org.openrdf.repository.RepositoryException;
 public class PersistenceServiceTest extends BaseMarmottaTest {
 
     @Test
-    public void testCreateDeleteContentItem() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
+    public void testCreateDeleteContentItem() throws RepositoryException, QueryEvaluationException, MalformedQueryException, java.net.URISyntaxException {
         PersistenceService db = new PersistenceServiceImpl(testHost);
 
         Assert.assertFalse(db.getContentItems().iterator().hasNext());
 
         ContentItem ci = db.createContentItem();
 
-        assertAsk(String.format("ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> }", baseUrl, ci.getURI()), new URIImpl(baseUrl));
+        assertAsk(String.format("ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> }", baseUrl, ci.getURI()), new URIImpl(baseUrl.toString()));
 
         Assert.assertTrue(db.getContentItems().iterator().hasNext());
 
         db.deleteContentItem(ci.getURI());
 
-        assertAskNot(String.format("ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> }", baseUrl, ci.getURI()), new URIImpl(baseUrl));
+        assertAskNot(String.format("ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> }", baseUrl, ci.getURI()), new URIImpl(baseUrl.toString()));
 
         Assert.assertFalse(db.getContentItems().iterator().hasNext());
 
@@ -53,7 +55,7 @@ public class PersistenceServiceTest extends BaseMarmottaTest {
     }
 
     @Test
-    public void testListContentItems() throws RepositoryException {
+    public void testListContentItems() throws RepositoryException, java.net.URISyntaxException {
         PersistenceService db = new PersistenceServiceImpl(testHost);
 
         ContentItem[] items = new ContentItem[5];

@@ -14,8 +14,6 @@
 package eu.mico.platform.storage.webservices;
 
 import eu.mico.platform.storage.api.StorageService;
-import eu.mico.platform.storage.model.Content;
-import eu.mico.platform.storage.model.ContentItem;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
@@ -26,7 +24,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Storage Web Service
@@ -48,26 +47,18 @@ public class StorageWebService {
         this.storageService = storageService;
     }
 
-    @GET
-    @Path("/items")
-    @Produces("application/json")
-    public Collection<ContentItem> getItems() {
-        return storageService.list();
-    }
-
-
     //TODO: RESTeasy does not support HTTP Range header in combination with streams.
     @GET
     @Path("/item/{contentId:.*}")
-    public InputStream getItem(@PathParam("contentId") String contentId) throws IOException{
-        return storageService.getInputStream(new Content(contentId));
+    public InputStream getItem(@PathParam("contentId") String contentId) throws IOException, URISyntaxException{
+        return storageService.getInputStream(new URI(contentId));
     }
 
     @PUT
     @Path("/item/{contentId:.*}")
     @Consumes("application/octet-stream")
-    public Response storeItem(@PathParam("contentId") String contentId, InputStream is) throws  IOException {
-        OutputStream os = storageService.getOutputStream(new Content(contentId));
+    public Response storeItem(@PathParam("contentId") String contentId, InputStream is) throws  IOException, URISyntaxException {
+        OutputStream os = storageService.getOutputStream(new URI(contentId));
         IOUtils.copy(is, os);
         is.close();
         os.close();

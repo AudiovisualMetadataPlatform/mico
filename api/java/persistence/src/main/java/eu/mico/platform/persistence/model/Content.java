@@ -13,15 +13,14 @@
  */
 package eu.mico.platform.persistence.model;
 
-import org.apache.commons.vfs2.FileSystemException;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.repository.RepositoryException;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.UUID;
 
 /**
  * Binary content, offered through inputstreams and outputstreams. Can be used for representing any kind of non-RDF
@@ -29,6 +28,7 @@ import java.util.UUID;
  *
  * @author Sebastian Schaffert
  * @author Sergio Fernández
+ * @author Horst Stadler
  */
 public interface Content {
 
@@ -96,12 +96,12 @@ public interface Content {
      * Return a new output stream for writing to the content. Any existing content will be overwritten.
      * @return
      */
-    OutputStream getOutputStream() throws FileSystemException;
+    OutputStream getOutputStream() throws IOException;
 
     /**
      *  Return a new input stream for reading the content.
      * @return
      */
-    InputStream getInputStream() throws FileSystemException;
+    InputStream getInputStream() throws IOException;
 
 }

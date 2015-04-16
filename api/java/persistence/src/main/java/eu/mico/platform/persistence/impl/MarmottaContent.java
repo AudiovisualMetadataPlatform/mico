@@ -14,14 +14,10 @@
 package eu.mico.platform.persistence.impl;
 
 import com.google.common.base.Preconditions;
+import eu.mico.platform.storage.api.StorageService;
+import eu.mico.platform.storage.impl.StorageServiceBuilder;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.Metadata;
-import org.apache.commons.io.input.ProxyInputStream;
-import org.apache.commons.io.output.ProxyOutputStream;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileSystemManager;
-import org.apache.commons.vfs2.VFS;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -37,6 +33,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
+
 
 import static com.google.common.collect.ImmutableMap.of;
 import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
@@ -52,26 +50,34 @@ public class MarmottaContent implements Content {
 
     private MarmottaContentItem item;
 
-    private String baseUrl;
-    private String contentUrl;
+    private java.net.URI marmottaHost;
+    private StorageService storage;
     private String id;
 
 
-    public MarmottaContent(MarmottaContentItem item, String baseUrl, String contentUrl, String id) {
+    public MarmottaContent(MarmottaContentItem item, java.net.URI marmottaHost, java.net.URI storageHost, String id) {
         this.item       = item;
-        this.baseUrl    = baseUrl;
-        this.contentUrl = contentUrl;
+        this.marmottaHost = marmottaHost;
         this.id = id;
+        this.storage = StorageServiceBuilder.buildStorageService(storageHost);
     }
 
 
-    protected MarmottaContent(MarmottaContentItem item, String baseUrl, String contentUrl, URI uri) {
-        Preconditions.checkArgument(uri.stringValue().startsWith(baseUrl), "the content part URI must match the baseUrl");
+    protected MarmottaContent(MarmottaContentItem item, java.net.URI marmottaHost, java.net.URI storageHost, URI uri) {
+        Preconditions.checkArgument(uri.stringValue().startsWith(marmottaHost.toString()), "the content part URI must match the marmottaHost");
 
         this.item       = item;
-        this.baseUrl    = baseUrl;
-        this.contentUrl = contentUrl;
-        this.id = uri.stringValue().substring(baseUrl.length() + 1);
+        this.marmottaHost = marmottaHost;
+        this.id = getIDFromURI(uri);
+        this.storage = StorageServiceBuilder.buildStorageService(storageHost);
+    }
+
+    private String getIDFromURI(URI uri) {
+        String uriString = uri.stringValue();
+        if (uriString == null || uriString.isEmpty() || uriString.endsWith("/"))
+            return null;
+
+        return uriString.substring(uriString.lastIndexOf("/") + 1);
     }
 
 
@@ -88,7 +94,7 @@ public class MarmottaContent implements Content {
      */
     @Override
     public URI getURI() {
-        return new URIImpl(baseUrl + "/" + id);
+        return new URIImpl(marmottaHost.toString() + "/" + item.getID() + "/" + id);
     }
 
 
@@ -234,22 +240,12 @@ public class MarmottaContent implements Content {
      * @return
      */
     @Override
-    public OutputStream getOutputStream() throws FileSystemException {
-        FileSystemManager fsmgr = VFS.getManager();
-        final FileObject d = fsmgr.resolveFile(getContentItemPath());
-        final FileObject f = fsmgr.resolveFile(getContentPartPath());
-        if(!d.exists()) {
-            d.createFolder();
+    public OutputStream getOutputStream() throws IOException {
+        try {
+            return storage.getOutputStream(new java.net.URI(item.getID() + "/" + getId()));
+        } catch (java.net.URISyntaxException e) {
+            return null;
         }
-        f.createFile();
-        return new ProxyOutputStream(f.getContent().getOutputStream()) {
-            @Override
-            public void close() throws IOException {
-                super.close();
-                f.close();
-                d.close();
-            }
-        };
     }
 
     /**
@@ -258,18 +254,10 @@ public class MarmottaContent implements Content {
      * @return
      */
     @Override
-    public InputStream getInputStream() throws FileSystemException {
-        FileSystemManager fsmgr = VFS.getManager();
-        final FileObject f = fsmgr.resolveFile(getContentPartPath());
-        if(f.getParent().exists() && f.exists()) {
-            return new ProxyInputStream(f.getContent().getInputStream()) {@Override
-                public void close() throws IOException {
-                    super.close();
-                    f.close();
-                }
-            }
-            ;
-        } else {
+    public InputStream getInputStream() throws IOException {
+        try {
+            return storage.getInputStream(new java.net.URI(item.getID() + "/" + getId()));
+        } catch (java.net.URISyntaxException e) {
             return null;
         }
     }
@@ -282,7 +270,7 @@ public class MarmottaContent implements Content {
 
         MarmottaContent that = (MarmottaContent) o;
 
-        if (!baseUrl.equals(that.baseUrl)) return false;
+        if (!marmottaHost.equals(that.marmottaHost)) return false;
         if (!id.equals(that.id)) return false;
 
         return true;
@@ -290,7 +278,7 @@ public class MarmottaContent implements Content {
 
     @Override
     public int hashCode() {
-        int result = baseUrl.hashCode();
+        int result = marmottaHost.hashCode();
         result = 31 * result + id.hashCode();
         return result;
     }
@@ -298,17 +286,8 @@ public class MarmottaContent implements Content {
     @Override
     public String toString() {
         return "ContextualMarmottaContent{" +
-                "baseUrl='" + baseUrl + '\'' +
+                "marmottaHost='" + marmottaHost + '\'' +
                 ", id='" + id + '\'' +
                 '}';
     }
-
-    private String getContentItemPath() {
-        return contentUrl + "/" + id.substring(0, id.lastIndexOf('/'));
-    }
-
-    private String getContentPartPath() {
-        return contentUrl + "/" + id + ".bin";
-    }
-
 }

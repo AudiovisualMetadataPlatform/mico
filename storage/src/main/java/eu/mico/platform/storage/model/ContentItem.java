@@ -11,10 +11,20 @@ import java.util.Set;
  */
 public class ContentItem {
 
+    private String id;
     private Set<Content> parts;
 
-    public ContentItem() {
+    public ContentItem(String id) {
+        this.id = id;
         parts = new HashSet<>();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Set<Content> getParts() {

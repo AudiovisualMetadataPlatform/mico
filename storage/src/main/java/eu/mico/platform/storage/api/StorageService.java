@@ -1,12 +1,11 @@
 package eu.mico.platform.storage.api;
 
-import eu.mico.platform.storage.model.Content;
-import eu.mico.platform.storage.model.ContentItem;
-
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collection;
+import java.net.URI;
+import java.util.UUID;
 
 /**
  * Storage Service
@@ -16,10 +15,10 @@ import java.util.Collection;
  */
 public interface StorageService {
 
-    Collection<ContentItem> list();
+    OutputStream getOutputStream(URI contentPath) throws IOException;
 
-    OutputStream getOutputStream(Content part) throws IOException;
+    InputStream getInputStream(URI contentPath) throws IOException;
 
-    InputStream getInputStream(Content part) throws IOException;
+    boolean delete(URI contentPath) throws IOException;
 
 }

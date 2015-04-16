@@ -35,37 +35,37 @@ public class MarmottaMetadata implements Metadata {
 
     private static Logger log = LoggerFactory.getLogger(MarmottaMetadata.class);
 
-    private String baseUri;
+    private java.net.URI baseURL;
     private String context;
 
     private Repository repository;
 
     /**
-     * Create a new contextual marmotta metadata instance connecting to the Marmotta instance with the given base URI
+     * Create a new contextual marmotta metadata instance connecting to the Marmotta instance with the given base URL
      * using the main SPARQL endpoint.
      *
-     * @param baseUri base URI of the marmotta server, without the trailing slash, e.g. http://localhost:8080/marmotta
+     * @param baseURL base URL of the marmotta server, without the trailing slash, e.g. http://localhost:8080/marmotta
      */
-    public MarmottaMetadata(String baseUri) throws RepositoryException {
-        this.context = context;
+    public MarmottaMetadata(java.net.URI baseURL) throws RepositoryException {
+        this.context = null;
 
-        this.baseUri  = baseUri;
-        repository    = new SPARQLRepository(this.baseUri + "/sparql/select", this.baseUri+"/sparql/update");
+        this.baseURL  = baseURL;
+        repository    = new SPARQLRepository(this.baseURL.toString() + "/sparql/select", this.baseURL.toString() + "/sparql/update");
         repository.initialize();
     }
 
     /**
-     * Create a new contextual marmotta metadata instance connecting to the Marmotta instance with the given base URI
+     * Create a new contextual marmotta metadata instance connecting to the Marmotta instance with the given base URL
      * and the context with the given UUID.
      *
-     * @param baseUri base URI of the marmotta server, without the trailing slash, e.g. http://localhost:8080/marmotta
+     * @param baseURL base URL of the marmotta server, without the trailing slash, e.g. http://localhost:8080/marmotta
      * @param context UUID of the metadata object to access
      */
-    public MarmottaMetadata(String baseUri, String context) throws RepositoryException {
+    public MarmottaMetadata(String baseURL, String context) throws RepositoryException, java.net.URISyntaxException {
         this.context = context;
 
-        this.baseUri  = baseUri + "/" + context.toString();
-        repository    = new SPARQLRepository(this.baseUri + "/sparql/select", this.baseUri+"/sparql/update");
+        this.baseURL  = new java.net.URI(baseURL + "/" + context);
+        repository    = new SPARQLRepository(this.baseURL.toString() + "/sparql/select", this.baseURL.toString() + "/sparql/update");
         repository.initialize();
     }
 
@@ -87,7 +87,7 @@ public class MarmottaMetadata implements Metadata {
             try {
                 con.begin();
 
-                con.add(in, baseUri, format);
+                con.add(in, baseURL.toString(), format);
 
                 con.commit();
             } catch(RepositoryException ex) {
@@ -164,7 +164,7 @@ public class MarmottaMetadata implements Metadata {
             try {
                 con.begin();
 
-                Update u = con.prepareUpdate(QueryLanguage.SPARQL, sparqlUpdate, baseUri);
+                Update u = con.prepareUpdate(QueryLanguage.SPARQL, sparqlUpdate, baseURL.toString());
                 u.execute();
 
                 con.commit();
@@ -195,7 +195,7 @@ public class MarmottaMetadata implements Metadata {
             try {
                 con.begin();
 
-                TupleQuery q = con.prepareTupleQuery(QueryLanguage.SPARQL, sparqlQuery, baseUri);
+                TupleQuery q = con.prepareTupleQuery(QueryLanguage.SPARQL, sparqlQuery, baseURL.toString());
                 return q.evaluate();
             } catch(RepositoryException ex) {
                 con.rollback();
@@ -225,7 +225,7 @@ public class MarmottaMetadata implements Metadata {
             try {
                 con.begin();
 
-                BooleanQuery q = con.prepareBooleanQuery(QueryLanguage.SPARQL, sparqlQuery, baseUri);
+                BooleanQuery q = con.prepareBooleanQuery(QueryLanguage.SPARQL, sparqlQuery, baseURL.toString());
                 return q.evaluate();
 
             } catch(RepositoryException ex) {

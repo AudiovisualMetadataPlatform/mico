@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  *
@@ -23,8 +25,13 @@ import java.io.StringWriter;
 public class StorageServiceHDFSTest {
 
     final static String host = "localhost";
-    final static Content contentId = new Content("junittest");
+    static URI contentId = null;
     final static String testString = "This is a Test.";
+
+    @BeforeClass
+    public static void init() throws URISyntaxException{
+        contentId = new URI("junittest");
+    }
 
     @Test
     public void test1ConnectHDFS() throws IOException
@@ -37,7 +44,7 @@ public class StorageServiceHDFSTest {
     @Test
     public void test2StoreContent() throws IOException
     {
-        StorageServiceHDFS s = new StorageServiceHDFS(host);
+        StorageServiceHDFS s = new StorageServiceHDFS(host, -1, "/");
         PrintStream out = new PrintStream(s.getOutputStream(contentId));
         out.print(testString);
         out.close();
@@ -56,7 +63,7 @@ public class StorageServiceHDFSTest {
     @Test
     public void test4RetrieveContent() throws IOException
     {
-        StorageServiceHDFS s = new StorageServiceHDFS(host);
+        StorageServiceHDFS s = new StorageServiceHDFS(host, -1, "/");
         StringWriter writer = new StringWriter();
         InputStream is = s.getInputStream(contentId);
         IOUtils.copy(is, writer);
@@ -81,8 +88,8 @@ public class StorageServiceHDFSTest {
         return FileSystem.get(hdfsConfig);
     }
 
-    private static Path getContentPartPath(Content part) {
-        return new Path(null, null, "/" + part.getId() + ".bin");
+    private static Path getContentPartPath(URI part) {
+        return new Path(null, null, "/" + part.getPath() + ".bin");
     }
 
 
