@@ -357,5 +357,23 @@
         </dependencies>
 
     </dependencyManagement>
-    
+
+    <profiles>
+        <profile>
+            <!-- Quickbuild without tests -->
+            <id>quick</id>
+            <activation>
+                <property>
+                    <name>quick</name>
+                    <value>true</value>
+                </property>
+            </activation>
+
+            <properties>
+                <skipTests>true</skipTests>
+                <skipITs>true</skipITs>
+            </properties>
+        </profile>
+    </profiles>
+
 </project>
