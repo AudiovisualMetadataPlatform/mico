@@ -23,7 +23,7 @@ You can configure the MICO platform connection in your Spring Application contex
            				http://www.mico-project.eu/schema/spring/platform http://www.mico-project.eu/schema/spring/platform-1.0.xsd">
 
         <context:component-scan base-package="org.mico.project.uop.playground.service" />
-        <mico:mico-platform id="mico" host="192.168.56.102" />
+        <mico:mico-platform id="mico" host="127.0.0.1" />
     </beans>
     
 ## Analyser
