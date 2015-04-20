@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.*;
 
 /**
@@ -57,16 +58,16 @@ public class EventManagerImpl implements EventManager {
 
     private DiscoveryConsumer discovery;
 
-    public EventManagerImpl(String host) throws IOException {
+    public EventManagerImpl(String host) throws IOException, URISyntaxException {
         this(host, "mico", "mico");
     }
 
 
-    public EventManagerImpl(String host, String user, String password) throws IOException {
+    public EventManagerImpl(String host, String user, String password) throws IOException, URISyntaxException {
         this(host,5672, 8080, user, password);
     }
 
-    public EventManagerImpl(String host, int rabbitPort, int marmottaPort, String user, String password) throws IOException {
+    public EventManagerImpl(String host, int rabbitPort, int marmottaPort, String user, String password) throws IOException, URISyntaxException {
         this.host = host;
         this.rabbitPort = rabbitPort;
         this.marmottaPort = marmottaPort;
@@ -76,6 +77,7 @@ public class EventManagerImpl implements EventManager {
         Preconditions.checkArgument(marmottaPort == 8080, "changing the marmotta port is currently not supported");
 
         services = new HashMap<>();
+        this.persistenceService = new PersistenceServiceImpl(host);
     }
 
     @Override
@@ -88,9 +90,6 @@ public class EventManagerImpl implements EventManager {
      */
     @Override
     public void init() throws IOException {
-
-        persistenceService = new PersistenceServiceImpl(host,user,password);
-
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(host);
         factory.setPort(rabbitPort);

@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -68,9 +69,9 @@ public class PlatformConfiguration implements ApplicationContextAware{
 
     /**
      *
-     * @throws IOException
+     * @throws IOException, URISyntaxException
      */
-    public void init() throws IOException {
+    public void init() throws IOException, URISyntaxException {
         logger.info("Connect to MICO platform at " + host);
         eventManager = new EventManagerImpl(host);
         eventManager.init();

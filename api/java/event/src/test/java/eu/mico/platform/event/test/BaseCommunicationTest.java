@@ -41,7 +41,7 @@ public abstract class BaseCommunicationTest {
         if(testHost == null) {
             testHost = System.getProperty("test.host");
             if(testHost == null) {
-                testHost = "192.168.56.102";
+                testHost = "127.0.0.1";
                 log.warn("test.host variable not defined, falling back to default one: {}", testHost);
             }
         }

@@ -33,6 +33,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URISyntaxException;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -80,7 +81,7 @@ public class WordCountAnalyzer implements AnalysisService {
     public void call(AnalysisResponse analysisResponse, ContentItem contentItem, URI uri) throws AnalysisException, IOException {
         try {
             // get the content part with the given URI
-            Content content = contentItem.getContentPart(uri);
+            Content content = contentItem.getContentPart(uri.stringValue());
 
             // get the input stream and read it into a string
             String text = IOUtils.toString(content.getInputStream(), "utf-8");
@@ -157,6 +158,8 @@ public class WordCountAnalyzer implements AnalysisService {
             // DONE
         } catch (IOException e) {
             log.error("error while accessing event manager:",e);
+        } catch (URISyntaxException e) {
+            log.error("invalid hostname:", e);
         }
 
     }
