@@ -36,7 +36,7 @@
         <jetty.version>9.2.1.v20140609</jetty.version>
         <sesame.version>2.7.12</sesame.version>
         <javaee.port>8080</javaee.port>
-        <marmotta.version>3.3.0-SNAPSHOT</marmotta.version>
+        <marmotta.version>3.4.0-SNAPSHOT</marmotta.version>
         <marmotta.context>/marmotta</marmotta.context>
         <marmotta.home>${project.build.directory}${file.separator}marmotta</marmotta.home>
         <hadoop.version>2.4.1</hadoop.version>
