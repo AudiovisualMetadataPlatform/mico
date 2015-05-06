@@ -110,6 +110,13 @@
             <groupId>org.apache.marmotta</groupId>
             <artifactId>marmotta-sparql</artifactId>
         </dependency>
+        <!-- FIXME - this should be a transitive dep. -->
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.1</version>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.marmotta</groupId>
             <artifactId>kiwi-caching-hazelcast</artifactId>
