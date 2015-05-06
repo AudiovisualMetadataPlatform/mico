@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,14 +17,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.marmotta.commons.http.ContentType;
 import org.apache.marmotta.commons.http.MarmottaHttpUtils;
 import org.apache.marmotta.platform.core.api.config.ConfigurationService;
-import org.apache.marmotta.platform.core.api.triplestore.ContextService;
 import org.apache.marmotta.platform.core.exception.MarmottaException;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import java.net.URISyntaxException;
 import java.util.*;
 
 /**
@@ -111,12 +109,20 @@ public abstract class ContextualWebServiceBase {
     }
 
     protected ContentType performContentNegotiation(String format, String accept, Collection<String> producedTypes) {
+        return performContentNegotiation(format, accept == null ? Collections.<String>emptyList() : Collections.singletonList(accept), producedTypes);
+    }
+
+    protected ContentType performContentNegotiation(String format, List<String> accept, Collection<String> producedTypes) {
         List<ContentType> producedContentTypes = MarmottaHttpUtils.parseStringList(producedTypes);
         return performContentNegotiation(format, accept, producedContentTypes);
 
     }
 
     protected ContentType performContentNegotiation(String format, String accept, List<ContentType> producedContentTypes) {
+        return performContentNegotiation(format, accept == null ? Collections.<String>emptyList() : Collections.singletonList(accept), producedContentTypes);
+    }
+
+    protected ContentType performContentNegotiation(String format, List<String> accept, List<ContentType> producedContentTypes) {
         List<ContentType> acceptedContentTypes;
         if (StringUtils.isNotBlank(format)) {
             //forced format
@@ -128,12 +134,23 @@ public abstract class ContextualWebServiceBase {
                 acceptedContentTypes = MarmottaHttpUtils.parseAcceptHeader(format);
             }
         } else {
-            //from the accept header
-            acceptedContentTypes = MarmottaHttpUtils.parseAcceptHeader(StringUtils.defaultString(accept, ""));
+            //from the accept headers
+            acceptedContentTypes = MarmottaHttpUtils.parseAcceptHeaders(accept);
         }
 
         //actual content negotiation
         return MarmottaHttpUtils.bestContentType(producedContentTypes, acceptedContentTypes);
+    }
+
+
+    protected static <T> List<T> enumToList(Enumeration<T> enumeration) {
+        List<T> list = new LinkedList<>();
+
+        while (enumeration.hasMoreElements()) {
+            list.add(enumeration.nextElement());
+        }
+
+        return list;
     }
 
 }
