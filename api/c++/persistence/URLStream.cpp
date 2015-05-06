@@ -111,11 +111,11 @@ namespace mico {
                 * Regex groups:
                 * 1:   scheme: ([[:alpha:]][[:alnum:]\+\.-]*?)://
                 * 2,3: username and password: (?:([[:alnum:]]+?)(?::([[:alnum:]]+?))?@)?
-                * 4:   domain/ip: ([\.[:alnum:]]+?)
+                * 4:   domain/ip: ([[:alnum:]\.-]+?)
                 * 5:   port: (?::([[:digit:]]+?))?
                 * 6:   path (including query and fragments: (/.*)
                 */
-                std::regex uri_pattern("^(?:([[:alpha:]][[:alnum:]\\+\\.-]*?)://(?:(?:([[:alnum:]]+?)(?::([[:alnum:]]+?))?@)?([\\.[:alnum:]]+?)(?::([[:digit:]]+?))?)?)?(/.*)");
+                std::regex uri_pattern("^(?:([[:alpha:]][[:alnum:]\\+\\.-]*?)://(?:(?:([[:alnum:]]+?)(?::([[:alnum:]]+?))?@)?([[:alnum:]\\.-]+?)(?::([[:digit:]]+?))?)?)?(/.*)");
                 std::smatch result;
                 std::regex_search(url_s, result, uri_pattern);
 

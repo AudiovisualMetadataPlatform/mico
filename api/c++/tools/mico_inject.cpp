@@ -118,5 +118,7 @@ int main(int argc, char **argv) {
 		delete item;
 	} catch(EventManagerException ex) {
 		std::cerr << "could not initialise event manager: " << ex.getMessage() << std::endl;
+	} catch (std::string ex) {
+		std::cerr << "other error: " << ex << std::endl;
 	}
 }
