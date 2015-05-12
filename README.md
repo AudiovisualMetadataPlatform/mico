@@ -124,8 +124,13 @@ Building the C++ API has additional requirements for native libraries. In partic
 * expat library for XML parsing (apt-get install libexpat1-dev)
 * Boost 1.55 libraries for additional C++ functionalities (apt-get install libboost1.55-dev libboost-log1.55-dev libboost-system1.55-dev)
 * xxd for inlining SPARQL queries in C++ (part of VIM, apt-get install vim-common)
-* protobuf for the event communication protocol (manual install, the Debian/Ubuntu version is outdated)
-* AMQP-CPP for communication with RabbitMQ (manual install)
+* protobuf for the event communication protocol (apt-get install libprotobuf-dev protobuf-compiler)
+* AMQP-CPP for communication with RabbitMQ (https://github.com/CopernicaMarketingSoftware/AMQP-CPP, manual build and install tag v2.1.4 - do *not* use the cmake but the Makefile instead)
+* libhdfs3 (https://github.com/PivotalRD/libhdfs3, manual build and install)
+   * libxml2 (apt-get install libxml2-dev)
+   * kerberos (apt-get install libkrb5-dev)
+   * libuuid (apt-get install libuuid-dev)
+   * libgsasl (apt-get install libgsasl7-dev)
 * Doxygen for building the documentation
 
 For building the C++ binary tools (mico_inject etc.), there are the following additional dependencies:
