@@ -49,8 +49,8 @@ public class MarmottaContentTest extends BaseMarmottaTest {
     public void testFramework105FtpIndividualCalls() throws RepositoryException, UpdateExecutionException, MalformedQueryException, QueryEvaluationException, IOException {
         final ContentItem item = new MarmottaContentItem(baseUrl, contentUrlFtp, UUID.randomUUID().toString());
         final Content content = item.createContentPart();
-        final String contentId = content.getId();
-        final String contentPath = contentUrlFtp + "/" + item.getID() + "/" + content.getId() + ".bin";
+        final String contentId = content.getID();
+        final String contentPath = contentUrlFtp + "/" + item.getID() + "/" + content.getID() + ".bin";
         final String contentItemPath = contentUrlFtp + "/" + item.getID();
         log.info("Using {} as path for testing", contentPath);
 
@@ -107,7 +107,7 @@ public class MarmottaContentTest extends BaseMarmottaTest {
         final ContentItem item = new MarmottaContentItem(baseUrl, storageURL, UUID.randomUUID().toString());
         final Content content = item.createContentPart();
 
-        log.debug("ID: {}/{}", item.getID(), content.getId());
+        log.debug("ID: {}/{}", item.getID(), content.getID());
 
         OutputStream out = content.getOutputStream();
         InputStream in = this.getClass().getClassLoader().getResourceAsStream("FRAMEWORK-105.mp4");

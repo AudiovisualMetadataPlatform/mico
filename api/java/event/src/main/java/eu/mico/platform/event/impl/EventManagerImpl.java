@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Add file description here!
@@ -40,14 +41,17 @@ import java.util.*;
  */
 public class EventManagerImpl implements EventManager {
 
+    private final int RPC_CONFIG_TIMEOUT = 5 * 1000;
+
     private static Logger log = LoggerFactory.getLogger(EventManagerImpl.class);
 
-    private String host;
-    private int rabbitPort;
-    private int marmottaPort;
+    private String amqpHost;
+    private int amqpPort;
+    private String amqpUser;
+    private String amqpPassword;
 
-    private String user;
-    private String password;
+    private java.net.URI marmottaBaseUri;
+    private java.net.URI storageBaseUri;
 
     private PersistenceService persistenceService;
 
@@ -58,26 +62,22 @@ public class EventManagerImpl implements EventManager {
 
     private DiscoveryConsumer discovery;
 
-    public EventManagerImpl(String host) throws IOException, URISyntaxException {
-        this(host, "mico", "mico");
+    public EventManagerImpl(String amqpHost) throws IOException {
+        this(amqpHost, "mico", "mico");
     }
 
 
-    public EventManagerImpl(String host, String user, String password) throws IOException, URISyntaxException {
-        this(host,5672, 8080, user, password);
+    public EventManagerImpl(String amqpHost, String amqpUser, String amqpPassword) throws IOException {
+        this(amqpHost,5672, amqpUser, amqpPassword);
     }
 
-    public EventManagerImpl(String host, int rabbitPort, int marmottaPort, String user, String password) throws IOException, URISyntaxException {
-        this.host = host;
-        this.rabbitPort = rabbitPort;
-        this.marmottaPort = marmottaPort;
-        this.user = user;
-        this.password = password;
-
-        Preconditions.checkArgument(marmottaPort == 8080, "changing the marmotta port is currently not supported");
+    public EventManagerImpl(String amqpHost, int amqpPort, String amqpUser, String amqpPassword) throws IOException {
+        this.amqpHost = amqpHost;
+        this.amqpPort = amqpPort;
+        this.amqpUser = amqpUser;
+        this.amqpPassword = amqpPassword;
 
         services = new HashMap<>();
-        this.persistenceService = new PersistenceServiceImpl(host);
     }
 
     @Override
@@ -89,14 +89,18 @@ public class EventManagerImpl implements EventManager {
      * Initialise the event manager, setting up any necessary channels and connections
      */
     @Override
-    public void init() throws IOException {
+    public void init() throws IOException, TimeoutException, URISyntaxException {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(host);
-        factory.setPort(rabbitPort);
-        factory.setUsername(user);
-        factory.setPassword(password);
+        factory.setHost(amqpHost);
+        factory.setPort(amqpPort);
+        factory.setUsername(amqpUser);
+        factory.setPassword(amqpPassword);
 
         connection = factory.newConnection();
+
+        getConfiguration();
+        Preconditions.checkArgument(marmottaBaseUri.getPort() == 8080, "The marmotta port has to be 8080.");
+        this.persistenceService = new PersistenceServiceImpl(marmottaBaseUri, storageBaseUri);
 
         registryChannel = connection.createChannel();
 
@@ -106,6 +110,25 @@ public class EventManagerImpl implements EventManager {
 
         // register a listener queue for this event manager on the discovery exchange so we can react to discovery requests
         discovery = new DiscoveryConsumer();
+    }
+
+    private void getConfiguration() throws IOException, TimeoutException, java.net.URISyntaxException {
+        Channel configChannel = connection.createChannel();
+        RpcClient configClient = new RpcClient(configChannel, "", QUEUE_CONFIG_REQUEST, RPC_CONFIG_TIMEOUT);
+
+        log.info("Retrieving Marmotta and storage configuration...");
+        Event.ConfigurationEvent config;
+        try {
+            config = Event.ConfigurationEvent.parseFrom(configClient.primitiveCall(Event.ConfigurationDiscoverEvent.newBuilder().build().toByteArray()));
+        } finally {
+            configClient.close();
+            configChannel.close();
+        }
+
+        log.info("Got Marmotta base URI: {}", config.getMarmottaBaseUri());
+        this.marmottaBaseUri = new java.net.URI(config.getMarmottaBaseUri());
+        log.info("Got storage base URI: {}", config.getStorageBaseUri());
+        this.storageBaseUri = new java.net.URI(config.getStorageBaseUri());
     }
 
     /**

@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Add file description here!
@@ -69,7 +70,7 @@ public abstract class BaseBrokerTest {
     }
 
     @Before
-    public void setupTestBase() throws IOException, URISyntaxException {
+    public void setupTestBase() throws IOException, URISyntaxException, TimeoutException {
         eventManager = new EventManagerImpl(testHost);
         eventManager.init();
 

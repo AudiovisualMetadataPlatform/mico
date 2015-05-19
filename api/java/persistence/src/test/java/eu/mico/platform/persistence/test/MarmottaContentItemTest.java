@@ -94,7 +94,7 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
         // check if content item parts is now non-empty
         Assert.assertTrue(item.listContentParts().iterator().hasNext());
 
-        item.deleteContent(content.getURI().stringValue());
+        item.deleteContent(content.getURI());
 
         // check if content part has been removed from triple store
         assertAskNot(String.format("ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> } ", item.getURI().stringValue(), content.getURI().stringValue()), new URIImpl(item.getURI().stringValue() + MarmottaContentItem.SUFFIX_METADATA));
@@ -117,7 +117,7 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
         Assert.assertEquals("text/plain", content.getType());
 
-        item.deleteContent(content.getURI().stringValue());
+        item.deleteContent(content.getURI());
 
 
     }
@@ -155,7 +155,7 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
         Assert.assertEquals("Hello, World!\n", result);
 
 
-        item.deleteContent(content.getId());
+        item.deleteContent(content.getURI());
     }
 
 

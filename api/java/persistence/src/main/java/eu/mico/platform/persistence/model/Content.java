@@ -44,7 +44,7 @@ public interface Content {
      *
      * @return
      */
-    String getId();
+    String getID();
 
     /**
      *  Return the URI uniquely identifying this content part. The URI should be either a UUID or constructed in a way

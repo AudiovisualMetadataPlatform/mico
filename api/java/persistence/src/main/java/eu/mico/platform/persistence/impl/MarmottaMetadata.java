@@ -49,7 +49,7 @@ public class MarmottaMetadata implements Metadata {
     public MarmottaMetadata(java.net.URI baseURL) throws RepositoryException {
         this.context = null;
 
-        this.baseURL  = baseURL;
+        this.baseURL  = baseURL.normalize();
         repository    = new SPARQLRepository(this.baseURL.toString() + "/sparql/select", this.baseURL.toString() + "/sparql/update");
         repository.initialize();
     }
@@ -64,7 +64,7 @@ public class MarmottaMetadata implements Metadata {
     public MarmottaMetadata(String baseURL, String context) throws RepositoryException, java.net.URISyntaxException {
         this.context = context;
 
-        this.baseURL  = new java.net.URI(baseURL + "/" + context);
+        this.baseURL  = new java.net.URI(baseURL + "/" + context).normalize();
         repository    = new SPARQLRepository(this.baseURL.toString() + "/sparql/select", this.baseURL.toString() + "/sparql/update");
         repository.initialize();
     }

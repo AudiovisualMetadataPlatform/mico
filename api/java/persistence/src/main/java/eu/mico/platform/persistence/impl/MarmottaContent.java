@@ -23,8 +23,7 @@ import eu.mico.platform.storage.impl.StorageServiceBuilder;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
-import eu.mico.platform.persistence.util.Ontology;
-import org.openrdf.annotations.Iri;
+import org.apache.commons.lang3.StringUtils;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -46,9 +45,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.net.URL;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
@@ -66,39 +62,30 @@ public class MarmottaContent implements Content {
 
     private MarmottaContentItem item;
 
-    private java.net.URI marmottaHost;
+    private java.net.URI marmottaBase;
     private StorageService storage;
     private String id;
 
 
-    public MarmottaContent(MarmottaContentItem item, java.net.URI marmottaHost, java.net.URI storageHost, String id) {
+    public MarmottaContent(MarmottaContentItem item, java.net.URI marmottaBase, java.net.URI storageHost, String id) {
         this.item       = item;
-        this.marmottaHost = marmottaHost;
+        this.marmottaBase = marmottaBase;
         this.id = id;
         this.storage = StorageServiceBuilder.buildStorageService(storageHost);
     }
 
 
-    protected MarmottaContent(MarmottaContentItem item, java.net.URI marmottaHost, java.net.URI storageHost, URI uri) {
-        Preconditions.checkArgument(uri.stringValue().startsWith(marmottaHost.toString()), "the content part URI must match the marmottaHost");
-
+    protected MarmottaContent(MarmottaContentItem item, java.net.URI marmottaBase, java.net.URI storageHost, URI uri) {
+        Preconditions.checkArgument(URITools.validBaseURI(uri.stringValue(), marmottaBase.toString()), "The content part URI \"" + uri.stringValue() + "\" must match the marmottaBase \"" + marmottaBase.toString() + "\"");
         this.item       = item;
-        this.marmottaHost = marmottaHost;
-        this.id = getIDFromURI(uri);
+        this.marmottaBase = marmottaBase;
+        Preconditions.checkArgument(URITools.validContentPartURI(uri.stringValue(), marmottaBase.toString()), "The given content part URI \"" + uri.stringValue() + "\" does not address a content part");
+        this.id = URITools.getContentPartID(uri.stringValue(), marmottaBase.toString());
         this.storage = StorageServiceBuilder.buildStorageService(storageHost);
     }
 
-    private String getIDFromURI(URI uri) {
-        String uriString = uri.stringValue();
-        if (uriString == null || uriString.isEmpty() || uriString.endsWith("/"))
-            return null;
-
-        return uriString.substring(uriString.lastIndexOf("/") + 1);
-    }
-
-
     @Override
-    public String getId() {
+    public String getID() {
         return id;
     }
 
@@ -110,7 +97,7 @@ public class MarmottaContent implements Content {
      */
     @Override
     public URI getURI() {
-        return new URIImpl(marmottaHost.toString() + "/" + item.getID() + "/" + id);
+        return new URIImpl(marmottaBase.toString() + "/" + item.getID() + "/" + id);
     }
 
 
@@ -258,7 +245,7 @@ public class MarmottaContent implements Content {
     @Override
     public OutputStream getOutputStream() throws IOException {
         try {
-            return storage.getOutputStream(new java.net.URI(item.getID() + "/" + getId()));
+            return storage.getOutputStream(new java.net.URI(item.getID() + "/" + getID()));
         } catch (java.net.URISyntaxException e) {
             return null;
         }
@@ -272,7 +259,7 @@ public class MarmottaContent implements Content {
     @Override
     public InputStream getInputStream() throws IOException {
         try {
-            return storage.getInputStream(new java.net.URI(item.getID() + "/" + getId()));
+            return storage.getInputStream(new java.net.URI(item.getID() + "/" + getID()));
         } catch (java.net.URISyntaxException e) {
             return null;
         }
@@ -366,7 +353,7 @@ public class MarmottaContent implements Content {
 
         MarmottaContent that = (MarmottaContent) o;
 
-        if (!marmottaHost.equals(that.marmottaHost)) return false;
+        if (!marmottaBase.equals(that.marmottaBase)) return false;
         if (!id.equals(that.id)) return false;
 
         return true;
@@ -374,7 +361,7 @@ public class MarmottaContent implements Content {
 
     @Override
     public int hashCode() {
-        int result = marmottaHost.hashCode();
+        int result = marmottaBase.hashCode();
         result = 31 * result + id.hashCode();
         return result;
     }
@@ -382,7 +369,7 @@ public class MarmottaContent implements Content {
     @Override
     public String toString() {
         return "ContextualMarmottaContent{" +
-                "marmottaHost='" + marmottaHost + '\'' +
+                "marmottaBase='" + marmottaBase + '\'' +
                 ", id='" + id + '\'' +
                 '}';
     }

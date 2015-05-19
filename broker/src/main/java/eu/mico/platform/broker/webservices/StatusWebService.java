@@ -174,7 +174,7 @@ public class StatusWebService {
         if(item == null) {
             throw new NotFoundException("Content Item with URI " + itemUri + " not found in system");
         }
-        final Content     part = item.getContentPart(partUri);
+        final Content     part = item.getContentPart(new URIImpl(partUri));
         if(part == null) {
             throw new NotFoundException("Content Part with URI " + partUri + " not found in system");
         }

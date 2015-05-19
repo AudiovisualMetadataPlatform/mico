@@ -16,13 +16,14 @@ package eu.mico.platform.persistence.impl;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
-import eu.mico.platform.persistence.util.IDUtils;
 import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.*;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.UUID;
 
@@ -53,21 +54,11 @@ public class PersistenceServiceImpl implements PersistenceService {
         this(new java.net.URI("http://" + host + ":8080/marmotta"), new java.net.URI("hdfs://" + host));
     }
 
-    /**
-     * Persistence service
-     *
-     * @param host mico platform address
-     * @param user
-     * @param password
-     */
-    /*public PersistenceServiceImpl(String host, String user, String password) throws MalformedURLException {
-        this(new URL("http", host, 8080, "/marmotta"), new URL("ftp://" + user + ":" + password + "@" + host));
-    }*/
 
     public PersistenceServiceImpl(java.net.URI marmottaServerUrl, java.net.URI contentUrl) {
         System.setProperty("marmottaServerUrl", marmottaServerUrl.toString());
-        this.marmottaServerUrl = marmottaServerUrl;
-        this.contentUrl        = contentUrl;
+        this.marmottaServerUrl = marmottaServerUrl.normalize();
+        this.contentUrl        = contentUrl.normalize();
 
     }
 
@@ -97,8 +88,9 @@ public class PersistenceServiceImpl implements PersistenceService {
     public ContentItem createContentItem() throws RepositoryException {
 
         UUID id = UUID.randomUUID();
+        URIImpl contentItemURI = new URIImpl(URITools.normalizeURI(marmottaServerUrl.toString() + "/" + id.toString()));
 
-        ContentItem ci = new MarmottaContentItem(marmottaServerUrl,contentUrl,id.toString());
+        ContentItem ci = new MarmottaContentItem(marmottaServerUrl, contentUrl, contentItemURI);
 
         Metadata m = getMetadata();
         try {

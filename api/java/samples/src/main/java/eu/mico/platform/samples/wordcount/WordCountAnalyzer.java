@@ -22,7 +22,6 @@ import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.URI;
-import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.repository.RepositoryException;
@@ -32,13 +31,13 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URISyntaxException;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -81,7 +80,7 @@ public class WordCountAnalyzer implements AnalysisService {
     public void call(AnalysisResponse analysisResponse, ContentItem contentItem, URI uri) throws AnalysisException, IOException {
         try {
             // get the content part with the given URI
-            Content content = contentItem.getContentPart(uri.stringValue());
+            Content content = contentItem.getContentPart(uri);
 
             // get the input stream and read it into a string
             String text = IOUtils.toString(content.getInputStream(), "utf-8");
@@ -160,6 +159,8 @@ public class WordCountAnalyzer implements AnalysisService {
             log.error("error while accessing event manager:",e);
         } catch (URISyntaxException e) {
             log.error("invalid hostname:", e);
+        } catch (TimeoutException e) {
+            log.error("fetching configuration timed out:", e);
         }
 
     }

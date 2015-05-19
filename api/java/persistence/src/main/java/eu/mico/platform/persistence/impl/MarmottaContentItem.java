@@ -51,33 +51,33 @@ public class MarmottaContentItem implements ContentItem {
 
     private static Logger log = LoggerFactory.getLogger(MarmottaContentItem.class);
 
-    private java.net.URI marmottaHost;
+    private java.net.URI marmottaBase;
     private java.net.URI storageHost;
     private StorageService storage;
 
     // the content item's unique ID
     private String id;
 
-    public MarmottaContentItem(java.net.URI marmottaHost, java.net.URI storageHost, String id) {
-        this.marmottaHost = marmottaHost;
+    public MarmottaContentItem(java.net.URI marmottaBase, java.net.URI storageHost, String id) {
+        this.marmottaBase = marmottaBase.normalize();
         this.id = id;
-        this.storageHost = storageHost;
-        this.storage = StorageServiceBuilder.buildStorageService(storageHost);
+        this.storageHost = storageHost.normalize();
+        this.storage = StorageServiceBuilder.buildStorageService(this.storageHost);
     }
 
 
-    protected MarmottaContentItem(java.net.URI marmottaHost, java.net.URI storageHost, URI uri) {
-        Preconditions.checkArgument(uri.stringValue().startsWith(marmottaHost.toString()), "the content part URI ("+uri.stringValue()+") must match the baseUrl ("+ marmottaHost +")");
-
-        this.marmottaHost = marmottaHost;
-        this.storageHost = storageHost;
-        this.storage = StorageServiceBuilder.buildStorageService(storageHost);
-        this.id = uri.stringValue().substring(marmottaHost.toString().length() + 1);
+    protected MarmottaContentItem(java.net.URI marmottaBase, java.net.URI storageHost, URI uri) {
+        Preconditions.checkArgument(URITools.validBaseURI(uri.stringValue(), marmottaBase.toString()), "The content item URI \"" + uri.stringValue() + "\" must match the marmottaBase \"" + marmottaBase.toString() + "\"");
+        this.marmottaBase = marmottaBase.normalize();
+        this.storageHost = storageHost.normalize();
+        this.storage = StorageServiceBuilder.buildStorageService(this.storageHost);
+        Preconditions.checkArgument(URITools.validContentItemURI(uri.stringValue(), this.marmottaBase.toString()), "The given content item URI \"" + uri.stringValue() + "\" does not address a content item");
+        this.id = URITools.getContentItemID(uri.stringValue(), this.marmottaBase.toString());
     }
 
     /**
-     * Return the unique identifier (UUID) for this content item. The UUID should be built in a way that it is globally
-     * unique.
+     * Return the unique identifier for this content item. The ID should be built in a way that it is globally
+     * unique (e.g. UUID).
      *
      * @return
      */
@@ -87,14 +87,14 @@ public class MarmottaContentItem implements ContentItem {
     }
 
     /**
-     * Return the identifier (a unique URI) for this content item. This URI will be based on the internal UUID of the
-     * content item in the platform.
+     * Return the identifier (a unique URI) for this content item. This URI will be based on the internal
+     * ID of the content item in the platform.
      *
      * @return
      */
     @Override
     public URI getURI() {
-        return new URIImpl(marmottaHost.toString() + "/" + id);
+        return new URIImpl(URITools.normalizeURI(marmottaBase.toString() + "/" + id));
     }
 
     /**
@@ -110,7 +110,7 @@ public class MarmottaContentItem implements ContentItem {
     @Override
     public Metadata getMetadata() throws RepositoryException {
        try {
-           return new MarmottaMetadata(marmottaHost.toString(), id + SUFFIX_METADATA);
+           return new MarmottaMetadata(marmottaBase.toString(), id + SUFFIX_METADATA);
        } catch (java.net.URISyntaxException e) {
            return null;
        }
@@ -127,7 +127,7 @@ public class MarmottaContentItem implements ContentItem {
     @Override
     public Metadata getExecution() throws RepositoryException {
         try {
-            return new MarmottaMetadata(marmottaHost.toString(), id + SUFFIX_EXECUTION);
+            return new MarmottaMetadata(marmottaBase.toString(), id + SUFFIX_EXECUTION);
         } catch (java.net.URISyntaxException e) {
             return  null;
         }
@@ -142,7 +142,7 @@ public class MarmottaContentItem implements ContentItem {
     @Override
     public Metadata getResult() throws RepositoryException {
         try {
-            return new MarmottaMetadata(marmottaHost.toString(), id + SUFFIX_RESULT);
+            return new MarmottaMetadata(marmottaBase.toString(), id + SUFFIX_RESULT);
         } catch (java.net.URISyntaxException e) {
             return null;
         }
@@ -158,7 +158,23 @@ public class MarmottaContentItem implements ContentItem {
      */
     @Override
     public Content createContentPart() throws RepositoryException {
-        Content content = new MarmottaContent(this, marmottaHost, storageHost, id + "/" + IDUtils.generatedRandomId());
+        Content content = new MarmottaContent(this, marmottaBase, storageHost, IDUtils.generatedRandomId());
+        persistContentPart(content);
+        return content;
+    }
+
+    /**
+     * Create a new content part with the given ID and return a handle. The handle can then be used for updating the
+     * content and metadata of the content part.
+     *
+     * TODO: init file storage
+     *
+     * @param id the ID of the content part to create
+     * @return a handle to a ContentPart object that is suitable for reading and updating
+     */
+    public Content createContentPart(String id) throws RepositoryException {
+        Preconditions.checkArgument(URITools.validID(id), "The given ID \"" + id + "\" contains invalid characters");
+        Content content = new MarmottaContent(this, marmottaBase, storageHost,id);
         persistContentPart(content);
         return content;
     }
@@ -169,14 +185,13 @@ public class MarmottaContentItem implements ContentItem {
      *
      * TODO: init file storage
      *
-     * @param id the URI of the content part to create
+     * @param uri the URI of the content part to create
      * @return a handle to a ContentPart object that is suitable for reading and updating
      */
     @Override
-    public Content createContentPart(String id) throws RepositoryException {
-        Content content = new MarmottaContent(this, marmottaHost, storageHost,id);
-        persistContentPart(content);
-        return content;
+    public Content createContentPart(URI uri) throws RepositoryException {
+        Preconditions.checkArgument(URITools.validContentPartURI(uri.stringValue(), marmottaBase.toString()), "The given content part URI \"" + uri.stringValue() + "\" does not address a content part");
+        return createContentPart(URITools.getContentPartID(uri.stringValue(), marmottaBase.toString()));
     }
 
     private void persistContentPart(Content content) throws RepositoryException{
@@ -207,17 +222,19 @@ public class MarmottaContentItem implements ContentItem {
      *
      * TODO: init file storage
      *
-     * @param id the URI of the content part to return
+     * @param uri the URI of the content part to return
      * @return a handle to a ContentPart object that is suitable for reading and updating
      */
     @Override
-    public Content getContentPart(String id) throws RepositoryException {
+    public Content getContentPart(URI uri) throws RepositoryException {
+        Preconditions.checkArgument(URITools.validContentPartURI(uri.stringValue(), marmottaBase.toString()), "The given content part URI \"" + uri.stringValue() + "\" does not address a content part");
+
         // check if part exists
         Metadata m = getMetadata();
 
         try {
-            if(m.ask(createNamed("askContentPart", of("ci", getURI().stringValue(), "cp", id)))) {
-                return new MarmottaContent(this, marmottaHost, storageHost, id);
+            if(m.ask(createNamed("askContentPart", of("ci", getURI().stringValue(), "cp", uri.stringValue())))) {
+                return new MarmottaContent(this, marmottaBase, storageHost, uri);
             } else {
                 return null;
             }
@@ -231,21 +248,37 @@ public class MarmottaContentItem implements ContentItem {
     }
 
     /**
+     * Return a handle to the ContentPart with the given URI, or null in case the content item does not have this
+     * content part.
+     *
+     * TODO: init file storage
+     *
+     * @param uri the URI of the content part to return
+     * @return a handle to a ContentPart object that is suitable for reading and updating
+     */
+    /*@Override
+    public Content getContentPart(URI uri) throws RepositoryException {
+        Preconditions.checkArgument(URITools.validContentPartURI(uri.stringValue(), marmottaBase.toString()), "The given content part URI \"" + uri.stringValue() + "\" does not address a content part");
+        return getContentPart(URITools.getContentPartID(uri.stringValue(), marmottaBase.toString()));
+    }*/
+
+    /**
      * Remove the content part with the given URI in case it exists and is a part of this content item. Otherwise do
      * nothing.
      *
      * TODO: delete file storage
      *
-     * @param id the URI of the content part to delete
+     * @param uri the URI of the content part to delete
      */
     @Override
-    public void deleteContent(String id) throws RepositoryException, IOException {
+    public void deleteContent(URI uri) throws RepositoryException, IOException {
+        Preconditions.checkArgument(URITools.validContentPartURI(uri.stringValue(), marmottaBase.toString()), "The given content part URI \"" + uri.stringValue() + "\" does not address a content part");
         // delete metadata
         Metadata m = getMetadata();
 
         try {
-            m.update(createNamed("deleteContentPart", of("ci", getURI().stringValue(), "cp", id)));
-            storage.delete(new java.net.URI(getID() + "/" + id));
+            m.update(createNamed("deleteContentPart", of("ci", getURI().stringValue(), "cp", uri.stringValue())));
+            storage.delete(new java.net.URI(getID() + "/" + URITools.getContentPartID(uri.stringValue(), marmottaBase.toString())));
         } catch (MalformedQueryException e) {
             log.error("the SPARQL update was malformed:", e);
             throw new RepositoryException("the SPARQL update was malformed",e);
@@ -257,6 +290,20 @@ public class MarmottaContentItem implements ContentItem {
         }
 
     }
+
+    /**
+     * Remove the content part with the given URI in case it exists and is a part of this content item. Otherwise do
+     * nothing.
+     *
+     * TODO: delete file storage
+     *
+     * @param uri the URI of the content part to delete
+     */
+    /*@Override
+    public void deleteContent(URI uri) throws RepositoryException, IOException {
+        Preconditions.checkArgument(URITools.validContentPartURI(uri.stringValue(), marmottaBase.toString()), "The given content part URI \"" + uri.stringValue() + "\" does not address a content part");
+        deleteContent(URITools.getContentPartID(uri.stringValue(), marmottaBase.toString()));
+    }*/
 
     /**
      * Return an iterator over all content parts contained in this content item.
@@ -289,7 +336,7 @@ public class MarmottaContentItem implements ContentItem {
                             try {
                                 BindingSet b = r.next();
                                 URI part = (URI) b.getValue("p");
-                                return new MarmottaContent(MarmottaContentItem.this, marmottaHost, storageHost, part);
+                                return new MarmottaContent(MarmottaContentItem.this, marmottaBase, storageHost, part);
                             } catch (QueryEvaluationException e) {
                                 return null;
                             }
@@ -321,7 +368,7 @@ public class MarmottaContentItem implements ContentItem {
 
         MarmottaContentItem that = (MarmottaContentItem) o;
 
-        if (!marmottaHost.equals(that.marmottaHost)) return false;
+        if (!marmottaBase.equals(that.marmottaBase)) return false;
         if (!id.equals(that.id)) return false;
 
         return true;
@@ -329,7 +376,7 @@ public class MarmottaContentItem implements ContentItem {
 
     @Override
     public int hashCode() {
-        int result = marmottaHost.hashCode();
+        int result = marmottaBase.hashCode();
         result = 31 * result + id.hashCode();
         return result;
     }

@@ -15,6 +15,7 @@ import java.util.UUID;
 
 public class ContentItemMock implements ContentItem {
 
+    private final String BASE_URI = "http://example.org/contentitem/";
     private final String id;
     private final Map<URI, Content> contentParts;
 
@@ -34,7 +35,7 @@ public class ContentItemMock implements ContentItem {
 
     @Override
     public URI getURI() {
-        return new URIImpl("http://example.org/contentitem/" + id);
+        return new URIImpl(BASE_URI + id);
     }
 
     @Override
@@ -54,12 +55,11 @@ public class ContentItemMock implements ContentItem {
 
     @Override
     public Content createContentPart() throws RepositoryException {
-        final ContentMock content = new ContentMock(this, id + "/" + UUID.randomUUID());
+        final ContentMock content = new ContentMock(this, getURI().stringValue() + "/" + UUID.randomUUID());
         contentParts.put(content.getURI(), content);
         return content;
     }
 
-    @Override
     public Content createContentPart(String id) throws RepositoryException {
         final ContentMock content = new ContentMock(this, id);
         contentParts.put(content.getURI(), content);
@@ -67,14 +67,31 @@ public class ContentItemMock implements ContentItem {
     }
 
     @Override
-    public Content getContentPart(String id) throws RepositoryException {
-        return contentParts.get(id);
+    public Content createContentPart(URI uri) throws RepositoryException {
+        final ContentMock content = new ContentMock(this, uri.stringValue());
+        contentParts.put(content.getURI(), content);
+        return content;
     }
 
     @Override
-    public void deleteContent(String id) throws RepositoryException, FileSystemException {
-        contentParts.remove(id);
+    public Content getContentPart(URI uri) throws RepositoryException {
+        return contentParts.get(uri);
     }
+
+    /*@Override
+    public Content getContentPart(String id) throws RepositoryException {
+        return contentParts.get(new URIImpl(getURI().stringValue() + "/" + id));
+    }*/
+
+    @Override
+    public void deleteContent(URI uri) throws RepositoryException, FileSystemException {
+        contentParts.remove(uri);
+    }
+
+    /*@Override
+    public void deleteContent(String id) throws RepositoryException, FileSystemException {
+        contentParts.remove(new URIImpl(getURI().stringValue() + "/" + id));
+    }*/
 
     @Override
     public Iterable<Content> listContentParts() throws RepositoryException {

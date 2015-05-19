@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Add file description here!
@@ -46,9 +47,11 @@ public class MICOBrokerApplication extends Application {
     public MICOBrokerApplication(@Context ServletContext context) {
         super();
 
-        String host = context.getInitParameter("mico.host") != null ? context.getInitParameter("mico.host") : "localhost";
+        String host = context.getInitParameter("mico.host") != null ? context.getInitParameter("mico.host") : "mico-platform";
         String user = context.getInitParameter("mico.user") != null ? context.getInitParameter("mico.user") : "mico";
         String pass = context.getInitParameter("mico.pass") != null ? context.getInitParameter("mico.pass") : "mico";
+        String marmottaBaseUri = context.getInitParameter("mico.marmottaBaseUri") != null ? context.getInitParameter("mico.marmottaBaseUri") : "http://mico-platform:8080/marmotta";
+        String storageBaseUri = context.getInitParameter("mico.storageBaseUri") != null ? context.getInitParameter("mico.storageBaseUri") : "hdfs://mico-platform/";
 
         if("localhost".equals(host)) {
             try {
@@ -61,7 +64,7 @@ public class MICOBrokerApplication extends Application {
         log.info("initialising new MICO broker for host {}", host);
 
         try {
-            broker  = new MICOBrokerImpl(host, user, pass);
+            broker  = new MICOBrokerImpl(host, user, pass, 5672, marmottaBaseUri, storageBaseUri);
             manager = new EventManagerImpl(host, user, pass);
             manager.init();
 
@@ -74,6 +77,9 @@ public class MICOBrokerApplication extends Application {
         } catch (URISyntaxException ex) {
             log.error("could not initialise MICO broker, invalid URI (message: {})", ex.getMessage());
             log.debug("Exception:",ex);
+        } catch (TimeoutException ex) {
+            log.error("could not fetch Marmotta and storage configuration, request timed out (message: {})", ex.getMessage());
+            log.debug("Exception:", ex);
         }
     }
 

@@ -67,7 +67,9 @@ public class MICOBrokerImpl implements MICOBroker {
     private String user;
     private String password;
     private int rabbitPort;
-    private int marmottaPort;
+
+    private String marmottaBaseUri;
+    private String storageBaseUri;
 
     // a graph for representing the currently registered service dependencies
     private ServiceGraph dependencies;
@@ -77,7 +79,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
     private PersistenceService persistenceService;
 
-    private Channel registryChannel, discoveryChannel, contentChannel;
+    private Channel registryChannel, discoveryChannel, contentChannel, configChannel;
 
     // map from content item URIs to processing states
     private Map<String,ContentItemState> states;
@@ -90,18 +92,17 @@ public class MICOBrokerImpl implements MICOBroker {
         this(host, "mico", "mico");
     }
 
-
     public MICOBrokerImpl(String host, String user, String password) throws IOException, URISyntaxException {
-        this(host, user, password,5672, 8080);
+        this(host, user, password, 5672, "http://" + host + ":8080/marmotta", "hdfs://" + host + ("/"));
     }
 
-
-    public MICOBrokerImpl(String host, String user, String password, int rabbitPort, int marmottaPort) throws IOException, URISyntaxException {
+    public MICOBrokerImpl(String host, String user, String password, int rabbitPort, String marmottaBaseUri, String storageBaseUri) throws IOException, URISyntaxException {
         this.host = host;
         this.user = user;
         this.password = password;
         this.rabbitPort = rabbitPort;
-        this.marmottaPort = marmottaPort;
+        this.marmottaBaseUri = marmottaBaseUri;
+        this.storageBaseUri = storageBaseUri;
 
         dependencies = new ServiceGraph();
         states       = new HashMap<>();
@@ -109,7 +110,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
         log.info("initialising persistence service ...");
 
-        persistenceService = new PersistenceServiceImpl(host);
+        persistenceService = new PersistenceServiceImpl(new java.net.URI(this.marmottaBaseUri), new java.net.URI(this.storageBaseUri));
 
         log.info("initialising RabbitMQ connection ...");
 
@@ -124,6 +125,7 @@ public class MICOBrokerImpl implements MICOBroker {
         initRegistryQueue();
         initDiscoveryQueue();
         initContentItemQueue();
+        initConfigQueue();
     }
 
 
@@ -175,7 +177,7 @@ public class MICOBrokerImpl implements MICOBroker {
         discoveryChannel.basicConsume(queueName, false, new RegistrationConsumer(discoveryChannel));
 
         AMQP.BasicProperties props = new AMQP.BasicProperties.Builder().replyTo(queueName).correlationId(UUID.randomUUID().toString()).build();
-        discoveryChannel.basicPublish(EventManager.EXCHANGE_SERVICE_DISCOVERY,"",props,Event.DiscoveryEvent.newBuilder().build().toByteArray());
+        discoveryChannel.basicPublish(EventManager.EXCHANGE_SERVICE_DISCOVERY, "", props, Event.DiscoveryEvent.newBuilder().build().toByteArray());
 
 /*
         try {
@@ -194,11 +196,20 @@ public class MICOBrokerImpl implements MICOBroker {
         contentChannel = connection.createChannel();
 
         // create the input and output queue with a defined name
-        contentChannel.queueDeclare(EventManager.QUEUE_CONTENT_INPUT,true,false,false,null);
-        contentChannel.queueDeclare(EventManager.QUEUE_CONTENT_OUTPUT,true,false,false,null);
+        contentChannel.queueDeclare(EventManager.QUEUE_CONTENT_INPUT, true, false, false, null);
+        contentChannel.queueDeclare(EventManager.QUEUE_CONTENT_OUTPUT, true, false, false, null);
 
         // register a content item consumer with the queue
-        contentChannel.basicConsume(EventManager.QUEUE_CONTENT_INPUT,false, new ContentItemConsumer(contentChannel));
+        contentChannel.basicConsume(EventManager.QUEUE_CONTENT_INPUT, false, new ContentItemConsumer(contentChannel));
+    }
+
+    private void initConfigQueue() throws IOException {
+        log.info("setting up configuration request queue ...");
+        configChannel = connection.createChannel();
+
+        configChannel.queueDeclare(EventManager.QUEUE_CONFIG_REQUEST, false, true, false, null);
+
+        contentChannel.basicConsume(EventManager.QUEUE_CONFIG_REQUEST, false, new ConfigurationRequestConsumer(contentChannel));
     }
 
 
@@ -247,6 +258,38 @@ public class MICOBrokerImpl implements MICOBroker {
                 MICOBrokerImpl.this.notifyAll();
             }
         }
+    }
+
+    private class ConfigurationRequestConsumer extends DefaultConsumer {
+        public ConfigurationRequestConsumer(Channel channel) {
+            super(channel);
+        }
+
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+            log.info("received config discovery event with reply queue {} ...", properties.getReplyTo());
+
+            // parse config discovery request (as it doesn't contain any data for now we won't care about it further)
+            Event.ConfigurationDiscoverEvent configDiscover = Event.ConfigurationDiscoverEvent.parseFrom(body);
+
+            // construct reply properties, use the same correlation ID as in the request
+            final AMQP.BasicProperties replyProps = new AMQP.BasicProperties
+                    .Builder()
+                    .correlationId(properties.getCorrelationId())
+                    .build();
+
+            // construct configuration event
+            Event.ConfigurationEvent config = Event.ConfigurationEvent.newBuilder()
+                                                .setMarmottaBaseUri(marmottaBaseUri)
+                                                .setStorageBaseUri(storageBaseUri)
+                                                .build();
+
+            // send configuration
+            getChannel().basicPublish("", properties.getReplyTo(), replyProps, config.toByteArray());
+
+            // ack request
+            getChannel().basicAck(envelope.getDeliveryTag(), false);
+        }
+
     }
 
 

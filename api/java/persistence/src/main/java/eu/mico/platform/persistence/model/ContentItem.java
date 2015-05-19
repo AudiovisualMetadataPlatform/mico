@@ -86,30 +86,34 @@ public interface ContentItem {
     public Content createContentPart() throws RepositoryException;
 
     /**
+     * @deprecated Will be removed in favour of server generated IDs (UUIDs).
+     *
      * Create a new content part with the given ID and return a handle. The handle can then be used for updating the
      * content and metadata of the content part.
      *
-     * @param id the ID of the content part to create
+     * @param uri the URI of the content part to create
      * @return a handle to a ContentPart object that is suitable for reading and updating
      */
-    public Content createContentPart(String id) throws RepositoryException;
+
+    @Deprecated
+    public Content createContentPart(URI uri) throws RepositoryException;
 
     /**
-     * Return a handle to the ContentPart with the given ID, or null in case the content item does not have this
+     * Return a handle to the ContentPart with the given URI, or null in case the content item does not have this
      * content part.
      *
-     * @param id the ID of the content part to return
+     * @param uri the URI of the content part to return
      * @return a handle to a ContentPart object that is suitable for reading and updating
      */
-    public Content getContentPart(String id) throws RepositoryException;
+    public Content getContentPart(URI uri) throws RepositoryException;
 
     /**
-     * Remove the content part with the given ID in case it exists and is a part of this content item. Otherwise do
+     * Remove the content part with the given URI in case it exists and is a part of this content item. Otherwise do
      * nothing.
      *
-     * @param id the ID of the content part to delete
+     * @param uri the URI of the content part to delete
      */
-    public void deleteContent(String id) throws RepositoryException, IOException;
+    public void deleteContent(URI uri) throws RepositoryException, IOException;
 
     /**
      * Return an iterator over all content parts contained in this content item.
