@@ -24,7 +24,9 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 
-import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Add file description here!
@@ -37,7 +39,10 @@ public class PersistenceServiceTest extends BaseMarmottaTest {
     public void testCreateDeleteContentItem() throws RepositoryException, QueryEvaluationException, MalformedQueryException, java.net.URISyntaxException {
         PersistenceService db = new PersistenceServiceImpl(testHost);
 
-        Assert.assertFalse(db.getContentItems().iterator().hasNext());
+        int numberOfContentItems = 0;
+        Iterator<ContentItem> items = db.getContentItems().iterator();
+        for (; items.hasNext(); numberOfContentItems++)
+            items.next();
 
         ContentItem ci = db.createContentItem();
 
@@ -49,23 +54,28 @@ public class PersistenceServiceTest extends BaseMarmottaTest {
 
         assertAskNot(String.format("ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> }", baseUrl, ci.getURI()), new URIImpl(baseUrl.toString()));
 
-        Assert.assertFalse(db.getContentItems().iterator().hasNext());
+        items = db.getContentItems().iterator();
+        for (; items.hasNext(); numberOfContentItems--)
+            items.next();
 
-
+        Assert.assertTrue(numberOfContentItems == 0);
     }
 
     @Test
     public void testListContentItems() throws RepositoryException, java.net.URISyntaxException {
         PersistenceService db = new PersistenceServiceImpl(testHost);
 
-        ContentItem[] items = new ContentItem[5];
+        List<ContentItem> items = new ArrayList<ContentItem>();
         for(int i=0; i<5; i++) {
-            items[i] = db.createContentItem();
+            items.add(db.createContentItem());
         }
 
+        int itemsFound = 0;
         for(ContentItem ci : db.getContentItems()) {
-            Assert.assertThat(ci, Matchers.isIn(items));
+            if (items.contains(ci))
+                itemsFound++;
         }
+        Assert.assertTrue(items.size() == itemsFound);
 
         for(ContentItem ci : items) {
             db.deleteContentItem(ci.getURI());
