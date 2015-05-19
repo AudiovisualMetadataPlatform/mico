@@ -55,3 +55,15 @@ message ContentEvent {
 message DiscoveryEvent {
 
 }
+
+/**
+ * Marmotta and storage base URI to be used by the client (e.g. extractor, injector)
+ */
+message ConfigurationEvent {
+  required string marmottaBaseUri = 1; //!< base URI for the Marmotta triples.
+  required string storageBaseUri  = 2; //!< base URI for storage.
+}
+
+message ConfigurationDiscoverEvent {
+
+}
