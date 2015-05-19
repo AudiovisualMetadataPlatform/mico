@@ -87,7 +87,7 @@ public class StorageServiceHDFS implements StorageService {
         final FileSystem fs = FileSystem.get(this.hdfsConfig);
         Path path = getContentPartPath(contentPath.getPath());
         if (fs.delete(path, false)) {
-            while ((path = path.getParent()) != null && !fs.listFiles(path, false).hasNext()) {
+            while ((path = path.getParent()) != null && !fs.listFiles(path, false).hasNext() && !path.isRoot() && path.toString().startsWith(basePath.toString())) {
                 fs.delete(path, false);
             }
             return true;
