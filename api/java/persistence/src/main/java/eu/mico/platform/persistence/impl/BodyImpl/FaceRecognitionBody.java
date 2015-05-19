@@ -1,11 +1,11 @@
 package eu.mico.platform.persistence.impl.BodyImpl;
 
-import eu.mico.platform.persistence.impl.ModelPersistenceImpl.ModelPersistenceBodyImpl;
+import com.github.anno4j.model.Body;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 
 @Iri(Ontology.FACE_RECOGNITION_BODY_MICO)
-public class FaceRecognitionBody extends ModelPersistenceBodyImpl {
+public class FaceRecognitionBody extends Body {
 
     /**
      * The name of the person that was detected

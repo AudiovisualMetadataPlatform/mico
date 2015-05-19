@@ -13,14 +13,17 @@
  */
 package eu.mico.platform.persistence.impl;
 
+import com.github.anno4j.Anno4j;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
 import eu.mico.platform.persistence.util.IDUtils;
 import eu.mico.platform.persistence.util.VFSUtils;
 import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.*;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryConfigException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +43,8 @@ import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
 public class PersistenceServiceImpl implements PersistenceService {
 
     private static Logger log = LoggerFactory.getLogger(PersistenceServiceImpl.class);
+
+    public static MICOIDGenerator idGenerator;
 
     private String marmottaServerUrl;
     private String contentUrl;
@@ -72,10 +77,21 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     public PersistenceServiceImpl(String marmottaServerUrl, String contentUrl) {
-        System.setProperty("marmottaServerUrl", marmottaServerUrl);
 
         this.marmottaServerUrl = marmottaServerUrl;
         this.contentUrl        = contentUrl;
+
+        idGenerator = new MICOIDGenerator(marmottaServerUrl);
+
+        // configurate Anno4j
+        try {
+            Anno4j.getInstance().setRepository(getMetadata().getRepository());
+            Anno4j.getInstance().setIdGenerator(PersistenceServiceImpl.idGenerator);
+        } catch (RepositoryConfigException e) {
+            e.printStackTrace();
+        } catch (RepositoryException e) {
+            e.printStackTrace();
+        }
 
         VFSUtils.configure();
     }
@@ -89,7 +105,6 @@ public class PersistenceServiceImpl implements PersistenceService {
     @Override
     public Metadata getMetadata() throws RepositoryException {
         return new MarmottaMetadata(marmottaServerUrl);
-
     }
 
     private String getContext() {

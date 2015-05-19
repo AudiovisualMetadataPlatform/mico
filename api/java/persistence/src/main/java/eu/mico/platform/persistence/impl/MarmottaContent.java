@@ -13,22 +13,23 @@
  */
 package eu.mico.platform.persistence.impl;
 
+import com.github.anno4j.Anno4j;
+import com.github.anno4j.model.Annotation;
+import com.github.anno4j.model.Body;
+import com.github.anno4j.model.Selector;
+import com.github.anno4j.model.impl.target.SpecificResource;
 import com.google.common.base.Preconditions;
 import eu.mico.platform.persistence.exception.ConceptNotFoundException;
-import eu.mico.platform.persistence.metadata.IBody;
-import eu.mico.platform.persistence.metadata.IProvenance;
-import eu.mico.platform.persistence.metadata.ISelection;
+import eu.mico.platform.persistence.metadata.MICOProvenance;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
-import eu.mico.platform.persistence.util.Ontology;
 import org.apache.commons.io.input.ProxyInputStream;
 import org.apache.commons.io.output.ProxyOutputStream;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
-import org.openrdf.annotations.Iri;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -37,12 +38,7 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.UpdateExecutionException;
-import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.config.RepositoryConfigException;
-import org.openrdf.repository.object.ObjectConnection;
-import org.openrdf.repository.object.ObjectRepository;
-import org.openrdf.repository.object.config.ObjectRepositoryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +46,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
@@ -296,50 +290,30 @@ public class MarmottaContent implements Content {
     }
 
     @Override
-    public AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance, ISelection selection) throws RepositoryException {
+    public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance, Selector selection) throws RepositoryException {
 
-        /*
-         * Check if the extractor has created the org.openrdf.concepts file. Alibaba requires this file (can be empty), 
-         * to persist the annotated objects. If the file was not found, a ConceptNotFoundException will be thrown.
+        /**
+          * Check if the extractor has created the org.openrdf.concepts file. Alibaba requires this file (can be empty),  
+         * to persist the annotated objects. If the file was not found, a ConceptNotFoundException will be thrown. 
          */
-        if (!new File(body.getClass().getClassLoader().getResource(CONCEPT_PATH).getFile()).isFile()) {
-            throw new ConceptNotFoundException("Please create an empty org.openrdf.conpepts file inside your META-INF folder.");
+        if(!new File(body.getClass().getClassLoader().getResource(CONCEPT_PATH).getFile()).isFile()) {
+            throw new ConceptNotFoundException("Please create an empty org.open.concepts file inside your META-INF folder.");
         }
+
+        SpecificResource specificResource = new SpecificResource();
+        specificResource.setSelector(selection);
 
         // create annotation object
-        AnnotationImpl annotation = new AnnotationImpl();
-
-        // add body, selection and content to the annotation object
+        Annotation annotation = new Annotation();
         annotation.setBody(body);
+        annotation.setTarget(specificResource);
+        annotation.setAnnotatedAt(provenance.getAnnotatedAt());
+        annotation.setAnnotatedBy(provenance.getAnnotatedBy());
+        annotation.setSerializedAt(provenance.getSerializedAt());
+        annotation.setSerializedBy(provenance.getSerializedBy());
 
-        TargetImpl target = new TargetImpl();
-        target.setSelection(selection);
-        target.setSource(source.getURI().toString());
-
-        annotation.setTarget(target);
-
-        // Setting the provenance information
-        annotation.setProvenance(provenance);
-
-        ObjectConnection con = null;
-
-        try {
-            // get the repository
-            Repository store = item.getMetadata().getRepository();
-
-            // wrap in an object repository
-            ObjectRepositoryFactory factory = new ObjectRepositoryFactory();
-
-            ObjectRepository repository = factory.createRepository(store);
-            con = repository.getConnection();
-
-            // add the annotation to the repository
-            con.addObject(annotation);
-        } catch (RepositoryConfigException e) {
-            log.error("Unable to create the repository: ", e);
-            throw new RepositoryException("Unable to create the repository: ", e);
-        }
-
+        // Write the annotation object to the triple store
+        Anno4j.getInstance().createPersistenceService().persistAnnotation(annotation);
 
         // Link content part to annotation
         Metadata m = item.getMetadata();
@@ -360,14 +334,11 @@ public class MarmottaContent implements Content {
             throw new RepositoryException("the SPARQL update could not be executed", e);
         }
 
-        // close connection
-        con.close();
-
         return annotation;
     }
 
     @Override
-    public AnnotationImpl createAnnotation(IBody body, Content source, IProvenance provenance) throws ConceptNotFoundException, RepositoryException {
+    public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance) throws ConceptNotFoundException, RepositoryException {
         return createAnnotation(body, source, provenance, null);
     }
 

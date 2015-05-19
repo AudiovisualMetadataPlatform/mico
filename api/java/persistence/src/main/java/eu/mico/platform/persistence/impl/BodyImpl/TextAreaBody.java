@@ -1,11 +1,11 @@
 package eu.mico.platform.persistence.impl.BodyImpl;
 
-import eu.mico.platform.persistence.impl.ModelPersistenceImpl.ModelPersistenceBodyImpl;
+import com.github.anno4j.model.Body;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 
 @Iri(Ontology.TEXT_DCTYPES)
-public class TextAreaBody extends ModelPersistenceBodyImpl {
+public class TextAreaBody extends Body {
 
     @Iri(Ontology.FORMAT_DCTERMS)
     private String format;

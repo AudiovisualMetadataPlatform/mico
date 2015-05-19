@@ -1,11 +1,11 @@
 package eu.mico.platform.persistence.impl.SelectorImpl;
 
-import eu.mico.platform.persistence.impl.ModelPersistenceImpl.ModelPersistenceSelectionImpl;
+import com.github.anno4j.model.Selector;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 
 @Iri(Ontology.FRAGMENT_SELECTOR_OA)
-public class FragmentSelector extends ModelPersistenceSelectionImpl {
+public class FragmentSelector extends Selector {
 
     // The x-coordinate of the fragment
     private int xCoord;
@@ -18,14 +18,14 @@ public class FragmentSelector extends ModelPersistenceSelectionImpl {
 
     // The height of the fragment
     private int height;
-    
+
     // String representation of the x-coordinate, the y-coordinate, the width and the height
     @Iri(Ontology.VALUE_RDF)
     private String fragmentData;
-    
+
     @Iri(Ontology.CONFORMS_TO_DCTERMS)
     private final String conformsTo = "http://www.w3.org/TR/mediafrags";
-    
+
     public FragmentSelector() {
     }
 
@@ -39,23 +39,23 @@ public class FragmentSelector extends ModelPersistenceSelectionImpl {
 
     /**
      * Getter for the String representation of the x-coordinate, the y-coordinate, the width and the height in the form:
-     * 
+     * <p/>
      * "x-coordinate, y-coordinate, width, height"
-     *  
+     *
      * @return
      */
     public String getFragmentData() {
         return fragmentData;
     }
-    
+
     public int getxCoord() {
         return xCoord;
     }
-    
+
     public void setxCoord(int xCoord) {
         this.xCoord = xCoord;
     }
-    
+
     public int getyCoord() {
         return yCoord;
     }

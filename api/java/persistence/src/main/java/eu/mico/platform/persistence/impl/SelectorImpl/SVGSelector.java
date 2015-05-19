@@ -1,11 +1,11 @@
 package eu.mico.platform.persistence.impl.SelectorImpl;
 
-import eu.mico.platform.persistence.impl.ModelPersistenceImpl.ModelPersistenceSelectionImpl;
+import com.github.anno4j.model.Selector;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 
 @Iri(Ontology.SVG_SELECTOR_OA)
-public class SVGSelector extends ModelPersistenceSelectionImpl {
+public class SVGSelector extends Selector {
     
     @Iri(Ontology.VALUE_RDF)
     private String vectorLocation;

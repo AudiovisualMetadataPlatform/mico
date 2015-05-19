@@ -1,11 +1,11 @@
 package eu.mico.platform.persistence.impl.BodyImpl;
 
-import eu.mico.platform.persistence.impl.ModelPersistenceImpl.ModelPersistenceBodyImpl;
+import com.github.anno4j.model.Body;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 
 @Iri(Ontology.COLORLAYOUT_BODY_MICO)
-public class ColorLayoutBody extends ModelPersistenceBodyImpl {
+public class ColorLayoutBody extends Body {
 
     @Iri(Ontology.YDCCOEFF_MICO)
     private String YDC;
