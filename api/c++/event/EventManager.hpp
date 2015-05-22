@@ -41,10 +41,29 @@ namespace mico {
         */
         static const std::string QUEUE_CONTENT_OUTPUT = "content_output";
 
+        /**
+         * Name of the queue used for configuration discovery.
+         */
+        static const std::string QUEUE_CONFIG_REQUEST = "config_request";
+
 
         class AnalysisConsumer;
         class DiscoveryConsumer;
         class RabbitConnectionHandler;
+        class ConfigurationClient;
+
+        // Bug: https://github.com/CopernicaMarketingSoftware/AMQP-CPP/issues/25
+        // Got fixed with version 2.2.0
+        class AMQPCPPOnCloseBugfix {
+        private:
+            bool firstCall;
+            std::mutex firstCallMutex;
+
+        public:
+            AMQPCPPOnCloseBugfix();
+            bool isFirstCall();
+        };
+
 
         /**
         * This exception is thrown by the event manager in case a method call failed.
@@ -78,7 +97,7 @@ namespace mico {
             bool unavailable;            //!< indicate connection failure
 
             mico::persistence::
-            PersistenceService persistence;  //!< instance of persistence service to resolve content items
+            PersistenceService *persistence = NULL;  //!< instance of persistence service to resolve content items
 
             size_t recv_len;
             char*  recv_buf;
@@ -97,6 +116,11 @@ namespace mico {
 
             void doConnect();            //!< internal method called when TCP connection is established
             void doRead();               //!< internal method for reading data from network
+
+            ConfigurationClient *configurationClient = NULL; //<! configuration service
+
+            AMQPCPPOnCloseBugfix amqpWorkaround;
+
         public:
 
             EventManager(const std::string& host) : EventManager(host, "mico", "mico") {};
@@ -118,7 +142,7 @@ namespace mico {
             * content items.
             */
             mico::persistence::
-            PersistenceService& getPersistenceService() { return persistence; };
+            PersistenceService* getPersistenceService();
 
             /**
             *  Method that is called by the AMQP library every time it has data

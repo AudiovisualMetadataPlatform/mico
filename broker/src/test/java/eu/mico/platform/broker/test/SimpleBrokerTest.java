@@ -23,6 +23,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
  * Add file description here!
@@ -32,7 +33,7 @@ import java.io.IOException;
 public class SimpleBrokerTest extends BaseBrokerTest {
 
     @Test
-    public void testInit() throws IOException, InterruptedException {
+    public void testInit() throws IOException, InterruptedException, URISyntaxException {
         MICOBroker broker = new MICOBrokerImpl(testHost);
 
         setupMockAnalyser("A","B");
@@ -55,7 +56,7 @@ public class SimpleBrokerTest extends BaseBrokerTest {
 
 
     @Test
-    public void testDiscovery() throws IOException, InterruptedException {
+    public void testDiscovery() throws IOException, InterruptedException, URISyntaxException {
         setupMockAnalyser("A","B");
         setupMockAnalyser("B","C");
         setupMockAnalyser("A","C");

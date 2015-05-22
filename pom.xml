@@ -39,6 +39,7 @@
             <name>Sebastian Schaffert</name>
             <email>sebastian.schaffert@salzburgresearch.at</email>
             <organization>Salzburg Research</organization>
+            <roles><role>Alumni</role></roles>
         </developer>
         <developer>
             <name>Thomas Kurz</name>
@@ -53,6 +54,12 @@
         <developer>
             <name>Sergio Fernández</name>
             <email>sergio.fernandez@salzburgresearch.at</email>
+            <organization>Salzburg Research</organization>
+            <roles><role>Alumni</role></roles>
+        </developer>
+        <developer>
+            <name>Horst Stadler</name>
+            <email>horst.stadler@salzburgresearch.at</email>
             <organization>Salzburg Research</organization>
         </developer>
     </developers>
@@ -190,6 +197,7 @@
         <module>api/java</module>
         <module>marmotta</module>
         <module>broker</module>
+        <module>storage</module>
     </modules>
 
 </project>

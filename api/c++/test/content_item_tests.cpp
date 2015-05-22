@@ -47,7 +47,7 @@ class ContentItemTest : public ::testing::Test
 
 protected:
 	std::string base_url = "http://" + mico_host + ":8080/marmotta";
-	std::string content_dir = "ftp://" + mico_user + ":" + mico_pass + "@" + mico_host;
+	std::string content_dir = "hdfs://" + mico_host;
 	uuid base_ctx;
 	random_generator rnd_gen;
 	HTTPClient client;

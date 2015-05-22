@@ -29,6 +29,7 @@ import org.openrdf.rio.RDFParseException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
@@ -50,7 +51,7 @@ public class MarmottaMetadataTest extends BaseMarmottaTest {
         try {
             con.begin();
 
-            con.add(BaseMarmottaTest.class.getResourceAsStream("/demo-data.foaf"), baseUrl, RDFFormat.RDFXML, resolveContext(baseUuid.toString()));
+            con.add(BaseMarmottaTest.class.getResourceAsStream("/demo-data.foaf"), baseUrl.toString(), RDFFormat.RDFXML, resolveContext(baseUuid.toString()));
 
             con.commit();
         } catch(RepositoryException ex) {
@@ -61,9 +62,9 @@ public class MarmottaMetadataTest extends BaseMarmottaTest {
     }
 
     @Test
-    public void testUpdate() throws RepositoryException, MalformedQueryException, UpdateExecutionException {
+    public void testUpdate() throws RepositoryException, MalformedQueryException, UpdateExecutionException, URISyntaxException {
 
-        MarmottaMetadata m = new MarmottaMetadata(baseUrl, UUID.randomUUID().toString());
+        MarmottaMetadata m = new MarmottaMetadata(baseUrl.toString(), UUID.randomUUID().toString());
 
         m.update("INSERT DATA { <http://example.org/resource/R1> <http://example.org/property/P1> \"Value 1\" } ");
 
@@ -88,8 +89,8 @@ public class MarmottaMetadataTest extends BaseMarmottaTest {
 
 
     @Test
-    public void testQuery() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
-        MarmottaMetadata m = new MarmottaMetadata(baseUrl, baseUuid.toString());
+    public void testQuery() throws RepositoryException, QueryEvaluationException, MalformedQueryException, URISyntaxException {
+        MarmottaMetadata m = new MarmottaMetadata(baseUrl.toString(), baseUuid.toString());
 
         TupleQueryResult r = m.query("SELECT ?i WHERE { <http://localhost:8080/LMF/resource/hans_meier> <http://xmlns.com/foaf/0.1/interest> ?i }");
         Assert.assertEquals(1, r.getBindingNames().size());
@@ -105,8 +106,8 @@ public class MarmottaMetadataTest extends BaseMarmottaTest {
 
 
     @Test
-    public void testAsk() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
-        MarmottaMetadata m = new MarmottaMetadata(baseUrl, baseUuid.toString());
+    public void testAsk() throws RepositoryException, QueryEvaluationException, MalformedQueryException, URISyntaxException {
+        MarmottaMetadata m = new MarmottaMetadata(baseUrl.toString(), baseUuid.toString());
 
         Assert.assertTrue(m.ask("ASK { <http://localhost:8080/LMF/resource/hans_meier> <http://xmlns.com/foaf/0.1/interest> <http://rdf.freebase.com/ns/en.software_engineering> }"));
         Assert.assertFalse(m.ask("ASK { <http://localhost:8080/LMF/resource/hans_meier> <http://xmlns.com/foaf/0.1/interest> <http://rdf.freebase.com/ns/en.design> }"));
@@ -114,8 +115,8 @@ public class MarmottaMetadataTest extends BaseMarmottaTest {
 
 
     @Test
-    public void testLoad() throws RepositoryException, IOException, RDFParseException {
-        MarmottaMetadata m = new MarmottaMetadata(baseUrl, UUID.randomUUID().toString());
+    public void testLoad() throws RepositoryException, IOException, RDFParseException, URISyntaxException {
+        MarmottaMetadata m = new MarmottaMetadata(baseUrl.toString(), UUID.randomUUID().toString());
         m.load(this.getClass().getResourceAsStream("/version-base.rdf"), RDFFormat.RDFXML);
 
         RepositoryConnection con = getFullConnection();
@@ -140,8 +141,8 @@ public class MarmottaMetadataTest extends BaseMarmottaTest {
 
 
     @Test
-    public void testDump() throws RepositoryException, IOException, RDFParseException, RDFHandlerException {
-        MarmottaMetadata m = new MarmottaMetadata(baseUrl, baseUuid.toString());
+    public void testDump() throws RepositoryException, IOException, RDFParseException, RDFHandlerException, URISyntaxException {
+        MarmottaMetadata m = new MarmottaMetadata(baseUrl.toString(), baseUuid.toString());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         m.dump(out, RDFFormat.TURTLE);
 

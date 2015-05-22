@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -41,7 +42,7 @@ public class WebBrokerTest extends BaseBrokerTest {
 
 
     @Test
-    public void testSetup() throws IOException, InterruptedException, RepositoryException {
+    public void testSetup() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
         setupMockAnalyser("A","B");
         setupMockAnalyser("B","C");
         setupMockAnalyser("A","C");

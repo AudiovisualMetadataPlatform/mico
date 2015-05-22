@@ -42,7 +42,7 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
     @Test
     public void testContentItemMetadata() throws RepositoryException, UpdateExecutionException, MalformedQueryException, QueryEvaluationException {
-        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl, UUID.randomUUID());
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrlHdfs, UUID.randomUUID().toString());
 
         Metadata m = item.getMetadata();
 
@@ -54,7 +54,7 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
     @Test
     public void testContentItemExecution() throws RepositoryException, UpdateExecutionException, MalformedQueryException, QueryEvaluationException {
-        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl,UUID.randomUUID());
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrlHdfs,UUID.randomUUID().toString());
 
         Metadata m = item.getExecution();
 
@@ -66,7 +66,7 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
     @Test
     public void testContentItemResult() throws RepositoryException, UpdateExecutionException, MalformedQueryException, QueryEvaluationException {
-        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl,UUID.randomUUID());
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrlHdfs,UUID.randomUUID().toString());
 
         Metadata m = item.getResult();
 
@@ -78,8 +78,8 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
 
     @Test
-    public void testCreateDeleteContentPart() throws RepositoryException, QueryEvaluationException, MalformedQueryException, FileSystemException {
-        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl,UUID.randomUUID());
+    public void testCreateDeleteContentPart() throws RepositoryException, QueryEvaluationException, MalformedQueryException, IOException {
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrlHdfs,UUID.randomUUID().toString());
 
         Assert.assertFalse(item.listContentParts().iterator().hasNext());
 
@@ -106,8 +106,8 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
 
     @Test
-    public void testContentPartType() throws RepositoryException, QueryEvaluationException, MalformedQueryException, FileSystemException {
-        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl,UUID.randomUUID());
+    public void testContentPartType() throws RepositoryException, QueryEvaluationException, MalformedQueryException, IOException {
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrlHdfs,UUID.randomUUID().toString());
 
         Assert.assertFalse(item.listContentParts().iterator().hasNext());
 
@@ -125,7 +125,7 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
     @Test
     public void testListContentParts() throws RepositoryException, QueryEvaluationException, MalformedQueryException {
-        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl, UUID.randomUUID());
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrlHdfs, UUID.randomUUID().toString());
 
         Assert.assertFalse(item.listContentParts().iterator().hasNext());
 
@@ -142,7 +142,7 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
 
     @Test
     public void testStreamContentPart() throws RepositoryException, QueryEvaluationException, MalformedQueryException, IOException {
-        ContentItem item = new MarmottaContentItem(baseUrl, contentUrl, UUID.randomUUID());
+        ContentItem item = new MarmottaContentItem(baseUrl, contentUrlHdfs, UUID.randomUUID().toString());
 
         Content content = item.createContentPart();
 

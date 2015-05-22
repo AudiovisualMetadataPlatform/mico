@@ -17,12 +17,12 @@ import com.github.anno4j.model.Annotation;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Selector;
 import eu.mico.platform.persistence.metadata.MICOProvenance;
-import org.apache.commons.vfs2.FileSystemException;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.repository.RepositoryException;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -33,6 +33,7 @@ import java.io.OutputStream;
  * @author Sebastian Schaffert
  * @author Sergio Fernández
  * @author Andreas Eisenkolb
+ * @author Horst Stadler
  */
 public interface Content {
 
@@ -41,7 +42,7 @@ public interface Content {
      *
      * @return
      */
-    String getId();
+    String getID();
 
     /**
      *  Return the URI uniquely identifying this content part. The URI should be either a UUID or constructed in a way
@@ -100,13 +101,13 @@ public interface Content {
      * Return a new output stream for writing to the content. Any existing content will be overwritten.
      * @return
      */
-    OutputStream getOutputStream() throws FileSystemException;
+    OutputStream getOutputStream() throws IOException;
 
     /**
      *  Return a new input stream for reading the content.
      * @return
      */
-    InputStream getInputStream() throws FileSystemException;
+    InputStream getInputStream() throws IOException;
 
     /**
      * Return the parent content item.

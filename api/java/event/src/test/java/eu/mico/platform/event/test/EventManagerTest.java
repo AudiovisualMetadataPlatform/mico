@@ -29,6 +29,8 @@ import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Add file description here!
@@ -60,14 +62,14 @@ public class EventManagerTest extends BaseCommunicationTest {
 
 
     @Test
-    public void testCreateEventManager() throws IOException {
+    public void testCreateEventManager() throws IOException, URISyntaxException, TimeoutException {
         EventManager mgr = new EventManagerImpl(testHost);
         mgr.init();
         mgr.shutdown();
     }
 
     @Test
-    public void testRegisterService() throws IOException, InterruptedException {
+    public void testRegisterService() throws IOException, InterruptedException, URISyntaxException, TimeoutException {
         AnalysisService mock = new MockService();
 
         EventManager mgr = new EventManagerImpl(testHost);

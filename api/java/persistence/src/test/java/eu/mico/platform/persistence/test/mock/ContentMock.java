@@ -40,13 +40,13 @@ public class ContentMock implements Content {
     }
 
     @Override
-    public String getId() {
+    public String getID() {
         return  id;
     }
 
     @Override
     public URI getURI() {
-        return new URIImpl("http://example.org/content/" + id);
+        return new URIImpl(ci.getURI() + "/" + id);
     }
 
     @Override

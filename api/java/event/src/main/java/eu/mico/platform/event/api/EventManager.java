@@ -18,6 +18,8 @@ import eu.mico.platform.persistence.model.ContentItem;
 import org.openrdf.model.URI;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Add file description here!
@@ -49,6 +51,11 @@ public interface EventManager {
     String QUEUE_CONTENT_OUTPUT = "content_output";
 
     /**
+     * Name of the queue used to to receive config requests.
+     */
+    String QUEUE_CONFIG_REQUEST = "config_request";
+
+    /**
      * Register the given service with the event manager.
      *
      * @param service
@@ -72,12 +79,21 @@ public interface EventManager {
     public void injectContentItem(ContentItem item) throws IOException;
 
 
+    /**
+     * Get persistence service to create, get and delete ContentItems.
+     *
+     * @return PersistenceService
+     */
     PersistenceService getPersistenceService();
 
     /**
      * Initialise the event manager, setting up any necessary channels and connections
+     *
+     * @throws IOException, if something goes wrong while interacting with the AMQP server.
+     * @throws TimeoutException, if there is no reply on a a configuration discovery request.
+     * @throws URISyntaxException, if the configuration reply contains invalid URIs.
      */
-    public void init() throws IOException;
+    public void init() throws IOException, TimeoutException, URISyntaxException;
 
 
     /**

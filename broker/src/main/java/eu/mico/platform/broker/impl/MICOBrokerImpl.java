@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,19 +17,24 @@ import com.rabbitmq.client.*;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.exception.StateNotFoundException;
 import eu.mico.platform.broker.model.*;
+import eu.mico.platform.broker.util.RabbitMQUtils;
 import eu.mico.platform.event.api.EventManager;
-import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceImpl;
 import eu.mico.platform.persistence.model.ContentItem;
+import org.apache.commons.lang3.StringUtils;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 /**
  * MICO Message Broker, orchestrating the communication between analysis services and the analysis workflow for content
@@ -66,7 +71,9 @@ public class MICOBrokerImpl implements MICOBroker {
     private String user;
     private String password;
     private int rabbitPort;
-    private int marmottaPort;
+
+    private String marmottaBaseUri;
+    private String storageBaseUri;
 
     // a graph for representing the currently registered service dependencies
     private ServiceGraph dependencies;
@@ -76,7 +83,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
     private PersistenceService persistenceService;
 
-    private Channel registryChannel, discoveryChannel, contentChannel;
+    private Channel registryChannel, discoveryChannel, contentChannel, configChannel;
 
     // map from content item URIs to processing states
     private Map<String,ContentItemState> states;
@@ -85,30 +92,25 @@ public class MICOBrokerImpl implements MICOBroker {
     private Map<String,Channel> channels;
 
 
-    public MICOBrokerImpl(String host) throws IOException {
+    public MICOBrokerImpl(String host) throws IOException, URISyntaxException {
         this(host, "mico", "mico");
     }
 
-
-    public MICOBrokerImpl(String host, String user, String password) throws IOException {
-        this(host, user, password,5672, 8080);
+    public MICOBrokerImpl(String host, String user, String password) throws IOException, URISyntaxException {
+        this(host, user, password, 5672, "http://" + host + ":8080/marmotta", "hdfs://" + host + ("/"));
     }
 
-
-    public MICOBrokerImpl(String host, String user, String password, int rabbitPort, int marmottaPort) throws IOException {
+    public MICOBrokerImpl(String host, String user, String password, int rabbitPort, String marmottaBaseUri, String storageBaseUri) throws IOException, URISyntaxException {
         this.host = host;
         this.user = user;
         this.password = password;
         this.rabbitPort = rabbitPort;
-        this.marmottaPort = marmottaPort;
+        this.marmottaBaseUri = marmottaBaseUri;
+        this.storageBaseUri = storageBaseUri;
 
         dependencies = new ServiceGraph();
         states       = new HashMap<>();
         channels     = new HashMap<>();
-
-        log.info("initialising persistence service ...");
-
-        persistenceService = new PersistenceServiceImpl(host,user,password);
 
         log.info("initialising RabbitMQ connection ...");
 
@@ -120,9 +122,13 @@ public class MICOBrokerImpl implements MICOBroker {
 
         connection = factory.newConnection();
 
+        initConfigQueue();
         initRegistryQueue();
         initDiscoveryQueue();
         initContentItemQueue();
+
+        log.info("initialising persistence service ...");
+        persistenceService = new PersistenceServiceImpl(new java.net.URI(this.marmottaBaseUri), new java.net.URI(this.storageBaseUri));
     }
 
 
@@ -174,7 +180,7 @@ public class MICOBrokerImpl implements MICOBroker {
         discoveryChannel.basicConsume(queueName, false, new RegistrationConsumer(discoveryChannel));
 
         AMQP.BasicProperties props = new AMQP.BasicProperties.Builder().replyTo(queueName).correlationId(UUID.randomUUID().toString()).build();
-        discoveryChannel.basicPublish(EventManager.EXCHANGE_SERVICE_DISCOVERY,"",props,Event.DiscoveryEvent.newBuilder().build().toByteArray());
+        discoveryChannel.basicPublish(EventManager.EXCHANGE_SERVICE_DISCOVERY, "", props, Event.DiscoveryEvent.newBuilder().build().toByteArray());
 
 /*
         try {
@@ -193,11 +199,68 @@ public class MICOBrokerImpl implements MICOBroker {
         contentChannel = connection.createChannel();
 
         // create the input and output queue with a defined name
-        contentChannel.queueDeclare(EventManager.QUEUE_CONTENT_INPUT,true,false,false,null);
-        contentChannel.queueDeclare(EventManager.QUEUE_CONTENT_OUTPUT,true,false,false,null);
+        contentChannel.queueDeclare(EventManager.QUEUE_CONTENT_INPUT, true, false, false, null);
+        contentChannel.queueDeclare(EventManager.QUEUE_CONTENT_OUTPUT, true, false, false, null);
 
         // register a content item consumer with the queue
-        contentChannel.basicConsume(EventManager.QUEUE_CONTENT_INPUT,false, new ContentItemConsumer(contentChannel));
+        contentChannel.basicConsume(EventManager.QUEUE_CONTENT_INPUT, false, new ContentItemConsumer(contentChannel));
+    }
+
+    private void initConfigQueue() throws IOException {
+        log.info("setting up configuration request queue ...");
+        configChannel = connection.createChannel();
+
+        try {
+            configChannel.queueDeclare(EventManager.QUEUE_CONFIG_REQUEST, false, true, false, null);
+            configChannel.basicConsume(EventManager.QUEUE_CONFIG_REQUEST, false, new ConfigurationRequestConsumer(configChannel));
+        } catch (IOException e) {
+            if (RabbitMQUtils.isCausedByChannelCloseException(e, 405)) {
+                log.info("There is already a broker running. Retrieving central configuration.");
+                // The Channes has already been closed, so we need a new one.
+                Channel channel = connection.createChannel();
+                try {
+                    try {
+                        RpcClient configClient = new RpcClient(channel, "", EventManager.QUEUE_CONFIG_REQUEST, 5000);
+                        try {
+                            log.info("Retrieving Marmotta and storage configuration...");
+                            Event.ConfigurationEvent config = Event.ConfigurationEvent.parseFrom(configClient.primitiveCall(Event.ConfigurationDiscoverEvent.newBuilder().build().toByteArray()));
+
+                            boolean diff = false;
+                            log.info("Got Marmotta base URI: {}", config.getMarmottaBaseUri());
+                            if (StringUtils.equals(this.marmottaBaseUri, config.getMarmottaBaseUri())) {
+                                log.info("All brokers agree on the marmottaBaseUri: <{}>", marmottaBaseUri);
+                            } else {
+                                log.warn("Other broker reports different marmottaBaseUri: <{}> != <{}> (mine), using the new value", config.getMarmottaBaseUri(), marmottaBaseUri);
+                                this.marmottaBaseUri = config.getMarmottaBaseUri();
+                                diff = true;
+                            }
+                            log.info("Got storage base URI: {}", config.getStorageBaseUri());
+                            if (StringUtils.equals(this.storageBaseUri, config.getStorageBaseUri())) {
+                                log.info("All brokers agree on the storageBaseUri: <{}>", storageBaseUri);
+                            } else {
+                                log.warn("Other broker reports different storageBaseUri: <{}> != <{}> (mine), using the new value", config.getStorageBaseUri(), storageBaseUri);
+                                this.storageBaseUri = config.getStorageBaseUri();
+                                diff = true;
+                            }
+                            if (diff) {
+                                log.warn("!!! Local settings for marmottaBaseUri and/or storageUri overwritten !!!");
+                                log.warn("!!! marmottaBaseUri: <{}>", marmottaBaseUri);
+                                log.warn("!!! storageUri: <{}>", storageBaseUri);
+                                log.warn("!!!");
+                            }
+                        } finally {
+                            configClient.close();
+                        }
+                    } catch (TimeoutException e1) {
+                        throw new IllegalStateException("ConfigQueue exists but no one ins answering there", e);
+                    }
+                } finally {
+                    if (channel.isOpen()) channel.close();
+                }
+            } else {
+                throw e;
+            }
+        }
     }
 
 
@@ -246,6 +309,38 @@ public class MICOBrokerImpl implements MICOBroker {
                 MICOBrokerImpl.this.notifyAll();
             }
         }
+    }
+
+    private class ConfigurationRequestConsumer extends DefaultConsumer {
+        public ConfigurationRequestConsumer(Channel channel) {
+            super(channel);
+        }
+
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+            log.info("received config discovery event with reply queue {} ...", properties.getReplyTo());
+
+            // parse config discovery request (as it doesn't contain any data for now we won't care about it further)
+            Event.ConfigurationDiscoverEvent configDiscover = Event.ConfigurationDiscoverEvent.parseFrom(body);
+
+            // construct reply properties, use the same correlation ID as in the request
+            final AMQP.BasicProperties replyProps = new AMQP.BasicProperties
+                    .Builder()
+                    .correlationId(properties.getCorrelationId())
+                    .build();
+
+            // construct configuration event
+            Event.ConfigurationEvent config = Event.ConfigurationEvent.newBuilder()
+                                                .setMarmottaBaseUri(marmottaBaseUri)
+                                                .setStorageBaseUri(storageBaseUri)
+                                                .build();
+
+            // send configuration
+            getChannel().basicPublish("", properties.getReplyTo(), replyProps, config.toByteArray());
+
+            // ack request
+            getChannel().basicAck(envelope.getDeliveryTag(), false);
+        }
+
     }
 
 

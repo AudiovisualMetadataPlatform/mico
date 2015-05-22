@@ -229,7 +229,7 @@ public class ContextualSparqlWebService extends ContextualWebServiceBase {
                         return Response.status(Response.Status.BAD_REQUEST).entity("no result format specified or unsupported result format").build();
                 }
 
-                ContentType bestType = performContentNegotiation(format, StringUtils.defaultString(request.getHeader("Accept"), ""), offeredTypes);
+                ContentType bestType = performContentNegotiation(format, enumToList(request.getHeaders("Accept")), offeredTypes);
                 if (bestType == null) {
                     return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("no result format specified or unsupported result format").build();
                 } else {

@@ -22,7 +22,6 @@ import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.URI;
-import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.repository.RepositoryException;
@@ -32,12 +31,13 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
+import java.net.URISyntaxException;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -79,11 +79,13 @@ public class WordCountAnalyzer implements AnalysisService {
     @Override
     public void call(AnalysisResponse analysisResponse, ContentItem contentItem, URI uri) throws AnalysisException, IOException {
         try {
+            log.info("Retrieved analysis call for {}", uri);
             // get the content part with the given URI
             Content content = contentItem.getContentPart(uri);
 
             // get the input stream and read it into a string
             String text = IOUtils.toString(content.getInputStream(), "utf-8");
+            log.debug("Loaded text of {} to count words", uri);
 
             // count the words using a regular expression pattern
             Pattern p_wordcount = Pattern.compile("\\w+");
@@ -92,6 +94,7 @@ public class WordCountAnalyzer implements AnalysisService {
             int count;
             for(count = 0; m.find(); count++);
 
+            log.debug("Countend {} words in {}", count, uri);
 
             // create a new content part for assigning the metadata
             Content result = contentItem.createContentPart();
@@ -106,6 +109,7 @@ public class WordCountAnalyzer implements AnalysisService {
             // report newly available results to broker
             analysisResponse.sendMessage(contentItem, result.getURI());
 
+            log.debug("Done for {}", uri);
         } catch (RepositoryException e) {
             log.error("error accessing metadata repository",e);
 
@@ -157,6 +161,10 @@ public class WordCountAnalyzer implements AnalysisService {
             // DONE
         } catch (IOException e) {
             log.error("error while accessing event manager:",e);
+        } catch (URISyntaxException e) {
+            log.error("invalid hostname:", e);
+        } catch (TimeoutException e) {
+            log.error("fetching configuration timed out:", e);
         }
 
     }

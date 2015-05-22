@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 	try {
 		EventManager eventManager(argv[1], mico_user, mico_pass);
 		
-		ContentItem* item = eventManager.getPersistenceService().createContentItem();
+		ContentItem* item = eventManager.getPersistenceService()->createContentItem();
 		
 		for(int i=4; i<argc; i++) {
 			int fd = open(argv[i], O_RDONLY);
@@ -118,5 +118,7 @@ int main(int argc, char **argv) {
 		delete item;
 	} catch(EventManagerException ex) {
 		std::cerr << "could not initialise event manager: " << ex.getMessage() << std::endl;
+	} catch (std::string ex) {
+		std::cerr << "other error: " << ex << std::endl;
 	}
 }

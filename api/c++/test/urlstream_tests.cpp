@@ -67,3 +67,25 @@ TEST(URLStreamTests,FILEWriteStream) {
 	
 	os.flush();
 }
+
+TEST(URLStreamTests,HDFSWriteStream) {
+	url_ostream os("hdfs://127.0.0.1/test.txt");
+
+	os << "Hello, World!\n";
+	os << "Sending through URLStream\n";
+
+	os.flush();
+}
+
+TEST(URLStreamTests,HDFSReadStream) {
+	url_istream is("hdfs://127.0.0.1/test.txt");
+
+	std::string r;
+	while(is) {
+		std::string s;
+		is >> s;
+
+		r +=s;
+	}
+	ASSERT_TRUE(r.length() > 0);
+}

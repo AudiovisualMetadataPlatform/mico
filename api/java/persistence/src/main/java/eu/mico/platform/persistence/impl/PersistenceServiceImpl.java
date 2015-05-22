@@ -17,8 +17,7 @@ import com.github.anno4j.Anno4j;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
-import eu.mico.platform.persistence.util.IDUtils;
-import eu.mico.platform.persistence.util.VFSUtils;
+import eu.mico.platform.storage.util.VFSUtils;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.*;
@@ -39,6 +38,7 @@ import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
  *
  * @author Sebastian Schaffert
  * @author Sergio Fernández
+ * @author Horst Stadler
  */
 public class PersistenceServiceImpl implements PersistenceService {
 
@@ -46,42 +46,25 @@ public class PersistenceServiceImpl implements PersistenceService {
 
     public static MICOIDGenerator idGenerator;
 
-    private String marmottaServerUrl;
-    private String contentUrl;
-
-    /**
-     * Persistence service over localhost with the default credentials
-     */
-    public PersistenceServiceImpl() {
-        this("127.0.0.1");
-    }
+    private java.net.URI marmottaServerUrl;
+    private java.net.URI contentUrl;
 
     /**
      * Persistence service the default credentials
      *
      * @param host mico platform address
      */
-    public PersistenceServiceImpl(String host) {
-        this(host, "mico", "pass123");
+    public PersistenceServiceImpl(String host)throws java.net.URISyntaxException {
+        this(new java.net.URI("http://" + host + ":8080/marmotta"), new java.net.URI("hdfs://" + host));
     }
 
-    /**
-     * Persistence service
-     *
-     * @param host mico platform address
-     * @param user
-     * @param password
-     */
-    public PersistenceServiceImpl(String host, String user, String password) {
-        this("http://" + host + ":8080/marmotta", "ftp://" + user + ":" + password + "@" + host);
-    }
 
-    public PersistenceServiceImpl(String marmottaServerUrl, String contentUrl) {
+    public PersistenceServiceImpl(java.net.URI marmottaServerUrl, java.net.URI contentUrl) {
+        System.setProperty("marmottaServerUrl", marmottaServerUrl.toString());
+        this.marmottaServerUrl = marmottaServerUrl.normalize();
+        this.contentUrl        = contentUrl.normalize();
 
-        this.marmottaServerUrl = marmottaServerUrl;
-        this.contentUrl        = contentUrl;
-
-        idGenerator = new MICOIDGenerator(marmottaServerUrl);
+        idGenerator = new MICOIDGenerator(marmottaServerUrl.toString());
 
         // configurate Anno4j
         try {
@@ -107,7 +90,7 @@ public class PersistenceServiceImpl implements PersistenceService {
         return new MarmottaMetadata(marmottaServerUrl);
     }
 
-    private String getContext() {
+    private java.net.URI getContext() {
         return marmottaServerUrl;
     }
 
@@ -120,13 +103,14 @@ public class PersistenceServiceImpl implements PersistenceService {
     @Override
     public ContentItem createContentItem() throws RepositoryException {
 
-        UUID uuid = IDUtils.generatedRandomUuid();
+        UUID id = UUID.randomUUID();
+        URIImpl contentItemURI = new URIImpl(URITools.normalizeURI(marmottaServerUrl.toString() + "/" + id.toString()));
 
-        ContentItem ci = new MarmottaContentItem(marmottaServerUrl,contentUrl,uuid);
+        ContentItem ci = new MarmottaContentItem(marmottaServerUrl, contentUrl, contentItemURI);
 
         Metadata m = getMetadata();
         try {
-            m.update(createNamed("createContentItem", of("g", marmottaServerUrl, "ci", ci.getURI().stringValue())));
+            m.update(createNamed("createContentItem", of("g", marmottaServerUrl.toString(), "ci", ci.getURI().stringValue())));
 
             return ci;
         } catch (MalformedQueryException e) {
@@ -152,7 +136,7 @@ public class PersistenceServiceImpl implements PersistenceService {
 
         Metadata m = getMetadata();
         try {
-            m.update(createNamed("createContentItem", of("g", marmottaServerUrl, "ci", ci.getURI().stringValue())));
+            m.update(createNamed("createContentItem", of("g", marmottaServerUrl.toString(), "ci", ci.getURI().stringValue())));
 
             return ci;
         } catch (MalformedQueryException e) {
@@ -177,7 +161,7 @@ public class PersistenceServiceImpl implements PersistenceService {
         Metadata m = getMetadata();
 
         try {
-            if(m.ask(createNamed("askContentItem", of("g", marmottaServerUrl, "ci", id.stringValue())))) {
+            if(m.ask(createNamed("askContentItem", of("g", marmottaServerUrl.toString(), "ci", id.stringValue())))) {
                 return new MarmottaContentItem(marmottaServerUrl, contentUrl,id);
             } else {
                 return null;
@@ -204,7 +188,7 @@ public class PersistenceServiceImpl implements PersistenceService {
 
         try {
             // delete from global metadata first
-            m.update(createNamed("deleteContentItem", of("g", marmottaServerUrl, "ci", id.stringValue())));
+            m.update(createNamed("deleteContentItem", of("g", marmottaServerUrl.toString(), "ci", id.stringValue())));
 
             // delete the metadata, execution, and results context for the content item
             m.update(createNamed("deleteGraph", of("g", id.stringValue() + MarmottaContentItem.SUFFIX_METADATA)));
@@ -231,7 +215,7 @@ public class PersistenceServiceImpl implements PersistenceService {
         Metadata m = getMetadata();
 
         try {
-            final TupleQueryResult r = m.query(createNamed("listContentItems", of("g", marmottaServerUrl)));
+            final TupleQueryResult r = m.query(createNamed("listContentItems", of("g", marmottaServerUrl.toString())));
 
 
             return new Iterable<ContentItem>() {

@@ -194,6 +194,8 @@ public class StatusWebService {
             }
         } catch (FileSystemException e) {
             return Response.serverError().entity(e.getMessage()).build();
+        } catch (IOException e) {
+            return Response.serverError().entity(e.getMessage()).build();
         }
 
 

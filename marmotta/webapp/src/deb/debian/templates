@@ -14,8 +14,11 @@ Template: mico-marmotta/create-database
 Type: boolean
 Default: true
 Description: Create Marmotta database and user?
- If you select "Yes" here, the setup script will automatically create the PostgreSQL database and user configured in
- the previous steps. If you select "No", the setup script will only update the Marmotta configuration with the values
+ The setup script can automatically create the PostgreSQL database and user configured in
+ the previous steps.
+ .
+ If you choose not to create the database, the setup script will only update
+ the Marmotta configuration with the values
  you provided; in this case you need to make sure the database exists and is accessible.
 
 Template: mico-marmotta/host-name

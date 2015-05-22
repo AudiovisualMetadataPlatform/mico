@@ -13,10 +13,11 @@ ADD_DEFINITIONS(
 )
 
 find_package (Threads)
-find_package(CURL)
+find_package(CURL REQUIRED)
+find_package(HDFS)
 find_package(EXPAT)
 find_package(Protobuf)
-find_package(Boost COMPONENTS system REQUIRED)
+find_package(Boost COMPONENTS system log REQUIRED)
 find_package(TESSERACT)
 find_package(LibMagic)
 find_package(AMQPCPP REQUIRED)

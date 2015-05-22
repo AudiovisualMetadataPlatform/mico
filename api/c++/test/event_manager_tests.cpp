@@ -95,9 +95,9 @@ TEST_F(EventManagerTest,registerService) {
 }
 
 TEST_F(EventManagerTest, injectContentItem) {
-	ContentItem* item = eventManager->getPersistenceService().createContentItem();
+	ContentItem* item = eventManager->getPersistenceService()->createContentItem();
 	eventManager->injectContentItem(*item);
-	eventManager->getPersistenceService().deleteContentItem(item->getURI());
+	eventManager->getPersistenceService()->deleteContentItem(item->getURI());
 	delete item;
 }
 
@@ -111,7 +111,7 @@ TEST_F(EventManagerTest, analyseContentItem) {
 	eventManager->registerService(s_bc);
 	eventManager->registerService(s_ac);
 
-	ContentItem* item = eventManager->getPersistenceService().createContentItem();
+	ContentItem* item = eventManager->getPersistenceService()->createContentItem();
 	Content* part = item->createContentPart();
 	part->setType("A");
 	
@@ -130,6 +130,6 @@ TEST_F(EventManagerTest, analyseContentItem) {
 	}
 	EXPECT_EQ(4,count);
 
-	eventManager->getPersistenceService().deleteContentItem(item->getURI());
+	eventManager->getPersistenceService()->deleteContentItem(item->getURI());
 	delete item;
 }

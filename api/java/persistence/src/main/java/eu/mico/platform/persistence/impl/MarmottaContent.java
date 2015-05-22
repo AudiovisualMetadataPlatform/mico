@@ -2,9 +2,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,12 +24,8 @@ import eu.mico.platform.persistence.metadata.MICOProvenance;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
-import org.apache.commons.io.input.ProxyInputStream;
-import org.apache.commons.io.output.ProxyOutputStream;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileSystemManager;
-import org.apache.commons.vfs2.VFS;
+import eu.mico.platform.storage.api.StorageService;
+import eu.mico.platform.storage.impl.StorageServiceBuilder;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -63,30 +59,30 @@ public class MarmottaContent implements Content {
 
     private MarmottaContentItem item;
 
-    private String baseUrl;
-    private String contentUrl;
+    private java.net.URI marmottaBase;
+    private StorageService storage;
     private String id;
 
-    public MarmottaContent(MarmottaContentItem item, String baseUrl, String contentUrl, String id) throws RepositoryException {
-        this.item = item;
-        this.baseUrl = baseUrl;
-        this.contentUrl = contentUrl;
+
+    public MarmottaContent(MarmottaContentItem item, java.net.URI marmottaBase, java.net.URI storageHost, String id) {
+        this.item       = item;
+        this.marmottaBase = marmottaBase;
         this.id = id;
+        this.storage = StorageServiceBuilder.buildStorageService(storageHost);
     }
 
 
-    protected MarmottaContent(MarmottaContentItem item, String baseUrl, String contentUrl, URI uri) {
-        Preconditions.checkArgument(uri.stringValue().startsWith(baseUrl), "the content part URI must match the baseUrl");
-
-        this.item = item;
-        this.baseUrl = baseUrl;
-        this.contentUrl = contentUrl;
-        this.id = uri.stringValue().substring(baseUrl.length() + 1);
+    protected MarmottaContent(MarmottaContentItem item, java.net.URI marmottaBase, java.net.URI storageHost, URI uri) {
+        Preconditions.checkArgument(URITools.validBaseURI(uri.stringValue(), marmottaBase.toString()), "The content part URI \"" + uri.stringValue() + "\" must match the marmottaBase \"" + marmottaBase.toString() + "\"");
+        this.item       = item;
+        this.marmottaBase = marmottaBase;
+        Preconditions.checkArgument(URITools.validContentPartURI(uri.stringValue(), marmottaBase.toString()), "The given content part URI \"" + uri.stringValue() + "\" does not address a content part");
+        this.id = URITools.getContentPartID(uri.stringValue(), marmottaBase.toString());
+        this.storage = StorageServiceBuilder.buildStorageService(storageHost);
     }
-
 
     @Override
-    public String getId() {
+    public String getID() {
         return id;
     }
 
@@ -98,7 +94,7 @@ public class MarmottaContent implements Content {
      */
     @Override
     public URI getURI() {
-        return new URIImpl(baseUrl + "/" + id);
+        return new URIImpl(marmottaBase.toString() + "/" + item.getID() + "/" + id);
     }
 
 
@@ -145,6 +141,7 @@ public class MarmottaContent implements Content {
             throw new RepositoryException("the SPARQL query could not be executed", e);
         }
     }
+
 
 
     /**
@@ -207,10 +204,10 @@ public class MarmottaContent implements Content {
             m.update(createNamed("setContentProperty", of("ci", item.getURI().stringValue(), "p", property.stringValue(), "cp", getURI().stringValue(), "value", value.stringValue())));
         } catch (MalformedQueryException e) {
             log.error("the SPARQL update was malformed:", e);
-            throw new RepositoryException("the SPARQL update was malformed", e);
+            throw new RepositoryException("the SPARQL update was malformed",e);
         } catch (UpdateExecutionException e) {
             log.error("the SPARQL update could not be executed:", e);
-            throw new RepositoryException("the SPARQL update could not be executed", e);
+            throw new RepositoryException("the SPARQL update could not be executed",e);
         }
     }
 
@@ -222,17 +219,17 @@ public class MarmottaContent implements Content {
         Metadata m = item.getMetadata();
         try {
             TupleQueryResult r = m.query(createNamed("getContentProperty", "ci", item.getURI().stringValue(), "p", property.stringValue(), "cp", getURI().stringValue()));
-            if (r.hasNext()) {
+            if(r.hasNext()) {
                 return r.next().getValue("t");
             } else {
                 return null;
             }
         } catch (MalformedQueryException e) {
             log.error("the SPARQL query was malformed:", e);
-            throw new RepositoryException("the SPARQL query was malformed", e);
+            throw new RepositoryException("the SPARQL query was malformed",e);
         } catch (QueryEvaluationException e) {
             log.error("the SPARQL query could not be executed:", e);
-            throw new RepositoryException("the SPARQL query could not be executed", e);
+            throw new RepositoryException("the SPARQL query could not be executed",e);
         }
     }
 
@@ -243,22 +240,12 @@ public class MarmottaContent implements Content {
      * @return
      */
     @Override
-    public OutputStream getOutputStream() throws FileSystemException {
-        FileSystemManager fsmgr = VFS.getManager();
-        final FileObject d = fsmgr.resolveFile(getContentItemPath());
-        final FileObject f = fsmgr.resolveFile(getContentPartPath());
-        if (!d.exists()) {
-            d.createFolder();
+    public OutputStream getOutputStream() throws IOException {
+        try {
+            return storage.getOutputStream(new java.net.URI(item.getID() + "/" + getID()));
+        } catch (java.net.URISyntaxException e) {
+            return null;
         }
-        f.createFile();
-        return new ProxyOutputStream(f.getContent().getOutputStream()) {
-            @Override
-            public void close() throws IOException {
-                super.close();
-                f.close();
-                d.close();
-            }
-        };
     }
 
     /**
@@ -267,19 +254,10 @@ public class MarmottaContent implements Content {
      * @return
      */
     @Override
-    public InputStream getInputStream() throws FileSystemException {
-        FileSystemManager fsmgr = VFS.getManager();
-        final FileObject f = fsmgr.resolveFile(getContentPartPath());
-        if (f.getParent().exists() && f.exists()) {
-            return new ProxyInputStream(f.getContent().getInputStream()) {
-                @Override
-                public void close() throws IOException {
-                    super.close();
-                    f.close();
-                }
-            }
-                    ;
-        } else {
+    public InputStream getInputStream() throws IOException {
+        try {
+            return storage.getInputStream(new java.net.URI(item.getID() + "/" + getID()));
+        } catch (java.net.URISyntaxException e) {
             return null;
         }
     }
@@ -349,7 +327,7 @@ public class MarmottaContent implements Content {
 
         MarmottaContent that = (MarmottaContent) o;
 
-        if (!baseUrl.equals(that.baseUrl)) return false;
+        if (!marmottaBase.equals(that.marmottaBase)) return false;
         if (!id.equals(that.id)) return false;
 
         return true;
@@ -357,7 +335,7 @@ public class MarmottaContent implements Content {
 
     @Override
     public int hashCode() {
-        int result = baseUrl.hashCode();
+        int result = marmottaBase.hashCode();
         result = 31 * result + id.hashCode();
         return result;
     }
@@ -365,17 +343,8 @@ public class MarmottaContent implements Content {
     @Override
     public String toString() {
         return "ContextualMarmottaContent{" +
-                "baseUrl='" + baseUrl + '\'' +
+                "marmottaBase='" + marmottaBase + '\'' +
                 ", id='" + id + '\'' +
                 '}';
     }
-
-    private String getContentItemPath() {
-        return contentUrl + "/" + id.substring(0, id.lastIndexOf('/'));
-    }
-
-    private String getContentPartPath() {
-        return contentUrl + "/" + id + ".bin";
-    }
-
 }

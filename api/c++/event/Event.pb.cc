@@ -34,6 +34,12 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* DiscoveryEvent_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   DiscoveryEvent_reflection_ = NULL;
+const ::google::protobuf::Descriptor* ConfigurationEvent_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  ConfigurationEvent_reflection_ = NULL;
+const ::google::protobuf::Descriptor* ConfigurationDiscoverEvent_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  ConfigurationDiscoverEvent_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* Implementation_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* RegistrationType_descriptor_ = NULL;
 
@@ -112,6 +118,36 @@ void protobuf_AssignDesc_Event_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DiscoveryEvent));
+  ConfigurationEvent_descriptor_ = file->message_type(4);
+  static const int ConfigurationEvent_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ConfigurationEvent, marmottabaseuri_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ConfigurationEvent, storagebaseuri_),
+  };
+  ConfigurationEvent_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      ConfigurationEvent_descriptor_,
+      ConfigurationEvent::default_instance_,
+      ConfigurationEvent_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ConfigurationEvent, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ConfigurationEvent, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(ConfigurationEvent));
+  ConfigurationDiscoverEvent_descriptor_ = file->message_type(5);
+  static const int ConfigurationDiscoverEvent_offsets_[1] = {
+  };
+  ConfigurationDiscoverEvent_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      ConfigurationDiscoverEvent_descriptor_,
+      ConfigurationDiscoverEvent::default_instance_,
+      ConfigurationDiscoverEvent_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ConfigurationDiscoverEvent, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ConfigurationDiscoverEvent, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(ConfigurationDiscoverEvent));
   Implementation_descriptor_ = file->enum_type(0);
   RegistrationType_descriptor_ = file->enum_type(1);
 }
@@ -134,6 +170,10 @@ void protobuf_RegisterTypes(const ::std::string&) {
     ContentEvent_descriptor_, &ContentEvent::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     DiscoveryEvent_descriptor_, &DiscoveryEvent::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    ConfigurationEvent_descriptor_, &ConfigurationEvent::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    ConfigurationDiscoverEvent_descriptor_, &ConfigurationDiscoverEvent::default_instance());
 }
 
 }  // namespace
@@ -147,6 +187,10 @@ void protobuf_ShutdownFile_Event_2eproto() {
   delete ContentEvent_reflection_;
   delete DiscoveryEvent::default_instance_;
   delete DiscoveryEvent_reflection_;
+  delete ConfigurationEvent::default_instance_;
+  delete ConfigurationEvent_reflection_;
+  delete ConfigurationDiscoverEvent::default_instance_;
+  delete ConfigurationDiscoverEvent_reflection_;
 }
 
 void protobuf_AddDesc_Event_2eproto() {
@@ -165,20 +209,27 @@ void protobuf_AddDesc_Event_2eproto() {
     "ISTER\"M\n\rAnalysisEvent\022\021\n\tserviceId\030\001 \002("
     "\t\022\026\n\016contentItemUri\030\002 \002(\t\022\021\n\tobjectUri\030\003"
     " \001(\t\"&\n\014ContentEvent\022\026\n\016contentItemUri\030\001"
-    " \002(\t\"\020\n\016DiscoveryEvent*/\n\016Implementation"
-    "\022\010\n\004JAVA\020\001\022\007\n\003CPP\020\002\022\n\n\006PYTHON\020\003*0\n\020Regis"
-    "trationType\022\014\n\010REGISTER\020\001\022\016\n\nUNREGISTER\020"
-    "\002B\036\n\034eu.mico.platform.event.model", 513);
+    " \002(\t\"\020\n\016DiscoveryEvent\"E\n\022ConfigurationE"
+    "vent\022\027\n\017marmottaBaseUri\030\001 \002(\t\022\026\n\016storage"
+    "BaseUri\030\002 \002(\t\"\034\n\032ConfigurationDiscoverEv"
+    "ent*/\n\016Implementation\022\010\n\004JAVA\020\001\022\007\n\003CPP\020\002"
+    "\022\n\n\006PYTHON\020\003*0\n\020RegistrationType\022\014\n\010REGI"
+    "STER\020\001\022\016\n\nUNREGISTER\020\002B\036\n\034eu.mico.platfo"
+    "rm.event.model", 614);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "Event.proto", &protobuf_RegisterTypes);
   RegistrationEvent::default_instance_ = new RegistrationEvent();
   AnalysisEvent::default_instance_ = new AnalysisEvent();
   ContentEvent::default_instance_ = new ContentEvent();
   DiscoveryEvent::default_instance_ = new DiscoveryEvent();
+  ConfigurationEvent::default_instance_ = new ConfigurationEvent();
+  ConfigurationDiscoverEvent::default_instance_ = new ConfigurationDiscoverEvent();
   RegistrationEvent::default_instance_->InitAsDefaultInstance();
   AnalysisEvent::default_instance_->InitAsDefaultInstance();
   ContentEvent::default_instance_->InitAsDefaultInstance();
   DiscoveryEvent::default_instance_->InitAsDefaultInstance();
+  ConfigurationEvent::default_instance_->InitAsDefaultInstance();
+  ConfigurationDiscoverEvent::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_Event_2eproto);
 }
 
@@ -1509,6 +1560,485 @@ void DiscoveryEvent::Swap(DiscoveryEvent* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = DiscoveryEvent_descriptor_;
   metadata.reflection = DiscoveryEvent_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int ConfigurationEvent::kMarmottaBaseUriFieldNumber;
+const int ConfigurationEvent::kStorageBaseUriFieldNumber;
+#endif  // !_MSC_VER
+
+ConfigurationEvent::ConfigurationEvent()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:mico.event.model.ConfigurationEvent)
+}
+
+void ConfigurationEvent::InitAsDefaultInstance() {
+}
+
+ConfigurationEvent::ConfigurationEvent(const ConfigurationEvent& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:mico.event.model.ConfigurationEvent)
+}
+
+void ConfigurationEvent::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
+  _cached_size_ = 0;
+  marmottabaseuri_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  storagebaseuri_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+ConfigurationEvent::~ConfigurationEvent() {
+  // @@protoc_insertion_point(destructor:mico.event.model.ConfigurationEvent)
+  SharedDtor();
+}
+
+void ConfigurationEvent::SharedDtor() {
+  if (marmottabaseuri_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete marmottabaseuri_;
+  }
+  if (storagebaseuri_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete storagebaseuri_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void ConfigurationEvent::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* ConfigurationEvent::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return ConfigurationEvent_descriptor_;
+}
+
+const ConfigurationEvent& ConfigurationEvent::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_Event_2eproto();
+  return *default_instance_;
+}
+
+ConfigurationEvent* ConfigurationEvent::default_instance_ = NULL;
+
+ConfigurationEvent* ConfigurationEvent::New() const {
+  return new ConfigurationEvent;
+}
+
+void ConfigurationEvent::Clear() {
+  if (_has_bits_[0 / 32] & 3) {
+    if (has_marmottabaseuri()) {
+      if (marmottabaseuri_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        marmottabaseuri_->clear();
+      }
+    }
+    if (has_storagebaseuri()) {
+      if (storagebaseuri_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        storagebaseuri_->clear();
+      }
+    }
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool ConfigurationEvent::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:mico.event.model.ConfigurationEvent)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // required string marmottaBaseUri = 1;
+      case 1: {
+        if (tag == 10) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_marmottabaseuri()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->marmottabaseuri().data(), this->marmottabaseuri().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "marmottabaseuri");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(18)) goto parse_storageBaseUri;
+        break;
+      }
+
+      // required string storageBaseUri = 2;
+      case 2: {
+        if (tag == 18) {
+         parse_storageBaseUri:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_storagebaseuri()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->storagebaseuri().data(), this->storagebaseuri().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "storagebaseuri");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:mico.event.model.ConfigurationEvent)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:mico.event.model.ConfigurationEvent)
+  return false;
+#undef DO_
+}
+
+void ConfigurationEvent::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:mico.event.model.ConfigurationEvent)
+  // required string marmottaBaseUri = 1;
+  if (has_marmottabaseuri()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->marmottabaseuri().data(), this->marmottabaseuri().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "marmottabaseuri");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      1, this->marmottabaseuri(), output);
+  }
+
+  // required string storageBaseUri = 2;
+  if (has_storagebaseuri()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->storagebaseuri().data(), this->storagebaseuri().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "storagebaseuri");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      2, this->storagebaseuri(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+  // @@protoc_insertion_point(serialize_end:mico.event.model.ConfigurationEvent)
+}
+
+::google::protobuf::uint8* ConfigurationEvent::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:mico.event.model.ConfigurationEvent)
+  // required string marmottaBaseUri = 1;
+  if (has_marmottabaseuri()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->marmottabaseuri().data(), this->marmottabaseuri().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "marmottabaseuri");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->marmottabaseuri(), target);
+  }
+
+  // required string storageBaseUri = 2;
+  if (has_storagebaseuri()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->storagebaseuri().data(), this->storagebaseuri().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "storagebaseuri");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        2, this->storagebaseuri(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:mico.event.model.ConfigurationEvent)
+  return target;
+}
+
+int ConfigurationEvent::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required string marmottaBaseUri = 1;
+    if (has_marmottabaseuri()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->marmottabaseuri());
+    }
+
+    // required string storageBaseUri = 2;
+    if (has_storagebaseuri()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->storagebaseuri());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void ConfigurationEvent::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const ConfigurationEvent* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const ConfigurationEvent*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void ConfigurationEvent::MergeFrom(const ConfigurationEvent& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_marmottabaseuri()) {
+      set_marmottabaseuri(from.marmottabaseuri());
+    }
+    if (from.has_storagebaseuri()) {
+      set_storagebaseuri(from.storagebaseuri());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void ConfigurationEvent::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ConfigurationEvent::CopyFrom(const ConfigurationEvent& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ConfigurationEvent::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
+
+  return true;
+}
+
+void ConfigurationEvent::Swap(ConfigurationEvent* other) {
+  if (other != this) {
+    std::swap(marmottabaseuri_, other->marmottabaseuri_);
+    std::swap(storagebaseuri_, other->storagebaseuri_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata ConfigurationEvent::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = ConfigurationEvent_descriptor_;
+  metadata.reflection = ConfigurationEvent_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+#endif  // !_MSC_VER
+
+ConfigurationDiscoverEvent::ConfigurationDiscoverEvent()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:mico.event.model.ConfigurationDiscoverEvent)
+}
+
+void ConfigurationDiscoverEvent::InitAsDefaultInstance() {
+}
+
+ConfigurationDiscoverEvent::ConfigurationDiscoverEvent(const ConfigurationDiscoverEvent& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:mico.event.model.ConfigurationDiscoverEvent)
+}
+
+void ConfigurationDiscoverEvent::SharedCtor() {
+  _cached_size_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+ConfigurationDiscoverEvent::~ConfigurationDiscoverEvent() {
+  // @@protoc_insertion_point(destructor:mico.event.model.ConfigurationDiscoverEvent)
+  SharedDtor();
+}
+
+void ConfigurationDiscoverEvent::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void ConfigurationDiscoverEvent::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* ConfigurationDiscoverEvent::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return ConfigurationDiscoverEvent_descriptor_;
+}
+
+const ConfigurationDiscoverEvent& ConfigurationDiscoverEvent::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_Event_2eproto();
+  return *default_instance_;
+}
+
+ConfigurationDiscoverEvent* ConfigurationDiscoverEvent::default_instance_ = NULL;
+
+ConfigurationDiscoverEvent* ConfigurationDiscoverEvent::New() const {
+  return new ConfigurationDiscoverEvent;
+}
+
+void ConfigurationDiscoverEvent::Clear() {
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool ConfigurationDiscoverEvent::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:mico.event.model.ConfigurationDiscoverEvent)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+  handle_unusual:
+    if (tag == 0 ||
+        ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+        ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+      goto success;
+    }
+    DO_(::google::protobuf::internal::WireFormat::SkipField(
+          input, tag, mutable_unknown_fields()));
+  }
+success:
+  // @@protoc_insertion_point(parse_success:mico.event.model.ConfigurationDiscoverEvent)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:mico.event.model.ConfigurationDiscoverEvent)
+  return false;
+#undef DO_
+}
+
+void ConfigurationDiscoverEvent::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:mico.event.model.ConfigurationDiscoverEvent)
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+  // @@protoc_insertion_point(serialize_end:mico.event.model.ConfigurationDiscoverEvent)
+}
+
+::google::protobuf::uint8* ConfigurationDiscoverEvent::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:mico.event.model.ConfigurationDiscoverEvent)
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:mico.event.model.ConfigurationDiscoverEvent)
+  return target;
+}
+
+int ConfigurationDiscoverEvent::ByteSize() const {
+  int total_size = 0;
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void ConfigurationDiscoverEvent::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const ConfigurationDiscoverEvent* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const ConfigurationDiscoverEvent*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void ConfigurationDiscoverEvent::MergeFrom(const ConfigurationDiscoverEvent& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void ConfigurationDiscoverEvent::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ConfigurationDiscoverEvent::CopyFrom(const ConfigurationDiscoverEvent& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ConfigurationDiscoverEvent::IsInitialized() const {
+
+  return true;
+}
+
+void ConfigurationDiscoverEvent::Swap(ConfigurationDiscoverEvent* other) {
+  if (other != this) {
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata ConfigurationDiscoverEvent::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = ConfigurationDiscoverEvent_descriptor_;
+  metadata.reflection = ConfigurationDiscoverEvent_reflection_;
   return metadata;
 }
 

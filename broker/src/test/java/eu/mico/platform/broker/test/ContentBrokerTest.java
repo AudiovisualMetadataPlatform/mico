@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,7 +46,7 @@ import static org.hamcrest.Matchers.hasProperty;
 public class ContentBrokerTest extends BaseBrokerTest {
 
     @Test
-    public void testSimpleAnalyse() throws IOException, InterruptedException, RepositoryException {
+    public void testSimpleAnalyse() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
         MICOBroker broker = new MICOBrokerImpl(testHost);
 
         setupMockAnalyser("A","B");

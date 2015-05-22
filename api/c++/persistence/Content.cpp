@@ -201,65 +201,14 @@ namespace mico {
             return new mico::io::url_istream(contentDirectory + "/" + id + ".bin");
         }
 
-
-        // needed to suppress libcurl output
-        static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *_device) {
-            return size*nmemb;
-        }
-
         void Content::deleteContent() {
             std::string path(contentDirectory + "/" + id + ".bin");
 
             LOG_DEBUG("deleting binary content from %s", path.c_str());
 
-
-            if(strncmp("ftp://",path.c_str(),6) == 0)  {
-                // FTP URL mode
-                CURL *curl;
-                CURLcode res;
-
-                curl_global_init(CURL_GLOBAL_DEFAULT);
-                curl = curl_easy_init();
-                if(curl) {
-                    // TODO: need to split URL at least into path and filename
-                    int pathSep = path.find('/', 7);
-                    std::string host = path.substr(0, pathSep);
-                    std::string file = path.substr(pathSep +1);
-
-                    //std::string command1 = "CD " + dir;
-                    std::string command2 = "DELE " + file;
-
-                    curl_slist* commands = NULL;
-                    commands = curl_slist_append(commands,command2.c_str());
-
-
-                    curl_easy_setopt(curl, CURLOPT_URL, host.c_str());
-                    curl_easy_setopt(curl, CURLOPT_POSTQUOTE, commands);
-                    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-
-                    res = curl_easy_perform(curl);
-                    curl_easy_cleanup(curl);
-                    if(CURLE_OK != res) {
-                        LOG_ERROR("could not delete resource: %d", res);
-                    }
-
-                    curl_slist_free_all(commands);
-                }
-                curl_global_cleanup();
-
-
-            } else if(strncmp("http://",path.c_str(),7) == 0 || strncmp("https://",path.c_str(),8) == 0) {
-                LOG_ERROR("deleting HTTP data not yet supported ...");
-            } else if(strncmp("file://",path.c_str(),7) == 0) {
-                unlink(path.c_str()+7);
-            } else if(strstr(path.c_str(), "://") != NULL) {
-                // unknown protocol
-                throw std::string("unsupported URL protocol: ") + path;
-            } else {
-                // file mode
-                unlink(path.c_str());
+            if (mico::io::remove(path) != 0) {
+                LOG_ERROR("failed to delete %s", path.c_str());
             }
-
         }
     }
 }

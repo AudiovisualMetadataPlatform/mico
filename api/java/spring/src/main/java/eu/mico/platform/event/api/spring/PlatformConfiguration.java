@@ -25,10 +25,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Configuration and lifecycle of the MICO platform configuration. Consists of initialisation methods, shutdown hook and access to central platform components.
@@ -68,9 +70,9 @@ public class PlatformConfiguration implements ApplicationContextAware{
 
     /**
      *
-     * @throws IOException
+     * @throws IOException, URISyntaxException
      */
-    public void init() throws IOException {
+    public void init() throws IOException, URISyntaxException, TimeoutException {
         logger.info("Connect to MICO platform at " + host);
         eventManager = new EventManagerImpl(host);
         eventManager.init();

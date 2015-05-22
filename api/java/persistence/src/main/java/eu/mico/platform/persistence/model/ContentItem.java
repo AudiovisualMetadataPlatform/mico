@@ -13,12 +13,11 @@
  */
 package eu.mico.platform.persistence.model;
 
-import org.apache.commons.vfs2.FileSystemException;
 import org.openrdf.model.URI;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 
-import java.util.UUID;
+import java.io.IOException;
 
 /**
  * Representation of a ContentItem. A ContentItem is a collection of ContentParts, e.g. an HTML page together with
@@ -26,6 +25,7 @@ import java.util.UUID;
  * with the Linked Data platform, its RDF type is ldp:BasicContainer
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
+ * @author Horst Stadler
  */
 public interface ContentItem {
 
@@ -35,7 +35,7 @@ public interface ContentItem {
      *
      * @return
      */
-    public UUID getID();
+    public String getID();
 
     /**
      * Return the identifier (a unique URI) for this content item. This URI will be based on the internal UUID of the
@@ -86,30 +86,34 @@ public interface ContentItem {
     public Content createContentPart() throws RepositoryException;
 
     /**
-     * Create a new content part with the given URI and return a handle. The handle can then be used for updating the
+     * @deprecated Will be removed in favour of server generated IDs (UUIDs).
+     *
+     * Create a new content part with the given ID and return a handle. The handle can then be used for updating the
      * content and metadata of the content part.
      *
-     * @param id the URI of the content part to create
+     * @param uri the URI of the content part to create
      * @return a handle to a ContentPart object that is suitable for reading and updating
      */
-    public Content createContentPart(URI id) throws RepositoryException;
+
+    @Deprecated
+    public Content createContentPart(URI uri) throws RepositoryException;
 
     /**
      * Return a handle to the ContentPart with the given URI, or null in case the content item does not have this
      * content part.
      *
-     * @param id the URI of the content part to return
+     * @param uri the URI of the content part to return
      * @return a handle to a ContentPart object that is suitable for reading and updating
      */
-    public Content getContentPart(URI id) throws RepositoryException;
+    public Content getContentPart(URI uri) throws RepositoryException;
 
     /**
      * Remove the content part with the given URI in case it exists and is a part of this content item. Otherwise do
      * nothing.
      *
-     * @param id the URI of the content part to delete
+     * @param uri the URI of the content part to delete
      */
-    public void deleteContent(URI id) throws RepositoryException, FileSystemException;
+    public void deleteContent(URI uri) throws RepositoryException, IOException;
 
     /**
      * Return an iterator over all content parts contained in this content item.
