@@ -79,11 +79,13 @@ public class WordCountAnalyzer implements AnalysisService {
     @Override
     public void call(AnalysisResponse analysisResponse, ContentItem contentItem, URI uri) throws AnalysisException, IOException {
         try {
+            log.info("Retrieved analysis call for {}", uri);
             // get the content part with the given URI
             Content content = contentItem.getContentPart(uri);
 
             // get the input stream and read it into a string
             String text = IOUtils.toString(content.getInputStream(), "utf-8");
+            log.debug("Loaded text of {} to count words", uri);
 
             // count the words using a regular expression pattern
             Pattern p_wordcount = Pattern.compile("\\w+");
@@ -92,6 +94,7 @@ public class WordCountAnalyzer implements AnalysisService {
             int count;
             for(count = 0; m.find(); count++);
 
+            log.debug("Countend {} words in {}", count, uri);
 
             // create a new content part for assigning the metadata
             Content result = contentItem.createContentPart();
@@ -106,6 +109,7 @@ public class WordCountAnalyzer implements AnalysisService {
             // report newly available results to broker
             analysisResponse.sendMessage(contentItem, result.getURI());
 
+            log.debug("Done for {}", uri);
         } catch (RepositoryException e) {
             log.error("error accessing metadata repository",e);
 

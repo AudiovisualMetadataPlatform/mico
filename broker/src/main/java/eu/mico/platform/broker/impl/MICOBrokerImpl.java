@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,13 @@ import com.rabbitmq.client.*;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.exception.StateNotFoundException;
 import eu.mico.platform.broker.model.*;
+import eu.mico.platform.broker.util.RabbitMQUtils;
 import eu.mico.platform.event.api.EventManager;
-import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceImpl;
 import eu.mico.platform.persistence.model.ContentItem;
+import org.apache.commons.lang3.StringUtils;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
@@ -30,7 +31,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 /**
  * MICO Message Broker, orchestrating the communication between analysis services and the analysis workflow for content
@@ -108,10 +112,6 @@ public class MICOBrokerImpl implements MICOBroker {
         states       = new HashMap<>();
         channels     = new HashMap<>();
 
-        log.info("initialising persistence service ...");
-
-        persistenceService = new PersistenceServiceImpl(new java.net.URI(this.marmottaBaseUri), new java.net.URI(this.storageBaseUri));
-
         log.info("initialising RabbitMQ connection ...");
 
         ConnectionFactory factory = new ConnectionFactory();
@@ -122,10 +122,13 @@ public class MICOBrokerImpl implements MICOBroker {
 
         connection = factory.newConnection();
 
+        initConfigQueue();
         initRegistryQueue();
         initDiscoveryQueue();
         initContentItemQueue();
-        initConfigQueue();
+
+        log.info("initialising persistence service ...");
+        persistenceService = new PersistenceServiceImpl(new java.net.URI(this.marmottaBaseUri), new java.net.URI(this.storageBaseUri));
     }
 
 
@@ -207,9 +210,57 @@ public class MICOBrokerImpl implements MICOBroker {
         log.info("setting up configuration request queue ...");
         configChannel = connection.createChannel();
 
-        configChannel.queueDeclare(EventManager.QUEUE_CONFIG_REQUEST, false, true, false, null);
+        try {
+            configChannel.queueDeclare(EventManager.QUEUE_CONFIG_REQUEST, false, true, false, null);
+            configChannel.basicConsume(EventManager.QUEUE_CONFIG_REQUEST, false, new ConfigurationRequestConsumer(configChannel));
+        } catch (IOException e) {
+            if (RabbitMQUtils.isCausedByChannelCloseException(e, 405)) {
+                log.info("There is already a broker running. Retrieving central configuration.");
+                // The Channes has already been closed, so we need a new one.
+                Channel channel = connection.createChannel();
+                try {
+                    try {
+                        RpcClient configClient = new RpcClient(channel, "", EventManager.QUEUE_CONFIG_REQUEST, 5000);
+                        try {
+                            log.info("Retrieving Marmotta and storage configuration...");
+                            Event.ConfigurationEvent config = Event.ConfigurationEvent.parseFrom(configClient.primitiveCall(Event.ConfigurationDiscoverEvent.newBuilder().build().toByteArray()));
 
-        contentChannel.basicConsume(EventManager.QUEUE_CONFIG_REQUEST, false, new ConfigurationRequestConsumer(contentChannel));
+                            boolean diff = false;
+                            log.info("Got Marmotta base URI: {}", config.getMarmottaBaseUri());
+                            if (StringUtils.equals(this.marmottaBaseUri, config.getMarmottaBaseUri())) {
+                                log.info("All brokers agree on the marmottaBaseUri: <{}>", marmottaBaseUri);
+                            } else {
+                                log.warn("Other broker reports different marmottaBaseUri: <{}> != <{}> (mine), using the new value", config.getMarmottaBaseUri(), marmottaBaseUri);
+                                this.marmottaBaseUri = config.getMarmottaBaseUri();
+                                diff = true;
+                            }
+                            log.info("Got storage base URI: {}", config.getStorageBaseUri());
+                            if (StringUtils.equals(this.storageBaseUri, config.getStorageBaseUri())) {
+                                log.info("All brokers agree on the storageBaseUri: <{}>", storageBaseUri);
+                            } else {
+                                log.warn("Other broker reports different storageBaseUri: <{}> != <{}> (mine), using the new value", config.getStorageBaseUri(), storageBaseUri);
+                                this.storageBaseUri = config.getStorageBaseUri();
+                                diff = true;
+                            }
+                            if (diff) {
+                                log.warn("!!! Local settings for marmottaBaseUri and/or storageUri overwritten !!!");
+                                log.warn("!!! marmottaBaseUri: <{}>", marmottaBaseUri);
+                                log.warn("!!! storageUri: <{}>", storageBaseUri);
+                                log.warn("!!!");
+                            }
+                        } finally {
+                            configClient.close();
+                        }
+                    } catch (TimeoutException e1) {
+                        throw new IllegalStateException("ConfigQueue exists but no one ins answering there", e);
+                    }
+                } finally {
+                    if (channel.isOpen()) channel.close();
+                }
+            } else {
+                throw e;
+            }
+        }
     }
 
 
