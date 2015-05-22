@@ -52,18 +52,143 @@ namespace mico {
 
         };
 
+
+        AMQPCPPOnCloseBugfix::AMQPCPPOnCloseBugfix() {
+            firstCall = true;
+        }
+
+        bool AMQPCPPOnCloseBugfix::isFirstCall() {
+            firstCallMutex.lock();
+            bool retVal = firstCall;
+            firstCall = false;
+            firstCallMutex.unlock();
+            return retVal;
+        }
+
+        class ConfigurationClient {
+        private:
+            bool error = false;
+            bool receivedConfig = false;
+            AMQP::Channel *channel;
+            std::string marmottaBaseURI;
+            std::string storageBaseURI;
+
+            std::timed_mutex configAvailableMutex; //!< mutex to wait a given timeout for a config reply.
+
+            AMQPCPPOnCloseBugfix amqpWorkaround;
+
+            void parseResponse(const AMQP::Message &message) {
+                mico::event::model::ConfigurationEvent configurationEvent;
+                configurationEvent.ParseFromArray(message.body(), message.bodySize());
+                marmottaBaseURI = configurationEvent.marmottabaseuri();
+                storageBaseURI = configurationEvent.storagebaseuri();
+                receivedConfig = true;
+                //release mutex as config is available now.
+                configAvailableMutex.unlock();
+                LOG_INFO("Marmotta base URI: %s", marmottaBaseURI.c_str());
+                LOG_INFO("Storage base URI: %s", storageBaseURI.c_str());
+            }
+
+        public:
+            ConfigurationClient(AMQP::Channel* channel)
+                : channel(channel)
+            {
+                //lock mutex as we do not have the config now.
+                configAvailableMutex.lock();
+
+                channel->onReady([this]() {
+                    if (!amqpWorkaround.isFirstCall())
+                        return;
+                    //declare config reply queue
+                    this->channel->declareQueue(AMQP::autodelete + AMQP::exclusive)
+                            .onSuccess([this](const std::string &name, uint32_t messageCount, uint32_t consumerCount) {
+                                LOG_INFO ("starting to listen for config replys %s", name.c_str());
+                                this->channel->consume(name).onReceived([this, name](const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
+                                    LOG_INFO ("received config reply ... ");
+                                    //TODO: Check correlation ID
+                                    this->channel->ack(deliveryTag);
+                                    this->channel->removeQueue(name, 0);
+                                    parseResponse(message);
+                                }).onError([this](const char* message) {
+                                    LOG_ERROR ("error consuming message from config reply queue: %s", message);
+                                    this->error = true;
+                                });
+
+                                //prepare config request
+                                mico::event::model::ConfigurationDiscoverEvent discoverEvent;
+                                char buffer[discoverEvent.ByteSize()];
+                                discoverEvent.SerializeToArray(buffer, discoverEvent.ByteSize());
+                                AMQP::Envelope requestEnvelope(buffer, discoverEvent.ByteSize());
+                                requestEnvelope.setReplyTo(name);
+
+                                LOG_INFO("sending config request...");
+                                this->channel->publish("", QUEUE_CONFIG_REQUEST, requestEnvelope);
+                            })
+                            .onError([this](const char* message) {
+                                LOG_ERROR ("could not declare config reply queue: %s", message);
+                                this->error = true;
+                            });
+
+                });
+                channel->onError([this](const char* message) {
+                    LOG_ERROR ("could not open config discover channel: %s", message);
+                    this->error = true;
+                });
+            }
+
+            bool configAvailable() {
+                if(error)
+                    return false;
+                if(receivedConfig)
+                    return true;
+                if (configAvailableMutex.try_lock_for(std::chrono::milliseconds(5000))) {
+                    configAvailableMutex.unlock();
+                    return configAvailable();
+                } else {
+                    LOG_ERROR("did not get a config reply within timeout");
+                    error = true;
+                }
+            }
+
+            std::string getMarmottaBaseURI() {
+                if (configAvailable())
+                    return marmottaBaseURI;
+                return "";
+            }
+
+            std::string getStorageBaseURI() {
+                if (configAvailable())
+                    return storageBaseURI;
+                return "";
+            }
+
+            ~ConfigurationClient() {
+                LOG_INFO("ConfigurationClient destrutor.");
+                if (channel != NULL) {
+                    if (channel->connected()) {
+                        channel->close();
+                    }
+                    delete(channel);
+                    channel = NULL;
+                }
+            }
+        };
+
         class AnalysisConsumer : public Consumer {
             friend class EventManager;
 
         private:
-            PersistenceService& persistence;
+            PersistenceService* persistence;
             AnalysisService&  service;
             const std::string queue;
+            AMQPCPPOnCloseBugfix amqpWorkaround;
 
         public:
-            AnalysisConsumer(PersistenceService& persistence, AnalysisService& service, std::string queue, AMQP::Channel* channel)
+            AnalysisConsumer(PersistenceService* persistence, AnalysisService& service, std::string queue, AMQP::Channel* channel)
                     : Consumer(channel), persistence(persistence), service(service), queue(queue) {
                 channel->onReady([this, channel, queue]() {
+                    if (!amqpWorkaround.isFirstCall())
+                        return;
                     channel->declareQueue(queue, AMQP::durable + AMQP::autodelete)
                             .onSuccess([this,channel, queue]() {
                                 LOG_INFO("starting to consume data for analysis service %s on queue %s", this->service.getServiceID().stringValue().c_str(), this->queue.c_str());
@@ -86,7 +211,7 @@ namespace mico {
 
                 LOG_DEBUG("received analysis event (content item %s, object %s, replyTo %s)", event.contentitemuri().c_str(), event.objecturi().c_str(), message.replyTo().c_str());
 
-                ContentItem *ci = persistence.getContentItem(URI(event.contentitemuri()));
+                ContentItem *ci = (*persistence).getContentItem(URI(event.contentitemuri()));
                 URI object(event.objecturi());
 
                 service.call([this,&message](const ContentItem& ci, const URI& object) {
@@ -118,7 +243,8 @@ namespace mico {
         EventManager::EventManager(const string& host, int rabbitPort, int marmottaPort, const string& user, const string& password)
                 : host(host), rabbitPort(rabbitPort), marmottaPort(marmottaPort)
                 , user(user), password(password), connected(false), unavailable(false)
-                , persistence(host, marmottaPort, user, password), socket(io_service)  {
+                , socket(io_service)  {
+
 
             recv_len = 8192;
             recv_buf = (char*)malloc(recv_len * sizeof(char));
@@ -193,6 +319,8 @@ namespace mico {
             // wait for I/O loop thread to finish properly
             receiver.join();
 
+            if (persistence != NULL)
+                delete(persistence);
         }
 
         void EventManager::doConnect() {
@@ -245,11 +373,16 @@ namespace mico {
 
 
         void EventManager::onConnected(AMQP::Connection *connection) {
-
-
             LOG_DEBUG("establishing AMQP channel ... ");
+
+            // setup configuration service (channel gets shut down by the service itself)
+            configurationClient = new ConfigurationClient(new AMQP::Channel(connection));
+
             channel    = new AMQP::Channel(connection);
             channel->onReady([this]() {
+                if (!amqpWorkaround.isFirstCall())
+                    return;
+
                 // check for the two exchanges we are making use of
                 channel->declareExchange(EXCHANGE_SERVICE_REGISTRY, AMQP::fanout, AMQP::passive)
                         .onError([](const char* message) {
@@ -308,6 +441,24 @@ namespace mico {
 
         }
 
+        /**
+         * Get the persistence service. On the first call it creates the instance using the marmotta and storage base
+         * URI provided by the configuration service.
+         */
+        mico::persistence::PersistenceService* EventManager::getPersistenceService() {
+            if (persistence == NULL) {
+                //configAvailable will wait for a specific timeout, if the configuration fetch process has not finished
+                // yet.
+                if (!configurationClient->configAvailable()) {
+                    LOG_ERROR("failed to get configuration");
+                    throw EventManagerException("failed to get configuration");
+                    unavailable = true;
+                }
+                persistence = new mico::persistence::PersistenceService(configurationClient->getMarmottaBaseURI(), configurationClient->getStorageBaseURI());
+            }
+            return persistence;
+        }
+
         void EventManager::onClosed(AMQP::Connection *connection) {
             LOG_DEBUG("RabbitMQ connection closed!");
         }
@@ -328,7 +479,7 @@ namespace mico {
             boost::uuids::uuid UUID = rnd_gen();
             std::string queue = service->getQueueName() != "" ? service->getQueueName() : boost::uuids::to_string(UUID);
 
-            services[service] = new AnalysisConsumer(persistence, *service, queue, new AMQP::Channel(connection));
+            services[service] = new AnalysisConsumer(getPersistenceService(), *service, queue, new AMQP::Channel(connection));
 
             mico::event::model::RegistrationEvent registrationEvent;
             registrationEvent.set_type(mico::event::model::REGISTER);
