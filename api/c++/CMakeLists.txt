@@ -13,7 +13,7 @@ ADD_DEFINITIONS(
 )
 
 find_package (Threads)
-find_package(CURL)
+find_package(CURL REQUIRED)
 find_package(HDFS)
 find_package(EXPAT)
 find_package(Protobuf)
