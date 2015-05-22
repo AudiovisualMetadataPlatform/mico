@@ -10,7 +10,7 @@
 // network I/O
 #include <boost/asio.hpp>
 
-#include "amqpcpp.h"
+#include <amqpcpp.h>
 #include "rdf_model.hpp"
 #include "ContentItem.hpp"
 #include "PersistenceService.hpp"
