@@ -135,10 +135,10 @@ If you use a different Linux distribution you may have to compile the following 
 
 * AMQP-CPP for communication with RabbitMQ (https://github.com/CopernicaMarketingSoftware/AMQP-CPP, manual build and install tag v2.1.4 - do not use the cmake but the Makefile instead)
 * libhdfs3 (https://github.com/PivotalRD/libhdfs3, manual build and install), dependencies
-  * libxml2 (apt-get install libxml2-dev)
-  * kerberos (apt-get install libkrb5-dev)
-  * libuuid (apt-get install libuuid-dev)
-  * libgsasl (apt-get install libgsasl7-dev)s
+    * libxml2 (apt-get install libxml2-dev)
+    * kerberos (apt-get install libkrb5-dev)
+    * libuuid (apt-get install libuuid-dev)
+    * libgsasl (apt-get install libgsasl7-dev)s
 
 For building the C++ binary tools (mico_inject etc.), there are the following additional dependencies:
 
