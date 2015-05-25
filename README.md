@@ -132,6 +132,7 @@ recommended Debian systems are provided as packages by the MICO repository. In p
 
 If you use a different Linux distribution you may have to compile the following libraries on your own 
 (tested exemplary with Fedora 20):
+
 * AMQP-CPP for communication with RabbitMQ (https://github.com/CopernicaMarketingSoftware/AMQP-CPP, manual build and install tag v2.1.4 - do not use the cmake but the Makefile instead)
 * libhdfs3 (https://github.com/PivotalRD/libhdfs3, manual build and install), dependencies
   * libxml2 (apt-get install libxml2-dev)
