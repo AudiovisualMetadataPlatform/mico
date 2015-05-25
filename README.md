@@ -117,21 +117,27 @@ following prerequisites need to be satisfied:
 
 ### C++ API
 
-Building the C++ API has additional requirements for native libraries. In particular, these are:
+Building the C++ API has additional requirements for native libraries. For convenience, packaes not provided by the 
+recommended Debian systems are provided as packages by the MICO repository. In particular, the dependencies are:
 
 * GNU Autotools, GCC >= 4.8 with C++11 support
 * cURL library for HTTP requests (apt-get install libcurl4-gnutls-dev)
 * expat library for XML parsing (apt-get install libexpat1-dev)
 * Boost 1.55 libraries for additional C++ functionalities (apt-get install libboost1.55-dev libboost-log1.55-dev libboost-system1.55-dev)
 * xxd for inlining SPARQL queries in C++ (part of VIM, apt-get install vim-common)
-* protobuf for the event communication protocol (apt-get install libprotobuf-dev protobuf-compiler)
-* AMQP-CPP for communication with RabbitMQ (apt-get install libamqpcpp-dev=2.1.4)
-* libhdfs3 (apt-get install libhdfs3-dev)
-   * libxml2 (apt-get install libxml2-dev)
-   * kerberos (apt-get install libkrb5-dev)
-   * libuuid (apt-get install libuuid-dev)
-   * libgsasl (apt-get install libgsasl7-dev)
+* protobuf for the event communication protocol (apt-get install libprotobuf-dev protobuf-compiler, version > 2.5)
+* AMQP-CPP for communication with RabbitMQ (apt-get install libamqpcpp-dev=2.1.4 - provided by MICO repository)
+* libhdfs3 (apt-get install libhdfs3-dev - - provided by MICO repository)
 * Doxygen for building the documentation
+
+If you use a different Linux distribution you may have to compile the following libraries on your own 
+(tested exemplary with Fedora 20):
+* AMQP-CPP for communication with RabbitMQ (https://github.com/CopernicaMarketingSoftware/AMQP-CPP, manual build and install tag v2.1.4 - do not use the cmake but the Makefile instead)
+* libhdfs3 (https://github.com/PivotalRD/libhdfs3, manual build and install), dependencies
+  * libxml2 (apt-get install libxml2-dev)
+  * kerberos (apt-get install libkrb5-dev)
+  * libuuid (apt-get install libuuid-dev)
+  * libgsasl (apt-get install libgsasl7-dev)s
 
 For building the C++ binary tools (mico_inject etc.), there are the following additional dependencies:
 
