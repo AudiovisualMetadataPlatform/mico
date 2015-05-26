@@ -1,4 +1,10 @@
-libmico-api (1.1.0) UNRELEASED; urgency=medium
+libmico-api (1.1.1) unstable; urgency=medium
+
+  * fixed build dependency
+
+ -- Jakob Frank <jakob.frank@salzburgresearch.at>  Tue, 26 May 2015 09:37:19 +0200
+
+libmico-api (1.1.0) unstable; urgency=medium
 
   * include the new storage (HDFS)
   * moved out amqp dependency (uses libamqpcpp2)
