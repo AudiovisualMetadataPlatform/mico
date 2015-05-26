@@ -1,3 +1,9 @@
+libmico-api (1.1.2) UNRELEASED; urgency=medium
+
+  * now really fixing the dependencies2
+
+ -- Jakob Frank <jakob.frank@salzburgresearch.at>  Tue, 26 May 2015 10:00:59 +0200
+
 libmico-api (1.1.1) unstable; urgency=medium
 
   * fixed build dependency
