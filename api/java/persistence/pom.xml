@@ -30,7 +30,7 @@
 
     <repositories>
         <repository>
-            <id>snapshots</id>
+            <id>snapshots-up</id>
             <url>http://nil.dimis.fim.uni-passau.de:8080/nexus-2.0.6/content/repositories/thirdparty</url>
             <releases>
                 <enabled>true</enabled>
