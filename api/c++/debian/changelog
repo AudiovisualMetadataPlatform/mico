@@ -2,6 +2,7 @@ libmico-api (1.1.3) unstable; urgency=medium
 
   [ Jakob Frank ]
   * Merge in PR #5 from Christian
+  * Add missing dependency for the OCR service: en language model
 
   [ Christan Weigel ]
   * improved build process
