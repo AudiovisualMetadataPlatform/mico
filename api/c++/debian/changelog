@@ -1,3 +1,14 @@
+libmico-api (1.1.3) unstable; urgency=medium
+
+  [ Jakob Frank ]
+  * Merge in PR #5 from Christian
+
+  [ Christan Weigel ]
+  * improved build process
+  * protobuf template now get compiled during build
+
+ -- Jakob Frank <jakob.frank@salzburgresearch.at>  Wed, 27 May 2015 10:05:10 +0200
+
 libmico-api (1.1.2) unstable; urgency=medium
 
   * now really fixing the dependencies2
