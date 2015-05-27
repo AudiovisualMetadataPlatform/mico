@@ -16,7 +16,7 @@ find_package (Threads)
 find_package(CURL REQUIRED)
 find_package(HDFS)
 find_package(EXPAT)
-find_package(Protobuf)
+find_package(Protobuf 2.6 REQUIRED)
 find_package(Boost COMPONENTS system log REQUIRED)
 find_package(TESSERACT)
 find_package(LibMagic)
@@ -43,6 +43,8 @@ if(BUILD_DOCUMENTATION)
 
     install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc/libmico-api1)
 endif()
+
+include_directories(${AMQPCPP_INCLUDE_DIRS})
 
 
 add_subdirectory(logging)
