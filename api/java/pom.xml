@@ -109,6 +109,17 @@
         <url>https://issues.mico-project.eu/browse/FRAMEWORK/</url>
     </issueManagement>
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <modules>
         <module>persistence</module>
         <module>event</module>

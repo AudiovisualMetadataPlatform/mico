@@ -29,6 +29,17 @@
     <name>MICO Platform: Storage</name>
     <packaging>pom</packaging>
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <modules>
         <module>core</module>
         <module>webapp</module>
