@@ -1,130 +1,114 @@
 package eu.mico.platform.persistence.metadata;
 
-import com.github.anno4j.model.Agent;
-import com.github.anno4j.model.Motivation;
-
+/**
+ * Object representing the provenance information
+ * inside the MICO platform.
+ */
 public class MICOProvenance {
 
     /**
-     * Refers to http://www.w3.org/ns/oa#motivatedBy
+     * The Name of the extractor invoking the
+     * createAnnotation() function of the
+     * content object.
      */
-    private Motivation motivatedBy;
+    private String extractorName;
+
     /**
-     * Refers to http://www.w3.org/ns/oa#serializedBy
+     * Specifies the input (type) the
+     * given extractor requires.
      */
-    private Agent serializedBy;
+    private String requires;
+
     /**
-     * Refers to http://www.w3.org/ns/oa#serializedAt
+     * Specifies the output (type) the
+     * given extractor provides.
      */
-    private String serializedAt;
-    /**
-     * Refers to http://www.w3.org/ns/oa#annotatedBy
-     */
-    private Agent annotatedBy;
-    /**
-     * Refers to http://www.w3.org/ns/oa#annotatedAt
-     */
-    private String annotatedAt;
+    private String provides;
 
     public MICOProvenance() {
-
-    }
-
-    public MICOProvenance(Motivation motivatedBy, Agent serializedBy, String serializedAt, Agent annotatedBy, String annotatedAt) {
-        this.motivatedBy = motivatedBy;
-        this.serializedBy = serializedBy;
-        this.serializedAt = serializedAt;
-        this.annotatedBy = annotatedBy;
-        this.annotatedAt = annotatedAt;
     }
 
     /**
-     * Sets new Refers to http:www.w3.orgnsoa#serializedBy.
+     * Custom Constructor setting the the required provenance information.
      *
-     * @param serializedBy New value of Refers to http:www.w3.orgnsoa#serializedBy.
+     * @param extractorName The name of the extractor.
+     * @param requires      The required input (type).
+     * @param provides      The provided output (type).
      */
-    public void setSerializedBy(Agent serializedBy) {
-        this.serializedBy = serializedBy;
+    public MICOProvenance(String extractorName, String requires, String provides) {
+        this.extractorName = extractorName;
+        this.requires = requires;
+        this.provides = provides;
+    }
+
+
+    /**
+     * Sets new The Name of the extractor invoking the
+     * createAnnotation function of the
+     * content object..
+     *
+     * @param extractorName New value of The Name of the extractor invoking the
+     *                      createAnnotation function of the
+     *                      content object..
+     */
+    public void setExtractorName(String extractorName) {
+        this.extractorName = extractorName;
     }
 
     /**
-     * Gets Refers to http:www.w3.orgnsoa#serializedAt.
+     * Sets new Specifies the input type the
+     * given extractor requires..
      *
-     * @return Value of Refers to http:www.w3.orgnsoa#serializedAt.
+     * @param requires New value of Specifies the input type the
+     *                 given extractor requires..
      */
-    public String getSerializedAt() {
-        return serializedAt;
+    public void setRequires(String requires) {
+        this.requires = requires;
     }
 
     /**
-     * Sets new Refers to http:www.w3.orgnsoa#annotatedAt.
+     * Gets The Name of the extractor invoking the
+     * createAnnotation function of the
+     * content object..
      *
-     * @param annotatedAt New value of Refers to http:www.w3.orgnsoa#annotatedAt.
+     * @return Value of The Name of the extractor invoking the
+     * createAnnotation function of the
+     * content object..
      */
-    public void setAnnotatedAt(String annotatedAt) {
-        this.annotatedAt = annotatedAt;
+    public String getExtractorName() {
+        return extractorName;
     }
 
     /**
-     * Sets new Refers to http:www.w3.orgnsoa#serializedAt.
+     * Gets Specifies the output type the
+     * given extractor provides..
      *
-     * @param serializedAt New value of Refers to http:www.w3.orgnsoa#serializedAt.
+     * @return Value of Specifies the output type the
+     * given extractor provides..
      */
-    public void setSerializedAt(String serializedAt) {
-        this.serializedAt = serializedAt;
+    public String getProvides() {
+        return provides;
     }
 
     /**
-     * Gets Refers to http:www.w3.orgnsoa#motivatedBy.
+     * Gets Specifies the input type the
+     * given extractor requires..
      *
-     * @return Value of Refers to http:www.w3.orgnsoa#motivatedBy.
+     * @return Value of Specifies the input type the
+     * given extractor requires..
      */
-    public Motivation getMotivatedBy() {
-        return motivatedBy;
+    public String getRequires() {
+        return requires;
     }
 
     /**
-     * Sets new Refers to http:www.w3.orgnsoa#motivatedBy.
+     * Sets new Specifies the output type the
+     * given extractor provides..
      *
-     * @param motivatedBy New value of Refers to http:www.w3.orgnsoa#motivatedBy.
+     * @param provides New value of Specifies the output type the
+     *                 given extractor provides..
      */
-    public void setMotivatedBy(Motivation motivatedBy) {
-        this.motivatedBy = motivatedBy;
-    }
-
-    /**
-     * Gets Refers to http:www.w3.orgnsoa#annotatedBy.
-     *
-     * @return Value of Refers to http:www.w3.orgnsoa#annotatedBy.
-     */
-    public Agent getAnnotatedBy() {
-        return annotatedBy;
-    }
-
-    /**
-     * Sets new Refers to http:www.w3.orgnsoa#annotatedBy.
-     *
-     * @param annotatedBy New value of Refers to http:www.w3.orgnsoa#annotatedBy.
-     */
-    public void setAnnotatedBy(Agent annotatedBy) {
-        this.annotatedBy = annotatedBy;
-    }
-
-    /**
-     * Gets Refers to http:www.w3.orgnsoa#serializedBy.
-     *
-     * @return Value of Refers to http:www.w3.orgnsoa#serializedBy.
-     */
-    public Agent getSerializedBy() {
-        return serializedBy;
-    }
-
-    /**
-     * Gets Refers to http:www.w3.orgnsoa#annotatedAt.
-     *
-     * @return Value of Refers to http:www.w3.orgnsoa#annotatedAt.
-     */
-    public String getAnnotatedAt() {
-        return annotatedAt;
+    public void setProvides(String provides) {
+        this.provides = provides;
     }
 }
