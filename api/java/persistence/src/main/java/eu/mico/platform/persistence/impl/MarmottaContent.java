@@ -283,20 +283,13 @@ public class MarmottaContent implements Content {
         SpecificResource specificResource = new SpecificResource();
         specificResource.setSelector(selection);
 
-        MICOAnnotation annotation = new MICOAnnotation();
+        Annotation annotation = new Annotation();
         annotation.setBody(body);
         annotation.setTarget(specificResource);
 
-        Software agent = new Software();
-        agent.setName(provenance.getExtractorName());
-
-        annotation.setAnnotatedBy(agent);
-
         // setting the current timestamp
         annotation.setAnnotatedAt(new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString());
-
-        annotation.setProvides(provenance.getProvides());
-        annotation.setRequires(provenance.getRequires());
+        annotation.setAnnotatedBy(new MICOSoftwareAgent(provenance.getRequires(), provenance.getProvides(), provenance.getExtractorName()));
 
         // Write the annotation object to the triple store
         Anno4j.getInstance().createPersistenceService().persistAnnotation(annotation);
