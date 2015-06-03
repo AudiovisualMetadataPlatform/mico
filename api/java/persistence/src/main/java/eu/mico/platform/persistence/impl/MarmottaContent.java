@@ -17,6 +17,7 @@ import com.github.anno4j.Anno4j;
 import com.github.anno4j.model.Annotation;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Selector;
+import com.github.anno4j.model.impl.agent.Software;
 import com.github.anno4j.model.impl.target.SpecificResource;
 import com.google.common.base.Preconditions;
 import eu.mico.platform.persistence.exception.ConceptNotFoundException;
@@ -42,6 +43,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Calendar;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
@@ -281,14 +283,13 @@ public class MarmottaContent implements Content {
         SpecificResource specificResource = new SpecificResource();
         specificResource.setSelector(selection);
 
-        // create annotation object
         Annotation annotation = new Annotation();
         annotation.setBody(body);
         annotation.setTarget(specificResource);
-        annotation.setAnnotatedAt(provenance.getAnnotatedAt());
-        annotation.setAnnotatedBy(provenance.getAnnotatedBy());
-        annotation.setSerializedAt(provenance.getSerializedAt());
-        annotation.setSerializedBy(provenance.getSerializedBy());
+
+        // setting the current timestamp
+        annotation.setAnnotatedAt(new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString());
+        annotation.setAnnotatedBy(new MICOSoftwareAgent(provenance.getRequires(), provenance.getProvides(), provenance.getExtractorName()));
 
         // Write the annotation object to the triple store
         Anno4j.getInstance().createPersistenceService().persistAnnotation(annotation);

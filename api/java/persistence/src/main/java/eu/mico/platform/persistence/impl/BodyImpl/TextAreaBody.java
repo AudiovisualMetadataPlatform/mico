@@ -1,20 +1,23 @@
 package eu.mico.platform.persistence.impl.BodyImpl;
 
 import com.github.anno4j.model.Body;
+import com.github.anno4j.model.ontologies.CNT;
+import com.github.anno4j.model.ontologies.DCTYPES;
+import com.github.anno4j.model.ontologies.RDF;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 
-@Iri(Ontology.TEXT_DCTYPES)
+@Iri(DCTYPES.TEXT)
 public class TextAreaBody extends Body {
 
     @Iri(Ontology.FORMAT_DCTERMS)
     private String format;
     
-    @Iri(Ontology.CHARS_CNT)
+    @Iri(CNT.CHARS)
     private String value;
     
-    @Iri(Ontology.TYPE_RDF)
-    private final String TYPE = Ontology.CONTENT_AS_TEXT_CNT;
+    @Iri(RDF.VALUE)
+    private final String TYPE = CNT.CONTENT_AS_TEXT;
 
     public TextAreaBody() {
     }

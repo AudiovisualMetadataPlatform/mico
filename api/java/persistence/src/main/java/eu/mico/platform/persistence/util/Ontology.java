@@ -1,5 +1,7 @@
 package eu.mico.platform.persistence.util;
 
+import com.github.anno4j.model.ontologies.DCTERMS;
+
 public class Ontology {
 
     /**
@@ -107,13 +109,13 @@ public class Ontology {
     /**
      * Open Annotation (oa:)
      */
-    
+
     public final static String NS_OA = "http://www.w3.org/ns/oa#";
 
     public final static String ANNOTATION_OA = NS_OA + "annotation";
-    
+
     public final static String SPECIFIC_RESOURCE_OA = NS_OA + "SpecificResource";
-    
+
     public final static String FRAGMENT_SELECTOR_OA = NS_OA + "FragmentSelector";
 
     public final static String HAS_BODY_OA = NS_OA + "hasBody";
@@ -131,71 +133,15 @@ public class Ontology {
     public final static String HAS_SELECTOR_OA = NS_OA + "hasSelector";
 
     public final static String HAS_SOURCE_OA = NS_OA + "hasSource";
-    
+
     public final static String SVG_SELECTOR_OA = NS_OA + "SVGSelector";
-
-
-
-    /**
-     * RDF (rdf:)
-     */
-
-    public final static String NS_RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-
-    public final static String TYPE_RDF = NS_RDF + "type";
-    public final static String VALUE_RDF = NS_RDF + "value";
 
 
     /**
      * Dublin Core Terms (dcterms:)
      */
 
-    public final static String NS_DCTERMS = "http://purl.org/dc/terms/";
-    
-    public final static String IMAGE_DCTERMS = NS_DCTERMS + "Image";
-    
-    public final static String CONFORMS_TO_DCTERMS = NS_DCTERMS + "conformsTo";
-    
-    public final static String FORMAT_DCTERMS = NS_DCTERMS + "format";
+    public final static String FORMAT_DCTERMS = DCTERMS.NS + "format";
 
-    /**
-     * Dublin Core Types (dctypes:) 
-     */
-    
-    public final static String NS_DCTYPES = "http://purl.org/dc/dcmitype/";
-    
-    public final static String TEXT_DCTYPES = NS_DCTYPES + "TEXT_DCTYPES";
-    
-    /**
-     * Provenance (prov:) 
-     */
-    
-    public final static String NS_PROV = "http://www.w3.org/ns/prov/";
-    
-    public final static String SOFTWARE_AGENT_PROV = NS_PROV + "SoftwareAgent";
-    
-    public final static String GENERATED_AT_TIME_POV = NS_PROV + "generatedAtTime";
-    
-    public final static String WAS_GENERATED_BY_POV = NS_PROV + "wasGeneratedBy";
-    
-    public final static String INVALIDATED_AT_TIME_POV = NS_PROV + "invalidatedAtTime";
-
-    /**
-     * Friend of a Friend (foaf:) 
-     */
-    
-    public final static String NS_FOAF = "http://xmlns.com/foaf/0.1/";
-    
-    public final static String NAME_FOAF = NS_FOAF + "name";
-
-    /**
-     * Representing Content (cnt:)
-     */
-    
-    public final static String NS_CNT = "http://www.w3.org/2011/content#";
-
-    public final static String CHARS_CNT = NS_CNT + "chars";
-    
-    public final static String CONTENT_AS_TEXT_CNT = Ontology.NS_CNT + "ContentAsText";
 }
 
