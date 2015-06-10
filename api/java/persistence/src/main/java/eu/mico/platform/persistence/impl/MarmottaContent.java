@@ -280,12 +280,15 @@ public class MarmottaContent implements Content {
             throw new ConceptNotFoundException("Please create an empty org.open.concepts file inside your META-INF folder.");
         }
 
-        SpecificResource specificResource = new SpecificResource();
-        specificResource.setSelector(selection);
-
         Annotation annotation = new Annotation();
         annotation.setBody(body);
-        annotation.setTarget(specificResource);
+
+        if(source != null) {
+            SpecificResource specificResource = new SpecificResource();
+            specificResource.setSelector(selection);
+            specificResource.setSource(new ContentPartRMO(new URIImpl(source.getURI().toString())));
+            annotation.setTarget(specificResource);
+        }
 
         // setting the current timestamp
         annotation.setAnnotatedAt(new java.sql.Timestamp(Calendar.getInstance().getTime().getTime()).toString());
