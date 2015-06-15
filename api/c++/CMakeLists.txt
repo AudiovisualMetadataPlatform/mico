@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 2.8.4)
 project(mico-platform)
-set(VERSION_MAJOR 1)
-set(VERSION_MINOR 0)
-set(VERSION_PATCH 0)
+
+if (NOT DEFINED MICO_PLATFORM_VERSION)
+    set(MICO_PLATFORM_VERSION "1.1.3")
+endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules/")
 
