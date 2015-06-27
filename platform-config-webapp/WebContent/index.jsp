@@ -1,9 +1,11 @@
-<html>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<title>Spring MVC Tutorial Series by Crunchify.com</title>
+<title>Mico Platform - configurations</title>
 <style type="text/css">
 body {
-	background-image: url('http://crunchify.com/bg.png');
+	background-image: url('<c:url value="img/bg.png" />');;
 }
 </style>
 </head>

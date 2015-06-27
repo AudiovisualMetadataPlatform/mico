@@ -23,13 +23,9 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.HtmlUtils;
 
 
-/*
- * author: Crunchify.com
- * 
- */
  
 /**
- * @author sld
+ * @author Marcel Sieland
  *
  */
 @Controller
@@ -47,9 +43,7 @@ public class MainController  {
 	@RequestMapping(value={"/configs","/run"})
 	public ModelAndView configs() {
  
-		String message = "<br><div style='text-align:center;'>"
-				+ "********** <h3>Available Platform Configurations</h3> **********";
-		ModelAndView modelAndView = new ModelAndView("configs", "message", message);
+		ModelAndView modelAndView = new ModelAndView("result");
 		Set<Object> propertyNames = getCmdProps().keySet();
 		modelAndView.addObject("commands", propertyNames);
 		if (currentConfig != null){
@@ -57,6 +51,16 @@ public class MainController  {
 		}
 
 		return modelAndView;
+	}
+	
+	/**
+	 * resets the platform, by stopping all known configurations and their extractors
+	 * @return ModelAndView for config page
+	 */
+	@RequestMapping(value={"/stopAll"})
+	public ModelAndView reset() {
+		stopAll();
+		return configs();
 	}
 
 	
@@ -69,16 +73,14 @@ public class MainController  {
 		StringBuilder status = new StringBuilder();
 		
 		if(cmdName.equals(currentConfig)){
-			status.append("Configuration already started");
+			status.append("Configuration ["+currentConfig+"] already started");
 		}else{
 			if (currentConfig != null){
 				stopConfig(currentConfig);
-				status.append("Old configuration stopped");
+				status.append("Old configuration ["+currentConfig+"] stopped");
 			}
 			System.out.println("command: " + cmdName);
-			String cmd = getCmdProps().getProperty(cmdName);
-			String fullCMD = "sudo "+base+" "+cmd+" "+host+" "+user+" "+pw+ " start";
-			ProcessBuilder pb = new ProcessBuilder("bash", "-c", fullCMD);
+			ProcessBuilder pb = getProcessBuilder(cmdName,true);
 			modelAndView.addAllObjects(runCommand(pb));
 			currentConfig = cmdName;
 		}
@@ -101,32 +103,34 @@ public class MainController  {
 
 	private Map<String, String> runCommand(ProcessBuilder pb) throws IOException,
 			InterruptedException {
-		Process process = pb.start();
-		IOThreadHandler outputHandler = new IOThreadHandler(process.getInputStream());
-		IOThreadHandler errorHandler = new IOThreadHandler(process.getErrorStream());
-		outputHandler.start();
-		process.waitFor();
 		String error = null;
-		int exitValue = process.exitValue();
-		if (exitValue != 0){
-			String errMsg = errorHandler.getOutput().toString();
-			error = "unable to start selected configuration: Error Code " + exitValue+ 
-					"\n"+HtmlUtils.htmlEscape(errMsg);
-			System.out.println("Error ["+exitValue + "] - " + error );
-		}
-
 		Map<String,String> map = new HashMap<String, String>(); 
-		String message = HtmlUtils.htmlEscape(outputHandler.getOutput().toString());
-		map.put("message", message);
+		try {
+			Process process = pb.start();
+			IOThreadHandler outputHandler = new IOThreadHandler(process.getInputStream());
+			IOThreadHandler errorHandler = new IOThreadHandler(process.getErrorStream());
+			outputHandler.start();
+			process.waitFor();
+			int exitValue = process.exitValue();
+			if (exitValue != 0) {
+				String errMsg = errorHandler.getOutput().toString();
+				error = "unable to start selected configuration: Error Code "
+						+ exitValue + "\n" + HtmlUtils.htmlEscape(errMsg);
+				System.out.println("Error [" + exitValue + "] - " + error);
+			}
+
+			String message = HtmlUtils.htmlEscape(outputHandler.getOutput()
+					.toString());
+			map.put("message", message);
+		} catch (IOException e) {
+			error = e.getMessage();
+		}
 		map.put("error", error);
 		return map;
 	}
 
 	private boolean stopConfig(String cmdName) {
-		String cmd = getCmdProps().getProperty(cmdName);
-		String fullCMD = "sudo " + base + " " + cmd + " " + host + " " + user
-				+ " " + pw + " stop";
-		ProcessBuilder pb = new ProcessBuilder("bash", "-c", fullCMD);
+		ProcessBuilder pb = getProcessBuilder(cmdName,false);
 		try {
 			runCommand(pb);
 		} catch (IOException | InterruptedException e) {
@@ -137,20 +141,34 @@ public class MainController  {
 		return true;
 	}
 
+
+	/**
+	 * create a process builder to start or stop a configuration
+	 * @param cmd - path to configuration script
+	 * @param start - start or stop the configuration
+	 * @return
+	 */
+	private ProcessBuilder getProcessBuilder(String cmdName,boolean start) {
+		String cmd = getCmdProps().getProperty(cmdName);
+		String fullCMD = "sudo " + base + " " + cmd + " " + host + " " + user
+				+ " " + pw + " stop";
+		ProcessBuilder pb = new ProcessBuilder("bash", "-c", fullCMD);
+		return pb;
+	}
+
 	private boolean stopAll(){
 		Properties props = getCmdProps();
 		Set<Object> keys = props.keySet();
 		for (Object key : keys){
-			String cmd = (String) props.get(key);
-			
-			String fullCMD = "sudo "+base+" "+cmd+" "+host+" "+user+" "+pw+ " stop";
-			ProcessBuilder pb = new ProcessBuilder("bash", "-c", fullCMD);
-			try {
-				runCommand(pb);
-			} catch (IOException | InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return false;
+			if(key instanceof String){
+				ProcessBuilder pb = getProcessBuilder((String)key,false);
+				try {
+					runCommand(pb);
+				} catch (IOException | InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					return false;
+				}
 			}
 		}
 		return true;
