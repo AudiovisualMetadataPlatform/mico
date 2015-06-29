@@ -8,6 +8,24 @@ import org.openrdf.annotations.Iri;
 @Iri(Ontology.FACE_DETECTION_BODY_MICO)
 public class FaceDetectionBody extends Body {
 
+    /**
+     * Confidence value for the detected face
+     */
+    @Iri(Ontology.HAS_CONFIDENCE_MICO)
+    private Double confidence;
+
     public FaceDetectionBody() {
+    }
+
+    public FaceDetectionBody(Double confidence) {
+        this.confidence = confidence;
+    }
+
+    public Double getConfidence() {
+        return confidence;
+    }
+
+    public void setConfidence(Double confidence) {
+        this.confidence = confidence;
     }
 }

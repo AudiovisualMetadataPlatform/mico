@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 public class SpatialFragmentSelector extends FragmentSelector {
 
-    private Pattern pattern = Pattern.compile("#xywh=(\\d*),(\\d*),(\\d*),(\\d*)");
+    private Pattern pattern = Pattern.compile("#xywh=(\\d+),(\\d+),(\\d+),(\\d+)");
 
 
     public SpatialFragmentSelector() {
