@@ -21,7 +21,7 @@ prepare target machine
  - create /var/lib/tomcat7/conf/Catalina/localhost/mico-conf.xml
  and insert
  <Context docBase="/usr/share/mico/mico-conf.war" unpackWAR="false" useNaming="true">
-    <Parameter name="conf.script" value="/home/user/Downloads/extractors-public/configurations/mico-config-$
+    <Parameter name="conf.script" value="/home/user/Downloads/extractors-public/configurations/mico-config-extractors.sh">
     <Parameter name="mico.host" value="mico-platform" override="true"/>
     <Parameter name="mico.user" value="mico" override="true"/>
     <Parameter name="mico.pass" value="mico" override="true"/>
