@@ -8,11 +8,12 @@ prepare target machine
 
 3. store webapp war in `/usr/share/mico/mico-conf.war`
 4. store properties file with available extractor configurations in `/usr/share/mico/platform-config.properties` and insert values such as
+
 		[displayName]=[path to config start script]
 		animal-detection=/usr/share/mico/configurations/mico-detect-animals.sh
 
 5. Tell tomcat where to find the webapp
-  * create `/var/lib/tomcat7/conf/Catalina/localhost/mico-conf.xml` and insert 
+    * create `/var/lib/tomcat7/conf/Catalina/localhost/mico-conf.xml` and insert 
 
 			<Context docBase="/usr/share/mico/mico-conf.war" unpackWAR="false" useNaming="true">
       		  <Parameter name="conf.script" value="/home/user/Downloads/extractors-public/configurations/mico-config-extractors.sh"/>
@@ -20,4 +21,4 @@ prepare target machine
       		  <Parameter name="mico.user" value="mico" override="true"/>
       		  <Parameter name="mico.pass" value="mico" override="true"/>
     		</Context>
-  * restart tomcat: sudo service tomcat7 restart
+    * restart tomcat: sudo service tomcat7 restart
