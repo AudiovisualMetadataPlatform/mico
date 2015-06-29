@@ -21,4 +21,5 @@ prepare target machine
       		  <Parameter name="mico.user" value="mico" override="true"/>
       		  <Parameter name="mico.pass" value="mico" override="true"/>
     		</Context>
+
     * restart tomcat: sudo service tomcat7 restart
