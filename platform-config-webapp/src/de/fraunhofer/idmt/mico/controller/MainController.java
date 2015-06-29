@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -169,8 +170,9 @@ public class MainController  {
 
 	private boolean stopAll(){
 		Properties props = getCmdProps();
-		Set<Object> keys = props.keySet();
-		for (Object key : keys){
+		Enumeration<Object> keys = props.keys();
+		while ( keys.hasMoreElements()){
+			Object key = keys.nextElement();
 			if(key instanceof String){
 				ProcessBuilder pb = getProcessBuilder((String)key,false);
 				try {
