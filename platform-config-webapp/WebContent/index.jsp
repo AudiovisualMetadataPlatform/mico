@@ -15,7 +15,7 @@ body {
 		<h2>
 			This is the platform configuration web site<br> <br>
 		</h2>
-
+<jsp:forward page="configs.html" />
 		<h3>
 			<a href="run.html">Click here to See available configurations... </a>
 		</h3>

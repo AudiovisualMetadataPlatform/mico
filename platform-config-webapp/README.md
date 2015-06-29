@@ -20,6 +20,7 @@ prepare target machine
 
 			<Context docBase="/usr/share/mico/mico-conf.war" unpackWAR="false" useNaming="true">
       		  <Parameter name="conf.script" value="/home/user/Downloads/extractors-public/configurations/mico-config-extractors.sh"/>
+      		  <Parameter name="conf.props" value="/usr/share/mico/platform-config.properties"/>
       		  <Parameter name="mico.host" value="mico-platform" override="true"/>
       		  <Parameter name="mico.user" value="mico" override="true"/>
       		  <Parameter name="mico.pass" value="mico" override="true"/>

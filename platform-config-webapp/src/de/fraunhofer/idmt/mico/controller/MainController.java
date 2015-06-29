@@ -48,6 +48,8 @@ public class MainController  {
 		modelAndView.addObject("commands", propertyNames);
 		if (currentConfig != null){
 			modelAndView.addObject("status", "Active configuration: " + currentConfig);
+		}else{
+			modelAndView.addObject("status", "No configuration currently active");
 		}
 
 		return modelAndView;
@@ -82,7 +84,10 @@ public class MainController  {
 			System.out.println("command: " + cmdName);
 			ProcessBuilder pb = getProcessBuilder(cmdName,true);
 			modelAndView.addAllObjects(runCommand(pb));
-			currentConfig = cmdName;
+			if (!modelAndView.getModel().containsKey("error") || modelAndView.getModel().get("error") != null){
+				// if there was no error, the current config should be the new one
+				currentConfig = cmdName;
+			}
 		}
 
 		Set<Object> propertyNames = getCmdProps().keySet();
@@ -96,6 +101,11 @@ public class MainController  {
 	private void setInits(HttpServletRequest req) {
 		ServletContext context = req.getServletContext();
 		base = context.getInitParameter("conf.script");
+		String cmdPropFilePath = context.getInitParameter("conf.props");
+		cmdPropFileLnx = cmdPropFilePath != null ?
+				new File(cmdPropFilePath) : 
+				new File("/usr/share/mico/platform-config.properties");
+
 		host = context.getInitParameter("mico.host") != null ? context.getInitParameter("mico.host") : "mico-platform";
 		user = context.getInitParameter("mico.user") != null ? context.getInitParameter("mico.user") : "mico";
 		pw =   context.getInitParameter("mico.pass") != null ? context.getInitParameter("mico.pass") : "mico";
@@ -150,8 +160,9 @@ public class MainController  {
 	 */
 	private ProcessBuilder getProcessBuilder(String cmdName,boolean start) {
 		String cmd = getCmdProps().getProperty(cmdName);
+		String mode = start?" start":" stop";
 		String fullCMD = "sudo " + base + " " + cmd + " " + host + " " + user
-				+ " " + pw + " stop";
+				+ " " + pw + mode;
 		ProcessBuilder pb = new ProcessBuilder("bash", "-c", fullCMD);
 		return pb;
 	}
@@ -177,18 +188,20 @@ public class MainController  {
 	private Properties getCmdProps(){
 		if (cmdProps == null){
 			cmdProps = new Properties();
-			try {
-				if (cmdPropFileLnx.exists() && cmdPropFileLnx.canRead()) {
-					cmdProps.load(new FileInputStream(cmdPropFileLnx));
-				}else{
-					cmdProps.put("ls", "ls");
-					cmdProps.put("pwd", "pwd");
-					cmdProps.put("data\u0020from\u0020drive\u0020C:", "dir .");
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		}else{
+			cmdProps.clear();
+		}
+		try {
+			if (cmdPropFileLnx.exists() && cmdPropFileLnx.canRead()) {
+				cmdProps.load(new FileInputStream(cmdPropFileLnx));
+			}else{
+				cmdProps.put("ls", "ls");
+				cmdProps.put("pwd", "pwd");
+				cmdProps.put("data\u0020from\u0020drive\u0020C:", "dir .");
 			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return cmdProps;
 	}
