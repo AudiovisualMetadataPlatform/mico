@@ -35,6 +35,7 @@ Makefile
 .deps/
 .libs/
 .dirstamp
+api/c++/debian/libmico-api1.links
 
 *.iml
 .idea

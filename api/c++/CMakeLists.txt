@@ -5,6 +5,11 @@ if (NOT DEFINED MICO_PLATFORM_VERSION)
     set(MICO_PLATFORM_VERSION "1.1.3")
 endif()
 
+string(REPLACE "." ";" VERSION_LIST ${MICO_PLATFORM_VERSION})
+list(GET VERSION_LIST 0 MICO_PLATFORM_VERSION_MAJOR)
+list(GET VERSION_LIST 1 MICO_PLATFORM_VERSION_MINOR)
+list(GET VERSION_LIST 2 MICO_PLATFORM_VERSION_PATCH)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/modules/")
 
 ADD_DEFINITIONS(
@@ -24,6 +29,9 @@ find_package(LibMagic)
 find_package(AMQPCPP REQUIRED)
 find_package(Doxygen)
 find_package(LibDaemon)
+
+#this line creates the links file info with the current version for the debian packaging
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/debian/libmico-api1.links.in ${CMAKE_CURRENT_SOURCE_DIR}/debian/libmico-api1.links @ONLY)
 
 option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" )
 
