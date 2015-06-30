@@ -6,6 +6,7 @@ import com.github.anno4j.model.ontologies.RDF;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 
+// TODO: Split if needed. See TVSBody
 @Iri(Ontology.AVQ_BODY_MICO)
 public class AVQBody extends Body {
 

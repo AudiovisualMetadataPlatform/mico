@@ -31,6 +31,7 @@ public class SpatialTemporalFragmentSelector extends FragmentSelector {
      * @param end end of the temporal fragment in miliseconds
      */
     public SpatialTemporalFragmentSelector(int x, int y, int width, int height, int start, int end) {
+        this.setConformsToFragmentSpecification(FragmentSpecification.W3C_MEDIA_FRAGMENTS);
         this.setSpatialTemporalFragment(x, y, width, height, start, end);
     }
 

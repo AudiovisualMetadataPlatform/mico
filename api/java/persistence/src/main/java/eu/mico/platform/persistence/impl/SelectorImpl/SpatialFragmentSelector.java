@@ -16,6 +16,7 @@ public class SpatialFragmentSelector extends FragmentSelector {
     }
 
     public SpatialFragmentSelector(int x, int y, int width, int height) {
+        this.setConformsToFragmentSpecification(FragmentSpecification.W3C_MEDIA_FRAGMENTS);
         this.setSpatialFragment(x, y, width, height);
     }
 
