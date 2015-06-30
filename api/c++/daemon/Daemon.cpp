@@ -99,7 +99,7 @@ namespace mico {
                 services.push_back(s);
             }
 
-            start(name, server, user, password, services);
+            return start(name, server, user, password, services);
         }
 
 
