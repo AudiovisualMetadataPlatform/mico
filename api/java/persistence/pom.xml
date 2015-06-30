@@ -28,19 +28,6 @@
 
     <name>MICO Platform: Persistence</name>
 
-    <repositories>
-        <repository>
-            <id>snapshots-up</id>
-            <url>http://nil.dimis.fim.uni-passau.de:8080/nexus-2.0.6/content/repositories/thirdparty</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
     <build>
         <plugins>
             <plugin>
@@ -142,7 +129,7 @@
         <dependency>
             <groupId>com.github.anno4j</groupId>
             <artifactId>anno4j-core</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
