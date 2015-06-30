@@ -42,7 +42,8 @@ public class MainController  {
 	String pw = "mico-default";
 	
 	@RequestMapping(value={"/configs","/run"})
-	public ModelAndView configs() {
+	public ModelAndView configs(HttpServletRequest req) {
+		setInits(req);
  
 		ModelAndView modelAndView = new ModelAndView("result");
 		Set<Object> propertyNames = getCmdProps().keySet();
@@ -61,16 +62,22 @@ public class MainController  {
 	 * @return ModelAndView for config page
 	 */
 	@RequestMapping(value={"/stopAll"})
-	public ModelAndView reset() {
-		stopAll();
-		return configs();
+	public ModelAndView reset(HttpServletRequest req) {
+		String stopAll = stopAll();
+		if ("OK".equals(stopAll)){
+			currentConfig =null;
+			return configs(req);
+		}else{
+			ModelAndView mav = configs(req);
+			mav.addObject("error",stopAll);
+			return mav;
+		}
 	}
 
 	
 	@RequestMapping(value="/run", method= RequestMethod.POST)
 	public ModelAndView run(@RequestParam("command") String cmdName,
 			HttpServletRequest req) throws InterruptedException, IOException {
-		setInits(req);
 		
 		ModelAndView modelAndView = new ModelAndView("result");
 		StringBuilder status = new StringBuilder();
@@ -81,6 +88,7 @@ public class MainController  {
 			if (currentConfig != null){
 				stopConfig(currentConfig);
 				status.append("Old configuration ["+currentConfig+"] stopped");
+				currentConfig = null;
 			}
 			System.out.println("command: " + cmdName);
 			ProcessBuilder pb = getProcessBuilder(cmdName,true);
@@ -103,9 +111,10 @@ public class MainController  {
 		ServletContext context = req.getServletContext();
 		base = context.getInitParameter("conf.script");
 		String cmdPropFilePath = context.getInitParameter("conf.props");
-		cmdPropFileLnx = cmdPropFilePath != null ?
-				new File(cmdPropFilePath) : 
-				new File("/usr/share/mico/platform-config.properties");
+		if (cmdPropFilePath != null && cmdPropFilePath.length() > 0)
+			cmdPropFileLnx = new File(cmdPropFilePath);
+		else
+			cmdPropFileLnx = new File("/usr/share/mico/platform-config.properties");
 
 		host = context.getInitParameter("mico.host") != null ? context.getInitParameter("mico.host") : "mico-platform";
 		user = context.getInitParameter("mico.user") != null ? context.getInitParameter("mico.user") : "mico";
@@ -121,9 +130,10 @@ public class MainController  {
 			IOThreadHandler outputHandler = new IOThreadHandler(process.getInputStream());
 			IOThreadHandler errorHandler = new IOThreadHandler(process.getErrorStream());
 			outputHandler.start();
+			errorHandler.start();
 			process.waitFor();
 			int exitValue = process.exitValue();
-			if (exitValue != 0) {
+			if (exitValue != 0 || errorHandler.getOutput().length() > 0) {
 				String errMsg = errorHandler.getOutput().toString();
 				error = "unable to start selected configuration: Error Code "
 						+ exitValue + "\n" + HtmlUtils.htmlEscape(errMsg);
@@ -168,7 +178,7 @@ public class MainController  {
 		return pb;
 	}
 
-	private boolean stopAll(){
+	private String stopAll(){
 		Properties props = getCmdProps();
 		Enumeration<Object> keys = props.keys();
 		while ( keys.hasMoreElements()){
@@ -180,11 +190,11 @@ public class MainController  {
 				} catch (IOException | InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-					return false;
+					return e.getLocalizedMessage();
 				}
 			}
 		}
-		return true;
+		return "OK";
 	}
 
 	private Properties getCmdProps(){
