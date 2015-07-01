@@ -17,10 +17,8 @@ import com.github.anno4j.Anno4j;
 import com.github.anno4j.model.Annotation;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Selector;
-import com.github.anno4j.model.impl.agent.Software;
 import com.github.anno4j.model.impl.target.SpecificResource;
 import com.google.common.base.Preconditions;
-import eu.mico.platform.persistence.exception.ConceptNotFoundException;
 import eu.mico.platform.persistence.metadata.MICOProvenance;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
@@ -39,7 +37,6 @@ import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -56,8 +53,6 @@ import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
 public class MarmottaContent implements Content {
 
     private static Logger log = LoggerFactory.getLogger(MarmottaContent.class);
-
-    private final String CONCEPT_PATH = "META-INF/org.openrdf.concepts";
 
     private MarmottaContentItem item;
 
@@ -272,14 +267,6 @@ public class MarmottaContent implements Content {
     @Override
     public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance, Selector selection) throws RepositoryException {
 
-        /**
-          * Check if the extractor has created the org.openrdf.concepts file. Alibaba requires this file (can be empty),  
-         * to persist the annotated objects. If the file was not found, a ConceptNotFoundException will be thrown. 
-         */
-        if(!new File(body.getClass().getClassLoader().getResource(CONCEPT_PATH).getFile()).isFile()) {
-            throw new ConceptNotFoundException("Please create an empty org.open.concepts file inside your META-INF folder.");
-        }
-
         Annotation annotation = new Annotation();
         annotation.setBody(body);
 
@@ -320,7 +307,7 @@ public class MarmottaContent implements Content {
     }
 
     @Override
-    public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance) throws ConceptNotFoundException, RepositoryException {
+    public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance) throws  RepositoryException {
         return createAnnotation(body, source, provenance, null);
     }
 
