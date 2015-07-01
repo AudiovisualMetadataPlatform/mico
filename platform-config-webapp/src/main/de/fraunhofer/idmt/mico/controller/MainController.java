@@ -16,6 +16,8 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -32,11 +34,13 @@ import org.springframework.web.util.HtmlUtils;
 @Controller
 public class MainController  {
 	
-	private File cmdPropFileLnx = new File("/usr/share/mico/platform-config.properties");
+	private File cmdPropFile = new File("/usr/share/mico/platform-config.properties");
 	private Properties cmdProps = null;
 	private String currentConfig = null;
 	
-	String base = "/home/user/Downloads/extractors-public/configurations/mico-config-extractors.sh";
+    private static Logger log = LoggerFactory.getLogger(MainController.class);
+
+    String base = "/home/user/Downloads/extractors-public/configurations/mico-config-extractors.sh";
 	String host = "mico-platform-default";
 	String user = "mico-default";
 	String pw = "mico-default";
@@ -112,9 +116,9 @@ public class MainController  {
 		base = context.getInitParameter("conf.script");
 		String cmdPropFilePath = context.getInitParameter("conf.props");
 		if (cmdPropFilePath != null && cmdPropFilePath.length() > 0)
-			cmdPropFileLnx = new File(cmdPropFilePath);
+			cmdPropFile = new File(cmdPropFilePath);
 		else
-			cmdPropFileLnx = new File("/usr/share/mico/platform-config.properties");
+			cmdPropFile = new File("/usr/share/mico/platform-config.properties");
 
 		host = context.getInitParameter("mico.host") != null ? context.getInitParameter("mico.host") : "mico-platform";
 		user = context.getInitParameter("mico.user") != null ? context.getInitParameter("mico.user") : "mico";
@@ -133,11 +137,14 @@ public class MainController  {
 			errorHandler.start();
 			process.waitFor();
 			int exitValue = process.exitValue();
-			if (exitValue != 0 || errorHandler.getOutput().length() > 0) {
+			if (exitValue != 0 ) {
 				String errMsg = errorHandler.getOutput().toString();
 				error = "unable to start selected configuration: Error Code "
 						+ exitValue + "\n" + HtmlUtils.htmlEscape(errMsg);
 				System.out.println("Error [" + exitValue + "] - " + error);
+			}else if (errorHandler.getOutput().length() > 0){
+				String errMsg = errorHandler.getOutput().toString();
+				log.info("command returned 0, but there is data on error stream: \n{}",errMsg);
 			}
 
 			String message = HtmlUtils.htmlEscape(outputHandler.getOutput()
@@ -204,9 +211,11 @@ public class MainController  {
 			cmdProps.clear();
 		}
 		try {
-			if (cmdPropFileLnx.exists() && cmdPropFileLnx.canRead()) {
-				cmdProps.load(new FileInputStream(cmdPropFileLnx));
+			if (cmdPropFile.exists() && cmdPropFile.canRead()) {
+				cmdProps.load(new FileInputStream(cmdPropFile));
 			}else{
+				log.warn("unable to load commands from: {}",cmdPropFile);
+				log.info("create default commands ...");
 				cmdProps.put("ls", "ls");
 				cmdProps.put("pwd", "pwd");
 				cmdProps.put("data\u0020from\u0020drive\u0020C:", "dir .");

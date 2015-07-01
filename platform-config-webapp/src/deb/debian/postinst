@@ -1,0 +1,57 @@
+#!/bin/sh
+# postinst script for [[name]]
+
+set -e
+
+# summary of how this script can be called:
+#        * <postinst> `configure' <most-recently-configured-version>
+#        * <old-postinst> `abort-upgrade' <new version>
+#        * <conflictor's-postinst> `abort-remove' `in-favour' <package>
+#          <new-version>
+#        * <postinst> `abort-remove'
+#        * <deconfigured's-postinst> `abort-deconfigure' `in-favour'
+#          <failed-install-package> <version> `removing'
+#          <conflicting-package> <version>
+# for details, see http://www.debian.org/doc/debian-policy/ or
+# the debian-policy package
+
+case "$1" in
+    configure)
+        # Source debconf library.
+        . /usr/share/debconf/confmodule
+        service tomcat7 stop || true
+
+        db_get mico-base/username
+        MICO_USER="$RET"
+
+        db_get mico-base/password
+        MICO_PASS="$RET"
+
+        db_get mico-marmotta/host-name
+        HOSTNAME="$RET"
+
+        db_stop
+
+        cat >/etc/tomcat7/Catalina/localhost/mico-configuration.xml <<EOF
+<Context docBase="/usr/share/mico/mico-conf.war" unpackWAR="false" useNaming="true">
+    <Parameter name="conf.script" value="/usr/share/mico/configurations/mico-config-extractors.sh" override="true"/>
+    <Parameter name="conf.props" value="/usr/share/mico/platform-config.properties" override="true"/>
+    <Parameter name="mico.host" value="$HOSTNAME" override="true"/>
+    <Parameter name="mico.user" value="$MICO_USER" override="true"/>
+    <Parameter name="mico.pass" value="$MICO_PASS" override="true"/>
+</Context>
+EOF
+
+        service tomcat7 start || true
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+exit 0
