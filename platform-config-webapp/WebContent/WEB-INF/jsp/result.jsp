@@ -68,6 +68,13 @@ select, input {
 	min-width: 180px;
 	margin: 10px;
 }
+
+footer{
+	text-align: center;
+}
+footer a {
+	margin: 5px;
+}
 </style>
 </head>
 <body>
@@ -115,5 +122,10 @@ select, input {
 		</div>
 	</div>
 	</main>
+	<footer>
+		<a href="stopAll.html">stop all extractors</a>  
+		<a href="/broker">show broker page</a>
+		<a href="/marmotta">show marmotta</a>
+	</footer>
 </body>
 </html>

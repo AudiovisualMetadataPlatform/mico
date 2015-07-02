@@ -204,6 +204,7 @@
         <module>marmotta</module>
         <module>broker</module>
         <module>storage</module>
+        <module>platform-config-webapp</module>
     </modules>
 
 </project>

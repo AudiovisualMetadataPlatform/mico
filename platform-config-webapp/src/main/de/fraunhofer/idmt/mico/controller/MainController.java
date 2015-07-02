@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -15,6 +16,8 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,23 +34,28 @@ import org.springframework.web.util.HtmlUtils;
 @Controller
 public class MainController  {
 	
-	private File cmdPropFileLnx = new File("/usr/share/mico/platform-config.properties");
+	private File cmdPropFile = new File("/usr/share/mico/platform-config.properties");
 	private Properties cmdProps = null;
 	private String currentConfig = null;
 	
-	String base = "/home/user/Downloads/extractors-public/configurations/mico-config-extractors.sh";
+    private static Logger log = LoggerFactory.getLogger(MainController.class);
+
+    String base = "/home/user/Downloads/extractors-public/configurations/mico-config-extractors.sh";
 	String host = "mico-platform-default";
 	String user = "mico-default";
 	String pw = "mico-default";
 	
 	@RequestMapping(value={"/configs","/run"})
-	public ModelAndView configs() {
+	public ModelAndView configs(HttpServletRequest req) {
+		setInits(req);
  
 		ModelAndView modelAndView = new ModelAndView("result");
 		Set<Object> propertyNames = getCmdProps().keySet();
 		modelAndView.addObject("commands", propertyNames);
 		if (currentConfig != null){
 			modelAndView.addObject("status", "Active configuration: " + currentConfig);
+		}else{
+			modelAndView.addObject("status", "No configuration currently active");
 		}
 
 		return modelAndView;
@@ -58,16 +66,22 @@ public class MainController  {
 	 * @return ModelAndView for config page
 	 */
 	@RequestMapping(value={"/stopAll"})
-	public ModelAndView reset() {
-		stopAll();
-		return configs();
+	public ModelAndView reset(HttpServletRequest req) {
+		String stopAll = stopAll();
+		if ("OK".equals(stopAll)){
+			currentConfig =null;
+			return configs(req);
+		}else{
+			ModelAndView mav = configs(req);
+			mav.addObject("error",stopAll);
+			return mav;
+		}
 	}
 
 	
 	@RequestMapping(value="/run", method= RequestMethod.POST)
 	public ModelAndView run(@RequestParam("command") String cmdName,
 			HttpServletRequest req) throws InterruptedException, IOException {
-		setInits(req);
 		
 		ModelAndView modelAndView = new ModelAndView("result");
 		StringBuilder status = new StringBuilder();
@@ -78,11 +92,15 @@ public class MainController  {
 			if (currentConfig != null){
 				stopConfig(currentConfig);
 				status.append("Old configuration ["+currentConfig+"] stopped");
+				currentConfig = null;
 			}
 			System.out.println("command: " + cmdName);
 			ProcessBuilder pb = getProcessBuilder(cmdName,true);
 			modelAndView.addAllObjects(runCommand(pb));
-			currentConfig = cmdName;
+			if (!modelAndView.getModel().containsKey("error") || modelAndView.getModel().get("error") != null){
+				// if there was no error, the current config should be the new one
+				currentConfig = cmdName;
+			}
 		}
 
 		Set<Object> propertyNames = getCmdProps().keySet();
@@ -96,6 +114,12 @@ public class MainController  {
 	private void setInits(HttpServletRequest req) {
 		ServletContext context = req.getServletContext();
 		base = context.getInitParameter("conf.script");
+		String cmdPropFilePath = context.getInitParameter("conf.props");
+		if (cmdPropFilePath != null && cmdPropFilePath.length() > 0)
+			cmdPropFile = new File(cmdPropFilePath);
+		else
+			cmdPropFile = new File("/usr/share/mico/platform-config.properties");
+
 		host = context.getInitParameter("mico.host") != null ? context.getInitParameter("mico.host") : "mico-platform";
 		user = context.getInitParameter("mico.user") != null ? context.getInitParameter("mico.user") : "mico";
 		pw =   context.getInitParameter("mico.pass") != null ? context.getInitParameter("mico.pass") : "mico";
@@ -110,13 +134,17 @@ public class MainController  {
 			IOThreadHandler outputHandler = new IOThreadHandler(process.getInputStream());
 			IOThreadHandler errorHandler = new IOThreadHandler(process.getErrorStream());
 			outputHandler.start();
+			errorHandler.start();
 			process.waitFor();
 			int exitValue = process.exitValue();
-			if (exitValue != 0) {
+			if (exitValue != 0 ) {
 				String errMsg = errorHandler.getOutput().toString();
 				error = "unable to start selected configuration: Error Code "
 						+ exitValue + "\n" + HtmlUtils.htmlEscape(errMsg);
 				System.out.println("Error [" + exitValue + "] - " + error);
+			}else if (errorHandler.getOutput().length() > 0){
+				String errMsg = errorHandler.getOutput().toString();
+				log.info("command returned 0, but there is data on error stream: \n{}",errMsg);
 			}
 
 			String message = HtmlUtils.htmlEscape(outputHandler.getOutput()
@@ -150,16 +178,18 @@ public class MainController  {
 	 */
 	private ProcessBuilder getProcessBuilder(String cmdName,boolean start) {
 		String cmd = getCmdProps().getProperty(cmdName);
+		String mode = start?" start":" stop";
 		String fullCMD = "sudo " + base + " " + cmd + " " + host + " " + user
-				+ " " + pw + " stop";
+				+ " " + pw + mode;
 		ProcessBuilder pb = new ProcessBuilder("bash", "-c", fullCMD);
 		return pb;
 	}
 
-	private boolean stopAll(){
+	private String stopAll(){
 		Properties props = getCmdProps();
-		Set<Object> keys = props.keySet();
-		for (Object key : keys){
+		Enumeration<Object> keys = props.keys();
+		while ( keys.hasMoreElements()){
+			Object key = keys.nextElement();
 			if(key instanceof String){
 				ProcessBuilder pb = getProcessBuilder((String)key,false);
 				try {
@@ -167,28 +197,32 @@ public class MainController  {
 				} catch (IOException | InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-					return false;
+					return e.getLocalizedMessage();
 				}
 			}
 		}
-		return true;
+		return "OK";
 	}
 
 	private Properties getCmdProps(){
 		if (cmdProps == null){
 			cmdProps = new Properties();
-			try {
-				if (cmdPropFileLnx.exists() && cmdPropFileLnx.canRead()) {
-					cmdProps.load(new FileInputStream(cmdPropFileLnx));
-				}else{
-					cmdProps.put("ls", "ls");
-					cmdProps.put("pwd", "pwd");
-					cmdProps.put("data\u0020from\u0020drive\u0020C:", "dir .");
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		}else{
+			cmdProps.clear();
+		}
+		try {
+			if (cmdPropFile.exists() && cmdPropFile.canRead()) {
+				cmdProps.load(new FileInputStream(cmdPropFile));
+			}else{
+				log.warn("unable to load commands from: {}",cmdPropFile);
+				log.info("create default commands ...");
+				cmdProps.put("ls", "ls");
+				cmdProps.put("pwd", "pwd");
+				cmdProps.put("data\u0020from\u0020drive\u0020C:", "dir .");
 			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return cmdProps;
 	}
