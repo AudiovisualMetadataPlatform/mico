@@ -21,10 +21,20 @@ public class TVSBody extends Body {
         this.confidence = confidence;
     }
 
+    /**
+     * Gets Confidence value for the detected shotkeyframe.
+     *
+     * @return Value of Confidence value for the detected shotkeyframe.
+     */
     public Double getConfidence() {
         return confidence;
     }
 
+    /**
+     * Sets new Confidence value for the detected shotkeyframe.
+     *
+     * @param confidence New value of Confidence value for the detected shotkeyframe.
+     */
     public void setConfidence(Double confidence) {
         this.confidence = confidence;
     }

@@ -66,11 +66,15 @@ public class Ontology {
 
     public final static String AVQ_BODY_MICO = NS_MICO + "AVQBody";
 
+    public final static String AVQ_SHOT_BODY_MICO = NS_MICO + "AVQShotBody";
+
+    public final static String AVQ_KEY_FRAME_BODY_MICO = NS_MICO + "AVQKeyFrameBody";
+
     public final static String TVS_BODY_MICO = NS_MICO + "TVSBody";
 
-    public final static String KEY_FRAME_BODY_MICO = NS_MICO + "KeyFrameBody";
+    public final static String TVS_KEY_FRAME_BODY_MICO = NS_MICO + "TVSKeyFrameBody";
 
-    public final static String SHOT_BODY_MICO = NS_MICO + "ShotBody";
+    public final static String TVS_SHOT_BODY_MICO = NS_MICO + "TVSShotBody";
 
     public final static String VSI_BODY_MICO = NS_MICO + "VSIBody";
 
