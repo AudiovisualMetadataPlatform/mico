@@ -1,23 +1,17 @@
 package eu.mico.platform.persistence.impl;
 
 import com.github.anno4j.model.Annotation;
+import com.github.anno4j.model.impl.ResourceObject;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 import org.openrdf.model.Resource;
-import org.openrdf.repository.object.ObjectConnection;
-import org.openrdf.repository.object.RDFObject;
 
 /**
  * Wrapper for the mico ContentPart object. Containing
  * only the information that used to be persisted using Anno4j.
  */
 @Iri(Ontology.CONTENT_PART_MICO)
-public class ContentPartRMO implements RDFObject {
-
-    /**
-     * Unique identifier for the instance.
-     */
-    private Resource resource;
+public class ContentPartRMO extends ResourceObject {
 
     /**
      * Conforms to oa:Annotation (http://www.openannotation.org/spec/core/core.html)
@@ -25,39 +19,11 @@ public class ContentPartRMO implements RDFObject {
     @Iri(Ontology.HAS_CONTENT_MICO)
     private Annotation annotation;
 
-
     public ContentPartRMO() {
     }
 
-    public ContentPartRMO(Resource resource) {
-        this.resource = resource;
-    }
-
-    /**
-     * The current {@link org.openrdf.repository.object.ObjectConnection} this object is attached to. Will be implemented by the proxy object.
-     */
-    @Override
-    public ObjectConnection getObjectConnection() {
-        return null;
-    }
-
-    /**
-     * Gets Unique identifier for the instance.
-     *
-     * @return Value of Unique identifier for the instance.
-     */
-    @Override
-    public Resource getResource() {
-        return resource;
-    }
-
-    /**
-     * Sets new Unique identifier for the instance..
-     *
-     * @param resource New value of Unique identifier for the instance..
-     */
-    public void setResource(Resource resource) {
-        this.resource = resource;
+    public ContentPartRMO(Resource uri) {
+        this.setResource(uri);
     }
 
     /**
