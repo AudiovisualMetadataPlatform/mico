@@ -23,14 +23,19 @@ m4/ltversion.m4
 m4/lt~obsolete.m4
 Makefile
 
+*.deb
+*.dsc
+*.tar.*
 *.o
 *.a
 *.la
 *.lo
 *.user
+*.changes
 .deps/
 .libs/
 .dirstamp
+api/c++/debian/libmico-api1.links
 
 *.iml
 .idea
