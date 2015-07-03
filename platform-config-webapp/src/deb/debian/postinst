@@ -35,7 +35,7 @@ case "$1" in
         cat >/etc/tomcat7/Catalina/localhost/mico-configuration.xml <<EOF
 <Context docBase="/usr/share/mico/mico-conf.war" unpackWAR="false" useNaming="true">
     <Parameter name="conf.script" value="/usr/share/mico/configurations/mico-config-extractors.sh" override="true"/>
-    <Parameter name="conf.props" value="/usr/share/mico/platform-config.properties" override="true"/>
+    <Parameter name="conf.props" value="/usr/share/mico/configurations/platform-config.properties" override="true"/>
     <Parameter name="mico.host" value="$HOSTNAME" override="true"/>
     <Parameter name="mico.user" value="$MICO_USER" override="true"/>
     <Parameter name="mico.pass" value="$MICO_PASS" override="true"/>
