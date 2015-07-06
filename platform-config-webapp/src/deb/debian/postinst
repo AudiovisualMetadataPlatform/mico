@@ -33,14 +33,22 @@ case "$1" in
         db_stop
 
         cat >/etc/tomcat7/Catalina/localhost/mico-configuration.xml <<EOF
-<Context docBase="/usr/share/mico/mico-conf.war" unpackWAR="false" useNaming="true">
-    <Parameter name="conf.script" value="/usr/share/mico/configurations/mico-config-extractors.sh" override="true"/>
-    <Parameter name="conf.props" value="/usr/share/mico/configurations/platform-config.properties" override="true"/>
-    <Parameter name="mico.host" value="$HOSTNAME" override="true"/>
-    <Parameter name="mico.user" value="$MICO_USER" override="true"/>
-    <Parameter name="mico.pass" value="$MICO_PASS" override="true"/>
-</Context>
+<!-- ATTENTION: This is a generated file
+  -- ALL CHANGES HERE WILL BE LOST
+  -- edit mico-configuration.xml.tmpl and run dpkg-reconfigure mico-conf to update
+  -->
 EOF
+        sed "s|%HOSTNAME%|$HOSTNAME|g; s|%MICO_USER%|$MICO_USER|g; s|%MICO_PASS%|$MICO_PASS|g" \
+            /etc/tomcat7/Catalina/localhost/mico-configuration.xml.tmpl >> /etc/tomcat7/Catalina/localhost/mico-configuration.xml
+
+        cat >/etc/sudoers.d/mico-configuration <<EOF
+# ATTENTION: This is a generated file
+# ALL CHANGES HERE WILL BE LOST
+# edit mico-configuration.sudoers.tmpl and run dpkg-reconfigure mico-conf to update
+EOF
+        cat /etc/sudoers.d/mico-configuration.sudoers.tmpl >> /etc/sudoers.d/mico-configuration
+        chown root:root /etc/sudoers.d/mico-configuration
+        chmod 0440 /etc/sudoers.d/mico-configuration
 
         service tomcat7 start || true
     ;;

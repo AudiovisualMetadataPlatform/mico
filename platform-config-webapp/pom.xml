@@ -58,7 +58,6 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -117,6 +116,29 @@
                                                 <group>tomcat7</group>
                                             </mapper>
                                         </data>
+										<data>
+											<src>src/deb/resources/mico-configuration.xml.tmpl</src>
+											<type>file</type>
+											<mapper>
+												<type>perm</type>
+												<prefix>/etc/tomcat7/Catalina/localhost</prefix>
+												<user>root</user>
+												<group>root</group>
+											</mapper>
+											<conffile>true</conffile>
+										</data>
+										<data>
+											<src>src/deb/resources/mico-configuration.sudoers.tmpl</src>
+											<type>file</type>
+											<mapper>
+												<type>perm</type>
+												<prefix>/etc/sudoers.d</prefix>
+												<user>root</user>
+												<group>root</group>
+												<filemode>440</filemode>
+											</mapper>
+											<conffile>true</conffile>
+										</data>
                                     </dataSet>
                                 </configuration>
                             </execution>
