@@ -1,0 +1,24 @@
+# Inputs:
+ #   $(ci) : The uri of the content item
+ #   $(cp) : The uri of the content part
+ #   $(format) : The MIME type of the binary file
+ #   $(location) : The location of the binary file
+ #   $(prevCP) : URL of the previouse contant part
+ PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>
+ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+ PREFIX oa: <http://www.w3.org/ns/oa#>
+ PREFIX dc: <http://purl.org/dc/elements/1.1/>
+
+ INSERT DATA {
+ 	GRAPH <$(ci)-metadata> {
+         <$(cp)> mico:hasContent ?an .
+         ?an rdf:type oa:Annotation .
+         ?an oa:hasBody ?body .
+         ?an oa:hasTarget ?target .
+         ?body rdf:type mico:BinaryBody .
+         ?body dc:format $(format) .
+         ?body mico:hasLocation $(location) .
+ 	     ?target rdf:type oa:SpecificResource .
+ 	     ?target oa:hasSource <$(prevCP)> .
+ 	}
+ }

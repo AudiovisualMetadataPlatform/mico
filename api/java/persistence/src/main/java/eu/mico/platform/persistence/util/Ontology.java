@@ -9,6 +9,8 @@ public class Ontology {
      */
     
     public final static String NS_MICO = "http://www.mico-project.eu/ns/platform/1.0/schema#";
+
+    public final static String BINARY_BODY_MICO = NS_MICO + "BinaryBody";
     
     public final static String HAS_BODY_MICO = NS_MICO + "hasBody";
 
