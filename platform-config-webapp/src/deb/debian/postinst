@@ -34,9 +34,9 @@ case "$1" in
 
         cat >/etc/tomcat7/Catalina/localhost/mico-configuration.xml <<EOF
 <!-- ATTENTION: This is a generated file
-  -- ALL CHANGES HERE WILL BE LOST
-  -- edit mico-configuration.xml.tmpl and run dpkg-reconfigure mico-conf to update
-  -->
+     ALL CHANGES HERE WILL BE LOST
+     edit mico-configuration.xml.tmpl and run dpkg-reconfigure mico-conf to update
+-->
 EOF
         sed "s|%HOSTNAME%|$HOSTNAME|g; s|%MICO_USER%|$MICO_USER|g; s|%MICO_PASS%|$MICO_PASS|g" \
             /etc/tomcat7/Catalina/localhost/mico-configuration.xml.tmpl >> /etc/tomcat7/Catalina/localhost/mico-configuration.xml
