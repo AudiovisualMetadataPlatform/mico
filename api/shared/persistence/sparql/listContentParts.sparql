@@ -1,6 +1,7 @@
 # Inputs:
  #   $(ci) : The uri of the content item
 PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 SELECT ?p WHERE {
   GRAPH <$(ci)-metadata> {

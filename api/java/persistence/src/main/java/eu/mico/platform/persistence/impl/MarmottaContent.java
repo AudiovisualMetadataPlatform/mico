@@ -18,6 +18,9 @@ import com.github.anno4j.model.Annotation;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Selector;
 import com.github.anno4j.model.impl.target.SpecificResource;
+import com.github.anno4j.querying.Comparison;
+import com.github.anno4j.querying.Criteria;
+import com.github.anno4j.querying.QueryService;
 import com.google.common.base.Preconditions;
 import eu.mico.platform.persistence.metadata.MICOProvenance;
 import eu.mico.platform.persistence.model.Content;
@@ -25,6 +28,7 @@ import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
 import eu.mico.platform.storage.api.StorageService;
 import eu.mico.platform.storage.impl.StorageServiceBuilder;
+import org.apache.marmotta.ldpath.parser.ParseException;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -40,7 +44,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import static com.google.common.collect.ImmutableMap.of;
 import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
@@ -309,6 +315,42 @@ public class MarmottaContent implements Content {
     @Override
     public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance) throws  RepositoryException {
         return createAnnotation(body, source, provenance, null);
+    }
+
+    @Override
+    public List<Annotation> findAnnotations() throws RepositoryException {
+        return findAnnotations(new Criteria("oa:hasTarget/oa:hasSource[is-a mico:ContentPart]", this.getURI().toString(), Comparison.EQ));
+    }
+
+    @Override
+    public List<Annotation> findAnnotations(Criteria criteria) throws RepositoryException {
+        List<Criteria> criteriaList = new ArrayList();
+        criteriaList.add(criteria);
+
+        return findAnnotations(criteriaList);
+    }
+
+    @Override
+    public List<Annotation> findAnnotations(List<Criteria> criteriaList) throws RepositoryException {
+        QueryService<Annotation> queryService = Anno4j.getInstance().createQueryService(Annotation.class);
+        queryService.addPrefix("mico", "http://www.mico-project.eu/ns/platform/1.0/schema#");
+
+        for(Criteria criteria : criteriaList) {
+            queryService.setAnnotationCriteria(criteria.getLdpath(), criteria.getConstraint(), criteria.getComparison());
+        }
+
+        try {
+            return queryService.execute();
+        } catch (ParseException e) {
+            log.error("could not parse the ldpath expressions to SPARQL queries:", e);
+            throw new RepositoryException("could not parse the ldpath expressions to SPARQL queries", e);
+        } catch (MalformedQueryException e) {
+            log.error("the executed sparql query was malformed:", e);
+            throw new RepositoryException("the executed sparql query was malformed", e);
+        } catch (QueryEvaluationException e) {
+            log.error("the SPARQL query could not have been evaluated:", e);
+            throw new RepositoryException("the SPARQL query could not have been evaluated", e);
+        }
     }
 
     @Override
