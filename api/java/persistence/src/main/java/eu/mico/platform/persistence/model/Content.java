@@ -16,6 +16,7 @@ package eu.mico.platform.persistence.model;
 import com.github.anno4j.model.Annotation;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Selector;
+import com.github.anno4j.querying.Criteria;
 import eu.mico.platform.persistence.metadata.MICOProvenance;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
@@ -25,6 +26,7 @@ import org.openrdf.repository.RepositoryException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 /**
  * Binary content, offered through inputstreams and outputstreams. Can be used for representing any kind of non-RDF
@@ -117,12 +119,35 @@ public interface Content {
 
     /**
      * Creates and persists the annotation object for the content part.
-     * @return
+     * @return the created annotation object
     */
     Annotation createAnnotation(Body body, Content source, MICOProvenance provenance, Selector selection) throws RepositoryException;
     /**
      * Creates and persists the annotation object for the content part.
-     * @return
+     * @return the created annotation object
      */
     Annotation createAnnotation(Body body, Content source, MICOProvenance provenance) throws RepositoryException;
+
+    /**
+     *
+     * @return Returns all annotation objects of the given content part.
+     * @throws RepositoryException
+     */
+    List<Annotation> findAnnotations() throws RepositoryException;
+
+    /**
+     *
+     * @param criteria The criteria object containts the ldpath, the constraint and the comparison method.
+     * @return Returns all annotation objects of the given content part considering the specific criteria.
+     * @throws RepositoryException
+     */
+    List<Annotation> findAnnotations(Criteria criteria) throws RepositoryException;
+
+    /**
+     *
+     * @param criteriaList The list of criteria object containts the ldpath, the constraint and the comparison method.
+     * @return Returns all annotation objects of the given content part considering the list of specific criteria.
+     * @throws RepositoryException
+     */
+    List<Annotation> findAnnotations(List<Criteria> criteriaList) throws RepositoryException;
 }

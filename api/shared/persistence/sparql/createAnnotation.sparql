@@ -6,7 +6,7 @@
 
  INSERT DATA {
    GRAPH <$(cp)-metadata> {
-                                       <$(cp)> mico:hasContent <$(an)> .
-                                       <$(cp)> ldp:contains <$(an)> .
+       <$(cp)> mico:hasContent <$(an)> .
+       <$(cp)> ldp:contains <$(an)> .
    }
  }

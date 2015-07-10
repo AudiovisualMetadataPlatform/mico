@@ -69,7 +69,7 @@ public class PersistenceServiceImpl implements PersistenceService {
         // configurate Anno4j
         try {
             Anno4j.getInstance().setRepository(getMetadata().getRepository());
-            Anno4j.getInstance().setIdGenerator(PersistenceServiceImpl.idGenerator);
+            Anno4j.getInstance().setIdGenerator(idGenerator);
         } catch (RepositoryConfigException e) {
             e.printStackTrace();
         } catch (RepositoryException e) {
