@@ -22,7 +22,8 @@ case "$1" in
     ;;
 
     remove|abort-install|disappear)
-		rm /etc/tomcat7/Catalina/localhost/mico-configuration.xml
+		rm /etc/tomcat7/Catalina/localhost/mico-configuration.xml || true
+		rm /etc/sudoers.d/mico-configuration || true
         service tomcat7 start
     ;;
 
