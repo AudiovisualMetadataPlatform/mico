@@ -113,17 +113,7 @@ public class ContentMock implements Content {
     }
 
     @Override
-    public List<Annotation> findAnnotations() throws RepositoryException {
-        return null;
-    }
-
-    @Override
-    public List<Annotation> findAnnotations(Criteria criteria) throws RepositoryException {
-        return null;
-    }
-
-    @Override
-    public List<Annotation> findAnnotations(List<Criteria> criteriaList) throws RepositoryException {
+    public List<Annotation> findDerivedAnnotations() throws RepositoryException {
         return null;
     }
 
