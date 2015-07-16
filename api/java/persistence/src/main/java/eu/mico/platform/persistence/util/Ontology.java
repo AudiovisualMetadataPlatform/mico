@@ -88,6 +88,8 @@ public class Ontology {
     
     public final static String NER_BODY_MICO = NS_MICO + "NERBody";
 
+    public final static String STT_BODY_MICO = NS_MICO + "STTBody";
+
     public final static String PSP_BODY_MICO = NS_MICO + "PSPBody";
 
     public final static String ASR_BODY_MICO = NS_MICO + "ASRDBody";
