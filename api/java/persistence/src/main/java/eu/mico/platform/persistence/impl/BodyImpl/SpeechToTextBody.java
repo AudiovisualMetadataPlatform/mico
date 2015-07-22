@@ -5,6 +5,9 @@ import com.github.anno4j.model.Body;
 import com.github.anno4j.model.ontologies.RDF;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
+import org.openrdf.repository.object.LangString;
+
+import java.util.Locale;
 
 /**
  * Class represents the body for a SpeechToText annotation. The relevant timestamp information is stored in the
@@ -17,7 +20,7 @@ public class SpeechToTextBody extends Body {
      * The value of the body corresponds to the word that is detected.
      */
     @Iri(RDF.VALUE)
-    private String value;
+    private LangString value;
 
     /**
      * Default constructor.
@@ -28,7 +31,7 @@ public class SpeechToTextBody extends Body {
      * Constructor also setting the value.
      * @param value The word that is detected.
      */
-    public SpeechToTextBody(String value) {
+    public SpeechToTextBody(LangString value) {
         this.value = value;
     }
 
@@ -37,7 +40,7 @@ public class SpeechToTextBody extends Body {
      *
      * @return Value of value.
      */
-    public String getValue() {
+    public LangString getValue() {
         return value;
     }
 
@@ -46,8 +49,8 @@ public class SpeechToTextBody extends Body {
      *
      * @param value New value of value.
      */
-    public void setValue(String value) {
+    public void setValue(LangString value) {
         this.value = value;
     }
-
+    
 }
