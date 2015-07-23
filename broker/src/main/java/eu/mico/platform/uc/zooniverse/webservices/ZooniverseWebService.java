@@ -91,7 +91,7 @@ public class ZooniverseWebService {
             final HttpGet request = new HttpGet(imageUrl);
             return httpClient.execute(request, new ResponseHandler<Response>() {
                 @Override
-                public Response handleResponse(HttpResponse httpResponse) throws ClientProtocolException, IOException {
+                public Response handleResponse(HttpResponse httpResponse) throws IOException {
                     final StatusLine statusLine = httpResponse.getStatusLine();
                     if (statusLine.getStatusCode() == 200) {
                         final Header cType = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
@@ -182,24 +182,30 @@ public class ZooniverseWebService {
                 rspEntity.put("subjectId", subjectId);
                 rspEntity.put("contentItem", contentItem.getURI().stringValue());
 
+                final Response.Status status;
                 if (state.isFinalState()) {
-                    rspEntity.put("status", "finished");
+                    // FIXME: Change status to OK (200) after implementing this part.
+                    // status = Response.Status.OK;
+                    status = Response.Status.NOT_IMPLEMENTED;
 
+                    rspEntity.put("status", "finished");
+                    // TODO: Get the analysis results (anno4j? SPARQL?)
+                    rspEntity.put("message", "Retrieving analysis result not yet implemented. Sorry :-(");
                 } else {
+                    status = Response.Status.ACCEPTED;
+
                     rspEntity.put("status", "inProgress");
                     rspEntity.put("message", String.format("Analysis of subject '%s' (<%s>) is not yet complete. Please try again later!", subjectId, uri));
-                    return Response.accepted()
-                            .entity(rspEntity)
-                            .link(java.net.URI.create(uri.stringValue()), "contentItem")
-                            .build();
                 }
+                return Response.status(status)
+                        .entity(rspEntity)
+                        .link(java.net.URI.create(uri.stringValue()), "contentItem")
+                        .build();
             }
         } catch (RepositoryException e) {
             log.error("Could not load ContentItem for subjectId " + subjectId);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
-
-        return Response.status(Response.Status.NOT_IMPLEMENTED).build();
     }
 
     @DELETE
