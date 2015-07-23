@@ -130,24 +130,8 @@ public interface Content {
 
     /**
      *
-     * @return Returns all annotation objects of the given content part.
+     * @return Returns all annotation objects that have a reference to the given content part.
      * @throws RepositoryException
      */
-    List<Annotation> findAnnotations() throws RepositoryException;
-
-    /**
-     *
-     * @param criteria The criteria object containts the ldpath, the constraint and the comparison method.
-     * @return Returns all annotation objects of the given content part considering the specific criteria.
-     * @throws RepositoryException
-     */
-    List<Annotation> findAnnotations(Criteria criteria) throws RepositoryException;
-
-    /**
-     *
-     * @param criteriaList The list of criteria object containts the ldpath, the constraint and the comparison method.
-     * @return Returns all annotation objects of the given content part considering the list of specific criteria.
-     * @throws RepositoryException
-     */
-    List<Annotation> findAnnotations(List<Criteria> criteriaList) throws RepositoryException;
+    List<Annotation> findDerivedAnnotations() throws RepositoryException;
 }

@@ -318,39 +318,11 @@ public class MarmottaContent implements Content {
     }
 
     @Override
-    public List<Annotation> findAnnotations() throws RepositoryException {
-        return findAnnotations(new Criteria("oa:hasTarget/oa:hasSource[is-a mico:ContentPart]", this.getURI().toString(), Comparison.EQ));
-    }
-
-    @Override
-    public List<Annotation> findAnnotations(Criteria criteria) throws RepositoryException {
-        List<Criteria> criteriaList = new ArrayList();
-        criteriaList.add(criteria);
-
-        return findAnnotations(criteriaList);
-    }
-
-    @Override
-    public List<Annotation> findAnnotations(List<Criteria> criteriaList) throws RepositoryException {
-        QueryService<Annotation> queryService = Anno4j.getInstance().createQueryService(Annotation.class);
-        queryService.addPrefix("mico", "http://www.mico-project.eu/ns/platform/1.0/schema#");
-
-        for(Criteria criteria : criteriaList) {
-            queryService.setAnnotationCriteria(criteria.getLdpath(), criteria.getConstraint(), criteria.getComparison());
-        }
-
-        try {
-            return queryService.execute();
-        } catch (ParseException e) {
-            log.error("could not parse the ldpath expressions to SPARQL queries:", e);
-            throw new RepositoryException("could not parse the ldpath expressions to SPARQL queries", e);
-        } catch (MalformedQueryException e) {
-            log.error("the executed sparql query was malformed:", e);
-            throw new RepositoryException("the executed sparql query was malformed", e);
-        } catch (QueryEvaluationException e) {
-            log.error("the SPARQL query could not have been evaluated:", e);
-            throw new RepositoryException("the SPARQL query could not have been evaluated", e);
-        }
+    /**
+     * Finds all annotation object, which have a reference to the given content part.
+     */
+    public List<Annotation> findDerivedAnnotations() throws RepositoryException {
+        return AnnotationQueryService.findAnnotations(new Criteria("oa:hasTarget/oa:hasSource[is-a mico:ContentPart]", this.getURI().toString(), Comparison.EQ));
     }
 
     @Override
