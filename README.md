@@ -117,7 +117,7 @@ following prerequisites need to be satisfied:
 
 ### C++ API
 
-Building the C++ API has additional requirements for native libraries. For convenience, packaes not provided by the 
+Building the C++ API has additional requirements for native libraries. For convenience, packages not provided by the 
 recommended Debian systems are provided as packages by the MICO repository. In particular, the dependencies are:
 
 * GNU Autotools, GCC >= 4.8 with C++11 support
