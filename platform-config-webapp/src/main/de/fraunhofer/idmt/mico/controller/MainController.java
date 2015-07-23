@@ -36,7 +36,7 @@ public class MainController  {
 	
 	private File cmdPropFile = new File("/usr/share/mico/platform-config.properties");
 	private Properties cmdProps = null;
-	private String currentConfig = null;
+	private static String currentConfig;
 	
     private static Logger log = LoggerFactory.getLogger(MainController.class);
 
