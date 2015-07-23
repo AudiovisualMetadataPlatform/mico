@@ -156,7 +156,7 @@ public class ZooniverseWebService {
                 rspEntity.put("contentPart", contentPart.getURI());
                 rspEntity.put("status", "submitted");
 
-                return Response.status(Response.Status.ACCEPTED)
+                return Response.status(Response.Status.CREATED)
                         .entity(rspEntity)
                         .link(java.net.URI.create(ci.getURI().stringValue()), "contentItem")
                         .link(java.net.URI.create(contentPart.getURI().stringValue()), "contentPart")
