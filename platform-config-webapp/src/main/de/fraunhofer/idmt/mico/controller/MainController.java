@@ -94,13 +94,13 @@ public class MainController  {
 				status.append("Old configuration ["+currentConfig+"] stopped");
 				currentConfig = null;
 			}
-			System.out.println("command: " + cmdName);
 			ProcessBuilder pb = getProcessBuilder(cmdName,true);
 			modelAndView.addAllObjects(runCommand(pb));
-			if (!modelAndView.getModel().containsKey("error") || modelAndView.getModel().get("error") != null){
+			if (!modelAndView.getModel().containsKey("error") || modelAndView.getModel().get("error") == null){
 				// if there was no error, the current config should be the new one
 				currentConfig = cmdName;
 			}
+			log.debug("current config is now {}",currentConfig);
 		}
 
 		Set<Object> propertyNames = getCmdProps().keySet();
@@ -141,7 +141,7 @@ public class MainController  {
 				String errMsg = errorHandler.getOutput().toString();
 				error = "unable to start selected configuration: Error Code "
 						+ exitValue + "\n" + HtmlUtils.htmlEscape(errMsg);
-				System.out.println("Error [" + exitValue + "] - " + error);
+				log.error("Error [" + exitValue + "] - " + error);
 			}else if (errorHandler.getOutput().length() > 0){
 				String errMsg = errorHandler.getOutput().toString();
 				log.info("command returned 0, but there is data on error stream: \n{}",errMsg);
