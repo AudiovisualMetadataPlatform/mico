@@ -35,7 +35,6 @@ public class MicoRabbitProducer extends DefaultProducer {
     public void process(Exchange exchange) throws Exception {
     	LOG.info("{} - P R O D U C E analyze event and put it to msg body", endpoint.getEndpointKey());
     	String content = exchange.getIn().getBody(String.class);
-    	log.warn("incomming CONTENT {}  \n  ... try to extract content and partURLs", content);
         AnalysisEvent event;
     	try{
     	    String[] lines = content.split("\r\n");
@@ -72,10 +71,11 @@ public class MicoRabbitProducer extends DefaultProducer {
     }
 
     private AnalysisEvent generateEvent(String item, String part) {
+        String service = endpoint.getServiceId();
         Event.AnalysisEvent analysisEvent = Event.AnalysisEvent.newBuilder()
                 .setContentItemUri(item)
                 .setObjectUri(part)
-                .setServiceId("wordcount").build();
+                .setServiceId(service).build();
     	
     	return analysisEvent;
     }

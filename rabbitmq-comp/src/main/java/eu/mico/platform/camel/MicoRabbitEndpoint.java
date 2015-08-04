@@ -27,14 +27,19 @@ public class MicoRabbitEndpoint extends DefaultEndpoint {
     @UriParam(defaultValue = "10")
     private int option = 10;
 
-    @UriParam(name="host", defaultValue = "10.129.40.216")
-    private String host = "10.129.40.216";
+    @UriParam(name="host", defaultValue = "mico-platform")
+    private String host = "mico-platform";
     @UriParam(name="user", defaultValue = "mico")
     private String user = "mico";
     @UriParam(defaultValue = "mico")
     private String password = "mico";
-    @UriParam(defaultValue = "5672")
+    @UriParam(defaultValue = "5672", description = "the port where the rabbitmq broker listens for connections")
     private int rabbitPort = 5672;
+    /**
+     * each extractor service has is own id, in rabbitmq this id is used a routing key
+     */
+    @UriParam(description = "the unique id of an extractor service")
+    private String serviceId = "wordcount";
     
     private Connection connection = null;
 
@@ -123,5 +128,13 @@ public class MicoRabbitEndpoint extends DefaultEndpoint {
 	public void setHost(String host) {
 		this.host = host;
 	}
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
+    }
 
 }
