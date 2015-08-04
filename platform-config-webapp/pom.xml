@@ -48,7 +48,6 @@
 		<dependency>
 		    <groupId>javax.servlet</groupId>
 		    <artifactId>javax.servlet-api</artifactId>
-		    <version>3.0.1</version>
 		    <scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -62,7 +61,6 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
@@ -126,7 +124,7 @@
 												<user>root</user>
 												<group>root</group>
 											</mapper>
-											<conffile>true</conffile>
+											<conffile>false</conffile>
 										</data>
 										<data>
 											<src>src/deb/resources/mico-configuration.sudoers.tmpl</src>
@@ -138,7 +136,7 @@
 												<group>root</group>
 												<filemode>440</filemode>
 											</mapper>
-											<conffile>true</conffile>
+											<conffile>false</conffile>
 										</data>
                                     </dataSet>
                                 </configuration>

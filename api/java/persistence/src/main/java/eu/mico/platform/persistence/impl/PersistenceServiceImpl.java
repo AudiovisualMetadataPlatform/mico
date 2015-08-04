@@ -69,7 +69,7 @@ public class PersistenceServiceImpl implements PersistenceService {
         // configurate Anno4j
         try {
             Anno4j.getInstance().setRepository(getMetadata().getRepository());
-            Anno4j.getInstance().setIdGenerator(PersistenceServiceImpl.idGenerator);
+            Anno4j.getInstance().setIdGenerator(idGenerator);
         } catch (RepositoryConfigException e) {
             e.printStackTrace();
         } catch (RepositoryException e) {
@@ -126,7 +126,7 @@ public class PersistenceServiceImpl implements PersistenceService {
      * Create a new content item with the given URI and return it. The content item should be suitable for reading and
      * updating and write all updates to the underlying low-level persistence layer.
      *
-     * @param id
+     * @param id the URI of the ContentItem
      * @return a handle to the newly created ContentItem
      */
     @Override

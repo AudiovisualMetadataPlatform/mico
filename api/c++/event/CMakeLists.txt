@@ -37,7 +37,7 @@ add_library(mico_event SHARED
   EventManager.cpp
 )
 target_link_libraries(mico_event mico_logging mico_rdf mico_persistence ${PROTOBUF_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${AMQPCPP_LIBRARIES})
-set_target_properties(mico_event PROPERTIES SOVERSION "${MICO_PLATFORM_VERSION}")
+set_target_properties(mico_event PROPERTIES VERSION "${MICO_PLATFORM_VERSION}" SOVERSION "${MICO_PLATFORM_SOVERSION}")
 
 install (TARGETS mico_event DESTINATION lib)
 install (FILES AnalysisService.hpp EventManager.hpp DESTINATION include)
