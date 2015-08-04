@@ -1,0 +1,8 @@
+http://mico-platform:8080/marmotta/c04b7656-684d-44af-a3b7-a816ae45e7df
+http://mico-platform:8080/marmotta/c04b7656-684d-44af-a3b7-a816ae45e7df/e61153e7-8618-472d-9c0b-b4a22d8249f4
+
+
+{
+"item":"http://mico-platform:8080/marmotta/c04b7656-684d-44af-a3b7-a816ae45e7df",
+"part":"http://mico-platform:8080/marmotta/c04b7656-684d-44af-a3b7-a816ae45e7df/e61153e7-8618-472d-9c0b-b4a22d8249f4"
+}
