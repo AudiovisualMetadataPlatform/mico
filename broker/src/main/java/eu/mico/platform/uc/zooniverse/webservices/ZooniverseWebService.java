@@ -17,6 +17,9 @@
  */
 package eu.mico.platform.uc.zooniverse.webservices;
 
+import com.github.anno4j.model.Annotation;
+import com.github.anno4j.model.impl.selector.FragmentSelector;
+import com.github.anno4j.model.impl.target.SpecificResource;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.model.ContentItemState;
@@ -176,21 +179,61 @@ public class ZooniverseWebService {
             if (uri == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem with subjectId '%s'%n", subjectId)).build();
             } else {
+                final Response.Status status;
                 final ContentItem contentItem = persistenceService.getContentItem(uri);
                 final ContentItemState state = broker.getStates().get(uri.stringValue());
                 Map<String, Object> rspEntity = new HashMap<>();
                 rspEntity.put("subjectId", subjectId);
                 rspEntity.put("contentItem", contentItem.getURI().stringValue());
 
-                final Response.Status status;
-                if (state.isFinalState()) {
-                    // FIXME: Change status to OK (200) after implementing this part.
-                    // status = Response.Status.OK;
-                    status = Response.Status.NOT_IMPLEMENTED;
+                //FIXME: We do not have a state object when the broker is restarted.
+                if (state == null || state.isFinalState()) {
+                    List<Object> rspContentParts = new ArrayList<>();
+
+                    //FIXME: beautfy!
+                    for (Content contentPart : contentItem.listContentParts()) {
+                        Map<String, Object> rspAnnotation = new HashMap<>();
+                        for (Annotation annotation : contentPart.findDerivedAnnotations()) {
+                            if (annotation.getTarget() == null || ! (annotation.getTarget() instanceof SpecificResource))
+                                continue;
+                            SpecificResource target = (SpecificResource)annotation.getTarget();
+
+                            if (target.getSelector() == null || ! (target.getSelector() instanceof FragmentSelector))
+                                continue;;
+                            FragmentSelector selector = ((FragmentSelector) target.getSelector());
+
+                            rspAnnotation.put("contentPart", contentPart.getURI().stringValue());
+
+                            Map<String, Object> rspTarget = new HashMap<>();
+                            rspTarget.put("resource", annotation.getTarget().getResourceAsString());
+                            Map <String,Object> rspSelector = new HashMap<>();
+                            rspSelector.put("resource", selector.getResourceAsString());
+                            rspSelector.put("value", selector.getValue());
+                            rspSelector.put("conformsTo", selector.getConformsTo());
+                            rspTarget.put("selector", rspSelector);
+                            rspAnnotation.put("target", rspTarget);
+
+                            rspAnnotation.put("resource", annotation.getResourceAsString());
+                            if (annotation.getMotivatedBy() != null)
+                                rspAnnotation.put("motivatedBy", annotation.getMotivatedBy().toString());
+                            if (annotation.getSerializedBy() != null)
+                                rspAnnotation.put("serializedBy", annotation.getSerializedBy().getName());
+                            if (annotation.getSerializedAt() != null)
+                                rspAnnotation.put("serializedAt", annotation.getSerializedAt().toString());
+                            if (annotation.getAnnotatedBy() != null)
+                                rspAnnotation.put("annotatedBy", annotation.getAnnotatedBy().getName());
+                            if (annotation.getAnnotatedAt() != null)
+                                rspAnnotation.put("annotatedAt", annotation.getAnnotatedAt().toString());
+                        }
+                        if (rspAnnotation.size() > 0)
+                            rspContentParts.add(rspAnnotation);
+                    }
+
+                    if (rspContentParts.size() > 0)
+                        rspEntity.put("contentParts", rspContentParts);
 
                     rspEntity.put("status", "finished");
-                    // TODO: Get the analysis results (anno4j? SPARQL?)
-                    rspEntity.put("message", "Retrieving analysis result not yet implemented. Sorry :-(");
+                    status = Response.Status.OK;
                 } else {
                     status = Response.Status.ACCEPTED;
 
