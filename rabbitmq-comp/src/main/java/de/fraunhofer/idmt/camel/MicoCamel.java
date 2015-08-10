@@ -3,6 +3,7 @@ package de.fraunhofer.idmt.camel;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,12 +72,9 @@ public class MicoCamel {
 
         // create a content item with a single part of type "A"; it should walk through the registered mock services and
         // eventually finish analysis; we simply wait until we receive an event on the output queue.
-        PersistenceService svc = eventManager.getPersistenceService();
-        ContentItem item = svc.createContentItem();
+        ContentItem item;
         try {
-            Content partA = item.createContentPart();
-            partA.setType("A");
-            partA.getOutputStream().write("Das ist Text A".getBytes());
+            item = createSampleItemAndPart();
 
             log.info("sending item ...   {}", System.currentTimeMillis());
 //            eventManager.injectContentItem(item);
@@ -116,13 +114,63 @@ public class MicoCamel {
             }
         } finally {
             //svc.deleteContentItem(item.getURI());
-            channel.clearConfirmListeners();
-            channel.clearFlowListeners();
-            channel.clearReturnListeners();
-            channel.close();
-            connection.clearBlockedListeners();
-            connection.close();
-            eventManager.shutdown();
+            shutdown();
         }
+    }
+
+
+    private ContentItem createSampleItemAndPart()
+            throws RepositoryException, IOException {
+        if(eventManager == null){
+            log.warn("Init mico camel befor calling: 'createSampleItemAndPart(..)'");
+            return null;
+        }
+        String content = "Das ist Text A";
+        String type = "A";
+        ContentItem item = createItem();
+        addPart(content.getBytes(), type, item);
+
+        return item;
+    }
+
+
+    public ContentItem createItem() throws RepositoryException {
+        if(eventManager == null){
+            log.warn("Init mico camel befor calling: 'createItem(..)'");
+            return null;
+        }
+        PersistenceService svc = eventManager.getPersistenceService();
+        ContentItem item = svc.createContentItem();
+        return item;
+    }
+
+
+    /**
+     * @param content content of new part
+     * @param type type of new part
+     * @param item item to which the new part should be added
+     * @throws RepositoryException
+     * @throws IOException
+     */
+    public Content addPart(byte[] content, String type, ContentItem item)
+            throws RepositoryException, IOException {
+        Content partA = item.createContentPart();
+        partA.setType(type);
+        OutputStream outputStream = partA.getOutputStream();
+        outputStream.write(content);
+        outputStream.flush();
+        outputStream.close();
+        return partA;
+    }
+
+
+    public void shutdown() throws IOException {
+        channel.clearConfirmListeners();
+        channel.clearFlowListeners();
+        channel.clearReturnListeners();
+        channel.close();
+        connection.clearBlockedListeners();
+        connection.close();
+        eventManager.shutdown();
     }
 }

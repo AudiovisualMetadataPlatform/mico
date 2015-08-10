@@ -4,7 +4,7 @@
     <!-- encoders are assigned the type
          ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
     <encoder>
-      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+      <pattern>%d{HH:mm:ss.SSS} [%thread{20}] %-5level %logger{60} - %msg%n</pattern>
     </encoder>
   </appender>
 
@@ -15,12 +15,23 @@
   <logger name="org.openrdf" level="INFO" additivity="false">
     <appender-ref ref="STDOUT" />
   </logger>
-  
+
   <logger name="org.apache.camel" level="INFO" additivity="false">
     <appender-ref ref="STDOUT" />
   </logger>
 
-  <root level="debug">
+  <logger name="org.apache.commons.httpclient" level="INFO" additivity="false">
+    <appender-ref ref="STDOUT" />
+  </logger>
+
+  <logger name="eu.mico.platform.camel" level="DEBUG" additivity="false">
+    <appender-ref ref="STDOUT" />
+  </logger>
+
+  <logger name="de.fraunhofer.idmt" level="DEBUG" additivity="false">
+    <appender-ref ref="STDOUT" />
+  </logger>
+  <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>

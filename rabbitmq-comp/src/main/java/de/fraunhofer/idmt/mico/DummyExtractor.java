@@ -88,12 +88,17 @@ public class DummyExtractor implements AnalysisService {
             cp.setProperty(DCTERMS.CREATED, isodate.format(new Date())); // set the created date for the new content part
             
             OutputStream os = cp.getOutputStream();
-			IOUtils.copy(ci.getContentPart(object).getInputStream(),os);
-			os.write(("\n Data added by: " + getServiceID()).getBytes());
-			os.flush();
-			log.info("new contentpart added: {}", cp.getURI());
+            try{
+                ci.getContentPart(object).getInputStream();
+                IOUtils.copy(ci.getContentPart(object).getInputStream(), os);
+            }catch(Exception e){
+                log.warn("unable to access content part data",e);
+            }
+            os.write(("\nData added by: " + getServiceID() + "\n").getBytes());
+            os.flush();
+            log.info("new contentpart added: {}", cp.getURI());
 
-            resp.sendMessage(ci,cp.getURI());
+            resp.sendMessage(ci, cp.getURI());
             setCalled(true);
         } catch (RepositoryException e) {
             throw new AnalysisException("could not access triple store");

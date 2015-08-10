@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
+import org.apache.camel.Message;
 import org.apache.camel.impl.DefaultProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,28 +39,29 @@ public class MicoRabbitProducer extends DefaultProducer {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        LOG.info("{} - P R O D U C E analyze event and put it to msg body", endpoint.getEndpointKey());
+        LOG.info("{} - P R O D U C E analyze event and put it to msg body", endpoint.getName());
         AnalysisEvent event;
+        Message inItem = exchange.getIn();
+        String item = inItem.getHeader(KEY_MICO_ITEM, String.class);
+        String part = inItem.getHeader(KEY_MICO_PART, String.class);
         try {
-            String item = exchange.getIn().getHeader(KEY_MICO_ITEM, String.class);
-            String part = exchange.getIn().getHeader(KEY_MICO_PART, String.class);
             if (item != null && part != null) {
                 log.info("found content part in msg HEADER: {}" , part);
             }else{
                 // try to read item and part uri from msg body
-                String content = exchange.getIn().getBody(String.class);
+                String content = inItem.getBody(String.class);
                 String[] lines = content.split("\r\n");
                 item = lines[0];
                 part = lines[1];
-                exchange.getIn().setHeader(KEY_MICO_ITEM, item);
-                exchange.getIn().setHeader(KEY_MICO_PART, part);
+                inItem.setHeader(KEY_MICO_ITEM, item);
+                inItem.setHeader(KEY_MICO_PART, part);
             }
             event = generateEvent(item, part);
         } catch (Exception e) {
             log.warn("unable to extract content item and part uri from message", e);
             event = generateEventSample();
         }
-        exchange.getIn().setBody(event);
+        inItem.setBody(event);
         // create a new channel for the content item
         // so it runs isolated from the other items
         Channel channel = endpoint.getConnection().createChannel();
@@ -72,9 +74,9 @@ public class MicoRabbitProducer extends DefaultProducer {
                 Thread.sleep(300);
             }
             // save new part in header to tell next extractor to process that part
-            exchange.getIn().setHeader(KEY_MICO_PART, manager.getNewObjectUri());
+            inItem.setHeader(KEY_MICO_PART, manager.getNewObjectUri());
         }
-        LOG.info("{} - extraction finished");
+        LOG.info("extraction finished - {}",item);
     }
 
     public AnalysisEvent generateEventSample() {
@@ -96,7 +98,7 @@ public class MicoRabbitProducer extends DefaultProducer {
 
     /**
      * The ContentItemManager coordinates the analysis of a content item. Starting from the initial state, it sends
-     * analysis events to appropriate analysers as found in the dependency graph. A thread loop waits and only terminates
+     * analysis events to appropriate analyzers as found in the dependency graph. A thread loop waits and only terminates
      * once all service requests are finished. In this case, the manager sends a content event response to the output queue
      */
     private class AnalyseManager extends DefaultConsumer {
