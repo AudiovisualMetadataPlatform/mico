@@ -35,7 +35,7 @@ case "$1" in
         cat >/etc/tomcat7/Catalina/localhost/broker.xml <<EOF
 <!-- ATTENTION: This is a generated file
      ALL CHANGES HERE WILL BE LOST
-     edit broker.xml.tmpl and run dpkg-reconfigure mico-conf to update
+     edit broker.xml.tmpl and run dpkg-reconfigure mico-broker to update
 -->
 EOF
         sed "s|%HOSTNAME%|$HOSTNAME|g; s|%MICO_USER%|$MICO_USER|g; s|%MICO_PASS%|$MICO_PASS|g" \
