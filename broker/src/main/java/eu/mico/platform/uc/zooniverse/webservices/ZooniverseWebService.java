@@ -205,15 +205,12 @@ public class ZooniverseWebService {
                             rspAnnotation.put("contentPart", contentPart.getURI().stringValue());
 
                             Map<String, Object> rspTarget = new HashMap<>();
-                            rspTarget.put("resource", annotation.getTarget().getResourceAsString());
                             Map <String,Object> rspSelector = new HashMap<>();
-                            rspSelector.put("resource", selector.getResourceAsString());
                             rspSelector.put("value", selector.getValue());
                             rspSelector.put("conformsTo", selector.getConformsTo());
                             rspTarget.put("selector", rspSelector);
                             rspAnnotation.put("target", rspTarget);
 
-                            rspAnnotation.put("resource", annotation.getResourceAsString());
                             if (annotation.getMotivatedBy() != null)
                                 rspAnnotation.put("motivatedBy", annotation.getMotivatedBy().toString());
                             if (annotation.getSerializedBy() != null)
