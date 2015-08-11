@@ -275,7 +275,17 @@
                                                 <group>tomcat7</group>
                                             </mapper>
                                         </data>
-
+                                        <data>
+                                            <src>src/deb/resources/broker.xml.tmpl</src>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/etc/tomcat7/Catalina/localhost</prefix>
+                                                <user>root</user>
+                                                <group>root</group>
+                                            </mapper>
+                                            <conffile>false</conffile>
+                                        </data>
                                         <!--
                                         <data>
                                             <src>${project.build.directory}/deb-resources/</src>

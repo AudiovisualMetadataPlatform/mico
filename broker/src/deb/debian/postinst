@@ -33,14 +33,14 @@ case "$1" in
         db_stop
 
         cat >/etc/tomcat7/Catalina/localhost/broker.xml <<EOF
-<Context docBase="/usr/share/mico/broker.war" unpackWAR="false" useNaming="true">
-    <Parameter name="mico.host" value="$HOSTNAME" override="true"/>
-    <Parameter name="mico.user" value="$MICO_USER" override="true"/>
-    <Parameter name="mico.pass" value="$MICO_PASS" override="true"/>
-    <Parameter name="mico.marmottaBaseUri" value="http://$HOSTNAME:8080/marmotta" override="true"/>
-    <Parameter name="mico.storageBaseUri" value="ftp://$HOSTNAME/" override="true"/>
-</Context>
+<!-- ATTENTION: This is a generated file
+     ALL CHANGES HERE WILL BE LOST
+     edit broker.xml.tmpl and run dpkg-reconfigure mico-conf to update
+-->
 EOF
+        sed "s|%HOSTNAME%|$HOSTNAME|g; s|%MICO_USER%|$MICO_USER|g; s|%MICO_PASS%|$MICO_PASS|g" \
+            /etc/tomcat7/Catalina/localhost/broker.xml.tmpl >> /etc/tomcat7/Catalina/localhost/broker.xml
+
 
         service tomcat7 start || true
     ;;

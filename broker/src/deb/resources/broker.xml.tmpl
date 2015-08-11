@@ -13,5 +13,10 @@
     limitations under the License.
 
 -->
-<Context docBase="/usr/share/mico/${project.build.finalName}.war" unpackWAR="false" useNaming="true">
+<Context docBase="/usr/share/mico/broker.war" unpackWAR="false" useNaming="true">
+    <Parameter name="mico.host" value="%HOSTNAME%" override="true"/>
+    <Parameter name="mico.user" value="%MICO_USER%" override="true"/>
+    <Parameter name="mico.pass" value="%MICO_PASS%" override="true"/>
+    <Parameter name="mico.marmottaBaseUri" value="http://%HOSTNAME%:8080/marmotta" override="true"/>
+    <Parameter name="mico.storageBaseUri" value="ftp://%HOSTNAME%/" override="true"/>
 </Context>
