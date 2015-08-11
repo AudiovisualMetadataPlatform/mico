@@ -167,7 +167,18 @@
                                                 <group>tomcat7</group>
                                             </mapper>
                                         </data>
-
+                                        <data>
+                                            <src>src/deb/resources/marmotta.xml.tmpl</src>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/etc/tomcat7/Catalina/localhost</prefix>
+                                                <user>root</user>
+                                                <group>root</group>
+                                            </mapper>
+                                            <conffile>false</conffile>
+                                        </data>
+                                        <!--
                                         <data>
                                             <src>${project.build.directory}/deb-resources/</src>
                                             <includes>*.xml</includes>
@@ -180,7 +191,6 @@
                                                 <group>tomcat7</group>
                                             </mapper>
                                         </data>
-                                        <!--
                                         <data>
                                             <src>${basedir}/src/deb/doc</src>
                                             <type>directory</type>
