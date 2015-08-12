@@ -46,7 +46,7 @@ public class MicoRabbitProducer extends DefaultProducer {
         String part = inItem.getHeader(KEY_MICO_PART, String.class);
         try {
             if (item != null && part != null) {
-                log.info("found content part in msg HEADER: {}" , part);
+                log.debug("found content part in msg HEADER: {}" , part);
             }else{
                 // try to read item and part uri from msg body
                 String content = inItem.getBody(String.class);
@@ -55,6 +55,9 @@ public class MicoRabbitProducer extends DefaultProducer {
                 part = lines[1];
                 inItem.setHeader(KEY_MICO_ITEM, item);
                 inItem.setHeader(KEY_MICO_PART, part);
+                if (item != null && part != null) {
+                    log.debug("found content part in msg BODY: {}" , part);
+                }
             }
             event = generateEvent(item, part);
         } catch (Exception e) {
@@ -70,7 +73,7 @@ public class MicoRabbitProducer extends DefaultProducer {
         manager.sendEvent();
         if(exchange.getPattern().equals(ExchangePattern.InOut)||true){
             while (!manager.hasResponse()) {
-                LOG.info("..waiting for response..");
+                LOG.debug("..waiting for response..");
                 Thread.sleep(300);
             }
             // save new part in header to tell next extractor to process that part
@@ -149,32 +152,32 @@ public class MicoRabbitProducer extends DefaultProducer {
 
         @Override
         public void handleCancel(String consumerTag) throws IOException {
-            log.warn("Cancel: {}", consumerTag);
+            log.info("Cancel: {}", consumerTag);
             super.handleCancel(consumerTag);
         }
 
         @Override
         public void handleCancelOk(String consumerTag) {
-            log.warn("CancelOk: {}", consumerTag);
+            log.info("CancelOk: {}", consumerTag);
             super.handleCancelOk(consumerTag);
         }
 
         @Override
         public void handleConsumeOk(String consumerTag) {
-            log.warn("ConsumeOk: {}", consumerTag);
+            log.info("ConsumeOk: {}", consumerTag);
             super.handleConsumeOk(consumerTag);
         }
 
         @Override
         public void handleRecoverOk(String consumerTag) {
-            log.warn("RecoverOk: {}", consumerTag);
+            log.info("RecoverOk: {}", consumerTag);
             super.handleRecoverOk(consumerTag);
         }
 
         @Override
         public void handleShutdownSignal(String consumerTag,
                 ShutdownSignalException sig) {
-            log.warn("ShutdownSignal: {} for consumer {}", sig, consumerTag);
+            log.info("ShutdownSignal: {} for consumer {}", sig, consumerTag);
             super.handleShutdownSignal(consumerTag, sig);
         }
 

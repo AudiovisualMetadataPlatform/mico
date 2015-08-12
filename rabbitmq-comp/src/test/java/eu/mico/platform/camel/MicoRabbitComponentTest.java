@@ -38,7 +38,7 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
 
     private static final String TEST_DATA = "src/test/resources/data";
     private static MicoCamel micoCamel;
-    private static String itemUri,partUri;
+    private static String textItemUri,textPartUri;
 
     private static SimpleDateFormat isodate = new SimpleDateFormat("yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'", DateFormatSymbols.getInstance(Locale.US));
     static {
@@ -47,7 +47,7 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
     
 
     
-    @Test
+    @Test(timeout=5000)
     public void testMicoRabbit() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMinimumMessageCount(1);       
@@ -66,19 +66,13 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
     protected RouteBuilder createRouteBuilder() throws Exception {
         return new RouteBuilder() {
             public void configure() {
-            	getContext().setDelayer(300L);                
-                
-//                from("mico-comp://foo").pipeline()
-////                  .inOut("mico-comp://bar")
-//                  .to("mico-comp://baz")
-//                  .to("mock:result");
-                
+                getContext().setDelayer(300L);
 
-                from("direct:a")
-                        .pipeline()
+                from("direct:a").pipeline()
                         .to("mico-comp://foo?serviceId=A-B-queue")
                         .to("mico-comp://foo?serviceId=B-text/plain-queue")
-                        .to("mico-comp:vbox?host=mico-platform&user=mico&password=mico&serviceId=wordcount")
+                        // .to("mico-comp:vbox?host=mico-platform&user=mico&password=mico&serviceId=ocr-queue-jpeg")
+                        // .to("mico-comp:vbox?host=mico-platform&user=mico&password=mico&serviceId=wordcount")
                         .to("mock:result");
             }
         };
@@ -90,7 +84,7 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
 
         micoCamel = new MicoCamel();
         micoCamel.init();
-        createTestItem();
+        createTextItem();
    }
     
     @AfterClass
@@ -132,7 +126,7 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
      * @throws IOException
      * @throws RepositoryException
      */
-    private static void createTestItem() throws IOException, RepositoryException {
+    private static void createTextItem() throws IOException, RepositoryException {
         ContentItem item = micoCamel.createItem();
         String content = "This is a sample text for testing ...";
         String type = "text/plain";
@@ -141,8 +135,8 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         part.setRelation(DCTERMS.SOURCE, new URIImpl("file://test-data.txt"));              // set the analyzed content part as source for the new content part
         part.setProperty(DCTERMS.CREATED, isodate.format(new Date())); // set the created date for the new content part
         
-        itemUri = item.getURI().toString();
-        partUri = part.getURI().toString();
+        textItemUri = item.getURI().toString();
+        textPartUri = part.getURI().toString();
     }
 
     /**
@@ -150,6 +144,13 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
      * @return an exchange containing item and part uri in headers
      */
     private Exchange createExchange() {
+        return createExchange(textItemUri, textPartUri);
+    }
+    /**
+     * create exchange containing item and part uri of sample/test content
+     * @return an exchange containing item and part uri in headers
+     */
+    private Exchange createExchange(String itemUri, String partUri) {
         Exchange exchange = context.getEndpoint("direct:a").createExchange();
         Message msg = exchange.getIn();
         msg.setHeader(KEY_MICO_ITEM, itemUri);
