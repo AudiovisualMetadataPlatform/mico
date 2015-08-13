@@ -1,5 +1,5 @@
 ASK {
   GRAPH <$(ci)-metadata> {
-    <$(ci)> <http://www.w3.org/ns/ldp#contains> <$(cp)>
+    <$(ci)> <http://www.mico-project.eu/ns/platform/1.0/schema#hasContentPart> <$(cp)>
   }
 }

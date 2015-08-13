@@ -2,9 +2,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@ import com.github.anno4j.Anno4j;
 import com.github.anno4j.model.Annotation;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Selector;
+import com.github.anno4j.model.Target;
 import com.github.anno4j.model.impl.target.SpecificResource;
 import com.github.anno4j.querying.Comparison;
 import com.github.anno4j.querying.Criteria;
@@ -68,7 +69,7 @@ public class MarmottaContent implements Content {
 
 
     public MarmottaContent(MarmottaContentItem item, java.net.URI marmottaBase, java.net.URI storageHost, String id) {
-        this.item       = item;
+        this.item = item;
         this.marmottaBase = marmottaBase;
         this.id = id;
         this.storage = StorageServiceBuilder.buildStorageService(storageHost);
@@ -77,7 +78,7 @@ public class MarmottaContent implements Content {
 
     protected MarmottaContent(MarmottaContentItem item, java.net.URI marmottaBase, java.net.URI storageHost, URI uri) {
         Preconditions.checkArgument(URITools.validBaseURI(uri.stringValue(), marmottaBase.toString()), "The content part URI \"" + uri.stringValue() + "\" must match the marmottaBase \"" + marmottaBase.toString() + "\"");
-        this.item       = item;
+        this.item = item;
         this.marmottaBase = marmottaBase;
         Preconditions.checkArgument(URITools.validContentPartURI(uri.stringValue(), marmottaBase.toString()), "The given content part URI \"" + uri.stringValue() + "\" does not address a content part");
         this.id = URITools.getContentPartID(uri.stringValue(), marmottaBase.toString());
@@ -146,7 +147,6 @@ public class MarmottaContent implements Content {
     }
 
 
-
     /**
      * Set the property value for the given property of this content part using an arbitrary string identifier;
      *
@@ -207,10 +207,10 @@ public class MarmottaContent implements Content {
             m.update(createNamed("setContentProperty", of("ci", item.getURI().stringValue(), "p", property.stringValue(), "cp", getURI().stringValue(), "value", value.stringValue())));
         } catch (MalformedQueryException e) {
             log.error("the SPARQL update was malformed:", e);
-            throw new RepositoryException("the SPARQL update was malformed",e);
+            throw new RepositoryException("the SPARQL update was malformed", e);
         } catch (UpdateExecutionException e) {
             log.error("the SPARQL update could not be executed:", e);
-            throw new RepositoryException("the SPARQL update could not be executed",e);
+            throw new RepositoryException("the SPARQL update could not be executed", e);
         }
     }
 
@@ -222,17 +222,17 @@ public class MarmottaContent implements Content {
         Metadata m = item.getMetadata();
         try {
             TupleQueryResult r = m.query(createNamed("getContentProperty", "ci", item.getURI().stringValue(), "p", property.stringValue(), "cp", getURI().stringValue()));
-            if(r.hasNext()) {
+            if (r.hasNext()) {
                 return r.next().getValue("t");
             } else {
                 return null;
             }
         } catch (MalformedQueryException e) {
             log.error("the SPARQL query was malformed:", e);
-            throw new RepositoryException("the SPARQL query was malformed",e);
+            throw new RepositoryException("the SPARQL query was malformed", e);
         } catch (QueryEvaluationException e) {
             log.error("the SPARQL query could not be executed:", e);
-            throw new RepositoryException("the SPARQL query could not be executed",e);
+            throw new RepositoryException("the SPARQL query could not be executed", e);
         }
     }
 
@@ -271,12 +271,27 @@ public class MarmottaContent implements Content {
     }
 
     @Override
-    public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance, Selector selection) throws RepositoryException {
+    public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance) throws RepositoryException {
+        return createAnnotation(body, source, provenance, null, null);
+    }
 
+    @Override
+    public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance, Selector selection) throws RepositoryException {
+        return createAnnotation(body, source, provenance, selection, null);
+    }
+
+    @Override
+    public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance, Target target) throws RepositoryException {
+        return createAnnotation(body, source, provenance, null, target);
+    }
+
+    public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance, Selector selection, Target target) throws RepositoryException {
         Annotation annotation = new Annotation();
         annotation.setBody(body);
 
-        if(source != null) {
+        if (target != null) {
+            annotation.setTarget(target);
+        } else if (source != null) {
             SpecificResource specificResource = new SpecificResource();
             specificResource.setSelector(selection);
             specificResource.setSource(new ContentPartRMO(new URIImpl(source.getURI().toString())));
@@ -288,7 +303,7 @@ public class MarmottaContent implements Content {
         annotation.setAnnotatedBy(new MICOSoftwareAgent(provenance.getRequires(), provenance.getProvides(), provenance.getExtractorName()));
 
         // Write the annotation object to the triple store
-        Anno4j.getInstance().createPersistenceService().persistAnnotation(annotation);
+        Anno4j.getInstance().createPersistenceService(new URIImpl(this.item.getURI().toString() + "-metadata")).persistAnnotation(annotation);
 
         // Link content part to annotation
         Metadata m = item.getMetadata();
@@ -310,11 +325,6 @@ public class MarmottaContent implements Content {
         }
 
         return annotation;
-    }
-
-    @Override
-    public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance) throws  RepositoryException {
-        return createAnnotation(body, source, provenance, null);
     }
 
     @Override

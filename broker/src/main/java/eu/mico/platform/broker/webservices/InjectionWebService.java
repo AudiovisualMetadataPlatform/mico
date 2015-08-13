@@ -14,11 +14,12 @@
 package eu.mico.platform.broker.webservices;
 
 import com.google.common.collect.ImmutableMap;
-import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.model.ContentItemState;
-import eu.mico.platform.broker.model.Transition;
+
+import eu.mico.platform.anno4j.model.impl.body.MultiMediaBody;
+import eu.mico.platform.anno4j.model.impl.micotarget.InitialTarget;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.persistence.metadata.MICOProvenance;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import org.apache.commons.io.IOUtils;
@@ -28,7 +29,6 @@ import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -98,9 +98,16 @@ public class InjectionWebService {
 
         Content content = item.createContentPart();
         content.setType(type);
-        content.setRelation(DCTERMS.CREATOR, new URIImpl("http://www.mico-project.eu/broker/injection-web-service"));
-        content.setProperty(DCTERMS.CREATED, ISO8601FORMAT.format(new Date()));
-        content.setProperty(DCTERMS.SOURCE, fileName);
+
+        MICOProvenance provenance = new MICOProvenance();
+        provenance.setExtractorName("http://www.mico-project.eu/broker/injection-web-service");
+
+        MultiMediaBody multiMediaBody = new MultiMediaBody();
+        multiMediaBody.setFormat(type);
+
+        InitialTarget target = new InitialTarget(content.getURI().toString());
+
+        content.createAnnotation(multiMediaBody, null, provenance, target);
 
         OutputStream out = content.getOutputStream();
         int bytes = IOUtils.copy(request.getInputStream(), out);

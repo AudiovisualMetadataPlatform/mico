@@ -140,8 +140,8 @@
         <!-- Read/Write API -->
         <dependency>
             <groupId>com.github.anno4j</groupId>
-            <artifactId>anno4j-core</artifactId>
-            <version>1.0.5</version>
+            <artifactId>anno4j-ontologies-mico</artifactId>
+            <version>1.1.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>

@@ -16,6 +16,7 @@ package eu.mico.platform.persistence.model;
 import com.github.anno4j.model.Annotation;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Selector;
+import com.github.anno4j.model.Target;
 import com.github.anno4j.querying.Criteria;
 import eu.mico.platform.persistence.metadata.MICOProvenance;
 import org.openrdf.model.Model;
@@ -127,6 +128,12 @@ public interface Content {
      * @return the created annotation object
      */
     Annotation createAnnotation(Body body, Content source, MICOProvenance provenance) throws RepositoryException;
+
+    /**
+     * Creates the annotation object for the first content part of a content item.
+     * @return the created annotation object
+     */
+    Annotation createAnnotation(Body body, Content source, MICOProvenance provenance, Target target) throws RepositoryException;
 
     /**
      *

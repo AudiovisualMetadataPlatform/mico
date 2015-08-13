@@ -1,14 +1,18 @@
 # Inputs:
  #   $(ci) : The uri of the content item
  #   $(type) : The MIME type
-PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>
+PREFIX oa: <http://www.w3.org/ns/oa#>
 
- SELECT ?p WHERE {
-   GRAPH <$(ci)-metadata> {
-     <$(ci)> mico:hasContentPart ?p .
-     ?p rdf:type mico:ContentPart .
-     ?p dct:type "$(type)" .
-   }
- }
+  SELECT ?p WHERE {
+    GRAPH <$(ci)-metadata> {
+      <$(ci)> mico:hasContentPart ?p .
+      ?p rdf:type mico:ContentPart .
+      ?p mico:hasContent ?an .
+      ?an rdf:type oa:Annotation .
+      ?an oa:hasBody ?body .
+      ?body dc:format "$(type)" .
+    }
+  }
