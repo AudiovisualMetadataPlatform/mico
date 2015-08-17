@@ -186,11 +186,10 @@ public class ZooniverseWebService {
                 rspEntity.put("subjectId", subjectId);
                 rspEntity.put("contentItem", contentItem.getURI().stringValue());
 
-                //FIXME: We do not have a state object when the broker is restarted.
+                //There is no state object when the broker is restarted.
                 if (state == null || state.isFinalState()) {
                     List<Object> rspContentParts = new ArrayList<>();
 
-                    //FIXME: beautfy!
                     for (Content contentPart : contentItem.listContentParts()) {
                         Map<String, Object> rspAnnotation = new HashMap<>();
                         for (Annotation annotation : contentPart.findDerivedAnnotations()) {
