@@ -35,7 +35,7 @@
 
         <jetty.version>9.2.1.v20140609</jetty.version>
         <sesame.version>2.7.12</sesame.version>
-        <javaee.port>8080</javaee.port>
+        <javaee.port>8081</javaee.port>
         <marmotta.version>3.4.0-SNAPSHOT</marmotta.version>
         <marmotta.context>/marmotta</marmotta.context>
         <marmotta.home>${project.build.directory}${file.separator}marmotta</marmotta.home>
@@ -182,6 +182,11 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>2.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>4.5</version>
             </dependency>
 
             <dependency>
