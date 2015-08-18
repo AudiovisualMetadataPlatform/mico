@@ -1,0 +1,10 @@
+<routes xmlns="http://camel.apache.org/schema/spring">
+    <!-- here we define the sample route -->
+    <route id="sample">
+        <from uri="direct:foo"/>
+        <to uri="mock:bar"/>
+    </route>
+ 
+    <!-- we could add more routes if we like,
+         but in this example we stick to one route only -->
+</routes>

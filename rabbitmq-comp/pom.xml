@@ -15,7 +15,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <mico-project.version>1.2.2</mico-project.version>
-    <camel.version>2.15.1</camel.version>
+    <camel.version>2.15.2</camel.version>
   </properties>
 
   <parent>

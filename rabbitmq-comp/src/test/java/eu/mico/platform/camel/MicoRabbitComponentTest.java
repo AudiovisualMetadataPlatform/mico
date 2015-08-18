@@ -1,7 +1,9 @@
 package eu.mico.platform.camel;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DateFormatSymbols;
@@ -14,7 +16,10 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.model.ModelCamelContext;
+import org.apache.camel.model.RoutesDefinition;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.commons.io.IOUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -36,9 +41,10 @@ import static eu.mico.platform.camel.MicoRabbitProducer.KEY_MICO_PART;;
  */
 public class MicoRabbitComponentTest extends CamelTestSupport {
 
-    private static final String TEST_DATA = "src/test/resources/data";
+    private static final String TEST_DATA_FOLDER = "src/test/resources/data/";
     private static MicoCamel micoCamel;
     private static String textItemUri,textPartUri;
+    private static String imageItemUri,imagePartUri;
 
     private static SimpleDateFormat isodate = new SimpleDateFormat("yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'", DateFormatSymbols.getInstance(Locale.US));
     static {
@@ -46,8 +52,8 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
     }
     
 
-    
-    @Test(timeout=5000)
+
+    @Test(timeout=20000)
     public void testMicoRabbit() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMinimumMessageCount(1);       
@@ -56,24 +62,57 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         assertMockEndpointsSatisfied();
     }
 
-    @Test
-    @Ignore
-    public void testMicoCamel() throws Exception {
-		micoCamel.testSimpleAnalyse();
+    /**
+     * @throws Exception
+     */
+    @Ignore // ignored, because a mico_wordcount and mico_ocr_service must be connected to run this test
+    @Test(timeout=20000)
+    public void testImageRoute() throws Exception {
+        MockEndpoint mock = getMockEndpoint("mock:result_image");
+        mock.expectedMinimumMessageCount(1);       
+
+        template.send("direct:image",createExchange(imageItemUri, imagePartUri));
+        assertMockEndpointsSatisfied();
+    }
+
+    /** test route defined in xml
+     * @throws Exception
+     */
+    @Test(timeout=5000)
+    public void testSampleXmlRoute() throws Exception {
+        MockEndpoint mock2 = getMockEndpoint("mock:bar");
+        mock2.expectedMinimumMessageCount(1);
+
+        template.send("direct:foo",createExchange());
+        assertMockEndpointsSatisfied();
     }
 
     @Override
     protected RouteBuilder createRouteBuilder() throws Exception {
         return new RouteBuilder() {
             public void configure() {
-                getContext().setDelayer(300L);
-
+                ModelCamelContext context = getContext();
+                context.setDelayer(300L);
+                
+                try {
+                    InputStream is = new FileInputStream("src/test/resources/routes/sampleRoute.xml");
+                    RoutesDefinition routes = context.loadRoutesDefinition(is);
+                    context.addRouteDefinitions(routes.getRoutes());
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                
                 from("direct:a").pipeline()
-                        .to("mico-comp://foo?serviceId=A-B-queue")
-                        .to("mico-comp://foo?serviceId=B-text/plain-queue")
-                        // .to("mico-comp:vbox?host=mico-platform&user=mico&password=mico&serviceId=ocr-queue-jpeg")
-                        // .to("mico-comp:vbox?host=mico-platform&user=mico&password=mico&serviceId=wordcount")
+                        .to("mico-comp://foo1?serviceId=A-B-queue")
+                        .to("mico-comp://foo2?serviceId=B-text/plain-queue")
                         .to("mock:result");
+
+                from("direct:image")
+                        .pipeline()
+                        .to("mico-comp:vbox1?host=mico-platform&user=mico&password=mico&serviceId=ocr-queue-png")
+                        .to("mico-comp:vbox2?host=mico-platform&user=mico&password=mico&serviceId=wordcount")
+                        .to("mock:result_image");
             }
         };
     }
@@ -85,12 +124,17 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         micoCamel = new MicoCamel();
         micoCamel.init();
         createTextItem();
+        createImageItem();
    }
     
     @AfterClass
     static public void cleanup() throws IOException{
         resetDataFolder();
-        
+
+        // remove test items from platform
+        micoCamel.deleteContentItem(textItemUri);
+        micoCamel.deleteContentItem(imageItemUri);
+
         micoCamel.shutdown();
     }
 
@@ -99,8 +143,8 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
      * move them back and delete the folder
      */
     private static void resetDataFolder() {
-        Path destPath = new File(TEST_DATA).toPath();
-        File processed = new File(TEST_DATA,".camel");
+        Path destPath = new File(TEST_DATA_FOLDER).toPath();
+        File processed = new File(TEST_DATA_FOLDER,".camel");
         if(processed.exists()){
             for (File f : processed.listFiles()){
                 Path source = f.toPath();
@@ -117,11 +161,11 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
     }
     
     public static URI getServiceID() {
-        return new URIImpl("http://example.org/services/CAMEL-TEST-Service");
+        return new URIImpl("http://example.org/services/CAMEL-TEST-injector");
     }
 
     /**
-     * create and store test data/item in mico persistence and 
+     * create and store/inject test data/item in mico persistence and 
      * store item and part uri in class
      * @throws IOException
      * @throws RepositoryException
@@ -139,6 +183,24 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         textPartUri = part.getURI().toString();
     }
 
+    /**
+     * create and inject test item containing an image and 
+     * store item and part uri in class
+     * @throws IOException
+     * @throws RepositoryException
+     */
+    private static void createImageItem() throws IOException, RepositoryException {
+        ContentItem item = micoCamel.createItem();
+        InputStream content = new FileInputStream(TEST_DATA_FOLDER+"sample.png");
+        String type = "image/png";
+        Content part = micoCamel.addPart(IOUtils.toByteArray(content), type, item);
+        part.setRelation(DCTERMS.CREATOR, getServiceID());  // set the service ID as provenance information for the new content part
+        part.setRelation(DCTERMS.SOURCE, new URIImpl("file://sample.png"));              // set the analyzed content part as source for the new content part
+        part.setProperty(DCTERMS.CREATED, isodate.format(new Date())); // set the created date for the new content part
+        
+        imageItemUri = item.getURI().toString();
+        imagePartUri = part.getURI().toString();
+    }
     /**
      * create exchange containing item and part uri of sample/test content
      * @return an exchange containing item and part uri in headers

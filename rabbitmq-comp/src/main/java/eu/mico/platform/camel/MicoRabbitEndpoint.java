@@ -22,7 +22,7 @@ import com.rabbitmq.client.ConnectionFactory;
 @ManagedResource(description = "Managed MicoRabbitMQEndpoint")
 @UriEndpoint(scheme = "mico-comp", title = "MicoRabbit", syntax="mico-comp:name", consumerClass = MicoRabbitConsumer.class, label = "MicoRabbit")
 public class MicoRabbitEndpoint extends DefaultEndpoint {
-    @UriPath @Metadata(required = "true")
+    @UriPath(name=":name") @Metadata(required = "true")
     private String name;
     @UriParam(defaultValue = "10")
     private int option = 10;

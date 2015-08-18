@@ -39,7 +39,7 @@ public class MicoRabbitProducer extends DefaultProducer {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        LOG.info("{} - P R O D U C E analyze event and put it to msg body", endpoint.getName());
+        LOG.info("P R O D U C E analyze event for {} and put it to msg body", serviceId);
         AnalysisEvent event;
         Message inItem = exchange.getIn();
         String item = inItem.getHeader(KEY_MICO_ITEM, String.class);
@@ -61,7 +61,7 @@ public class MicoRabbitProducer extends DefaultProducer {
             }
             event = generateEvent(item, part);
         } catch (Exception e) {
-            log.warn("unable to extract content item and part uri from message", e);
+            log.warn("unable to extract content item and part uri from message: {}", e.getLocalizedMessage());
             event = generateEventSample();
         }
         inItem.setBody(event);

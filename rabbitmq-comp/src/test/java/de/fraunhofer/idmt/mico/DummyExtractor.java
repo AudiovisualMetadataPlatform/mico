@@ -69,24 +69,25 @@ public class DummyExtractor implements AnalysisService {
     }
 
     @Override
-    public void call(AnalysisResponse resp, ContentItem ci, URI object) throws AnalysisException, IOException {
-    	if(ci == null){
-    		log.warn("contentItem is null");
-    		return;
-    	}
-    	if(object == null){
-    		log.warn("object is null");
-    		return;
-    	}
+    public void call(AnalysisResponse resp, ContentItem ci, URI object)
+            throws AnalysisException, IOException {
+        if (ci == null) {
+            log.warn("contentItem is null");
+            return;
+        }
+        if (object == null) {
+            log.warn("object is null");
+            return;
+        }
         log.info("mock analysis request for content item {}, object {}", ci.getURI(), object);
         Content cp = null;
         try {
             cp = ci.createContentPart();
             cp.setType(getProvides());
-            cp.setRelation(DCTERMS.CREATOR, getServiceID());  // set the service ID as provenance information for the new content part
-            cp.setRelation(DCTERMS.SOURCE, object);              // set the analyzed content part as source for the new content part
-            cp.setProperty(DCTERMS.CREATED, isodate.format(new Date())); // set the created date for the new content part
-            
+            cp.setRelation(DCTERMS.CREATOR, getServiceID());
+            cp.setRelation(DCTERMS.SOURCE, object);
+            cp.setProperty(DCTERMS.CREATED, isodate.format(new Date()));
+
             OutputStream os = cp.getOutputStream();
             try{
                 ci.getContentPart(object).getInputStream();
