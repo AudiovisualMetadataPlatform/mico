@@ -4,11 +4,13 @@
  #   $(format) : The MIME type of the binary file
  #   $(location) : The location of the binary file
  #   $(prevCP) : URL of the previous content part
- #   $(type)   : More specific rdf:type value, e.g. mico:CLraw
+ #   $(timestamp) : The timestamp of the image fragment
+
  PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>
  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
  PREFIX oa: <http://www.w3.org/ns/oa#>
  PREFIX dc: <http://purl.org/dc/elements/1.1/>
+ PREFIX dcterms: <http://purl.org/dc/terms/>
 
  INSERT DATA {
  	GRAPH <$(ci)-metadata> {
@@ -16,10 +18,17 @@
          ?an rdf:type oa:Annotation .
          ?an oa:hasBody ?body .
          ?an oa:hasTarget ?target .
-         ?body rdf:type <$(type)> .
+
+         ?body rdf:type mico:ImageExtractionBody .
          ?body dc:format "$(format)" .
+
  	     ?target rdf:type oa:SpecificResource .
  	     ?target oa:hasSource <$(prevCP)> .
  	     ?target mico:hasLocation "$(location)" .
+ 	     ?target oa:hasSelector ?selector .
+
+ 	     ?selector rdf:type oa:FragmentSelector .
+ 	     ?selector dcterms:conformsTo "http://www.w3.org/TR/media-frags/" .
+ 	     ?selector rdf:value "t=npt:$(timestamp),$(timestamp)" .
  	}
  }
