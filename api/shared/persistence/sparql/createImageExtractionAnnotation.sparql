@@ -5,6 +5,10 @@
  #   $(location) : The location of the binary file
  #   $(prevCP) : URL of the previous content part
  #   $(timestamp) : The timestamp of the image fragment
+ #   $(annotationURL) : Unique URL for the annotation
+ #   $(bodyURL) : Unqiue URL for the body
+ #   $(selectorURL) : Unique URL for the selector
+ #   $(targetURL) : Unique URL for the target
 
  PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>
  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -14,21 +18,21 @@
 
  INSERT DATA {
  	GRAPH <$(ci)-metadata> {
-         <$(cp)> mico:hasContent ?an .
-         ?an rdf:type oa:Annotation .
-         ?an oa:hasBody ?body .
-         ?an oa:hasTarget ?target .
+         <$(cp)> mico:hasContent <$(annotationURL)> .
+         <$(annotationURL)> rdf:type oa:Annotation .
+         <$(annotationURL)> oa:hasBody <$(bodyURL)> .
+         <$(annotationURL)> oa:hasTarget <$(targetURL)> .
 
-         ?body rdf:type mico:ImageExtractionBody .
-         ?body dc:format "$(format)" .
+         <$(bodyURL)> rdf:type mico:ImageExtractionBody .
+         <$(bodyURL)> dc:format "$(format)" .
 
- 	     ?target rdf:type oa:SpecificResource .
- 	     ?target oa:hasSource <$(prevCP)> .
- 	     ?target mico:hasLocation "$(location)" .
- 	     ?target oa:hasSelector ?selector .
+ 	       <$(targetURL)> rdf:type oa:SpecificResource .
+ 	       <$(targetURL)> oa:hasSource <$(prevCP)> .
+ 	       <$(targetURL)> mico:hasLocation "$(location)" .
+ 	       <$(targetURL)> oa:hasSelector <$(selectorURL)> .
 
- 	     ?selector rdf:type oa:FragmentSelector .
- 	     ?selector dcterms:conformsTo "http://www.w3.org/TR/media-frags/" .
- 	     ?selector rdf:value "t=npt:$(timestamp),$(timestamp)" .
+ 	       <$(selectorURL)> rdf:type oa:FragmentSelector .
+ 	       <$(selectorURL)> dcterms:conformsTo "http://www.w3.org/TR/media-frags/" .
+ 	       <$(selectorURL)> rdf:value "t=npt:$(timestamp),$(timestamp)" .
  	}
  }
