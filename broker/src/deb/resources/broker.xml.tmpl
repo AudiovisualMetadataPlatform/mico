@@ -18,5 +18,5 @@
     <Parameter name="mico.user" value="%MICO_USER%" override="true"/>
     <Parameter name="mico.pass" value="%MICO_PASS%" override="true"/>
     <Parameter name="mico.marmottaBaseUri" value="http://%HOSTNAME%:8080/marmotta" override="true"/>
-    <Parameter name="mico.storageBaseUri" value="ftp://%HOSTNAME%/" override="true"/>
+    <Parameter name="mico.storageBaseUri" value="ftp://%MICO_USER%:%MICO_PASS%@%HOSTNAME%/" override="true"/>
 </Context>
