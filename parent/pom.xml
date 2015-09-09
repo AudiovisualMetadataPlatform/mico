@@ -41,8 +41,6 @@
         <marmotta.version>3.4.0-SNAPSHOT</marmotta.version>
         <marmotta.context>/marmotta</marmotta.context>
         <marmotta.home>${project.build.directory}${file.separator}marmotta</marmotta.home>
-        <hadoop.version>2.4.1</hadoop.version>
-        <hadoop.home>${project.build.directory}${file.separator}hadoop-${hadoop.version}</hadoop.home>
         
         <resteasy.version>3.0.8.Final</resteasy.version>
         <jackson.version>1.9.13</jackson.version>
@@ -208,11 +206,6 @@
                     <groupId>com.googlecode.maven-download-plugin</groupId>
                     <artifactId>download-maven-plugin</artifactId>
                     <version>1.2.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>com.github.shyiko.hadoop-maven-plugin</groupId>
-                    <artifactId>hadoop-maven-plugin</artifactId>
-                    <version>1.0.0</version>
                 </plugin>
 
                 <plugin>
