@@ -55,7 +55,7 @@ public class ContentItemMock implements ContentItem {
 
     @Override
     public Content createContentPart() throws RepositoryException {
-        final ContentMock content = new ContentMock(this, getURI().stringValue() + "/" + UUID.randomUUID());
+        final ContentMock content = new ContentMock(this, UUID.randomUUID().toString());
         contentParts.put(content.getURI(), content);
         return content;
     }
