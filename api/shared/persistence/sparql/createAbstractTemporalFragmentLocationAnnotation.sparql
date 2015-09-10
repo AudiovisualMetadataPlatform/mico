@@ -5,13 +5,18 @@
  #   $(annotationURL) : Unique URL for the annotation
  #   $(bodyURL) : Unqiue URL for the body
  #   $(targetURL) : Unique URL for the target
- #   $(format) : The MIME type of the binary file
  #   $(location) : The download location of the binary file
- #
+ #   $(format) : The MIME type of the binary file
+ #   $(selectorURL) : Unique URL for the selector
+ #   $(timestart)   : The timestamp of the start of the fragment
+ #   $(timeend)     : The timestamp of the end of the fragment
+
+ # NOTE: if there are problems with the mico platform ui not showing the contentitems, maybe add
  PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>
  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
  PREFIX oa: <http://www.w3.org/ns/oa#>
  PREFIX dc: <http://purl.org/dc/elements/1.1/>
+ PREFIX dcterms: <http://purl.org/dc/terms/>
 
  INSERT DATA {
  	GRAPH <$(ci)-metadata> {
@@ -20,8 +25,12 @@
          <$(annotationURL)> oa:hasBody <$(bodyURL)> .
          <$(annotationURL)> oa:hasTarget <$(targetURL)> .
          <$(bodyURL)> dc:format "$(format)" .
- 	     <$(targetURL)> rdf:type oa:SpecificResource .
- 	     <$(targetURL)> oa:hasSource <$(prevCP)> .
- 	     <$(targetURL)> mico:hasLocation "$(location)" .
+         <$(targetURL)> rdf:type oa:SpecificResource .
+         <$(targetURL)> oa:hasSource <$(prevCP)> .
+         <$(targetURL)> mico:hasLocation "$(location)" .
+         <$(targetURL)> oa:hasSelector <$(selectorURL)>.
+         	   <$(selectorURL)> rdf:type oa:FragmentSelector .
+         	   <$(selectorURL)> dcterms:conformsTo "http://www.w3.org/TR/media-frags/" .
+         	   <$(selectorURL)> rdf:value "t=npt:$(timestart),$(timeend)" .
  	}
  }
