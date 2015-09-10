@@ -105,6 +105,13 @@ public class StatusWebService {
             for(Map.Entry<String, ContentItemState> state : broker.getStates().entrySet()) {
                 result.add(wrapContentItemStatus(state.getKey(),state.getValue(),showParts));
             }
+            Collections.sort(result, new Comparator<Map<String,Object>>() {
+                @Override
+                public int compare(Map<String,Object> ci1, Map<String,Object> ci2) {
+                    return ((String)(ci1.get("time"))).compareTo((String)(ci2.get("time")));
+                }
+
+            });
         } else if(broker.getStates().containsKey(itemUri)) {
             result.add(wrapContentItemStatus(itemUri, broker.getStates().get(itemUri),showParts));
         } else {
