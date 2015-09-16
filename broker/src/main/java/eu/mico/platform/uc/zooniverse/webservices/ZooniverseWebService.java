@@ -17,14 +17,12 @@
  */
 package eu.mico.platform.uc.zooniverse.webservices;
 
-import com.github.anno4j.model.Annotation;
-import com.github.anno4j.model.impl.selector.FragmentSelector;
-import com.github.anno4j.model.impl.target.SpecificResource;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.model.ContentItemState;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.persistence.impl.MarmottaContentItem;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
@@ -40,14 +38,13 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.DCTERMS;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.UpdateExecutionException;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.query.*;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -56,13 +53,16 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  */
-@Path("zooniverse/{subjectID:[^/]+}")
+@Path("zooniverse/")
 public class ZooniverseWebService {
 
     private static final Logger log = LoggerFactory.getLogger(ZooniverseWebService.class);
@@ -72,14 +72,20 @@ public class ZooniverseWebService {
         ISO8601FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
+    private static final MimetypesFileTypeMap mimetypesMap = new MimetypesFileTypeMap();
+
     private final EventManager eventManager;
     private final MICOBroker broker;
+    private final String marmottaBaseUri;
     private final PersistenceService persistenceService;
     private final CloseableHttpClient httpClient;
 
-    public ZooniverseWebService(EventManager eventManager, MICOBroker broker) {
+    public ZooniverseWebService(EventManager eventManager, MICOBroker broker, String marmottaBaseUri) {
         this.eventManager = eventManager;
         this.broker = broker;
+        this.marmottaBaseUri = marmottaBaseUri;
+
+        mimetypesMap.addMimeTypes("image/jpeg jpeg jpg");
 
         this.persistenceService = eventManager.getPersistenceService();
         this.httpClient = HttpClientBuilder.create()
@@ -89,7 +95,7 @@ public class ZooniverseWebService {
 
     @PUT
     @Produces("application/json")
-    public Response sendURLs(@PathParam("subjectID") final String subjectId, @QueryParam("url") final java.net.URI imageUrl) {
+    public Response sendURLs(@QueryParam("url") final java.net.URI imageUrl) {
         try {
             final HttpGet request = new HttpGet(imageUrl);
             return httpClient.execute(request, new ResponseHandler<Response>() {
@@ -98,10 +104,16 @@ public class ZooniverseWebService {
                     final StatusLine statusLine = httpResponse.getStatusLine();
                     if (statusLine.getStatusCode() == 200) {
                         final Header cType = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+                        final MediaType type;
                         if (cType != null) {
-                            final MediaType type = MediaType.valueOf(cType.getValue());
+                            type = MediaType.valueOf(cType.getValue());
+                        } else {
+                            type = MediaType.valueOf(mimetypesMap.getContentType(imageUrl.getPath()));
+                        }
+
+                        if (type != null) {
                             try (InputStream is = httpResponse.getEntity().getContent()) {
-                                return uploadImage(subjectId, type, is);
+                                return uploadImage(type, is);
                             }
                         } else {
                             throw new ClientProtocolException("Could not determine ContentType of remote resource " + imageUrl);
@@ -116,7 +128,7 @@ public class ZooniverseWebService {
                     .entity(e.getMessage())
                     .build();
         } catch (IOException e) {
-            log.error("Could not fetch image to create ContentItem for subjectId " + subjectId);
+            log.error("Could not fetch image to create content item");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
     }
@@ -124,174 +136,275 @@ public class ZooniverseWebService {
     @POST
     @Consumes("image/*")
     @Produces("application/json")
-    public Response uploadImage(@PathParam("subjectID") String subjectId, @HeaderParam(HttpHeaders.CONTENT_TYPE) MediaType type, @Context InputStream postBody) {
+    public Response uploadImage(@HeaderParam(HttpHeaders.CONTENT_TYPE) MediaType type, @Context InputStream postBody) {
         if (type == null || postBody == null) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("ContentType and postBody required!")
                     .build();
         }
         try {
-            final URI uri = getContentItemUriForSubjectId(subjectId);
-            if (uri != null) {
-                return Response.status(Response.Status.CONFLICT)
-                        .entity(String.format("ContentItem with SubjectId '%s' already exists: <%s>%n", subjectId, uri))
-                        .build();
-            } else {
-                final ContentItem ci = persistenceService.createContentItem();
-                setSubjectIdForContentItemUri(ci.getURI(), subjectId);
+            final ContentItem ci = persistenceService.createContentItem();
 
-                final Content contentPart = ci.createContentPart();
-                contentPart.setType(String.format("%s/%s", type.getType(), type.getSubtype()));
-                contentPart.setRelation(DCTERMS.CREATOR, new URIImpl("http://www.mico-project.eu/broker/zooniverse-web-service"));
-                contentPart.setProperty(DCTERMS.CREATED, ISO8601FORMAT.format(new Date()));
+            final Content contentPart = ci.createContentPart();
+            contentPart.setType(String.format("%s/%s", type.getType(), type.getSubtype()));
+            contentPart.setRelation(DCTERMS.CREATOR, new URIImpl("http://www.mico-project.eu/broker/zooniverse-web-service"));
+            contentPart.setProperty(DCTERMS.CREATED, ISO8601FORMAT.format(new Date()));
 
-                try (OutputStream outputStream = contentPart.getOutputStream()) {
-                    IOUtils.copy(postBody, outputStream);
-                } catch (IOException e) {
-                    log.error("Could not persist binary data for ContentPart {}: {}", contentPart.getURI(), e.getMessage());
-                    throw e;
-                }
-
-                eventManager.injectContentItem(ci);
-                Map<String, Object> rspEntity = new HashMap<>();
-                rspEntity.put("subjectId", subjectId);
-                rspEntity.put("contentItem", ci.getURI());
-                rspEntity.put("contentPart", contentPart.getURI());
-                rspEntity.put("status", "submitted");
-
-                return Response.status(Response.Status.CREATED)
-                        .entity(rspEntity)
-                        .link(java.net.URI.create(ci.getURI().stringValue()), "contentItem")
-                        .link(java.net.URI.create(contentPart.getURI().stringValue()), "contentPart")
-                        .build();
+            try (OutputStream outputStream = contentPart.getOutputStream()) {
+                IOUtils.copy(postBody, outputStream);
+            } catch (IOException e) {
+                log.error("Could not persist binary data for ContentPart {}: {}", contentPart.getURI(), e.getMessage());
+                throw e;
             }
+
+            eventManager.injectContentItem(ci);
+            Map<String, Object> rspEntity = new HashMap<>();
+            rspEntity.put("id", String.format("%s/%s", ci.getID(), contentPart.getID()));
+            rspEntity.put("status", "submitted");
+
+            return Response.status(Response.Status.CREATED)
+                    .entity(rspEntity)
+                    .link(java.net.URI.create(ci.getURI().stringValue()), "contentItem")
+                    .link(java.net.URI.create(contentPart.getURI().stringValue()), "contentPart")
+                    .build();
         } catch (RepositoryException | IOException e) {
-            log.error("Could not create ContentItem for subjectId " + subjectId);
+            log.error("Could not create ContentItem");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
     }
 
     @GET
+    @Path("{contentItemID:[^/]+}/{contentPartID:[^/]+}")
     @Produces("application/json")
-    public Response getResult(@PathParam("subjectID") String subjectId) {
+    public Response getResult(@PathParam("contentItemID") final String contentItemId, @PathParam("contentPartID") final String contentPartId) {
+
+        final URI contentItemUri;
+        final URI contentPartUri;
         try {
-            final URI uri = getContentItemUriForSubjectId(subjectId);
-            if (uri == null) {
-                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem with subjectId '%s'%n", subjectId)).build();
-            } else {
-                final Response.Status status;
-                final ContentItem contentItem = persistenceService.getContentItem(uri);
-                final ContentItemState state = broker.getStates().get(uri.stringValue());
-                Map<String, Object> rspEntity = new HashMap<>();
-                rspEntity.put("subjectId", subjectId);
-                rspEntity.put("contentItem", contentItem.getURI().stringValue());
+            contentItemUri = concatUrlWithPath(marmottaBaseUri, contentItemId);
+            contentPartUri = concatUrlWithPath(marmottaBaseUri, String.format("%s/%s", contentItemId, contentPartId));
+        }
+        catch (URISyntaxException e) {
+            log.error("Unable to create URI with marmotta base '{}', content item id '{}' and content part id '{}'", marmottaBaseUri, contentItemId, contentPartId);
+            return Response.status(Response.Status.NOT_FOUND).entity(String.format("Unable to create URI with marmotta base '%s', content item id '%s' and content part id '%s'", marmottaBaseUri, contentItemId, contentPartId)).build();
+        }
 
-                //There is no state object when the broker is restarted.
-                if (state == null || state.isFinalState()) {
-                    List<Object> rspContentParts = new ArrayList<>();
-
-                    for (Content contentPart : contentItem.listContentParts()) {
-                        Map<String, Object> rspAnnotation = new HashMap<>();
-                        for (Annotation annotation : contentPart.findDerivedAnnotations()) {
-                            if (annotation.getTarget() == null || ! (annotation.getTarget() instanceof SpecificResource))
-                                continue;
-                            SpecificResource target = (SpecificResource)annotation.getTarget();
-
-                            if (target.getSelector() == null || ! (target.getSelector() instanceof FragmentSelector))
-                                continue;;
-                            FragmentSelector selector = ((FragmentSelector) target.getSelector());
-
-                            rspAnnotation.put("contentPart", contentPart.getURI().stringValue());
-
-                            Map<String, Object> rspTarget = new HashMap<>();
-                            Map <String,Object> rspSelector = new HashMap<>();
-                            rspSelector.put("value", selector.getValue());
-                            rspSelector.put("conformsTo", selector.getConformsTo());
-                            rspTarget.put("selector", rspSelector);
-                            rspAnnotation.put("target", rspTarget);
-
-                            if (annotation.getMotivatedBy() != null)
-                                rspAnnotation.put("motivatedBy", annotation.getMotivatedBy().toString());
-                            if (annotation.getSerializedBy() != null)
-                                rspAnnotation.put("serializedBy", annotation.getSerializedBy().getName());
-                            if (annotation.getSerializedAt() != null)
-                                rspAnnotation.put("serializedAt", annotation.getSerializedAt().toString());
-                            if (annotation.getAnnotatedBy() != null)
-                                rspAnnotation.put("annotatedBy", annotation.getAnnotatedBy().getName());
-                            if (annotation.getAnnotatedAt() != null)
-                                rspAnnotation.put("annotatedAt", annotation.getAnnotatedAt().toString());
-                        }
-                        if (rspAnnotation.size() > 0)
-                            rspContentParts.add(rspAnnotation);
-                    }
-
-                    if (rspContentParts.size() > 0)
-                        rspEntity.put("contentParts", rspContentParts);
-
-                    rspEntity.put("status", "finished");
-                    status = Response.Status.OK;
-                } else {
-                    status = Response.Status.ACCEPTED;
-
-                    rspEntity.put("status", "inProgress");
-                    rspEntity.put("message", String.format("Analysis of subject '%s' (<%s>) is not yet complete. Please try again later!", subjectId, uri));
-                }
-                return Response.status(status)
-                        .entity(rspEntity)
-                        .link(java.net.URI.create(uri.stringValue()), "contentItem")
-                        .build();
-            }
+        final ContentItem contentItem;
+        try {
+            contentItem = persistenceService.getContentItem(contentItemUri);
+            if (contentItem == null)
+                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'%n", contentItemUri.stringValue())).build();
         } catch (RepositoryException e) {
-            log.error("Could not load ContentItem for subjectId " + subjectId);
+            log.error("Error getting content item {}: {}", contentItemUri, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
-    }
 
-    @DELETE
-    public Response deleteSubject(@PathParam("subjectID") String subjectId) {
+        final Content contentPart;
         try {
-            final URI contentItem = getContentItemUriForSubjectId(subjectId);
-            if (contentItem == null) {
-                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem with subjectId '%s'%n", subjectId)).build();
-            } else {
-                persistenceService.deleteContentItem(contentItem);
-                return Response.noContent().build();
+
+            contentPart = contentItem.getContentPart(contentPartUri);
+            if (contentPart == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentPart '%s'%n", contentPartUri.stringValue())).build();
+            }
+            if (contentPart.getType() == null || !contentPart.getType().startsWith("image/")) {
+                log.error("The requested resource is not an image: {}", contentPart.getURI());
+                return Response.status(Response.Status.BAD_REQUEST).entity("The requested resource is not an image").build();
             }
         } catch (RepositoryException e) {
-            log.error("Could not delete ContentItem for subjectId " + subjectId);
+            log.error("Error getting content part{}: {}", contentPartUri, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
+
+        Map<String, Object> rspEntity = new HashMap<>();
+
+        final ContentItemState state = broker.getStates().get(contentItemUri.stringValue());
+        if (state != null && !state.isFinalState()) {
+            rspEntity.put("status", "inProgress");
+            return Response.status(Response.Status.ACCEPTED)
+                    .entity(rspEntity)
+                    .build();
+        }
+
+        try {
+            List<Object> objects = getObjects(contentPartUri);
+            if (objects == null) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            }
+            rspEntity.put("objects", objects);
+            rspEntity.put("objectsFound", objects.size());
+
+            rspEntity.put("processingBegin", getProcessingBegin(contentPartUri));
+            rspEntity.put("processingEnd", getProcessingEnd(contentItemUri));
+        } catch (RepositoryException e) {
+            log.error("Error processing queries: {}", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
+        }
+
+        rspEntity.put("extractorVersion", null);
+        rspEntity.put("modelID", null);
+        rspEntity.put("status", "finished");
+
+        return Response.status(Response.Status.OK)
+                .entity(rspEntity)
+                .build();
+
     }
 
-
-    private URI getContentItemUriForSubjectId(String subjectId) throws RepositoryException {
+    private String getProcessingEnd(URI contentItemUri) throws  RepositoryException {
         final Metadata metadata = persistenceService.getMetadata();
 
         try {
-            final TupleQueryResult result = metadata.query(String.format("SELECT ?uri WHERE { ?uri a <%s>; <%s> \"%s\".}", "http://www.mico-project.eu/ns/platform/1.0/schema#ContentItem", DCTERMS.IDENTIFIER, subjectId));
+
+            final String query = String.format(
+                    "SELECT ?value WHERE {\n" +
+                            " <%s>  <http://www.mico-project.eu/ns/platform/1.0/schema#hasContentPart> ?cp .\n" +
+                            " ?cp <%s> \"text/vnd.fhg-hog-detector+xml\" .\n" +
+                            " ?cp <%s> ?value .\n" +
+                            "}",
+                    contentItemUri,
+                    DCTERMS.TYPE,
+                    DCTERMS.CREATED
+            );
+
+            final TupleQueryResult result = metadata.query(query);
+
             try {
                 if (result.hasNext()) {
-                    return (URI) result.next().getBinding("uri").getValue();
+                    return result.next().getBinding("value").getValue().stringValue();
                 }
-                return null;
             } finally {
                 result.close();
             }
-        } catch (QueryEvaluationException | MalformedQueryException e) {
-            e.printStackTrace();
-            return null;
+        } catch (MalformedQueryException | QueryEvaluationException e) {
+            log.error("Error querying objects; {}", e);
         }
-
+        return null;
     }
 
-    private void setSubjectIdForContentItemUri(URI contentItem, String subjectId) throws RepositoryException {
+    private String getProcessingBegin(URI contentPartUri) throws  RepositoryException {
         final Metadata metadata = persistenceService.getMetadata();
 
         try {
-            metadata.update(String.format("INSERT DATA { <%s> <%s> \"%s\". }", contentItem, DCTERMS.IDENTIFIER, subjectId));
-        } catch (MalformedQueryException | UpdateExecutionException e) {
-            e.printStackTrace();
+
+            final String query = String.format(
+                    "SELECT ?value WHERE {\n" +
+                            " <%s>  <%s> ?value .\n" +
+                            "}",
+                    contentPartUri, DCTERMS.CREATED
+            );
+
+            final TupleQueryResult result = metadata.query(query);
+
+            try {
+                if (result.hasNext()) {
+                    return result.next().getBinding("value").getValue().stringValue();
+                }
+            } finally {
+                result.close();
+            }
+        } catch (MalformedQueryException | QueryEvaluationException e) {
+            log.error("Error querying objects; {}", e);
         }
+        return null;
+    }
+
+    private List<Object> getObjects(URI contentPartUri) throws RepositoryException{
+        List<Object> rspObjects = new ArrayList<>();
+        final Metadata metadata = persistenceService.getMetadata();
+
+        try {
+
+            final String query = String.format(
+                    "SELECT ?value WHERE {\n" +
+                            " ?extractoroutput <%s>  <%s> .\n" +
+                            " ?extractoroutput <%s> \"text/vnd.fhg-hog-detector+xml\" .\n" +
+                            " ?specificresource <http://www.w3.org/ns/oa#hasSource> ?extractoroutput .\n" +
+                            " ?specificresource <http://www.w3.org/ns/oa#hasSelector> ?selector .\n" +
+                            " ?selector <%s> <http://www.w3.org/ns/oa#FragmentSelector> .\n" +
+                            " ?selector <%s> ?value\n" +
+                            "}",
+                    DCTERMS.SOURCE, contentPartUri,
+                    DCTERMS.TYPE,
+                    RDF.TYPE,
+                    RDF.VALUE
+            );
+
+            final TupleQueryResult result = metadata.query(query);
+
+            try {
+                while (result.hasNext()) {
+                    Map<String, Object> rspObject = new HashMap<>();
+                    String value = result.next().getBinding("value").getValue().stringValue();
+                    final Pattern fragmentPattern = Pattern.compile("#xywh=(-?\\d+),(-?\\d+),(-?\\d+),(-?\\d+)");
+                    Matcher matcher = fragmentPattern.matcher(value);
+                    if (!matcher.matches()) {
+                        log.error("Error parsing value {}", value);
+                        return null;
+                    }
+                    rspObject.put("x", Integer.parseInt(matcher.group(1)));
+                    rspObject.put("y", Integer.parseInt(matcher.group(2)));
+                    rspObject.put("w", Integer.parseInt(matcher.group(3)));
+                    rspObject.put("h", Integer.parseInt(matcher.group(4)));
+                    rspObject.put("groupID", null);
+                    rspObjects.add(rspObject);
+                }
+            } finally {
+                result.close();
+            }
+        } catch (MalformedQueryException | QueryEvaluationException e) {
+            log.error("Error querying objects; {}", e);
+            return null;
+        }
+        return rspObjects;
+    }
+
+    @DELETE
+    @Path("{contentItemID:[^/]+}/{contentPartID:[^/]+}")
+    public Response deleteSubject(@PathParam("contentItemID") final String contentItemId, @PathParam("contentPartID") final String contentPartId) {
+        final URI contentItemUri;
+        try {
+            contentItemUri = concatUrlWithPath(marmottaBaseUri, contentItemId);
+        }
+        catch (URISyntaxException e) {
+            log.error("Unable to create URI with marmotta base '{}', content item id '{}' and content part id '{}'", marmottaBaseUri, contentItemId, contentPartId);
+            return Response.status(Response.Status.NOT_FOUND).entity(String.format("Unable to create URI with marmotta base '%s', content item id '%s' and content part id '%s'", marmottaBaseUri, contentItemId, contentPartId)).build();
+        }
+
+        final ContentItem contentItem;
+        try {
+            contentItem = persistenceService.getContentItem(contentItemUri);
+            if (contentItem == null)
+                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'%n", contentItemUri.stringValue())).build();
+
+            /*
+            //Remove triples before deleteContentItem, as the Graph gets dropped there.
+            final Metadata metadata = persistenceService.getMetadata();
+            final String query = String.format(
+                    "DELETE WHERE { GRAPH <%s%s> { ?s ?p ?o . }};\n" +
+                    "DELETE WHERE { GRAPH <%s%s> { ?s ?p ?o . }};\n" +
+                    "DELETE WHERE { GRAPH <%s%s> { ?s ?p ?o . }};\n",
+                    contentItemUri, MarmottaContentItem.SUFFIX_METADATA,
+                    contentItemUri, MarmottaContentItem.SUFFIX_EXECUTION,
+                    contentItemUri, MarmottaContentItem.SUFFIX_RESULT
+            );
+            metadata.update(query);*/
+
+            persistenceService.deleteContentItem(contentItemUri);
+        } catch (RepositoryException /*| UpdateExecutionException | MalformedQueryException*/ e) {
+            log.error("Error removing content item {}: {}", contentItemUri, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
+        }
+
+
+
+        return Response.noContent().build();
+    }
+
+    private URI concatUrlWithPath(String baseURL, String extraPath) throws URISyntaxException{
+        java.net.URI baseURI = new java.net.URI(baseURL).normalize();
+        String newPath = baseURI.getPath() + "/" + extraPath;
+        java.net.URI newURI = baseURI.resolve(newPath);
+        return new URIImpl(newURI.normalize().toString());
     }
 
 }
