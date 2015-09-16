@@ -105,13 +105,20 @@ namespace mico {
             */
             ContentItem(const std::string& baseUrl, const std::string& contentDirectory, const mico::rdf::model::URI& uri);
 
+            /**
+            * Return the (base URL) used by this content item
+            *
+            * @return The base url as string
+            */
+            inline  std::string getBaseUrl() const { return baseUrl; }
+
 
             /**
             * Return the identifier (a unique URI) for this content item.
             *
             * @return the URI identifying this content item
             */
-            inline const mico::rdf::model::URI getURI() const { return mico::rdf::model::URI(baseUrl + "/" + boost::uuids::to_string(id)); };
+            inline const mico::rdf::model::URI getURI() const { return mico::rdf::model::URI(baseUrl + "/" + boost::uuids::to_string(id)); }
 
             /**
             * Return (read-only) content item metadata part of the initial content item, e.g. provenance information etc.
@@ -121,7 +128,7 @@ namespace mico {
             *
             * @return a handle to a Metadata object that is suitable for reading
             */
-            ContentItemMetadata& getMetadata() { return metadata; };
+            ContentItemMetadata& getMetadata() { return metadata; }
 
             /**
             * Return execution plan and metadata (e.g. dependencies, profiling information, execution information). Can be
@@ -217,12 +224,12 @@ namespace mico {
 
         public:
             content_part_iterator(ContentItem& item, const std::string& baseUrl, const std::string& contentDirectory)
-                    : pos(-1), item(item), baseUrl(baseUrl), contentDirectory(contentDirectory), result(NULL) {};
+                    : pos(-1), item(item), baseUrl(baseUrl), contentDirectory(contentDirectory), result(NULL) {}
 
             content_part_iterator(ContentItem& item, const std::string& baseUrl, const std::string& contentDirectory, const mico::rdf::query::TupleResult* r)
-                    :  pos(0), item(item), baseUrl(baseUrl), contentDirectory(contentDirectory), result(r) {};
+                    :  pos(0), item(item), baseUrl(baseUrl), contentDirectory(contentDirectory), result(r) {}
 
-            ~content_part_iterator() { if(result) { delete result; } };
+            ~content_part_iterator() { if(result) { delete result; } }
 
 
         private:

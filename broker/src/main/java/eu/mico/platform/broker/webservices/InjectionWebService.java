@@ -98,6 +98,8 @@ public class InjectionWebService {
 
         Content content = item.createContentPart();
         content.setType(type);
+        // deprecated - The model should use haslocation on the target instead of dcterms:source
+        content.setProperty(DCTERMS.SOURCE, fileName);
 
         MICOProvenance provenance = new MICOProvenance();
         provenance.setExtractorName("http://www.mico-project.eu/broker/injection-web-service");
@@ -105,7 +107,7 @@ public class InjectionWebService {
         MultiMediaBody multiMediaBody = new MultiMediaBody();
         multiMediaBody.setFormat(type);
 
-        InitialTarget target = new InitialTarget(content.getURI().toString());
+        InitialTarget target = new InitialTarget(fileName);
 
         content.createAnnotation(multiMediaBody, null, provenance, target);
 

@@ -15,6 +15,7 @@ package eu.mico.platform.persistence.impl;
 
 import com.github.anno4j.Anno4j;
 import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
 import eu.mico.platform.storage.util.VFSUtils;
@@ -26,6 +27,7 @@ import org.openrdf.repository.config.RepositoryConfigException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.UUID;
 
@@ -181,8 +183,17 @@ public class PersistenceServiceImpl implements PersistenceService {
     @Override
     public void deleteContentItem(URI id) throws RepositoryException {
 
-        // delete the content parts binary data
         // TODO
+        // For now errors (non existing files) have to be ignored, as a content part must have a data part.
+
+        ContentItem contentItem = getContentItem(id);
+        for (Content contentPart : contentItem.listContentParts()) {
+            try {
+                contentItem.deleteContent(contentPart.getURI());
+            } catch (IOException e) {
+                log.error("Error deleting content part {} from storage: {}", contentPart.getURI().toString(), e);
+            }
+        }
 
         Metadata m = getMetadata();
 
