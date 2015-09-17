@@ -61,10 +61,10 @@ import java.util.regex.Matcher;
 
 /**
  */
-@Path("zooniverse/")
-public class ZooniverseWebService {
+@Path("zooniverse/animaldetection")
+public class AnimalDetectionWebService {
 
-    private static final Logger log = LoggerFactory.getLogger(ZooniverseWebService.class);
+    private static final Logger log = LoggerFactory.getLogger(AnimalDetectionWebService.class);
 
     public static final SimpleDateFormat ISO8601FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", DateFormatSymbols.getInstance(Locale.US));
     static {
@@ -79,7 +79,7 @@ public class ZooniverseWebService {
     private final PersistenceService persistenceService;
     private final CloseableHttpClient httpClient;
 
-    public ZooniverseWebService(EventManager eventManager, MICOBroker broker, String marmottaBaseUri) {
+    public AnimalDetectionWebService(EventManager eventManager, MICOBroker broker, String marmottaBaseUri) {
         this.eventManager = eventManager;
         this.broker = broker;
         this.marmottaBaseUri = marmottaBaseUri;
