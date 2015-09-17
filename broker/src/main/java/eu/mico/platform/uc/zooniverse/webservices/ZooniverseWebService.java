@@ -22,7 +22,6 @@ import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.model.ContentItemState;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.impl.MarmottaContentItem;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
@@ -376,21 +375,8 @@ public class ZooniverseWebService {
             if (contentItem == null)
                 return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'%n", contentItemUri.stringValue())).build();
 
-            /*
-            //Remove triples before deleteContentItem, as the Graph gets dropped there.
-            final Metadata metadata = persistenceService.getMetadata();
-            final String query = String.format(
-                    "DELETE WHERE { GRAPH <%s%s> { ?s ?p ?o . }};\n" +
-                    "DELETE WHERE { GRAPH <%s%s> { ?s ?p ?o . }};\n" +
-                    "DELETE WHERE { GRAPH <%s%s> { ?s ?p ?o . }};\n",
-                    contentItemUri, MarmottaContentItem.SUFFIX_METADATA,
-                    contentItemUri, MarmottaContentItem.SUFFIX_EXECUTION,
-                    contentItemUri, MarmottaContentItem.SUFFIX_RESULT
-            );
-            metadata.update(query);*/
-
             persistenceService.deleteContentItem(contentItemUri);
-        } catch (RepositoryException /*| UpdateExecutionException | MalformedQueryException*/ e) {
+        } catch (RepositoryException e) {
             log.error("Error removing content item {}: {}", contentItemUri, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
