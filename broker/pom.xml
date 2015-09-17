@@ -290,7 +290,7 @@
                                                 <user>root</user>
                                                 <group>root</group>
                                             </mapper>
-                                            <conffile>false</conffile>
+                                            <conffile>true</conffile>
                                         </data>
                                         <!--
                                         <data>
