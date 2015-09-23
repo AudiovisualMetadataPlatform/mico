@@ -175,7 +175,7 @@
                     <artifactId>jackson-mapper-asl</artifactId>
                 </exclusion>
 
-               <!-- Exclude Commons HttpClient & CLI -->
+               <!-- Exclude Commons HttpClient -->
                 <exclusion>
                     <groupId>commons-httpclient</groupId>
                     <artifactId>commons-httpclient</artifactId>
