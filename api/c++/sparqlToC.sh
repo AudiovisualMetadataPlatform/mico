@@ -13,4 +13,4 @@
 # limitations under the License.
 #
 
-xxd -i $1 | sed 's/ \+[a-zA-Z_]\+persistence_sparql_/ /' > $2
+xxd -i $1 | sed 's/ \+[a-zA-Z0-9_]\+persistence_sparql_/ /' > $2
