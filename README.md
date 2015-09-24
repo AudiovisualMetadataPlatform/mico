@@ -126,6 +126,7 @@ recommended Debian systems are provided as packages by the MICO repository. In p
 * Boost 1.55 libraries for additional C++ functionalities (apt-get install libboost1.55-dev libboost-log1.55-dev libboost-system1.55-dev)
 * xxd for inlining SPARQL queries in C++ (part of VIM, apt-get install vim-common)
 * protobuf for the event communication protocol (apt-get install libprotobuf-dev protobuf-compiler, version > 2.5)
+* libdaemon as the (sample) extractors run as daemon (apt-get install libdaemon-dev)
 * AMQP-CPP for communication with RabbitMQ (apt-get install libamqpcpp-dev=2.1.4 - provided by MICO repository)
 * libhdfs3 (apt-get install libhdfs3-dev - - provided by MICO repository)
 * Doxygen for building the documentation
