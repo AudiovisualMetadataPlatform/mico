@@ -17,6 +17,7 @@ import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
+import eu.mico.platform.uc.zooniverse.webservices.TextAnalysisWebService;
 import eu.mico.platform.uc.zooniverse.webservices.ZooniverseWebService;
 import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
@@ -73,6 +74,7 @@ public class MICOBrokerApplication extends Application {
             services.add(new StatusWebService(broker));
             services.add(new InjectionWebService(manager));
             services.add(new ZooniverseWebService(manager, broker));
+            services.add(new TextAnalysisWebService(manager, broker, marmottaBaseUri));
         } catch (IOException ex) {
             log.error("could not initialise MICO broker, services not available (message: {})", ex.getMessage());
             log.debug("Exception:",ex);
