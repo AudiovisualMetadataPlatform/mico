@@ -139,7 +139,7 @@ public class TextAnalysisWebServiceTest {
 
     private static PersistenceService mockPersistenceService() throws RepositoryException, IOException, QueryEvaluationException, MalformedQueryException {
         PersistenceService persistenceService = mock(PersistenceService.class);
-        ContentItem contentItem = mockContentItem();
+        ContentItem contentItem = mockCreateContentItem();
         Metadata metadata = mockMetadata();
         when(persistenceService.createContentItem()).thenReturn(contentItem);
         when(persistenceService.getContentItem(Matchers.<URI>any())).thenAnswer(new Answer<ContentItem>(){
@@ -170,17 +170,20 @@ public class TextAnalysisWebServiceTest {
         return metadata;
     }
 
-    private static ContentItem mockContentItem() throws RepositoryException, IOException {
+    private static ContentItem mockCreateContentItem() throws RepositoryException, IOException {
         URI uri = mock(URI.class);
         when(uri.stringValue()).thenReturn("http://localhost/contentitem/1");
-        return mockContentItem(uri);
-    }
-
-    private static ContentItem mockContentItem(URI uri) throws RepositoryException, IOException {
         ContentItem contentItem = mock(ContentItem.class);
         Content content1 = mockContent();
         Content content2 = mockContent();
         when(contentItem.createContentPart()).thenReturn(content1).thenReturn(content2);
+        when(contentItem.getID()).thenReturn("1");
+        when(contentItem.getURI()).thenReturn(uri);
+        return contentItem;
+    }
+
+    private static ContentItem mockContentItem(URI uri) throws RepositoryException, IOException {
+        ContentItem contentItem = mock(ContentItem.class);
         when(contentItem.getID()).thenReturn("1");
         when(contentItem.getURI()).thenReturn(uri);
         return contentItem;
