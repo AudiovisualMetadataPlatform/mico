@@ -1,4 +1,10 @@
-libmico-api (1.2.4) UNRELEASED; urgency=medium
+libmico-api (1.2.5) unstable; urgency=medium
+
+  * version bump for whole platform - no changes to C++ API
+
+ -- Christian Weigel <christian@micobox154>  Mon, 05 Oct 2015 14:00:35 +0200
+
+libmico-api (1.2.4) unstable; urgency=medium
 
   * added logger access to daemon LogBackend
 

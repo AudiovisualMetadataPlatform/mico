@@ -88,8 +88,9 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
         // check if the URI of the created content part is a sub-URI of the current content item
         Assert.assertTrue(content.getURI().stringValue().startsWith(item.getURI().stringValue()));
 
+
         // check if content item entry has been added to the metadata repository
-        assertAsk(String.format("ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> } ", item.getURI().stringValue(), content.getURI().stringValue()), new URIImpl(item.getURI().stringValue() + MarmottaContentItem.SUFFIX_METADATA));
+        assertAsk(String.format("ASK { <%s>  <http://www.mico-project.eu/ns/platform/1.0/schema#hasContentPart> <%s> } ", item.getURI().stringValue(), content.getURI().stringValue()), new URIImpl(item.getURI().stringValue() + MarmottaContentItem.SUFFIX_METADATA));
 
         // check if content item parts is now non-empty
         Assert.assertTrue(item.listContentParts().iterator().hasNext());
@@ -97,7 +98,7 @@ public class MarmottaContentItemTest extends BaseMarmottaTest {
         item.deleteContent(content.getURI());
 
         // check if content part has been removed from triple store
-        assertAskNot(String.format("ASK { <%s> <http://www.w3.org/ns/ldp#contains> <%s> } ", item.getURI().stringValue(), content.getURI().stringValue()), new URIImpl(item.getURI().stringValue() + MarmottaContentItem.SUFFIX_METADATA));
+        assertAskNot(String.format("ASK { <%s> <http://www.mico-project.eu/ns/platform/1.0/schema#hasContentPart> <%s> } ", item.getURI().stringValue(), content.getURI().stringValue()), new URIImpl(item.getURI().stringValue() + MarmottaContentItem.SUFFIX_METADATA));
 
         // check if content item parts is now again empty
         Assert.assertFalse(item.listContentParts().iterator().hasNext());

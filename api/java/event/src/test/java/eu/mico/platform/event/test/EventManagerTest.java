@@ -40,7 +40,8 @@ import java.util.concurrent.TimeoutException;
 public class EventManagerTest extends BaseCommunicationTest {
 
     private static Connection connection;
-    private static MockBroker broker;
+    private static MockBrokerRegisterEvents brokerRegister;
+    private static MockBrokerConfigEvents brokerConfig;
 
     @BeforeClass
     public static void setupLocal() throws IOException {
@@ -51,7 +52,8 @@ public class EventManagerTest extends BaseCommunicationTest {
 
         connection = factory.newConnection();
 
-        broker = new MockBroker(connection.createChannel());
+        brokerRegister = new MockBrokerRegisterEvents(connection.createChannel());
+        brokerConfig = new MockBrokerConfigEvents(connection.createChannel());
     }
 
 
@@ -76,12 +78,11 @@ public class EventManagerTest extends BaseCommunicationTest {
         mgr.init();
 
         mgr.registerService(mock);
-
         // give the queue some time and then test for registration success
-        synchronized (broker) {
-            broker.wait(500);
+        synchronized (brokerRegister) {
+            brokerRegister.wait(500);
         }
-        Assert.assertEquals(mock.getServiceID().stringValue(), broker.lastService);
+        Assert.assertEquals(mock.getServiceID().stringValue(), brokerRegister.lastService);
 
         mgr.shutdown();
 
@@ -121,12 +122,11 @@ public class EventManagerTest extends BaseCommunicationTest {
     }
 
     // a mock message broker just recording service registry events to test if they worked
-    private static class MockBroker extends DefaultConsumer {
+    private static class MockBrokerRegisterEvents extends DefaultConsumer {
 
         private String lastService;
 
-
-        public MockBroker(Channel channel) throws IOException {
+        public MockBrokerRegisterEvents(Channel channel) throws IOException {
             super(channel);
 
             String queueName = channel.queueDeclare().getQueue();
@@ -134,15 +134,6 @@ public class EventManagerTest extends BaseCommunicationTest {
             channel.basicConsume(queueName, true, this);
         }
 
-
-        /**
-         * No-op implementation of {@link com.rabbitmq.client.Consumer#handleDelivery}.
-         *
-         * @param consumerTag
-         * @param envelope
-         * @param properties
-         * @param body
-         */
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
             Event.RegistrationEvent registrationEvent = Event.RegistrationEvent.parseFrom(body);
@@ -152,6 +143,39 @@ public class EventManagerTest extends BaseCommunicationTest {
             synchronized (this) {
                 this.notifyAll();
             }
+        }
+    }
+
+    // a mock config broker waiting for config requests and sending back fake responses
+    private static class MockBrokerConfigEvents extends DefaultConsumer {
+        public MockBrokerConfigEvents(Channel channel) throws IOException {
+            super(channel);
+
+            channel.queueDeclare("config_request", false, true, false, null);
+            channel.basicConsume("config_request", false, this);
+        }
+
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+            Event.ConfigurationDiscoverEvent configDiscover = Event.ConfigurationDiscoverEvent.parseFrom(body);
+
+            // construct reply properties, use the same correlation ID as in the request
+            final AMQP.BasicProperties replyProps = new AMQP.BasicProperties
+                    .Builder()
+                    .correlationId(properties.getCorrelationId())
+                    .build();
+
+            // construct configuration event
+            Event.ConfigurationEvent config = Event.ConfigurationEvent.newBuilder()
+                    .setMarmottaBaseUri("http://" + testHost + ":8080/marmotta")
+                    .setStorageBaseUri("ftp://" + testHost + "/")
+                    .build();
+
+            // send configuration
+            getChannel().basicPublish("", properties.getReplyTo(), replyProps, config.toByteArray());
+
+            // ack request
+            getChannel().basicAck(envelope.getDeliveryTag(), false);
         }
     }
 }
