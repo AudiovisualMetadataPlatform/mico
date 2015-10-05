@@ -11,9 +11,14 @@ import eu.mico.platform.persistence.model.Metadata;
 import eu.mico.platform.uc.zooniverse.model.TextAnalysisInput;
 import eu.mico.platform.uc.zooniverse.model.TextAnalysisOutput;
 import org.apache.commons.io.IOUtils;
+import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.util.Literals;
 import org.openrdf.model.vocabulary.DCTERMS;
+import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
@@ -28,9 +33,7 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * ...
@@ -96,18 +99,9 @@ public class TextAnalysisWebService {
 
     @GET
     @Produces("application/json")
-    public Response getResult(@PathParam("contentItemID") final String contentItemId) {
+    public Response getResult(@QueryParam("contentItemID") final String contentItemId) {
 
-        final URI contentItemUri;
-
-        //get content item
-        try {
-            contentItemUri = concatUrlWithPath(marmottaBaseUri, contentItemId);
-        }
-        catch (URISyntaxException e) {
-            log.error("Bad format for content item id '{}'", contentItemId);
-            return Response.status(Response.Status.BAD_REQUEST).entity(String.format("Bad format for content item id '%s'", contentItemId)).build();
-        }
+        final URI contentItemUri = ValueFactoryImpl.getInstance().createURI(contentItemId);
 
         final ContentItem contentItem;
         try {
@@ -146,37 +140,98 @@ public class TextAnalysisWebService {
 
     }
 
-    private TextAnalysisOutput getResult(ContentItem ci) throws Exception {
-        TextAnalysisOutput out = new TextAnalysisOutput(ci);
 
+
+    private static String queryEntities = "PREFIX fam: <http://vocab.fusepool.info/fam#>\n" +
+            "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
+            "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
+            "SELECT DISTINCT ?entity ?label WHERE {\n" +
+            "  <%s>\n" +
+            "  mico:hasContentPart/mico:hasContent/oa:hasBody ?body.\n" +
+            "  ?body a fam:LinkedEntity; fam:entity-label ?label; fam:entity-reference ?entity.\n" +
+            "}";
+
+    private static String queryTopics = "PREFIX fam: <http://vocab.fusepool.info/fam#>\n" +
+            "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
+            "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
+            "SELECT DISTINCT ?uri ?topic ?confidence WHERE {\n" +
+            "  <%s>\n" +
+            "  mico:hasContentPart/mico:hasContent/oa:hasBody ?body.\n" +
+            "  ?body a fam:TopicAnnotation; fam:topic-label ?topic; fam:topic-reference ?uri; fam:confidence ?confidence.\n" +
+            "}";
+
+    private static String querySentiment = "PREFIX fam: <http://vocab.fusepool.info/fam#>\n" +
+            "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
+            "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
+            "SELECT ?sentiment WHERE {\n" +
+            "  <%s>\n" +
+            "  mico:hasContentPart/mico:hasContent/oa:hasBody ?body.\n" +
+            "  ?body a fam:SentimentAnnotation; fam:sentiment ?sentiment.\n" +
+            "}";
+
+    private TextAnalysisOutput getResult(ContentItem ci) throws Exception {
         final Metadata metadata = persistenceService.getMetadata();
 
         try {
+            TextAnalysisOutput out = new TextAnalysisOutput(ci);
 
-            final String query = "";//TODO
+            out.sentiment = querySentiment(metadata,ci);
+            out.entities = queryList(queryEntities, metadata,ci);
+            out.topics = queryList(queryTopics, metadata,ci);
 
-            final TupleQueryResult result = metadata.query(query);
-
-            try {
-                while (result.hasNext()) {
-                    result.next().getBinding("value").getValue().stringValue();
-                }
-            } finally {
-                result.close();
-            }
+            return out;
         } catch (MalformedQueryException | QueryEvaluationException e) {
             log.error("Error querying objects; {}", e);
             throw new Exception(e);
         }
-
-        return out;
     }
 
-    private URI concatUrlWithPath(String baseURL, String extraPath) throws URISyntaxException{
-        java.net.URI baseURI = new java.net.URI(baseURL).normalize();
-        String newPath = baseURI.getPath() + "/" + extraPath;
-        java.net.URI newURI = baseURI.resolve(newPath);
-        return new URIImpl(newURI.normalize().toString());
+    private List queryList(String query, Metadata metadata, ContentItem ci) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
+        query = String.format(query, ci.getURI().stringValue());
+
+        List res = new ArrayList<>();
+        final TupleQueryResult result = metadata.query(query);
+
+        try {
+            while (result.hasNext()) {
+                HashMap map = new HashMap<>();
+                BindingSet bindings = result.next();
+                for(String name : result.getBindingNames()) {
+                    Value v = bindings.getBinding(name).getValue();
+                    if(v instanceof Literal) {
+                        Literal l = (Literal) v;
+                        try {
+                            map.put(name,l.doubleValue());//workaround !
+                        } catch (IllegalArgumentException e) {
+                            map.put(name,l.stringValue());
+                        }
+                    } else {
+                        map.put(name, v.stringValue());
+                    }
+                }
+                res.add(map);
+            }
+        } finally {
+            result.close();
+        }
+        return res;
+    }
+
+    private Object querySentiment(Metadata metadata, ContentItem ci) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
+
+        String query = String.format(querySentiment, ci.getURI().stringValue());
+
+        final TupleQueryResult result = metadata.query(query);
+
+        try {
+            if (result.hasNext()) {
+                return ((Literal)result.next().getBinding(result.getBindingNames().get(0)).getValue()).doubleValue();
+            }
+        } finally {
+            result.close();
+        }
+
+        return null;
     }
 
 }

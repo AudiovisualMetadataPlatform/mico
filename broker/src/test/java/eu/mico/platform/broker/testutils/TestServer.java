@@ -16,7 +16,8 @@ public class TestServer {
 
     public TestServer() {
         server = new Server(0);
-        WebAppContext context = new WebAppContext("/Users/tkurz/Documents/projects/Mico/Development/platform/broker/src/test/webapp","/");
+        String webappFolder = TestServer.class.getClassLoader().getResource("webapp").getPath();
+        WebAppContext context = new WebAppContext(webappFolder,"/");
         server.setHandler(context);
         TestApplication.webservices = new HashSet<>();
     }
