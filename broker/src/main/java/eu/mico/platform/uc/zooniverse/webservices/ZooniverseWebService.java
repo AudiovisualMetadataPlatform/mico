@@ -62,7 +62,7 @@ import java.util.*;
 
 /**
  */
-@Path("zooniverse/{subjectID:[^/]+}")
+@Path("zooniverse/animaldetection")
 public class ZooniverseWebService {
 
     private static final Logger log = LoggerFactory.getLogger(ZooniverseWebService.class);
