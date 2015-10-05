@@ -73,12 +73,9 @@ public class MICOBrokerApplication extends Application {
             services = new HashSet<>();
             services.add(new StatusWebService(broker));
             services.add(new InjectionWebService(manager));
-<<<<<<< HEAD
-            services.add(new ZooniverseWebService(manager, broker));
             services.add(new TextAnalysisWebService(manager, broker, marmottaBaseUri));
-=======
             services.add(new AnimalDetectionWebService(manager, broker, marmottaBaseUri));
->>>>>>> FRAMEWORK-179
+
         } catch (IOException ex) {
             log.error("could not initialise MICO broker, services not available (message: {})", ex.getMessage());
             log.debug("Exception:",ex);
