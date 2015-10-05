@@ -225,7 +225,7 @@ public class AnimalDetectionWebService {
         }
 
         try {
-            List<Object> objects = getObjects(contentPartUri);
+            List<Object> objects = getObjects(contentItemUri);
             if (objects == null) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             }
@@ -239,8 +239,8 @@ public class AnimalDetectionWebService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
 
-        rspEntity.put("extractorVersion", null);
-        rspEntity.put("modelID", null);
+        //rspEntity.put("extractorVersion", null);
+        //rspEntity.put("modelID", null);
         rspEntity.put("status", "finished");
 
         return Response.status(Response.Status.OK)
@@ -287,9 +287,9 @@ public class AnimalDetectionWebService {
 
             final String query = String.format(
                     "SELECT ?value WHERE {\n" +
-                            " <%s>  <%s> ?value .\n" +
+                            " <%s>   <http://www.w3.org/ns/oa#serializedAt> ?value .\n" +
                             "}",
-                    contentPartUri, DCTERMS.CREATED
+                    contentPartUri
             );
 
             final TupleQueryResult result = metadata.query(query);
@@ -307,25 +307,29 @@ public class AnimalDetectionWebService {
         return null;
     }
 
-    private List<Object> getObjects(URI contentPartUri) throws RepositoryException{
+    private List<Object> getObjects(URI contentItemUri) throws RepositoryException{
         List<Object> rspObjects = new ArrayList<>();
         final Metadata metadata = persistenceService.getMetadata();
 
         try {
 
             final String query = String.format(
-                    "SELECT ?value WHERE {\n" +
-                            " ?extractoroutput <%s>  <%s> .\n" +
-                            " ?extractoroutput <%s> \"text/vnd.fhg-hog-detector+xml\" .\n" +
-                            " ?specificresource <http://www.w3.org/ns/oa#hasSource> ?extractoroutput .\n" +
-                            " ?specificresource <http://www.w3.org/ns/oa#hasSelector> ?selector .\n" +
-                            " ?selector <%s> <http://www.w3.org/ns/oa#FragmentSelector> .\n" +
-                            " ?selector <%s> ?value\n" +
-                            "}",
-                    DCTERMS.SOURCE, contentPartUri,
-                    DCTERMS.TYPE,
-                    RDF.TYPE,
-                    RDF.VALUE
+                "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
+                "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
+                "SELECT ?animal ?region ?confidence WHERE {\n" +
+                    "<%s> mico:hasContentPart ?cp .\n" +
+                    "?cp mico:hasContent ?annot .\n" +
+                    "?annot oa:hasBody ?body .\n" +
+                    "?annot oa:hasTarget ?tgt .\n" +
+                    "?tgt  oa:hasSelector ?fs .\n" +
+                    "?body rdf:value ?animal .\n" +
+                    "?body mico:hasConfidence ?confidence .\n" +
+                    "?fs rdf:value ?region\n" +
+                "FILTER EXISTS {?body rdf:type mico:AnimalDetectionBody}\n" +
+                "}",
+                contentItemUri
             );
 
             final TupleQueryResult result = metadata.query(query);
@@ -333,7 +337,10 @@ public class AnimalDetectionWebService {
             try {
                 while (result.hasNext()) {
                     Map<String, Object> rspObject = new HashMap<>();
-                    String value = result.next().getBinding("value").getValue().stringValue();
+                    BindingSet bindingSet = result.next();
+                    rspObject.put("animal", bindingSet.getBinding("animal").getValue().stringValue());
+                    rspObject.put("confidence", bindingSet.getBinding("confidence").getValue().stringValue());
+                    String value = bindingSet.getBinding("region").getValue().stringValue();
                     final Pattern fragmentPattern = Pattern.compile("#xywh=(-?\\d+),(-?\\d+),(-?\\d+),(-?\\d+)");
                     Matcher matcher = fragmentPattern.matcher(value);
                     if (!matcher.matches()) {
@@ -344,7 +351,6 @@ public class AnimalDetectionWebService {
                     rspObject.put("y", Integer.parseInt(matcher.group(2)));
                     rspObject.put("w", Integer.parseInt(matcher.group(3)));
                     rspObject.put("h", Integer.parseInt(matcher.group(4)));
-                    rspObject.put("groupID", null);
                     rspObjects.add(rspObject);
                 }
             } finally {
