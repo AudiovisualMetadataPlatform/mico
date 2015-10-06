@@ -106,7 +106,7 @@ public class TextAnalysisWebServiceTest {
         String contentItemId = "d9347936-30ac-42f7-a0d5-4a2bfd908256";
 
         given().
-                param("contentItemID", contentItemId).
+                param("id", contentItemId).
         when().
                 get(server.getUrl() + "zooniverse/textanalysis").
         then().
