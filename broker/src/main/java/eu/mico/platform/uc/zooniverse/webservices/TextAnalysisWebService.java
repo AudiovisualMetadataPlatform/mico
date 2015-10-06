@@ -97,7 +97,8 @@ public class TextAnalysisWebService {
 
     @GET
     @Produces("application/json")
-    public Response getResult(@QueryParam("id") final String contentItemId) {
+    @Path("{id:[^/]+}")
+    public Response getResult(@PathParam("id") final String contentItemId) {
 
         final URI contentItemUri;
         try {

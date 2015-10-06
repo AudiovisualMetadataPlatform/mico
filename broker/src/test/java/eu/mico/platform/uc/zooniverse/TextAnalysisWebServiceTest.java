@@ -105,10 +105,8 @@ public class TextAnalysisWebServiceTest {
     public void testGetResult() {
         String contentItemId = "d9347936-30ac-42f7-a0d5-4a2bfd908256";
 
-        given().
-                param("id", contentItemId).
-        when().
-                get(server.getUrl() + "zooniverse/textanalysis").
+        com.jayway.restassured.RestAssured.when().
+                get(server.getUrl() + "zooniverse/textanalysis/" + contentItemId).
         then().
                 assertThat()
                 .body("id", equalTo("d9347936-30ac-42f7-a0d5-4a2bfd908256"))
