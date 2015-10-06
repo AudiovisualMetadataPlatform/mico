@@ -240,7 +240,6 @@ public class AnimalDetectionWebService {
         }
 
         //rspEntity.put("extractorVersion", null);
-        //rspEntity.put("modelID", null);
         rspEntity.put("status", "finished");
 
         return Response.status(Response.Status.OK)
@@ -318,7 +317,7 @@ public class AnimalDetectionWebService {
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
                 "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
-                "SELECT ?animal ?region ?confidence WHERE {\n" +
+                "SELECT ?animal ?region ?confidence ?version WHERE {\n" +
                     "<%s> mico:hasContentPart ?cp .\n" +
                     "?cp mico:hasContent ?annot .\n" +
                     "?annot oa:hasBody ?body .\n" +
@@ -326,6 +325,7 @@ public class AnimalDetectionWebService {
                     "?tgt  oa:hasSelector ?fs .\n" +
                     "?body rdf:value ?animal .\n" +
                     "?body mico:hasConfidence ?confidence .\n" +
+                    "?body mico:hasExtractionVersion ?version .\n" +
                     "?fs rdf:value ?region\n" +
                 "FILTER EXISTS {?body rdf:type mico:AnimalDetectionBody}\n" +
                 "}",
@@ -340,6 +340,7 @@ public class AnimalDetectionWebService {
                     BindingSet bindingSet = result.next();
                     rspObject.put("animal", bindingSet.getBinding("animal").getValue().stringValue());
                     rspObject.put("confidence", bindingSet.getBinding("confidence").getValue().stringValue());
+                    rspObject.put("algorithmVersion", bindingSet.getBinding("version").getValue().stringValue());
                     String value = bindingSet.getBinding("region").getValue().stringValue();
                     final Pattern fragmentPattern = Pattern.compile("#xywh=(-?\\d+),(-?\\d+),(-?\\d+),(-?\\d+)");
                     Matcher matcher = fragmentPattern.matcher(value);
