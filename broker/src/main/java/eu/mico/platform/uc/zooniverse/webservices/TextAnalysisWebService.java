@@ -72,23 +72,21 @@ public class TextAnalysisWebService {
         try {
             final ContentItem ci = persistenceService.createContentItem();
 
-            for(String comment: input.comments) {
-                final Content contentPart = ci.createContentPart();
-                contentPart.setType("text/plain");
-                contentPart.setRelation(DCTERMS.CREATOR, new URIImpl("http://www.mico-project.eu/broker/zooniverse-text-analysis-web-service"));
-                contentPart.setProperty(DCTERMS.CREATED, ISO8601FORMAT.format(new Date()));
-                try (OutputStream outputStream = contentPart.getOutputStream()) {
-                    IOUtils.copy(IOUtils.toInputStream(comment), outputStream);
-                } catch (IOException e) {
-                    log.error("Could not persist text data for ContentPart {}: {}", contentPart.getURI(), e.getMessage());
-                    throw e;
-                }
+            final Content contentPart = ci.createContentPart();
+            contentPart.setType("text/plain");
+            contentPart.setRelation(DCTERMS.CREATOR, new URIImpl("http://www.mico-project.eu/broker/zooniverse-text-analysis-web-service"));
+            contentPart.setProperty(DCTERMS.CREATED, ISO8601FORMAT.format(new Date()));
+            try (OutputStream outputStream = contentPart.getOutputStream()) {
+                IOUtils.copy(IOUtils.toInputStream(input.comment), outputStream);
+            } catch (IOException e) {
+                log.error("Could not persist text data for ContentPart {}: {}", contentPart.getURI(), e.getMessage());
+                throw e;
             }
 
             eventManager.injectContentItem(ci);
 
             return Response.status(Response.Status.CREATED)
-                    .entity(ImmutableMap.of("id",ci.getID(),"status","submitted","link",ci.getURI().stringValue()))
+                    .entity(ImmutableMap.of("id",ci.getID(),"status","submitted"))
                     .link(java.net.URI.create(ci.getURI().stringValue()), "contentItem")
                     .build();
         } catch (RepositoryException | IOException e) {
@@ -101,7 +99,13 @@ public class TextAnalysisWebService {
     @Produces("application/json")
     public Response getResult(@QueryParam("contentItemID") final String contentItemId) {
 
-        final URI contentItemUri = ValueFactoryImpl.getInstance().createURI(contentItemId);
+        final URI contentItemUri;
+        try {
+            contentItemUri = concatUrlWithPath(marmottaBaseUri, contentItemId);
+        } catch (URISyntaxException e) {
+            log.error("Error creating uri for {}: {}", contentItemId, e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(e).build();
+        }
 
         final ContentItem contentItem;
         try {
@@ -139,25 +143,22 @@ public class TextAnalysisWebService {
                 .build();
 
     }
-
-
-
     private static String queryEntities = "PREFIX fam: <http://vocab.fusepool.info/fam#>\n" +
             "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
             "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
-            "SELECT DISTINCT ?entity ?label WHERE {\n" +
+            "SELECT DISTINCT ?uri ?label WHERE {\n" +
             "  <%s>\n" +
             "  mico:hasContentPart/mico:hasContent/oa:hasBody ?body.\n" +
-            "  ?body a fam:LinkedEntity; fam:entity-label ?label; fam:entity-reference ?entity.\n" +
+            "  ?body a fam:LinkedEntity; fam:entity-label ?label; fam:entity-reference ?uri.\n" +
             "}";
 
     private static String queryTopics = "PREFIX fam: <http://vocab.fusepool.info/fam#>\n" +
             "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
             "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
-            "SELECT DISTINCT ?uri ?topic ?confidence WHERE {\n" +
+            "SELECT DISTINCT ?uri ?label ?confidence WHERE {\n" +
             "  <%s>\n" +
             "  mico:hasContentPart/mico:hasContent/oa:hasBody ?body.\n" +
-            "  ?body a fam:TopicAnnotation; fam:topic-label ?topic; fam:topic-reference ?uri; fam:confidence ?confidence.\n" +
+            "  ?body a fam:TopicAnnotation; fam:topic-label ?label; fam:topic-reference ?uri; fam:confidence ?confidence.\n" +
             "}";
 
     private static String querySentiment = "PREFIX fam: <http://vocab.fusepool.info/fam#>\n" +
@@ -232,6 +233,13 @@ public class TextAnalysisWebService {
         }
 
         return null;
+    }
+
+    private URI concatUrlWithPath(String baseURL, String extraPath) throws URISyntaxException{
+        java.net.URI baseURI = new java.net.URI(baseURL).normalize();
+        String newPath = baseURI.getPath() + "/" + extraPath;
+        java.net.URI newURI = baseURI.resolve(newPath);
+        return new URIImpl(newURI.normalize().toString());
     }
 
 }

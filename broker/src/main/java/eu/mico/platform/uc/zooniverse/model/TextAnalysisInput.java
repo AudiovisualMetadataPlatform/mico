@@ -11,7 +11,6 @@ import java.util.List;
 @XmlRootElement
 public class TextAnalysisInput {
 
-    public String id;
-    public List<String> comments;
+    public String comment;
 
 }

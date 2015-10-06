@@ -56,7 +56,7 @@ public class TextAnalysisWebServiceTest {
 
     private static Repository repository;
 
-    private static ArrayList<Content> contents = new ArrayList<>();
+    private static Content content;
 
     @BeforeClass
     public static void init() throws Exception {
@@ -65,7 +65,7 @@ public class TextAnalysisWebServiceTest {
         TextAnalysisWebService textAnalysisWebService = new TextAnalysisWebService(
                 mockEvenmanager(),
                 mockBroker(),
-                "http://localhost:8080/marmotta");
+                "http://mico-platform:8080/marmotta");
 
         //init in memory repository
         repository = initializeRepository();
@@ -88,24 +88,22 @@ public class TextAnalysisWebServiceTest {
     public void testUpload() throws IOException {
         given().
                 contentType(MediaType.APPLICATION_JSON).
-                content("{\"id\":\"1\",\"comments\":[\"This is text 1\",\"This is text 2\"]}").
-        when().
+                content("{\"comment\":\"This is a text\"}").
+                when().
                 post(server.getUrl() + "zooniverse/textanalysis").
-        then().
+                then().
                 assertThat()
-                    .body("id", equalTo("1"))
-                    .body("link", equalTo("http://localhost/contentitem/1"))
+                .body("id", equalTo("d9347936-30ac-42f7-a0d5-4a2bfd908256"))
                     .body("status", equalTo("submitted"));
 
         //test content parts
-        Assert.assertEquals(2, contents.size());
-        Assert.assertEquals("This is text 1", new String(((ByteArrayOutputStream)contents.get(0).getOutputStream()).toByteArray()));
-        Assert.assertEquals("This is text 2", new String(((ByteArrayOutputStream) contents.get(1).getOutputStream()).toByteArray()));
+        Assert.assertNotNull(content);
+        Assert.assertEquals("This is a text", new String(((ByteArrayOutputStream)content.getOutputStream()).toByteArray()));
     }
 
     @Test
     public void testGetResult() {
-        String contentItemId = "http://mico-platform:8080/marmotta/d9347936-30ac-42f7-a0d5-4a2bfd908256";
+        String contentItemId = "d9347936-30ac-42f7-a0d5-4a2bfd908256";
 
         given().
                 param("contentItemID", contentItemId).
@@ -113,7 +111,7 @@ public class TextAnalysisWebServiceTest {
                 get(server.getUrl() + "zooniverse/textanalysis").
         then().
                 assertThat()
-                .body("id", equalTo("1"))
+                .body("id", equalTo("d9347936-30ac-42f7-a0d5-4a2bfd908256"))
                 .body("sentiment", equalTo(-0.26978558F))
                 .body("topics.size()", equalTo(3))
                 .body("entities.size()", equalTo(20))
@@ -172,28 +170,26 @@ public class TextAnalysisWebServiceTest {
 
     private static ContentItem mockCreateContentItem() throws RepositoryException, IOException {
         URI uri = mock(URI.class);
-        when(uri.stringValue()).thenReturn("http://localhost/contentitem/1");
+        when(uri.stringValue()).thenReturn("http://localhost/contentitem/d9347936-30ac-42f7-a0d5-4a2bfd908256");
         ContentItem contentItem = mock(ContentItem.class);
-        Content content1 = mockContent();
-        Content content2 = mockContent();
-        when(contentItem.createContentPart()).thenReturn(content1).thenReturn(content2);
-        when(contentItem.getID()).thenReturn("1");
+        Content content = mockContent();
+        when(contentItem.createContentPart()).thenReturn(content);
+        when(contentItem.getID()).thenReturn("d9347936-30ac-42f7-a0d5-4a2bfd908256");
         when(contentItem.getURI()).thenReturn(uri);
         return contentItem;
     }
 
     private static ContentItem mockContentItem(URI uri) throws RepositoryException, IOException {
         ContentItem contentItem = mock(ContentItem.class);
-        when(contentItem.getID()).thenReturn("1");
+        when(contentItem.getID()).thenReturn("d9347936-30ac-42f7-a0d5-4a2bfd908256");
         when(contentItem.getURI()).thenReturn(uri);
         return contentItem;
     }
 
     private static Content mockContent() throws IOException {
-        Content content = mock(Content.class);
+        content = mock(Content.class);
         OutputStream os = new ByteArrayOutputStream();
         when(content.getOutputStream()).thenReturn(os);
-        contents.add(content);
         return content;
     }
 
