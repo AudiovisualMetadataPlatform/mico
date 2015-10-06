@@ -1,3 +1,9 @@
+libmico-api (1.2.6) unstable; urgency=medium
+
+  * version bump for whole platform - no changes to C++ API
+
+ -- Horst Stadler <horst.stadler@salzburgresearch.at>  Tue, 06 Oct 2015 12:38:00 +0200
+
 libmico-api (1.2.5) unstable; urgency=medium
 
   * version bump for whole platform - no changes to C++ API
