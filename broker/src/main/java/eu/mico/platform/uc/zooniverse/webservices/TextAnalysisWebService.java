@@ -121,7 +121,7 @@ public class TextAnalysisWebService {
         final ContentItemState state = broker.getStates().get(contentItemUri.stringValue());
         if (state != null && !state.isFinalState()) {
             return Response.status(Response.Status.ACCEPTED)
-                    .entity(ImmutableMap.of("id",contentItemId,"status","inProgress","link",contentItemUri))
+                    .entity(ImmutableMap.of("id",contentItemId,"status","inProgress"))
                     .build();
         }
 
