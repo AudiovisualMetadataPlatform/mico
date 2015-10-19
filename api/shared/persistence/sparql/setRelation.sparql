@@ -1,0 +1,21 @@
+#   $(ci)      : The URL of the content item
+#   $(rel)     : The name of the relation (e.g. oa::hasSelector)
+#   $(fromURL) : Unique URL of the source of the relation
+#   $(toURL)   : Unique URL of the target of the relation
+#
+#   Notice: This template does delete any existing 
+#           relation with this name!
+DELETE {
+  GRAPH <$(ci)-metadata> {
+    <$(fromURL)> <$(rel)> ?x
+  }
+} WHERE {
+  GRAPH <$(ci)-metadata> {
+    <$(fromURL)> <$(rel)> ?x
+  }
+} ;
+INSERT DATA {
+  GRAPH <$(ci)-metadata> {
+    <$(fromURL)> <$(rel)> <$(toURL)>
+  }
+}

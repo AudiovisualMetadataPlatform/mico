@@ -1,12 +1,11 @@
 # Inputs:
  #   $(cp) : The uri of the content part
+ #   $(ci) : The content item uri
  #   $(an) : The uri of the annotation
  PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>
- PREFIX ldp: <http://www.w3.org/ns/ldp#>
 
  INSERT DATA {
-   GRAPH <$(cp)-metadata> {
+   GRAPH <$(ci)-metadata> {
        <$(cp)> mico:hasContent <$(an)> .
-       <$(cp)> ldp:contains <$(an)> .
    }
  }

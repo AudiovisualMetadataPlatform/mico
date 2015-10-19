@@ -9,9 +9,12 @@
 #include <EventManager.hpp>
 
 namespace mico {
+    namespace log {
+        class LoggingBackend;
+    }
     namespace daemon {
 
-
+        mico::log::LoggingBackend* createDaemonLogBackend();
 
         /*
         * Start a MICO daemon of the given name, connecting to the given server with the given user and password. The list of analysis services passed as last argument

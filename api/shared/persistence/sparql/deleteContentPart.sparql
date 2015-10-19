@@ -1,6 +1,7 @@
-PREFIX ldp: <http://www.w3.org/ns/ldp#>
+PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>
+
 DELETE DATA {
   GRAPH <$(ci)-metadata> {
-    <$(ci)> ldp:contains <$(cp)>
+    <$(ci)> mico:hasContentPart <$(cp)>
   }
 }

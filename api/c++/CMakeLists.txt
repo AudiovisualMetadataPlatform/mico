@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.4)
 project(mico-platform)
 
 if (NOT DEFINED MICO_PLATFORM_VERSION)
-    set(MICO_PLATFORM_VERSION "1.2.1")
+    set(MICO_PLATFORM_VERSION "1.2.4")
 endif()
 
 string(REPLACE "." ";" VERSION_LIST ${MICO_PLATFORM_VERSION})
