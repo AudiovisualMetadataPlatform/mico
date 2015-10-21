@@ -135,12 +135,12 @@ TEST_F(ContentItemTest,CreateDeleteContentPart)
 	params["ci"] = item->getURI().stringValue();
 	params["cp"] = part->getURI().stringValue();
 
-	assertAskM(sparql_format_query("ASK { <$(ci)> <http://www.w3.org/ns/ldp#contains> <$(cp)> }",params));
+  assertAskM(sparql_format_query("ASK { <$(ci)> <http://www.mico-project.eu/ns/platform/1.0/schema#hasContentPart> <$(cp)> }",params));
 
 	item->deleteContentPart(part->getURI());
 
 	ASSERT_EQ(item->begin(), item->end());
-	assertAskMN(sparql_format_query("ASK { <$(ci)> <http://www.w3.org/ns/ldp#contains> <$(cp)> }",params));
+  assertAskMN(sparql_format_query("ASK { <$(ci)> <http://www.mico-project.eu/ns/platform/1.0/schema#hasContentPart> <$(cp)> }",params));
 
 	delete part;
 }
