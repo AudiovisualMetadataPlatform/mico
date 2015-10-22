@@ -3,6 +3,7 @@ package eu.mico.platform.uc.zooniverse;
 import com.google.common.io.Resources;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.model.ContentItemState;
+import eu.mico.platform.broker.model.ServiceGraph;
 import eu.mico.platform.broker.testutils.TestServer;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
@@ -19,6 +20,7 @@ import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.*;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
@@ -34,6 +36,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 
 import static com.jayway.restassured.RestAssured.given;
@@ -120,9 +123,12 @@ public class TextAnalysisWebServiceTest {
         MICOBroker broker = mock(MICOBroker.class);
         Map states = mock(Map.class);
         ContentItemState state = mock(ContentItemState.class);
+        ServiceGraph serviceGraph = mock(ServiceGraph.class);
+        when(serviceGraph.getDescriptorURIs()).thenReturn(Collections.<URI>singleton(new URIImpl("http://www.mico-project.eu/services/ner-text")));
         when(state.isFinalState()).thenReturn(true);
         when(states.get(any())).thenReturn(state);
         when(broker.getStates()).thenReturn(states);
+        when(broker.getDependencies()).thenReturn(serviceGraph);
         return broker;
     }
 
