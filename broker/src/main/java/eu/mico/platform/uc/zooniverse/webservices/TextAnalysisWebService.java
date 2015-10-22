@@ -3,6 +3,8 @@ package eu.mico.platform.uc.zooniverse.webservices;
 import com.google.common.collect.ImmutableMap;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.model.ContentItemState;
+import eu.mico.platform.broker.model.ServiceDescriptor;
+import eu.mico.platform.broker.model.ServiceGraph;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Content;
@@ -62,12 +64,27 @@ public class TextAnalysisWebService {
         this.persistenceService = eventManager.getPersistenceService();
     }
 
+    private static final URI ExtractorURI = new URIImpl("http://www.mico-project.eu/services/ner-text");
+
     @POST
     @Consumes("application/json")
     @Produces("application/json")
     public Response uploadImage(TextAnalysisInput input) {
 
-        //TODO checks
+        ServiceGraph dependencies = broker.getDependencies();
+
+        boolean extractorRunning = false;
+
+        for(URI descriptorURI : dependencies.getDescriptorURIs()) {
+            if(descriptorURI.equals(ExtractorURI)) {
+                extractorRunning = true;
+                break;
+            }
+        }
+
+        if(!extractorRunning) return Response.status(Response.Status.SERVICE_UNAVAILABLE)
+                .entity(String.format("Extractor '%s' currently not active",ExtractorURI.stringValue()))
+                .build();
 
         try {
             final ContentItem ci = persistenceService.createContentItem();

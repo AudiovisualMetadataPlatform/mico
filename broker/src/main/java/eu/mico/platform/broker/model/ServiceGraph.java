@@ -18,7 +18,9 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.openrdf.model.URI;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Representation of a service dependency graph. The vertices are the symbolic representations of the input/output
@@ -44,6 +46,10 @@ public class ServiceGraph extends DefaultDirectedGraph<TypeDescriptor,ServiceDes
     public ServiceGraph() {
         super(ServiceDescriptor.class);
         services = new HashMap<>();
+    }
+
+    public Set<URI> getDescriptorURIs() {
+        return services.keySet();
     }
 
 
