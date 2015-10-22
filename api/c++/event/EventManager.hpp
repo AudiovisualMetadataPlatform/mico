@@ -121,6 +121,8 @@ namespace mico {
 
             AMQPCPPOnCloseBugfix amqpWorkaround;
 
+            std::vector<char> intermediateReceiveBuffer; //!< buffer for temoprary storage of bytes of unfinished RabbitMQ frames
+
         public:
 
             EventManager(const std::string& host) : EventManager(host, "mico", "mico") {};
