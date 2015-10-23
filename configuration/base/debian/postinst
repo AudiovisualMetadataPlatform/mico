@@ -34,8 +34,17 @@ case "$1" in
 	    db_set mico-base/password $MICO_PASS 
 	fi
 
-	groupadd $MICO_USER || true
-	useradd -d /tmp -g $MICO_USER -M $MICO_USER || true
+	if getent group $MICO_USER >/dev/null 2>&1; then
+	    echo "Skipping creation of group $MICO_USER as it already exists."
+	else
+	    groupadd $MICO_USER || true
+	fi
+
+	if getent passwd $MICO_USER  >/dev/null 2>&1; then
+	    echo "Skipping creation of user $MICO_USER as it already exists."
+	else
+	    useradd -d /tmp -g $MICO_USER -M $MICO_USER || true
+	fi
 
 	chpasswd <<EOF
 $MICO_USER:$MICO_PASS
