@@ -39,7 +39,7 @@ class PersistenceServiceTest : public ::testing::Test {
 
 protected:
   std::string base_url = "http://" + mico_host + ":8080/marmotta";
-  std::string content_dir = "ftp://" + mico_user + ":" + mico_pass + "@" + mico_host;
+  std::string content_dir = "hdfs://" + mico_host;
   HTTPClient client;
   PersistenceService* svc;
 

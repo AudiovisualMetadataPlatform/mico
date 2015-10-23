@@ -62,14 +62,14 @@ namespace mico {
                 for (AnalysisService *s : services) {
                     eventManager.registerService(s);
                 }
-            };
+            }
 
             void stop() {
                 for (AnalysisService *s : services) {
                     eventManager.unregisterService(s);
                 }
 
-            };
+            }
 
         public:
 
@@ -85,13 +85,13 @@ namespace mico {
                 for (AnalysisService *s : services) {
                     delete s;
                 }
-            };
+            }
 
 
         };
 
 
-
+        log::LoggingBackend* createDaemonLogBackend() { return (log::LoggingBackend*) new DaemonLogBackend(); }
 
         int start(const char* name, const char* server, const char* user, const char* password, std::initializer_list<mico::event::AnalysisService*> svcs) {
             std::vector<AnalysisService*> services;

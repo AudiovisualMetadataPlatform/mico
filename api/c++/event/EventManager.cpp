@@ -15,6 +15,7 @@
 #include "Event.pb.h"
 
 #include <boost/uuid/uuid_generators.hpp>
+#include <google/protobuf/stubs/common.h>
 
 #include "Logging.hpp"
 
@@ -249,6 +250,9 @@ namespace mico {
             recv_len = 8192;
             recv_buf = (char*)malloc(recv_len * sizeof(char));
 
+            //reserving 10000 bytes here since this is the default max frame size set in AMQP
+            intermediateReceiveBuffer.reserve(10000);
+
             LOG_INFO ("connecting to RabbitMQ server running on host %s, port %d", host.c_str(), rabbitPort);
 
             // establish RabbitMQ connection and channel
@@ -321,6 +325,11 @@ namespace mico {
 
             if (persistence != NULL)
                 delete(persistence);
+
+            if (configurationClient != NULL)
+              delete configurationClient;
+
+            google::protobuf::ShutdownProtobufLibrary();
         }
 
         void EventManager::doConnect() {
@@ -339,7 +348,13 @@ namespace mico {
             // register read handler
             socket.async_read_some(buffer(recv_buf,recv_len), [this](boost::system::error_code ec, std::size_t bytes_received) {
                 if(!ec) {
-                    connection->parse(recv_buf, bytes_received);
+                    intermediateReceiveBuffer.insert(intermediateReceiveBuffer.end(),recv_buf,recv_buf+bytes_received);
+
+                    size_t bytes_processed =
+                        connection->parse(&intermediateReceiveBuffer[0], intermediateReceiveBuffer.size());
+
+                    intermediateReceiveBuffer.erase(intermediateReceiveBuffer.begin(),
+                                                    intermediateReceiveBuffer.begin()+bytes_processed);
                     doRead();
                 } else {
                     socket.close();
@@ -374,6 +389,9 @@ namespace mico {
 
         void EventManager::onConnected(AMQP::Connection *connection) {
             LOG_DEBUG("establishing AMQP channel ... ");
+
+            if (configurationClient != NULL)
+              delete configurationClient;
 
             // setup configuration service (channel gets shut down by the service itself)
             configurationClient = new ConfigurationClient(new AMQP::Channel(connection));

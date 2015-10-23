@@ -8,7 +8,7 @@ Homepage: https://bitbucket.org/mico-project/platform
 
 Package: mico-platform
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, mico-broker, mico-persistence, mico-base, mico-marmotta, libmico-api-dev, mico-service-ocr, lighttpd, dwww, gettext-base
+Depends: ${shlibs:Depends}, ${misc:Depends}, mico-broker, mico-persistence, mico-base, mico-marmotta, mico-conf, libmico-api1, libmico-api-dev, mico-service-ocr, lighttpd, dwww, gettext-base
 Description: metapackage for installing the complete MICO platform and client libraries
  This is a metapackage installing a complete setup of the MICO platform, including the server and C++ client components
  and online documentation. It installs a lightweight http server with a simple entry page for single point access to the

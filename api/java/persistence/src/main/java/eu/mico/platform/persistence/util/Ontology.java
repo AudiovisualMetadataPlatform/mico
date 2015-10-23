@@ -1,7 +1,5 @@
 package eu.mico.platform.persistence.util;
 
-import com.github.anno4j.model.ontologies.DCTERMS;
-
 public class Ontology {
 
     /**
@@ -149,13 +147,6 @@ public class Ontology {
     public final static String HAS_SOURCE_OA = NS_OA + "hasSource";
 
     public final static String SVG_SELECTOR_OA = NS_OA + "SVGSelector";
-
-
-    /**
-     * Dublin Core Terms (dcterms:)
-     */
-
-    public final static String FORMAT_DCTERMS = DCTERMS.NS + "format";
 
 }
 

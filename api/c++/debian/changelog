@@ -1,3 +1,36 @@
+libmico-api (1.2.7) unstable; urgency=medium
+
+  * fixed critical Rabbit MQ communcation bug
+  * some build file cleanup
+  * fixed unit test according to changes in data model
+
+ -- Christian Weigel <christian@micobox154>  Thu, 22 Oct 2015 13:33:36 +0200
+
+libmico-api (1.2.6) unstable; urgency=medium
+
+  * version bump for whole platform - no changes to C++ API
+
+ -- Horst Stadler <horst.stadler@salzburgresearch.at>  Tue, 06 Oct 2015 12:38:00 +0200
+
+libmico-api (1.2.5) unstable; urgency=medium
+
+  * version bump for whole platform - no changes to C++ API
+
+ -- Christian Weigel <christian@micobox154>  Mon, 05 Oct 2015 14:00:35 +0200
+
+libmico-api (1.2.4) unstable; urgency=medium
+
+  * added logger access to daemon LogBackend
+
+ -- Christian Weigel <christian@micobox154>  Mon, 14 Sep 2015 14:20:55 +0200
+
+libmico-api (1.2.3) unstable; urgency=medium
+
+  * new TVS model annotation templates
+  * new function (non API breaking)
+
+ -- Christian Weigel <christian@micobox154>  Thu, 10 Sep 2015 15:56:46 +0200
+
 libmico-api (1.2.2) unstable; urgency=medium
 
   * changed soname of mico api libs

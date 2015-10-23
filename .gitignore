@@ -47,3 +47,5 @@ atlassian-ide-plugin.xml
 doc/
 
 kiwi-test.log
+maven-eclipse.xml
+broker/.externalToolBuilders

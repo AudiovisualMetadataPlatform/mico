@@ -1,7 +1,7 @@
 package eu.mico.platform.persistence.impl;
 
 import com.github.anno4j.model.impl.agent.Software;
-import eu.mico.platform.persistence.util.Ontology;
+import eu.mico.platform.anno4j.model.namespaces.MICO;
 import org.openrdf.annotations.Iri;
 
 @Iri("http://www.w3.org/ns/prov/SoftwareAgent")
@@ -11,14 +11,14 @@ public class MICOSoftwareAgent extends Software {
      * Specifies the input (type) the
      * given extractor requires.
      */
-    @Iri(Ontology.REQUIRES_MICO)
+    @Iri(MICO.REQUIRES)
     private String requires;
 
     /**
      * Specifies the output (type) the
      * given extractor provides.
      */
-    @Iri(Ontology.PROVIDES_MICO)
+    @Iri(MICO.PROVIDES)
     private String provides;
 
 

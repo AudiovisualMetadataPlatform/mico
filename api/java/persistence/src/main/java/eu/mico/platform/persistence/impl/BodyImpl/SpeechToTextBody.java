@@ -1,8 +1,7 @@
 package eu.mico.platform.persistence.impl.BodyImpl;
 
-import com.github.anno4j.Anno4j;
 import com.github.anno4j.model.Body;
-import com.github.anno4j.model.ontologies.RDF;
+import com.github.anno4j.model.namespaces.RDF;
 import eu.mico.platform.persistence.util.Ontology;
 import org.openrdf.annotations.Iri;
 import org.openrdf.repository.object.LangString;

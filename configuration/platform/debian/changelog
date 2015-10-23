@@ -1,3 +1,9 @@
+mico-platform (1.0.5) unstable; urgency=medium
+
+  * Added dependencies: mico-conf, libmico-api1
+
+ -- Horst Stadler <horst.stadler@salzburgresearch.at>  Wed, 07 Oct 2015 16:21:05 +0200
+
 mico-platform (1.0.4) unstable; urgency=medium
 
   * templates for welcome page

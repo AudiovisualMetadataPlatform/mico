@@ -24,6 +24,7 @@ import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceImpl;
 import eu.mico.platform.persistence.model.ContentItem;
 import org.apache.commons.lang3.StringUtils;
+import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 

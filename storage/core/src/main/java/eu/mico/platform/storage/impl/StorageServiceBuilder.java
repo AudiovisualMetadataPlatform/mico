@@ -27,6 +27,8 @@ public class StorageServiceBuilder {
                 return new StorageServiceFTP(url.getHost(), url.getPort(), url.getPath(), username, password);
             case "hdfs":
                 return new StorageServiceHDFS(url.getHost(), url.getPort(), url.getPath());
+            case "file":
+                return new StorageServiceLocalFS(url);
         }
 
         return null;

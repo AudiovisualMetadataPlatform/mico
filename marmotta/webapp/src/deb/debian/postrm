@@ -26,6 +26,7 @@ case "$1" in
     ;;
 
     remove|abort-install|disappear)
+        rm /etc/tomcat7/Catalina/localhost/marmotta.xml || true
         service tomcat7 start
     ;;
 

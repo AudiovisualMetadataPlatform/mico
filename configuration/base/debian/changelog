@@ -1,3 +1,9 @@
+mico-base (1.0.4) unstable; urgency=medium
+
+  * Check if user/group exist before creation, to avoid confusion because of the error message
+
+ -- Horst Stadler <horst.stadler@salzburgresearch.at>  Wed, 07 Oct 2015 14:56:30 +0200
+
 mico-base (1.0.3) unstable; urgency=medium
 
   * use useradd instead of adduser

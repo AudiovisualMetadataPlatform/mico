@@ -1,0 +1,19 @@
+# Inputs:
+#   $(ci)          : The URL of the content item
+#   $(selectorURL) : Unique URL for the selector
+#   $(timestart)   : The timestamp of the start of the fragment
+#   $(timeend)     : The timestamp of the end of the fragment
+ 
+ PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>
+ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+ PREFIX oa: <http://www.w3.org/ns/oa#>
+ PREFIX dcterms: <http://purl.org/dc/terms/>
+
+ INSERT DATA {
+ GRAPH <$(ci)-metadata>
+ 	{
+	   <$(selectorURL)> rdf:type oa:FragmentSelector .
+	   <$(selectorURL)> dcterms:conformsTo "http://www.w3.org/TR/media-frags/" .
+	   <$(selectorURL)> rdf:value "t=npt:$(timestart),$(timeend)" .
+ 	}
+ }

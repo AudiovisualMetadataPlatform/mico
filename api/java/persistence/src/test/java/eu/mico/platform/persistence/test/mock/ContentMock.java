@@ -3,6 +3,7 @@ package eu.mico.platform.persistence.test.mock;
 import com.github.anno4j.model.Annotation;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Selector;
+import com.github.anno4j.model.Target;
 import com.github.anno4j.querying.Criteria;
 import eu.mico.platform.persistence.metadata.MICOProvenance;
 import eu.mico.platform.persistence.model.Content;
@@ -111,6 +112,12 @@ public class ContentMock implements Content {
     public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance) throws RepositoryException {
         return null;
     }
+
+    @Override
+    public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance, Target target) throws RepositoryException {
+        return null;
+    }
+
 
     @Override
     public List<Annotation> findDerivedAnnotations() throws RepositoryException {
