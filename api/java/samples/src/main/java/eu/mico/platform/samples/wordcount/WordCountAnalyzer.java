@@ -48,6 +48,8 @@ import java.util.regex.Pattern;
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
 public class WordCountAnalyzer implements AnalysisService {
+    
+    private static Boolean debug = true;
 
     private static Logger log = LoggerFactory.getLogger(WordCountAnalyzer.class);
 
@@ -91,6 +93,20 @@ public class WordCountAnalyzer implements AnalysisService {
             Pattern p_wordcount = Pattern.compile("\\w+");
             Matcher m = p_wordcount.matcher(text);
 
+            // we are progressing ... inform broker
+            analysisResponse.sendProgress(contentItem, uri, 50);
+            if (debug == true) {
+                try {
+                    log.debug("debug is enabled, sleep 2 seconds and send next progress info");
+                    Thread.sleep(2000);
+                    analysisResponse.sendProgress(contentItem, uri, 75);
+                    log.debug("progress updated, sleep 2 seconds again");
+                    Thread.sleep(2000);
+                } catch (Exception e) {
+                    log.warn(e.getMessage());
+                }
+            }
+
             int count;
             for(count = 0; m.find(); count++);
 
@@ -107,8 +123,9 @@ public class WordCountAnalyzer implements AnalysisService {
             result.setProperty(new URIImpl("http://www.mico-project.org/properties/wordcount"), Integer.toString(count));
 
             // report newly available results to broker
-            analysisResponse.sendMessage(contentItem, result.getURI());
+            analysisResponse.sendNew(contentItem, result.getURI());
 
+            analysisResponse.sendFinish(contentItem, uri);
             log.debug("Done for {}", uri);
         } catch (RepositoryException e) {
             log.error("error accessing metadata repository",e);
