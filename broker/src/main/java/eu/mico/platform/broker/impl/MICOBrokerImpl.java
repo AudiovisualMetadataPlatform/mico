@@ -13,7 +13,9 @@
  */
 package eu.mico.platform.broker.impl;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.rabbitmq.client.*;
+
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.exception.StateNotFoundException;
 import eu.mico.platform.broker.model.*;
@@ -23,6 +25,7 @@ import eu.mico.platform.event.model.Event;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceImpl;
 import eu.mico.platform.persistence.model.ContentItem;
+
 import org.apache.commons.lang3.StringUtils;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -455,18 +458,51 @@ public class MICOBrokerImpl implements MICOBroker {
          */
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-            Event.AnalysisEvent analysisResponse = Event.AnalysisEvent.parseFrom(body);
-            log.info("received processing result from service {} for content item {}: new object {}", analysisResponse.getServiceId(), analysisResponse.getContentItemUri(), analysisResponse.getObjectUri());
+            try{
+                Event.AnalysisEvent analysisResponse = Event.AnalysisEvent.parseFrom(body);
+                log.info("received processing result from service {} for content item {}: new object {}", analysisResponse.getServiceId(), analysisResponse.getContentItemUri(), analysisResponse.getObjectUri());
+                boolean success = handleAnalysisEvent(properties, analysisResponse);
+                if (success){
+                    getChannel().basicAck(envelope.getDeliveryTag(), false);
+                }
+            }
+            catch(InvalidProtocolBufferException e){
+                Event.AnalyzeProgress progress = Event.AnalyzeProgress.parseFrom(body);
+                Transition transition = state.getProgress().get(properties.getCorrelationId());
+                transition.setProgress(progress.getProgress());
+            }
+        }
 
+
+        private boolean handleAnalysisEvent(AMQP.BasicProperties properties,
+                Event.AnalysisEvent analysisResponse) throws IOException {
             try {
                 state.addState(new URIImpl(analysisResponse.getObjectUri()), dependencies.getTargetState(new URIImpl(analysisResponse.getServiceId())));
-                state.removeProgress(properties.getCorrelationId());
+
+                URIImpl itemUri = new URIImpl(analysisResponse.getContentItemUri());
+                URIImpl partUri = new URIImpl(analysisResponse.getObjectUri());
+//                mimetype = persistenceService.getContentItem(itemUri)
+//                        .getContentPart(partUri).getType();
+
+                
+                switch (analysisResponse.getType()){
+                case ERROR:
+                    log.warn(analysisResponse.getMessage(),analysisResponse.getDescription());
+                case NEW_PART:
+                    // nothing special to do
+                    break;
+                case FINISH:
+                    // this is the last message we are waiting for
+                    state.removeProgress(properties.getCorrelationId());
+                case PROGRESS:
+                }
 
                 executeStateTransitions();
-                getChannel().basicAck(envelope.getDeliveryTag(), false);
+                return true;
             } catch (StateNotFoundException e) {
                 log.warn("could not proceed analysing content item {}, part {}; next state unknown because service was not registered", analysisResponse.getContentItemUri(), analysisResponse.getObjectUri());
             }
+            return false;
         }
 
         @Override

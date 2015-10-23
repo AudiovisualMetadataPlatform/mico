@@ -29,6 +29,7 @@ public class Transition {
     private TypeDescriptor stateStart;
     private TypeDescriptor stateEnd;
     private ServiceDescriptor service;
+    private float progress = -1.0f;
 
     public Transition(ContentItem item, URI object, TypeDescriptor stateStart, TypeDescriptor stateEnd, ServiceDescriptor service) {
         this.item = item;
@@ -68,5 +69,15 @@ public class Transition {
                 ", stateEnd=" + stateEnd +
                 ", service=" + service.getUri() +
                 '}';
+    }
+
+
+    public float getProgress() {
+        return progress;
+    }
+
+
+    public void setProgress(float progress) {
+        this.progress = progress;
     }
 }
