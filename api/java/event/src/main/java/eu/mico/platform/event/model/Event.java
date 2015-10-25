@@ -3252,18 +3252,35 @@ public final class Event {
         getObjectUriBytes();
 
     /**
-     * <code>required float progress = 4;</code>
+     * <code>required .mico.event.model.MessageType type = 4 [default = PROGRESS];</code>
      *
      * <pre>
-     *!&lt; indicates the progress of one extractor (0.0 .. 1.0)
+     *!&lt; 
+     * </pre>
+     */
+    boolean hasType();
+    /**
+     * <code>required .mico.event.model.MessageType type = 4 [default = PROGRESS];</code>
+     *
+     * <pre>
+     *!&lt; 
+     * </pre>
+     */
+    eu.mico.platform.event.model.Event.MessageType getType();
+
+    /**
+     * <code>required float progress = 5;</code>
+     *
+     * <pre>
+     *!&lt; normalized progress of extractor (0.0 .. 1.0)
      * </pre>
      */
     boolean hasProgress();
     /**
-     * <code>required float progress = 4;</code>
+     * <code>required float progress = 5;</code>
      *
      * <pre>
-     *!&lt; indicates the progress of one extractor (0.0 .. 1.0)
+     *!&lt; normalized progress of extractor (0.0 .. 1.0)
      * </pre>
      */
     float getProgress();
@@ -3338,8 +3355,19 @@ public final class Event {
               objectUri_ = bs;
               break;
             }
-            case 37: {
-              bitField0_ |= 0x00000008;
+            case 32: {
+              int rawValue = input.readEnum();
+              eu.mico.platform.event.model.Event.MessageType value = eu.mico.platform.event.model.Event.MessageType.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(4, rawValue);
+              } else {
+                bitField0_ |= 0x00000008;
+                type_ = value;
+              }
+              break;
+            }
+            case 45: {
+              bitField0_ |= 0x00000010;
               progress_ = input.readFloat();
               break;
             }
@@ -3545,23 +3573,46 @@ public final class Event {
       }
     }
 
-    public static final int PROGRESS_FIELD_NUMBER = 4;
-    private float progress_;
+    public static final int TYPE_FIELD_NUMBER = 4;
+    private eu.mico.platform.event.model.Event.MessageType type_;
     /**
-     * <code>required float progress = 4;</code>
+     * <code>required .mico.event.model.MessageType type = 4 [default = PROGRESS];</code>
      *
      * <pre>
-     *!&lt; indicates the progress of one extractor (0.0 .. 1.0)
+     *!&lt; 
      * </pre>
      */
-    public boolean hasProgress() {
+    public boolean hasType() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>required float progress = 4;</code>
+     * <code>required .mico.event.model.MessageType type = 4 [default = PROGRESS];</code>
      *
      * <pre>
-     *!&lt; indicates the progress of one extractor (0.0 .. 1.0)
+     *!&lt; 
+     * </pre>
+     */
+    public eu.mico.platform.event.model.Event.MessageType getType() {
+      return type_;
+    }
+
+    public static final int PROGRESS_FIELD_NUMBER = 5;
+    private float progress_;
+    /**
+     * <code>required float progress = 5;</code>
+     *
+     * <pre>
+     *!&lt; normalized progress of extractor (0.0 .. 1.0)
+     * </pre>
+     */
+    public boolean hasProgress() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>required float progress = 5;</code>
+     *
+     * <pre>
+     *!&lt; normalized progress of extractor (0.0 .. 1.0)
      * </pre>
      */
     public float getProgress() {
@@ -3572,6 +3623,7 @@ public final class Event {
       serviceId_ = "";
       contentItemUri_ = "";
       objectUri_ = "";
+      type_ = eu.mico.platform.event.model.Event.MessageType.PROGRESS;
       progress_ = 0F;
     }
     private byte memoizedIsInitialized = -1;
@@ -3589,6 +3641,10 @@ public final class Event {
         return false;
       }
       if (!hasObjectUri()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasType()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -3613,7 +3669,10 @@ public final class Event {
         output.writeBytes(3, getObjectUriBytes());
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeFloat(4, progress_);
+        output.writeEnum(4, type_.getNumber());
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeFloat(5, progress_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -3638,7 +3697,11 @@ public final class Event {
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeFloatSize(4, progress_);
+          .computeEnumSize(4, type_.getNumber());
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFloatSize(5, progress_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -3763,8 +3826,10 @@ public final class Event {
         bitField0_ = (bitField0_ & ~0x00000002);
         objectUri_ = "";
         bitField0_ = (bitField0_ & ~0x00000004);
-        progress_ = 0F;
+        type_ = eu.mico.platform.event.model.Event.MessageType.PROGRESS;
         bitField0_ = (bitField0_ & ~0x00000008);
+        progress_ = 0F;
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
 
@@ -3808,6 +3873,10 @@ public final class Event {
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
           to_bitField0_ |= 0x00000008;
         }
+        result.type_ = type_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
         result.progress_ = progress_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -3840,6 +3909,9 @@ public final class Event {
           objectUri_ = other.objectUri_;
           onChanged();
         }
+        if (other.hasType()) {
+          setType(other.getType());
+        }
         if (other.hasProgress()) {
           setProgress(other.getProgress());
         }
@@ -3857,6 +3929,10 @@ public final class Event {
           return false;
         }
         if (!hasObjectUri()) {
+          
+          return false;
+        }
+        if (!hasType()) {
           
           return false;
         }
@@ -4186,49 +4262,100 @@ public final class Event {
         return this;
       }
 
-      private float progress_ ;
+      private eu.mico.platform.event.model.Event.MessageType type_ = eu.mico.platform.event.model.Event.MessageType.PROGRESS;
       /**
-       * <code>required float progress = 4;</code>
+       * <code>required .mico.event.model.MessageType type = 4 [default = PROGRESS];</code>
        *
        * <pre>
-       *!&lt; indicates the progress of one extractor (0.0 .. 1.0)
+       *!&lt; 
        * </pre>
        */
-      public boolean hasProgress() {
+      public boolean hasType() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>required float progress = 4;</code>
+       * <code>required .mico.event.model.MessageType type = 4 [default = PROGRESS];</code>
        *
        * <pre>
-       *!&lt; indicates the progress of one extractor (0.0 .. 1.0)
+       *!&lt; 
+       * </pre>
+       */
+      public eu.mico.platform.event.model.Event.MessageType getType() {
+        return type_;
+      }
+      /**
+       * <code>required .mico.event.model.MessageType type = 4 [default = PROGRESS];</code>
+       *
+       * <pre>
+       *!&lt; 
+       * </pre>
+       */
+      public Builder setType(eu.mico.platform.event.model.Event.MessageType value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000008;
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required .mico.event.model.MessageType type = 4 [default = PROGRESS];</code>
+       *
+       * <pre>
+       *!&lt; 
+       * </pre>
+       */
+      public Builder clearType() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        type_ = eu.mico.platform.event.model.Event.MessageType.PROGRESS;
+        onChanged();
+        return this;
+      }
+
+      private float progress_ ;
+      /**
+       * <code>required float progress = 5;</code>
+       *
+       * <pre>
+       *!&lt; normalized progress of extractor (0.0 .. 1.0)
+       * </pre>
+       */
+      public boolean hasProgress() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>required float progress = 5;</code>
+       *
+       * <pre>
+       *!&lt; normalized progress of extractor (0.0 .. 1.0)
        * </pre>
        */
       public float getProgress() {
         return progress_;
       }
       /**
-       * <code>required float progress = 4;</code>
+       * <code>required float progress = 5;</code>
        *
        * <pre>
-       *!&lt; indicates the progress of one extractor (0.0 .. 1.0)
+       *!&lt; normalized progress of extractor (0.0 .. 1.0)
        * </pre>
        */
       public Builder setProgress(float value) {
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000010;
         progress_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required float progress = 4;</code>
+       * <code>required float progress = 5;</code>
        *
        * <pre>
-       *!&lt; indicates the progress of one extractor (0.0 .. 1.0)
+       *!&lt; normalized progress of extractor (0.0 .. 1.0)
        * </pre>
        */
       public Builder clearProgress() {
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000010);
         progress_ = 0F;
         onChanged();
         return this;
@@ -6174,18 +6301,19 @@ public final class Event {
       "(\t\022\026\n\016contentItemUri\030\002 \002(\t\022\021\n\tobjectUri\030" +
       "\003 \001(\t\022+\n\004type\030\004 \001(\0162\035.mico.event.model.M" +
       "essageType\022\017\n\007message\030\005 \001(\t\022\023\n\013descripti",
-      "on\030\006 \001(\t\"a\n\017AnalyzeProgress\022\021\n\tserviceId" +
-      "\030\001 \002(\t\022\026\n\016contentItemUri\030\002 \002(\t\022\021\n\tobject" +
-      "Uri\030\003 \002(\t\022\020\n\010progress\030\004 \002(\002\"&\n\014ContentEv" +
-      "ent\022\026\n\016contentItemUri\030\001 \002(\t\"\020\n\016Discovery" +
-      "Event\"E\n\022ConfigurationEvent\022\027\n\017marmottaB" +
-      "aseUri\030\001 \002(\t\022\026\n\016storageBaseUri\030\002 \002(\t\"\034\n\032" +
-      "ConfigurationDiscoverEvent*/\n\016Implementa" +
-      "tion\022\010\n\004JAVA\020\001\022\007\n\003CPP\020\002\022\n\n\006PYTHON\020\003*0\n\020R" +
-      "egistrationType\022\014\n\010REGISTER\020\001\022\016\n\nUNREGIS" +
-      "TER\020\002*@\n\013MessageType\022\014\n\010PROGRESS\020\001\022\n\n\006FI",
-      "NISH\020\002\022\014\n\010NEW_PART\020\003\022\t\n\005ERROR\020\004B\036\n\034eu.mi" +
-      "co.platform.event.model"
+      "on\030\006 \001(\t\"\230\001\n\017AnalyzeProgress\022\021\n\tserviceI" +
+      "d\030\001 \002(\t\022\026\n\016contentItemUri\030\002 \002(\t\022\021\n\tobjec" +
+      "tUri\030\003 \002(\t\0225\n\004type\030\004 \002(\0162\035.mico.event.mo" +
+      "del.MessageType:\010PROGRESS\022\020\n\010progress\030\005 " +
+      "\002(\002\"&\n\014ContentEvent\022\026\n\016contentItemUri\030\001 " +
+      "\002(\t\"\020\n\016DiscoveryEvent\"E\n\022ConfigurationEv" +
+      "ent\022\027\n\017marmottaBaseUri\030\001 \002(\t\022\026\n\016storageB" +
+      "aseUri\030\002 \002(\t\"\034\n\032ConfigurationDiscoverEve" +
+      "nt*/\n\016Implementation\022\010\n\004JAVA\020\001\022\007\n\003CPP\020\002\022" +
+      "\n\n\006PYTHON\020\003*0\n\020RegistrationType\022\014\n\010REGIS",
+      "TER\020\001\022\016\n\nUNREGISTER\020\002*@\n\013MessageType\022\014\n\010" +
+      "PROGRESS\020\001\022\n\n\006FINISH\020\002\022\014\n\010NEW_PART\020\003\022\t\n\005" +
+      "ERROR\020\004B\036\n\034eu.mico.platform.event.model"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -6216,7 +6344,7 @@ public final class Event {
     internal_static_mico_event_model_AnalyzeProgress_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_mico_event_model_AnalyzeProgress_descriptor,
-        new java.lang.String[] { "ServiceId", "ContentItemUri", "ObjectUri", "Progress", });
+        new java.lang.String[] { "ServiceId", "ContentItemUri", "ObjectUri", "Type", "Progress", });
     internal_static_mico_event_model_ContentEvent_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_mico_event_model_ContentEvent_fieldAccessorTable = new
