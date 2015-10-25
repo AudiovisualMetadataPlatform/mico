@@ -468,6 +468,7 @@ public class MICOBrokerImpl implements MICOBroker {
             }
             catch(InvalidProtocolBufferException e){
                 Event.AnalyzeProgress progress = Event.AnalyzeProgress.parseFrom(body);
+                log.trace("got progress event ({}) for {}", progress.getProgress(), progress.getObjectUri());
                 Transition transition = state.getProgress().get(properties.getCorrelationId());
                 transition.setProgress(progress.getProgress());
             }

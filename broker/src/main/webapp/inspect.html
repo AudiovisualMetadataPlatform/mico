@@ -76,7 +76,7 @@
         <tr ng-show="part.transitions.length > 0">
             <th>Transitions</th>
             <td>
-                <span ng-repeat="t in part.transitions">{{t.start_state}} -> {{t.end_state}} ({{t.service}}) ,</span>
+                <span ng-repeat="t in part.transitions">{{t.start_state}} -> {{t.end_state}} ({{t.service}}) ,({{t.progress}}%)</span>
             </td>
         </tr>
         <tr><th>Actions</th><td><a href="/marmotta/resource?uri={{part.uri}}">Metadata</a> - <a href="status/download?partUri={{part.uri}}&itemUri={{itemUri}}">Download</a></td></tr>

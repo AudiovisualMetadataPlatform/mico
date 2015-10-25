@@ -159,6 +159,7 @@ public class StatusWebService {
                     tprops.put("correlation", t.getKey());
                     tprops.put("start_state", t.getValue().getStateStart().getSymbol());
                     tprops.put("end_state", t.getValue().getStateEnd().getSymbol());
+                    tprops.put("progress", Float.toString(t.getValue().getProgress()));
                     tprops.put("service", t.getValue().getService().getUri().stringValue());
                     transitions.add(tprops);
                 }
