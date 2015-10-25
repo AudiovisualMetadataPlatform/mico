@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.lang.annotation.Inherited;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
@@ -340,6 +339,7 @@ public class EventManagerImpl implements EventManager {
                         .setContentItemUri(ci.getURI().stringValue())
                         .setObjectUri(object.stringValue())
                         .setServiceId(service.getServiceID().stringValue())
+                        .setType(MessageType.PROGRESS)
                         .setProgress(progress).build();
 
                 getChannel().basicPublish("", properties.getReplyTo(), replyProps, responseEvent.toByteArray());
@@ -364,7 +364,7 @@ public class EventManagerImpl implements EventManager {
                         .setContentItemUri(ci.getURI().stringValue())
                         .setObjectUri(object.stringValue())
                         .setServiceId(service.getServiceID().stringValue())
-                        .setType(MessageType.PROGRESS)
+                        .setType(MessageType.ERROR)
                         .setMessage(msg)
                         .setDescription(desc).build();
 
