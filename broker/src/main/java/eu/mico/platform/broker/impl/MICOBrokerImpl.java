@@ -22,6 +22,7 @@ import eu.mico.platform.broker.model.*;
 import eu.mico.platform.broker.util.RabbitMQUtils;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.model.Event;
+import eu.mico.platform.event.model.Event.MessageType;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceImpl;
 import eu.mico.platform.persistence.model.ContentItem;
@@ -465,12 +466,15 @@ public class MICOBrokerImpl implements MICOBroker {
                 if (success){
                     getChannel().basicAck(envelope.getDeliveryTag(), false);
                 }
+                if (analysisResponse.getType()== MessageType.PROGRESS){
+                    Event.AnalyzeProgress progress = Event.AnalyzeProgress.parseFrom(body);
+                    log.trace("got progress event ({}) for {}", progress.getProgress(), progress.getObjectUri());
+                    Transition transition = state.getProgress().get(properties.getCorrelationId());
+                    transition.setProgress(progress.getProgress());
+                }
             }
             catch(InvalidProtocolBufferException e){
-                Event.AnalyzeProgress progress = Event.AnalyzeProgress.parseFrom(body);
-                log.trace("got progress event ({}) for {}", progress.getProgress(), progress.getObjectUri());
-                Transition transition = state.getProgress().get(properties.getCorrelationId());
-                transition.setProgress(progress.getProgress());
+                log.warn("Error handling delivery",e);
             }
         }
 
