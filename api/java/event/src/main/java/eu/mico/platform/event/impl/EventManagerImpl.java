@@ -329,7 +329,12 @@ public class EventManagerImpl implements EventManager {
                 long current = System.currentTimeMillis();
                 if (current < progressDeltaMS + progressSentMS){
                     // prevent broker from progress flooding and wait at least deltaMS millis
+                    log.trace("suppress sending progress: {} for object: {}",progress, object);
                     return;
+                }
+                log.trace("sending progress of: {} for object: {}",progress, object);
+                if (progress > 1.0001f){
+                    log.warn("progress should not be grater then 1.0 but is: {}", progress);
                 }
                 Event.AnalyzeProgress responseEvent = Event.AnalyzeProgress.newBuilder()
                         .setContentItemUri(ci.getURI().stringValue())
@@ -338,6 +343,7 @@ public class EventManagerImpl implements EventManager {
                         .setProgress(progress).build();
 
                 getChannel().basicPublish("", properties.getReplyTo(), replyProps, responseEvent.toByteArray());
+                progressSentMS = current;
             }
 
             @Override
