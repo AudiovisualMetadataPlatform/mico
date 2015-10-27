@@ -104,18 +104,20 @@ public class AnimalDetectionWebService {
                     if (statusLine.getStatusCode() == 200) {
                         final Header cType = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
                         final MediaType type;
-                        if (cType != null) {
+                        if (cType != null && !MediaType.valueOf(cType.getValue()).equals(MediaType.APPLICATION_OCTET_STREAM_TYPE)) {
                             type = MediaType.valueOf(cType.getValue());
                         } else {
                             type = MediaType.valueOf(mimetypesMap.getContentType(imageUrl.getPath()));
                         }
 
-                        if (type != null) {
+                        if (type.toString().equalsIgnoreCase("image/jpeg")) {
                             try (InputStream is = httpResponse.getEntity().getContent()) {
                                 return uploadImage(type, is);
                             }
+                        } else if (type != null) {
+                            throw new ClientProtocolException(String.format("Invalid MIME type %s of remote resource %s", type.toString(), imageUrl));
                         } else {
-                            throw new ClientProtocolException("Could not determine ContentType of remote resource " + imageUrl);
+                            throw new ClientProtocolException("Could not determine MIME of remote resource " + imageUrl);
                         }
                     }
 
