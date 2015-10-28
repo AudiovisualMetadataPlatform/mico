@@ -32,10 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -370,6 +367,18 @@ public class MICOBrokerImpl implements MICOBroker {
             try {
                 ContentItem item = persistenceService.createContentItem(new URIImpl(contentEvent.getContentItemUri()));
 
+                if (states.size() >= 1000 && states.size() % 200 == 0) {
+                    log.info(" - checking for outdated states ...");
+                    int removeCounter = 0;
+                    long outdated = new Date().getTime() - (1 * 60 * 60 * 1000);
+                    for(Map.Entry<String, ContentItemState> state : getStates().entrySet()) {
+                        if (state.getValue().isFinalState() && state.getValue().getCreated().getTime() < outdated) {
+                            states.remove(state.getKey());
+                            removeCounter++;
+                        }
+                    }
+                    log.info(" - removed {} outdated states", removeCounter);
+                }
                 log.info("- adding initial content item state ...");
                 ContentItemState state = new ContentItemState(dependencies,item);
                 states.put(contentEvent.getContentItemUri(), state);
