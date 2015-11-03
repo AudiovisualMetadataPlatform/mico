@@ -32,7 +32,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -367,26 +370,6 @@ public class MICOBrokerImpl implements MICOBroker {
             try {
                 ContentItem item = persistenceService.createContentItem(new URIImpl(contentEvent.getContentItemUri()));
 
-                if (states.size() >= 1000 && states.size() % 250 == 0) {
-                    log.info(" - checking for outdated states ...");
-                    int removeCounter = 0;
-                    long outdated = new Date().getTime() - (1 * 60 * 60 * 1000);
-                    List<Map.Entry<String, ContentItemState>> states = new ArrayList(getStates().entrySet());
-                    Collections.sort(states, new Comparator<Map.Entry<String,ContentItemState>>() {
-                        @Override
-                        public int compare(Map.Entry<String,ContentItemState> cis1, Map.Entry<String,ContentItemState> cis2) {
-                            return (cis2.getValue().getCreated().compareTo(cis1.getValue().getCreated()));
-                        }
-
-                    });
-                    for(Map.Entry<String, ContentItemState> state : states.subList(250, states.size())) {
-                        if (state.getValue().isFinalState() && state.getValue().getCreated().getTime() < outdated) {
-                            states.remove(state.getKey());
-                            removeCounter++;
-                        }
-                    }
-                    log.info(" - removed {} outdated states", removeCounter);
-                }
                 log.info("- adding initial content item state ...");
                 ContentItemState state = new ContentItemState(dependencies,item);
                 states.put(contentEvent.getContentItemUri(), state);
