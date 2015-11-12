@@ -139,8 +139,10 @@ public class StatusWebService {
         if(showParts) {
             List<Map<String, Object>> parts = new ArrayList<>();
             ContentItem item = broker.getPersistenceService().getContentItem(new URIImpl(uri));
-            for (Content part : item.listContentParts()) {
-                parts.add(wrapContentStatus(state, part));
+            if (item != null) {
+                for (Content part : item.listContentParts()) {
+                    parts.add(wrapContentStatus(state, part));
+                }
             }
             sprops.put("parts", parts);
         }
