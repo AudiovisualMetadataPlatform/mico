@@ -98,7 +98,7 @@ public class StatusWebService {
     @GET
     @Path("/items")
     @Produces("application/json")
-    public List<Map<String,Object>> getItems(@QueryParam("uri") String itemUri, @QueryParam("parts") boolean showParts) throws RepositoryException {
+    public List<Map<String,Object>> getItems(@QueryParam("uri") String itemUri, @QueryParam("parts") boolean showParts, @QueryParam("offset") int offset, @QueryParam("number") int number) throws RepositoryException {
         List<Map<String,Object>> result = new ArrayList<>();
         if(itemUri == null) {
             // retrieve a list of all items
@@ -108,7 +108,7 @@ public class StatusWebService {
             Collections.sort(result, new Comparator<Map<String,Object>>() {
                 @Override
                 public int compare(Map<String,Object> ci1, Map<String,Object> ci2) {
-                    return ((String)(ci1.get("time"))).compareTo((String)(ci2.get("time")));
+                    return ((String)(ci2.get("time"))).compareTo((String)(ci1.get("time")));
                 }
 
             });
@@ -117,6 +117,16 @@ public class StatusWebService {
         } else {
             throw new NotFoundException("item with uri " + itemUri + " not found in broker");
         }
+
+        if (offset >= result.size())
+            offset = result.size() - 1;
+        if (offset >=0 && number > 0) {
+            if (offset + number > result.size())
+                number = result.size() - offset;
+            return result.subList(offset, offset + number);
+        }
+        if (offset > 0)
+            return result.subList(offset, result.size()-1);
         return result;
     }
 
@@ -129,8 +139,10 @@ public class StatusWebService {
         if(showParts) {
             List<Map<String, Object>> parts = new ArrayList<>();
             ContentItem item = broker.getPersistenceService().getContentItem(new URIImpl(uri));
-            for (Content part : item.listContentParts()) {
-                parts.add(wrapContentStatus(state, part));
+            if (item != null) {
+                for (Content part : item.listContentParts()) {
+                    parts.add(wrapContentStatus(state, part));
+                }
             }
             sprops.put("parts", parts);
         }

@@ -21,7 +21,7 @@
 
     <script src="webjars/angular-file-upload/1.6.5/angular-file-upload-shim.min.js"></script>
     <script src="webjars/angularjs/1.2.15/angular.js"></script>
-    <script src="webjars/angular-ui-bootstrap/0.10.0/ui-bootstrap-tpls.js"></script>
+    <script src="webjars/angular-ui-bootstrap/0.12.1/ui-bootstrap-tpls.js"></script>
     <script src="webjars/angular-file-upload/1.6.5/angular-file-upload.min.js"></script>
     <script src="js/controllers.js"></script>
 
@@ -73,12 +73,12 @@
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
     <h2>Service Registry</h2>
 
-    <table style="width: 100%">
+    <table class="table table-striped" style="width: 100%">
         <tr>
-            <th>Name</th><th>Language</th><th>Service ID</th><th>Requires</th><th>Provides</th><th>Registration Date</th><th>Calls</th>
+            <th>Name</th><th>Language</th><th>Service ID</th><th>Requires</th><th>Provides</th><th>Registration Date</th>
         </tr>
         <tr ng-repeat="svc in services">
-            <td>{{svc.name}}</td><td>{{svc.language}}</td><td>{{svc.uri}}</td><td>{{svc.requires}}</td><td>{{svc.provides}}</td><td>{{svc.time}}</td><td>{{svc.calls}}</td>
+            <td>{{svc.name}}</td><td>{{svc.language}}</td><td>{{svc.uri}}</td><td>{{svc.requires}}</td><td>{{svc.provides}}</td><td>{{svc.time}}</td>
 
         </tr>
     </table>
@@ -93,11 +93,11 @@
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
     <h2>Content Items</h2>
 
-    <table style="width: 100%">
+    <table ng-show="filteredItems.length>0" class="table table-striped" style="width: 100%">
         <tr>
             <th>URI</th><th>Actions</th><th>Registration</th><th>State</th>
         </tr>
-        <tr ng-repeat="item in items" style="border: 1px solid black;">
+        <tr ng-repeat="item in filteredItems">
             <td style="vert-align: top"><a href="/marmotta/resource?uri={{item.uri}}">{{item.uri}}</a></td>
             <td>
                 <a href="inspect.html?uri={{item.uri}}">Inspect</a> -
@@ -112,8 +112,10 @@
             </td>
         </tr>
     </table>
+    <pagination ng-show="filteredItems.length>0" ng-model="currentPage" items-per-page="numPerPage" total-items="items.length" max-size="maxSize" boundary-links="true">
+    </pagination>
 
-    <a href="inject.html">Inject new Content Item</a>
+    <br><a href="inject.html">Inject new Content Item</a>
 </div>
 
 </body>

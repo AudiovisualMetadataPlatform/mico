@@ -1,4 +1,4 @@
-Source: libmico-api
+Source: libmico-api-java
 Priority: optional
 Maintainer: Sebastian Schaffert <sebastian.schaffert@gmail.com>
 Section: java

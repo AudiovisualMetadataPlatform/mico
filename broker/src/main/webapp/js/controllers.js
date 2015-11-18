@@ -21,18 +21,27 @@ function getParameterByName(name) {
 }
 
 brokerApp.controller("StatusCtrl", function($scope,$http) {
+    function updateFilteredItems() {
+      var begin = (($scope.currentPage - 1) * $scope.numPerPage),
+          end = begin + $scope.numPerPage;
+      $scope.filteredItems = $scope.items.slice(begin, end);
+    };
 
     $scope.services = [];
-
     $http.get("status/services").success(function(data) {
         $scope.services = data;
     });
 
-
-    $scope.items = [];
+     $scope.items = []
+    ,$scope.filteredItems = []
+    ,$scope.currentPage = 1
+    ,$scope.numPerPage = 10
+    ,$scope.maxSize = 5;
     $http.get("status/items?parts=false").success(function(data) {
         $scope.items = data;
+        updateFilteredItems();
     });
+    $scope.$watch('currentPage + numPerPage', updateFilteredItems);
 });
 
 
