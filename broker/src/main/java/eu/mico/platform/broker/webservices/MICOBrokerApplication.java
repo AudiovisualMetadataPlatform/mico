@@ -76,6 +76,7 @@ public class MICOBrokerApplication extends Application {
             services.add(new TextAnalysisWebService(manager, broker, marmottaBaseUri));
             services.add(new AnimalDetectionWebService(manager, broker, marmottaBaseUri));
             services.add(new ContentWebService(manager, broker, marmottaBaseUri));
+            services.add(new DemoWebService(manager, broker, marmottaBaseUri));
 
         } catch (IOException ex) {
             log.error("could not initialise MICO broker, services not available (message: {})", ex.getMessage());
