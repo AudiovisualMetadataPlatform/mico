@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -111,7 +112,7 @@ public class MICOBrokerImpl implements MICOBroker {
         this.storageBaseUri = storageBaseUri;
 
         dependencies = new ServiceGraph();
-        states       = new HashMap<>();
+        states       = new ConcurrentHashMap<>();
         channels     = new HashMap<>();
 
         log.info("initialising RabbitMQ connection ...");
