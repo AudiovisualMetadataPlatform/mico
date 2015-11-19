@@ -34,6 +34,23 @@
             margin-right: 10%;
         }
 
+        .page-header {
+        padding-right: 300px;
+        background-image: url('http://www.mico-project.eu/wp-content/uploads/2014/04/mico_logo.png');
+        background-repeat: no-repeat;
+        background-position: right top;
+        border-bottom: 2px solid #ACCD6C;
+        }
+
+        .page-header h1 {
+        font-size: 3.2em;
+        color: #3a6548;
+        }
+
+        .page-header h1 small {
+        color: #ACCD6C
+        }
+
         td {
             padding: 5px;
         }
@@ -44,8 +61,16 @@
 <body ng-controller="ShowItemCtrl">
 
 
+<div class="container-fluid page-header">
+    <h1>MICO <small>Content Item Status</small></h1>
+</div>
+
 <div class="container-fluid">
-    <h1>MICO Content Item Status</h1>
+    <ul class="nav nav-tabs" style="margin-top: 10px; margin-bottom: 10px;">
+        <li role="presentation" class="active"><a href="/broker/">Broker</a></li>
+        <li role="presentation"><a href="/mico-configuration/">Platform Configuration</a></li>
+        <li role="presentation"><a href="/marmotta/">Marmotta</a></li>
+    </ul>
 </div>
 
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
