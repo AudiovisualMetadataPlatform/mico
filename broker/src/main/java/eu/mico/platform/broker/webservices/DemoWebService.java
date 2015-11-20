@@ -367,8 +367,9 @@ public class DemoWebService {
             try {
                 result.put("type", "video");
                 result.put("part_uri", queryString(queryMediaPartURI, metadata, uri));
-                //result.put("segments", queryList(querySegments, metadata, uri)); TODO
-
+                result.put("faces", queryMapList(timedFaces, metadata, uri));
+                result.put("shotImages", queryMapList(shotImages, metadata, uri));
+                result.put("shots", queryMapList(shots, metadata, uri));
             } catch (MalformedQueryException | QueryEvaluationException e) {
                 log.error("Error querying objects; {}", e);
                 throw new Exception(e);
@@ -390,10 +391,69 @@ public class DemoWebService {
             "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "SELECT ?faces WHERE {\n" +
-            " <%s> mico:hasContentPart ?p. \n" +
-            "  ?p dct:creator \"http://www.mico-project.org/services/mico-extractor-object2RDF\";" +
-            "     mico:hasContent/oa:hasTarget/oa:hasSelector/rdf:value ?faces.\n" +
+            "   <%s> mico:hasContentPart/mico:hasContent ?c." +
+            "   ?c oa:hasTarget/oa:hasSelector/rdf:value ?faces." +
+            "   ?c oa:hasBody/rdf:type <http://www.mico-project.eu/ns/platform/1.0/schema#FaceDetectionBody>\n" +
             "}";
+
+    private static String shotImages = "PREFIX mm: <http://linkedmultimedia.org/sparql-mm/ns/1.0.0/function#>\n" +
+            "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
+            "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
+            "PREFIX dct: <http://purl.org/dc/terms/>\n" +
+            "SELECT ?type ?timestamp ?location WHERE {\n" +
+            "  <%s> mico:hasContentPart ?cp .\n" +
+            "  ?cp mico:hasContent ?annot .\n" +
+            "  ?annot oa:hasBody ?body .\n" +
+            "  ?annot oa:hasTarget ?tgt .\n" +
+            "  ?tgt  mico:hasLocation ?location .\n" +
+            "  ?tgt  oa:hasSelector ?fs .\n" +
+            "  ?fs rdf:value ?timestamp .\n" +
+            "  ?cp dct:type ?type\n" +
+            "  FILTER EXISTS {?body rdf:type mico:TVSShotBoundaryFrameBody .\n" +
+            "                 ?cp dct:type \"image/png\"}\n" +
+            "} ORDER BY mm:getStart(?timestamp)";
+
+    private static String shots = "PREFIX mm: <http://linkedmultimedia.org/sparql-mm/ns/1.0.0/function#>\n" +
+            "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
+            "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
+            "SELECT ?time WHERE {\n" +
+            "  <%s>  mico:hasContentPart ?cp .\n" +
+            "  ?cp mico:hasContent ?annot .\n" +
+            "  ?annot oa:hasBody ?body .\n" +
+            "  ?annot oa:hasTarget ?tgt .\n" +
+            "  ?tgt  oa:hasSelector ?fs .\n" +
+            "  ?fs rdf:value ?time\n" +
+            "  FILTER EXISTS {?body rdf:type mico:TVSShotBody}\n" +
+            "} ORDER BY mm:getStart(?time)";
+
+    private static String timedFaces = "PREFIX mm: <http://linkedmultimedia.org/sparql-mm/ns/1.0.0/function#>\n" +
+            "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
+            "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
+            "PREFIX dct: <http://purl.org/dc/terms/>\n" +
+            "SELECT DISTINCT ?timestamp ?region WHERE {\n" +
+            "  <%s> mico:hasContentPart ?cp .\n" +
+            "  ?cp mico:hasContent ?annot .\n" +
+            "  ?annot oa:hasBody ?body .\n" +
+            "  ?annot oa:hasTarget ?tgt .\n" +
+            "  ?tgt  oa:hasSelector ?fs .\n" +
+            "  ?fs rdf:value ?region .\n" +
+            "  ?tgt oa:hasSource ?pcp .\n" +
+            "  ?pcp dct:source ?ppcp .\n" +
+            "  ?ppcp mico:hasContent ?ppannot .\n" +
+            "  ?ppannot oa:hasBody ?ppbody .\n" +
+            "  ?ppbody rdf:type ?frameType . \n" +
+            "  ?ppannot oa:hasTarget ?pptgt .\n" +
+            "  ?pptgt  oa:hasSelector ?ppfs .\n" +
+            "  ?ppfs rdf:value ?timestamp\n" +
+            "  FILTER EXISTS {?body rdf:type mico:FaceDetectionBody .\n" +
+            "                ?pcp dct:type \"text/vnd.fhg-ccv-facedetection+xml\"}\n" +
+            "} ORDER BY mm:getStart(?timestamp)";
 
     private String queryString(String query, Metadata metadata, String uri) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
         query = String.format(query, uri);
