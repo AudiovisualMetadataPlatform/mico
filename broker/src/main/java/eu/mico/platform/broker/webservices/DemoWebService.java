@@ -194,28 +194,19 @@ public class DemoWebService {
     @Consumes("multipart/form-data")
     public Response uploadVideo(MultipartFormDataInput input) {
 
-        boolean sendEmail = false;
+        String email = null;
 
         Map<String, List<InputPart>> formParts = input.getFormDataMap();
 
         try {
 
-            if(formParts.containsKey("email_enabled")) {
-                List<InputPart> enabled = formParts.get("email_enabled");
-                if(enabled.size()==1) {
-                    sendEmail = Boolean.parseBoolean(enabled.get(0).getBodyAsString());
+            if(formParts.containsKey("email")) {
+                List<InputPart> _email = formParts.get("email");
+                if(_email.size()==1) {
+                    email = _email.get(0).getBodyAsString();
+                    Preconditions.checkArgument(EmailValidator.getInstance().isValid(email),"Email is not valid");
                 }
             }
-
-            Preconditions.checkArgument(formParts.containsKey("email"), "Email has to be included");
-
-            List<InputPart> inPart0 = formParts.get("email");
-
-            Preconditions.checkArgument(inPart0.size() == 1, "One and only one email has to be included");
-
-            String email = inPart0.get(0).getBodyAsString();
-
-            Preconditions.checkArgument(EmailValidator.getInstance().isValid(email),"Email is not valid");
 
             Preconditions.checkArgument(formParts.containsKey("file"), "File has to be included");
 
@@ -240,13 +231,13 @@ public class DemoWebService {
                 final ContentItem ci = injectContentItem(mediaType, istream, filename);
 
                 //start Thread
-                if(sendEmail) {
+                if(email != null) {
                     EmailThread emailThread = new EmailThread(email,filename,broker,ci);
                     emailThread.run();
                 }
 
                 return Response.status(Response.Status.CREATED)
-                        .entity(ImmutableMap.of("id", ci.getID(), "uri", ci.getURI().stringValue(), "status", "injected"))
+                        .entity(ImmutableMap.of("id", ci.getID(), "uri", ci.getURI().stringValue(), "status", "injected", "email", email != null))
                         .build();
             } catch (RepositoryException | IOException e) {
                 log.error("Could not create ContentItem");
