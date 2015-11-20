@@ -248,8 +248,8 @@ public class DemoWebService {
 
     @GET
     @Produces("application/json")
-    @Path("{id:[^/]+}")
-    public Response getResult(@PathParam("uri") final String uriString) {
+    @Path("/video")
+    public Response getResult(@QueryParam("uri") final String uriString) {
 
         final URI contentItemUri = new URIImpl(uriString);
 
