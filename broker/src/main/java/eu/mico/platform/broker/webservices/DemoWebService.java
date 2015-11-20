@@ -490,10 +490,9 @@ public class DemoWebService {
 
         try {
             while (result.hasNext()) {
-                HashMap map = new HashMap<>();
                 BindingSet bindings = result.next();
                 Value v = bindings.getBinding(result.getBindingNames().get(0)).getValue();
-                res.add(v);
+                res.add(v.stringValue());
             }
         } finally {
             result.close();
