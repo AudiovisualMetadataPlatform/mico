@@ -118,8 +118,6 @@ public class DemoWebService {
 
                 ContentItemState state = broker.getStates().get(ci.getURI().stringValue());
 
-                if(state == null) return Response.serverError().entity("Cannot inject content item").build();
-
                 while (state == null || !state.isFinalState()) {
 
                     if(System.currentTimeMillis() > start+timeout) {
