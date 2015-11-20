@@ -16,6 +16,7 @@ import eu.mico.platform.persistence.model.Metadata;
 import eu.mico.platform.uc.zooniverse.model.TextAnalysisInput;
 import eu.mico.platform.uc.zooniverse.model.TextAnalysisOutput;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.http.client.utils.URIBuilder;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -119,7 +120,7 @@ public class DemoWebService {
 
                 if(state == null) return Response.serverError().entity("Cannot inject content item").build();
 
-                while (!state.isFinalState()) {
+                while (state == null || !state.isFinalState()) {
 
                     if(System.currentTimeMillis() > start+timeout) {
                         return Response.status(408).entity("Image took to long to compute").build();
@@ -193,9 +194,19 @@ public class DemoWebService {
     @Consumes("multipart/form-data")
     public Response uploadVideo(MultipartFormDataInput input) {
 
+        boolean sendEmail = false;
+
         Map<String, List<InputPart>> formParts = input.getFormDataMap();
 
         try {
+
+            if(formParts.containsKey("email_enabled")) {
+                List<InputPart> enabled = formParts.get("email_enabled");
+                if(enabled.size()==1) {
+                    sendEmail = Boolean.parseBoolean(enabled.get(0).getBodyAsString());
+                }
+            }
+
             Preconditions.checkArgument(formParts.containsKey("email"), "Email has to be included");
 
             List<InputPart> inPart0 = formParts.get("email");
@@ -229,8 +240,10 @@ public class DemoWebService {
                 final ContentItem ci = injectContentItem(mediaType, istream, filename);
 
                 //start Thread
-                EmailThread emailThread = new EmailThread(email,filename,broker,ci);
-                emailThread.run();
+                if(sendEmail) {
+                    EmailThread emailThread = new EmailThread(email,filename,broker,ci);
+                    emailThread.run();
+                }
 
                 return Response.status(Response.Status.CREATED)
                         .entity(ImmutableMap.of("id", ci.getID(), "uri", ci.getURI().stringValue(), "status", "injected"))
@@ -248,8 +261,45 @@ public class DemoWebService {
 
     @GET
     @Produces("application/json")
+    @Path("/image")
+    public Response getImageResult(@QueryParam("uri") final String uriString) {
+
+        final URI contentItemUri = new URIImpl(uriString);
+
+        final ContentItem contentItem;
+        try {
+            contentItem = persistenceService.getContentItem(contentItemUri);
+            if (contentItem == null)
+                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'", contentItemUri.stringValue())).build();
+        } catch (RepositoryException e) {
+            log.error("Error getting content item {}: {}", contentItemUri, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
+        }
+
+        //test if it is still in progress
+        final ContentItemState state = broker.getStates().get(contentItemUri.stringValue());
+        if (state != null && !state.isFinalState()) {
+            return Response.status(Response.Status.ACCEPTED)
+                    .entity(ImmutableMap.of("uri", uriString, "status", "inProgress"))
+                    .build();
+        }
+
+        try {
+            Object result = createImageResult(uriString);
+            return Response.status(Response.Status.CREATED)
+                    .entity(ImmutableMap.of("id", contentItem.getID(), "uri", contentItem.getURI().stringValue(), "result", result, "status", "done"))
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
+        }
+
+    }
+
+    @GET
+    @Produces("application/json")
     @Path("/video")
-    public Response getResult(@QueryParam("uri") final String uriString) {
+    public Response getVideoResult(@QueryParam("uri") final String uriString) {
 
         final URI contentItemUri = new URIImpl(uriString);
 
