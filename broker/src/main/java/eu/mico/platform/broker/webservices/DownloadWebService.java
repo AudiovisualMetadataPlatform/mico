@@ -12,6 +12,7 @@ import org.openrdf.repository.RepositoryException;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -34,7 +35,7 @@ public class DownloadWebService {
 
     @GET
     @Path("{item}/{part}.{suffix}")
-    public File download(String item, String part, String suffix) throws IOException, URISyntaxException, RepositoryException {
+    public File download(@PathParam("item")String item, @PathParam("part")String part, @PathParam("suffix")String suffix) throws IOException, URISyntaxException, RepositoryException {
 
         //read file
         File file = File.createTempFile(item+part,suffix);
