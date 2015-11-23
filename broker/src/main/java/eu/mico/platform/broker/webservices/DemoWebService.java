@@ -333,7 +333,7 @@ public class DemoWebService {
                 result.put("type", "image");
                 result.put("part_uri", queryString(queryMediaPartURI, metadata, uri));
                 result.put("faces", queryList(queryFaces, metadata, uri));
-                result.put("animals", queryMapList(queryFaces, metadata, uri));
+                result.put("animals", queryMapList(animals, metadata, uri));
 
             } catch (MalformedQueryException | QueryEvaluationException e) {
                 log.error("Error querying objects; {}", e);
