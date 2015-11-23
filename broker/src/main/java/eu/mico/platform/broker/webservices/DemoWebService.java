@@ -333,6 +333,7 @@ public class DemoWebService {
                 result.put("type", "image");
                 result.put("part_uri", queryString(queryMediaPartURI, metadata, uri));
                 result.put("faces", queryList(queryFaces, metadata, uri));
+                result.put("animals", queryMapList(queryFaces, metadata, uri));
 
             } catch (MalformedQueryException | QueryEvaluationException e) {
                 log.error("Error querying objects; {}", e);
@@ -358,7 +359,8 @@ public class DemoWebService {
                 result.put("part_uri", queryString(queryMediaPartURI, metadata, uri));
                 result.put("faces", queryMapList(timedFaces, metadata, uri));
                 result.put("shotImages", queryMapList(shotImages, metadata, uri));
-                result.put("shots", queryMapList(shots, metadata, uri));
+                //result.put("shots", queryMapList(shots, metadata, uri));
+                result.put("timedText", queryMapList(timedText, metadata, uri));
             } catch (MalformedQueryException | QueryEvaluationException e) {
                 log.error("Error querying objects; {}", e);
                 throw new Exception(e);
@@ -374,6 +376,49 @@ public class DemoWebService {
     private static String queryMediaPartURI = "PREFIX dct: <http://purl.org/dc/terms/>\n" +
             "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
             "SELECT ?p WHERE {<%s> mico:hasContentPart ?p. ?p dct:creator \""+INJECTOR+"\" }";
+
+    private static String animals = "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
+            "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
+            "SELECT ?animal ?region ?confidence ?version WHERE {\n" +
+            "<%s> mico:hasContentPart ?cp .\n" +
+            "?cp mico:hasContent ?annot .\n" +
+            "?annot oa:hasBody ?body .\n" +
+            "?annot oa:hasTarget ?tgt .\n" +
+            "?tgt  oa:hasSelector ?fs .\n" +
+            "?body rdf:value ?animal .\n" +
+            "?body mico:hasConfidence ?confidence .\n" +
+            "?body mico:hasExtractionVersion ?version .\n" +
+            "?fs rdf:value ?region\n" +
+            "FILTER EXISTS {?body rdf:type mico:AnimalDetectionBody}\n" +
+            "}";
+
+    private static String timedText = "PREFIX mm: <http://linkedmultimedia.org/sparql-mm/ns/1.0.0/function#>\n" +
+            "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
+            "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
+            "PREFIX dct: <http://purl.org/dc/terms/>\n" +
+            "PREFIX fam: <http://vocab.fusepool.info/fam#>\n" +
+            "\n" +
+            "SELECT (group_concat(?stt_value;separator=\" \") AS ?text) ((?group)*3 AS ?start) ((?group+1)*3 AS ?end) WHERE {\n" +
+            "  <http://demo3.mico-project.eu:8080/marmotta/9bdc7ab6-d970-4d47-8cba-258ff5cf27af>\n" +
+            "  mico:hasContentPart ?cp .\n" +
+            "  ?cp mico:hasContent ?stt_annot .\n" +
+            "  ?stt_annot oa:hasBody ?stt_body .\n" +
+            "  ?stt_body rdf:type  ?stt_body_type .\n" +
+            "  ?stt_body rdf:value ?stt_value .\n" +
+            "  ?stt_annot oa:hasTarget ?tgt .\n" +
+            "  ?tgt  oa:hasSelector ?fs .\n" +
+            "  ?fs rdf:value ?timestamp .\n" +
+            "  BIND (floor((mm:getStart(?timestamp) / 3)) AS ?group)\n" +
+            "  FILTER (?stt_body_type = mico:STTBody)\n" +
+            "  FILTER (!regex(?stt_value,\"^<eps>$\"))\n" +
+            "  FILTER (!regex(?stt_value,\"^\\\\[noise\\\\]\"))\n" +
+            "}\n" +
+            "GROUP BY ?group\n" +
+            "ORDER BY mm:getStart(?timestamp)";
 
     private static String queryFaces = "PREFIX dct: <http://purl.org/dc/terms/>\n" +
             "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
