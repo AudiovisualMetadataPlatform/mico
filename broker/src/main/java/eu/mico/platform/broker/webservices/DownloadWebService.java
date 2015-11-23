@@ -42,19 +42,19 @@ public class DownloadWebService {
     @Path("{item}/{part}.png")
     @Produces("image/png")
     public File downloadPng(@PathParam("item")String item, @PathParam("part")String part) throws IOException, URISyntaxException, RepositoryException {
-        return createResponse(item,part,"png");
+        return createResponse(item,part,".png");
     }
     @GET
     @Path("{item}/{part}.jpg")
     @Produces("image/jpeg")
     public File downloadJpg(@PathParam("item")String item, @PathParam("part")String part) throws IOException, URISyntaxException, RepositoryException {
-        return createResponse(item,part,"jpg");
+        return createResponse(item,part,".jpg");
     }
     @GET
     @Path("{item}/{part}.mp4")
     @Produces("video/mp4")
     public File downloadMp4(@PathParam("item")String item, @PathParam("part")String part) throws IOException, URISyntaxException, RepositoryException {
-        return createResponse(item,part,"mp4");
+        return createResponse(item,part,".mp4");
     }
 
     private File createResponse(String item, String part, String suffix) throws IOException, URISyntaxException, RepositoryException {
