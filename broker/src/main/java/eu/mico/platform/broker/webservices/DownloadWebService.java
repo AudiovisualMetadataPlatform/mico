@@ -11,10 +11,7 @@ import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
@@ -42,16 +39,28 @@ public class DownloadWebService {
     }
 
     @GET
-    @Path("{item}/{part}.{suffix}")
-    public Response download(@PathParam("item")String item, @PathParam("part")String part, @PathParam("suffix")String suffix) throws IOException, URISyntaxException, RepositoryException {
+    @Path("{item}/{part}.png")
+    @Produces("image/png")
+    public File downloadPng(@PathParam("item")String item, @PathParam("part")String part) throws IOException, URISyntaxException, RepositoryException {
+        return createResponse(item,part,"png");
+    }
+    @GET
+    @Path("{item}/{part}.jpg")
+    @Produces("image/jpeg")
+    public File downloadJpg(@PathParam("item")String item, @PathParam("part")String part) throws IOException, URISyntaxException, RepositoryException {
+        return createResponse(item,part,"jpg");
+    }
+    @GET
+    @Path("{item}/{part}.mp4")
+    @Produces("video/mp4")
+    public File downloadMp4(@PathParam("item")String item, @PathParam("part")String part) throws IOException, URISyntaxException, RepositoryException {
+        return createResponse(item,part,"mp4");
+    }
 
+    private File createResponse(String item, String part, String suffix) throws IOException, URISyntaxException, RepositoryException {
         //read file
         File file = File.createTempFile(item+part,suffix);
         file.deleteOnExit();
-
-        String contentType = Files.probeContentType(file.toPath());
-
-        logger.info("return {} for item {} and part {}" );
 
         PersistenceService ps = eventManager.getPersistenceService();
 
@@ -68,15 +77,7 @@ public class DownloadWebService {
         FileOutputStream fileOutputStream = new FileOutputStream(file);
         IOUtils.copy(part_o.getInputStream(),fileOutputStream);
 
-        Response response = Response.ok().entity(file).build();
-
-        if(contentType != null) {
-            response.getHeaders().put("Content-Type", Collections.<Object>singletonList(contentType));
-        } else {
-            response.getHeaders().put("Content-Type", Collections.<Object>singletonList(MediaType.APPLICATION_OCTET_STREAM));
-        }
-
-        return response;
+        return file;
     }
 
     private URI getURI(String baseURL, String extraPath) throws URISyntaxException {
