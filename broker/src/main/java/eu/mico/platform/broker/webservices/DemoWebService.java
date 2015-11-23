@@ -403,7 +403,7 @@ public class DemoWebService {
             "PREFIX fam: <http://vocab.fusepool.info/fam#>\n" +
             "\n" +
             "SELECT (group_concat(?stt_value;separator=\" \") AS ?text) ((?group)*3 AS ?start) ((?group+1)*3 AS ?end) WHERE {\n" +
-            "  <http://demo3.mico-project.eu:8080/marmotta/9bdc7ab6-d970-4d47-8cba-258ff5cf27af>\n" +
+            "  <%s>\n" +
             "  mico:hasContentPart ?cp .\n" +
             "  ?cp mico:hasContent ?stt_annot .\n" +
             "  ?stt_annot oa:hasBody ?stt_body .\n" +
