@@ -73,7 +73,6 @@ public class MICOBrokerApplication extends Application {
             services = new HashSet<>();
             services.add(new StatusWebService(broker));
             services.add(new InjectionWebService(manager));
-            services.add(new DownloadWebService(manager,marmottaBaseUri));
             services.add(new TextAnalysisWebService(manager, broker, marmottaBaseUri));
             services.add(new AnimalDetectionWebService(manager, broker, marmottaBaseUri));
             services.add(new ContentWebService(manager, broker, marmottaBaseUri));
