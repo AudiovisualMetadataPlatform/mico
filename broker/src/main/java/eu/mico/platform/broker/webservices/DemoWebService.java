@@ -229,7 +229,9 @@ public class DemoWebService {
                 final ContentItem ci = injectContentItem(mediaType, istream, filename);
 
                 //start Thread
+                log.info("Send email: {}", email != null);
                 if(email != null) {
+                    log.info("Start email thread for {}", email);
                     EmailThread emailThread = new EmailThread(email,filename,broker,ci);
                     emailThread.run();
                 }
@@ -441,10 +443,10 @@ public class DemoWebService {
             "  ?cp mico:hasContent ?annot .\n" +
             "  ?annot oa:hasBody ?body .\n" +
             "  ?annot oa:hasTarget ?tgt .\n" +
-            "  ?tgt  mico:hasLocation ?location .\n" +
             "  ?tgt  oa:hasSelector ?fs .\n" +
             "  ?fs rdf:value ?timestamp .\n" +
             "  ?cp dct:type ?type\n" +
+            "  BIND (uri(concat(replace(str(?cp),'marmotta','resource'),'.png')) AS ?location)" +
             "  FILTER EXISTS {?body rdf:type mico:TVSShotBoundaryFrameBody .\n" +
             "                 ?cp dct:type \"image/png\"}\n" +
             "} ORDER BY mm:getStart(?timestamp)";

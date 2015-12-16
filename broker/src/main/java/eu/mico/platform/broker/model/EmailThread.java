@@ -24,6 +24,7 @@ public class EmailThread extends Thread {
     private String ciName;
 
     public EmailThread(String email, String ciName, MICOBroker broker, ContentItem contentItem) {
+        super();
         this.email = email;
         this.broker = broker;
         this.contentItem = contentItem;
@@ -32,7 +33,6 @@ public class EmailThread extends Thread {
     }
 
     public void run() {
-
         try {
             EmailService.sendEmail(email, "Analysis started", "Hi!\n\nThanks for testing Mico Analysis. As soon as the analysis for '%s' has been finished, we will inform you via email!\n\nYour Mico team", ciName);
 
