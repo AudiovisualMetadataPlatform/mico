@@ -2,30 +2,20 @@ package eu.mico.platform.broker.webservices;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import com.sun.jersey.core.header.FormDataContentDisposition;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.model.ContentItemState;
 import eu.mico.platform.broker.model.EmailThread;
-import eu.mico.platform.broker.model.ServiceGraph;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.impl.MarmottaContentItem;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
-import eu.mico.platform.uc.zooniverse.model.TextAnalysisInput;
-import eu.mico.platform.uc.zooniverse.model.TextAnalysisOutput;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.apache.http.client.utils.URIBuilder;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.query.BindingSet;
@@ -36,10 +26,7 @@ import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -47,9 +34,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -115,7 +102,7 @@ public class DemoWebService {
 
             String filename = getFileName(headers, mediaType);
 
-            return createImageResult(mediaType, istream, filename);
+            return createImageResult(mediaType.toString(), istream, filename);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -123,7 +110,7 @@ public class DemoWebService {
         }
     }
 
-    private Response createImageResult(MediaType mediaType, InputStream istream, String filename) throws Exception {
+    private Response createImageResult(String mediaType, InputStream istream, String filename) throws Exception {
         try {
             final ContentItem ci = injectContentItem(mediaType, istream, filename);
 
@@ -162,20 +149,19 @@ public class DemoWebService {
     @Path("/imageurl")
     @Produces("application/json")
     public Response uploadImageFromURL(@QueryParam("url")String urlString) {
-        //simple mimetype check (TODO extend)
-        MediaType mediaType;
-        if(urlString.endsWith(".png")) {
-            mediaType = new MediaType("image","png");
-        } else if(urlString.endsWith(".jpg")) {
-            mediaType = new MediaType("image","jpeg");
-        } else {
-            return Response.status(400).entity("Media type cannot be determined or is not acceptable").build();
-        }
 
         try {
             URL url = new URL(urlString);
-            String filename = Paths.get(url.toURI()).getFileName().toString();
-            return createImageResult(mediaType, url.openStream(), filename);
+            java.nio.file.Path path = Paths.get(url.toURI());
+
+            String filename = path.getFileName().toString();
+            String type = Files.probeContentType(path);
+
+            if(!type.equals("image/png") && !type.equals("image/jpeg")) {
+                return Response.status(400).entity("Media type cannot be determined or is not acceptable").build();
+            }
+
+            return createImageResult(type, url.openStream(), filename);
         } catch (MalformedURLException e) {
             return Response.status(400).entity("Url is not valid").build();
         } catch (Exception e) {
@@ -183,11 +169,11 @@ public class DemoWebService {
         }
     }
 
-    private ContentItem injectContentItem(MediaType mediaType, InputStream istream, String filename) throws RepositoryException, IOException {
+    private ContentItem injectContentItem(String mediaType, InputStream istream, String filename) throws RepositoryException, IOException {
         final ContentItem ci = persistenceService.createContentItem();
 
         final Content contentPart = ci.createContentPart();
-        contentPart.setType(mediaType.toString());
+        contentPart.setType(mediaType);
         contentPart.setProperty(DCTERMS.TITLE, filename);
         contentPart.setRelation(DCTERMS.CREATOR, new URIImpl(INJECTOR));
         contentPart.setProperty(DCTERMS.CREATED, ISO8601FORMAT.format(new Date()));
@@ -260,7 +246,7 @@ public class DemoWebService {
             String filename = getFileName(headers, mediaType);
 
             try {
-                final ContentItem ci = injectContentItem(mediaType, istream, filename);
+                final ContentItem ci = injectContentItem(mediaType.toString(), istream, filename);
 
                 //start Thread
                 log.info("Send email: {}", email != null);
