@@ -15,6 +15,7 @@ import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
 import eu.mico.platform.uc.zooniverse.model.TextAnalysisInput;
 import eu.mico.platform.uc.zooniverse.model.TextAnalysisOutput;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -44,7 +46,10 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.*;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -110,42 +115,71 @@ public class DemoWebService {
 
             String filename = getFileName(headers, mediaType);
 
-            try {
-                final ContentItem ci = injectContentItem(mediaType, istream, filename);
-
-                //test if it is still in progress
-                long start = System.currentTimeMillis();
-
-                ContentItemState state = broker.getStates().get(ci.getURI().stringValue());
-
-                while (state == null || !state.isFinalState()) {
-
-                    if(System.currentTimeMillis() > start+timeout) {
-                        return Response.status(408).entity("Image took to long to compute").build();
-                    }
-
-                    Thread.sleep(timestep);
-
-                    state = broker.getStates().get(ci.getURI().stringValue());
-                }
-
-                Object result = createImageResult(ci.getURI().stringValue());
-
-                return Response.status(Response.Status.CREATED)
-                        .entity(ImmutableMap.of("id", ci.getID(), "uri", ci.getURI().stringValue(), "result", result, "status", "done"))
-                        .build();
-            } catch (RepositoryException | IOException e) {
-                log.error("Could not create ContentItem");
-                throw new Exception(e);
-            } catch (InterruptedException e) {
-                log.error("Some wired threat interrupt");
-                Thread.currentThread().interrupt();
-                throw new Exception(e);
-            }
+            return createImageResult(mediaType, istream, filename);
 
         } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().entity(e).build();
+        }
+    }
+
+    private Response createImageResult(MediaType mediaType, InputStream istream, String filename) throws Exception {
+        try {
+            final ContentItem ci = injectContentItem(mediaType, istream, filename);
+
+            //test if it is still in progress
+            long start = System.currentTimeMillis();
+
+            ContentItemState state = broker.getStates().get(ci.getURI().stringValue());
+
+            while (state == null || !state.isFinalState()) {
+
+                if(System.currentTimeMillis() > start+timeout) {
+                    return Response.status(408).entity("Image took to long to compute").build();
+                }
+
+                Thread.sleep(timestep);
+
+                state = broker.getStates().get(ci.getURI().stringValue());
+            }
+
+            Object result = createImageResult(ci.getURI().stringValue());
+
+            return Response.status(Response.Status.CREATED)
+                    .entity(ImmutableMap.of("id", ci.getID(), "uri", ci.getURI().stringValue(), "result", result, "status", "done"))
+                    .build();
+        } catch (RepositoryException | IOException e) {
+            log.error("Could not create ContentItem");
+            throw new Exception(e);
+        } catch (InterruptedException e) {
+            log.error("Some wired threat interrupt");
+            Thread.currentThread().interrupt();
+            throw new Exception(e);
+        }
+    }
+
+    @POST
+    @Path("/imageurl")
+    @Produces("application/json")
+    public Response uploadImageFromURL(@QueryParam("url")String urlString) {
+        //simple mimetype check (TODO extend)
+        MediaType mediaType;
+        if(urlString.endsWith(".png")) {
+            mediaType = new MediaType("image","png");
+        } else if(urlString.endsWith(".jpg")) {
+            mediaType = new MediaType("image","jpeg");
+        } else {
+            return Response.status(400).entity("Media type cannot be determined or is not acceptable").build();
+        }
+
+        try {
+            URL url = new URL(urlString);
+            String filename = Paths.get(url.toURI()).getFileName().toString();
+            return createImageResult(mediaType, url.openStream(), filename);
+        } catch (MalformedURLException e) {
+            return Response.status(400).entity("Url is not valid").build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Cannot read file").build();
         }
     }
 
