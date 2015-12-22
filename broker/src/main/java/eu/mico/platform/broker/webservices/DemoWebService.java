@@ -253,7 +253,7 @@ public class DemoWebService {
                 if(email != null) {
                     log.info("Start email thread for {}", email);
                     EmailThread emailThread = new EmailThread(email,filename,broker,ci);
-                    emailThread.run();
+                    emailThread.start();
                 }
 
                 return Response.status(Response.Status.CREATED)

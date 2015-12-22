@@ -34,19 +34,19 @@ public class EmailThread extends Thread {
 
     public void run() {
         try {
-            EmailService.sendEmail(email, "Analysis started", "Hi!\n\nThanks for testing Mico Analysis. As soon as the analysis for '%s' has been finished, we will inform you via email!\n\nYour Mico team", ciName);
+            EmailService.sendEmail(email, "Analysis started", "Hi!\n\nThanks for testing MICO Analysis. As soon as the analysis for '%s' has been finished, we will inform you via email!\n\nYour MICO team", ciName);
 
-            while(start + timeout < System.currentTimeMillis()) {
+            while(start + timeout > System.currentTimeMillis()) {
 
                 ContentItemState state = broker.getStates().get(contentItem.getURI().stringValue());
                 if(state != null && state.isFinalState()) {
-                    EmailService.sendEmail(email, "Analysis finished", "Hi!\n\nThe analysis for '%s' has been finished. You can get your results here:\n\nhttp://demo3.mico-project.eu/demo/#/video?uri=%s\n\nYour Mico team", ciName, contentItem.getURI().stringValue());
+                    EmailService.sendEmail(email, "Analysis finished", "Hi!\n\nThe analysis for '%s' has been finished. You can get your results here:\n\nhttp://demo3.mico-project.eu/#/video?uri=%s\n\nYour MICO team", ciName, contentItem.getURI().stringValue());
                     return;
                 }
                 sleep(timestep);
             }
 
-            EmailService.sendEmail(email, "Analysis error", "Hi!\n\nWe are sorry, but the analysis for '%s' run into a timeout. Please try another video!\n\nYour Mico team", ciName);
+            EmailService.sendEmail(email, "Analysis error", "Hi!\n\nWe are sorry, but the analysis for '%s' run into a timeout. Please try another video!\n\nYour MICO team", ciName);
 
         } catch (EmailException e) {
             e.printStackTrace();
