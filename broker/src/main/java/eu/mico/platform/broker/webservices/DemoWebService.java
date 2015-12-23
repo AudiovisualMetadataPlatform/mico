@@ -12,6 +12,14 @@ import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.openrdf.model.URI;
@@ -26,17 +34,17 @@ import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.ws.rs.*;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -60,16 +68,25 @@ public class DemoWebService {
         ISO8601FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
+    private static final MimetypesFileTypeMap mimetypesMap = new MimetypesFileTypeMap();
+
     private final EventManager eventManager;
     private final MICOBroker broker;
     private final String marmottaBaseUri;
     private final PersistenceService persistenceService;
+    private final CloseableHttpClient httpClient;
 
     public DemoWebService(EventManager eventManager, MICOBroker broker, String marmottaBaseUri) {
         this.eventManager = eventManager;
         this.broker = broker;
         this.marmottaBaseUri = marmottaBaseUri;
         this.persistenceService = eventManager.getPersistenceService();
+        this.httpClient = HttpClientBuilder.create()
+                .setUserAgent("MicoPlatform (ZooniverseWebService)")
+                .build();
+
+        mimetypesMap.addMimeTypes("image/jpeg jpeg jpg");
+        mimetypesMap.addMimeTypes("image/png png");
     }
 
     private static final URI ExtractorURI = new URIImpl("http://www.mico-project.eu/services/ner-text");
@@ -98,7 +115,7 @@ public class DemoWebService {
             Preconditions.checkArgument(mediaType.isCompatible(MediaType.valueOf("image/*")), "Only type image/* is supported");
 
             // Handle the body of that part with an InputStream
-            InputStream istream = inputPart.getBody(InputStream.class,null);
+            InputStream istream = inputPart.getBody(InputStream.class, null);
 
             String filename = getFileName(headers, mediaType);
 
@@ -148,25 +165,72 @@ public class DemoWebService {
     @POST
     @Path("/imageurl")
     @Produces("application/json")
-    public Response uploadImageFromURL(@QueryParam("url")String urlString) {
-
+    public Response uploadImageFromURL(@QueryParam("url") final java.net.URI imageUrl) {
         try {
-            URL url = new URL(urlString);
-            java.nio.file.Path path = Paths.get(url.toURI());
-
-            String filename = path.getFileName().toString();
-            String type = Files.probeContentType(path);
-
-            if(!type.equals("image/png") && !type.equals("image/jpeg")) {
-                return Response.status(400).entity("Media type cannot be determined or is not acceptable").build();
+            if (!(imageUrl.getScheme().equalsIgnoreCase("http") || imageUrl.getScheme().equalsIgnoreCase("https")) ||
+                    isPrivateHost(imageUrl.getHost()) ||
+                    !(imageUrl.getPort() == -1 || imageUrl.getPort() == 80 || imageUrl.getPort() == 443))
+            {
+                throw new ClientProtocolException(String.format("Invalid URL scheme (%s), host (%s) or port (%s)", imageUrl.getScheme(), imageUrl.getHost(), imageUrl.getPort()));
             }
 
-            return createImageResult(type, url.openStream(), filename);
-        } catch (MalformedURLException e) {
-            return Response.status(400).entity("Url is not valid").build();
-        } catch (Exception e) {
-            return Response.status(500).entity("Cannot read file").build();
+            final HttpGet request = new HttpGet(imageUrl);
+            return httpClient.execute(request, new ResponseHandler<Response>() {
+                @Override
+                public Response handleResponse(HttpResponse httpResponse) throws IOException {
+                    final StatusLine statusLine = httpResponse.getStatusLine();
+                    if (statusLine.getStatusCode() == 200) {
+                        final Header cType = httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+                        final MediaType type;
+                        if (cType != null && !MediaType.valueOf(cType.getValue()).equals(MediaType.APPLICATION_OCTET_STREAM_TYPE)) {
+                            type = MediaType.valueOf(cType.getValue());
+                        } else {
+                            type = MediaType.valueOf(mimetypesMap.getContentType(imageUrl.getPath()));
+                        }
+
+                        Header size = httpResponse.getFirstHeader(HttpHeaders.CONTENT_LENGTH);
+                        if (size == null || Integer.parseInt(size.getValue()) > 10 * 1024 * 1024) {
+                            throw new ClientProtocolException("Content-length not set or maximum image size exceeded.");
+                        }
+
+                        if (type.toString().equalsIgnoreCase("image/jpeg") || mimetypesMap.toString().equalsIgnoreCase("image/png")) {
+                            try (InputStream is = httpResponse.getEntity().getContent()) {
+                                return createImageResult(type.toString(), is, imageUrl.getPath());
+                            } catch (Exception e) {
+                                throw new ClientProtocolException(e.getMessage());
+                            }
+
+                        } else if (type != null) {
+                            throw new ClientProtocolException(String.format("Invalid MIME type %s of remote resource %s", type.toString(), imageUrl));
+                        } else {
+                            throw new ClientProtocolException("Could not determine MIME of remote resource " + imageUrl);
+                        }
+                    }
+
+                    throw new ClientProtocolException(String.format("HTTP-%d: %s", statusLine.getStatusCode(), statusLine.getReasonPhrase()));
+                }
+            });
+        } catch (ClientProtocolException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
+        } catch (IOException e) {
+            log.error("Could not fetch image to create content item");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
+
         }
+    }
+
+    private boolean isPrivateHost(String host) throws UnknownHostException {
+        InetAddress addr = InetAddress.getByName(host);
+        if (addr.isMulticastAddress() ||
+                addr.isAnyLocalAddress() ||
+                addr.isLoopbackAddress() ||
+                addr.isLinkLocalAddress() ||
+                addr.isSiteLocalAddress()) {
+            return true;
+        }
+        return false;
     }
 
     private ContentItem injectContentItem(String mediaType, InputStream istream, String filename) throws RepositoryException, IOException {
