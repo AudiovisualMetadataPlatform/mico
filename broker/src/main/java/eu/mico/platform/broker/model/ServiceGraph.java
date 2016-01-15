@@ -15,6 +15,7 @@ package eu.mico.platform.broker.model;
 
 import eu.mico.platform.broker.exception.StateNotFoundException;
 import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DirectedPseudograph;
 import org.openrdf.model.URI;
 
 import java.util.HashMap;
@@ -39,7 +40,7 @@ import java.util.Set;
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
-public class ServiceGraph extends DefaultDirectedGraph<TypeDescriptor,ServiceDescriptor> {
+public class ServiceGraph extends DirectedPseudograph<TypeDescriptor,ServiceDescriptor> {
 
     private Map<URI,ServiceDescriptor> services;
 

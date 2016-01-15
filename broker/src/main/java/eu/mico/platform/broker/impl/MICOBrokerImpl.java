@@ -286,9 +286,8 @@ public class MICOBrokerImpl implements MICOBroker {
                 TypeDescriptor tin = new TypeDescriptor(registrationEvent.getRequires());
                 TypeDescriptor tout = new TypeDescriptor(registrationEvent.getProvides());
 
-                if (!dependencies.containsEdge(svc)) {
+                if (!dependencies.containsEdge(svc) && dependencies.addEdge(tin, tout, svc)) {
                     log.info("- adding service {} to dependency graph, as it does not exist yet", svc.getUri());
-                    dependencies.addEdge(tin, tout, svc);
                 } else {
                     log.info("- not adding service {} to dependency graph, it already exists", svc.getUri());
                 }
