@@ -50,6 +50,14 @@ namespace mico {
             * @return URL type.
             */
             static URLType getType(url_components url);
+
+            /*
+            * Removes double occurrences of slashes from string
+            *
+            * @param path The path to fix
+            * @return Fixed path
+            */
+            static std::string fixPath(const std::string& path);
         }
 
         /**
@@ -91,3 +99,4 @@ namespace mico {
 }
 
 #endif
+

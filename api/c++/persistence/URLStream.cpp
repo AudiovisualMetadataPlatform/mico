@@ -42,12 +42,14 @@ namespace mico {
 
             switch (url_type) {
                 case URL_TYPE_FILE:
-                    return new FileOStream(url_parsed.path.c_str());
+                    return new FileOStream(fixPath(url_parsed.path).c_str());
                 case URL_TYPE_HTTP:
                 case URL_TYPE_FTP:
                     return new WebOStreambuf(url);
                 case URL_TYPE_HDFS:
                     return new HDFSOStream(url_parsed.path.c_str(), url_parsed.host.c_str(), url_parsed.port);
+                case URL_TYPE_UNKNOWN:
+                    break;
             }
             throw std::string("Invalid URL: ") + url;
         }
@@ -66,18 +68,29 @@ namespace mico {
 
             switch (url_type) {
                 case URL_TYPE_FILE:
-                    return new FileIStream(url_parsed.path.c_str());
+                    return new FileIStream(fixPath(url_parsed.path).c_str());
                 case URL_TYPE_HTTP:
                 case URL_TYPE_FTP:
                     return new WebIStreambuf(url);
                 case URL_TYPE_HDFS:
                     return new HDFSIStream(url_parsed.path.c_str(), url_parsed.host.c_str(), url_parsed.port);
+                case URL_TYPE_UNKNOWN:
+                    break;
             }
             throw std::string("Invalid URL: ") + url;
         }
 
 
         namespace {
+            std::string fixPath(const std::string& path) {
+                std::string p = std::string(path);
+                std::size_t pos;
+                while((pos = p.find("//")) != std::string::npos) {
+                    p.erase(pos, 1);
+                }
+                return p;
+            }
+
             URLType getType(url_components url) {
                 std::string scheme = url.scheme;
                 std::transform(scheme.begin(), scheme.end(), scheme.begin(), ::tolower);
@@ -144,13 +157,15 @@ namespace mico {
 
             switch (url_type) {
                 case URL_TYPE_FILE:
-                    return removeLocalFile(url_parsed.path.c_str());
+                    return removeLocalFile(fixPath(url_parsed.path).c_str());
                 case URL_TYPE_HTTP:
                     throw std::string("remove not supported for HTTP(S): ") + url;
                 case URL_TYPE_FTP:
                     return removeFtpFile(url_parsed.path.c_str());
                 case URL_TYPE_HDFS:
                     return removeHdfsFile(url_parsed.path.c_str());
+                case URL_TYPE_UNKNOWN:
+                    break;
             }
             throw std::string("Invalid URL: ") + url;
         }

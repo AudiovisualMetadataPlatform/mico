@@ -30,6 +30,7 @@ namespace mico {
             mkdirs(path);
             open(path, std::ios::out);
             //close gets called by the destructor of the parent class.
+            chmod(path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
         }
 
         int removeLocalFile(const char* path) {
@@ -56,7 +57,7 @@ namespace mico {
                         // create directory
                         if(last) {
                             if(chdir(last) != 0) {
-                                if(mkdir(last,S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+                                if(mkdir(last, S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
                                     LOG_ERROR("could not create directory %s, exiting!", _path);
                                     exit(1);
                                 }
@@ -76,3 +77,4 @@ namespace mico {
         }
     }
 }
+
