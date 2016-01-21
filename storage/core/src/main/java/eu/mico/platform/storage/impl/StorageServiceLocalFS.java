@@ -26,8 +26,13 @@ public class StorageServiceLocalFS implements StorageService {
         if (file == null)
             return null;
         File parentDir = file.getParentFile();
-        if (!parentDir.exists())
+        if (!parentDir.exists()) {
             parentDir.mkdirs();
+            //grant read and write permissions for the directory to every user
+            parentDir.setReadable(true, false);
+            parentDir.setWritable(true, false);
+            parentDir.setExecutable(true, false);
+        }
         return new FileOutputStream(file);
     }
 
@@ -61,6 +66,9 @@ public class StorageServiceLocalFS implements StorageService {
         File file = basePath.resolve(path + ".bin").normalize().toFile();
         if (!file.toPath().startsWith(basePath))
             return null;
+        file.setReadable(true, false);    //everybody can read
+        file.setWritable(true, true);     //owner can write
+        file.setExecutable(false, false); //no one can execute
         return file;
     }
 }

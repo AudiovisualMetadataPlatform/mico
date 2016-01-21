@@ -53,7 +53,13 @@ public class MICOBrokerApplication extends Application {
         String user = context.getInitParameter("mico.user") != null ? context.getInitParameter("mico.user") : "mico";
         String pass = context.getInitParameter("mico.pass") != null ? context.getInitParameter("mico.pass") : "mico";
         String marmottaBaseUri = context.getInitParameter("mico.marmottaBaseUri") != null ? context.getInitParameter("mico.marmottaBaseUri") : "http://mico-platform:8080/marmotta";
-        String storageBaseUri = context.getInitParameter("mico.storageBaseUri") != null ? context.getInitParameter("mico.storageBaseUri") : "hdfs://mico-platform/";
+        while (marmottaBaseUri.endsWith("/")) {
+            marmottaBaseUri = marmottaBaseUri.substring(0, marmottaBaseUri.length()-1);
+        }
+        String storageBaseUri = context.getInitParameter("mico.storageBaseUri") != null ? context.getInitParameter("mico.storageBaseUri") : "file:///data";
+        while (storageBaseUri.endsWith("/")) {
+            storageBaseUri = storageBaseUri.substring(0, storageBaseUri.length()-1);
+        }
 
         if("localhost".equals(host)) {
             try {
