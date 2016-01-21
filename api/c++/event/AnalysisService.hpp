@@ -9,6 +9,7 @@
 namespace mico {
     namespace event {
 
+        class AnalysisResponse; //class forward declaration
         /**
         * Interface to be implemented by services. Consists of some informational methods as well as a callback which is called
         * whenever a new event for this service has been received.
@@ -16,6 +17,7 @@ namespace mico {
         * @author Sebastian Schaffert (sschaffert@apache.org)
         */
         class AnalysisService {
+
         protected:
             mico::rdf::model::URI serviceID;
             std::string provides;
@@ -76,8 +78,7 @@ namespace mico {
             * @param ci     the content item to analyse
             * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
             */
-            virtual void call(std::function<void(const mico::persistence::ContentItem& ci, const mico::rdf::model::URI& object)> resp, mico::persistence::ContentItem& ci, mico::rdf::model::URI& object) = 0;
-
+            virtual void call(mico::event::AnalysisResponse& response, mico::persistence::ContentItem& ci, mico::rdf::model::URI& object) = 0;
         };
 
     }

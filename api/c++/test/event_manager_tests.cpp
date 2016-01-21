@@ -70,11 +70,11 @@ public:
      * @param ci     the content item to analyse
      * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
      */
-    void call(std::function<void(const ContentItem& ci, const URI& object)> resp, ContentItem& ci, URI& object) {
+    void call(AnalysisResponse& resp, ContentItem& ci, URI& object) {
 		std::cout << "analysis callback of mock service " << serviceID.stringValue() << " called!" << std::endl;
 		Content* c = ci.createContentPart();
 		c->setType(getProvides());
-		resp(ci,c->getURI());		
+    resp.sendFinish(ci,c->getURI());
 		called = true;
 	};
 	

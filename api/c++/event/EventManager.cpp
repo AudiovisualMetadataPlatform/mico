@@ -175,6 +175,78 @@ namespace mico {
             }
         };
 
+        void AnalysisResponse::sendFinish(const ContentItem& ci, const URI& object) {
+          LOG_INFO("AnalysisResponse:sendFinish to queue %s", m_message.replyTo().c_str());
+          mico::event::model::AnalysisEvent event;
+          event.set_contentitemuri(ci.getURI().stringValue());
+          event.set_objecturi(object.stringValue());
+          event.set_serviceid(m_service.getServiceID().stringValue());
+          event.set_type(::mico::event::model::MessageType::FINISH);
+
+          char buffer[event.ByteSize()];
+          event.SerializeToArray(buffer, event.ByteSize());
+
+          AMQP::Envelope data(buffer, event.ByteSize());
+          data.setCorrelationID(m_message.correlationID());
+
+          m_channel->publish("", m_message.replyTo(), data);
+        }
+
+        void AnalysisResponse::sendErrorMessage(const ContentItem& ci, const URI& object, const std::string& msg)
+        {
+          LOG_INFO("AnalysisResponse:sendErrorMessage: \"%s\" to queue %s",msg.c_str(), m_message.replyTo().c_str());
+          mico::event::model::AnalysisEvent event;
+          event.set_contentitemuri(ci.getURI().stringValue());
+          event.set_objecturi(object.stringValue());
+          event.set_serviceid(m_service.getServiceID().stringValue());
+          event.set_type(::mico::event::model::MessageType::ERROR);
+          event.set_message(msg);
+
+          char buffer[event.ByteSize()];
+          event.SerializeToArray(buffer, event.ByteSize());
+
+          AMQP::Envelope data(buffer, event.ByteSize());
+          data.setCorrelationID(m_message.correlationID());
+
+          m_channel->publish("", m_message.replyTo(), data);
+        }
+
+        void AnalysisResponse::sendProgress(const ContentItem& ci, const URI& object, const float& progress)
+        {
+          LOG_INFO("AnalysisResponse:sendProgress: %f to queue %s", progress, m_message.replyTo().c_str());
+          mico::event::model::AnalyzeProgress event;
+          event.set_contentitemuri(ci.getURI().stringValue());
+          event.set_objecturi(object.stringValue());
+          event.set_serviceid(m_service.getServiceID().stringValue());
+          event.set_type(::mico::event::model::MessageType::PROGRESS);
+          event.set_progress(progress);
+
+          char buffer[event.ByteSize()];
+          event.SerializeToArray(buffer, event.ByteSize());
+
+          AMQP::Envelope data(buffer, event.ByteSize());
+          data.setCorrelationID(m_message.correlationID());
+
+          m_channel->publish("", m_message.replyTo(), data);
+        }
+
+        void AnalysisResponse::sendNew(const ContentItem& ci, const URI& object) {
+          LOG_INFO("AnalysisResponse:sendNew to queue %s", m_message.replyTo().c_str());
+          mico::event::model::AnalysisEvent event;
+          event.set_contentitemuri(ci.getURI().stringValue());
+          event.set_objecturi(object.stringValue());
+          event.set_serviceid(m_service.getServiceID().stringValue());
+          event.set_type(::mico::event::model::MessageType::NEW_PART);
+
+          char buffer[event.ByteSize()];
+          event.SerializeToArray(buffer, event.ByteSize());
+
+          AMQP::Envelope data(buffer, event.ByteSize());
+          data.setCorrelationID(m_message.correlationID());
+
+          m_channel->publish("", m_message.replyTo(), data);
+        }
+
         class AnalysisConsumer : public Consumer {
             friend class EventManager;
 
@@ -209,26 +281,13 @@ namespace mico {
                 mico::event::model::AnalysisEvent event;
                 event.ParseFromArray(message.body(), message.bodySize());
 
-
                 LOG_DEBUG("received analysis event (content item %s, object %s, replyTo %s)", event.contentitemuri().c_str(), event.objecturi().c_str(), message.replyTo().c_str());
 
                 ContentItem *ci = (*persistence).getContentItem(URI(event.contentitemuri()));
                 URI object(event.objecturi());
+                AnalysisResponse response(this->service, message, channel);
 
-                service.call([this,&message](const ContentItem& ci, const URI& object) {
-                    mico::event::model::AnalysisEvent event;
-                    event.set_contentitemuri(ci.getURI().stringValue());
-                    event.set_objecturi(object.stringValue());
-                    event.set_serviceid(this->service.getServiceID().stringValue());
-
-                    char buffer[event.ByteSize()];
-                    event.SerializeToArray(buffer, event.ByteSize());
-
-                    AMQP::Envelope data(buffer, event.ByteSize());
-                    data.setCorrelationID(message.correlationID());
-
-                    this->channel->publish("", message.replyTo(), data);
-                }, *ci, object);
+                service.call( response, *ci, object);
 
                 channel->ack(deliveryTag);
 
@@ -515,7 +574,6 @@ namespace mico {
             this->channel->publish(EXCHANGE_SERVICE_REGISTRY, "", data);
 
         }
-
 
         /**
         * Unregister the service with the given ID.

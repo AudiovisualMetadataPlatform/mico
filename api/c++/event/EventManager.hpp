@@ -64,6 +64,21 @@ namespace mico {
             bool isFirstCall();
         };
 
+        class AnalysisResponse
+        {
+        private:
+          AnalysisService& m_service;
+          const AMQP::Message &m_message;
+          AMQP::Channel* m_channel;
+        public:
+          AnalysisResponse(AnalysisService& service, const AMQP::Message &message, AMQP::Channel* channel):
+            m_service(service), m_message(message), m_channel(channel) {}
+
+          void sendFinish(      const mico::persistence::ContentItem& ci, const mico::rdf::model::URI& object);
+          void sendErrorMessage(const mico::persistence::ContentItem& ci, const mico::rdf::model::URI& object, const std::string& msg);
+          void sendProgress(    const mico::persistence::ContentItem& ci, const mico::rdf::model::URI& object, const float& progress);
+          void sendNew(         const mico::persistence::ContentItem& ci, const mico::rdf::model::URI& object);
+        };
 
         /**
         * This exception is thrown by the event manager in case a method call failed.
@@ -219,7 +234,6 @@ namespace mico {
             * @throws IOException
             */
             void injectContentItem(const mico::persistence::ContentItem& item);
-
         };
 
     }

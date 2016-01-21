@@ -105,7 +105,7 @@ public:
     * @param ci     the content item to analyse
     * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
     */
-    void call(std::function<void(const ContentItem& ci, const URI& object)> resp, ContentItem& ci, URI& object) {
+    void call(AnalysisResponse& resp, ContentItem& ci, URI& object) {
         // retrieve the content part identified by the object URI
         Content* imgPart = ci.getContentPart(object);
 
@@ -135,8 +135,9 @@ public:
             *out << plainText;
             delete out;
 
-            // notify broker that we created a new content part by calling the callback function passed as argument
-            resp(ci, txtPart->getURI());
+            // notify broker that we created a new content part by calling functions from AnalysisResponse passed as argument
+            resp.sendNew(ci, txtPart->getURI());
+            resp.sendFinish(ci, object);
 
             // clean up
             delete imgPart;
