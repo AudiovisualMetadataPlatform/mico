@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DateFormatSymbols;
@@ -151,6 +152,10 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
                 try {
                     System.out.println("move file back to scr folder: " + source.getFileName());
                     Files.move(source, destPath.resolve(source.getFileName()));
+                } catch (FileAlreadyExistsException e){
+                    // file was not processed correctly and is still in source folder, 
+                    // remove the copy from processed folder
+                    f.delete();
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
