@@ -94,14 +94,19 @@ public class WordCountAnalyzer implements AnalysisService {
             Matcher m = p_wordcount.matcher(text);
 
             // we are progressing ... inform broker
-            analysisResponse.sendProgress(contentItem, uri, 50);
+            analysisResponse.sendProgress(contentItem, uri, 0.25f);
             if (debug == true) {
                 try {
-                    log.debug("debug is enabled, sleep 2 seconds and send next progress info");
-                    Thread.sleep(2000);
-                    analysisResponse.sendProgress(contentItem, uri, 75);
-                    log.debug("progress updated, sleep 2 seconds again");
-                    Thread.sleep(2000);
+                    log.debug("debug is enabled, sleep 5 seconds and send next progress info");
+                    Thread.sleep(5000);
+                    analysisResponse.sendProgress(contentItem, uri, 0.50f);
+                    Thread.sleep(5000);
+                    analysisResponse.sendProgress(contentItem, uri, 0.75f);
+                    analysisResponse.sendProgress(contentItem, uri, 0.76f);
+                    analysisResponse.sendProgress(contentItem, uri, 0.77f);
+                    analysisResponse.sendProgress(contentItem, uri, 0.78f);
+                    log.debug("... progress updated, sleep 5 seconds again");
+                    Thread.sleep(5000);
                 } catch (Exception e) {
                     log.warn(e.getMessage());
                 }
