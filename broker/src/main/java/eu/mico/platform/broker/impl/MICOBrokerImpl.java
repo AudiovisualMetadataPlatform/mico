@@ -419,12 +419,12 @@ public class MICOBrokerImpl implements MICOBroker {
         private void executeStateTransitions() throws IOException {
             log.info("looking for possible state transitions ...");
             if(state.isFinalState()) {
+                // send finish event
+                getChannel().basicPublish("", EventManager.QUEUE_CONTENT_OUTPUT, null, Event.ContentEvent.newBuilder().setContentItemUri(item.getURI().stringValue()).build().toByteArray());
+
                 synchronized (this) {
                     this.notifyAll();
                 }
-
-                // send finish event
-                getChannel().basicPublish("", EventManager.QUEUE_CONTENT_OUTPUT, null, Event.ContentEvent.newBuilder().setContentItemUri(item.getURI().stringValue()).build().toByteArray());
             } else {
                 for (Transition t : state.getPossibleTransitions()) {
                     log.debug("- transition: {}", t);
