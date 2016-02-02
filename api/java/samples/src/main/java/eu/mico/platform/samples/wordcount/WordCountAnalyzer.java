@@ -13,13 +13,17 @@
  */
 package eu.mico.platform.samples.wordcount;
 
+import eu.mico.platform.anno4j.model.impl.body.MultiMediaBody;
+import eu.mico.platform.anno4j.model.impl.micotarget.InitialTarget;
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
+import eu.mico.platform.persistence.metadata.MICOProvenance;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
+
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -126,7 +130,18 @@ public class WordCountAnalyzer implements AnalysisService {
 
             // add the wordcount as property
             result.setProperty(new URIImpl("http://www.mico-project.org/properties/wordcount"), Integer.toString(count));
+            
+            // add wordcount as Mico Annotation
+            MICOProvenance provenance = new MICOProvenance();
+            provenance.setExtractorName("http://www.mico-project.eu/broker/injection-web-service");
 
+            MultiMediaBody multiMediaBody = new MultiMediaBody();
+            multiMediaBody.setFormat("Mico:Wordcount");
+
+            InitialTarget target = new InitialTarget(uri.toString());
+
+            result.createAnnotation(multiMediaBody, null, provenance, target);
+            
             // report newly available results to broker
             analysisResponse.sendNew(contentItem, result.getURI());
 

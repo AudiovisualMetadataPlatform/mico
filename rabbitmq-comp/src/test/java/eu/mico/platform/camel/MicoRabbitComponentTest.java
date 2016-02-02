@@ -31,6 +31,9 @@ import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.repository.RepositoryException;
 
 import de.fraunhofer.idmt.camel.MicoCamel;
+import eu.mico.platform.anno4j.model.impl.body.MultiMediaBody;
+import eu.mico.platform.anno4j.model.impl.micotarget.InitialTarget;
+import eu.mico.platform.persistence.metadata.MICOProvenance;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import static eu.mico.platform.camel.MicoRabbitProducer.KEY_MICO_ITEM;
@@ -42,6 +45,7 @@ import static eu.mico.platform.camel.MicoRabbitProducer.KEY_MICO_PART;;
  */
 public class MicoRabbitComponentTest extends CamelTestSupport {
 
+    private static final String SAMPLE_PNG = "sample.png";
     private static final String TEST_DATA_FOLDER = "src/test/resources/data/";
     private static MicoCamel micoCamel;
     private static String textItemUri,textPartUri;
@@ -54,6 +58,7 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
     
 
 
+    @Ignore
     @Test(timeout=20000)
     public void testMicoRabbit() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result");
@@ -73,6 +78,19 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         mock.expectedMinimumMessageCount(1);       
 
         template.send("direct:image",createExchange(imageItemUri, imagePartUri));
+        assertMockEndpointsSatisfied();
+    }
+
+    /**
+     * @throws Exception
+     */
+    @Ignore // ignored, because a mico_wordcount must be connected to run this test
+    @Test(timeout=10000)
+    public void testTextRoute() throws Exception {
+        MockEndpoint mock = getMockEndpoint("mock:result_text");
+        mock.expectedMinimumMessageCount(1);       
+
+        template.send("direct:text",createExchange(textItemUri, textPartUri));
         assertMockEndpointsSatisfied();
     }
 
@@ -114,6 +132,12 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
                         .to("mico-comp:vbox1?host=mico-platform&user=mico&password=mico&serviceId=ocr-queue-png")
                         .to("mico-comp:vbox2?host=mico-platform&user=mico&password=mico&serviceId=wordcount")
                         .to("mock:result_image");
+            
+                from("direct:text")
+                .pipeline()
+                .to("mico-comp:vbox2?host=mico-platform&user=mico&password=mico&serviceId=wordcount")
+                .to("mock:result_text");
+
             }
         };
     }
@@ -133,8 +157,8 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         resetDataFolder();
 
         // remove test items from platform
-        micoCamel.deleteContentItem(textItemUri);
-        micoCamel.deleteContentItem(imageItemUri);
+        //micoCamel.deleteContentItem(textItemUri);
+        //micoCamel.deleteContentItem(imageItemUri);
 
         micoCamel.shutdown();
     }
@@ -180,12 +204,17 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         String content = "This is a sample text for testing ...";
         String type = "text/plain";
         Content part = micoCamel.addPart(content.getBytes(), type, item);
-        part.setRelation(DCTERMS.CREATOR, getServiceID());  // set the service ID as provenance information for the new content part
-        part.setRelation(DCTERMS.SOURCE, new URIImpl("file://test-data.txt"));              // set the analyzed content part as source for the new content part
-        part.setProperty(DCTERMS.CREATED, isodate.format(new Date())); // set the created date for the new content part
+        part.setProperty(DCTERMS.SOURCE, "file://test-data.txt");              // set the analyzed content part as source for the new content part
+        part.setType(type);
         
+        MultiMediaBody multiMediaBody = new MultiMediaBody();
+        multiMediaBody.setFormat(type);
+        InitialTarget target = new InitialTarget("test-data.txt");
+        part.createAnnotation(multiMediaBody, null, getProvenance(), target);
+
         textItemUri = item.getURI().toString();
         textPartUri = part.getURI().toString();
+        System.out.println("textPart: " + textPartUri);
     }
 
     /**
@@ -196,15 +225,22 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
      */
     private static void createImageItem() throws IOException, RepositoryException {
         ContentItem item = micoCamel.createItem();
-        InputStream content = new FileInputStream(TEST_DATA_FOLDER+"sample.png");
+        InputStream content = new FileInputStream(TEST_DATA_FOLDER+SAMPLE_PNG);
         String type = "image/png";
         Content part = micoCamel.addPart(IOUtils.toByteArray(content), type, item);
-        part.setRelation(DCTERMS.CREATOR, getServiceID());  // set the service ID as provenance information for the new content part
-        part.setRelation(DCTERMS.SOURCE, new URIImpl("file://sample.png"));              // set the analyzed content part as source for the new content part
+        part.setProperty(DCTERMS.SOURCE, "file://" + SAMPLE_PNG);              // set the analyzed content part as source for the new content part
         part.setProperty(DCTERMS.CREATED, isodate.format(new Date())); // set the created date for the new content part
-        
+        part.setType(type);
+
+        MultiMediaBody multiMediaBody = new MultiMediaBody();
+        multiMediaBody.setFormat(type);
+        InitialTarget target = new InitialTarget(SAMPLE_PNG);
+        part.createAnnotation(multiMediaBody, null, getProvenance(), target);
+
         imageItemUri = item.getURI().toString();
         imagePartUri = part.getURI().toString();
+        System.out.println("imageItem: " + imageItemUri);
+        System.out.println("imagePart: " + imagePartUri);
     }
     /**
      * create exchange containing item and part uri of sample/test content
@@ -223,6 +259,12 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         msg.setHeader(KEY_MICO_ITEM, itemUri);
         msg.setHeader(KEY_MICO_PART, partUri);
         return exchange;
+    }
+    
+    private static MICOProvenance getProvenance() {
+        MICOProvenance micoProvenance = new MICOProvenance();
+        micoProvenance.setExtractorName(getServiceID().toString());
+        return micoProvenance;
     }
     
 }

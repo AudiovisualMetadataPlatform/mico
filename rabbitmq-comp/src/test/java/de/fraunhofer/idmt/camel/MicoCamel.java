@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
