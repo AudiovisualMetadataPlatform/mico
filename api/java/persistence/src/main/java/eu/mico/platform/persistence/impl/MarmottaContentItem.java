@@ -29,8 +29,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 
 import static com.google.common.collect.ImmutableMap.of;
@@ -213,6 +215,8 @@ public class MarmottaContentItem implements ContentItem {
         } catch (UpdateExecutionException e) {
             log.error("the SPARQL update could not be executed:",e);
             throw new RepositoryException("the SPARQL update could not be executed",e);
+        } finally {
+            m.close();
         }
     }
 
@@ -244,6 +248,8 @@ public class MarmottaContentItem implements ContentItem {
         } catch (QueryEvaluationException e) {
             log.error("the SPARQL query could not be executed:",e);
             throw new RepositoryException("the SPARQL query could not be executed",e);
+        } finally {
+            m.close();
         }
     }
 
@@ -287,6 +293,8 @@ public class MarmottaContentItem implements ContentItem {
             throw new RepositoryException("the SPARQL update could not be executed",e);
         } catch (java.net.URISyntaxException e) {
             log.error("Failed removing content because of invalid URI: ", e);
+        } finally {
+            m.close();
         }
 
     }
@@ -308,7 +316,7 @@ public class MarmottaContentItem implements ContentItem {
     /**
      * Return an iterator over all content parts contained in this content item.
      *
-     * @return an iterable that (lazily) iterates over the content parts
+     * @return an iterable that (non-lazily) iterates over the content parts
      */
     @Override
     public Iterable<Content> listContentParts() throws RepositoryException {
@@ -317,47 +325,26 @@ public class MarmottaContentItem implements ContentItem {
 
         try {
             final TupleQueryResult r = m.query(createNamed("listContentParts", "ci", getURI().stringValue()));
-
-            return new Iterable<Content>() {
-                @Override
-                public Iterator<Content> iterator() {
-                    return new Iterator<Content>() {
-                        @Override
-                        public boolean hasNext() {
-                            try {
-                                return r.hasNext();
-                            } catch (QueryEvaluationException e) {
-                                return false;
-                            }
-                        }
-
-                        @Override
-                        public Content next() {
-                            try {
-                                BindingSet b = r.next();
-                                URI part = (URI) b.getValue("p");
-                                return new MarmottaContent(MarmottaContentItem.this, marmottaBase, storageHost, part);
-                            } catch (QueryEvaluationException e) {
-                                return null;
-                            }
-                        }
-
-                        @Override
-                        public void remove() {
-                            throw new UnsupportedOperationException("removing elements not supported");
-                        }
-                    };
+            List<Content> result = new ArrayList<Content>();
+            while (r.hasNext()) {
+                try {
+                    result.add(new MarmottaContent(this, marmottaBase, storageHost, (URI) r.next().getValue("p")));
+                } catch (QueryEvaluationException e) {
+                    result.add(null);
                 }
-            };
+            }
+            r.close();
 
+            return result;
         } catch (MalformedQueryException e) {
             log.error("the SPARQL query was malformed:", e);
             throw new RepositoryException("the SPARQL query was malformed",e);
         } catch (QueryEvaluationException e) {
             log.error("the SPARQL query could not be executed:", e);
             throw new RepositoryException("the SPARQL query could not be executed",e);
+        } finally {
+            m.close();
         }
-
     }
 
 

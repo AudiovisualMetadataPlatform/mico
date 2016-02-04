@@ -121,6 +121,8 @@ public class PersistenceServiceImpl implements PersistenceService {
         } catch (UpdateExecutionException e) {
             log.error("the SPARQL update could not be executed:",e);
             throw new RepositoryException("the SPARQL update could not be executed",e);
+        } finally {
+            m.close();
         }
     }
 
@@ -135,11 +137,9 @@ public class PersistenceServiceImpl implements PersistenceService {
     public ContentItem createContentItem(URI id) throws RepositoryException {
         ContentItem ci = new MarmottaContentItem(marmottaServerUrl,contentUrl,id);
 
-
         Metadata m = getMetadata();
         try {
             m.update(createNamed("createContentItem", of("g", marmottaServerUrl.toString(), "ci", ci.getURI().stringValue())));
-
             return ci;
         } catch (MalformedQueryException e) {
             log.error("the SPARQL update was malformed:",e);
@@ -147,6 +147,8 @@ public class PersistenceServiceImpl implements PersistenceService {
         } catch (UpdateExecutionException e) {
             log.error("the SPARQL update could not be executed:",e);
             throw new RepositoryException("the SPARQL update could not be executed",e);
+        } finally {
+            m.close();
         }
     }
 
@@ -174,6 +176,8 @@ public class PersistenceServiceImpl implements PersistenceService {
         } catch (QueryEvaluationException e) {
             log.error("the SPARQL query could not be executed:",e);
             throw new RepositoryException("the SPARQL query could not be executed",e);
+        } finally {
+            m.close();
         }
     }
 
@@ -212,6 +216,8 @@ public class PersistenceServiceImpl implements PersistenceService {
         } catch (UpdateExecutionException e) {
             log.error("the SPARQL update could not be executed:", e);
             throw new RepositoryException("the SPARQL update could not be executed",e);
+        } finally {
+            m.close();
         }
 
     }
@@ -270,6 +276,8 @@ public class PersistenceServiceImpl implements PersistenceService {
         } catch (QueryEvaluationException e) {
             log.error("the SPARQL query could not be executed:", e);
             throw new RepositoryException("the SPARQL query could not be executed",e);
+        } finally {
+            m.close();
         }
 
     }
