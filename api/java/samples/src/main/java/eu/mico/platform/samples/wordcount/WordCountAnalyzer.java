@@ -53,7 +53,7 @@ import java.util.regex.Pattern;
  */
 public class WordCountAnalyzer implements AnalysisService {
     
-    private static Boolean debug = true;
+    private static Boolean simulateSlow = true;
 
     private static Logger log = LoggerFactory.getLogger(WordCountAnalyzer.class);
 
@@ -99,21 +99,8 @@ public class WordCountAnalyzer implements AnalysisService {
 
             // we are progressing ... inform broker
             analysisResponse.sendProgress(contentItem, uri, 0.25f);
-            if (debug == true) {
-                try {
-                    log.debug("debug is enabled, sleep 5 seconds and send next progress info");
-                    Thread.sleep(5000);
-                    analysisResponse.sendProgress(contentItem, uri, 0.50f);
-                    Thread.sleep(5000);
-                    analysisResponse.sendProgress(contentItem, uri, 0.75f);
-                    analysisResponse.sendProgress(contentItem, uri, 0.76f);
-                    analysisResponse.sendProgress(contentItem, uri, 0.77f);
-                    analysisResponse.sendProgress(contentItem, uri, 0.78f);
-                    log.debug("... progress updated, sleep 5 seconds again");
-                    Thread.sleep(5000);
-                } catch (Exception e) {
-                    log.warn(e.getMessage());
-                }
+            if (simulateSlow == true) {
+                simulateLongTask(analysisResponse, contentItem, uri);
             }
 
             int count;
@@ -133,7 +120,7 @@ public class WordCountAnalyzer implements AnalysisService {
             
             // add wordcount as Mico Annotation
             MICOProvenance provenance = new MICOProvenance();
-            provenance.setExtractorName("http://www.mico-project.eu/broker/injection-web-service");
+            provenance.setExtractorName(getServiceID().stringValue());
 
             MultiMediaBody multiMediaBody = new MultiMediaBody();
             multiMediaBody.setFormat("Mico:Wordcount");
@@ -151,6 +138,32 @@ public class WordCountAnalyzer implements AnalysisService {
             log.error("error accessing metadata repository",e);
 
             throw new AnalysisException("error accessing metadata repository",e);
+        }
+    }
+
+    /**
+     * This function uses Thread.sleep() to simulate long running analyze
+     * process
+     * 
+     * @param analysisResponse
+     * @param contentItem
+     * @param uri
+     */
+    private void simulateLongTask(AnalysisResponse analysisResponse,
+            ContentItem contentItem, URI uri) {
+        try {
+            log.debug("debug is enabled, sleep 5 seconds and send next progress info");
+            Thread.sleep(5000);
+            analysisResponse.sendProgress(contentItem, uri, 0.50f);
+            Thread.sleep(5000);
+            analysisResponse.sendProgress(contentItem, uri, 0.75f);
+            analysisResponse.sendProgress(contentItem, uri, 0.76f);
+            analysisResponse.sendProgress(contentItem, uri, 0.77f);
+            analysisResponse.sendProgress(contentItem, uri, 0.78f);
+            log.debug("... progress updated, sleep 5 seconds again");
+            Thread.sleep(5000);
+        } catch (Exception e) {
+            log.warn(e.getMessage());
         }
     }
 

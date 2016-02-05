@@ -46,10 +46,12 @@ import static eu.mico.platform.camel.MicoRabbitProducer.KEY_MICO_PART;;
 public class MicoRabbitComponentTest extends CamelTestSupport {
 
     private static final String SAMPLE_PNG = "sample.png";
+    private static final String SAMPLE_MP4 = "sample-video.mp4";
     private static final String TEST_DATA_FOLDER = "src/test/resources/data/";
     private static MicoCamel micoCamel;
     private static String textItemUri,textPartUri;
     private static String imageItemUri,imagePartUri;
+    private static String videoItemUri,videoPartUri;
 
     private static SimpleDateFormat isodate = new SimpleDateFormat("yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'", DateFormatSymbols.getInstance(Locale.US));
     static {
@@ -84,7 +86,7 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
     /**
      * @throws Exception
      */
-    @Ignore // ignored, because a mico_wordcount must be connected to run this test
+    @Ignore("ignored, because a mico_wordcount must be connected to run this test")
     @Test(timeout=10000)
     public void testTextRoute() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result_text");
@@ -106,21 +108,40 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         assertMockEndpointsSatisfied();
     }
 
+    /** test route defined in xml
+     * @throws Exception
+     */
+    @Test(timeout=20000)
+    public void testSampleSplitRoute() throws Exception {
+        MockEndpoint mock2 = getMockEndpoint("mock:result_split2");
+        MockEndpoint mock3 = getMockEndpoint("mock:result_split3");
+        mock2.expectedMinimumMessageCount(1);
+        mock3.expectedMinimumMessageCount(1);
+
+        template.send("direct:test_split",createExchange());
+        assertMockEndpointsSatisfied();
+    }
+
+    /** test ner sample route defined in xml
+     * @throws Exception
+     */
+    @Ignore("all extractors for video-kaldi-ner pipeline must be connected")
+    @Test(timeout=400000l)
+    public void testSampleNerRoute() throws Exception {
+        MockEndpoint mock2 = getMockEndpoint("mock:result_kaldi_rdf");
+        MockEndpoint mock3 = getMockEndpoint("mock:result_kaldi_ner");
+        mock2.expectedMinimumMessageCount(1);
+        mock3.expectedMinimumMessageCount(1);
+
+        template.send("direct:video_mp4",createExchange(videoItemUri,videoPartUri));
+        assertMockEndpointsSatisfied();
+    }
+
     @Override
     protected RouteBuilder createRouteBuilder() throws Exception {
         return new RouteBuilder() {
             public void configure() {
-                ModelCamelContext context = getContext();
-                context.setDelayer(300L);
-                
-                try {
-                    InputStream is = new FileInputStream("src/test/resources/routes/sampleRoute.xml");
-                    RoutesDefinition routes = context.loadRoutesDefinition(is);
-                    context.addRouteDefinitions(routes.getRoutes());
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                loadXmlSampleRoutes();
                 
                 from("direct:a").pipeline()
                         .to("mico-comp://foo1?serviceId=A-B-queue")
@@ -139,6 +160,25 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
                 .to("mock:result_text");
 
             }
+
+            private void loadXmlSampleRoutes() {
+                ModelCamelContext context = getContext();
+                context.setDelayer(400L);
+                String[] testFiles = {
+                        "src/test/resources/routes/sampleSplitRoute.xml",
+                        "src/test/resources/routes/videoNerRoute_v1.xml",
+                        "src/test/resources/routes/sampleRoute.xml" };
+                try {
+                    for (int i =0 ; i< testFiles.length; i++){
+                        InputStream is = new FileInputStream(testFiles[i]);
+                        RoutesDefinition routes = context.loadRoutesDefinition(is);
+                        context.addRouteDefinitions(routes.getRoutes());
+                    }
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
         };
     }
 
@@ -150,6 +190,7 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         micoCamel.init();
         createTextItem();
         createImageItem();
+        createVideoItem();
    }
     
     @AfterClass
@@ -157,8 +198,9 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         resetDataFolder();
 
         // remove test items from platform
-        //micoCamel.deleteContentItem(textItemUri);
-        //micoCamel.deleteContentItem(imageItemUri);
+        micoCamel.deleteContentItem(textItemUri);
+        micoCamel.deleteContentItem(imageItemUri);
+        micoCamel.deleteContentItem(videoItemUri);
 
         micoCamel.shutdown();
     }
@@ -205,6 +247,7 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         String type = "text/plain";
         Content part = micoCamel.addPart(content.getBytes(), type, item);
         part.setProperty(DCTERMS.SOURCE, "file://test-data.txt");              // set the analyzed content part as source for the new content part
+        part.setProperty(DCTERMS.CREATED, isodate.format(new Date()));         // set the created date for the new content part
         part.setType(type);
         
         MultiMediaBody multiMediaBody = new MultiMediaBody();
@@ -229,7 +272,7 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         String type = "image/png";
         Content part = micoCamel.addPart(IOUtils.toByteArray(content), type, item);
         part.setProperty(DCTERMS.SOURCE, "file://" + SAMPLE_PNG);              // set the analyzed content part as source for the new content part
-        part.setProperty(DCTERMS.CREATED, isodate.format(new Date())); // set the created date for the new content part
+        part.setProperty(DCTERMS.CREATED, isodate.format(new Date()));         // set the created date for the new content part
         part.setType(type);
 
         MultiMediaBody multiMediaBody = new MultiMediaBody();
@@ -242,8 +285,35 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         System.out.println("imageItem: " + imageItemUri);
         System.out.println("imagePart: " + imagePartUri);
     }
+    
+
     /**
-     * create exchange containing item and part uri of sample/test content
+     * create and store/inject test data/item in mico persistence and 
+     * store item and part uri in class
+     * @throws IOException
+     * @throws RepositoryException
+     */
+    private static void createVideoItem() throws IOException, RepositoryException {
+        ContentItem item = micoCamel.createItem();
+        InputStream content = new FileInputStream(TEST_DATA_FOLDER+SAMPLE_MP4);
+        String type = "video/mp4";
+        Content part = micoCamel.addPart(IOUtils.toByteArray(content), type, item);
+        part.setProperty(DCTERMS.SOURCE, "file://test-video.mp4");              // set the analyzed content part as source for the new content part
+        part.setProperty(DCTERMS.CREATED, isodate.format(new Date()));          // set the created date for the new content part
+        part.setType(type);
+        
+        MultiMediaBody multiMediaBody = new MultiMediaBody();
+        multiMediaBody.setFormat(type);
+        InitialTarget target = new InitialTarget("test-video.mp4");
+        part.createAnnotation(multiMediaBody, null, getProvenance(), target);
+
+        videoItemUri = item.getURI().toString();
+        videoPartUri = part.getURI().toString();
+        System.out.println("videoPart: " + videoPartUri);
+    }
+    
+    /**
+     * create exchange containing item and part uri of sample text content
      * @return an exchange containing item and part uri in headers
      */
     private Exchange createExchange() {

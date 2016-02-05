@@ -97,6 +97,7 @@ public class DummyExtractor implements AnalysisService {
             }
             os.write(("\nData added by: " + getServiceID() + "\n").getBytes());
             os.flush();
+            os.close();
             log.info("new contentpart added: {}", cp.getURI());
 
             resp.sendMessage(ci, cp.getURI());
