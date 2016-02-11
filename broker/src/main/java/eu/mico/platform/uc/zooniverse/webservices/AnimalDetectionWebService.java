@@ -125,11 +125,12 @@ public class AnimalDetectionWebService {
                 }
             });
         } catch (ClientProtocolException e) {
+            log.error("Could not fetch image to create content item: %s", e.toString());
             return Response.status(ClientResponse.Status.BAD_GATEWAY)
                     .entity(e.getMessage())
                     .build();
         } catch (IOException e) {
-            log.error("Could not fetch image to create content item");
+            log.error("Could not fetch image to create content item: %s", e.toString());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
     }
@@ -229,6 +230,7 @@ public class AnimalDetectionWebService {
         try {
             List<Object> objects = getObjects(contentItemUri);
             if (objects == null) {
+                log.error("Empty objects list of content item: %s", contentItemUri.toString());
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             }
             rspEntity.put("objects", objects);
