@@ -202,6 +202,8 @@ public class TextAnalysisWebService {
         } catch (MalformedQueryException | QueryEvaluationException e) {
             log.error("Error querying objects; {}", e);
             throw new Exception(e);
+        } finally {
+            metadata.close();
         }
     }
 

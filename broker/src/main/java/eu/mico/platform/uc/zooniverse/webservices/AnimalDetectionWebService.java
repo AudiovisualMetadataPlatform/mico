@@ -277,6 +277,8 @@ public class AnimalDetectionWebService {
             }
         } catch (MalformedQueryException | QueryEvaluationException e) {
             log.error("Error querying objects; {}", e);
+        } finally {
+            metadata.close();
         }
         return null;
     }
@@ -304,6 +306,8 @@ public class AnimalDetectionWebService {
             }
         } catch (MalformedQueryException | QueryEvaluationException e) {
             log.error("Error querying objects; {}", e);
+        } finally {
+            metadata.close();
         }
         return null;
     }
@@ -362,6 +366,8 @@ public class AnimalDetectionWebService {
         } catch (MalformedQueryException | QueryEvaluationException e) {
             log.error("Error querying objects; {}", e);
             return null;
+        } finally {
+            metadata.close();
         }
         return rspObjects;
     }
