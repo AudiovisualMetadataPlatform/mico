@@ -1,0 +1,47 @@
+<routes xmlns="http://camel.apache.org/schema/spring" >
+<!--
+input    | service name     | output       | queue name
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+video     -> audioDemux   -> wav             http://www.mico-project.org/services/audiodemux-queue-8kHz-mp4
+wav       -> diarization  -> diari.xml       speakerdiarization
+xml+wav   -> kaldi        -> kaldi.xml       kaldicpp
+kaldi.xml -> kaldi2rdf    -> text/fam+turtle xml2rdf
+kaldi.xml -> kaldi2text   -> kaldi.txt       kaldiXml2txt
+kaldi.txt -> ner          -> text/fam+turtle serengeti-text-analysis
+
+MP4 -> dmx ->  dia 
+         \      \
+           -  -  -> kaldi -> kaldi2rdf 
+                      \
+                       -> kaldi2txt -> ner
+                       
+ -->
+    <route id="video-speech-text-ner">
+        <from uri="direct:video_mp4" />
+        <pipeline>
+            <to uri="mico-comp:vbox1?host=mico-platform&amp;user=mico&amp;password=mico&amp;serviceId=http://www.mico-project.org/services/audiodemux-queue-8kHz-mp4" />
+            <to uri="mico-comp:vbox1?host=mico-platform&amp;user=mico&amp;password=mico&amp;serviceId=speakerdiarization" />
+            <to uri="mico-comp:vbox1?host=mico-platform&amp;user=mico&amp;password=mico&amp;serviceId=kaldicpp" />
+        </pipeline>
+        <multicast>
+            <to uri="direct:kaldi-rdf" />
+            <to uri="direct:kaldi-ner" />
+        </multicast>
+    </route>
+    <route id="kaldi-ner">
+        <from uri="direct:kaldi-ner"/>
+        <pipeline>
+            <to uri="mico-comp:vbox1?host=mico-platform&amp;user=mico&amp;password=mico&amp;serviceId=kaldiXml2txt"/>
+            <to uri="mico-comp:vbox1?host=mico-platform&amp;user=mico&amp;password=mico&amp;serviceId=serengeti-text-analysis"/>
+            <to uri="mock:result_kaldi_ner"/>
+        </pipeline>
+    </route>
+
+    <route id="kaldi-rdf">
+        <from uri="direct:kaldi-rdf"/>
+        <to uri="mico-comp:vbox1?host=mico-platform&amp;user=mico&amp;password=mico&amp;serviceId=xml2rdf"/>
+        <to uri="mock:result_kaldi_rdf"/>
+    </route>
+    
+
+</routes>

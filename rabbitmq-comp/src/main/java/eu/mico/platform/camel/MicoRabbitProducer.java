@@ -61,8 +61,8 @@ public class MicoRabbitProducer extends DefaultProducer {
             }
             event = generateEvent(item, part);
         } catch (Exception e) {
-            log.warn("unable to extract content item and part uri from message: {}", e.getLocalizedMessage());
-            event = generateEventSample();
+            log.error("unable to extract content item and part uri from message: {}", e.getLocalizedMessage());
+            return;
         }
         inItem.setBody(event);
         // create a new channel for the content item
@@ -74,7 +74,11 @@ public class MicoRabbitProducer extends DefaultProducer {
         if(exchange.getPattern().equals(ExchangePattern.InOut)||true){
             while (!manager.hasResponse()) {
                 LOG.debug("..waiting for response..");
-                Thread.sleep(300);
+
+                synchronized (serviceId){
+                    //Thread.sleep(300);
+                    serviceId.wait();
+                }
             }
             // save new part in header to tell next extractor to process that part
             inItem.setHeader(KEY_MICO_PART, manager.getNewObjectUri());
@@ -82,12 +86,6 @@ public class MicoRabbitProducer extends DefaultProducer {
         LOG.info("extraction finished - {}",item);
     }
 
-    public AnalysisEvent generateEventSample() {
-        LOG.info("generate PREDEFINED event");
-        String item = "http://mico-platform:8080/marmotta/c04b7656-684d-44af-a3b7-a816ae45e7df";
-        String part = "http://mico-platform:8080/marmotta/c04b7656-684d-44af-a3b7-a816ae45e7df/e61153e7-8618-472d-9c0b-b4a22d8249f4";
-        return generateEvent(item, part);
-    }
 
     private AnalysisEvent generateEvent(String item, String part) {
         LOG.info("generate event for {} {}", serviceId, part);
@@ -146,8 +144,13 @@ public class MicoRabbitProducer extends DefaultProducer {
                     "received processing result from service {} for content item {}: new object {}",
                     analysisResponse.getServiceId(),
                     analysisResponse.getContentItemUri(), newObjectUri);
-            response = true;
             getChannel().basicAck(envelope.getDeliveryTag(), false);
+            
+            //analyze process finished, notify waiting threads to continue camel route
+            response = true;
+            synchronized(serviceId){
+                serviceId.notify();
+            }
         }
 
         @Override

@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,20 @@ public class MicoCamel {
 
     protected static AnalysisService extr_1 = new DummyExtractor("A", "B");
     protected static AnalysisService extr_2 = new DummyExtractor("B", "text/plain");
+    protected static AnalysisService extr_a = new DummyExtractor("A", "B");
+    protected static AnalysisService extr_b = new DummyExtractor("B", "C");
+    protected static AnalysisService extr_c = new DummyExtractor("C1", "D");
+    protected static AnalysisService extr_d = new DummyExtractor("D", "E");
+    protected static AnalysisService extr_e = new DummyExtractor("C2", "F");
 
+    /**
+     * setup test environment including mico eventManager and some registered
+     * dummy services
+     * 
+     * @throws IOException
+     * @throws TimeoutException
+     * @throws URISyntaxException
+     */
     public void init() throws IOException, TimeoutException, URISyntaxException {
         String testHost = System.getenv("test.host");
         if (testHost == null) {
@@ -56,6 +68,11 @@ public class MicoCamel {
         channel.queueDeclare("myqueue", false, false, false, args);
         eventManager.registerService(extr_1);
         eventManager.registerService(extr_2);
+        eventManager.registerService(extr_a);
+        eventManager.registerService(extr_b);
+        eventManager.registerService(extr_c);
+        eventManager.registerService(extr_d);
+        eventManager.registerService(extr_e);
 
     }
 
