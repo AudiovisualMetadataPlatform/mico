@@ -36,7 +36,7 @@
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
 #include <boost/program_options.hpp>
-
+#include <Logging.hpp>
 #include "AnalysisService.hpp"
 #include "Daemon.hpp"
 
@@ -250,10 +250,12 @@ int main(int argc, char **argv) {
     return mico::daemon::stop(s_daemon_id.c_str());
   }
   if (asDaemon) {
+    mico::log::set_log_backend (mico::daemon::createDaemonLogBackend());
     // create a new instance of a MICO daemon, auto-registering two instances of the OCR analysis service
     return mico::daemon::start(s_daemon_id.c_str(), ip.c_str(), user.c_str(), passw.c_str(),
     {new OCRAnalysisService("png", "image/png", "eng"), new OCRAnalysisService("jpeg", "image/jpeg", "eng")});
   } else {
+    mico::log::set_log_backend (new mico::log::StdOutBackend());
     mgr = new EventManager(ip.c_str(), user.c_str(), passw.c_str());
     ocrService = new OCRAnalysisService("png", "image/png", "eng");
 
