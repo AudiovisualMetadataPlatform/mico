@@ -279,19 +279,25 @@ namespace mico {
 
             void handleDelivery(const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
                 mico::event::model::AnalysisEvent event;
-                event.ParseFromArray(message.body(), message.bodySize());
+                if (event.ParseFromArray(message.body(), message.bodySize())){
 
-                LOG_DEBUG("received analysis event (content item %s, object %s, replyTo %s)", event.contentitemuri().c_str(), event.objecturi().c_str(), message.replyTo().c_str());
+                    LOG_DEBUG("received analysis event (content item %s, object %s, replyTo %s)", event.contentitemuri().c_str(), event.objecturi().c_str(), message.replyTo().c_str());
 
-                ContentItem *ci = (*persistence).getContentItem(URI(event.contentitemuri()));
-                URI object(event.objecturi());
-                AnalysisResponse response(this->service, message, channel);
+                    ContentItem *ci = (*persistence).getContentItem(URI(event.contentitemuri()));
+                    URI object(event.objecturi());
+                    AnalysisResponse response(this->service, message, channel);
 
-                service.call( response, *ci, object);
+                    service.call( response, *ci, object);
+
+                    LOG_DEBUG("acknowledged finished processing of analysis event (content item %s, object %s, replyTo %s)", event.contentitemuri().c_str(), event.objecturi().c_str(), message.replyTo().c_str());
+                }else{
+                    //@TODO send error to broker
+                    LOG_ERROR("Could not parse received analysis event.");
+                    LOG_INFO("received event data: %s ", event.DebugString().c_str());
+                }
 
                 channel->ack(deliveryTag);
 
-                LOG_DEBUG("acknowledged finished processing of analysis event (content item %s, object %s, replyTo %s)", event.contentitemuri().c_str(), event.objecturi().c_str(), message.replyTo().c_str());
             }
         };
 

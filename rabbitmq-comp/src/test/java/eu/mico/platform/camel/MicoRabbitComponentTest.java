@@ -74,10 +74,10 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
      * @throws Exception
      */
     @Ignore // ignored, because a mico_wordcount and mico_ocr_service must be connected to run this test
-    @Test(timeout=20000)
+    @Test(timeout=60000)
     public void testImageRoute() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result_image");
-        mock.expectedMinimumMessageCount(1);       
+        mock.expectedMinimumMessageCount(1);
 
         template.send("direct:image",createExchange(imageItemUri, imagePartUri));
         assertMockEndpointsSatisfied();
@@ -90,7 +90,7 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
     @Test(timeout=10000)
     public void testTextRoute() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result_text");
-        mock.expectedMinimumMessageCount(1);       
+        mock.expectedMinimumMessageCount(1);
 
         template.send("direct:text",createExchange(textItemUri, textPartUri));
         assertMockEndpointsSatisfied();
