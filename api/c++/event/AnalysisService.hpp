@@ -2,6 +2,7 @@
 #define HAVE_ANALYSIS_SERVICE_H 1
 
 #include <string>
+#include <list>
 
 #include "rdf_model.hpp"
 #include "ContentItem.hpp"
@@ -78,7 +79,7 @@ namespace mico {
             * @param ci     the content item to analyse
             * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
             */
-            virtual void call(mico::event::AnalysisResponse& response, mico::persistence::ContentItem& ci, mico::rdf::model::URI& object) = 0;
+            virtual void call(mico::event::AnalysisResponse& response, mico::persistence::ContentItem& ci, std::list<mico::rdf::model::URI>& object, std::map<std::string,std::string>& params) = 0;
         };
 
     }
