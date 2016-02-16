@@ -1,4 +1,4 @@
-package eu.mico.platform.uc.zooniverse.model;
+package eu.mico.platform.zooniverse.model;
 
 import eu.mico.platform.persistence.model.ContentItem;
 

@@ -1,4 +1,4 @@
-package eu.mico.platform;
+package eu.mico.platform.reco;
 
 
 import eu.mico.platform.broker.api.MICOBroker;

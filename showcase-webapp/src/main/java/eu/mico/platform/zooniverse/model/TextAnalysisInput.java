@@ -1,4 +1,4 @@
-package eu.mico.platform.uc.zooniverse.model;
+package eu.mico.platform.zooniverse.model;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;

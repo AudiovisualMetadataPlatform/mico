@@ -145,12 +145,6 @@
             <version>1.4</version>
         </dependency>
 
-        <!-- Zooniverse -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-        </dependency>
-
         <!-- communication with RabbitMQ -->
         <dependency>
             <groupId>com.rabbitmq</groupId>
