@@ -1,4 +1,4 @@
-package eu.mico.platform.broker.webservices;
+package eu.mico.platform;
 
 
 import eu.mico.platform.broker.api.MICOBroker;
