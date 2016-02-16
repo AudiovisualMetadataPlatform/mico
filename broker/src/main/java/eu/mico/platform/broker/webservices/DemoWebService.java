@@ -3,12 +3,12 @@ package eu.mico.platform.broker.webservices;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.model.ContentItemState;
+import eu.mico.platform.broker.model.ItemState;
 import eu.mico.platform.broker.model.EmailThread;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Metadata;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -108,7 +108,7 @@ public class DemoWebService {
 
             InputPart inputPart = inPart.get(0);
 
-            // Retrieve headers, read the Content-Disposition header to obtain the original name of the file
+            // Retrieve headers, read the Part-Disposition header to obtain the original name of the file
             MultivaluedMap<String, String> headers = inputPart.getHeaders();
             MediaType mediaType = inputPart.getMediaType();
 
@@ -129,12 +129,12 @@ public class DemoWebService {
 
     private Response createImageResult(String mediaType, InputStream istream, String filename) throws Exception {
         try {
-            final ContentItem ci = injectContentItem(mediaType, istream, filename);
+            final Item ci = injectContentItem(mediaType, istream, filename);
 
             //test if it is still in progress
             long start = System.currentTimeMillis();
 
-            ContentItemState state = broker.getStates().get(ci.getURI().stringValue());
+            ItemState state = broker.getStates().get(ci.getURI().stringValue());
 
             while (state == null || !state.isFinalState()) {
 
@@ -153,7 +153,7 @@ public class DemoWebService {
                     .entity(ImmutableMap.of("id", ci.getID(), "uri", ci.getURI().stringValue(), "result", result, "status", "done"))
                     .build();
         } catch (RepositoryException | IOException e) {
-            log.error("Could not create ContentItem");
+            log.error("Could not create Item");
             throw new Exception(e);
         } catch (InterruptedException e) {
             log.error("Some wired threat interrupt");
@@ -190,7 +190,7 @@ public class DemoWebService {
 
                         Header size = httpResponse.getFirstHeader(HttpHeaders.CONTENT_LENGTH);
                         if (size == null || Integer.parseInt(size.getValue()) > 10 * 1024 * 1024) {
-                            throw new ClientProtocolException("Content-length not set or maximum image size exceeded.");
+                            throw new ClientProtocolException("Part-length not set or maximum image size exceeded.");
                         }
 
                         if (type.toString().equalsIgnoreCase("image/jpeg") || mimetypesMap.toString().equalsIgnoreCase("image/png")) {
@@ -233,29 +233,29 @@ public class DemoWebService {
         return false;
     }
 
-    private ContentItem injectContentItem(String mediaType, InputStream istream, String filename) throws RepositoryException, IOException {
-        final ContentItem ci = persistenceService.createContentItem();
+    private Item injectContentItem(String mediaType, InputStream istream, String filename) throws RepositoryException, IOException {
+        final Item ci = persistenceService.createItem();
 
-        final Content contentPart = ci.createContentPart();
-        contentPart.setType(mediaType);
-        contentPart.setProperty(DCTERMS.TITLE, filename);
-        contentPart.setRelation(DCTERMS.CREATOR, new URIImpl(INJECTOR));
-        contentPart.setProperty(DCTERMS.CREATED, ISO8601FORMAT.format(new Date()));
-        try (OutputStream outputStream = contentPart.getOutputStream()) {
+        final Part part = ci.createPart();
+        part.setType(mediaType);
+        part.setProperty(DCTERMS.TITLE, filename);
+        part.setRelation(DCTERMS.CREATOR, new URIImpl(INJECTOR));
+        part.setProperty(DCTERMS.CREATED, ISO8601FORMAT.format(new Date()));
+        try (OutputStream outputStream = part.getOutputStream()) {
             IOUtils.copy(istream, outputStream);
         } catch (IOException e) {
-            log.error("Could not persist text data for ContentPart {}: {}", contentPart.getURI(), e.getMessage());
+            log.error("Could not persist text data for ContentPart {}: {}", part.getURI(), e.getMessage());
             throw e;
         }
 
-        eventManager.injectContentItem(ci);
+        eventManager.injectItem(ci);
         return ci;
     }
 
-    // Parse Content-Disposition header to get the original file name
+    // Parse Part-Disposition header to get the original file name
     private String getFileName(MultivaluedMap<String, String> headers, MediaType type) {
 
-        String[] contentDispositionHeader = headers.getFirst("Content-Disposition").split(";");
+        String[] contentDispositionHeader = headers.getFirst("Part-Disposition").split(";");
         for (String name : contentDispositionHeader) {
 
             if ((name.trim().startsWith("filename"))) {
@@ -298,7 +298,7 @@ public class DemoWebService {
 
             InputPart inputPart = inPart.get(0);
 
-            // Retrieve headers, read the Content-Disposition header to obtain the original name of the file
+            // Retrieve headers, read the Part-Disposition header to obtain the original name of the file
             MultivaluedMap<String, String> headers = inputPart.getHeaders();
             MediaType mediaType = inputPart.getMediaType();
 
@@ -310,7 +310,7 @@ public class DemoWebService {
             String filename = getFileName(headers, mediaType);
 
             try {
-                final ContentItem ci = injectContentItem(mediaType.toString(), istream, filename);
+                final Item ci = injectContentItem(mediaType.toString(), istream, filename);
 
                 //start Thread
                 log.info("Send email: {}", email != null);
@@ -324,7 +324,7 @@ public class DemoWebService {
                         .entity(ImmutableMap.of("id", ci.getID(), "uri", ci.getURI().stringValue(), "status", "injected", "email", email != null))
                         .build();
             } catch (RepositoryException | IOException e) {
-                log.error("Could not create ContentItem");
+                log.error("Could not create Item");
                 throw new Exception(e);
             }
 
@@ -341,18 +341,18 @@ public class DemoWebService {
 
         final URI contentItemUri = new URIImpl(uriString);
 
-        final ContentItem contentItem;
+        final Item item;
         try {
-            contentItem = persistenceService.getContentItem(contentItemUri);
-            if (contentItem == null)
-                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'", contentItemUri.stringValue())).build();
+            item = persistenceService.getItem(contentItemUri);
+            if (item == null)
+                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find Item '%s'", contentItemUri.stringValue())).build();
         } catch (RepositoryException e) {
             log.error("Error getting content item {}: {}", contentItemUri, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
 
         //test if it is still in progress
-        final ContentItemState state = broker.getStates().get(contentItemUri.stringValue());
+        final ItemState state = broker.getStates().get(contentItemUri.stringValue());
         if (state != null && !state.isFinalState()) {
             return Response.status(Response.Status.ACCEPTED)
                     .entity(ImmutableMap.of("uri", uriString, "status", "inProgress"))
@@ -362,7 +362,7 @@ public class DemoWebService {
         try {
             Object result = createImageResult(uriString);
             return Response.status(Response.Status.CREATED)
-                    .entity(ImmutableMap.of("id", contentItem.getID(), "uri", contentItem.getURI().stringValue(), "result", result, "status", "done"))
+                    .entity(ImmutableMap.of("id", item.getID(), "uri", item.getURI().stringValue(), "result", result, "status", "done"))
                     .build();
         } catch (Exception e) {
             e.printStackTrace();
@@ -378,18 +378,18 @@ public class DemoWebService {
 
         final URI contentItemUri = new URIImpl(uriString);
 
-        final ContentItem contentItem;
+        final Item item;
         try {
-            contentItem = persistenceService.getContentItem(contentItemUri);
-            if (contentItem == null)
-                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'", contentItemUri.stringValue())).build();
+            item = persistenceService.getItem(contentItemUri);
+            if (item == null)
+                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find Item '%s'", contentItemUri.stringValue())).build();
         } catch (RepositoryException e) {
             log.error("Error getting content item {}: {}", contentItemUri, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
 
         //test if it is still in progress
-        final ContentItemState state = broker.getStates().get(contentItemUri.stringValue());
+        final ItemState state = broker.getStates().get(contentItemUri.stringValue());
         if (state != null && !state.isFinalState()) {
             return Response.status(Response.Status.ACCEPTED)
                     .entity(ImmutableMap.of("uri", uriString, "status", "inProgress"))
@@ -399,7 +399,7 @@ public class DemoWebService {
         try {
             Object result = createVideoResult(uriString);
             return Response.status(Response.Status.CREATED)
-                    .entity(ImmutableMap.of("id", contentItem.getID(), "uri", contentItem.getURI().stringValue(), "result", result, "status", "done"))
+                    .entity(ImmutableMap.of("id", item.getID(), "uri", item.getURI().stringValue(), "result", result, "status", "done"))
                     .build();
         } catch (Exception e) {
             e.printStackTrace();

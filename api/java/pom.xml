@@ -125,6 +125,7 @@
         <module>event</module>
         <module>spring</module>
         <module>samples</module>
+        <module>mmm-anno4j</module>
     </modules>
 
     <profiles>

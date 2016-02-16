@@ -15,13 +15,13 @@ package eu.mico.platform.broker.webservices;
 
 import com.google.common.collect.ImmutableMap;
 
-import eu.mico.platform.anno4j.model.impl.body.MultiMediaBody;
-import eu.mico.platform.anno4j.model.impl.micotarget.InitialTarget;
+import eu.mico.platform.anno4j.model.impl.bodymmm.MultiMediaBody;
+import eu.mico.platform.anno4j.model.impl.targetmmm.InitialTarget;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.metadata.MICOProvenance;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Item;
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
@@ -41,7 +41,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * A webservice for creating new content items and adding new content parts. Used by the inject.html frontend
+ * A webservice for creating new  items and adding new  parts. Used by the inject.html frontend
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
@@ -61,25 +61,25 @@ public class InjectionWebService {
 
 
     /**
-     * Create a new content item and return its URI in the "uri" field of the JSON response.
+     * Create a new item and return its URI in the "uri" field of the JSON response.
      * @return
      */
     @POST
     @Path("/create")
     @Produces("application/json")
-    public Map<String,String> createContentItem() throws RepositoryException {
+    public Map<String,String> contentItem() throws RepositoryException {
         PersistenceService ps = eventManager.getPersistenceService();
 
-        ContentItem item = ps.createContentItem();
+        Item item = ps.createItem();
 
-        log.info("created content item {}", item.getURI());
+        log.info("created item {}", item.getURI());
 
         return ImmutableMap.of("uri", item.getURI().stringValue());
     }
 
 
     /**
-     * Add a new content part to the content item using the request body as content. Return the URI of the new part in
+     * Add a new part to the item using the request body as content. Return the URI of the new part in
      * the "uri" field of the JSON response.
      *
      * @return
@@ -87,19 +87,19 @@ public class InjectionWebService {
     @POST
     @Path("/add")
     @Produces("application/json")
-    public Response addContentPart(@QueryParam("ci")String contentItem, @QueryParam("type") String type, @QueryParam("name") String fileName, @Context HttpServletRequest request) throws RepositoryException, IOException {
+    public Response addContentPart(@QueryParam("ci")String itemString, @QueryParam("type") String type, @QueryParam("name") String fileName, @Context HttpServletRequest request) throws RepositoryException, IOException {
         PersistenceService ps = eventManager.getPersistenceService();
 
-        ContentItem item = ps.getContentItem(new URIImpl(contentItem));
+        Item item = ps.getItem(new URIImpl(itemString));
 
         if(item == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("content item "+contentItem+" does not exist").build();
+            return Response.status(Response.Status.NOT_FOUND).entity("part item "+itemString+" does not exist").build();
         }
 
-        Content content = item.createContentPart();
-        content.setType(type);
+        Part part = item.createPart();
+        part.setType(type);
         // deprecated - The model should use haslocation on the target instead of dcterms:source
-        content.setProperty(DCTERMS.SOURCE, fileName);
+        part.setProperty(DCTERMS.SOURCE, fileName);
 
         MICOProvenance provenance = new MICOProvenance();
         provenance.setExtractorName("http://www.mico-project.eu/broker/injection-web-service");
@@ -109,31 +109,31 @@ public class InjectionWebService {
 
         InitialTarget target = new InitialTarget(fileName);
 
-        content.createAnnotation(multiMediaBody, null, provenance, target);
+        part.createAnnotation(multiMediaBody, null, provenance, target);
 
-        OutputStream out = content.getOutputStream();
+        OutputStream out = part.getOutputStream();
         int bytes = IOUtils.copy(request.getInputStream(), out);
         out.close();
 
-        log.info("content item {}: uploaded {} bytes for new content part {}", item.getURI(), bytes, content.getURI());
+        log.info("item {}: uploaded {} bytes for new part {}", item.getURI(), bytes, part.getURI());
 
-        return Response.ok(ImmutableMap.of("uri", content.getURI().stringValue())).build();
+        return Response.ok(ImmutableMap.of("uri", part.getURI().stringValue())).build();
     }
 
 
     /**
-     * Submit the content item for analysis by notifying the broker about its parts.
+     * Submit the item for analysis by notifying the broker about its parts.
      * @return
      */
     @POST
     @Path("/submit")
-    public Response submitContentItem(@QueryParam("ci")String contentItem) throws RepositoryException, IOException {
+    public Response submitItem(@QueryParam("ci")String itemString) throws RepositoryException, IOException {
 
         PersistenceService ps = eventManager.getPersistenceService();
-        ContentItem item = ps.getContentItem(new URIImpl(contentItem));
-        eventManager.injectContentItem(item);
+        Item item = ps.getItem(new URIImpl(itemString));
+        eventManager.injectItem(item);
 
-        log.info("submitted content item {}", item.getURI());
+        log.info("submitted item {}", item.getURI());
 
         return Response.ok().build();
     }
@@ -148,25 +148,25 @@ public class InjectionWebService {
         List<Map<String,Object>> result = new ArrayList<>();
         if(itemUri == null) {
             // retrieve a list of all items
-            for(ContentItem ci : ps.getContentItems()) {
-                result.add(wrapContentItem(ci, showParts));
+            for(Item ci : ps.getItems()) {
+                result.add(wrapItem(ci, showParts));
             }
-        } else if(ps.getContentItem(new URIImpl(itemUri)) != null) {
-            result.add(wrapContentItem(ps.getContentItem(new URIImpl(itemUri)), showParts));
+        } else if(ps.getItem(new URIImpl(itemUri)) != null) {
+            result.add(wrapItem(ps.getItem(new URIImpl(itemUri)), showParts));
         } else {
             throw new NotFoundException("item with uri " + itemUri + " not found in broker");
         }
         return result;
     }
 
-    private Map<String,Object> wrapContentItem(ContentItem ci, boolean showParts) throws RepositoryException {
+    private Map<String,Object> wrapItem(Item ci, boolean showParts) throws RepositoryException {
         Map<String,Object> sprops = new HashMap<>();
         sprops.put("uri", ci.getURI().stringValue());
 
         if(showParts) {
             List<Map<String, Object>> parts = new ArrayList<>();
-            for (Content part : ci.listContentParts()) {
-                parts.add(wrapContent(part));
+            for (Part part : ci.getParts()) {
+                parts.add(wrapPart(part));
             }
             sprops.put("parts", parts);
         }
@@ -174,7 +174,7 @@ public class InjectionWebService {
         return sprops;
     }
 
-    private Map<String,Object> wrapContent(Content part) throws RepositoryException {
+    private Map<String,Object> wrapPart(Part part) throws RepositoryException {
         Map<String,Object> sprops = new HashMap<>();
         sprops.put("uri", part.getURI().stringValue());
         sprops.put("title", part.getProperty(DCTERMS.TITLE));
@@ -196,13 +196,13 @@ public class InjectionWebService {
     public Response downloadPart(@QueryParam("itemUri") String itemUri, @QueryParam("partUri") String partUri) throws RepositoryException {
         PersistenceService ps = eventManager.getPersistenceService();
 
-        final ContentItem item = ps.getContentItem(new URIImpl(itemUri));
+        final Item item = ps.getItem(new URIImpl(itemUri));
         if(item == null) {
-            throw new NotFoundException("Content Item with URI " + itemUri + " not found in system");
+            throw new NotFoundException("Part Item with URI " + itemUri + " not found in system");
         }
-        final Content     part = item.getContentPart(new URIImpl(partUri));
+        final Part part = item.getPart(new URIImpl(partUri));
         if(part == null) {
-            throw new NotFoundException("Content Part with URI " + partUri + " not found in system");
+            throw new NotFoundException("Part Part with URI " + partUri + " not found in system");
         }
 
         StreamingOutput entity = new StreamingOutput() {

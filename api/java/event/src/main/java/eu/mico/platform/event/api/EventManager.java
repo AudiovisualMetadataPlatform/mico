@@ -14,8 +14,7 @@
 package eu.mico.platform.event.api;
 
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.ContentItem;
-import org.openrdf.model.URI;
+import eu.mico.platform.persistence.model.Item;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -48,7 +47,7 @@ public interface EventManager {
     /**
      * Name of the queue used for reporting about content items where processing is finished.
      */
-    String QUEUE_CONTENT_OUTPUT = "content_output";
+    String QUEUE_PART_OUTPUT = "content_output";
 
     /**
      * Name of the queue used to to receive config requests.
@@ -76,7 +75,7 @@ public interface EventManager {
      * @param item content item to analyse
      * @throws IOException
      */
-    public void injectContentItem(ContentItem item) throws IOException;
+    public void injectItem(Item item) throws IOException;
 
 
     /**

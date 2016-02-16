@@ -3,17 +3,11 @@ package eu.mico.platform.broker.webservices;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.ContentItem;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.repository.RepositoryException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 /**
  * @author Thomas Kurz (tkurz@apache.org)

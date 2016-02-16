@@ -33,7 +33,7 @@ An analyser has to be annotated with the @AnalysisService tag and implement the 
     public class NewAnalyser implements Analyser {
 
         @Override
-        public void call(AnalysisResponse analysisResponse, ContentItem contentItem, URI uri) {
+        public void call(AnalysisResponse analysisResponse, ContentItem item, URI uri) {
             //... analyser implementation
         }
     }

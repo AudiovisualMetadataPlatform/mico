@@ -13,7 +13,7 @@
  */
 package eu.mico.platform.event.api;
 
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Item;
 import org.openrdf.model.URI;
 
 import java.io.IOException;
@@ -32,13 +32,13 @@ public interface AnalysisResponse {
      * used e,g, to notify the message broker that a new content part has been created or an object or entity has been
      * identified by the analysis service.
      * 
-     * @deprecated use {@link #sendFinish(ContentItem, URI)} or one of the other sendXXXX() functions instead.
+     * @deprecated use {@link #sendFinish(Item, URI)} or one of the other sendXXXX() functions instead.
      *
      * @param ci     the updated content item
      * @param object the updated object
      */
     @Deprecated
-    public void sendMessage(ContentItem ci, URI object) throws IOException;
+    public void sendMessage(Item ci, URI object) throws IOException;
 
     /**
      * Send a message to the broker's callback queue that the given content item and object have been processed.
@@ -46,7 +46,7 @@ public interface AnalysisResponse {
      * @param ci     the updated content item
      * @param object the updated object
      */
-    public void sendFinish(ContentItem ci, URI object) throws IOException;
+    public void sendFinish(Item ci, URI object) throws IOException;
 
     /**
      * Send a message to the broker's callback queue that the given content item and object have been updated. 
@@ -55,7 +55,7 @@ public interface AnalysisResponse {
      * @param object    the updated object
      * @param progress  the progress value (0..100)
      */
-    public void sendProgress(ContentItem ci, URI object, float progress) throws IOException;
+    public void sendProgress(Item ci, URI object, float progress) throws IOException;
 
 
     /**
@@ -66,7 +66,7 @@ public interface AnalysisResponse {
      * @param msg    the error message
      * @param desc   further information about the error
      */
-    public void sendError(ContentItem ci, URI object, String msg, String desc) throws IOException;
+    public void sendError(Item ci, URI object, String msg, String desc) throws IOException;
 
     /**
      * Send a message to the broker's callback queue that a new content part was added. 
@@ -74,6 +74,6 @@ public interface AnalysisResponse {
      * @param ci          the processed content item
      * @param object      the new object / part
      */
-    public void sendNew(ContentItem ci, URI object) throws IOException;
+    public void sendNew(Item ci, URI object) throws IOException;
 
 }

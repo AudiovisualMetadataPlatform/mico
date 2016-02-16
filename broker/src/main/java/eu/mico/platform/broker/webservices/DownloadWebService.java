@@ -2,8 +2,8 @@ package eu.mico.platform.broker.webservices;
 
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Item;
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -12,14 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.util.Collections;
 
 /**
  * @author Thomas Kurz (tkurz@apache.org)
@@ -64,14 +60,14 @@ public class DownloadWebService {
 
         PersistenceService ps = eventManager.getPersistenceService();
 
-        final ContentItem item_o = ps.getContentItem(getURI(marmottaBaseUri,item));
+        final Item item_o = ps.getItem(getURI(marmottaBaseUri,item));
         if(item_o == null) {
-            throw new NotFoundException("Content Item with URI " + getURI(marmottaBaseUri,item) + " not found in system");
+            throw new NotFoundException("Part Item with URI " + getURI(marmottaBaseUri,item) + " not found in system");
         }
-        final Content part_o = item_o.getContentPart(getURI(marmottaBaseUri,item+"/"+part));
+        final Part part_o = item_o.getPart(getURI(marmottaBaseUri,item+"/"+part));
 
         if(part_o == null) {
-            throw new NotFoundException("Content Part with URI " + getURI(marmottaBaseUri,item+"/"+part) + " not found in system");
+            throw new NotFoundException("Part Part with URI " + getURI(marmottaBaseUri,item+"/"+part) + " not found in system");
         }
 
         FileOutputStream fileOutputStream = new FileOutputStream(file);

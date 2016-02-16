@@ -2,16 +2,15 @@ package eu.mico.platform.uc.zooniverse;
 
 import com.google.common.io.Resources;
 import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.model.ContentItemState;
+import eu.mico.platform.broker.model.ItemState;
 import eu.mico.platform.broker.model.ServiceGraph;
 import eu.mico.platform.broker.testutils.TestServer;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Metadata;
 import eu.mico.platform.uc.zooniverse.webservices.TextAnalysisWebService;
-import org.eclipse.jetty.webapp.MetaData;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -35,14 +34,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.number.IsCloseTo.closeTo;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -59,7 +55,7 @@ public class TextAnalysisWebServiceTest {
 
     private static Repository repository;
 
-    private static Content content;
+    private static Part part;
 
     @BeforeClass
     public static void init() throws Exception {
@@ -99,17 +95,17 @@ public class TextAnalysisWebServiceTest {
                 .body("id", equalTo("d9347936-30ac-42f7-a0d5-4a2bfd908256"))
                     .body("status", equalTo("submitted"));
 
-        //test content parts
-        Assert.assertNotNull(content);
-        Assert.assertEquals("This is a text", new String(((ByteArrayOutputStream)content.getOutputStream()).toByteArray()));
+        //test part
+        Assert.assertNotNull(part);
+        Assert.assertEquals("This is a text", new String(((ByteArrayOutputStream) part.getOutputStream()).toByteArray()));
     }
 
     @Test
     public void testGetResult() {
-        String contentItemId = "d9347936-30ac-42f7-a0d5-4a2bfd908256";
+        String itemId = "d9347936-30ac-42f7-a0d5-4a2bfd908256";
 
         com.jayway.restassured.RestAssured.when().
-                get(server.getUrl() + "zooniverse/textanalysis/" + contentItemId).
+                get(server.getUrl() + "zooniverse/textanalysis/" + itemId).
         then().
                 assertThat()
                 .body("id", equalTo("d9347936-30ac-42f7-a0d5-4a2bfd908256"))
@@ -122,7 +118,7 @@ public class TextAnalysisWebServiceTest {
     private static MICOBroker mockBroker() {
         MICOBroker broker = mock(MICOBroker.class);
         Map states = mock(Map.class);
-        ContentItemState state = mock(ContentItemState.class);
+        ItemState state = mock(ItemState.class);
         ServiceGraph serviceGraph = mock(ServiceGraph.class);
         when(serviceGraph.getDescriptorURIs()).thenReturn(Collections.<URI>singleton(new URIImpl("http://www.mico-project.eu/services/ner-text")));
         when(state.isFinalState()).thenReturn(true);
@@ -141,14 +137,14 @@ public class TextAnalysisWebServiceTest {
 
     private static PersistenceService mockPersistenceService() throws RepositoryException, IOException, QueryEvaluationException, MalformedQueryException {
         PersistenceService persistenceService = mock(PersistenceService.class);
-        ContentItem contentItem = mockCreateContentItem();
+        Item item = mockCreateItem();
         Metadata metadata = mockMetadata();
-        when(persistenceService.createContentItem()).thenReturn(contentItem);
-        when(persistenceService.getContentItem(Matchers.<URI>any())).thenAnswer(new Answer<ContentItem>(){
+        when(persistenceService.createItem()).thenReturn(item);
+        when(persistenceService.getItem(Matchers.<URI>any())).thenAnswer(new Answer<Item>(){
             @Override
-            public ContentItem answer(InvocationOnMock invocationOnMock) throws Throwable {
+            public Item answer(InvocationOnMock invocationOnMock) throws Throwable {
                 URI uri = (URI) invocationOnMock.getArguments()[0];
-                return mockContentItem(uri);
+                return mockItem(uri);
             }
         });
         when(persistenceService.getMetadata()).thenReturn(metadata);
@@ -172,29 +168,29 @@ public class TextAnalysisWebServiceTest {
         return metadata;
     }
 
-    private static ContentItem mockCreateContentItem() throws RepositoryException, IOException {
+    private static Item mockCreateItem() throws RepositoryException, IOException {
         URI uri = mock(URI.class);
         when(uri.stringValue()).thenReturn("http://localhost/contentitem/d9347936-30ac-42f7-a0d5-4a2bfd908256");
-        ContentItem contentItem = mock(ContentItem.class);
-        Content content = mockContent();
-        when(contentItem.createContentPart()).thenReturn(content);
-        when(contentItem.getID()).thenReturn("d9347936-30ac-42f7-a0d5-4a2bfd908256");
-        when(contentItem.getURI()).thenReturn(uri);
-        return contentItem;
+        Item item = mock(Item.class);
+        Part part = mockPart();
+        when(item.createPart()).thenReturn(part);
+        when(item.getID()).thenReturn("d9347936-30ac-42f7-a0d5-4a2bfd908256");
+        when(item.getURI()).thenReturn(uri);
+        return item;
     }
 
-    private static ContentItem mockContentItem(URI uri) throws RepositoryException, IOException {
-        ContentItem contentItem = mock(ContentItem.class);
-        when(contentItem.getID()).thenReturn("d9347936-30ac-42f7-a0d5-4a2bfd908256");
-        when(contentItem.getURI()).thenReturn(uri);
-        return contentItem;
+    private static Item mockItem(URI uri) throws RepositoryException, IOException {
+        Item item = mock(Item.class);
+        when(item.getID()).thenReturn("d9347936-30ac-42f7-a0d5-4a2bfd908256");
+        when(item.getURI()).thenReturn(uri);
+        return item;
     }
 
-    private static Content mockContent() throws IOException {
-        content = mock(Content.class);
+    private static Part mockPart() throws IOException {
+        part = mock(Part.class);
         OutputStream os = new ByteArrayOutputStream();
-        when(content.getOutputStream()).thenReturn(os);
-        return content;
+        when(part.getOutputStream()).thenReturn(os);
+        return part;
     }
 
     private static Repository initializeRepository() throws RepositoryException, IOException, RDFParseException {

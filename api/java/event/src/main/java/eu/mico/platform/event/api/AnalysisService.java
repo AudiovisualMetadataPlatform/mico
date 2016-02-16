@@ -14,7 +14,7 @@
 package eu.mico.platform.event.api;
 
 import eu.mico.platform.event.model.AnalysisException;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Item;
 import org.openrdf.model.URI;
 
 import java.io.IOException;
@@ -74,5 +74,5 @@ public interface AnalysisService {
      * @param ci     the content item to analyse
      * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
      */
-    public void call(AnalysisResponse resp, ContentItem ci, URI object) throws AnalysisException, IOException;
+    public void call(AnalysisResponse resp, Item ci, URI object) throws AnalysisException, IOException;
 }

@@ -14,8 +14,8 @@
 package eu.mico.platform.event.api.spring;
 
 import com.google.common.io.ByteStreams;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Item;
 import org.openrdf.repository.RepositoryException;
 
 import java.io.*;
@@ -36,19 +36,19 @@ public class PlatformUtils {
      * @throws RepositoryException
      * @throws IOException
      */
-    public static Content persistNewContentItemWithPart(File file, String type, PlatformConfiguration platformConfiguration) throws RepositoryException, IOException {
-        ContentItem contentItem =  platformConfiguration.getPersistenceService().createContentItem();
-        Content contentPart = contentItem.createContentPart();
+    public static Part persistNewContentItemWithPart(File file, String type, PlatformConfiguration platformConfiguration) throws RepositoryException, IOException {
+        Item item =  platformConfiguration.getPersistenceService().createItem();
+        Part part = item.createPart();
 
         try (
-            OutputStream outputStream = contentPart.getOutputStream();
-            InputStream inputStream = new FileInputStream(file);
+                OutputStream outputStream = part.getOutputStream();
+                InputStream inputStream = new FileInputStream(file);
         ) {
             ByteStreams.copy(inputStream, outputStream);
-            contentPart.setType(type);
-            platformConfiguration.getEventManager().injectContentItem(contentItem);
+            part.setType(type);
+            platformConfiguration.getEventManager().injectItem(item);
         }
 
-        return contentPart;
+        return part;
     }
 }

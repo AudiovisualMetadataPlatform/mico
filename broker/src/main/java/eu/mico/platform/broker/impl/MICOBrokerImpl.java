@@ -22,13 +22,11 @@ import eu.mico.platform.broker.model.*;
 import eu.mico.platform.broker.util.RabbitMQUtils;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.model.Event;
-import eu.mico.platform.event.model.Event.MessageType;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.impl.PersistenceServiceImpl;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
+import eu.mico.platform.persistence.model.Item;
 
 import org.apache.commons.lang3.StringUtils;
-import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
@@ -38,7 +36,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
@@ -93,7 +90,7 @@ public class MICOBrokerImpl implements MICOBroker {
     private Channel registryChannel, discoveryChannel, contentChannel, configChannel;
 
     // map from content item URIs to processing states
-    private Map<String,ContentItemState> states;
+    private Map<String,ItemState> states;
 
     // map from content item URIs to channels
     private Map<String,Channel> channels;
@@ -135,7 +132,7 @@ public class MICOBrokerImpl implements MICOBroker {
         initContentItemQueue();
 
         log.info("initialising persistence service ...");
-        persistenceService = new PersistenceServiceImpl(new java.net.URI(this.marmottaBaseUri), new java.net.URI(this.storageBaseUri));
+        persistenceService = new PersistenceServiceAnno4j(new java.net.URI(this.marmottaBaseUri), new java.net.URI(this.storageBaseUri));
     }
 
 
@@ -146,7 +143,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
 
     @Override
-    public Map<String, ContentItemState> getStates() {
+    public Map<String, ItemState> getStates() {
         return states;
     }
 
@@ -207,7 +204,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
         // create the input and output queue with a defined name
         contentChannel.queueDeclare(EventManager.QUEUE_CONTENT_INPUT, true, false, false, null);
-        contentChannel.queueDeclare(EventManager.QUEUE_CONTENT_OUTPUT, true, false, false, null);
+        contentChannel.queueDeclare(EventManager.QUEUE_PART_OUTPUT, true, false, false, null);
 
         // register a content item consumer with the queue
         contentChannel.basicConsume(EventManager.QUEUE_CONTENT_INPUT, false, new ContentItemConsumer(contentChannel));
@@ -368,15 +365,15 @@ public class MICOBrokerImpl implements MICOBroker {
          */
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-            Event.ContentEvent contentEvent = Event.ContentEvent.parseFrom(body);
+            Event.PartEvent partEvent = Event.PartEvent.parseFrom(body);
 
-            log.info("new content item injected (URI: {}), preparing for analysis!", contentEvent.getContentItemUri());
+            log.info("new content item injected (URI: {}), preparing for analysis!", partEvent.getItemUri());
             try {
-                ContentItem item = persistenceService.createContentItem(new URIImpl(contentEvent.getContentItemUri()));
+                Item item = persistenceService.getItem(new URIImpl(partEvent.getItemUri()));
 
                 log.info("- adding initial content item state ...");
-                ContentItemState state = new ContentItemState(dependencies,item);
-                states.put(contentEvent.getContentItemUri(), state);
+                ItemState state = new ItemState(dependencies,item);
+                states.put(partEvent.getItemUri(), state);
 
                 log.info("- setting up messaging for content item analysis ...");
 
@@ -404,12 +401,12 @@ public class MICOBrokerImpl implements MICOBroker {
      * once all service requests are finished. In this case, the manager sends a content event response to the output queue
      */
     private class ContentItemManager extends DefaultConsumer implements Runnable {
-        private ContentItem      item;
-        private ContentItemState state;
+        private Item item;
+        private ItemState state;
         private String           queue;
         private String           queueTag;
 
-        public ContentItemManager(ContentItem item, ContentItemState state, Channel channel) throws IOException {
+        public ContentItemManager(Item item, ItemState state, Channel channel) throws IOException {
             super(channel);
             this.item = item;
             this.state = state;
@@ -424,7 +421,7 @@ public class MICOBrokerImpl implements MICOBroker {
             log.info("looking for possible state transitions ...");
             if(state.isFinalState()) {
                 // send finish event
-                getChannel().basicPublish("", EventManager.QUEUE_CONTENT_OUTPUT, null, Event.ContentEvent.newBuilder().setContentItemUri(item.getURI().stringValue()).build().toByteArray());
+                getChannel().basicPublish("", EventManager.QUEUE_PART_OUTPUT, null, Event.PartEvent.newBuilder().setContentItemUri(item.getURI().stringValue()).build().toByteArray());
 
                 synchronized (this) {
                     this.notifyAll();
@@ -513,8 +510,8 @@ public class MICOBrokerImpl implements MICOBroker {
             URIImpl partUri = new URIImpl(analysisResponse.getObjectUri());
             String serviceId = analysisResponse.getServiceId();
             try{
-                String mimetype = persistenceService.getContentItem(itemUri)
-                    .getContentPart(partUri).getType();
+                String mimetype = persistenceService.getItem(itemUri)
+                    .getPart(partUri).getType();
                 if (mimetype != null){
                     TypeDescriptor newState = dependencies.getState(mimetype);
                     state.addState(partUri, newState);

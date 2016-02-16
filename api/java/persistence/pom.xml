@@ -128,12 +128,6 @@
             <artifactId>sesame-repository-sparql</artifactId>
         </dependency>
 
-        <!-- Read/Write API -->
-        <dependency>
-            <groupId>com.github.anno4j</groupId>
-            <artifactId>anno4j-ontologies-mico</artifactId>
-        </dependency>
-
         <!-- JUnit Testing Libraries -->
         <dependency>
             <groupId>junit</groupId>
@@ -165,6 +159,11 @@
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-rio-turtle</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>eu.mico-project.platform</groupId>
+            <artifactId>mmm-anno4j</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
     </dependencies>

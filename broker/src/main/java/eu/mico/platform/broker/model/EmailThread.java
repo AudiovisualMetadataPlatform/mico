@@ -1,12 +1,9 @@
 package eu.mico.platform.broker.model;
 
-import com.github.anno4j.persistence.PersistenceService;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.service.EmailService;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Item;
 import org.apache.commons.mail.EmailException;
-
-import javax.ws.rs.core.Response;
 
 /**
  * @author Thomas Kurz (tkurz@apache.org)
@@ -19,15 +16,15 @@ public class EmailThread extends Thread {
 
     private String email;
     private MICOBroker broker;
-    private ContentItem contentItem;
+    private Item item;
     private long start;
     private String ciName;
 
-    public EmailThread(String email, String ciName, MICOBroker broker, ContentItem contentItem) {
+    public EmailThread(String email, String ciName, MICOBroker broker, Item item) {
         super();
         this.email = email;
         this.broker = broker;
-        this.contentItem = contentItem;
+        this.item = item;
         this.ciName = ciName;
         this.start = System.currentTimeMillis();
     }
@@ -38,9 +35,9 @@ public class EmailThread extends Thread {
 
             while(start + timeout > System.currentTimeMillis()) {
 
-                ContentItemState state = broker.getStates().get(contentItem.getURI().stringValue());
+                ItemState state = broker.getStates().get(item.getURI().stringValue());
                 if(state != null && state.isFinalState()) {
-                    EmailService.sendEmail(email, "Analysis finished", "Hi!\n\nThe analysis for '%s' has been finished. You can get your results here:\n\nhttp://demo3.mico-project.eu/#/video?uri=%s\n\nYour MICO team", ciName, contentItem.getURI().stringValue());
+                    EmailService.sendEmail(email, "Analysis finished", "Hi!\n\nThe analysis for '%s' has been finished. You can get your results here:\n\nhttp://demo3.mico-project.eu/#/video?uri=%s\n\nYour MICO team", ciName, item.getURI().stringValue());
                     return;
                 }
                 sleep(timestep);

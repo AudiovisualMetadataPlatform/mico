@@ -14,11 +14,11 @@
 package eu.mico.platform.broker.webservices;
 
 import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.model.ContentItemState;
+import eu.mico.platform.broker.model.ItemState;
 import eu.mico.platform.broker.model.ServiceDescriptor;
 import eu.mico.platform.broker.model.Transition;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Item;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileSystemException;
@@ -107,7 +107,7 @@ public class StatusWebService {
         List<Map<String,Object>> result = new ArrayList<>();
         if(itemUri == null) {
             // retrieve a list of all items
-            for(Map.Entry<String, ContentItemState> state : broker.getStates().entrySet()) {
+            for(Map.Entry<String, ItemState> state : broker.getStates().entrySet()) {
                 result.add(wrapContentItemStatus(state.getKey(),state.getValue(),showParts));
             }
             Collections.sort(result, new Comparator<Map<String,Object>>() {
@@ -135,7 +135,7 @@ public class StatusWebService {
         return result;
     }
 
-    private Map<String,Object> wrapContentItemStatus(String uri, ContentItemState state, boolean showParts) throws RepositoryException {
+    private Map<String,Object> wrapContentItemStatus(String uri, ItemState state, boolean showParts) throws RepositoryException {
         Map<String,Object> sprops = new HashMap<>();
         sprops.put("uri", uri);
         sprops.put("finished", state.isFinalState() ? "true" : "false");
@@ -143,9 +143,9 @@ public class StatusWebService {
 
         if(showParts) {
             List<Map<String, Object>> parts = new ArrayList<>();
-            ContentItem item = broker.getPersistenceService().getContentItem(new URIImpl(uri));
+            Item item = broker.getPersistenceService().getItem(new URIImpl(uri));
             if (item != null) {
-                for (Content part : item.listContentParts()) {
+                for (Part part : item.getParts()) {
                     parts.add(wrapContentStatus(state, part));
                 }
             }
@@ -155,7 +155,7 @@ public class StatusWebService {
         return sprops;
     }
 
-    private Map<String,Object> wrapContentStatus(ContentItemState state, Content part) throws RepositoryException {
+    private Map<String,Object> wrapContentStatus(ItemState state, Part part) throws RepositoryException {
         Map<String,Object> sprops = new HashMap<>();
         sprops.put("uri", part.getURI().stringValue());
         sprops.put("title", part.getProperty(DCTERMS.TITLE));
@@ -195,13 +195,13 @@ public class StatusWebService {
     @GET
     @Path("/download")
     public Response downloadPart(@QueryParam("itemUri") String itemUri, @QueryParam("partUri") String partUri) throws RepositoryException {
-        final ContentItem item = broker.getPersistenceService().getContentItem(new URIImpl(itemUri));
+        final Item item = broker.getPersistenceService().getItem(new URIImpl(itemUri));
         if(item == null) {
-            throw new NotFoundException("Content Item with URI " + itemUri + " not found in system");
+            throw new NotFoundException("Part Item with URI " + itemUri + " not found in system");
         }
-        final Content     part = item.getContentPart(new URIImpl(partUri));
+        final Part part = item.getPart(new URIImpl(partUri));
         if(part == null) {
-            throw new NotFoundException("Content Part with URI " + partUri + " not found in system");
+            throw new NotFoundException("Part Part with URI " + partUri + " not found in system");
         }
         try {
             final InputStream is = part.getInputStream();
@@ -215,7 +215,7 @@ public class StatusWebService {
 
                 return Response.ok(entity, part.getType()).build();
             } else {
-                throw new NotFoundException("Content Part with URI " + partUri + " has no binary content");
+                throw new NotFoundException("Part Part with URI " + partUri + " has no binary content");
             }
         } catch (FileSystemException e) {
             return Response.serverError().entity(e.getMessage()).build();

@@ -21,8 +21,8 @@ import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Item;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.vfs2.FileSystemOptions;
 import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
@@ -133,11 +133,11 @@ public abstract class BaseBrokerTest {
         }
 
         @Override
-        public void call(AnalysisResponse resp, ContentItem ci, URI object) throws AnalysisException, IOException {
+        public void call(AnalysisResponse resp, Item ci, URI object) throws AnalysisException, IOException {
             log.info("mock analysis request for content item {}, object {}", ci.getURI(), object);
-            Content c = null;
+            Part c = null;
             try {
-                c = ci.createContentPart();
+                c = ci.createPart();
                 c.setType(getProvides());
 
                 resp.sendMessage(ci,c.getURI());

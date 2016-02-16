@@ -31,8 +31,8 @@ import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.repository.RepositoryException;
 
 import de.fraunhofer.idmt.camel.MicoCamel;
-import eu.mico.platform.anno4j.model.impl.body.MultiMediaBody;
-import eu.mico.platform.anno4j.model.impl.micotarget.InitialTarget;
+import eu.mico.platform.anno4j.model.impl.bodymmm.MultiMediaBody;
+import eu.mico.platform.anno4j.model.impl.targetmmm.InitialTarget;
 import eu.mico.platform.persistence.metadata.MICOProvenance;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;

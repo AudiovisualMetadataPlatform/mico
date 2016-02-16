@@ -1,8 +1,8 @@
 package eu.mico.platform.event.test.mock;
 
 import eu.mico.platform.event.api.AnalysisResponse;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Item;
 
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.URI;
@@ -28,22 +28,22 @@ public class AnalysisResponseCollector implements AnalysisResponse {
     }
 
     @Override
-    public void sendMessage(ContentItem ci, URI object) throws IOException {
+    public void sendMessage(Item ci, URI object) throws IOException {
         try {
             log.debug("sent message about {}", object.stringValue());
-            final Content content = ci.getContentPart(object);
-            responses.put(object, IOUtils.toString(content.getInputStream()));
+            final Part part = ci.getPart(object);
+            responses.put(object, IOUtils.toString(part.getInputStream()));
         } catch (RepositoryException e) {
             log.error("Repository Exception: {}", e.getMessage(), e);
         }
     }
 
     @Override
-    public void sendFinish(ContentItem ci, URI object) throws IOException {
+    public void sendFinish(Item ci, URI object) throws IOException {
         try {
             log.debug("sent message about {}", object.stringValue());
-            final Content content = ci.getContentPart(object);
-            responses.put(object, IOUtils.toString(content.getInputStream()));
+            final Part part = ci.getPart(object);
+            responses.put(object, IOUtils.toString(part.getInputStream()));
         } catch (RepositoryException e) {
             log.error("Repository Exception: {}", e.getMessage(), e);
         }
@@ -54,21 +54,21 @@ public class AnalysisResponseCollector implements AnalysisResponse {
     }
 
     @Override
-    public void sendProgress(ContentItem ci, URI object, float progress)
+    public void sendProgress(Item ci, URI object, float progress)
             throws IOException {
         log.debug("sent progress message about {}", object.stringValue());
         progresses.put(object, String.valueOf(progress));
     }
 
     @Override
-    public void sendError(ContentItem ci, URI object, String msg, String desc)
+    public void sendError(Item ci, URI object, String msg, String desc)
             throws IOException {
         log.debug("sent error message about {}", object.stringValue());
         errors.put(object, msg);
     }
 
     @Override
-    public void sendNew(ContentItem ci, URI object)
+    public void sendNew(Item ci, URI object)
             throws IOException {
         // TODO Auto-generated method stub
         

@@ -128,6 +128,25 @@ public abstract class BaseMarmottaTest {
         }
     }
 
+    protected static void assertAsk(String askQuery) throws MalformedQueryException, QueryEvaluationException {
+        try {
+            RepositoryConnection conn = getFullConnection();
+            try {
+                conn.begin();
+
+                Assert.assertTrue(conn.prepareBooleanQuery(QueryLanguage.SPARQL,askQuery).evaluate());
+
+                conn.commit();
+            } catch(RepositoryException ex) {
+                conn.rollback();
+            } finally {
+                conn.close();
+            }
+        } catch(RepositoryException ex) {
+            ex.printStackTrace();
+        }
+    }
+
     protected static void assertAskNot(String askQuery, final URI context) throws MalformedQueryException, QueryEvaluationException {
         try {
             RepositoryConnection conn = getFullConnection();
@@ -158,4 +177,24 @@ public abstract class BaseMarmottaTest {
         }
     }
 
+    protected static void assertAskNot(String askQuery) throws MalformedQueryException, QueryEvaluationException {
+        try {
+            RepositoryConnection conn = getFullConnection();
+            try {
+                conn.begin();
+
+                BooleanQuery q = conn.prepareBooleanQuery(QueryLanguage.SPARQL,askQuery);
+
+                Assert.assertTrue(!q.evaluate());
+
+                conn.commit();
+            } catch(RepositoryException ex) {
+                conn.rollback();
+            } finally {
+                conn.close();
+            }
+        } catch(RepositoryException ex) {
+            ex.printStackTrace();
+        }
+    }
 }

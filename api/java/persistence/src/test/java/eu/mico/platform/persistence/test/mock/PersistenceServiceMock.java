@@ -1,7 +1,7 @@
 package eu.mico.platform.persistence.test.mock;
 
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Metadata;
 import org.openrdf.model.URI;
 import org.openrdf.repository.RepositoryException;
@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public class PersistenceServiceMock implements PersistenceService {
 
-    private Map<URI, ContentItem> contentItems;
+    private Map<URI, Item> contentItems;
 
     public PersistenceServiceMock() {
         contentItems = new HashMap<>();
@@ -25,31 +25,31 @@ public class PersistenceServiceMock implements PersistenceService {
     }
 
     @Override
-    public ContentItem createContentItem() throws RepositoryException {
-        final ContentItemMock ci = new ContentItemMock(UUID.randomUUID().toString());
+    public Item createItem() throws RepositoryException {
+        final ItemMock ci = new ItemMock(UUID.randomUUID().toString());
         contentItems.put(ci.getURI(), ci);
         return ci;
     }
 
     @Override
-    public ContentItem createContentItem(URI id) throws RepositoryException {
-        final ContentItemMock ci = new ContentItemMock(id);
+    public Item createItem(URI id) throws RepositoryException {
+        final ItemMock ci = new ItemMock(id);
         contentItems.put(ci.getURI(), ci);
         return ci;
     }
 
     @Override
-    public ContentItem getContentItem(URI id) throws RepositoryException {
+    public Item getItem(URI id) throws RepositoryException {
         return contentItems.get(id);
     }
 
     @Override
-    public void deleteContentItem(URI id) throws RepositoryException {
+    public void deleteItem(URI id) throws RepositoryException {
         contentItems.remove(id);
     }
 
     @Override
-    public Iterable<ContentItem> getContentItems() throws RepositoryException {
+    public Iterable<Item> getItems() throws RepositoryException {
         return Collections.unmodifiableCollection(contentItems.values());
     }
 

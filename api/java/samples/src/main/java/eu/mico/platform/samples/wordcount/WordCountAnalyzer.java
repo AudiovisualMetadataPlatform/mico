@@ -13,16 +13,16 @@
  */
 package eu.mico.platform.samples.wordcount;
 
-import eu.mico.platform.anno4j.model.impl.body.MultiMediaBody;
-import eu.mico.platform.anno4j.model.impl.micotarget.InitialTarget;
+import eu.mico.platform.anno4j.model.impl.bodymmm.MultiMediaBody;
+import eu.mico.platform.anno4j.model.impl.targetmmm.InitialTarget;
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.metadata.MICOProvenance;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Item;
 
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.URI;
@@ -83,14 +83,14 @@ public class WordCountAnalyzer implements AnalysisService {
     }
 
     @Override
-    public void call(AnalysisResponse analysisResponse, ContentItem contentItem, URI uri) throws AnalysisException, IOException {
+    public void call(AnalysisResponse analysisResponse, Item item, URI uri) throws AnalysisException, IOException {
         try {
             log.info("Retrieved analysis call for {}", uri);
-            // get the content part with the given URI
-            Content content = contentItem.getContentPart(uri);
+            // get the part part with the given URI
+            Part part = item.getPart(uri);
 
             // get the input stream and read it into a string
-            String text = IOUtils.toString(content.getInputStream(), "utf-8");
+            String text = IOUtils.toString(part.getInputStream(), "utf-8");
             log.debug("Loaded text of {} to count words", uri);
 
             // count the words using a regular expression pattern
@@ -98,9 +98,9 @@ public class WordCountAnalyzer implements AnalysisService {
             Matcher m = p_wordcount.matcher(text);
 
             // we are progressing ... inform broker
-            analysisResponse.sendProgress(contentItem, uri, 0.25f);
+            analysisResponse.sendProgress(item, uri, 0.25f);
             if (simulateSlow == true) {
-                simulateLongTask(analysisResponse, contentItem, uri);
+                simulateLongTask(analysisResponse, item, uri);
             }
 
             int count;
@@ -108,12 +108,12 @@ public class WordCountAnalyzer implements AnalysisService {
 
             log.debug("Countend {} words in {}", count, uri);
 
-            // create a new content part for assigning the metadata
-            Content result = contentItem.createContentPart();
+            // create a new part part for assigning the metadata
+            Part result = item.createPart();
             result.setType(getProvides());
-            result.setRelation(DCTERMS.CREATOR, getServiceID());  // set the service ID as provenance information for the new content part
-            result.setRelation(DCTERMS.SOURCE, uri);              // set the analyzed content part as source for the new content part
-            result.setProperty(DCTERMS.CREATED, isodate.format(new Date())); // set the created date for the new content part
+            result.setRelation(DCTERMS.CREATOR, getServiceID());  // set the service ID as provenance information for the new part part
+            result.setRelation(DCTERMS.SOURCE, uri);              // set the analyzed part part as source for the new part part
+            result.setProperty(DCTERMS.CREATED, isodate.format(new Date())); // set the created date for the new part part
 
             // add the wordcount as property
             result.setProperty(new URIImpl("http://www.mico-project.org/properties/wordcount"), Integer.toString(count));
@@ -130,9 +130,9 @@ public class WordCountAnalyzer implements AnalysisService {
             result.createAnnotation(multiMediaBody, null, provenance, target);
             
             // report newly available results to broker
-            analysisResponse.sendNew(contentItem, result.getURI());
+            analysisResponse.sendNew(item, result.getURI());
 
-            analysisResponse.sendFinish(contentItem, uri);
+            analysisResponse.sendFinish(item, uri);
             log.debug("Done for {}", uri);
         } catch (RepositoryException e) {
             log.error("error accessing metadata repository",e);
@@ -146,20 +146,20 @@ public class WordCountAnalyzer implements AnalysisService {
      * process
      * 
      * @param analysisResponse
-     * @param contentItem
+     * @param item
      * @param uri
      */
     private void simulateLongTask(AnalysisResponse analysisResponse,
-            ContentItem contentItem, URI uri) {
+                                  Item item, URI uri) {
         try {
             log.debug("debug is enabled, sleep 5 seconds and send next progress info");
             Thread.sleep(5000);
-            analysisResponse.sendProgress(contentItem, uri, 0.50f);
+            analysisResponse.sendProgress(item, uri, 0.50f);
             Thread.sleep(5000);
-            analysisResponse.sendProgress(contentItem, uri, 0.75f);
-            analysisResponse.sendProgress(contentItem, uri, 0.76f);
-            analysisResponse.sendProgress(contentItem, uri, 0.77f);
-            analysisResponse.sendProgress(contentItem, uri, 0.78f);
+            analysisResponse.sendProgress(item, uri, 0.75f);
+            analysisResponse.sendProgress(item, uri, 0.76f);
+            analysisResponse.sendProgress(item, uri, 0.77f);
+            analysisResponse.sendProgress(item, uri, 0.78f);
             log.debug("... progress updated, sleep 5 seconds again");
             Thread.sleep(5000);
         } catch (Exception e) {

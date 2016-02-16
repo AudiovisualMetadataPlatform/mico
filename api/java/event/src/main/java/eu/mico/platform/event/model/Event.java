@@ -4373,7 +4373,7 @@ public final class Event {
   }
 
   public interface ContentEventOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:mico.event.model.ContentEvent)
+      // @@protoc_insertion_point(interface_extends:mico.event.model.PartEvent)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -4383,7 +4383,7 @@ public final class Event {
     /**
      * <code>required string contentItemUri = 1;</code>
      */
-    java.lang.String getContentItemUri();
+    java.lang.String getItemUri();
     /**
      * <code>required string contentItemUri = 1;</code>
      */
@@ -4391,30 +4391,30 @@ public final class Event {
         getContentItemUriBytes();
   }
   /**
-   * Protobuf type {@code mico.event.model.ContentEvent}
+   * Protobuf type {@code mico.event.model.PartEvent}
    *
    * <pre>
    **
    * Notify the broker that a new content item is available in the system using the given URI.
    * </pre>
    */
-  public static final class ContentEvent extends
+  public static final class PartEvent extends
       com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:mico.event.model.ContentEvent)
+      // @@protoc_insertion_point(message_implements:mico.event.model.PartEvent)
       ContentEventOrBuilder {
-    // Use ContentEvent.newBuilder() to construct.
-    private ContentEvent(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+    // Use PartEvent.newBuilder() to construct.
+    private PartEvent(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private ContentEvent(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+    private PartEvent(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
 
-    private static final ContentEvent defaultInstance;
-    public static ContentEvent getDefaultInstance() {
+    private static final PartEvent defaultInstance;
+    public static PartEvent getDefaultInstance() {
       return defaultInstance;
     }
 
-    public ContentEvent getDefaultInstanceForType() {
+    public PartEvent getDefaultInstanceForType() {
       return defaultInstance;
     }
 
@@ -4424,7 +4424,7 @@ public final class Event {
         getUnknownFields() {
       return this.unknownFields;
     }
-    private ContentEvent(
+    private PartEvent(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -4474,21 +4474,21 @@ public final class Event {
         internalGetFieldAccessorTable() {
       return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ContentEvent_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              eu.mico.platform.event.model.Event.ContentEvent.class, eu.mico.platform.event.model.Event.ContentEvent.Builder.class);
+              PartEvent.class, PartEvent.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<ContentEvent> PARSER =
-        new com.google.protobuf.AbstractParser<ContentEvent>() {
-      public ContentEvent parsePartialFrom(
+    public static com.google.protobuf.Parser<PartEvent> PARSER =
+        new com.google.protobuf.AbstractParser<PartEvent>() {
+      public PartEvent parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ContentEvent(input, extensionRegistry);
+        return new PartEvent(input, extensionRegistry);
       }
     };
 
     @java.lang.Override
-    public com.google.protobuf.Parser<ContentEvent> getParserForType() {
+    public com.google.protobuf.Parser<PartEvent> getParserForType() {
       return PARSER;
     }
 
@@ -4504,7 +4504,7 @@ public final class Event {
     /**
      * <code>required string contentItemUri = 1;</code>
      */
-    public java.lang.String getContentItemUri() {
+    public java.lang.String getItemUri() {
       java.lang.Object ref = contentItemUri_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
@@ -4583,53 +4583,53 @@ public final class Event {
       return super.writeReplace();
     }
 
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+    public static PartEvent parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+    public static PartEvent parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(byte[] data)
+    public static PartEvent parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+    public static PartEvent parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(java.io.InputStream input)
+    public static PartEvent parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+    public static PartEvent parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseDelimitedFrom(java.io.InputStream input)
+    public static PartEvent parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseDelimitedFrom(
+    public static PartEvent parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+    public static PartEvent parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+    public static PartEvent parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -4638,7 +4638,7 @@ public final class Event {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(eu.mico.platform.event.model.Event.ContentEvent prototype) {
+    public static Builder newBuilder(PartEvent prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
@@ -4650,7 +4650,7 @@ public final class Event {
       return builder;
     }
     /**
-     * Protobuf type {@code mico.event.model.ContentEvent}
+     * Protobuf type {@code mico.event.model.PartEvent}
      *
      * <pre>
      **
@@ -4659,7 +4659,7 @@ public final class Event {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:mico.event.model.ContentEvent)
+        // @@protoc_insertion_point(builder_implements:mico.event.model.PartEvent)
         eu.mico.platform.event.model.Event.ContentEventOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
@@ -4670,10 +4670,10 @@ public final class Event {
           internalGetFieldAccessorTable() {
         return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ContentEvent_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                eu.mico.platform.event.model.Event.ContentEvent.class, eu.mico.platform.event.model.Event.ContentEvent.Builder.class);
+                PartEvent.class, PartEvent.Builder.class);
       }
 
-      // Construct using eu.mico.platform.event.model.Event.ContentEvent.newBuilder()
+      // Construct using eu.mico.platform.event.model.Event.PartEvent.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -4707,20 +4707,20 @@ public final class Event {
         return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ContentEvent_descriptor;
       }
 
-      public eu.mico.platform.event.model.Event.ContentEvent getDefaultInstanceForType() {
-        return eu.mico.platform.event.model.Event.ContentEvent.getDefaultInstance();
+      public PartEvent getDefaultInstanceForType() {
+        return PartEvent.getDefaultInstance();
       }
 
-      public eu.mico.platform.event.model.Event.ContentEvent build() {
-        eu.mico.platform.event.model.Event.ContentEvent result = buildPartial();
+      public PartEvent build() {
+        PartEvent result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public eu.mico.platform.event.model.Event.ContentEvent buildPartial() {
-        eu.mico.platform.event.model.Event.ContentEvent result = new eu.mico.platform.event.model.Event.ContentEvent(this);
+      public PartEvent buildPartial() {
+        PartEvent result = new PartEvent(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -4733,16 +4733,16 @@ public final class Event {
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof eu.mico.platform.event.model.Event.ContentEvent) {
-          return mergeFrom((eu.mico.platform.event.model.Event.ContentEvent)other);
+        if (other instanceof PartEvent) {
+          return mergeFrom((PartEvent)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(eu.mico.platform.event.model.Event.ContentEvent other) {
-        if (other == eu.mico.platform.event.model.Event.ContentEvent.getDefaultInstance()) return this;
+      public Builder mergeFrom(PartEvent other) {
+        if (other == PartEvent.getDefaultInstance()) return this;
         if (other.hasContentItemUri()) {
           bitField0_ |= 0x00000001;
           contentItemUri_ = other.contentItemUri_;
@@ -4764,11 +4764,11 @@ public final class Event {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        eu.mico.platform.event.model.Event.ContentEvent parsedMessage = null;
+        PartEvent parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (eu.mico.platform.event.model.Event.ContentEvent) e.getUnfinishedMessage();
+          parsedMessage = (PartEvent) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -4789,7 +4789,7 @@ public final class Event {
       /**
        * <code>required string contentItemUri = 1;</code>
        */
-      public java.lang.String getContentItemUri() {
+      public java.lang.String getItemUri() {
         java.lang.Object ref = contentItemUri_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
@@ -4837,7 +4837,7 @@ public final class Event {
        */
       public Builder clearContentItemUri() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        contentItemUri_ = getDefaultInstance().getContentItemUri();
+        contentItemUri_ = getDefaultInstance().getItemUri();
         onChanged();
         return this;
       }
@@ -4855,15 +4855,15 @@ public final class Event {
         return this;
       }
 
-      // @@protoc_insertion_point(builder_scope:mico.event.model.ContentEvent)
+      // @@protoc_insertion_point(builder_scope:mico.event.model.PartEvent)
     }
 
     static {
-      defaultInstance = new ContentEvent(true);
+      defaultInstance = new PartEvent(true);
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:mico.event.model.ContentEvent)
+    // @@protoc_insertion_point(class_scope:mico.event.model.PartEvent)
   }
 
   public interface DiscoveryEventOrBuilder extends

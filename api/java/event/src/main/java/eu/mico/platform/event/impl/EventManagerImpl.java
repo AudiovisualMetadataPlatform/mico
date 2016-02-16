@@ -24,8 +24,8 @@ import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.event.model.Event.MessageType;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.impl.PersistenceServiceImpl;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
+import eu.mico.platform.persistence.model.Item;
 
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -104,7 +104,7 @@ public class EventManagerImpl implements EventManager {
 
         getConfiguration();
         Preconditions.checkArgument(marmottaBaseUri.getPort() == 8080, "The marmotta port has to be 8080.");
-        this.persistenceService = new PersistenceServiceImpl(marmottaBaseUri, storageBaseUri);
+        this.persistenceService = new PersistenceServiceAnno4j(marmottaBaseUri, storageBaseUri);
 
         registryChannel = connection.createChannel();
 
@@ -230,9 +230,9 @@ public class EventManagerImpl implements EventManager {
      * @throws java.io.IOException
      */
     @Override
-    public void injectContentItem(ContentItem item) throws IOException {
+    public void injectItem(Item item) throws IOException {
         Channel chan = connection.createChannel();
-        chan.basicPublish("", EventManager.QUEUE_CONTENT_INPUT, null, Event.ContentEvent.newBuilder().setContentItemUri(item.getURI().stringValue()).build().toByteArray());
+        chan.basicPublish("", EventManager.QUEUE_CONTENT_INPUT, null, Event.PartEvent.newBuilder().setContentItemUri(item.getURI().stringValue()).build().toByteArray());
         chan.close();
     }
 
@@ -304,15 +304,15 @@ public class EventManagerImpl implements EventManager {
             }
 
             /** 
-             * @see eu.mico.platform.event.api.AnalysisResponse#sendMessage(eu.mico.platform.persistence.model.ContentItem, org.openrdf.model.URI)
-             * @deprecated use {@link #sendFinish(ContentItem, URI)} or one of the other sendXXXX() functions instead.
+             * @see eu.mico.platform.event.api.AnalysisResponse#sendMessage(Item, org.openrdf.model.URI)
+             * @deprecated use {@link #sendFinish(Item, URI)} or one of the other sendXXXX() functions instead.
              */
-            public void sendMessage(ContentItem ci, URI object) throws IOException {
+            public void sendMessage(Item ci, URI object) throws IOException {
                 sendFinish(ci, object);
             }
 
             @Override
-            public void sendFinish(ContentItem ci, URI object) throws IOException {
+            public void sendFinish(Item ci, URI object) throws IOException {
                 Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
                         .setContentItemUri(ci.getURI().stringValue())
                         .setObjectUri(object.stringValue())
@@ -323,8 +323,8 @@ public class EventManagerImpl implements EventManager {
             }
 
             @Override
-            public void sendProgress(ContentItem ci, URI object,
-                    float progress) throws IOException {
+            public void sendProgress(Item ci, URI object,
+                                     float progress) throws IOException {
                 long current = System.currentTimeMillis();
                 if (current < progressDeltaMS + progressSentMS){
                     // prevent broker from progress flooding and wait at least deltaMS millis
@@ -347,7 +347,7 @@ public class EventManagerImpl implements EventManager {
             }
 
             @Override
-            public void sendNew(ContentItem ci, URI object) throws IOException {
+            public void sendNew(Item ci, URI object) throws IOException {
                 Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
                         .setContentItemUri(ci.getURI().stringValue())
                         .setObjectUri(object.stringValue())
@@ -358,8 +358,8 @@ public class EventManagerImpl implements EventManager {
             }
 
             @Override
-            public void sendError(ContentItem ci, URI object, String msg,
-                    String desc) throws IOException {
+            public void sendError(Item ci, URI object, String msg,
+                                  String desc) throws IOException {
                 Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
                         .setContentItemUri(ci.getURI().stringValue())
                         .setObjectUri(object.stringValue())
@@ -413,7 +413,7 @@ public class EventManagerImpl implements EventManager {
             final AnalysisResponse response = new AnalysisResponseImpl(properties, replyProps);
 
             try {
-                final ContentItem ci = persistenceService.getContentItem(new URIImpl(analysisEvent.getContentItemUri()));
+                final Item ci = persistenceService.getItem(new URIImpl(analysisEvent.getContentItemUri()));
 
                 service.call(response, ci, new URIImpl(analysisEvent.getObjectUri()));
 

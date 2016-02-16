@@ -16,7 +16,7 @@ package eu.mico.platform.event.api.spring;
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.model.AnalysisException;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Item;
 import org.openrdf.model.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +84,7 @@ public class AnalyserProxy implements AnalysisService {
     }
 
     @Override
-    public void call(AnalysisResponse resp, ContentItem ci, URI uri) throws AnalysisException, IOException {
+    public void call(AnalysisResponse resp, Item ci, URI uri) throws AnalysisException, IOException {
         logger.info("Performing analyser method");
         analyser.call(resp, ci, uri);
     }

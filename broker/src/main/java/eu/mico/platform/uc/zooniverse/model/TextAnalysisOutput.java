@@ -1,8 +1,7 @@
 package eu.mico.platform.uc.zooniverse.model;
 
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Item;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -19,7 +18,7 @@ public class TextAnalysisOutput {
     public List topics;
     public List entities;
 
-    public TextAnalysisOutput(ContentItem ci) {
+    public TextAnalysisOutput(Item ci) {
         this.id = ci.getID();
     }
 
