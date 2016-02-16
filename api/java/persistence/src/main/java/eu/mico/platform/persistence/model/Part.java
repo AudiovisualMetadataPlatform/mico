@@ -17,7 +17,6 @@ import com.github.anno4j.model.Annotation;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Selector;
 import com.github.anno4j.model.Target;
-import com.github.anno4j.querying.Criteria;
 import eu.mico.platform.persistence.metadata.MICOProvenance;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
@@ -38,7 +37,7 @@ import java.util.List;
  * @author Andreas Eisenkolb
  * @author Horst Stadler
  */
-public interface Content {
+public interface Part extends Resource {
 
     /**
      * Return the internal id
@@ -49,7 +48,7 @@ public interface Content {
 
     /**
      *  Return the URI uniquely identifying this content part. The URI should be either a UUID or constructed in a way
-     *  that it derives from the ContentItem this part belongs to.
+     *  that it derives from the Item this part belongs to.
      * @return
      */
     URI getURI();
@@ -116,27 +115,26 @@ public interface Content {
      * Return the parent content item.
      * @return
      */
-    ContentItem getContentItem();
+    Item getContentItem();
 
     /**
      * Creates and persists the annotation object for the content part.
      * @return the created annotation object
     */
-    Annotation createAnnotation(Body body, Content source, MICOProvenance provenance, Selector selection) throws RepositoryException;
+    Annotation createAnnotation(Body body, Part source, MICOProvenance provenance, Selector selection) throws RepositoryException;
     /**
      * Creates and persists the annotation object for the content part.
      * @return the created annotation object
      */
-    Annotation createAnnotation(Body body, Content source, MICOProvenance provenance) throws RepositoryException;
+    Annotation createAnnotation(Body body, Part source, MICOProvenance provenance) throws RepositoryException;
 
     /**
      * Creates the annotation object for the first content part of a content item.
      * @return the created annotation object
      */
-    Annotation createAnnotation(Body body, Content source, MICOProvenance provenance, Target target) throws RepositoryException;
+    Annotation createAnnotation(Body body, Part source, MICOProvenance provenance, Target target) throws RepositoryException;
 
     /**
-     *
      * @return Returns all annotation objects that have a reference to the given content part.
      * @throws RepositoryException
      */

@@ -14,20 +14,19 @@
 package eu.mico.platform.persistence.model;
 
 import org.openrdf.model.URI;
-import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 
 import java.io.IOException;
 
 /**
- * Representation of a ContentItem. A ContentItem is a collection of ContentParts, e.g. an HTML page together with
+ * Representation of a Item. A Item is a collection of ContentParts, e.g. an HTML page together with
  * its embedded images. ContentParts can be either original content or created during analysis. For compatibility
  * with the Linked Data platform, its RDF type is ldp:BasicContainer
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  * @author Horst Stadler
  */
-public interface ContentItem {
+public interface Item extends Resource {
 
     /**
      * Return the unique identifier (UUID) for this content item. The UUID should be built in a way that it is globally
@@ -83,7 +82,7 @@ public interface ContentItem {
      *
      * @return a handle to a ContentPart object that is suitable for reading and updating
      */
-    public Content createContentPart() throws RepositoryException;
+    public Part createPart() throws RepositoryException;
 
     /**
      * @deprecated Will be removed in favour of server generated IDs (UUIDs).
@@ -96,7 +95,7 @@ public interface ContentItem {
      */
 
     @Deprecated
-    public Content createContentPart(URI uri) throws RepositoryException;
+    public Part createPart(URI uri) throws RepositoryException;
 
     /**
      * Return a handle to the ContentPart with the given URI, or null in case the content item does not have this
@@ -105,7 +104,7 @@ public interface ContentItem {
      * @param uri the URI of the content part to return
      * @return a handle to a ContentPart object that is suitable for reading and updating
      */
-    public Content getContentPart(URI uri) throws RepositoryException;
+    public Part getPart(URI uri) throws RepositoryException;
 
     /**
      * Remove the content part with the given URI in case it exists and is a part of this content item. Otherwise do
@@ -113,13 +112,13 @@ public interface ContentItem {
      *
      * @param uri the URI of the content part to delete
      */
-    public void deleteContent(URI uri) throws RepositoryException, IOException;
+    public void deletePart(URI uri) throws RepositoryException, IOException;
 
     /**
      * Return an iterator over all content parts contained in this content item.
      *
      * @return an iterable that (lazily) iterates over the content parts
      */
-    public Iterable<Content> listContentParts() throws RepositoryException;
+    public Iterable<Part> listParts() throws RepositoryException;
 
 }

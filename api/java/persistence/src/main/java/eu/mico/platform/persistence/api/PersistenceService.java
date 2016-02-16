@@ -13,7 +13,7 @@
  */
 package eu.mico.platform.persistence.api;
 
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Metadata;
 import org.openrdf.model.URI;
 import org.openrdf.repository.RepositoryException;
@@ -38,37 +38,37 @@ public interface PersistenceService {
      * Create a new content item with a random URI and return it. The content item should be suitable for reading and
      * updating and write all updates to the underlying low-level persistence layer.
      *
-     * @return a handle to the newly created ContentItem
+     * @return a handle to the newly created Item
      */
-    public ContentItem createContentItem() throws RepositoryException;
+    public Item createItem() throws RepositoryException;
 
     /**
      * Create a new content item with the given URI and return it. The content item should be suitable for reading and
      * updating and write all updates to the underlying low-level persistence layer.
      *
-     * @return a handle to the newly created ContentItem
+     * @return a handle to the newly created Item
      */
-    public ContentItem createContentItem(URI id) throws RepositoryException;
+    public Item createItem(URI id) throws RepositoryException;
 
 
     /**
      * Return the content item with the given URI if it exists. The content item should be suitable for reading and
      * updating and write all updates to the underlying low-level persistence layer.
      *
-     * @return a handle to the ContentItem with the given URI, or null if it does not exist
+     * @return a handle to the Item with the given URI, or null if it does not exist
      */
-    public ContentItem getContentItem(URI id) throws RepositoryException;
+    public Item getItem(URI id) throws RepositoryException;
 
     /**
      * Delete the content item with the given URI. If the content item does not exist, do nothing.
      */
-    public void deleteContentItem(URI id) throws RepositoryException;
+    public void deleteItem(URI id) throws RepositoryException;
 
     /**
      * Return an iterator over all currently available content items.
      *
      * @return iterable
      */
-    public Iterable<ContentItem> getContentItems() throws RepositoryException;
+    public Iterable<Item> getItems() throws RepositoryException;
 
 }

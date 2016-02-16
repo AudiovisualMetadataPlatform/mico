@@ -21,15 +21,13 @@ import com.github.anno4j.model.Target;
 import com.github.anno4j.model.impl.target.SpecificResource;
 import com.github.anno4j.querying.Comparison;
 import com.github.anno4j.querying.Criteria;
-import com.github.anno4j.querying.QueryService;
 import com.google.common.base.Preconditions;
 import eu.mico.platform.persistence.metadata.MICOProvenance;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Metadata;
 import eu.mico.platform.storage.api.StorageService;
 import eu.mico.platform.storage.impl.StorageServiceBuilder;
-import org.apache.marmotta.ldpath.parser.ParseException;
 import org.openrdf.model.Model;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -45,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -57,18 +54,18 @@ import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
-public class MarmottaContent implements Content {
+public class MarmottaPart implements Part {
 
-    private static Logger log = LoggerFactory.getLogger(MarmottaContent.class);
+    private static Logger log = LoggerFactory.getLogger(MarmottaPart.class);
 
-    private MarmottaContentItem item;
+    private MarmottaItem item;
 
     private java.net.URI marmottaBase;
     private StorageService storage;
     private String id;
 
 
-    public MarmottaContent(MarmottaContentItem item, java.net.URI marmottaBase, java.net.URI storageHost, String id) {
+    public MarmottaPart(MarmottaItem item, java.net.URI marmottaBase, java.net.URI storageHost, String id) {
         this.item = item;
         this.marmottaBase = marmottaBase;
         this.id = id;
@@ -76,7 +73,7 @@ public class MarmottaContent implements Content {
     }
 
 
-    protected MarmottaContent(MarmottaContentItem item, java.net.URI marmottaBase, java.net.URI storageHost, URI uri) {
+    protected MarmottaPart(MarmottaItem item, java.net.URI marmottaBase, java.net.URI storageHost, URI uri) {
         Preconditions.checkArgument(URITools.validBaseURI(uri.stringValue(), marmottaBase.toString()), "The content part URI \"" + uri.stringValue() + "\" must match the marmottaBase \"" + marmottaBase.toString() + "\"");
         this.item = item;
         this.marmottaBase = marmottaBase;
@@ -92,7 +89,7 @@ public class MarmottaContent implements Content {
 
     /**
      * Return the URI uniquely identifying this content part. The URI should be either a UUID or constructed in a way
-     * that it derives from the ContentItem this part belongs to.
+     * that it derives from the Item this part belongs to.
      *
      * @return
      */
@@ -284,26 +281,26 @@ public class MarmottaContent implements Content {
     }
 
     @Override
-    public ContentItem getContentItem() {
+    public Item getContentItem() {
         return item;
     }
 
     @Override
-    public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance) throws RepositoryException {
+    public Annotation createAnnotation(Body body, Part source, MICOProvenance provenance) throws RepositoryException {
         return createAnnotation(body, source, provenance, null, null);
     }
 
     @Override
-    public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance, Selector selection) throws RepositoryException {
+    public Annotation createAnnotation(Body body, Part source, MICOProvenance provenance, Selector selection) throws RepositoryException {
         return createAnnotation(body, source, provenance, selection, null);
     }
 
     @Override
-    public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance, Target target) throws RepositoryException {
+    public Annotation createAnnotation(Body body, Part source, MICOProvenance provenance, Target target) throws RepositoryException {
         return createAnnotation(body, source, provenance, null, target);
     }
 
-    public Annotation createAnnotation(Body body, Content source, MICOProvenance provenance, Selector selection, Target target) throws RepositoryException {
+    public Annotation createAnnotation(Body body, Part source, MICOProvenance provenance, Selector selection, Target target) throws RepositoryException {
         Annotation annotation = new Annotation();
         annotation.setBody(body);
 
@@ -360,7 +357,7 @@ public class MarmottaContent implements Content {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        MarmottaContent that = (MarmottaContent) o;
+        MarmottaPart that = (MarmottaPart) o;
 
         if (!marmottaBase.equals(that.marmottaBase)) return false;
         if (!id.equals(that.id)) return false;

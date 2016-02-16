@@ -1,7 +1,7 @@
 package eu.mico.platform.persistence.util;
 
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Item;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 
@@ -33,22 +33,22 @@ public class IDUtils {
     }
 
     /**
-     * Generate random URI using the Content Item as base
+     * Generate random URI using the Part Item as base
      *
      * @param item parent content item
      * @return uri
      */
-    public static URI generatedRandomUri(ContentItem item) {
+    public static URI generatedRandomUri(Item item) {
         return new URIImpl(item.getURI().stringValue() + "/" + generatedRandomId());
     }
 
     /**
-     * Generate random URI using the Content Part as base
+     * Generate random URI using the Part Part as base
      *
      * @param part parent content part
      * @return uri
      */
-    public static URI generatedRandomUri(Content part) {
+    public static URI generatedRandomUri(Part part) {
         return new URIImpl(part.getURI().stringValue() + "/" + generatedRandomId());
     }
 

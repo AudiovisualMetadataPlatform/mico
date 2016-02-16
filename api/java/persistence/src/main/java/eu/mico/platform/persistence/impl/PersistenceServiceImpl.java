@@ -2,9 +2,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,8 +15,8 @@ package eu.mico.platform.persistence.impl;
 
 import com.github.anno4j.Anno4j;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Metadata;
 import eu.mico.platform.storage.util.VFSUtils;
 import org.openrdf.model.URI;
@@ -36,7 +36,7 @@ import static eu.mico.platform.persistence.util.SPARQLUtil.createNamed;
 
 /**
  * An implementation of the persistence service using an FTP file system
- * and a Marmotta triple store for representing content item data.
+ * and a Marmotta triple store for representing  item data.
  *
  * @author Sebastian Schaffert
  * @author Sergio Fernández
@@ -48,25 +48,25 @@ public class PersistenceServiceImpl implements PersistenceService {
 
     public static MICOIDGenerator idGenerator;
 
-    private java.net.URI marmottaServerUrl;
-    private java.net.URI contentUrl;
+    private java.net.URI marmottaServerURI;
+    private java.net.URI partURI;
 
     /**
      * Persistence service the default credentials
      *
      * @param host mico platform address
      */
-    public PersistenceServiceImpl(String host)throws java.net.URISyntaxException {
+    public PersistenceServiceImpl(String host) throws java.net.URISyntaxException {
         this(new java.net.URI("http://" + host + ":8080/marmotta"), new java.net.URI("hdfs://" + host));
     }
 
 
-    public PersistenceServiceImpl(java.net.URI marmottaServerUrl, java.net.URI contentUrl) {
-        System.setProperty("marmottaServerUrl", marmottaServerUrl.toString());
-        this.marmottaServerUrl = marmottaServerUrl.normalize();
-        this.contentUrl        = contentUrl.normalize();
+    public PersistenceServiceImpl(java.net.URI marmottaServerURI, java.net.URI partURI) {
+        System.setProperty("marmottaServerURI", marmottaServerURI.toString());
+        this.marmottaServerURI = marmottaServerURI.normalize();
+        this.partURI = partURI.normalize();
 
-        idGenerator = new MICOIDGenerator(marmottaServerUrl.toString());
+        idGenerator = new MICOIDGenerator(marmottaServerURI.toString());
 
         // configurate Anno4j
         try {
@@ -83,119 +83,119 @@ public class PersistenceServiceImpl implements PersistenceService {
 
     /**
      * Get a handle on the overall metadata storage of the persistence service. This can e.g. be used for querying
-     * about existing content items.
+     * about existing items.
      *
      * @return
      */
     @Override
     public Metadata getMetadata() throws RepositoryException {
-        return new MarmottaMetadata(marmottaServerUrl);
+        return new MarmottaMetadata(marmottaServerURI);
     }
 
     private java.net.URI getContext() {
-        return marmottaServerUrl;
+        return marmottaServerURI;
     }
 
     /**
-     * Create a new content item with a random URI and return it. The content item should be suitable for reading and
+     * Create a new item with a random URI and return it. The item should be suitable for reading and
      * updating and write all updates to the underlying low-level persistence layer.
      *
-     * @return a handle to the newly created ContentItem
+     * @return a handle to the newly created Item
      */
     @Override
-    public ContentItem createContentItem() throws RepositoryException {
+    public Item createItem() throws RepositoryException {
 
         UUID id = UUID.randomUUID();
-        URIImpl contentItemURI = new URIImpl(URITools.normalizeURI(marmottaServerUrl.toString() + "/" + id.toString()));
+        URIImpl itemURI = new URIImpl(URITools.normalizeURI(marmottaServerURI.toString() + "/" + id.toString()));
 
-        ContentItem ci = new MarmottaContentItem(marmottaServerUrl, contentUrl, contentItemURI);
+        Item ci = new MarmottaItem(marmottaServerURI, partURI, itemURI);
 
         Metadata m = getMetadata();
         try {
-            m.update(createNamed("createContentItem", of("g", marmottaServerUrl.toString(), "ci", ci.getURI().stringValue())));
+            m.update(createNamed("createItem", of("g", marmottaServerURI.toString(), "ci", ci.getURI().stringValue())));
 
             return ci;
         } catch (MalformedQueryException e) {
-            log.error("the SPARQL update was malformed:",e);
-            throw new RepositoryException("the SPARQL update was malformed",e);
+            log.error("the SPARQL update was malformed:", e);
+            throw new RepositoryException("the SPARQL update was malformed", e);
         } catch (UpdateExecutionException e) {
-            log.error("the SPARQL update could not be executed:",e);
-            throw new RepositoryException("the SPARQL update could not be executed",e);
+            log.error("the SPARQL update could not be executed:", e);
+            throw new RepositoryException("the SPARQL update could not be executed", e);
         } finally {
             m.close();
         }
     }
 
     /**
-     * Create a new content item with the given URI and return it. The content item should be suitable for reading and
+     * Create a new item with the given URI and return it. The item should be suitable for reading and
      * updating and write all updates to the underlying low-level persistence layer.
      *
-     * @param id the URI of the ContentItem
-     * @return a handle to the newly created ContentItem
+     * @param id the URI of the Item
+     * @return a handle to the newly created Item
      */
     @Override
-    public ContentItem createContentItem(URI id) throws RepositoryException {
-        ContentItem ci = new MarmottaContentItem(marmottaServerUrl,contentUrl,id);
+    public Item createItem(URI id) throws RepositoryException {
+        Item ci = new MarmottaItem(marmottaServerURI, partURI, id);
 
         Metadata m = getMetadata();
         try {
-            m.update(createNamed("createContentItem", of("g", marmottaServerUrl.toString(), "ci", ci.getURI().stringValue())));
+            m.update(createNamed("createItem", of("g", marmottaServerURI.toString(), "ci", ci.getURI().stringValue())));
             return ci;
         } catch (MalformedQueryException e) {
-            log.error("the SPARQL update was malformed:",e);
-            throw new RepositoryException("the SPARQL update was malformed",e);
+            log.error("the SPARQL update was malformed:", e);
+            throw new RepositoryException("the SPARQL update was malformed", e);
         } catch (UpdateExecutionException e) {
-            log.error("the SPARQL update could not be executed:",e);
-            throw new RepositoryException("the SPARQL update could not be executed",e);
+            log.error("the SPARQL update could not be executed:", e);
+            throw new RepositoryException("the SPARQL update could not be executed", e);
         } finally {
             m.close();
         }
     }
 
     /**
-     * Return the content item with the given URI if it exists. The content item should be suitable for reading and
+     * Return the item with the given URI if it exists. The item should be suitable for reading and
      * updating and write all updates to the underlying low-level persistence layer.
      *
      * @param id
-     * @return a handle to the ContentItem with the given URI, or null if it does not exist
+     * @return a handle to the Item with the given URI, or null if it does not exist
      */
     @Override
-    public ContentItem getContentItem(URI id) throws RepositoryException {
+    public Item getItem(URI id) throws RepositoryException {
         // check if part exists
         Metadata m = getMetadata();
 
         try {
-            if(m.ask(createNamed("askContentItem", of("g", marmottaServerUrl.toString(), "ci", id.stringValue())))) {
-                return new MarmottaContentItem(marmottaServerUrl, contentUrl,id);
+            if (m.ask(createNamed("askItem", of("g", marmottaServerURI.toString(), "ci", id.stringValue())))) {
+                return new MarmottaItem(marmottaServerURI, partURI, id);
             } else {
                 return null;
             }
         } catch (MalformedQueryException e) {
-            log.error("the SPARQL query was malformed:",e);
-            throw new RepositoryException("the SPARQL query was malformed",e);
+            log.error("the SPARQL query was malformed:", e);
+            throw new RepositoryException("the SPARQL query was malformed", e);
         } catch (QueryEvaluationException e) {
-            log.error("the SPARQL query could not be executed:",e);
-            throw new RepositoryException("the SPARQL query could not be executed",e);
+            log.error("the SPARQL query could not be executed:", e);
+            throw new RepositoryException("the SPARQL query could not be executed", e);
         } finally {
             m.close();
         }
     }
 
     /**
-     * Delete the content item with the given URI. If the content item does not exist, do nothing.
+     * Delete the item with the given URI. If the item does not exist, do nothing.
      */
     @Override
-    public void deleteContentItem(URI id) throws RepositoryException {
+    public void deleteItem(URI id) throws RepositoryException {
 
         // TODO
-        // For now errors (non existing files) have to be ignored, as a content part must have a data part.
+        // For now errors (non existing files) have to be ignored, as a part must have a data part.
 
-        ContentItem contentItem = getContentItem(id);
-        for (Content contentPart : contentItem.listContentParts()) {
+        Item item = getItem(id);
+        for (Part part : item.listParts()) {
             try {
-                contentItem.deleteContent(contentPart.getURI());
+                item.deletePart(part.getURI());
             } catch (IOException e) {
-                log.error("Error deleting content part {} from storage: {}", contentPart.getURI().toString(), e);
+                log.error("Error deleting part {} from storage: {}", part.getURI().toString(), e);
             }
         }
 
@@ -203,19 +203,19 @@ public class PersistenceServiceImpl implements PersistenceService {
 
         try {
             // delete from global metadata first
-            m.update(createNamed("deleteContentItem", of("g", marmottaServerUrl.toString(), "ci", id.stringValue())));
+            m.update(createNamed("deleteItem", of("g", marmottaServerURI.toString(), "ci", id.stringValue())));
 
-            // delete the metadata, execution, and results context for the content item
-            m.update(createNamed("deleteGraph", of("g", id.stringValue() + MarmottaContentItem.SUFFIX_METADATA)));
-            m.update(createNamed("deleteGraph", of("g", id.stringValue() + MarmottaContentItem.SUFFIX_EXECUTION)));
-            m.update(createNamed("deleteGraph", of("g", id.stringValue() + MarmottaContentItem.SUFFIX_RESULT)));
+            // delete the metadata, execution, and results context for the item
+            m.update(createNamed("deleteGraph", of("g", id.stringValue() + MarmottaItem.SUFFIX_METADATA)));
+            m.update(createNamed("deleteGraph", of("g", id.stringValue() + MarmottaItem.SUFFIX_EXECUTION)));
+            m.update(createNamed("deleteGraph", of("g", id.stringValue() + MarmottaItem.SUFFIX_RESULT)));
 
         } catch (MalformedQueryException e) {
             log.error("the SPARQL update was malformed:", e);
-            throw new RepositoryException("the SPARQL update was malformed",e);
+            throw new RepositoryException("the SPARQL update was malformed", e);
         } catch (UpdateExecutionException e) {
             log.error("the SPARQL update could not be executed:", e);
-            throw new RepositoryException("the SPARQL update could not be executed",e);
+            throw new RepositoryException("the SPARQL update could not be executed", e);
         } finally {
             m.close();
         }
@@ -223,22 +223,22 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     /**
-     * Return an iterator over all currently available content items.
+     * Return an iterator over all currently available items.
      *
      * @return iterable
      */
     @Override
-    public Iterable<ContentItem> getContentItems() throws RepositoryException {
+    public Iterable<Item> getItems() throws RepositoryException {
         Metadata m = getMetadata();
 
         try {
-            final TupleQueryResult r = m.query(createNamed("listContentItems", of("g", marmottaServerUrl.toString())));
+            final TupleQueryResult r = m.query(createNamed("listItems", of("g", marmottaServerURI.toString())));
 
 
-            return new Iterable<ContentItem>() {
+            return new Iterable<Item>() {
                 @Override
-                public Iterator<ContentItem> iterator() {
-                    return new Iterator<ContentItem>() {
+                public Iterator<Item> iterator() {
+                    return new Iterator<Item>() {
                         @Override
                         public boolean hasNext() {
                             try {
@@ -249,13 +249,13 @@ public class PersistenceServiceImpl implements PersistenceService {
                         }
 
                         @Override
-                        public ContentItem next() {
+                        public Item next() {
                             try {
                                 BindingSet s = r.next();
 
                                 URI ci = (URI) s.getValue("p");
 
-                                return new MarmottaContentItem(marmottaServerUrl,contentUrl, ci);
+                                return new MarmottaItem(marmottaServerURI, partURI, ci);
 
                             } catch (QueryEvaluationException e) {
                                 return null;
@@ -272,10 +272,10 @@ public class PersistenceServiceImpl implements PersistenceService {
 
         } catch (MalformedQueryException e) {
             log.error("the SPARQL query was malformed:", e);
-            throw new RepositoryException("the SPARQL query was malformed",e);
+            throw new RepositoryException("the SPARQL query was malformed", e);
         } catch (QueryEvaluationException e) {
             log.error("the SPARQL query could not be executed:", e);
-            throw new RepositoryException("the SPARQL query could not be executed",e);
+            throw new RepositoryException("the SPARQL query could not be executed", e);
         } finally {
             m.close();
         }
