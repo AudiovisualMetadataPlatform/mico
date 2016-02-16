@@ -15,9 +15,14 @@ package eu.mico.platform;
 
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
+import eu.mico.platform.demo.ContentWebService;
+import eu.mico.platform.demo.DemoWebService;
+import eu.mico.platform.demo.DownloadWebService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.reco.RecoWebService;
+import eu.mico.platform.zooniverse.AnimalDetectionWebService;
+import eu.mico.platform.zooniverse.TextAnalysisWebService;
 import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +76,18 @@ public class ShowcaseApplication extends Application {
             manager.init();
 
             services = new HashSet<>();
+
+            //WP5
             services.add(new RecoWebService(manager, broker, marmottaBaseUri));
+
+            // Zooniverse
+            services.add(new AnimalDetectionWebService(manager, broker, marmottaBaseUri));
+            services.add(new TextAnalysisWebService(manager, broker, marmottaBaseUri));
+
+            //Demo
+            services.add(new DownloadWebService(manager,marmottaBaseUri));
+            services.add(new ContentWebService(manager, broker, marmottaBaseUri));
+            services.add(new DemoWebService(manager, broker, marmottaBaseUri));
 
         } catch (IOException ex) {
             log.error("could not initialise MICO broker, services not available (message: {})", ex.getMessage());

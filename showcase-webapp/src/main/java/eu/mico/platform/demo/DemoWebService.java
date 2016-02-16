@@ -1,4 +1,4 @@
-package eu.mico.platform.broker.webservices;
+package eu.mico.platform.demo;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;

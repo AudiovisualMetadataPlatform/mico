@@ -47,6 +47,7 @@
                             </manifest>
                         </archive>
                         <archiveClasses>false</archiveClasses>
+                        <attachClasses>true</attachClasses>
                     </configuration>
                 </plugin>
                 <plugin>
