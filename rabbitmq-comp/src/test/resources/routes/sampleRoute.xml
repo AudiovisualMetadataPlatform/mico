@@ -1,0 +1,26 @@
+<routes xmlns="http://camel.apache.org/schema/spring">
+	<!-- here we define the sample route -->
+	<route id="sample">
+		<from uri="direct:foo"/>
+		<to uri="mock:bar"/>
+	</route>
+
+	<route id="wordcount_jpg">
+		<from uri="direct:image_jpg"/>
+		<pipeline>
+			<to uri="mico-comp:vbox1?host=mico-platform&amp;user=mico&amp;password=mico&amp;serviceId=ocr-queue-jpg"/>
+			<to uri="mico-comp:vbox2?host=mico-platform&amp;user=mico&amp;password=mico&amp;serviceId=wordcount"/>
+			<to uri="mock:result_image_jpg"/>
+		</pipeline>
+	</route>
+
+	<route id="wordcount_png">
+		<from uri="direct:image_png"/>
+		<pipeline>
+			<to uri="mico-comp:vbox1?host=mico-platform&amp;user=mico&amp;password=mico&amp;serviceId=ocr-queue-png"/>
+			<to uri="mico-comp:vbox2?host=mico-platform&amp;user=mico&amp;password=mico&amp;serviceId=wordcount"/>
+			<to uri="mock:result_image_png"/>
+		</pipeline>
+	</route>
+
+</routes>

@@ -15,14 +15,18 @@ package eu.mico.platform.event.impl;
 
 import com.google.common.base.Preconditions;
 import com.rabbitmq.client.*;
+import com.rabbitmq.client.AMQP.BasicProperties;
+
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event;
+import eu.mico.platform.event.model.Event.MessageType;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceImpl;
 import eu.mico.platform.persistence.model.ContentItem;
+
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -286,6 +290,88 @@ public class EventManagerImpl implements EventManager {
 
     private class AnalysisConsumer extends DefaultConsumer {
 
+        private final class AnalysisResponseImpl implements
+                AnalysisResponse {
+            private final BasicProperties properties;
+            private final BasicProperties replyProps;
+            private long progressSentMS = 0; 
+            private final long progressDeltaMS = 1000;
+
+            private AnalysisResponseImpl(BasicProperties properties,
+                    BasicProperties replyProps) {
+                this.properties = properties;
+                this.replyProps = replyProps;
+            }
+
+            /** 
+             * @see eu.mico.platform.event.api.AnalysisResponse#sendMessage(eu.mico.platform.persistence.model.ContentItem, org.openrdf.model.URI)
+             * @deprecated use {@link #sendFinish(ContentItem, URI)} or one of the other sendXXXX() functions instead.
+             */
+            public void sendMessage(ContentItem ci, URI object) throws IOException {
+                sendFinish(ci, object);
+            }
+
+            @Override
+            public void sendFinish(ContentItem ci, URI object) throws IOException {
+                Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
+                        .setContentItemUri(ci.getURI().stringValue())
+                        .setObjectUri(object.stringValue())
+                        .setServiceId(service.getServiceID().stringValue())
+                        .setType(MessageType.FINISH).build();
+
+                getChannel().basicPublish("", properties.getReplyTo(), replyProps, responseEvent.toByteArray());
+            }
+
+            @Override
+            public void sendProgress(ContentItem ci, URI object,
+                    float progress) throws IOException {
+                long current = System.currentTimeMillis();
+                if (current < progressDeltaMS + progressSentMS){
+                    // prevent broker from progress flooding and wait at least deltaMS millis
+                    log.trace("suppress sending progress: {} for object: {}",progress, object);
+                    return;
+                }
+                log.trace("sending progress of: {} for object: {}",progress, object);
+                if (progress > 1.0001f){
+                    log.warn("progress should not be grater then 1.0 but is: {}", progress);
+                }
+                Event.AnalyzeProgress responseEvent = Event.AnalyzeProgress.newBuilder()
+                        .setContentItemUri(ci.getURI().stringValue())
+                        .setObjectUri(object.stringValue())
+                        .setServiceId(service.getServiceID().stringValue())
+                        .setType(MessageType.PROGRESS)
+                        .setProgress(progress).build();
+
+                getChannel().basicPublish("", properties.getReplyTo(), replyProps, responseEvent.toByteArray());
+                progressSentMS = current;
+            }
+
+            @Override
+            public void sendNew(ContentItem ci, URI object) throws IOException {
+                Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
+                        .setContentItemUri(ci.getURI().stringValue())
+                        .setObjectUri(object.stringValue())
+                        .setServiceId(service.getServiceID().stringValue())
+                        .setType(MessageType.NEW_PART).build();
+
+                getChannel().basicPublish("", properties.getReplyTo(), replyProps, responseEvent.toByteArray());
+            }
+
+            @Override
+            public void sendError(ContentItem ci, URI object, String msg,
+                    String desc) throws IOException {
+                Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
+                        .setContentItemUri(ci.getURI().stringValue())
+                        .setObjectUri(object.stringValue())
+                        .setServiceId(service.getServiceID().stringValue())
+                        .setType(MessageType.ERROR)
+                        .setMessage(msg)
+                        .setDescription(desc).build();
+
+                getChannel().basicPublish("", properties.getReplyTo(), replyProps, responseEvent.toByteArray());
+            }
+        }
+
         private AnalysisService service;
         private String          queueName;
 
@@ -324,17 +410,7 @@ public class EventManagerImpl implements EventManager {
                     .correlationId(properties.getCorrelationId())
                     .build();
 
-            final AnalysisResponse response = new AnalysisResponse() {
-                @Override
-                public void sendMessage(ContentItem ci, URI object) throws IOException {
-                    Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
-                            .setContentItemUri(ci.getURI().stringValue())
-                            .setObjectUri(object.stringValue())
-                            .setServiceId(service.getServiceID().stringValue()).build();
-
-                    getChannel().basicPublish("", properties.getReplyTo(), replyProps, responseEvent.toByteArray());
-                }
-            };
+            final AnalysisResponse response = new AnalysisResponseImpl(properties, replyProps);
 
             try {
                 final ContentItem ci = persistenceService.getContentItem(new URIImpl(analysisEvent.getContentItemUri()));

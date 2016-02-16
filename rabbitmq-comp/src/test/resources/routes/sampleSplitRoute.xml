@@ -1,0 +1,30 @@
+<routes xmlns="http://camel.apache.org/schema/spring" >
+
+    <route id="sample-part-one">
+        <from uri="direct:test_split" />
+        <pipeline>
+            <to uri="mico-comp://fooA?serviceId=A-B-queue"/>
+            <to uri="mico-comp://fooB?serviceId=B-C-queue"/>
+        </pipeline>
+        <multicast>
+            <to uri="direct:split2"/>
+            <to uri="direct:split3"/>
+        </multicast>
+    </route>
+    <route id="sample-part-two">
+        <from uri="direct:split2"/>
+        <pipeline>
+            <to uri="mico-comp://fooC1?serviceId=C1-D-queue"/>
+            <to uri="mico-comp://fooD?serviceId=D-E-queue"/>
+            <to uri="mock:result_split2"/>
+        </pipeline>
+    </route>
+
+    <route id="sample-part-three">
+        <from uri="direct:split3"/>
+        <to uri="mico-comp://fooC2?serviceId=C2-F-queue"/>
+        <to uri="mock:result_split3"/>
+    </route>
+    
+
+</routes>

@@ -13,13 +13,17 @@
  */
 package eu.mico.platform.samples.wordcount;
 
+import eu.mico.platform.anno4j.model.impl.body.MultiMediaBody;
+import eu.mico.platform.anno4j.model.impl.micotarget.InitialTarget;
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
+import eu.mico.platform.persistence.metadata.MICOProvenance;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
+
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -48,6 +52,8 @@ import java.util.regex.Pattern;
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
 public class WordCountAnalyzer implements AnalysisService {
+    
+    private static Boolean simulateSlow = true;
 
     private static Logger log = LoggerFactory.getLogger(WordCountAnalyzer.class);
 
@@ -91,6 +97,12 @@ public class WordCountAnalyzer implements AnalysisService {
             Pattern p_wordcount = Pattern.compile("\\w+");
             Matcher m = p_wordcount.matcher(text);
 
+            // we are progressing ... inform broker
+            analysisResponse.sendProgress(contentItem, uri, 0.25f);
+            if (simulateSlow == true) {
+                simulateLongTask(analysisResponse, contentItem, uri);
+            }
+
             int count;
             for(count = 0; m.find(); count++);
 
@@ -105,15 +117,53 @@ public class WordCountAnalyzer implements AnalysisService {
 
             // add the wordcount as property
             result.setProperty(new URIImpl("http://www.mico-project.org/properties/wordcount"), Integer.toString(count));
+            
+            // add wordcount as Mico Annotation
+            MICOProvenance provenance = new MICOProvenance();
+            provenance.setExtractorName(getServiceID().stringValue());
 
+            MultiMediaBody multiMediaBody = new MultiMediaBody();
+            multiMediaBody.setFormat("Mico:Wordcount");
+
+            InitialTarget target = new InitialTarget(uri.toString());
+
+            result.createAnnotation(multiMediaBody, null, provenance, target);
+            
             // report newly available results to broker
-            analysisResponse.sendMessage(contentItem, result.getURI());
+            analysisResponse.sendNew(contentItem, result.getURI());
 
+            analysisResponse.sendFinish(contentItem, uri);
             log.debug("Done for {}", uri);
         } catch (RepositoryException e) {
             log.error("error accessing metadata repository",e);
 
             throw new AnalysisException("error accessing metadata repository",e);
+        }
+    }
+
+    /**
+     * This function uses Thread.sleep() to simulate long running analyze
+     * process
+     * 
+     * @param analysisResponse
+     * @param contentItem
+     * @param uri
+     */
+    private void simulateLongTask(AnalysisResponse analysisResponse,
+            ContentItem contentItem, URI uri) {
+        try {
+            log.debug("debug is enabled, sleep 5 seconds and send next progress info");
+            Thread.sleep(5000);
+            analysisResponse.sendProgress(contentItem, uri, 0.50f);
+            Thread.sleep(5000);
+            analysisResponse.sendProgress(contentItem, uri, 0.75f);
+            analysisResponse.sendProgress(contentItem, uri, 0.76f);
+            analysisResponse.sendProgress(contentItem, uri, 0.77f);
+            analysisResponse.sendProgress(contentItem, uri, 0.78f);
+            log.debug("... progress updated, sleep 5 seconds again");
+            Thread.sleep(5000);
+        } catch (Exception e) {
+            log.warn(e.getMessage());
         }
     }
 

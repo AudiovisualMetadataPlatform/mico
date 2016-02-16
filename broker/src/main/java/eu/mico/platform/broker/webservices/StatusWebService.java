@@ -17,12 +17,11 @@ import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.model.ContentItemState;
 import eu.mico.platform.broker.model.ServiceDescriptor;
 import eu.mico.platform.broker.model.Transition;
-import eu.mico.platform.broker.model.TypeDescriptor;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileSystemException;
-import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.DCTERMS;
@@ -30,7 +29,9 @@ import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.awt.Dimension;
@@ -40,6 +41,8 @@ import java.io.OutputStream;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 /**
  * Add file description here!
@@ -53,7 +56,9 @@ public class StatusWebService {
 
     public static final SimpleDateFormat ISO8601FORMAT = createDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "UTC");
 
-
+    @Context
+    private ServletContext servletContext;
+    
     private MICOBroker broker;
 
     public StatusWebService(MICOBroker broker) {
@@ -171,6 +176,7 @@ public class StatusWebService {
                     tprops.put("correlation", t.getKey());
                     tprops.put("start_state", t.getValue().getStateStart().getSymbol());
                     tprops.put("end_state", t.getValue().getStateEnd().getSymbol());
+                    tprops.put("progress", Float.toString(t.getValue().getProgress()));
                     tprops.put("service", t.getValue().getService().getUri().stringValue());
                     transitions.add(tprops);
                 }
@@ -224,7 +230,18 @@ public class StatusWebService {
 
     @GET
     public Response getStatus() {
-        return Response.status(Response.Status.OK).build();
+        String mVersionString = "n.n";
+        try {
+            InputStream manifestStream = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF");
+            Manifest manifest = new Manifest(manifestStream);
+            Attributes attributes = manifest.getMainAttributes();
+            String impVersion = attributes.getValue("Implementation-Version");
+            mVersionString = impVersion;
+        }
+        catch(IOException ex) {
+            log.warn("Error while reading version: " + ex.getMessage());
+        }
+        return Response.status(Response.Status.OK).entity("Version: " + mVersionString).build();
     }
 
 

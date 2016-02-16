@@ -13,6 +13,13 @@ enum RegistrationType {
   UNREGISTER = 2;
 }
 
+enum MessageType {
+  PROGRESS = 1; //!< indicates, that the message is an value between 0..100
+  FINISH   = 2; //!< indicates, that the processing is done
+  NEW_PART = 3; //!< used to inform the broker that a new part was added to the item
+  ERROR    = 4; //!< indicates, that the processing failed and the message contains an error and further description
+}
+
 /**
  * Register a service with the message broker by sending its service identifier and input queue name.
  */
@@ -41,8 +48,18 @@ message AnalysisEvent {
   required string serviceId      = 1; //!< service identifier of the service generating the event
   required string contentItemUri = 2; //!< URI of the content item being processed
   optional string objectUri      = 3; //!< URI of the object of that content item being processed
+  optional MessageType type      = 4;  //!< progress, error
+  optional string message        = 5;  //!< a short info
+  optional string description    = 6;  //!< further description of message
 }
 
+message AnalyzeProgress {
+  required string serviceId      = 1; //!< service identifier of the service generating the event
+  required string contentItemUri = 2; //!< URI of the content item being processed
+  required string objectUri      = 3; //!< URI of the object of that content item being processed
+  required MessageType type      = 4 [default = PROGRESS]; //!< 
+  required float  progress       = 5; //!< normalized progress of extractor (0.0 .. 1.0)
+}
 
 /**
  * Notify the broker that a new content item is available in the system using the given URI.

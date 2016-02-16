@@ -134,5 +134,10 @@
     <button ng-click="submitContentItem()">Submit</button>
 </div>
 
+<div class="container-fluid" ng-show="itemUri">
+    <a href="index.html">Back to Overview</a><span ng-show="state != 'Submitted'"> (cancel inject)</span> <br>
+    <a href="inspect.html?uri={{itemUri}}" ng-show="state == 'Submitted'">Inspect item</a>
+</div>
+
 
 </body></html>
