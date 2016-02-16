@@ -1,6 +1,7 @@
 package eu.mico.platform.event.test.mock;
 
 import eu.mico.platform.event.api.AnalysisResponse;
+import eu.mico.platform.event.model.Event.ErrorCodes;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 
@@ -28,17 +29,6 @@ public class AnalysisResponseCollector implements AnalysisResponse {
     }
 
     @Override
-    public void sendMessage(ContentItem ci, URI object) throws IOException {
-        try {
-            log.debug("sent message about {}", object.stringValue());
-            final Content content = ci.getContentPart(object);
-            responses.put(object, IOUtils.toString(content.getInputStream()));
-        } catch (RepositoryException e) {
-            log.error("Repository Exception: {}", e.getMessage(), e);
-        }
-    }
-
-    @Override
     public void sendFinish(ContentItem ci, URI object) throws IOException {
         try {
             log.debug("sent message about {}", object.stringValue());
@@ -61,7 +51,7 @@ public class AnalysisResponseCollector implements AnalysisResponse {
     }
 
     @Override
-    public void sendError(ContentItem ci, URI object, String msg, String desc)
+    public void sendError(ContentItem ci, URI object, ErrorCodes code, String msg, String desc)
             throws IOException {
         log.debug("sent error message about {}", object.stringValue());
         errors.put(object, msg);
@@ -70,6 +60,7 @@ public class AnalysisResponseCollector implements AnalysisResponse {
     @Override
     public void sendNew(ContentItem ci, URI object)
             throws IOException {
+        log.debug("sent new message about {}", object.stringValue());
         // TODO Auto-generated method stub
         
     }

@@ -14,6 +14,7 @@
 package eu.mico.platform.event.test;
 
 import com.rabbitmq.client.*;
+
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
@@ -21,6 +22,7 @@ import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.persistence.model.ContentItem;
+
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -30,6 +32,8 @@ import org.openrdf.model.impl.URIImpl;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -114,8 +118,8 @@ public class EventManagerTest extends BaseCommunicationTest {
         }
 
         @Override
-        public void call(AnalysisResponse resp, ContentItem ci, URI object) throws AnalysisException, IOException {
-            resp.sendMessage(ci,object);
+        public void call(AnalysisResponse resp, ContentItem ci, List<URI> object, Map<String,String> params) throws AnalysisException, IOException {
+            resp.sendFinish(ci,object.get(0));
             called = true;
         }
 

@@ -20,6 +20,16 @@ enum MessageType {
   ERROR    = 4; //!< indicates, that the processing failed and the message contains an error and further description
 }
 
+enum ErrorCodes{
+  UNSUPPORTED_CONTENT_TYPE    = 30; // could be a bug in broker or in an extractor which provided that content (created content with different type then stated in annotation)
+  UNSUPPORTED_CONTENT_VARIANT = 31; // e.g. an animated 32bit HDR TIFF that cannot be read by an extractor using libtiff, while a 8bit RGB TIFF can be read without problem
+  DECODING_ERROR              = 32; // error in binary data / stream
+  MISSING_ANNOTATION          = 35; // extractor depends on non-existing annotation from other extractor
+  INSUFFICIENT_RESOURCE       = 40; // extractor is not able to process this part
+  INSUFFICIENT_STORAGE        = 41; // more detailed info then INSUFFICIENT_RESOURCE
+  UNEXPECTED_ERROR            = 50; // unknown / non-resolvable error
+}
+
 /**
  * Register a service with the message broker by sending its service identifier and input queue name.
  */
@@ -47,10 +57,22 @@ message RegistrationEvent {
 message AnalysisEvent {
   required string serviceId      = 1; //!< service identifier of the service generating the event
   required string contentItemUri = 2; //!< URI of the content item being processed
-  optional string objectUri      = 3; //!< URI of the object of that content item being processed
+  repeated string objectUri      = 3; //!< URI of the object of that content item being processed
   optional MessageType type      = 4;  //!< progress, error
   optional string message        = 5;  //!< a short info
   optional string description    = 6;  //!< further description of message
+  optional ErrorCodes errorCode  = 7;  //!< one of the predefined error codes, used by broker to handle error
+}
+
+message AnalysisRequest{
+message ParamEntry {
+  required string key = 1;
+  required string value = 2;
+}
+  required string serviceId      = 1;  // service identifier of the service generating the event
+  required string contentItemUri = 2;  // URI of the content item being processed
+  repeated string objectUri      = 3;  // URI of the object of that content item being processed
+  repeated ParamEntry params     = 10; // a map with runtime parameters for the extractor
 }
 
 message AnalyzeProgress {
@@ -58,7 +80,7 @@ message AnalyzeProgress {
   required string contentItemUri = 2; //!< URI of the content item being processed
   required string objectUri      = 3; //!< URI of the object of that content item being processed
   required MessageType type      = 4 [default = PROGRESS]; //!< 
-  required float  progress       = 5; //!< normalized progress of extractor (0.0 .. 1.0)
+  required float progress       = 5; //!< normalized progress of extractor (0.0 .. 1.0)
 }
 
 /**

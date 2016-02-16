@@ -443,7 +443,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
                     Event.AnalysisEvent analysisEvent = Event.AnalysisEvent.newBuilder()
                             .setContentItemUri(item.getURI().stringValue())
-                            .setObjectUri(t.getObject().stringValue())
+                            .setObjectUri(0,t.getObject().stringValue())
                             .setServiceId(t.getService().getUri().stringValue()).build();
 
                     getChannel().basicPublish("", t.getService().getQueueName(), ciProps, analysisEvent.toByteArray());
@@ -468,7 +468,7 @@ public class MICOBrokerImpl implements MICOBroker {
                             "received processing result from service {} for content item {}: new object {}",
                             analysisResponse.getServiceId(),
                             analysisResponse.getContentItemUri(),
-                            analysisResponse.getObjectUri());
+                            analysisResponse.getObjectUri(0));
 
                     switch (analysisResponse.getType()) {
                     case ERROR:
@@ -492,7 +492,7 @@ public class MICOBrokerImpl implements MICOBroker {
                     log.warn(
                             "could not proceed analysing content item {}, part {}; next state unknown because service was not registered",
                             analysisResponse.getContentItemUri(),
-                            analysisResponse.getObjectUri());
+                            analysisResponse.getObjectUri(0));
                 }
                 executeStateTransitions();
                 getChannel().basicAck(envelope.getDeliveryTag(), false);
@@ -510,7 +510,7 @@ public class MICOBrokerImpl implements MICOBroker {
         private void setStateForContent(Event.AnalysisEvent analysisResponse)
                 throws StateNotFoundException {
             URIImpl itemUri = new URIImpl(analysisResponse.getContentItemUri());
-            URIImpl partUri = new URIImpl(analysisResponse.getObjectUri());
+            URIImpl partUri = new URIImpl(analysisResponse.getObjectUri(0));
             String serviceId = analysisResponse.getServiceId();
             try{
                 String mimetype = persistenceService.getContentItem(itemUri)

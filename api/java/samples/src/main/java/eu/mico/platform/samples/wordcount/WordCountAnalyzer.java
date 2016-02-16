@@ -39,6 +39,7 @@ import java.net.URISyntaxException;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeoutException;
@@ -83,11 +84,12 @@ public class WordCountAnalyzer implements AnalysisService {
     }
 
     @Override
-    public void call(AnalysisResponse analysisResponse, ContentItem contentItem, URI uri) throws AnalysisException, IOException {
+    public void call(AnalysisResponse analysisResponse, ContentItem ci, List<URI> parts, java.util.Map<String,String> params) throws AnalysisException ,IOException {
         try {
+            URI uri = parts.get(0);
             log.info("Retrieved analysis call for {}", uri);
             // get the content part with the given URI
-            Content content = contentItem.getContentPart(uri);
+            Content content = ci.getContentPart(uri);
 
             // get the input stream and read it into a string
             String text = IOUtils.toString(content.getInputStream(), "utf-8");
@@ -98,9 +100,9 @@ public class WordCountAnalyzer implements AnalysisService {
             Matcher m = p_wordcount.matcher(text);
 
             // we are progressing ... inform broker
-            analysisResponse.sendProgress(contentItem, uri, 0.25f);
+            analysisResponse.sendProgress(ci, uri, 0.25f);
             if (simulateSlow == true) {
-                simulateLongTask(analysisResponse, contentItem, uri);
+                simulateLongTask(analysisResponse, ci, uri);
             }
 
             int count;
@@ -109,7 +111,7 @@ public class WordCountAnalyzer implements AnalysisService {
             log.debug("Countend {} words in {}", count, uri);
 
             // create a new content part for assigning the metadata
-            Content result = contentItem.createContentPart();
+            Content result = ci.createContentPart();
             result.setType(getProvides());
             result.setRelation(DCTERMS.CREATOR, getServiceID());  // set the service ID as provenance information for the new content part
             result.setRelation(DCTERMS.SOURCE, uri);              // set the analyzed content part as source for the new content part
@@ -130,9 +132,8 @@ public class WordCountAnalyzer implements AnalysisService {
             result.createAnnotation(multiMediaBody, null, provenance, target);
             
             // report newly available results to broker
-            analysisResponse.sendNew(contentItem, result.getURI());
+            analysisResponse.sendNew(ci, result.getURI());
 
-            analysisResponse.sendFinish(contentItem, uri);
             log.debug("Done for {}", uri);
         } catch (RepositoryException e) {
             log.error("error accessing metadata repository",e);

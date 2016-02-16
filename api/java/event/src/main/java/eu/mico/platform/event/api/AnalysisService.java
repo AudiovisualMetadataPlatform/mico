@@ -15,9 +15,12 @@ package eu.mico.platform.event.api;
 
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.model.ContentItem;
+
 import org.openrdf.model.URI;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Interface to be implemented by services. Consists of some informational methods as well as a callback which is called
@@ -74,5 +77,5 @@ public interface AnalysisService {
      * @param ci     the content item to analyse
      * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
      */
-    public void call(AnalysisResponse resp, ContentItem ci, URI object) throws AnalysisException, IOException;
+    public void call(AnalysisResponse resp, ContentItem ci, List<URI> object, Map<String, String> params) throws AnalysisException, IOException;
 }

@@ -14,6 +14,7 @@
 package eu.mico.platform.event.impl;
 
 import com.google.common.base.Preconditions;
+import com.google.protobuf.ProtocolStringList;
 import com.rabbitmq.client.*;
 import com.rabbitmq.client.AMQP.BasicProperties;
 
@@ -22,6 +23,8 @@ import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event;
+import eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry;
+import eu.mico.platform.event.model.Event.ErrorCodes;
 import eu.mico.platform.event.model.Event.MessageType;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceImpl;
@@ -288,6 +291,10 @@ public class EventManagerImpl implements EventManager {
     }
 
 
+    /**
+     * This is the client (extractor) side of event api. 
+     *
+     */
     private class AnalysisConsumer extends DefaultConsumer {
 
         private final class AnalysisResponseImpl implements
@@ -315,7 +322,7 @@ public class EventManagerImpl implements EventManager {
             public void sendFinish(ContentItem ci, URI object) throws IOException {
                 Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
                         .setContentItemUri(ci.getURI().stringValue())
-                        .setObjectUri(object.stringValue())
+                        .addObjectUri(object.stringValue())
                         .setServiceId(service.getServiceID().stringValue())
                         .setType(MessageType.FINISH).build();
 
@@ -350,7 +357,7 @@ public class EventManagerImpl implements EventManager {
             public void sendNew(ContentItem ci, URI object) throws IOException {
                 Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
                         .setContentItemUri(ci.getURI().stringValue())
-                        .setObjectUri(object.stringValue())
+                        .addObjectUri(object.stringValue())
                         .setServiceId(service.getServiceID().stringValue())
                         .setType(MessageType.NEW_PART).build();
 
@@ -358,13 +365,14 @@ public class EventManagerImpl implements EventManager {
             }
 
             @Override
-            public void sendError(ContentItem ci, URI object, String msg,
+            public void sendError(ContentItem ci, URI object, ErrorCodes code, String msg,
                     String desc) throws IOException {
                 Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
                         .setContentItemUri(ci.getURI().stringValue())
-                        .setObjectUri(object.stringValue())
+                        .addObjectUri(object.stringValue())
                         .setServiceId(service.getServiceID().stringValue())
                         .setType(MessageType.ERROR)
+                        .setErrorCode(code)
                         .setMessage(msg)
                         .setDescription(desc).build();
 
@@ -402,7 +410,7 @@ public class EventManagerImpl implements EventManager {
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, final AMQP.BasicProperties properties, byte[] body) throws IOException {
             // retrieve the event data from the byte array
-            Event.AnalysisEvent analysisEvent = Event.AnalysisEvent.parseFrom(body);
+            Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.parseFrom(body);
 
             // construct reply properties, use the same correlation ID as in the request
             final AMQP.BasicProperties replyProps = new AMQP.BasicProperties
@@ -414,20 +422,38 @@ public class EventManagerImpl implements EventManager {
 
             try {
                 final ContentItem ci = persistenceService.getContentItem(new URIImpl(analysisEvent.getContentItemUri()));
+                final List<URI> parts = parsePartsList(analysisEvent.getObjectUriList());
+                final Map<String,String> params = new HashMap<String, String>(); 
+                for ( ParamEntry entry: analysisEvent.getParamsList()){
+                    params.put(entry.getKey(), entry.getValue());
+                }
 
-                service.call(response, ci, new URIImpl(analysisEvent.getObjectUri()));
+
+                if(analysisEvent.getObjectUriCount() != 1){
+                    log.warn("Analysis event has {} parts, current API forwards the first entry to call method",parts.size());
+                }
+                service.call(response, ci, parts, params);
+                response.sendFinish(ci, parts.get(0));
 
                 getChannel().basicAck(envelope.getDeliveryTag(), false);
             } catch (RepositoryException e) {
                 log.error("could not access content item with URI {}, requeuing (message: {})", analysisEvent.getContentItemUri(), e.getMessage());
                 log.debug("Exception:",e);
                 getChannel().basicNack(envelope.getDeliveryTag(), false, true);
-            } catch (AnalysisException e) {
+            } catch (AnalysisException | IOException e) {
                 log.error("could not analyse content item with URI {}, requeuing (message: {})", analysisEvent.getContentItemUri(), e.getMessage());
                 log.debug("Exception:", e);
                 getChannel().basicNack(envelope.getDeliveryTag(), false, true);
             }
 
+        }
+
+        private List<URI> parsePartsList(List<String> objectUriList) {
+            List<URI> parts = new ArrayList<URI>();
+            for (String p : objectUriList){
+                parts.add(new URIImpl(p));
+            }
+            return null;
         }
     }
 }

@@ -13,6 +13,7 @@
  */
 package eu.mico.platform.event.api;
 
+import eu.mico.platform.event.model.Event.ErrorCodes;
 import eu.mico.platform.persistence.model.ContentItem;
 import org.openrdf.model.URI;
 
@@ -28,23 +29,11 @@ public interface AnalysisResponse {
 
 
     /**
-     * Send a message to the broker's callback queue that the given content item and object have been updated. Can be
-     * used e,g, to notify the message broker that a new content part has been created or an object or entity has been
-     * identified by the analysis service.
-     * 
-     * @deprecated use {@link #sendFinish(ContentItem, URI)} or one of the other sendXXXX() functions instead.
-     *
-     * @param ci     the updated content item
-     * @param object the updated object
-     */
-    @Deprecated
-    public void sendMessage(ContentItem ci, URI object) throws IOException;
-
-    /**
      * Send a message to the broker's callback queue that the given content item and object have been processed.
      * 
      * @param ci     the updated content item
      * @param object the updated object
+     * @throws IOException if something with the used communication channel is wrong
      */
     public void sendFinish(ContentItem ci, URI object) throws IOException;
 
@@ -54,6 +43,7 @@ public interface AnalysisResponse {
      * @param ci        the updated content item
      * @param object    the updated object
      * @param progress  the progress value (0..100)
+     * @throws IOException if something with the used communication channel is wrong
      */
     public void sendProgress(ContentItem ci, URI object, float progress) throws IOException;
 
@@ -63,16 +53,19 @@ public interface AnalysisResponse {
      *
      * @param ci     the processed content item
      * @param object the processed object
+     * @param code   one of the defined error codes, could be used by broker to handle the error
      * @param msg    the error message
      * @param desc   further information about the error
+     * @throws IOException if something with the used communication channel is wrong
      */
-    public void sendError(ContentItem ci, URI object, String msg, String desc) throws IOException;
+    public void sendError(ContentItem ci, URI object, ErrorCodes code, String msg, String desc) throws IOException;
 
     /**
      * Send a message to the broker's callback queue that a new content part was added. 
      *
-     * @param ci          the processed content item
-     * @param object      the new object / part
+     * @param ci           the processed content item
+     * @param object       the new object / part
+     * @throws IOException if something with the used communication channel is wrong
      */
     public void sendNew(ContentItem ci, URI object) throws IOException;
 
