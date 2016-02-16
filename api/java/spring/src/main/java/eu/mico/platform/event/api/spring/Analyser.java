@@ -30,5 +30,5 @@ public interface Analyser {
      * @param contentItem the content item to analyse
      * @param uri the URI of the object to analyse in the content item (a content part or a metadata URI)
      */
-    public void call(AnalysisResponse analysisResponse, ContentItem contentItem, URI uri);
+    public void call(AnalysisResponse analysisResponse, ContentItem contentItem, java.util.List<URI> parts, java.util.Map<String,String> params);
 }

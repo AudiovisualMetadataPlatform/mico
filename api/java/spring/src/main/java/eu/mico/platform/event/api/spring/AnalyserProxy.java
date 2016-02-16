@@ -84,8 +84,8 @@ public class AnalyserProxy implements AnalysisService {
     }
 
     @Override
-    public void call(AnalysisResponse resp, ContentItem ci, URI uri) throws AnalysisException, IOException {
+    public void call(AnalysisResponse resp, ContentItem ci, java.util.List<URI> parts, java.util.Map<String,String> params) throws AnalysisException ,IOException {
         logger.info("Performing analyser method");
-        analyser.call(resp, ci, uri);
+        analyser.call(resp, ci, parts, params);
     }
 }
