@@ -112,7 +112,7 @@ public class PersistenceServiceAnno4j implements PersistenceService {
      * Return the item with the given URI if it exists. The item should be suitable for reading and
      * updating and write all updates to the underlying low-level persistence layer.
      *
-     * @param id
+     * @param id Id of the item to retrieve
      * @return a handle to the Item with the given URI, or null if it does not exist
      */
     @Override
