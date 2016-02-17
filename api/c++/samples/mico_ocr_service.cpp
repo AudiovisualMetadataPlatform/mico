@@ -89,7 +89,7 @@ public:
     OCRAnalysisService(string id, string requires, string language)
             : AnalysisService("http://www.mico-project.org/services/OCR-"+id, requires, "text/plain", "ocr-queue-"+id) {
         if(api.Init(NULL, language.c_str())) {
-            std::cerr << "could not initialise tesseract instance" << std::endl;
+            LOG_ERROR( "could not initialise tesseract instance" );
             throw string("could not initialise tesseract instance");
         }
     };
@@ -107,8 +107,9 @@ public:
     * @param ci     the content item to analyse
     * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
     */
-    void call(AnalysisResponse& resp, ContentItem& ci, URI& object) {
+    void call(AnalysisResponse& resp, ContentItem& ci, std::list<mico::rdf::model::URI>& objects, std::map<std::string,std::string>& params) {
         // retrieve the content part identified by the object URI
+        mico::rdf::model::URI object = objects.front();
         Content* imgPart = ci.getContentPart(object);
 
         if(imgPart != NULL) {
@@ -137,6 +138,7 @@ public:
             *out << plainText;
             delete out;
 
+            LOG_INFO("Sending OCR results");
             // notify broker that we created a new content part by calling functions from AnalysisResponse passed as argument
             resp.sendNew(ci, txtPart->getURI());
             resp.sendFinish(ci, object);

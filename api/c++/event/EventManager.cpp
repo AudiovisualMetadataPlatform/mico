@@ -179,7 +179,7 @@ namespace mico {
           LOG_INFO("AnalysisResponse:sendFinish to queue %s", m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
           event.set_contentitemuri(ci.getURI().stringValue());
-          event.set_objecturi(object.stringValue());
+          event.add_objecturi(object.stringValue());
           event.set_serviceid(m_service.getServiceID().stringValue());
           event.set_type(::mico::event::model::MessageType::FINISH);
 
@@ -197,7 +197,7 @@ namespace mico {
           LOG_INFO("AnalysisResponse:sendErrorMessage: \"%s\" to queue %s",msg.c_str(), m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
           event.set_contentitemuri(ci.getURI().stringValue());
-          event.set_objecturi(object.stringValue());
+          event.add_objecturi(object.stringValue());
           event.set_serviceid(m_service.getServiceID().stringValue());
           event.set_type(::mico::event::model::MessageType::ERROR);
           event.set_message(msg);
@@ -234,7 +234,7 @@ namespace mico {
           LOG_INFO("AnalysisResponse:sendNew to queue %s", m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
           event.set_contentitemuri(ci.getURI().stringValue());
-          event.set_objecturi(object.stringValue());
+          event.add_objecturi(object.stringValue());
           event.set_serviceid(m_service.getServiceID().stringValue());
           event.set_type(::mico::event::model::MessageType::NEW_PART);
 
@@ -278,18 +278,25 @@ namespace mico {
 
 
             void handleDelivery(const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
-                mico::event::model::AnalysisEvent event;
+                mico::event::model::AnalysisRequest event;
                 if (event.ParseFromArray(message.body(), message.bodySize())){
 
-                    LOG_DEBUG("received analysis event (content item %s, object %s, replyTo %s)", event.contentitemuri().c_str(), event.objecturi().c_str(), message.replyTo().c_str());
+                    LOG_DEBUG("received analysis event (content item %s, object %s, replyTo %s)", event.contentitemuri().c_str(), event.objecturi(0).c_str(), message.replyTo().c_str());
 
                     ContentItem *ci = (*persistence).getContentItem(URI(event.contentitemuri()));
-                    URI object(event.objecturi());
+                    std::list<URI> objects;
+                    std::map<std::string,std::string> params;
+                    for (unsigned int i = 0; i < event.objecturi().size(); ++i) {
+                      objects.push_back(URI(event.objecturi(i)));
+                    }
+                    for (unsigned int i = 0; i < event.params().size(); ++i) {
+                      params[ event.params(i).key() ] = event.params(i).value();
+                    }
                     AnalysisResponse response(this->service, message, channel);
 
-                    service.call( response, *ci, object);
+                    service.call( response, *ci, objects, params);
 
-                    LOG_DEBUG("acknowledged finished processing of analysis event (content item %s, object %s, replyTo %s)", event.contentitemuri().c_str(), event.objecturi().c_str(), message.replyTo().c_str());
+                    LOG_DEBUG("acknowledged finished processing of analysis event (content item %s, object %s, replyTo %s)", event.contentitemuri().c_str(), event.objecturi(0).c_str(), message.replyTo().c_str());
                 }else{
                     //@TODO send error to broker
                     LOG_ERROR("Could not parse received analysis event.");
