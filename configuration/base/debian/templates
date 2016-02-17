@@ -18,3 +18,10 @@ Description: MICO user password:
  RabbitMQ, Apache Marmotta, and PostgreSQL. If you leave this value empty and
  the password has not previously been set, a random password is generated.
 
+Template: mico-base/userhome
+Type: string
+Default: /var/mico-user
+Description: Home directory for MICO user:
+ Enter the home directory of the user that is used for accessing various MICO
+ components.
+ The directory will be created if it does not exist yet.

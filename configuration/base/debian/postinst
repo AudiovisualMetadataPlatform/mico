@@ -29,6 +29,9 @@ case "$1" in
 	db_get mico-base/password
 	MICO_PASS="$RET"
 
+	db_get mico-base/userhome
+	MICO_USER_HOME="$RET"
+
 	if [ "$MICO_PASS" = "" ]; then
 	    MICO_PASS=`pwgen -ncs 12`
 	    db_set mico-base/password $MICO_PASS 
@@ -37,20 +40,34 @@ case "$1" in
 	if getent group $MICO_USER >/dev/null 2>&1; then
 	    echo "Skipping creation of group $MICO_USER as it already exists."
 	else
-	    groupadd $MICO_USER || true
+	    groupadd $MICO_USER
 	fi
 
 	if getent passwd $MICO_USER  >/dev/null 2>&1; then
-	    echo "Skipping creation of user $MICO_USER as it already exists."
+	    if [ "$(eval echo ~${MICO_USER})" != "$MICO_USER_HOME" ]; then
+                echo "Changing home of user $MICO_USER to $MICO_USER_HOME"
+	        echo "  waiting for all $MICO_USER user processes to terminate (required to change home)..."
+	        killall -w -u $MICO_USER || true
+	        usermod -d $MICO_USER_HOME $MICO_USER
+	    else
+	        echo "Skipping creation of user $MICO_USER as it already exists."
+	    fi
 	else
-	    useradd -d /tmp -g $MICO_USER -M $MICO_USER || true
+	    useradd -d $MICO_USER_HOME -g $MICO_USER -M $MICO_USER
+	fi
+
+        if [ ! -d "$MICO_USER_HOME" ]; then
+	    echo "Creating home directory $MICO_USER_HOME"
+	    mkdir -p $MICO_USER_HOME
+	    chown $MICO_USER:$MICO_USER $MICO_USER_HOME
+	    chmod 0750 $MICO_USER_HOME
 	fi
 
 	chpasswd <<EOF
 $MICO_USER:$MICO_PASS
 EOF
 	db_stop
-	    
+
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
