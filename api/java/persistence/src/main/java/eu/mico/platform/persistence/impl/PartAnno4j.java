@@ -126,4 +126,9 @@ public class PartAnno4j implements Part {
 
         return new AssetAnno4j(this.partMMM.getAsset(), this.persistenceService);
     }
+
+    @Override
+    public boolean hasAsset() throws RepositoryException {
+        return this.partMMM.getAsset() == null;
+    }
 }

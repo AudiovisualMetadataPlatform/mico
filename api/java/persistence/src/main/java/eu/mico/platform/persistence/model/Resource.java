@@ -25,4 +25,6 @@ public interface Resource {
 
     Asset getAsset() throws RepositoryException;
 
+    boolean hasAsset() throws RepositoryException;
+
 }

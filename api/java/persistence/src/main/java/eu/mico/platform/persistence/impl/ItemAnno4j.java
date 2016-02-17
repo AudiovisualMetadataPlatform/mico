@@ -127,6 +127,11 @@ public class ItemAnno4j implements Item {
     }
 
     @Override
+    public boolean hasAsset() throws RepositoryException {
+        return this.itemMMM.getAsset() == null;
+    }
+
+    @Override
     public String getSerializedAt() {
         return this.itemMMM.getSerializedAt();
     }
