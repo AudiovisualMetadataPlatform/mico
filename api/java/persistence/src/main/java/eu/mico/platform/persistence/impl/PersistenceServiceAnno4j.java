@@ -71,9 +71,9 @@ public class PersistenceServiceAnno4j implements PersistenceService {
     /**
      * For testing purpose. Starts an in memory sparql repository.
      */
-    public PersistenceServiceAnno4j(java.net.URI storageHost) throws URISyntaxException {
+    public PersistenceServiceAnno4j() throws URISyntaxException {
         this.sparqlServerURI = new java.net.URI("http://localhost/mem").normalize();
-        this.storage = StorageServiceBuilder.buildStorageService(storageHost.normalize());
+        this.storage = StorageServiceBuilder.buildStorageService(ClassLoader.getSystemResource("").toURI());
 
         IDGeneratorAnno4j idGenerator = new IDGeneratorAnno4j(sparqlServerURI.toString());
 

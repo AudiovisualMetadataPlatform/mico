@@ -1,6 +1,7 @@
 package eu.mico.platform.persistence.impl;
 
 import com.github.anno4j.Anno4j;
+import com.github.anno4j.model.Agent;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Target;
 import eu.mico.platform.anno4j.model.PartMMM;
@@ -80,6 +81,16 @@ public class PartAnno4j implements Part {
     @Override
     public void addTarget(Target target) {
         partMMM.addTarget(target);
+    }
+
+    @Override
+    public String getSerializedAt() {
+        return this.partMMM.getSerializedAt();
+    }
+
+    @Override
+    public Agent getSerializedBy() {
+        return this.partMMM.getSerializedBy();
     }
 
     @Override

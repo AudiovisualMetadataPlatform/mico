@@ -13,59 +13,104 @@
  */
 package eu.mico.platform.persistence.test;
 
+import com.github.anno4j.model.impl.ResourceObject;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Item;
-import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.net.URISyntaxException;
 
-public class PersistenceServiceAnno4jTest extends BaseMarmottaTest {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 
-    @Test
-    public void testCreateDeleteContentItem() throws RepositoryException, QueryEvaluationException, MalformedQueryException, java.net.URISyntaxException {
-        PersistenceService service = new PersistenceServiceAnno4j(testHost);
+public class PersistenceServiceAnno4jTest {
 
-        int numberOfInitialItems = Iterables.size(service.getItems());
+    private static PersistenceService persistenceService;
 
-        Item item = service.createItem();
-
-        assertAsk(String.format("ASK WHERE { graph <%s> { ?s ?p ?o } }", item.getURI()));
-
-        Assert.assertEquals(numberOfInitialItems + 1, Iterables.size(service.getItems()));
-
-        service.deleteItem(item.getURI());
-
-        Assert.assertEquals(numberOfInitialItems, Iterables.size(service.getItems()));
-
-        assertAskNot(String.format("ASK WHERE { graph <%s> { ?s ?p ?o } }", item.getURI()));
+    @BeforeClass
+    public static void setUp() throws URISyntaxException {
+        persistenceService = new PersistenceServiceAnno4j();
     }
 
     @Test
-    public void testListContentItems() throws RepositoryException, java.net.URISyntaxException {
-        PersistenceService service = new PersistenceServiceAnno4j(testHost);
+    public void createItemTest() throws RepositoryException {
+        Item item = persistenceService.createItem();
+        assertNotNull(item.getURI());
+        assertNotNull(item.getSerializedAt());
 
-        List<Item> items = new ArrayList<Item>();
-        for (int i = 0; i < 5; i++) {
-            items.add(service.createItem());
-        }
+        item.setSyntacticalType("syntactical-type");
+        item.setSemanticType("semantic-type");
 
-        int itemsFound = 0;
-        for (Item ci : service.getItems()) {
-            if (items.contains(ci))
-                itemsFound++;
-        }
+        ItemMMM itemMMM = persistenceService.getAnno4j().findByID(ItemMMM.class, item.getURI());
+        assertNotNull(itemMMM);
+        assertEquals(item.getSerializedAt(), itemMMM.getSerializedAt());
+        assertEquals(item.getSemanticType(), itemMMM.getSemanticType());
+        assertEquals(item.getSyntacticalType(), itemMMM.getSyntacticalType());
+    }
 
-        Assert.assertTrue(items.size() == itemsFound);
+    @Test
+    public void getItemTest() throws RepositoryException {
+        Item initialItem = persistenceService.createItem();
+        initialItem.setSyntacticalType("syntactical-type");
+        initialItem.setSemanticType("semantic-type");
 
-        for (Item ci : items) {
-            service.deleteItem(ci.getURI());
-        }
+        Item retrievedItem = persistenceService.getItem(initialItem.getURI());
+        assertEquals(initialItem.getURI(), retrievedItem.getURI());
+        assertEquals(initialItem.getSerializedAt(), retrievedItem.getSerializedAt());
+        assertEquals(initialItem.getSemanticType(), retrievedItem.getSemanticType());
+        assertEquals(initialItem.getSyntacticalType(), retrievedItem.getSyntacticalType());
+    }
+
+    @Test
+    public void getItemsTest() throws RepositoryException {
+
+        int initialItemCount = persistenceService.getAnno4j().findAll(ItemMMM.class).size();
+
+        Item item1 = persistenceService.createItem();
+        Item item2 = persistenceService.createItem();
+
+        int retrievedSize = Iterables.size(persistenceService.getItems());
+
+        assertEquals(initialItemCount+2, retrievedSize);
+    }
+
+    @Test
+    public void subGraphTest() throws RepositoryException {
+
+        int initialItemCount = persistenceService.getAnno4j().findAll(ItemMMM.class).size();
+
+        Item item1 = persistenceService.createItem();
+        Item item2 = persistenceService.createItem();
+
+        assertEquals(initialItemCount + 2, persistenceService.getAnno4j().findAll(ItemMMM.class).size());
+
+        assertEquals(1, persistenceService.getAnno4j().findAll(ItemMMM.class, item1.getURI()).size());
+        assertEquals(1, persistenceService.getAnno4j().findAll(ItemMMM.class, item2.getURI()).size());
+    }
+
+    @Test
+    public void deleteItemTest() throws RepositoryException {
+
+        int intialItemCount = Iterables.size(persistenceService.getItems());
+
+        Item item1 = persistenceService.createItem();
+        Item item2 = persistenceService.createItem();
+
+        assertEquals(intialItemCount + 2, Iterables.size(persistenceService.getItems()));
+
+        persistenceService.deleteItem(item1.getURI());
+
+        assertEquals(intialItemCount + 1, Iterables.size(persistenceService.getItems()));
+
+        assertEquals(0, persistenceService.getAnno4j().findAll(ItemMMM.class, item1.getURI()).size());
+        assertEquals(1, persistenceService.getAnno4j().findAll(ItemMMM.class, item2.getURI()).size());
     }
 }
