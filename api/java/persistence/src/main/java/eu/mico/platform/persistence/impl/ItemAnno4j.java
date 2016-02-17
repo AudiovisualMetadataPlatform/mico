@@ -108,7 +108,6 @@ public class ItemAnno4j implements Item {
                 AssetMMM assetMMM = anno4j.createObject(AssetMMM.class);
                 StringBuilder location = new StringBuilder()
                         .append(persistenceService.getStoragePrefix())
-                        .append("/")
                         .append(this.getURI().getLocalName())
                         .append("/")
                         .append(new URIImpl(assetMMM.getResourceAsString()).getLocalName());

@@ -106,7 +106,6 @@ public class PartAnno4j implements Part {
 
                 StringBuilder location = new StringBuilder()
                         .append(persistenceService.getStoragePrefix())
-                        .append("/")
                         .append(this.item.getURI().getLocalName())
                         .append("/")
                         .append(this.getURI().getLocalName())
