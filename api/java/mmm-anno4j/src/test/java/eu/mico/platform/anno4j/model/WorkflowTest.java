@@ -45,7 +45,7 @@ public class WorkflowTest {
         asset.setFormat(format);
         asset.setLocation(location);
 
-        itemMMM.setAssetMMM(asset);
+        itemMMM.setAsset(asset);
         itemMMM.setSerializedAt(2015, 18, 12, 10, 52, 00);
 
         // Create Part 1

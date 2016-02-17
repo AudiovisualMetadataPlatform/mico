@@ -43,7 +43,7 @@ public class ItemMMMTest {
         PartMMM part2 = anno4j.createObject(PartMMM.class);
         PartMMM part3 = anno4j.createObject(PartMMM.class);
 
-        itemMMM.setAssetMMM(asset);
+        itemMMM.setAsset(asset);
         queryService.addCriteria("mmm:hasAsset[is-a mmm:Asset]");
 
         // Query for non existing Items
