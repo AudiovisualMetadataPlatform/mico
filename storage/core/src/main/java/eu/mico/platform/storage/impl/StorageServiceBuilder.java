@@ -1,6 +1,7 @@
 package eu.mico.platform.storage.impl;
 
 import eu.mico.platform.storage.api.StorageService;
+import eu.mico.platform.storage.util.VFSUtils;
 
 import java.net.URI;
 
@@ -24,6 +25,7 @@ public class StorageServiceBuilder {
 
         switch(url.getScheme().toLowerCase()) {
             case "ftp":
+                VFSUtils.configure();
                 return new StorageServiceFTP(url.getHost(), url.getPort(), url.getPath(), username, password);
             case "hdfs":
                 return new StorageServiceHDFS(url.getHost(), url.getPort(), url.getPath());

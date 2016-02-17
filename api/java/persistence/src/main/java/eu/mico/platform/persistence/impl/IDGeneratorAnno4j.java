@@ -11,14 +11,14 @@ import java.util.UUID;
 
 public class IDGeneratorAnno4j implements IDGenerator {
 
-    private String marmottaServerUrl;
+    private String sparqlBaseURI;
 
-    public IDGeneratorAnno4j(String marmottaServerUrl) {
-        this.marmottaServerUrl = marmottaServerUrl;
+    public IDGeneratorAnno4j(String sparqlBaseURI) {
+        this.sparqlBaseURI = sparqlBaseURI;
     }
 
     @Override
     public Resource generateID(Set<URI> types) {
-        return new URIImpl(URITools.normalizeURI(marmottaServerUrl + "/" + UUID.randomUUID()));
+        return new URIImpl(URITools.normalizeURI(sparqlBaseURI + "/" + UUID.randomUUID()));
     }
 }
