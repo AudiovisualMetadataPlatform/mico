@@ -13,6 +13,7 @@
  */
 package eu.mico.platform.persistence.model;
 
+import com.github.anno4j.model.Agent;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Target;
 
@@ -43,4 +44,8 @@ public interface Part extends Resource {
     void setTarget(Set<Target> targets);
 
     void addTarget(Target target);
+
+    String getSerializedAt();
+
+    Agent getSerializedBy();
 }
