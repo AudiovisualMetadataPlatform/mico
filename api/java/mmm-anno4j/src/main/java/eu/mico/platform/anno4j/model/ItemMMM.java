@@ -20,7 +20,7 @@ public interface ItemMMM extends ResourceMMM {
      * @return Values of http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart.
      */
     @Iri(MMM.HAS_PART)
-    Set<PartMMM> getPartsMMM();
+    Set<PartMMM> getParts();
 
     /**
      * Sets a set of Parts by specifying http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart relationships.
@@ -28,14 +28,14 @@ public interface ItemMMM extends ResourceMMM {
      * @param parts New values of http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart.
      */
     @Iri(MMM.HAS_PART)
-    void setPartsMMM(Set<PartMMM> parts);
+    void setParts(Set<PartMMM> parts);
 
     /**
      * Adds a new single http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart relationship to this ItemMMM.
      *
      * @param part The new Part to add.
      */
-    void addPartMMM(PartMMM part);
+    void addPart(PartMMM part);
 
     @Iri(OADM.SERIALIZED_AT)
     String getSerializedAt();

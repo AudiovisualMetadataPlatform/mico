@@ -45,7 +45,7 @@ public class WorkflowTest {
         asset.setFormat(format);
         asset.setLocation(location);
 
-        itemMMM.setAssetMMM(asset);
+        itemMMM.setAsset(asset);
         itemMMM.setSerializedAt(2015, 18, 12, 10, 52, 00);
 
         // Create Part 1
@@ -60,7 +60,7 @@ public class WorkflowTest {
         spec1.setSource(itemMMM);
         part1.addTarget(spec1);
 
-        itemMMM.addPartMMM(part1);
+        itemMMM.addPart(part1);
 
         // Create Part 2
         PartMMM part2 = anno4j.createObject(PartMMM.class);
@@ -78,7 +78,7 @@ public class WorkflowTest {
         asset2.setFormat("someFormat2");
         asset2.setLocation("someLocation2");
 
-        itemMMM.addPartMMM(part2);
+        itemMMM.addPart(part2);
 
         // Create Part 3
         PartMMM part3 = anno4j.createObject(PartMMM.class);
@@ -92,7 +92,7 @@ public class WorkflowTest {
         spec3.setSource(part2);
         part3.addTarget(spec3);
 
-        itemMMM.addPartMMM(part3);
+        itemMMM.addPart(part3);
 
         // Persist
         anno4j.persist(itemMMM);
@@ -102,11 +102,11 @@ public class WorkflowTest {
         ItemMMM resultItemMMM = result.get(0);
 
         // Test
-        assertEquals(3, resultItemMMM.getPartsMMM().size());
+        assertEquals(3, resultItemMMM.getParts().size());
 
 //        System.out.println(resultItemMMM.getTriples(RDFFormat.TURTLE));
 
-        for(PartMMM part: resultItemMMM.getPartsMMM()) {
+        for(PartMMM part: resultItemMMM.getParts()) {
 //            System.out.println(part.getTriples(RDFFormat.TURTLE));
 
             String partResource = part.getResourceAsString();

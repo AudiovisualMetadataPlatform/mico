@@ -43,7 +43,7 @@ public class ItemMMMTest {
         PartMMM part2 = anno4j.createObject(PartMMM.class);
         PartMMM part3 = anno4j.createObject(PartMMM.class);
 
-        itemMMM.setAssetMMM(asset);
+        itemMMM.setAsset(asset);
         queryService.addCriteria("mmm:hasAsset[is-a mmm:Asset]");
 
         // Query for non existing Items
@@ -60,19 +60,19 @@ public class ItemMMMTest {
         assertEquals(1, result.size());
 
         // The itemMMM does not have any parts yet
-        assertEquals(0, result.get(0).getPartsMMM().size());
+        assertEquals(0, result.get(0).getParts().size());
 
         // Add two parts
         HashSet<PartMMM> parts = new HashSet<PartMMM>();
         parts.add(part1);
         parts.add(part2);
-        itemMMM.setPartsMMM(parts);
+        itemMMM.setParts(parts);
 
-        assertEquals(2, result.get(0).getPartsMMM().size());
+        assertEquals(2, result.get(0).getParts().size());
 
         // Now add one additional part by the addPart method
-        itemMMM.addPartMMM(part3);
+        itemMMM.addPart(part3);
 
-        assertEquals(3, result.get(0).getPartsMMM().size());
+        assertEquals(3, result.get(0).getParts().size());
     }
 }
