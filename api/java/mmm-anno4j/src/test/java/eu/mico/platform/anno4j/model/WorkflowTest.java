@@ -78,6 +78,7 @@ public class WorkflowTest {
         asset2.setFormat("someFormat2");
         asset2.setLocation("someLocation2");
 
+        part2.setAsset(asset2);
         itemMMM.addPart(part2);
 
         // Create Part 3
