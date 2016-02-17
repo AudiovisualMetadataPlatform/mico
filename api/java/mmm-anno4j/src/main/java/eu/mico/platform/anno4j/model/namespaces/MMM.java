@@ -154,4 +154,16 @@ public class MMM {
 
     public final static String HAS_SEMANTIC_TYPE = NS + "hasSemanticType";
 
+    public final static String AUDIO_DEMUX_BODY = NS + "AudioDemuxBody";
+
+    public final static String DIARIZATION_BODY = NS + "DiarizationBody";
+
+    public final static String MATCHING_AUDIO_SEGMENT_BODY = NS + "MatchingAudioSegmentBody";
+
+    public final static String MATCHING_VIDEO_SEGMENT_BODY = NS + "MatchingVideoSegmentBody";
+
+    public final static String SPEECH_MUSIC_BODY = NS + "SpeechMusicBody";
+
+    public final static String SPEECH_MUSIC_TO_TEXT_BODY = NS + "SpeechMusicToTextBody";
+
 }

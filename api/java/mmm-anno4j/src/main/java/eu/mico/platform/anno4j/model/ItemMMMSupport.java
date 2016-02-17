@@ -16,12 +16,12 @@ public abstract class ItemMMMSupport extends ResourceObjectSupport implements It
     /**
      * {@inheritDoc}
      */
-    public void addPartMMM(PartMMM part) {
-        if(this.getPartsMMM() == null) {
-            this.setPartsMMM(new HashSet<PartMMM>());
+    public void addPart(PartMMM part) {
+        if(this.getParts() == null) {
+            this.setParts(new HashSet<PartMMM>());
         }
 
-        this.getPartsMMM().add(part);
+        this.getParts().add(part);
     }
 
     @Override
