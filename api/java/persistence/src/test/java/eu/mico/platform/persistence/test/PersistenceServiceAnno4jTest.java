@@ -26,11 +26,6 @@ import org.openrdf.repository.RepositoryException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Add file description here!
- *
- * @author Sebastian Schaffert (sschaffert@apache.org)
- */
 public class PersistenceServiceAnno4jTest extends BaseMarmottaTest {
 
     @Test
