@@ -166,4 +166,6 @@ public class MMM {
 
     public final static String SPEECH_MUSIC_TO_TEXT_BODY = NS + "SpeechMusicToTextBody";
 
+    public final static String OBJECT_DETECTION_BODY = NS + "ObjectDetectionBody";
+
 }
