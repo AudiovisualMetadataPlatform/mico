@@ -45,9 +45,10 @@ public class PersistenceServiceAnno4j implements PersistenceService {
 
     private static Logger log = LoggerFactory.getLogger(PersistenceServiceAnno4j.class);
 
-    private StorageService storage;
-    private java.net.URI sparqlBaseURI;
-    private Anno4j anno4j;
+    private final StorageService storage;
+    private final java.net.URI sparqlBaseURI;
+    private final Anno4j anno4j;
+    private final String storagePrefix;
 
     public PersistenceServiceAnno4j(java.net.URI sparqlBaseURI, java.net.URI storageHost) {
         log.info("Sparql service URI : {}", sparqlBaseURI);
@@ -55,6 +56,7 @@ public class PersistenceServiceAnno4j implements PersistenceService {
 
         log.info("Build storage service for : {}", storageHost);
         this.storage = StorageServiceBuilder.buildStorageService(storageHost.normalize());
+        this.storagePrefix = storageHost.normalize().toString();
 
         IDGeneratorAnno4j idGenerator = new IDGeneratorAnno4j(sparqlBaseURI.toString());
         SPARQLRepository sparqlRepository = new SPARQLRepository(sparqlBaseURI.toString() + "/sparql/select", sparqlBaseURI.toString() + "/sparql/update");
@@ -74,6 +76,7 @@ public class PersistenceServiceAnno4j implements PersistenceService {
         log.info("Create local and in-memory configuration for Sparql service and storage service");
         this.sparqlBaseURI = new java.net.URI("http://localhost/mem").normalize();
         this.storage = StorageServiceBuilder.buildStorageService(ClassLoader.getSystemResource("").toURI());
+        this.storagePrefix = ClassLoader.getSystemResource("").toURI().normalize().toString();
 
         IDGeneratorAnno4j idGenerator = new IDGeneratorAnno4j(sparqlBaseURI.toString());
 
@@ -155,5 +158,10 @@ public class PersistenceServiceAnno4j implements PersistenceService {
     @Override
     public Anno4j getAnno4j() {
         return anno4j;
+    }
+
+    @Override
+    public String getStoragePrefix() {
+        return storagePrefix;
     }
 }
