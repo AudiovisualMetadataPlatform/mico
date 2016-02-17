@@ -179,7 +179,7 @@ namespace mico {
           LOG_INFO("AnalysisResponse:sendFinish to queue %s", m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
           event.set_contentitemuri(ci.getURI().stringValue());
-          event.set_objecturi(0, object.stringValue());
+          event.add_objecturi(object.stringValue());
           event.set_serviceid(m_service.getServiceID().stringValue());
           event.set_type(::mico::event::model::MessageType::FINISH);
 
@@ -197,7 +197,7 @@ namespace mico {
           LOG_INFO("AnalysisResponse:sendErrorMessage: \"%s\" to queue %s",msg.c_str(), m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
           event.set_contentitemuri(ci.getURI().stringValue());
-          event.set_objecturi(0, object.stringValue());
+          event.add_objecturi(object.stringValue());
           event.set_serviceid(m_service.getServiceID().stringValue());
           event.set_type(::mico::event::model::MessageType::ERROR);
           event.set_message(msg);
@@ -234,7 +234,7 @@ namespace mico {
           LOG_INFO("AnalysisResponse:sendNew to queue %s", m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
           event.set_contentitemuri(ci.getURI().stringValue());
-          event.set_objecturi(0, object.stringValue());
+          event.add_objecturi(object.stringValue());
           event.set_serviceid(m_service.getServiceID().stringValue());
           event.set_type(::mico::event::model::MessageType::NEW_PART);
 
