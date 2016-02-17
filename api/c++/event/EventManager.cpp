@@ -178,8 +178,8 @@ namespace mico {
         void AnalysisResponse::sendFinish(const ContentItem& ci, const URI& object) {
           LOG_INFO("AnalysisResponse:sendFinish to queue %s", m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
-          event.set_contentitemuri(ci.getURI().stringValue());
-          event.add_objecturi(object.stringValue());
+          event.set_itemuri(ci.getURI().stringValue());
+          event.add_parts(object.stringValue());
           event.set_serviceid(m_service.getServiceID().stringValue());
           event.set_type(::mico::event::model::MessageType::FINISH);
 
@@ -196,8 +196,8 @@ namespace mico {
         {
           LOG_INFO("AnalysisResponse:sendErrorMessage: \"%s\" to queue %s",msg.c_str(), m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
-          event.set_contentitemuri(ci.getURI().stringValue());
-          event.add_objecturi(object.stringValue());
+          event.set_itemuri(ci.getURI().stringValue());
+          event.add_parts(object.stringValue());
           event.set_serviceid(m_service.getServiceID().stringValue());
           event.set_type(::mico::event::model::MessageType::ERROR);
           event.set_message(msg);
@@ -215,8 +215,8 @@ namespace mico {
         {
           LOG_INFO("AnalysisResponse:sendProgress: %f to queue %s", progress, m_message.replyTo().c_str());
           mico::event::model::AnalyzeProgress event;
-          event.set_contentitemuri(ci.getURI().stringValue());
-          event.set_objecturi(object.stringValue());
+          event.set_itemuri(ci.getURI().stringValue());
+          event.set_part(object.stringValue());
           event.set_serviceid(m_service.getServiceID().stringValue());
           event.set_type(::mico::event::model::MessageType::PROGRESS);
           event.set_progress(progress);
@@ -233,8 +233,8 @@ namespace mico {
         void AnalysisResponse::sendNew(const ContentItem& ci, const URI& object) {
           LOG_INFO("AnalysisResponse:sendNew to queue %s", m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
-          event.set_contentitemuri(ci.getURI().stringValue());
-          event.add_objecturi(object.stringValue());
+          event.set_itemuri(ci.getURI().stringValue());
+          event.add_parts(object.stringValue());
           event.set_serviceid(m_service.getServiceID().stringValue());
           event.set_type(::mico::event::model::MessageType::NEW_PART);
 
@@ -628,7 +628,7 @@ namespace mico {
             LOG_INFO ("injecting content item %s...", item.getURI().stringValue().c_str());
 
             mico::event::model::ContentEvent contentEvent;
-            contentEvent.set_contentitemuri(item.getURI().stringValue());
+            contentEvent.set_itemuri(item.getURI().stringValue());
 
             char buffer[contentEvent.ByteSize()];
             contentEvent.SerializeToArray(buffer, contentEvent.ByteSize());

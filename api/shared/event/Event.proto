@@ -56,8 +56,8 @@ message RegistrationEvent {
  */
 message AnalysisEvent {
   required string serviceId      = 1; //!< service identifier of the service generating the event
-  required string contentItemUri = 2; //!< URI of the content item being processed
-  repeated string objectUri      = 3; //!< URI of the object of that content item being processed
+  required string itemUri        = 2; //!< URI of the content item being processed
+  repeated string parts          = 3; //!< URI of the object of that content item being processed
   optional MessageType type      = 4;  //!< progress, error
   optional string message        = 5;  //!< a short info
   optional string description    = 6;  //!< further description of message
@@ -77,17 +77,17 @@ message ParamEntry {
 
 message AnalyzeProgress {
   required string serviceId      = 1; //!< service identifier of the service generating the event
-  required string contentItemUri = 2; //!< URI of the content item being processed
-  required string objectUri      = 3; //!< URI of the object of that content item being processed
+  required string itemUri        = 2; //!< URI of the content item being processed
+  required string part           = 3; //!< URI of the object of that content item being processed
   required MessageType type      = 4 [default = PROGRESS]; //!< 
-  required float progress       = 5; //!< normalized progress of extractor (0.0 .. 1.0)
+  required float progress        = 5; //!< normalized progress of extractor (0.0 .. 1.0)
 }
 
 /**
  * Notify the broker that a new content item is available in the system using the given URI.
  */
 message ContentEvent {
-  required string contentItemUri = 1;
+  required string itemUri = 1;
 }
 
 
