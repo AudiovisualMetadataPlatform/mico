@@ -44,7 +44,7 @@ public class ItemAnno4j implements Item {
             partMMM.setSerializedBy(agent);
 
             this.persistenceService.getAnno4j().persist(partMMM, this.getURI());
-            this.itemMMM.addPartMMM(partMMM);
+            this.itemMMM.addPart(partMMM);
 
             log.info("Created Part with id {} in the context graph {} - Creator {}", partMMM.getResourceAsString(), this.getURI(), extractorID);
 
