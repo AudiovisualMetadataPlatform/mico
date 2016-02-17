@@ -2,9 +2,9 @@ package eu.mico.platform.persistence.impl;
 
 import com.github.anno4j.Anno4j;
 import com.github.anno4j.model.Agent;
+import eu.mico.platform.anno4j.model.AssetMMM;
 import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.anno4j.model.PartMMM;
-import eu.mico.platform.anno4j.model.AssetMMM;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
@@ -106,7 +106,13 @@ public class ItemAnno4j implements Item {
             try {
                 Anno4j anno4j = this.persistenceService.getAnno4j();
                 AssetMMM assetMMM = anno4j.createObject(AssetMMM.class);
-                assetMMM.setLocation(this.getURI().getLocalName() + "/" + new URIImpl(assetMMM.getResourceAsString()).getLocalName());
+                StringBuilder location = new StringBuilder()
+                        .append(persistenceService.getStoragePrefix())
+                        .append("/")
+                        .append(this.getURI().getLocalName())
+                        .append("/")
+                        .append(new URIImpl(assetMMM.getResourceAsString()).getLocalName());
+                assetMMM.setLocation(location.toString());
                 anno4j.persist(assetMMM, this.getURI());
                 this.itemMMM.setAsset(assetMMM);
 

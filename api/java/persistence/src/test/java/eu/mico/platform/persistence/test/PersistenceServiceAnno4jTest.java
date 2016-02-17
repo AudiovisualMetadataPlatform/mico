@@ -13,14 +13,11 @@
  */
 package eu.mico.platform.persistence.test;
 
-import com.github.anno4j.model.impl.ResourceObject;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
 import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Item;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
@@ -28,7 +25,6 @@ import org.openrdf.repository.RepositoryException;
 import java.net.URISyntaxException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class PersistenceServiceAnno4jTest {
@@ -71,11 +67,10 @@ public class PersistenceServiceAnno4jTest {
 
     @Test
     public void getItemsTest() throws RepositoryException {
-
         int initialItemCount = persistenceService.getAnno4j().findAll(ItemMMM.class).size();
 
-        Item item1 = persistenceService.createItem();
-        Item item2 = persistenceService.createItem();
+        persistenceService.createItem();
+        persistenceService.createItem();
 
         int retrievedSize = Iterables.size(persistenceService.getItems());
 
@@ -84,7 +79,6 @@ public class PersistenceServiceAnno4jTest {
 
     @Test
     public void subGraphTest() throws RepositoryException {
-
         int initialItemCount = persistenceService.getAnno4j().findAll(ItemMMM.class).size();
 
         Item item1 = persistenceService.createItem();
