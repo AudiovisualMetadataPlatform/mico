@@ -17,6 +17,7 @@ import eu.mico.platform.persistence.impl.MarmottaMetadata;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
