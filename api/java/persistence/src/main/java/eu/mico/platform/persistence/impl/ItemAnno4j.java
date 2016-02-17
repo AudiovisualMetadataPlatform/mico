@@ -2,10 +2,9 @@ package eu.mico.platform.persistence.impl;
 
 import com.github.anno4j.Anno4j;
 import com.github.anno4j.model.Agent;
-import com.github.anno4j.model.impl.agent.Software;
+import eu.mico.platform.anno4j.model.AssetMMM;
 import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.anno4j.model.PartMMM;
-import eu.mico.platform.anno4j.model.AssetMMM;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
@@ -13,6 +12,8 @@ import eu.mico.platform.persistence.model.Part;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,8 +22,9 @@ import java.util.List;
 
 public class ItemAnno4j implements Item {
 
-    private final PersistenceService persistenceService;
+    private static Logger log = LoggerFactory.getLogger(ItemAnno4j.class);
 
+    private final PersistenceService persistenceService;
     private final ItemMMM itemMMM;
 
     public ItemAnno4j(ItemMMM itemMMM, PersistenceService persistenceService) {
@@ -42,7 +44,10 @@ public class ItemAnno4j implements Item {
             partMMM.setSerializedBy(agent);
 
             this.persistenceService.getAnno4j().persist(partMMM, this.getURI());
-            this.itemMMM.addPartMMM(partMMM);
+            this.itemMMM.addPart(partMMM);
+
+            log.info("Created Part with id {} in the context graph {} - Creator {}", partMMM.getResourceAsString(), this.getURI(), extractorID);
+
             return new PartAnno4j(partMMM, this, persistenceService);
         } catch (IllegalAccessException e) {
             throw new RepositoryException("Illegal access", e);
@@ -101,9 +106,16 @@ public class ItemAnno4j implements Item {
             try {
                 Anno4j anno4j = this.persistenceService.getAnno4j();
                 AssetMMM assetMMM = anno4j.createObject(AssetMMM.class);
-                assetMMM.setLocation(this.getURI().getLocalName() + "/" + new URIImpl(assetMMM.getResourceAsString()).getLocalName());
+                StringBuilder location = new StringBuilder()
+                        .append(persistenceService.getStoragePrefix())
+                        .append(this.getURI().getLocalName())
+                        .append("/")
+                        .append(new URIImpl(assetMMM.getResourceAsString()).getLocalName());
+                assetMMM.setLocation(location.toString());
                 anno4j.persist(assetMMM, this.getURI());
                 this.itemMMM.setAsset(assetMMM);
+
+                log.info("No Asset available for Item {} - Created new Asset with id {} and location {}", this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
             } catch (IllegalAccessException e) {
                 throw new RepositoryException("Illegal access", e);
             } catch (InstantiationException e) {

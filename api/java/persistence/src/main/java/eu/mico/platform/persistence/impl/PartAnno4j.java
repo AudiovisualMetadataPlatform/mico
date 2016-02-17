@@ -13,10 +13,14 @@ import eu.mico.platform.persistence.model.Part;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
 public class PartAnno4j implements Part {
+
+    private static Logger log = LoggerFactory.getLogger(PersistenceServiceAnno4j.class);
 
     private final PersistenceService persistenceService;
     private final Item item;
@@ -99,9 +103,20 @@ public class PartAnno4j implements Part {
             try {
                 Anno4j anno4j = this.persistenceService.getAnno4j();
                 AssetMMM assetMMM = anno4j.createObject(AssetMMM.class);
-                assetMMM.setLocation(this.item.getURI().getLocalName() + "/" + this.getURI().getLocalName() + "/" + new URIImpl(assetMMM.getResourceAsString()).getLocalName());
+
+                StringBuilder location = new StringBuilder()
+                        .append(persistenceService.getStoragePrefix())
+                        .append(this.item.getURI().getLocalName())
+                        .append("/")
+                        .append(this.getURI().getLocalName())
+                        .append("/")
+                        .append(new URIImpl(assetMMM.getResourceAsString()).getLocalName());
+
+                assetMMM.setLocation(location.toString());
                 anno4j.persist(assetMMM, this.item.getURI());
                 this.partMMM.setAsset(assetMMM);
+
+                log.info("No Asset available for Part {} - Created new Asset with id {} and location {}", this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
             } catch (IllegalAccessException e) {
                 throw new RepositoryException("Illegal access", e);
             } catch (InstantiationException e) {

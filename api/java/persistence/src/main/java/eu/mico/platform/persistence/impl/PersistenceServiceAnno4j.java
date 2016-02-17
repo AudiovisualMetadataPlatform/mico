@@ -19,7 +19,6 @@ import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.storage.api.StorageService;
 import eu.mico.platform.storage.impl.StorageServiceBuilder;
-import eu.mico.platform.storage.util.VFSUtils;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -46,46 +45,46 @@ public class PersistenceServiceAnno4j implements PersistenceService {
 
     private static Logger log = LoggerFactory.getLogger(PersistenceServiceAnno4j.class);
 
-    private StorageService storage;
-    private java.net.URI sparqlServerURI;
-    private Anno4j anno4j;
+    private final StorageService storage;
+    private final java.net.URI sparqlBaseURI;
+    private final Anno4j anno4j;
+    private final String storagePrefix;
 
-    public PersistenceServiceAnno4j(java.net.URI sparqlServerURI, java.net.URI storageHost) {
-        this.sparqlServerURI = sparqlServerURI.normalize();
+    public PersistenceServiceAnno4j(java.net.URI sparqlBaseURI, java.net.URI storageHost) {
+        log.info("Sparql service URI : {}", sparqlBaseURI);
+        this.sparqlBaseURI = sparqlBaseURI.normalize();
+
+        log.info("Build storage service for : {}", storageHost);
         this.storage = StorageServiceBuilder.buildStorageService(storageHost.normalize());
+        this.storagePrefix = storageHost.normalize().toString();
 
-        IDGeneratorAnno4j idGenerator = new IDGeneratorAnno4j(sparqlServerURI.toString());
-        SPARQLRepository sparqlRepository = new SPARQLRepository(sparqlServerURI.toString() + "/sparql/select", sparqlServerURI.toString() + "/sparql/update");
+        IDGeneratorAnno4j idGenerator = new IDGeneratorAnno4j(sparqlBaseURI.toString());
+        SPARQLRepository sparqlRepository = new SPARQLRepository(sparqlBaseURI.toString() + "/sparql/select", sparqlBaseURI.toString() + "/sparql/update");
 
         try {
             this.anno4j = new Anno4j(sparqlRepository, idGenerator);
-        } catch (RepositoryException e) {
-            e.printStackTrace();
-        } catch (RepositoryConfigException e) {
-            e.printStackTrace();
+        } catch (RepositoryException | RepositoryConfigException e) {
+            throw new IllegalStateException("Couldn't instantiate Anno4j");
         }
 
-        VFSUtils.configure();
     }
 
     /**
      * For testing purpose. Starts an in memory sparql repository.
      */
     public PersistenceServiceAnno4j() throws URISyntaxException {
-        this.sparqlServerURI = new java.net.URI("http://localhost/mem").normalize();
+        log.info("Create local and in-memory configuration for Sparql service and storage service");
+        this.sparqlBaseURI = new java.net.URI("http://localhost/mem").normalize();
         this.storage = StorageServiceBuilder.buildStorageService(ClassLoader.getSystemResource("").toURI());
+        this.storagePrefix = ClassLoader.getSystemResource("").toURI().normalize().toString();
 
-        IDGeneratorAnno4j idGenerator = new IDGeneratorAnno4j(sparqlServerURI.toString());
+        IDGeneratorAnno4j idGenerator = new IDGeneratorAnno4j(sparqlBaseURI.toString());
 
         try {
             this.anno4j = new Anno4j(idGenerator);
-        } catch (RepositoryException e) {
-            e.printStackTrace();
-        } catch (RepositoryConfigException e) {
-            e.printStackTrace();
+        } catch (RepositoryException | RepositoryConfigException e) {
+            throw new IllegalStateException("Couldn't instantiate Anno4j");
         }
-
-        VFSUtils.configure();
     }
 
     /**
@@ -102,11 +101,13 @@ public class PersistenceServiceAnno4j implements PersistenceService {
             itemMMM.setSerializedAt(dateTime);
             anno4j.persist(itemMMM, new URIImpl(itemMMM.getResourceAsString()));
 
+            log.info("Created Item with id {} in the corresponding context graph", itemMMM.getResourceAsString());
+
             return new ItemAnno4j(itemMMM, this);
         } catch (IllegalAccessException e) {
             throw new RepositoryException("Illegal access", e);
         } catch (InstantiationException e) {
-            throw new RepositoryException("Could not instantiate", e);
+            throw new RepositoryException("Could not instantiate ItemMMM", e);
         }
     }
 
@@ -114,7 +115,7 @@ public class PersistenceServiceAnno4j implements PersistenceService {
      * Return the item with the given URI if it exists. The item should be suitable for reading and
      * updating and write all updates to the underlying low-level persistence layer.
      *
-     * @param id
+     * @param id Id of the item to retrieve
      * @return a handle to the Item with the given URI, or null if it does not exist
      */
     @Override
@@ -129,6 +130,7 @@ public class PersistenceServiceAnno4j implements PersistenceService {
     @Override
     public void deleteItem(URI id) throws RepositoryException {
         anno4j.clearContext(id);
+        log.info("Deleted item with id {} including all triples in the corresponding context graph", id.toString());
     }
 
     /**
@@ -144,6 +146,7 @@ public class PersistenceServiceAnno4j implements PersistenceService {
         for (ItemMMM itemMMM : itemsMMM) {
             itemsAnno4j.add(new ItemAnno4j(itemMMM, this));
         }
+
         return itemsAnno4j;
     }
 
@@ -155,5 +158,10 @@ public class PersistenceServiceAnno4j implements PersistenceService {
     @Override
     public Anno4j getAnno4j() {
         return anno4j;
+    }
+
+    @Override
+    public String getStoragePrefix() {
+        return storagePrefix;
     }
 }

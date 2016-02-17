@@ -57,4 +57,6 @@ public interface PersistenceService {
     StorageService getStorage();
 
     Anno4j getAnno4j();
+
+    String getStoragePrefix();
 }
