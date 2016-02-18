@@ -46,7 +46,7 @@ public interface AnalysisResponse {
      * @param ci     the updated content item
      * @param object the updated object
      */
-    public void sendFinish(Item ci, URI object) throws IOException;
+    void sendFinish(Item ci) throws IOException;
 
     /**
      * Send a message to the broker's callback queue that the given content item and object have been updated. 
@@ -62,11 +62,10 @@ public interface AnalysisResponse {
      * Send a message to the broker's callback queue that the given content item and object could not be processed. 
      *
      * @param ci     the processed content item
-     * @param object the processed object
      * @param msg    the error message
      * @param desc   further information about the error
      */
-    public void sendError(Item ci, URI object, String msg, String desc) throws IOException;
+    void sendError(Item ci, String msg, String desc) throws IOException;
 
     /**
      * Send a message to the broker's callback queue that a new content part was added. 
@@ -75,5 +74,6 @@ public interface AnalysisResponse {
      * @param object      the new object / part
      */
     public void sendNew(Item ci, URI object) throws IOException;
+
 
 }

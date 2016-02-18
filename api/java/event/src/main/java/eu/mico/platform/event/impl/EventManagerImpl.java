@@ -290,8 +290,7 @@ public class EventManagerImpl implements EventManager {
 
     private class AnalysisConsumer extends DefaultConsumer {
 
-        private final class AnalysisResponseImpl implements
-                AnalysisResponse {
+        private final class AnalysisResponseImpl implements AnalysisResponse {
             private final BasicProperties properties;
             private final BasicProperties replyProps;
             private long progressSentMS = 0; 
@@ -312,10 +311,9 @@ public class EventManagerImpl implements EventManager {
             }
 
             @Override
-            public void sendFinish(Item ci, URI object) throws IOException {
+            public void sendFinish(Item ci) throws IOException {
                 Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
                         .setContentItemUri(ci.getURI().stringValue())
-                        .setObjectUri(object.stringValue())
                         .setServiceId(service.getServiceID().stringValue())
                         .setType(MessageType.FINISH).build();
 
@@ -350,7 +348,7 @@ public class EventManagerImpl implements EventManager {
             public void sendNew(Item ci, URI object) throws IOException {
                 Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
                         .setContentItemUri(ci.getURI().stringValue())
-                        .setObjectUri(object.stringValue())
+                        .setObjectUri(0, object.stringValue())
                         .setServiceId(service.getServiceID().stringValue())
                         .setType(MessageType.NEW_PART).build();
 
@@ -358,11 +356,10 @@ public class EventManagerImpl implements EventManager {
             }
 
             @Override
-            public void sendError(Item ci, URI object, String msg,
+            public void sendError(Item ci, String msg,
                                   String desc) throws IOException {
                 Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
                         .setContentItemUri(ci.getURI().stringValue())
-                        .setObjectUri(object.stringValue())
                         .setServiceId(service.getServiceID().stringValue())
                         .setType(MessageType.ERROR)
                         .setMessage(msg)
@@ -415,7 +412,7 @@ public class EventManagerImpl implements EventManager {
             try {
                 final Item ci = persistenceService.getItem(new URIImpl(analysisEvent.getContentItemUri()));
 
-                service.call(response, ci, new URIImpl(analysisEvent.getObjectUri()));
+                service.call(response, ci, new URIImpl(analysisEvent.getObjectUri(0)));
 
                 getChannel().basicAck(envelope.getDeliveryTag(), false);
             } catch (RepositoryException e) {
