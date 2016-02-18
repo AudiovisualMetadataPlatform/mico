@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.zooniverse.model.TextAnalysisInput;
 import io.prediction.Event;
 import io.prediction.EventClient;
 import org.joda.time.DateTime;
@@ -63,7 +64,7 @@ public class RecoWebService {
 
 
         return Response.status(Response.Status.CREATED)
-                .entity(ImmutableMap.of("docker_running", dockerRunning, "call", docker_cmd))
+                .entity(ImmutableMap.of("docker_running", dockerRunning, "calls", docker_cmd))
                 .build();
     }
 
@@ -99,11 +100,14 @@ public class RecoWebService {
     @GET
     @Path("/piosimplereco")
     @Produces("text/plain")
-    public Response getSimpleReco(@QueryParam("userId") final String userId) {
+    public Response getSimpleReco(
+            @QueryParam("userId") final String userId,
+            @QueryParam("length") final String length
+    ) {
 
         try {
             URI recopath = new URI(DockerConf.PIO_RECO_API.toString() + "/queries.json");
-            String data = "{ \"user\": \"" + userId + "\", \"num\": 2 }";
+            String data = "{ \"user\": \"" + userId + "\", \"num\": "+ length + " }";
             String response = DockerUtils.forwardPOST(recopath, data);
             return Response.ok(response).build();
 
@@ -116,7 +120,7 @@ public class RecoWebService {
     @GET
     @Path("/createentity")
     @Produces("text/plain")
-    public Response cerateEvent() throws InterruptedException, ExecutionException, IOException {
+    public Response createEvent(TextAnalysisInput input) {
 
         //TODO!
 
@@ -132,13 +136,18 @@ public class RecoWebService {
         System.out.println(pioEvent.toJsonString());
 
         EventClient ec = new EventClient("micoaccesskey", DockerConf.PIO_EVENT_API.toString());
-        String eventId = ec.createEvent(pioEvent);
+        String eventId = null;
+        try {
+            eventId = ec.createEvent(pioEvent);
+        } catch (ExecutionException | InterruptedException | IOException e) {
+            return Response.ok(e.getMessage()).build();
+        }
 
         ec.close();
 
 
         return Response.status(Response.Status.CREATED)
-                .entity(ImmutableMap.of("entity_id", eventId, "entity", pioEvent.toString()))
+                .entity(ImmutableMap.of("entity_id", eventId, "entity", pioEvent.toString(), "input", input.comment))
                 .build();
 
     }

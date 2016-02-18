@@ -51,7 +51,7 @@ public class DockerUtils {
     }
 
     public static String getDockerCmd(String psauxOutput) {
-        Matcher m = Pattern.compile("(?m)^^.*docker run.*wp5$$").matcher(psauxOutput);
+        Matcher m = Pattern.compile("(?m)^.*docker.*$").matcher(psauxOutput);
         if (m.find()) {
             return m.group();
         } else {
