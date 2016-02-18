@@ -158,14 +158,20 @@ public class MMM {
 
     public final static String DIARIZATION_BODY = NS + "DiarizationBody";
 
+    public final static String MATCHING_SEGMENT_BODY = NS + "MatchingSegmentBody";
+
     public final static String MATCHING_AUDIO_SEGMENT_BODY = NS + "MatchingAudioSegmentBody";
 
     public final static String MATCHING_VIDEO_SEGMENT_BODY = NS + "MatchingVideoSegmentBody";
+
+    public final static String HAS_FINGERPRINT = NS + "hasFingerprint";
 
     public final static String SPEECH_MUSIC_BODY = NS + "SpeechMusicBody";
 
     public final static String SPEECH_MUSIC_TO_TEXT_BODY = NS + "SpeechMusicToTextBody";
 
     public final static String OBJECT_DETECTION_BODY = NS + "ObjectDetectionBody";
+
+    public final static String MEDIA_INFO_BODY = NS + "MediaInfoBody";
 
 }
