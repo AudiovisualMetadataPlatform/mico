@@ -50,43 +50,73 @@ message RegistrationEvent {
  * object URI is the URI of an object that should be taken into account by the receiving service;
  * this can be a content part (identified by its URI), a fragment identified and stored in the
  * metadata, etc.
- *
+ */
+message AnalysisRequest{
+message ParamEntry {
+  required string key    = 1;
+  required string value  = 2;
+}
+  required string serviceId      = 1;  // service identifier of the service generating the event
+  required string ItemUri        = 2;  // URI of the item being processed
+  repeated string partUri      = 3;  // URI of the part of that item being processed
+  repeated ParamEntry params     = 10; // a map with runtime parameters for the extractor
+}
+
+
+/*
  * AnalysisEvents are sent both, by the message broker to notify services that they should start
  * analysing an object, and by services to notify the message broker that they added a new object.
  */
 message AnalysisEvent {
-  required string serviceId      = 1; //!< service identifier of the service generating the event
-  required string itemUri        = 2; //!< URI of the content item being processed
-  repeated string parts          = 3; //!< URI of the object of that content item being processed
-  optional MessageType type      = 4;  //!< progress, error
-  optional string message        = 5;  //!< a short info
-  optional string description    = 6;  //!< further description of message
-  optional ErrorCodes errorCode  = 7;  //!< one of the predefined error codes, used by broker to handle error
-}
+    message Progress {
+      required string serviceId      = 1; //!< service identifier of the service generating the event
+      required string itemUri        = 2; //!< URI of the item being processed
+      required string partUri        = 3; //!< URI of the part of that item being processed
+      required float progress        = 5; //!< normalized progress of extractor (0.0 .. 1.0)
+    }
+    
+    message NewPart {
+      required string serviceId      = 1; //!< service identifier of the service generating the event    
+      required string itemUri        = 2; //!< URI of the item being processed
+      required string partUri        = 3; //!< URI of the part of that item being processed
+    }
+    
+    message Finish  {
+      required string serviceId      = 1; //!< service identifier of the service generating the event    
+      required string itemUri        = 2; //!< URI of the item being processed
+    }
+    
+    message Error {
+      required string serviceId      = 1; //!< service identifier of the service generating the event    
+      required string itemUri        = 2; //!< URI of the item being processed
+      optional string message        = 5;  //!< a short info
+      optional string description    = 6;  //!< further description of message
+      optional ErrorCodes errorCode  = 7;  //!< one of the predefined error codes, used by broker to handle error
+    }  
 
-message AnalysisRequest{
-message ParamEntry {
-  required string key = 1;
-  required string value = 2;
-}
-  required string serviceId      = 1;  // service identifier of the service generating the event
-  required string contentItemUri = 2;  // URI of the content item being processed
-  repeated string objectUri      = 3;  // URI of the object of that content item being processed
-  repeated ParamEntry params     = 10; // a map with runtime parameters for the extractor
-}
+    required MessageType type      = 1;
+    
+    oneof test_oneof{
+        Progress progress = 2;
+        NewPart  new      = 3;
+        Finish   finish   = 8;
+        Error    error    = 9;
+    }
 
-message AnalyzeProgress {
-  required string serviceId      = 1; //!< service identifier of the service generating the event
-  required string itemUri        = 2; //!< URI of the content item being processed
-  required string part           = 3; //!< URI of the object of that content item being processed
-  required MessageType type      = 4 [default = PROGRESS]; //!< 
-  required float progress        = 5; //!< normalized progress of extractor (0.0 .. 1.0)
+
+//  required string serviceId      = 1; //!< service identifier of the service generating the event
+//  required string itemUri        = 2; //!< URI of the content item being processed
+//  repeated string parts          = 3; //!< URI of the object of that content item being processed
+//  optional MessageType type      = 4;  //!< progress, error
+//  optional string message        = 5;  //!< a short info
+//  optional string description    = 6;  //!< further description of message
+//  optional ErrorCodes errorCode  = 7;  //!< one of the predefined error codes, used by broker to handle error
 }
 
 /**
- * Notify the broker that a new content item is available in the system using the given URI.
+ * Notify the broker that a new item is available in the system using the given URI.
  */
-message ContentEvent {
+message ItemEvent {
   required string itemUri = 1;
 }
 

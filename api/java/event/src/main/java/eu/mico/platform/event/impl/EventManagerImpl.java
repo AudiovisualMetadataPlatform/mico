@@ -21,6 +21,9 @@ import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event;
+import eu.mico.platform.event.model.Event.AnalysisEvent;
+import eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry;
+import eu.mico.platform.event.model.Event.ErrorCodes;
 import eu.mico.platform.event.model.Event.MessageType;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
@@ -33,7 +36,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
@@ -232,7 +237,7 @@ public class EventManagerImpl implements EventManager {
     @Override
     public void injectItem(Item item) throws IOException {
         Channel chan = connection.createChannel();
-        chan.basicPublish("", EventManager.QUEUE_CONTENT_INPUT, null, Event.PartEvent.newBuilder().setContentItemUri(item.getURI().stringValue()).build().toByteArray());
+        chan.basicPublish("", EventManager.QUEUE_CONTENT_INPUT, null, Event.ItemEvent.newBuilder().setItemUri(item.getURI().stringValue()).build().toByteArray());
         chan.close();
     }
 
@@ -288,6 +293,10 @@ public class EventManagerImpl implements EventManager {
     }
 
 
+    /**
+     * This is the client (extractor) side of event api. 
+     *
+     */
     private class AnalysisConsumer extends DefaultConsumer {
 
         private final class AnalysisResponseImpl implements AnalysisResponse {
@@ -302,66 +311,70 @@ public class EventManagerImpl implements EventManager {
                 this.replyProps = replyProps;
             }
 
-            /** 
-             * @see eu.mico.platform.event.api.AnalysisResponse#sendMessage(Item, org.openrdf.model.URI)
-             * @deprecated use {@link #sendFinish(Item, URI)} or one of the other sendXXXX() functions instead.
-             */
-            public void sendMessage(Item ci, URI object) throws IOException {
-                sendFinish(ci, object);
-            }
-
             @Override
             public void sendFinish(Item ci) throws IOException {
-                Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
-                        .setContentItemUri(ci.getURI().stringValue())
-                        .setServiceId(service.getServiceID().stringValue())
-                        .setType(MessageType.FINISH).build();
+            	AnalysisEvent.Finish finishMsg = AnalysisEvent.Finish.newBuilder()
+            			.setServiceId(service.getServiceID().stringValue())
+                        .setItemUri(ci.getURI().stringValue())
+            			.build();
+            			
+                AnalysisEvent analysisEvent = AnalysisEvent.newBuilder()
+                		.setFinish(finishMsg)
+                		.setType(MessageType.FINISH)
+                		.build();
 
-                getChannel().basicPublish("", properties.getReplyTo(), replyProps, responseEvent.toByteArray());
+                getChannel().basicPublish("", properties.getReplyTo(), replyProps, analysisEvent.toByteArray());
             }
 
             @Override
-            public void sendProgress(Item ci, URI object,
-                                     float progress) throws IOException {
+            public void sendProgress(Item ci, URI part, float progress) throws IOException {
                 long current = System.currentTimeMillis();
                 if (current < progressDeltaMS + progressSentMS){
                     // prevent broker from progress flooding and wait at least deltaMS millis
-                    log.trace("suppress sending progress: {} for object: {}",progress, object);
+                    log.trace("suppress sending progress: {} for object: {}",progress, part);
                     return;
                 }
-                log.trace("sending progress of: {} for object: {}",progress, object);
+                log.trace("sending progress of: {} for object: {}",progress, part);
                 if (progress > 1.0001f){
                     log.warn("progress should not be grater then 1.0 but is: {}", progress);
                 }
-                Event.AnalyzeProgress responseEvent = Event.AnalyzeProgress.newBuilder()
-                        .setContentItemUri(ci.getURI().stringValue())
-                        .setObjectUri(object.stringValue())
+                AnalysisEvent.Progress progressMsg = AnalysisEvent.Progress.newBuilder()
+                        .setItemUri(ci.getURI().stringValue())
+                        .setPartUri(part.stringValue())
                         .setServiceId(service.getServiceID().stringValue())
-                        .setType(MessageType.PROGRESS)
                         .setProgress(progress).build();
 
-                getChannel().basicPublish("", properties.getReplyTo(), replyProps, responseEvent.toByteArray());
+                AnalysisEvent analysisEvent = AnalysisEvent.newBuilder()
+                		.setProgress(progressMsg)
+                		.setType(MessageType.PROGRESS)
+                		.build();
+
+                getChannel().basicPublish("", properties.getReplyTo(), replyProps, analysisEvent.toByteArray());
                 progressSentMS = current;
             }
 
             @Override
-            public void sendNew(Item ci, URI object) throws IOException {
-                Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
-                        .setContentItemUri(ci.getURI().stringValue())
-                        .setObjectUri(0, object.stringValue())
+            public void sendNew(Item ci, URI part) throws IOException {
+                AnalysisEvent.NewPart newPartMsg = AnalysisEvent.NewPart.newBuilder()
+                        .setItemUri(ci.getURI().stringValue())
+                        .setPartUri(part.stringValue())
                         .setServiceId(service.getServiceID().stringValue())
-                        .setType(MessageType.NEW_PART).build();
+                        .build();
 
-                getChannel().basicPublish("", properties.getReplyTo(), replyProps, responseEvent.toByteArray());
+                        AnalysisEvent analysisEvent = AnalysisEvent.newBuilder()
+                		.setNew(newPartMsg)
+                		.setType(MessageType.NEW_PART)
+                		.build();
+
+                getChannel().basicPublish("", properties.getReplyTo(), replyProps, analysisEvent.toByteArray());
             }
 
             @Override
-            public void sendError(Item ci, String msg,
+            public void sendError(Item ci, ErrorCodes code, String msg,
                                   String desc) throws IOException {
-                Event.AnalysisEvent responseEvent = Event.AnalysisEvent.newBuilder()
-                        .setContentItemUri(ci.getURI().stringValue())
+                AnalysisEvent.Error responseEvent = AnalysisEvent.Error.newBuilder()
+                        .setItemUri(ci.getURI().stringValue())
                         .setServiceId(service.getServiceID().stringValue())
-                        .setType(MessageType.ERROR)
                         .setMessage(msg)
                         .setDescription(desc).build();
 
@@ -399,7 +412,7 @@ public class EventManagerImpl implements EventManager {
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, final AMQP.BasicProperties properties, byte[] body) throws IOException {
             // retrieve the event data from the byte array
-            Event.AnalysisEvent analysisEvent = Event.AnalysisEvent.parseFrom(body);
+            Event.AnalysisRequest analysisRequest = Event.AnalysisRequest.parseFrom(body);
 
             // construct reply properties, use the same correlation ID as in the request
             final AMQP.BasicProperties replyProps = new AMQP.BasicProperties
@@ -410,21 +423,37 @@ public class EventManagerImpl implements EventManager {
             final AnalysisResponse response = new AnalysisResponseImpl(properties, replyProps);
 
             try {
-                final Item item = persistenceService.getItem(new URIImpl(analysisEvent.getContentItemUri()));
 
-                service.call(response, item, new URIImpl(analysisEvent.getObjectUri(0)), persistenceService.getAnno4j());
+                final Item item = persistenceService.getItem(new URIImpl(analysisRequest.getItemUri()));
+                final List<URI> parts = parsePartsList(analysisRequest.getPartUriList());
+                final Map<String,String> params = new HashMap<String, String>(); 
+                for ( ParamEntry entry: analysisRequest.getParamsList()){
+                    params.put(entry.getKey(), entry.getValue());
+                }
+
+                service.call(response, item, parts, params);
+                //service.call(response, item, new URIImpl(analysisEvent.getObjectUri(0)), persistenceService.getAnno4j());
 
                 getChannel().basicAck(envelope.getDeliveryTag(), false);
             } catch (RepositoryException e) {
-                log.error("could not access content item with URI {}, requeuing (message: {})", analysisEvent.getContentItemUri(), e.getMessage());
+                log.error("could not access content item with URI {}, requeuing (message: {})", analysisRequest.getItemUri(), e.getMessage());
                 log.debug("Exception:",e);
                 getChannel().basicNack(envelope.getDeliveryTag(), false, true);
             } catch (AnalysisException e) {
-                log.error("could not analyse content item with URI {}, requeuing (message: {})", analysisEvent.getContentItemUri(), e.getMessage());
+                log.error("could not analyse content item with URI {}, requeuing (message: {})", analysisRequest.getItemUri(), e.getMessage());
                 log.debug("Exception:", e);
                 getChannel().basicNack(envelope.getDeliveryTag(), false, true);
             }
 
         }
+        private List<URI> parsePartsList(List<String> objectUriList) {
+            List<URI> parts = new ArrayList<URI>();
+            for (String p : objectUriList){
+                parts.add(new URIImpl(p));
+            }
+            return null;
+
+        }
+
     }
 }

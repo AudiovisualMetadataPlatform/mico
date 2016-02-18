@@ -7,12 +7,17 @@ import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.test.mock.PersistenceServiceMock;
+
+import org.openrdf.model.URI;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -41,15 +46,19 @@ public class EventManagerMock implements EventManager {
     @Override
     public void injectItem(Item item) throws IOException {
         try {
+        	Map<String, String> params = new HashMap<String, String>();
             log.debug("Injecting content item {}...", item.getURI());
             for (Part part : item.getParts()) {
                 for (AnalysisService service: services) {
-                    if (service.getRequires().equals(part.getType())) {
+                    if (service.getRequires().equals(part.getSyntacticalType())) {
+                        URI uri = item.getURI();
+                        List<URI> uris = new LinkedList<URI>();
+                        uris.add(uri);
                         try {
                             log.debug("calling service {} to analyze {}...", service.getServiceID(), part.getURI());
-                            service.call(responsesCollector, item, part.getURI());
+                            service.call(responsesCollector, item, uris, params);
                         } catch (AnalysisException e) {
-                            log.error("Analysis Exception processing {}: {}", part.getURI().stringValue(), e.getMessage());
+                            log.error("Analysis Exception processing {}: {}", uri.stringValue(), e.getMessage());
                         }
                     }
                 }

@@ -30,6 +30,8 @@ import org.openrdf.model.impl.URIImpl;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -114,8 +116,8 @@ public class EventManagerTest extends BaseCommunicationTest {
         }
 
         @Override
-        public void call(AnalysisResponse resp, Item ci, URI object) throws AnalysisException, IOException {
-            resp.sendMessage(ci,object);
+        public void call(AnalysisResponse resp, Item ci, List<URI> object, Map<String,String> params) throws AnalysisException, IOException {
+            resp.sendFinish(ci);
             called = true;
         }
 

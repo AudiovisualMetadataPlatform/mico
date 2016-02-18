@@ -1,6 +1,7 @@
 package eu.mico.platform.event.test.mock;
 
 import eu.mico.platform.event.api.AnalysisResponse;
+import eu.mico.platform.event.model.Event.ErrorCodes;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
 
@@ -28,25 +29,9 @@ public class AnalysisResponseCollector implements AnalysisResponse {
     }
 
     @Override
-    public void sendMessage(Item ci, URI object) throws IOException {
-        try {
-            log.debug("sent message about {}", object.stringValue());
-            final Part part = ci.getPart(object);
-            responses.put(object, IOUtils.toString(part.getInputStream()));
-        } catch (RepositoryException e) {
-            log.error("Repository Exception: {}", e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public void sendFinish(Item ci, URI object) throws IOException {
-        try {
-            log.debug("sent message about {}", object.stringValue());
-            final Part part = ci.getPart(object);
-            responses.put(object, IOUtils.toString(part.getInputStream()));
-        } catch (RepositoryException e) {
-            log.error("Repository Exception: {}", e.getMessage(), e);
-        }
+    public void sendFinish(Item ci) throws IOException {
+            log.debug("sent message about {}", ci.getURI().stringValue());
+            responses.put(ci.getURI(), ci.getSemanticType());
     }
 
     public Map<URI, String> getResponses() {
@@ -61,10 +46,10 @@ public class AnalysisResponseCollector implements AnalysisResponse {
     }
 
     @Override
-    public void sendError(Item ci, URI object, String msg, String desc)
+    public void sendError(Item ci, ErrorCodes code, String msg, String desc)
             throws IOException {
-        log.debug("sent error message about {}", object.stringValue());
-        errors.put(object, msg);
+        log.debug("sent error message about {}", ci.getURI().stringValue());
+        errors.put(ci.getURI(), msg);
     }
 
     @Override

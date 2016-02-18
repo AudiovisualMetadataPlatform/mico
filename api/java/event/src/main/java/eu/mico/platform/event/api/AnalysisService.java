@@ -21,6 +21,8 @@ import eu.mico.platform.persistence.model.Resource;
 import org.openrdf.model.URI;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Interface to be implemented by services. Consists of some informational methods as well as a callback which is called
@@ -78,5 +80,5 @@ public interface AnalysisService {
      * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
      * @param anno4j
      */
-    public void call(AnalysisResponse resp, Item item, Resource resource, Anno4j anno4j) throws AnalysisException, IOException;
+    public void call(AnalysisResponse resp, Item item,  List<URI> parts,  Map<String, String> params) throws AnalysisException, IOException;
 }
