@@ -2,7 +2,6 @@ package eu.mico.platform.storage.test;
 
 
 import eu.mico.platform.storage.impl.StorageServiceHDFS;
-import eu.mico.platform.storage.model.Content;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
