@@ -64,7 +64,7 @@ public class PartAnno4jTest {
     @Test
     public void bodyTest() throws RepositoryException, InstantiationException, IllegalAccessException {
         assertNull(part.getBody());
-        SpeechToTextBodyMMM body = anno4j.createObject(SpeechToTextBodyMMM.class, item.getURI());
+        SpeechToTextBodyMMM body = anno4j.createObject(SpeechToTextBodyMMM.class);
         body.getValue();
         int initialSpeechToTextBodiesDefaultGraph = anno4j.findAll(SpeechToTextBodyMMM.class).size();
         int initialSpeechToTextBodiesSubGraph = anno4j.findAll(SpeechToTextBodyMMM.class, item.getURI()).size();
@@ -87,8 +87,8 @@ public class PartAnno4jTest {
 
         int initialTargetCount = part.getTarget().size();
 
-        Target target1 = anno4j.createObject(SpecificResource.class, item.getURI());
-        Target target2 = anno4j.createObject(SpecificResource.class, item.getURI());
+        Target target1 = anno4j.createObject(SpecificResource.class);
+        Target target2 = anno4j.createObject(SpecificResource.class);
 
         Set<Target> targetSet = new HashSet<>();
         targetSet.add(target1);
