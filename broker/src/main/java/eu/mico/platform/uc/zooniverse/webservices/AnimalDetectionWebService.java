@@ -107,8 +107,9 @@ public class AnimalDetectionWebService {
                         if (cType != null && !MediaType.valueOf(cType.getValue()).equals(MediaType.APPLICATION_OCTET_STREAM_TYPE)) {
                             type = MediaType.valueOf(cType.getValue());
                         } else {
-                            type = MediaType.valueOf(mimetypesMap.getContentType(imageUrl.getPath()));
+                            type = MediaType.valueOf(mimetypesMap.getContentType(imageUrl.getPath().toLowerCase()));
                         }
+                        log.debug("Content type for URL {} is {}, proceeding with type {}", imageUrl.toString(), cType.getValue(), type.toString());
 
                         if (type.toString().equalsIgnoreCase("image/jpeg")) {
                             try (InputStream is = httpResponse.getEntity().getContent()) {
