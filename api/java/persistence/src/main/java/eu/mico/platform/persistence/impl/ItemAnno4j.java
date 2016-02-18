@@ -12,6 +12,7 @@ import eu.mico.platform.persistence.model.Part;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.object.RDFObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,6 +84,11 @@ public class ItemAnno4j implements Item {
     @Override
     public URI getURI() {
         return new URIImpl(itemMMM.getResourceAsString());
+    }
+
+    @Override
+    public RDFObject getRDFObject() {
+        return itemMMM;
     }
 
     @Override

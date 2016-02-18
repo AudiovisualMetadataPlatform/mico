@@ -13,8 +13,11 @@
  */
 package eu.mico.platform.event.api;
 
+import com.github.anno4j.Anno4j;
 import eu.mico.platform.event.model.AnalysisException;
+import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Resource;
 import org.openrdf.model.URI;
 
 import java.io.IOException;
@@ -73,6 +76,7 @@ public interface AnalysisService {
      * @param resp   a response object that can be used to send back notifications about new objects to the broker
      * @param ci     the content item to analyse
      * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
+     * @param anno4j
      */
-    public void call(AnalysisResponse resp, Item ci, URI object) throws AnalysisException, IOException;
+    public void call(AnalysisResponse resp, Item item, Resource resource, Anno4j anno4j) throws AnalysisException, IOException;
 }

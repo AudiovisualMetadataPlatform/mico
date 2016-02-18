@@ -410,9 +410,9 @@ public class EventManagerImpl implements EventManager {
             final AnalysisResponse response = new AnalysisResponseImpl(properties, replyProps);
 
             try {
-                final Item ci = persistenceService.getItem(new URIImpl(analysisEvent.getContentItemUri()));
+                final Item item = persistenceService.getItem(new URIImpl(analysisEvent.getContentItemUri()));
 
-                service.call(response, ci, new URIImpl(analysisEvent.getObjectUri(0)));
+                service.call(response, item, new URIImpl(analysisEvent.getObjectUri(0)), persistenceService.getAnno4j());
 
                 getChannel().basicAck(envelope.getDeliveryTag(), false);
             } catch (RepositoryException e) {

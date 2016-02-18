@@ -2,6 +2,7 @@ package eu.mico.platform.persistence.model;
 
 import org.openrdf.model.URI;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.object.RDFObject;
 
 /**
  * Super type of items and parts
@@ -14,6 +15,8 @@ public interface Resource {
      * @return
      */
     URI getURI();
+
+    RDFObject getRDFObject();
 
     /**
      * the mime type, e.g. "image/jpeg"
@@ -29,5 +32,4 @@ public interface Resource {
     Asset getAsset() throws RepositoryException;
 
     boolean hasAsset() throws RepositoryException;
-
 }
