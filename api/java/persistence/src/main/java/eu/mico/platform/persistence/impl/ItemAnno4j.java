@@ -29,21 +29,26 @@ public class ItemAnno4j implements Item {
 
     public ItemAnno4j(ItemMMM itemMMM, PersistenceService persistenceService) {
         this.itemMMM = itemMMM;
+
+        URIImpl context = new URIImpl(itemMMM.getResourceAsString());
+        itemMMM.getObjectConnection().setInsertContext(context);
+        itemMMM.getObjectConnection().setReadContexts(context);
+        itemMMM.getObjectConnection().setRemoveContexts(context);
+
         this.persistenceService = persistenceService;
     }
 
     @Override
     public Part createPart(URI extractorID) throws RepositoryException {
         try {
-            PartMMM partMMM = persistenceService.getAnno4j().createObject(PartMMM.class);
+            PartMMM partMMM = persistenceService.getAnno4j().createObject(PartMMM.class, this.getURI());
             String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
             partMMM.setSerializedAt(dateTime);
 
-            Agent agent = this.persistenceService.getAnno4j().createObject(Agent.class);
+            Agent agent = this.persistenceService.getAnno4j().createObject(Agent.class, this.getURI());
             agent.setResource(extractorID);
             partMMM.setSerializedBy(agent);
 
-            this.persistenceService.getAnno4j().persist(partMMM, this.getURI());
             this.itemMMM.addPart(partMMM);
 
             log.info("Created Part with id {} in the context graph {} - Creator {}", partMMM.getResourceAsString(), this.getURI(), extractorID);
@@ -105,14 +110,14 @@ public class ItemAnno4j implements Item {
         if (this.itemMMM.getAsset() == null) {
             try {
                 Anno4j anno4j = this.persistenceService.getAnno4j();
-                AssetMMM assetMMM = anno4j.createObject(AssetMMM.class);
+                AssetMMM assetMMM = anno4j.createObject(AssetMMM.class, this.getURI());
                 StringBuilder location = new StringBuilder()
                         .append(persistenceService.getStoragePrefix())
                         .append(this.getURI().getLocalName())
                         .append("/")
                         .append(new URIImpl(assetMMM.getResourceAsString()).getLocalName());
                 assetMMM.setLocation(location.toString());
-                anno4j.persist(assetMMM, this.getURI());
+
                 this.itemMMM.setAsset(assetMMM);
 
                 log.info("No Asset available for Item {} - Created new Asset with id {} and location {}", this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
