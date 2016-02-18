@@ -15,6 +15,9 @@ public interface Resource {
      */
     URI getURI();
 
+    /**
+     * the mime type, e.g. "image/jpeg"
+     */
     String getSyntacticalType();
 
     void setSyntacticalType(String syntacticalType) throws RepositoryException;

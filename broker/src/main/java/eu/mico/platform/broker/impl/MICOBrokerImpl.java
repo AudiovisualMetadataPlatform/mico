@@ -15,7 +15,6 @@ package eu.mico.platform.broker.impl;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.rabbitmq.client.*;
-
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.exception.StateNotFoundException;
 import eu.mico.platform.broker.model.*;
@@ -25,7 +24,6 @@ import eu.mico.platform.event.model.Event;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Item;
-
 import org.apache.commons.lang3.StringUtils;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -43,27 +41,26 @@ import java.util.concurrent.TimeoutException;
 /**
  * MICO Message Broker, orchestrating the communication between analysis services and the analysis workflow for content
  * items using RabbitMQ.
- *
+ * <p/>
  * Maintains a dependency graph of registered services based on the input and output they provide. For each content item,
  * uses this dependency graph to execute the analysis workflow.
- *
+ * <p/>
  * Maintains the following RabbitMQ exchanges:
  * - service_registry: an exchange where the event api sends new service registration events
  * - service_discovery: an exchange where the message broker sends a discovery request on startup and event managers
- *   respond with their service lists
- *
+ * respond with their service lists
+ * <p/>
  * Maintains the following RabbitMQ queues:
  * - content item input queue: the broker creates the queue if it does not exist and registers itself as a consumer for
- *                             newly injected content items
+ * newly injected content items
  * - content item replyto queue: the broker creates a new temporary queue for each content item it processes and sets it as
- *                             replyto queue for services analysing this content item; it registers itself as consumer
- *                             so it can forward results to the next analysers in the analysis graph
+ * replyto queue for services analysing this content item; it registers itself as consumer
+ * so it can forward results to the next analysers in the analysis graph
  * - registry queue bound to service_registry: the broker registers itself as consumer to get notified about newly
- *   registered services
+ * registered services
  * - replyto queue for each service discovery event: temporarily created when a service discovery is in process; event
- *   managers will respond to this queue about their services; the broker registers itself as consumer to get notified;
- *   queue is cleaned up automatically when it is no longer used.
- *
+ * managers will respond to this queue about their services; the broker registers itself as consumer to get notified;
+ * queue is cleaned up automatically when it is no longer used.
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
@@ -90,10 +87,10 @@ public class MICOBrokerImpl implements MICOBroker {
     private Channel registryChannel, discoveryChannel, contentChannel, configChannel;
 
     // map from content item URIs to processing states
-    private Map<String,ItemState> states;
+    private Map<String, ItemState> states;
 
     // map from content item URIs to channels
-    private Map<String,Channel> channels;
+    private Map<String, Channel> channels;
 
 
     public MICOBrokerImpl(String host) throws IOException, URISyntaxException {
@@ -113,8 +110,8 @@ public class MICOBrokerImpl implements MICOBroker {
         this.storageBaseUri = storageBaseUri;
 
         dependencies = new ServiceGraph();
-        states       = new ConcurrentHashMap<>();
-        channels     = new HashMap<>();
+        states = new ConcurrentHashMap<>();
+        channels = new HashMap<>();
 
         log.info("initialising RabbitMQ connection ...");
 
@@ -151,7 +148,6 @@ public class MICOBrokerImpl implements MICOBroker {
     public PersistenceService getPersistenceService() {
         return persistenceService;
     }
-
 
 
     private void initRegistryQueue() throws IOException {
@@ -280,7 +276,7 @@ public class MICOBrokerImpl implements MICOBroker {
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
             Event.RegistrationEvent registrationEvent = Event.RegistrationEvent.parseFrom(body);
 
-            if(registrationEvent.getType() == Event.RegistrationType.REGISTER) {
+            if (registrationEvent.getType() == Event.RegistrationType.REGISTER) {
                 log.info("service registration of service {} (in: {}, out: {}, queue: {})", registrationEvent.getServiceId(), registrationEvent.getRequires(), registrationEvent.getProvides(), registrationEvent.getQueueName());
 
                 ServiceDescriptor svc = new ServiceDescriptor(registrationEvent);
@@ -333,9 +329,9 @@ public class MICOBrokerImpl implements MICOBroker {
 
             // construct configuration event
             Event.ConfigurationEvent config = Event.ConfigurationEvent.newBuilder()
-                                                .setMarmottaBaseUri(marmottaBaseUri)
-                                                .setStorageBaseUri(storageBaseUri)
-                                                .build();
+                    .setMarmottaBaseUri(marmottaBaseUri)
+                    .setStorageBaseUri(storageBaseUri)
+                    .build();
 
             // send configuration
             getChannel().basicPublish("", properties.getReplyTo(), replyProps, config.toByteArray());
@@ -372,7 +368,7 @@ public class MICOBrokerImpl implements MICOBroker {
                 Item item = persistenceService.getItem(new URIImpl(partEvent.getItemUri()));
 
                 log.info("- adding initial content item state ...");
-                ItemState state = new ItemState(dependencies,item);
+                ItemState state = new ItemState(dependencies, item);
                 states.put(partEvent.getItemUri(), state);
 
                 log.info("- setting up messaging for content item analysis ...");
@@ -381,7 +377,7 @@ public class MICOBrokerImpl implements MICOBroker {
                 Channel channel = connection.createChannel();
 
                 log.info("- triggering analysis process for initial states ...");
-                ContentItemManager mgr = new ContentItemManager(item,state,channel);
+                ContentItemManager mgr = new ContentItemManager(item, state, channel);
                 Thread t = new Thread(mgr);
                 t.start();
 
@@ -389,7 +385,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
             } catch (RepositoryException e) {
                 log.error("could not load content item from persistence layer (message: {})", e.getMessage());
-                log.debug("Exception:",e);
+                log.debug("Exception:", e);
             }
         }
     }
@@ -403,8 +399,8 @@ public class MICOBrokerImpl implements MICOBroker {
     private class ContentItemManager extends DefaultConsumer implements Runnable {
         private Item item;
         private ItemState state;
-        private String           queue;
-        private String           queueTag;
+        private String queue;
+        private String queueTag;
 
         public ContentItemManager(Item item, ItemState state, Channel channel) throws IOException {
             super(channel);
@@ -419,7 +415,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
         private void executeStateTransitions() throws IOException {
             log.info("looking for possible state transitions ...");
-            if(state.isFinalState()) {
+            if (state.isFinalState()) {
                 // send finish event
                 getChannel().basicPublish("", EventManager.QUEUE_PART_OUTPUT, null, Event.PartEvent.newBuilder().setContentItemUri(item.getURI().stringValue()).build().toByteArray());
 
@@ -457,7 +453,7 @@ public class MICOBrokerImpl implements MICOBroker {
          */
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-            try{
+            try {
                 Event.AnalysisEvent analysisResponse = Event.AnalysisEvent
                         .parseFrom(body);
                 try {
@@ -468,21 +464,21 @@ public class MICOBrokerImpl implements MICOBroker {
                             analysisResponse.getObjectUri());
 
                     switch (analysisResponse.getType()) {
-                    case ERROR:
-                        log.warn(analysisResponse.getMessage(),
-                                analysisResponse.getDescription());
-                    case NEW_PART:
-                        setStateForContent(analysisResponse);
-                        break;
-                    case FINISH:
-                        // this is the last message we are waiting for
-                        state.removeProgress(properties.getCorrelationId());
-                    case PROGRESS:
-                        Event.AnalyzeProgress progress = Event.AnalyzeProgress
-                                .parseFrom(body);
-                        log.trace("got progress event ({}) for {}", progress.getProgress(), progress.getObjectUri());
-                        Transition transition = state.getProgress().get(properties.getCorrelationId());
-                        transition.setProgress(progress.getProgress());
+                        case ERROR:
+                            log.warn(analysisResponse.getMessage(),
+                                    analysisResponse.getDescription());
+                        case NEW_PART:
+                            setStateForContent(analysisResponse);
+                            break;
+                        case FINISH:
+                            // this is the last message we are waiting for
+                            state.removeProgress(properties.getCorrelationId());
+                        case PROGRESS:
+                            Event.AnalyzeProgress progress = Event.AnalyzeProgress
+                                    .parseFrom(body);
+                            log.trace("got progress event ({}) for {}", progress.getProgress(), progress.getObjectUri());
+                            Transition transition = state.getProgress().get(properties.getCorrelationId());
+                            transition.setProgress(progress.getProgress());
                     }
 
                 } catch (StateNotFoundException e) {
@@ -501,6 +497,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
         /**
          * update or set state for content part based on (mime-)type
+         *
          * @param analysisResponse
          * @throws StateNotFoundException
          */
@@ -509,21 +506,23 @@ public class MICOBrokerImpl implements MICOBroker {
             URIImpl itemUri = new URIImpl(analysisResponse.getContentItemUri());
             URIImpl partUri = new URIImpl(analysisResponse.getObjectUri());
             String serviceId = analysisResponse.getServiceId();
-            try{
-                String mimetype = persistenceService.getItem(itemUri)
-                    .getPart(partUri).getType();
-                if (mimetype != null){
+            try {
+                String mimetype = persistenceService
+                        .getItem(itemUri)
+                        .getPart(partUri).getSyntacticalType();
+
+                if (mimetype != null) {
                     TypeDescriptor newState = dependencies.getState(mimetype);
                     state.addState(partUri, newState);
-                }else{
+                } else {
                     log.warn(
                             "Type for not set for part {}, assume its type fits to produce value from service: {}.",
                             partUri, serviceId);
                     state.addState(partUri, dependencies.getTargetState(new URIImpl(serviceId)));
                 }
-            }catch(StateNotFoundException | RepositoryException e) {
+            } catch (StateNotFoundException | RepositoryException e) {
                 log.warn("unable to retrieve mimetype for {}, assume its type fits to produce value from service: {}.",
-                            partUri, serviceId, e);
+                        partUri, serviceId, e);
                 state.addState(partUri, dependencies.getTargetState(new URIImpl(serviceId)));
             }
         }
@@ -534,7 +533,7 @@ public class MICOBrokerImpl implements MICOBroker {
                 getChannel().confirmSelect();
                 executeStateTransitions();
 
-                if(!state.isFinalState()) {
+                if (!state.isFinalState()) {
                     // wait until executeStateTransitions notifies us of being finished
                     synchronized (this) {
                         this.wait();
@@ -542,7 +541,7 @@ public class MICOBrokerImpl implements MICOBroker {
                 }
             } catch (IOException ex) {
                 log.error("could not start processing of content item {} (message: {})", item.getURI().stringValue(), ex.getMessage());
-                log.debug("Exception:",ex);
+                log.debug("Exception:", ex);
             } catch (InterruptedException e) {
                 log.error("analysis of content item {} was interrupted ...", item.getURI().stringValue());
             } finally {
