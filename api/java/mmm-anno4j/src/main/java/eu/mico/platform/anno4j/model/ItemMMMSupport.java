@@ -4,8 +4,6 @@ package eu.mico.platform.anno4j.model;
 import com.github.anno4j.annotations.Partial;
 import com.github.anno4j.model.impl.ResourceObjectSupport;
 
-import java.util.HashSet;
-
 /**
  * This class implements the ItemMMM interface and adds additional functionality.
  */
@@ -17,11 +15,7 @@ public abstract class ItemMMMSupport extends ResourceObjectSupport implements It
      * {@inheritDoc}
      */
     public void addPart(PartMMM part) {
-        if(this.getParts() == null) {
-            this.setParts(new HashSet<PartMMM>());
-        }
-
-        this.getParts().add(part);
+        getParts().add(part);
     }
 
     @Override

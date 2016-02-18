@@ -1,7 +1,6 @@
 package eu.mico.platform.persistence.test;
 
 import com.github.anno4j.Anno4j;
-import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Target;
 import com.github.anno4j.model.impl.targets.SpecificResource;
 import eu.mico.platform.anno4j.model.AssetMMM;
@@ -65,12 +64,22 @@ public class PartAnno4jTest {
     @Test
     public void bodyTest() throws RepositoryException, InstantiationException, IllegalAccessException {
         assertNull(part.getBody());
-        Body body = anno4j.createObject(SpeechToTextBodyMMM.class);
+        SpeechToTextBodyMMM body = anno4j.createObject(SpeechToTextBodyMMM.class, item.getURI());
+        body.getValue();
+        int initialSpeechToTextBodiesDefaultGraph = anno4j.findAll(SpeechToTextBodyMMM.class).size();
+        int initialSpeechToTextBodiesSubGraph = anno4j.findAll(SpeechToTextBodyMMM.class, item.getURI()).size();
 
         part.setBody(body);
 
+        // check if body was created in default graph
+        assertEquals(initialSpeechToTextBodiesDefaultGraph + 1, anno4j.findAll(SpeechToTextBodyMMM.class).size());
+        // check if body was created in the correct sub graph
+        assertEquals(initialSpeechToTextBodiesSubGraph + 1, anno4j.findAll(SpeechToTextBodyMMM.class, item.getURI()).size());
+
         PartMMM partMMM = anno4j.findByID(PartMMM.class, part.getURI());
+
         assertEquals(body, partMMM.getBody());
+
     }
 
     @Test
@@ -78,8 +87,8 @@ public class PartAnno4jTest {
 
         int initialTargetCount = part.getTarget().size();
 
-        Target target1 = anno4j.createObject(SpecificResource.class);
-        Target target2 = anno4j.createObject(SpecificResource.class);
+        Target target1 = anno4j.createObject(SpecificResource.class, item.getURI());
+        Target target2 = anno4j.createObject(SpecificResource.class, item.getURI());
 
         Set<Target> targetSet = new HashSet<>();
         targetSet.add(target1);

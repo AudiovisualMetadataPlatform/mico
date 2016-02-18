@@ -102,7 +102,7 @@ public class PartAnno4j implements Part {
         if (this.partMMM.getAsset() == null) {
             try {
                 Anno4j anno4j = this.persistenceService.getAnno4j();
-                AssetMMM assetMMM = anno4j.createObject(AssetMMM.class);
+                AssetMMM assetMMM = anno4j.createObject(AssetMMM.class, this.item.getURI());
 
                 StringBuilder location = new StringBuilder()
                         .append(persistenceService.getStoragePrefix())
@@ -113,7 +113,7 @@ public class PartAnno4j implements Part {
                         .append(new URIImpl(assetMMM.getResourceAsString()).getLocalName());
 
                 assetMMM.setLocation(location.toString());
-                anno4j.persist(assetMMM, this.item.getURI());
+
                 this.partMMM.setAsset(assetMMM);
 
                 log.info("No Asset available for Part {} - Created new Asset with id {} and location {}", this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());

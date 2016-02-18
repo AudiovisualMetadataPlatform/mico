@@ -99,6 +99,8 @@ public class PersistenceServiceAnno4j implements PersistenceService {
             ItemMMM itemMMM = anno4j.createObject(ItemMMM.class);
             String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
             itemMMM.setSerializedAt(dateTime);
+
+            // call persist to move item to corresponding sub-graph
             anno4j.persist(itemMMM, new URIImpl(itemMMM.getResourceAsString()));
 
             log.info("Created Item with id {} in the corresponding context graph", itemMMM.getResourceAsString());
