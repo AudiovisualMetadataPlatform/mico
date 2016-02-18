@@ -73,7 +73,7 @@ public class TextAnalysisWebServiceTest {
     }
 
     @AfterClass
-    public static void shudown() throws Exception {
+    public static void shutdown() throws Exception {
         server.stop();
         repository.shutDown();
     }
