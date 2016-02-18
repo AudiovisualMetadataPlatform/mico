@@ -60,9 +60,9 @@ public class ItemState {
         try {
             for(Part part : item.getParts()) {
                 try {
-                    states.put(part.getURI(), graph.getState(part.getType()));
+                    states.put(part.getURI(), graph.getState(part.getSyntacticalType()));
                 } catch (StateNotFoundException e) {
-                    log.warn("no starting state found for part type {}", part.getType());
+                    log.warn("no starting state found for part type {}", part.getSyntacticalType());
                 }
             }
         } catch (RepositoryException e) {
