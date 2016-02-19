@@ -13,9 +13,7 @@
  */
 package eu.mico.platform.event.api;
 
-import com.github.anno4j.Anno4j;
 import eu.mico.platform.event.model.AnalysisException;
-import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Resource;
 import org.openrdf.model.URI;
@@ -37,7 +35,7 @@ public interface AnalysisService {
      *
      * @return a unique ID identifying this service globally
      */
-    public URI getServiceID();
+    URI getServiceID();
 
 
     /**
@@ -46,7 +44,7 @@ public interface AnalysisService {
      *
      * @return a symbolic identifier representing the output type of this service
      */
-    public String getProvides();
+    String getProvides();
 
 
     /**
@@ -55,7 +53,7 @@ public interface AnalysisService {
      *
      * @return  a symbolic identifier representing the input type of this service
      */
-    public String getRequires();
+    String getRequires();
 
 
     /**
@@ -67,7 +65,7 @@ public interface AnalysisService {
      *
      * @return a string identifying the queue name this service wants to use
      */
-    public String getQueueName();
+    String getQueueName();
 
 
     /**
@@ -76,9 +74,7 @@ public interface AnalysisService {
      * resolving the content item in the persistence service.
      *
      * @param resp   a response object that can be used to send back notifications about new objects to the broker
-     * @param ci     the content item to analyse
-     * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
-     * @param anno4j
      */
-    public void call(AnalysisResponse resp, Item item,  List<URI> parts,  Map<String, String> params) throws AnalysisException, IOException;
+    void call(AnalysisResponse resp, Item item,  List<Resource> resourceList,  Map<String, String> params) throws AnalysisException, IOException;
+
 }

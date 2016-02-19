@@ -20,6 +20,7 @@ import com.github.anno4j.model.impl.targets.SpecificResource;
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
+import eu.mico.platform.event.impl.AnalysisServiceAnno4j;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.model.Item;
@@ -40,7 +41,9 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
@@ -52,7 +55,7 @@ import java.util.regex.Pattern;
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
-public class WordCountAnalyzer implements AnalysisService {
+public class WordCountAnalyzer extends AnalysisServiceAnno4j {
     
     private static Boolean simulateSlow = true;
 
@@ -84,8 +87,14 @@ public class WordCountAnalyzer implements AnalysisService {
     }
 
     @Override
-    public void call(AnalysisResponse analysisResponse, Item item, Resource resource, Anno4j anno4j) throws AnalysisException, IOException {
+    public void call(AnalysisResponse analysisResponse, Item item, List<Resource> resourceList, Map<String, String> params) throws AnalysisException, IOException {
         try {
+            if(resourceList.size() > 1) {
+                throw new IllegalArgumentException("Resource list only allows one item to be processed.");
+            }
+
+            Resource resource = resourceList.get(0);
+
             log.info("Retrieved analysis call for {}", resource.getURI());
 
             // get the input stream and read it into a string
@@ -112,15 +121,15 @@ public class WordCountAnalyzer implements AnalysisService {
             part.setSyntacticalType(getProvides());
 
             // create example wordcount body and setting the result of the analyzer
-            WordCountBody wordCountBody = anno4j.createObject(WordCountBody.class);
+            WordCountBody wordCountBody = getAnno4j().createObject(WordCountBody.class);
             wordCountBody.setCount(count);
             part.setBody(wordCountBody);
 
-            SpecificResource specificResource = anno4j.createObject(SpecificResource.class);
-
-
+            // create the target and set a reference to the part/item on which the body refers to
+            SpecificResource specificResource = getAnno4j().createObject(SpecificResource.class);
             specificResource.setSource(resource.getRDFObject());
 
+            // adding the target to the part
             part.addTarget(specificResource);
 
             analysisResponse.sendNew(item, part.getURI());
