@@ -1,4 +1,4 @@
-package eu.mico.platform.broker.webservices;
+package eu.mico.platform.demo;
 
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;

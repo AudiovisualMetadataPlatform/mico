@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.mico.platform.uc.zooniverse.webservices;
+package eu.mico.platform.zooniverse;
 
 import com.sun.jersey.api.client.ClientResponse;
 import eu.mico.platform.broker.api.MICOBroker;
@@ -37,7 +37,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.model.vocabulary.DCTERMS;
-import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.*;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;

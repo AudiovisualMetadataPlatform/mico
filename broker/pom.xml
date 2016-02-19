@@ -47,6 +47,7 @@
                             </manifest>
                         </archive>
                         <archiveClasses>false</archiveClasses>
+                        <attachClasses>true</attachClasses>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -143,12 +144,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-email</artifactId>
             <version>1.4</version>
-        </dependency>
-
-        <!-- Zooniverse -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
         </dependency>
 
         <!-- communication with RabbitMQ -->

@@ -1,24 +1,21 @@
-package eu.mico.platform.uc.zooniverse.webservices;
+package eu.mico.platform.zooniverse;
 
 import com.google.common.collect.ImmutableMap;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.model.ContentItemState;
-import eu.mico.platform.broker.model.ServiceDescriptor;
 import eu.mico.platform.broker.model.ServiceGraph;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
-import eu.mico.platform.uc.zooniverse.model.TextAnalysisInput;
-import eu.mico.platform.uc.zooniverse.model.TextAnalysisOutput;
+import eu.mico.platform.zooniverse.model.TextAnalysisInput;
+import eu.mico.platform.zooniverse.model.TextAnalysisOutput;
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.util.Literals;
 import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
