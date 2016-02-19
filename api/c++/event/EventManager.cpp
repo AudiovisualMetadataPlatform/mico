@@ -12,11 +12,9 @@
  * limitations under the License.
  */
 #include "EventManager.hpp"
-#include "Event.pb.h"
 
 #include <boost/uuid/uuid_generators.hpp>
 #include <google/protobuf/stubs/common.h>
-
 #include "Logging.hpp"
 
 using std::string;
@@ -175,13 +173,14 @@ namespace mico {
             }
         };
 
-        void AnalysisResponse::sendFinish(const ContentItem& ci, const URI& object) {
+        void AnalysisResponse::sendFinish(const ContentItem& ci) {
           LOG_INFO("AnalysisResponse:sendFinish to queue %s", m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
-          event.set_itemuri(ci.getURI().stringValue());
-          event.add_parts(object.stringValue());
-          event.set_serviceid(m_service.getServiceID().stringValue());
-          event.set_type(::mico::event::model::MessageType::FINISH);
+          mico::event::model::AnalysisEvent::Finish fevent;
+          fevent.set_itemuri(ci.getURI().stringValue());
+          fevent.set_serviceid(m_service.getServiceID().stringValue());
+          event.set_type(mico::event::model::MessageType::FINISH);
+          event.set_allocated_finish(&fevent);
 
           char buffer[event.ByteSize()];
           event.SerializeToArray(buffer, event.ByteSize());
@@ -192,15 +191,18 @@ namespace mico {
           m_channel->publish("", m_message.replyTo(), data);
         }
 
-        void AnalysisResponse::sendErrorMessage(const ContentItem& ci, const URI& object, const std::string& msg)
+        void AnalysisResponse::sendErrorMessage(const ContentItem& ci, const mico::event::model::ErrorCodes& errcode, const std::string& msg, const std::string& desc)
         {
           LOG_INFO("AnalysisResponse:sendErrorMessage: \"%s\" to queue %s",msg.c_str(), m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
-          event.set_itemuri(ci.getURI().stringValue());
-          event.add_parts(object.stringValue());
-          event.set_serviceid(m_service.getServiceID().stringValue());
+          mico::event::model::AnalysisEvent::Error eevent;
+          eevent.set_itemuri(ci.getURI().stringValue());
+          eevent.set_serviceid(m_service.getServiceID().stringValue());
+          eevent.set_errorcode(errcode);
+          eevent.set_message(msg);
+          eevent.set_description(desc);
           event.set_type(::mico::event::model::MessageType::ERROR);
-          event.set_message(msg);
+          event.set_allocated_error(&eevent);
 
           char buffer[event.ByteSize()];
           event.SerializeToArray(buffer, event.ByteSize());
@@ -211,15 +213,17 @@ namespace mico {
           m_channel->publish("", m_message.replyTo(), data);
         }
 
-        void AnalysisResponse::sendProgress(const ContentItem& ci, const URI& object, const float& progress)
+        void AnalysisResponse::sendProgress(const ContentItem& ci, const URI& part, const float& progress)
         {
           LOG_INFO("AnalysisResponse:sendProgress: %f to queue %s", progress, m_message.replyTo().c_str());
-          mico::event::model::AnalyzeProgress event;
-          event.set_itemuri(ci.getURI().stringValue());
-          event.set_part(object.stringValue());
-          event.set_serviceid(m_service.getServiceID().stringValue());
+          mico::event::model::AnalysisEvent event;
+          mico::event::model::AnalysisEvent::Progress pevent;
+          pevent.set_itemuri(ci.getURI().stringValue());
+          pevent.set_parturi(part.stringValue());
+          pevent.set_serviceid(m_service.getServiceID().stringValue());
+          pevent.set_progress(progress);
           event.set_type(::mico::event::model::MessageType::PROGRESS);
-          event.set_progress(progress);
+          event.set_allocated_progress(&pevent);
 
           char buffer[event.ByteSize()];
           event.SerializeToArray(buffer, event.ByteSize());
@@ -230,13 +234,15 @@ namespace mico {
           m_channel->publish("", m_message.replyTo(), data);
         }
 
-        void AnalysisResponse::sendNew(const ContentItem& ci, const URI& object) {
+        void AnalysisResponse::sendNew(const ContentItem& ci, const URI& part) {
           LOG_INFO("AnalysisResponse:sendNew to queue %s", m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
-          event.set_itemuri(ci.getURI().stringValue());
-          event.add_parts(object.stringValue());
-          event.set_serviceid(m_service.getServiceID().stringValue());
+          mico::event::model::AnalysisEvent::NewPart nevent;
+          nevent.set_itemuri(ci.getURI().stringValue());
+          nevent.set_parturi(part.stringValue());
+          nevent.set_serviceid(m_service.getServiceID().stringValue());
           event.set_type(::mico::event::model::MessageType::NEW_PART);
+          event.set_allocated_new_(&nevent);
 
           char buffer[event.ByteSize()];
           event.SerializeToArray(buffer, event.ByteSize());
@@ -281,13 +287,13 @@ namespace mico {
                 mico::event::model::AnalysisRequest event;
                 if (event.ParseFromArray(message.body(), message.bodySize())){
 
-                    LOG_DEBUG("received analysis event (content item %s, object %s, replyTo %s)", event.contentitemuri().c_str(), event.objecturi(0).c_str(), message.replyTo().c_str());
+                    LOG_DEBUG("received analysis event (content item %s, object %s, replyTo %s)", event.itemuri().c_str(), event.parturi(0).c_str(), message.replyTo().c_str());
 
-                    ContentItem *ci = (*persistence).getContentItem(URI(event.contentitemuri()));
+                    ContentItem *ci = (*persistence).getContentItem(URI(event.itemuri()));
                     std::list<URI> objects;
                     std::map<std::string,std::string> params;
-                    for (unsigned int i = 0; i < event.objecturi().size(); ++i) {
-                      objects.push_back(URI(event.objecturi(i)));
+                    for (unsigned int i = 0; i < event.parturi().size(); ++i) {
+                      objects.push_back(URI(event.parturi(i)));
                     }
                     for (unsigned int i = 0; i < event.params().size(); ++i) {
                       params[ event.params(i).key() ] = event.params(i).value();
@@ -296,7 +302,7 @@ namespace mico {
 
                     service.call( response, *ci, objects, params);
 
-                    LOG_DEBUG("acknowledged finished processing of analysis event (content item %s, object %s, replyTo %s)", event.contentitemuri().c_str(), event.objecturi(0).c_str(), message.replyTo().c_str());
+                    LOG_DEBUG("acknowledged finished processing of analysis event (content item %s, object %s, replyTo %s)", event.itemuri().c_str(), event.parturi(0).c_str(), message.replyTo().c_str());
                 }else{
                     //@TODO send error to broker
                     LOG_ERROR("Could not parse received analysis event.");
@@ -627,7 +633,7 @@ namespace mico {
         void EventManager::injectContentItem(const ContentItem& item) {
             LOG_INFO ("injecting content item %s...", item.getURI().stringValue().c_str());
 
-            mico::event::model::ContentEvent contentEvent;
+            mico::event::model::ItemEvent contentEvent;
             contentEvent.set_itemuri(item.getURI().stringValue());
 
             char buffer[contentEvent.ByteSize()];

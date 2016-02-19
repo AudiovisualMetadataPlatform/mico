@@ -1,4 +1,4 @@
-include_directories(../event ../rdf ../persistence ../logging)
+include_directories(../event ${CMAKE_CURRENT_BINARY_DIR}/../event/protobuf_out ../rdf ../persistence ../logging)
 
 add_library(mico_daemon SHARED Daemon.cpp)
 

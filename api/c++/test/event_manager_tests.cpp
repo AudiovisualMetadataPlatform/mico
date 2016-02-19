@@ -74,7 +74,7 @@ public:
 		std::cout << "analysis callback of mock service " << serviceID.stringValue() << " called!" << std::endl;
 		Content* c = ci.createContentPart();
 		c->setType(getProvides());
-    resp.sendFinish(ci,c->getURI());
+    resp.sendFinish(ci);
 		called = true;
 	};
 	

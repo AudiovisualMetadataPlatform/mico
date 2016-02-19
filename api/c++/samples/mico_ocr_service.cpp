@@ -141,7 +141,7 @@ public:
             LOG_INFO("Sending OCR results");
             // notify broker that we created a new content part by calling functions from AnalysisResponse passed as argument
             resp.sendNew(ci, txtPart->getURI());
-            resp.sendFinish(ci, object);
+            resp.sendFinish(ci);
 
             // clean up
             delete imgPart;

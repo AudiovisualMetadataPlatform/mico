@@ -15,6 +15,7 @@
 #include "ContentItem.hpp"
 #include "PersistenceService.hpp"
 #include "AnalysisService.hpp"
+#include "Event.pb.h"
 
 namespace mico {
     namespace event {
@@ -74,10 +75,10 @@ namespace mico {
           AnalysisResponse(AnalysisService& service, const AMQP::Message &message, AMQP::Channel* channel):
             m_service(service), m_message(message), m_channel(channel) {}
 
-          void sendFinish(      const mico::persistence::ContentItem& ci, const mico::rdf::model::URI& object);
-          void sendErrorMessage(const mico::persistence::ContentItem& ci, const mico::rdf::model::URI& object, const std::string& msg);
-          void sendProgress(    const mico::persistence::ContentItem& ci, const mico::rdf::model::URI& object, const float& progress);
-          void sendNew(         const mico::persistence::ContentItem& ci, const mico::rdf::model::URI& object);
+          void sendFinish(      const mico::persistence::ContentItem& ci);
+          void sendErrorMessage(const mico::persistence::ContentItem& ci, const mico::event::model::ErrorCodes& errcode, const std::string& msg, const std::string& desc);
+          void sendProgress(    const mico::persistence::ContentItem& ci, const mico::rdf::model::URI& part, const float& progress);
+          void sendNew(         const mico::persistence::ContentItem& ci, const mico::rdf::model::URI& part);
         };
 
         /**
