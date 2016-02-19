@@ -22,7 +22,7 @@ public abstract class PartMMMSupport extends AnnotationSupport implements PartMM
     /**
      * {@inheritDoc}
      */
-    public void addInput(RDFObject input) {
+    public void addInput(ResourceMMM input) {
         this.getInputs().add(input);
     }
 }

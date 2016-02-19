@@ -5,6 +5,7 @@ import com.github.anno4j.model.Agent;
 import eu.mico.platform.anno4j.model.AssetMMM;
 import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.anno4j.model.PartMMM;
+import eu.mico.platform.anno4j.model.ResourceMMM;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
@@ -12,7 +13,6 @@ import eu.mico.platform.persistence.model.Part;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.object.RDFObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +87,7 @@ public class ItemAnno4j implements Item {
     }
 
     @Override
-    public RDFObject getRDFObject() {
+    public ResourceMMM getRDFObject() {
         return itemMMM;
     }
 

@@ -84,8 +84,8 @@ public class AnalyserProxy implements AnalysisService {
     }
 
     @Override
-    public void call(AnalysisResponse resp, Item ci, URI uri) throws AnalysisException, IOException {
+    public void call(AnalysisResponse resp, Item item, java.util.List<eu.mico.platform.persistence.model.Resource> resourceList, java.util.Map<String,String> params) throws AnalysisException ,IOException {
         logger.info("Performing analyser method");
-        analyser.call(resp, ci, uri);
+        analyser.call(resp, item, resourceList, params);
     }
 }
