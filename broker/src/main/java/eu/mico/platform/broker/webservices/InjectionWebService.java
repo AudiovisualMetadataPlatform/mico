@@ -2,9 +2,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,21 +14,18 @@
 package eu.mico.platform.broker.webservices;
 
 import com.google.common.collect.ImmutableMap;
-
-import eu.mico.platform.anno4j.model.impl.bodymmm.MultiMediaBody;
-import eu.mico.platform.anno4j.model.impl.targetmmm.InitialTarget;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.metadata.MICOProvenance;
-import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Part;
 import org.apache.commons.io.IOUtils;
-import org.openrdf.model.Value;
+import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -50,88 +47,56 @@ public class InjectionWebService {
 
     private static Logger log = LoggerFactory.getLogger(InjectionWebService.class);
 
-    public static final SimpleDateFormat ISO8601FORMAT = createDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "UTC");
-
-
     private EventManager eventManager;
+
+    private final URI extratorID = new URIImpl("http://www.mico-project.eu/injection-webservice/");
 
     public InjectionWebService(EventManager manager) {
         this.eventManager = manager;
     }
 
-
     /**
      * Create a new item and return its URI in the "uri" field of the JSON response.
+     *
      * @return
      */
     @POST
     @Path("/create")
     @Produces("application/json")
-    public Map<String,String> contentItem() throws RepositoryException {
+    public Response createItem(@QueryParam("type") String type, @Context HttpServletRequest request) throws RepositoryException, IOException {
         PersistenceService ps = eventManager.getPersistenceService();
 
         Item item = ps.createItem();
+        item.setSyntacticalType(type);
+        item.setSemanticType("application/injection-webservice");
 
-        log.info("created item {}", item.getURI());
+        Asset asset = item.getAsset();
+        asset.setFormat(type);
+        OutputStream out = asset.getOutputStream();
+        int bytes = IOUtils.copy(request.getInputStream(), out);
+        out.close();
 
-        return ImmutableMap.of("uri", item.getURI().stringValue());
+        log.info("item {}: uploaded {} bytes", item.getURI(), bytes);
+
+        return Response.ok(ImmutableMap.of("uri", item.getURI().stringValue())).build();
+
     }
 
-
     /**
-     * Add a new part to the item using the request body as content. Return the URI of the new part in
-     * the "uri" field of the JSON response.
+     * Submit the item for analysis by notifying the broker about its parts.
      *
      * @return
      */
     @POST
-    @Path("/add")
-    @Produces("application/json")
-    public Response addContentPart(@QueryParam("ci")String itemString, @QueryParam("type") String type, @QueryParam("name") String fileName, @Context HttpServletRequest request) throws RepositoryException, IOException {
-        PersistenceService ps = eventManager.getPersistenceService();
-
-        Item item = ps.getItem(new URIImpl(itemString));
-
-        if(item == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("part item "+itemString+" does not exist").build();
-        }
-
-        Part part = item.createPart();
-        part.setType(type);
-        // deprecated - The model should use haslocation on the target instead of dcterms:source
-        part.setProperty(DCTERMS.SOURCE, fileName);
-
-        MICOProvenance provenance = new MICOProvenance();
-        provenance.setExtractorName("http://www.mico-project.eu/broker/injection-web-service");
-
-        MultiMediaBody multiMediaBody = new MultiMediaBody();
-        multiMediaBody.setFormat(type);
-
-        InitialTarget target = new InitialTarget(fileName);
-
-        part.createAnnotation(multiMediaBody, null, provenance, target);
-
-        OutputStream out = part.getOutputStream();
-        int bytes = IOUtils.copy(request.getInputStream(), out);
-        out.close();
-
-        log.info("item {}: uploaded {} bytes for new part {}", item.getURI(), bytes, part.getURI());
-
-        return Response.ok(ImmutableMap.of("uri", part.getURI().stringValue())).build();
-    }
-
-
-    /**
-     * Submit the item for analysis by notifying the broker about its parts.
-     * @return
-     */
-    @POST
     @Path("/submit")
-    public Response submitItem(@QueryParam("ci")String itemString) throws RepositoryException, IOException {
+    public Response submitItem(@QueryParam("item") String itemString) throws RepositoryException, IOException {
 
         PersistenceService ps = eventManager.getPersistenceService();
         Item item = ps.getItem(new URIImpl(itemString));
-        eventManager.injectItem(item);
+
+        if (item != null) {
+            eventManager.injectItem(item);
+        }
 
         log.info("submitted item {}", item.getURI());
 
@@ -142,16 +107,16 @@ public class InjectionWebService {
     @GET
     @Path("/items")
     @Produces("application/json")
-    public List<Map<String,Object>> getItems(@QueryParam("uri") String itemUri, @QueryParam("parts") boolean showParts) throws RepositoryException {
+    public List<Map<String, Object>> getItems(@QueryParam("uri") String itemUri, @QueryParam("parts") boolean showParts) throws RepositoryException {
         PersistenceService ps = eventManager.getPersistenceService();
 
-        List<Map<String,Object>> result = new ArrayList<>();
-        if(itemUri == null) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        if (itemUri == null) {
             // retrieve a list of all items
-            for(Item ci : ps.getItems()) {
-                result.add(wrapItem(ci, showParts));
+            for (Item item : ps.getItems()) {
+                result.add(wrapItem(item, showParts));
             }
-        } else if(ps.getItem(new URIImpl(itemUri)) != null) {
+        } else if (ps.getItem(new URIImpl(itemUri)) != null) {
             result.add(wrapItem(ps.getItem(new URIImpl(itemUri)), showParts));
         } else {
             throw new NotFoundException("item with uri " + itemUri + " not found in broker");
@@ -159,13 +124,19 @@ public class InjectionWebService {
         return result;
     }
 
-    private Map<String,Object> wrapItem(Item ci, boolean showParts) throws RepositoryException {
-        Map<String,Object> sprops = new HashMap<>();
-        sprops.put("uri", ci.getURI().stringValue());
+    private Map<String, Object> wrapItem(Item item, boolean showParts) throws RepositoryException {
+        Map<String, Object> sprops = new HashMap<>();
+        sprops.put("uri", item.getURI().stringValue());
+        sprops.put("type", item.getSyntacticalType());
+        sprops.put("created", item.getSerializedAt());
 
-        if(showParts) {
+        if (item.hasAsset()) {
+            sprops.put("assetUri", item.getAsset().getLocation());
+        }
+
+        if (showParts) {
             List<Map<String, Object>> parts = new ArrayList<>();
-            for (Part part : ci.getParts()) {
+            for (Part part : item.getParts()) {
                 parts.add(wrapPart(part));
             }
             sprops.put("parts", parts);
@@ -174,48 +145,67 @@ public class InjectionWebService {
         return sprops;
     }
 
-    private Map<String,Object> wrapPart(Part part) throws RepositoryException {
-        Map<String,Object> sprops = new HashMap<>();
+    private Map<String, Object> wrapPart(Part part) throws RepositoryException {
+        Map<String, Object> sprops = new HashMap<>();
         sprops.put("uri", part.getURI().stringValue());
-        sprops.put("title", part.getProperty(DCTERMS.TITLE));
-        sprops.put("type",  part.getType());
-        sprops.put("creator",  stringValue(part.getRelation(DCTERMS.CREATOR)));
-        sprops.put("created",  part.getProperty(DCTERMS.CREATED));
-        sprops.put("source",  stringValue(part.getRelation(DCTERMS.SOURCE)));
+        sprops.put("type", part.getSyntacticalType());
+        sprops.put("creator", part.getSerializedBy().toString());
+        sprops.put("created", part.getSerializedAt());
 
+        if (part.hasAsset()) {
+            sprops.put("source", part.getAsset().getLocation());
+        }
         return sprops;
     }
 
-    private static String stringValue(Value v) {
-        return v != null ? v.stringValue() : null;
-    }
-
-
     @GET
     @Path("/download")
-    public Response downloadPart(@QueryParam("itemUri") String itemUri, @QueryParam("partUri") String partUri) throws RepositoryException {
+    public Response downloadPart(@QueryParam("itemUri") String itemUri, @QueryParam("resourceUri") String resourceUri) throws RepositoryException {
         PersistenceService ps = eventManager.getPersistenceService();
 
         final Item item = ps.getItem(new URIImpl(itemUri));
-        if(item == null) {
-            throw new NotFoundException("Part Item with URI " + itemUri + " not found in system");
-        }
-        final Part part = item.getPart(new URIImpl(partUri));
-        if(part == null) {
-            throw new NotFoundException("Part Part with URI " + partUri + " not found in system");
-        }
 
-        StreamingOutput entity = new StreamingOutput() {
-            @Override
-            public void write(OutputStream output) throws IOException, WebApplicationException {
-                IOUtils.copy(part.getInputStream(), output);
+        if (item == null) {
+            throw new NotFoundException("Item with URI " + itemUri + " not found in system");
+        }
+        StreamingOutput entity;
+        String type;
+        if (itemUri.equals(resourceUri)) {
+            entity = new StreamingOutput() {
+                @Override
+                public void write(OutputStream output) throws IOException, WebApplicationException {
+                    try {
+                        IOUtils.copy(item.getAsset().getInputStream(), output);
+                    } catch (RepositoryException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
+            };
+
+            type = item.getAsset().getFormat();
+        } else {
+            final Part part = item.getPart(new URIImpl(resourceUri));
+            if (part == null) {
+                throw new NotFoundException("Part with URI " + resourceUri + " not found in system");
             }
-        };
 
-        return Response.ok(entity, part.getType()).build();
+            entity = new StreamingOutput() {
+                @Override
+                public void write(OutputStream output) throws IOException, WebApplicationException {
+                    try {
+                        IOUtils.copy(part.getAsset().getInputStream(), output);
+                    } catch (RepositoryException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
+            };
+
+            type = part.getAsset().getFormat();
+        }
+
+
+        return Response.ok(entity, type).build();
     }
-
-
 
 
     private static SimpleDateFormat createDateFormat(String format, String timezone) {

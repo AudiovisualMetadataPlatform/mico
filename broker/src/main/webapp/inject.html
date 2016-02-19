@@ -62,7 +62,7 @@
 
 
 <div class="container-fluid page-header">
-    <h1>MICO <small>Content Item Injection</small></h1>
+    <h1>MICO <small>Item Injection</small></h1>
 </div>
 
 <div class="container-fluid">
@@ -74,7 +74,7 @@
 </div>
 
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;" ng-show="!itemUri">
-    <button ng-click="createContentItem()">Create New</button>
+    <button ng-click="createItem()">Create New</button>
 </div>
 
 
@@ -95,7 +95,7 @@
 
 
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px; border: 1px solid darkgray;" ng-repeat="part in itemData.parts">
-    <h3>Content Part {{$index}}</h3>
+    <h3>Part {{$index}}</h3>
 
     <table>
         <tr><th>URI</th><td><a href="/marmotta/resource?uri={{part.uri}}">{{part.uri}}</a></td></tr>
@@ -109,10 +109,10 @@
 
 
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;" ng-show="itemUri && state != 'Submitted'">
-    <h3>Add Content Part</h3>
+    <h3>Add Part</h3>
 
     <p>
-        Add one or more parts to the content item before starting analysis. The type for each part must be given and correspond to the type names
+        Add one or more parts to the item before starting analysis. The type for each part must be given and correspond to the type names
         (requires, provides) used by the analysis services registered with the broker. Typically, this means a MIME type like image/jpeg, image/png or text/plain.
     </p>
 
@@ -125,13 +125,13 @@
 
 
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;" ng-show="itemData.parts.length > 0  && state != 'Submitted'">
-    <h3>Submit Content Part</h3>
+    <h3>Submit Part</h3>
 
     <p>
-        Clicking on "Submit" will trigger analysis for the content item and its parts.
+        Clicking on "Submit" will trigger analysis for the item and its parts.
     </p>
 
-    <button ng-click="submitContentItem()">Submit</button>
+    <button ng-click="submitItem()">Submit</button>
 </div>
 
 <div class="container-fluid" ng-show="itemUri">

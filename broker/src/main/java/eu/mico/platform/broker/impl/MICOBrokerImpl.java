@@ -126,7 +126,7 @@ public class MICOBrokerImpl implements MICOBroker {
         initConfigQueue();
         initRegistryQueue();
         initDiscoveryQueue();
-        initContentItemQueue();
+        initItemQueue();
 
         log.info("initialising persistence service ...");
         persistenceService = new PersistenceServiceAnno4j(new java.net.URI(this.marmottaBaseUri), new java.net.URI(this.storageBaseUri));
@@ -194,7 +194,7 @@ public class MICOBrokerImpl implements MICOBroker {
     }
 
 
-    private void initContentItemQueue() throws IOException {
+    private void initItemQueue() throws IOException {
         log.info("setting up content injection queue ...");
         contentChannel = connection.createChannel();
 
@@ -203,7 +203,7 @@ public class MICOBrokerImpl implements MICOBroker {
         contentChannel.queueDeclare(EventManager.QUEUE_PART_OUTPUT, true, false, false, null);
 
         // register a content item consumer with the queue
-        contentChannel.basicConsume(EventManager.QUEUE_CONTENT_INPUT, false, new ContentItemConsumer(contentChannel));
+        contentChannel.basicConsume(EventManager.QUEUE_CONTENT_INPUT, false, new ItemConsumer(contentChannel));
     }
 
     private void initConfigQueue() throws IOException {
@@ -346,8 +346,8 @@ public class MICOBrokerImpl implements MICOBroker {
     /**
      * Handle the injection of new content items into the system by watching the QUEUE_CONTENT_INPUT
      */
-    private class ContentItemConsumer extends DefaultConsumer {
-        public ContentItemConsumer(Channel channel) {
+    private class ItemConsumer extends DefaultConsumer {
+        public ItemConsumer(Channel channel) {
             super(channel);
         }
 
@@ -361,7 +361,7 @@ public class MICOBrokerImpl implements MICOBroker {
          */
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-            Event.PartEvent partEvent = Event.PartEvent.parseFrom(body);
+            Event.ItemEvent partEvent = Event.ItemEvent.parseFrom(body);
 
             log.info("new content item injected (URI: {}), preparing for analysis!", partEvent.getItemUri());
             try {
@@ -417,7 +417,7 @@ public class MICOBrokerImpl implements MICOBroker {
             log.info("looking for possible state transitions ...");
             if (state.isFinalState()) {
                 // send finish event
-                getChannel().basicPublish("", EventManager.QUEUE_PART_OUTPUT, null, Event.PartEvent.newBuilder().setContentItemUri(item.getURI().stringValue()).build().toByteArray());
+                getChannel().basicPublish("", EventManager.QUEUE_PART_OUTPUT, null, Event.ItemEvent.newBuilder().setItemUri(item.getURI().stringValue()).build().toByteArray());
 
                 synchronized (this) {
                     this.notifyAll();
@@ -434,9 +434,9 @@ public class MICOBrokerImpl implements MICOBroker {
                             .replyTo(queue)
                             .build();
 
-                    Event.AnalysisEvent analysisEvent = Event.AnalysisEvent.newBuilder()
-                            .setContentItemUri(item.getURI().stringValue())
-                            .setObjectUri(t.getObject().stringValue())
+                    Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.newBuilder()
+                            .setItemUri(item.getURI().toString())
+                            .setPartUri(0, item.getURI().stringValue())
                             .setServiceId(t.getService().getUri().stringValue()).build();
 
                     getChannel().basicPublish("", t.getService().getQueueName(), ciProps, analysisEvent.toByteArray());
@@ -445,11 +445,10 @@ public class MICOBrokerImpl implements MICOBroker {
                     state.removeState(t.getObject());
                 }
             }
-
         }
 
         /**
-         * Handle response of a service with an analysis event in the replyto queue
+         * Handle response of a service with an analysis event in the reply to queue
          */
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
@@ -457,35 +456,26 @@ public class MICOBrokerImpl implements MICOBroker {
                 Event.AnalysisEvent analysisResponse = Event.AnalysisEvent
                         .parseFrom(body);
                 try {
-                    log.info(
-                            "received processing result from service {} for content item {}: new object {}",
-                            analysisResponse.getServiceId(),
-                            analysisResponse.getContentItemUri(),
-                            analysisResponse.getObjectUri());
 
                     switch (analysisResponse.getType()) {
                         case ERROR:
-                            log.warn(analysisResponse.getMessage(),
-                                    analysisResponse.getDescription());
+                            log.warn(analysisResponse.getError().getMessage(),
+                                    analysisResponse.getError().getDescription());
                         case NEW_PART:
-                            setStateForContent(analysisResponse);
+                            setStateForContent(analysisResponse.getNew());
                             break;
                         case FINISH:
                             // this is the last message we are waiting for
                             state.removeProgress(properties.getCorrelationId());
                         case PROGRESS:
-                            Event.AnalyzeProgress progress = Event.AnalyzeProgress
-                                    .parseFrom(body);
-                            log.trace("got progress event ({}) for {}", progress.getProgress(), progress.getObjectUri());
+                            Event.AnalysisEvent.Progress progress = analysisResponse.getProgress();
+                            log.trace("got progress event ({}) for {}", progress.getProgress(), progress.getPartUri());
                             Transition transition = state.getProgress().get(properties.getCorrelationId());
                             transition.setProgress(progress.getProgress());
                     }
 
                 } catch (StateNotFoundException e) {
-                    log.warn(
-                            "could not proceed analysing content item {}, part {}; next state unknown because service was not registered",
-                            analysisResponse.getContentItemUri(),
-                            analysisResponse.getObjectUri());
+                    e.printStackTrace();
                 }
                 executeStateTransitions();
                 getChannel().basicAck(envelope.getDeliveryTag(), false);
@@ -501,10 +491,9 @@ public class MICOBrokerImpl implements MICOBroker {
          * @param analysisResponse
          * @throws StateNotFoundException
          */
-        private void setStateForContent(Event.AnalysisEvent analysisResponse)
-                throws StateNotFoundException {
-            URIImpl itemUri = new URIImpl(analysisResponse.getContentItemUri());
-            URIImpl partUri = new URIImpl(analysisResponse.getObjectUri());
+        private void setStateForContent(Event.AnalysisEvent.NewPart analysisResponse) throws StateNotFoundException {
+            URIImpl itemUri = new URIImpl(analysisResponse.getItemUri());
+            URIImpl partUri = new URIImpl(analysisResponse.getPartUri());
             String serviceId = analysisResponse.getServiceId();
             try {
                 String mimetype = persistenceService
