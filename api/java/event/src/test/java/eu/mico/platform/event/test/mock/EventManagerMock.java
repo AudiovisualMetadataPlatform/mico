@@ -4,9 +4,9 @@ import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
-import eu.mico.platform.persistence.test.mock.PersistenceServiceMock;
 
 import org.openrdf.model.URI;
 import org.openrdf.repository.RepositoryException;
@@ -14,10 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,7 +32,7 @@ public class EventManagerMock implements EventManager {
     private static Logger log = LoggerFactory.getLogger(EventManagerMock.class);
 
     private Set<AnalysisService> services;
-    private PersistenceServiceMock persistenceService;
+    private PersistenceService persistenceService;
     private AnalysisResponseCollector responsesCollector;
 
     @Override
@@ -78,9 +80,9 @@ public class EventManagerMock implements EventManager {
     }
 
     @Override
-    public void init() throws IOException {
+    public void init() throws IOException, URISyntaxException {
         services = new HashSet<>();
-        persistenceService = new PersistenceServiceMock();
+        persistenceService = new PersistenceServiceAnno4j();
         responsesCollector = new AnalysisResponseCollector();
     }
 
