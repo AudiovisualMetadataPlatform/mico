@@ -6,6 +6,7 @@ import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Resource;
 import eu.mico.platform.persistence.model.Item;
 
 import org.openrdf.model.URI;
@@ -53,14 +54,14 @@ public class EventManagerMock implements EventManager {
             for (Part part : item.getParts()) {
                 for (AnalysisService service: services) {
                     if (service.getRequires().equals(part.getSyntacticalType())) {
-                        URI uri = item.getURI();
-                        List<URI> uris = new LinkedList<URI>();
-                        uris.add(uri);
+                        Resource uri = item.getParts().iterator().next();
+                        List<Resource> parts = new LinkedList<Resource>();
+                        parts.add(uri);
                         try {
                             log.debug("calling service {} to analyze {}...", service.getServiceID(), part.getURI());
-                            service.call(responsesCollector, item, uris, params);
+                            service.call(responsesCollector, item, parts, params);
                         } catch (AnalysisException e) {
-                            log.error("Analysis Exception processing {}: {}", uri.stringValue(), e.getMessage());
+                            log.error("Analysis Exception processing {}: {}", uri, e.getMessage());
                         }
                     }
                 }

@@ -21,6 +21,8 @@ import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Resource;
+
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -116,7 +118,7 @@ public class EventManagerTest extends BaseCommunicationTest {
         }
 
         @Override
-        public void call(AnalysisResponse resp, Item ci, List<URI> object, Map<String,String> params) throws AnalysisException, IOException {
+        public void call(AnalysisResponse resp, Item ci, List<Resource> object, Map<String,String> params) throws AnalysisException, IOException {
             resp.sendFinish(ci);
             called = true;
         }
