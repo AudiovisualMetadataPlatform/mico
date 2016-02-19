@@ -115,8 +115,10 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
     public void testSampleSplitRoute() throws Exception {
         MockEndpoint mock2 = getMockEndpoint("mock:result_split2");
         MockEndpoint mock3 = getMockEndpoint("mock:result_split3");
+	MockEndpoint mock4 = getMockEndpoint("mock:result_multicast");
         mock2.expectedMinimumMessageCount(1);
         mock3.expectedMinimumMessageCount(1);
+	mock4.expectedMinimumMessageCount(2);
 
         template.send("direct:test_split",createExchange());
         assertMockEndpointsSatisfied();
@@ -165,12 +167,14 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
                 ModelCamelContext context = getContext();
                 context.setDelayer(400L);
                 String[] testFiles = {
-                        "src/test/resources/routes/sampleSplitRoute.xml",
+                        "src/test/resources/routes/sampleSplitRoute_2.xml",
                         "src/test/resources/routes/videoNerRoute_v1.xml",
+			"src/test/resources/routes/automaticCreation_sampleSplitRoute.xml",
                         "src/test/resources/routes/sampleRoute.xml" };
                 try {
                     for (int i =0 ; i< testFiles.length; i++){
                         InputStream is = new FileInputStream(testFiles[i]);
+			System.out.println(testFiles[i]);
                         RoutesDefinition routes = context.loadRoutesDefinition(is);
                         context.addRouteDefinitions(routes.getRoutes());
                     }
