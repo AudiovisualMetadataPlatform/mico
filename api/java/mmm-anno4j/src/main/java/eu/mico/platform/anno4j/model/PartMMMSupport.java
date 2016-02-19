@@ -15,10 +15,6 @@ public abstract class PartMMMSupport extends AnnotationSupport implements PartMM
 
     @Override
     public void addTarget(Target target) {
-        if (this.getTarget() == null) {
-            this.setTarget(new HashSet<Target>());
-        }
-
         this.getTarget().add(target);
     }
 
@@ -27,10 +23,6 @@ public abstract class PartMMMSupport extends AnnotationSupport implements PartMM
      * {@inheritDoc}
      */
     public void addInput(RDFObject input) {
-        if (this.getInputs() == null) {
-            this.setInputs(new HashSet<RDFObject>());
-        }
-
         this.getInputs().add(input);
     }
 }

@@ -131,7 +131,9 @@ public class WordCountAnalyzer extends AnalysisServiceAnno4j {
 
             // adding the target to the part
             part.addTarget(specificResource);
-
+            
+            // adding the input
+            part.addInput(resource);
             analysisResponse.sendNew(item, part.getURI());
 
             analysisResponse.sendFinish(item);

@@ -1,8 +1,8 @@
 package eu.mico.platform.persistence.model;
 
+import eu.mico.platform.anno4j.model.ResourceMMM;
 import org.openrdf.model.URI;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.object.RDFObject;
 
 /**
  * Super type of items and parts
@@ -16,7 +16,7 @@ public interface Resource {
      */
     URI getURI();
 
-    RDFObject getRDFObject();
+    ResourceMMM getRDFObject();
 
     /**
      * the mime type, e.g. "image/jpeg"

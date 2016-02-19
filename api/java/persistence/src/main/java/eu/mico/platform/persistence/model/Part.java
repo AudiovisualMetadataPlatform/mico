@@ -16,6 +16,8 @@ package eu.mico.platform.persistence.model;
 import com.github.anno4j.model.Agent;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Target;
+import com.github.anno4j.model.impl.ResourceObject;
+import org.openrdf.repository.object.RDFObject;
 
 import java.util.Set;
 
@@ -39,11 +41,17 @@ public interface Part extends Resource {
 
     void setBody(Body body);
 
-    Set<Target> getTarget();
+    Set<Target> getTargets();
 
-    void setTarget(Set<Target> targets);
+    void setTargets(Set<Target> targets);
 
     void addTarget(Target target);
+
+    Set<Resource> getInputs();
+
+    void setInputs(Set<Resource> inputs);
+
+    void addInput(Resource input);
 
     String getSerializedAt();
 

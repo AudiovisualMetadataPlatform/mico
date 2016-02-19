@@ -3,6 +3,7 @@ package eu.mico.platform.anno4j.model;
 import com.github.anno4j.model.Annotation;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Target;
+import com.github.anno4j.model.impl.ResourceObject;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
 import org.openrdf.annotations.Iri;
 import org.openrdf.repository.object.RDFObject;
@@ -58,7 +59,7 @@ public interface PartMMM extends Annotation, ResourceMMM {
      * @return A set of objects that are used as semantic input for creating this Part.
      */
     @Iri(MMM.HAS_INPUT)
-    Set<RDFObject> getInputs();
+    Set<ResourceMMM> getInputs();
 
     /**
      * Sets the Set of objects that are the semantic input for this Part.
@@ -66,14 +67,14 @@ public interface PartMMM extends Annotation, ResourceMMM {
      * @param inputs    The set of objects that form the semantic input for this Part
      */
     @Iri(MMM.HAS_INPUT)
-    void setInputs(Set<RDFObject> inputs);
+    void setInputs(Set<ResourceMMM> inputs);
 
     /**
      * Adds a single object to the set of objects, that form the semantic input for this Part.
      *
      * @param input The object that is to be added to the set of objects, that form the semantic input for this part.
      */
-    void addInput(RDFObject input);
+    void addInput(ResourceMMM input);
 
     /**
      * Adds a http:www.w3.org/ns/oa#hasTarget relationship.

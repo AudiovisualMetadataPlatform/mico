@@ -85,7 +85,7 @@ public class PartAnno4jTest {
     @Test
     public void targetTest() throws RepositoryException, IllegalAccessException, InstantiationException {
 
-        int initialTargetCount = part.getTarget().size();
+        int initialTargetCount = part.getTargets().size();
 
         Target target1 = anno4j.createObject(SpecificResource.class);
         Target target2 = anno4j.createObject(SpecificResource.class);
@@ -100,7 +100,7 @@ public class PartAnno4jTest {
         part.addTarget(target2);
         assertEquals(initialTargetCount + 2, partMMM.getTarget().size());
 
-        part.setTarget(targetSet);
+        part.setTargets(targetSet);
         assertEquals(initialTargetCount + 1, partMMM.getTarget().size());
 
     }
