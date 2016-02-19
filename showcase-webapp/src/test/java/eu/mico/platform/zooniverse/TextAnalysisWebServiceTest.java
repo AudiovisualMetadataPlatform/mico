@@ -10,6 +10,7 @@ import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
 import eu.mico.platform.persistence.model.Metadata;
+import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.zooniverse.testutils.TestServer;
 import org.hamcrest.Matchers;
 import org.junit.AfterClass;
@@ -50,7 +51,7 @@ public class TextAnalysisWebServiceTest {
 
     private static Repository repository;
 
-    private static Content content;
+    private static Part part;
 
     @BeforeClass
     public static void init() throws Exception {
@@ -79,7 +80,7 @@ public class TextAnalysisWebServiceTest {
     }
 
     @Test
-    public void testUpload() throws IOException {
+    public void testUpload() throws IOException, RepositoryException {
         RestAssured.given().
                 contentType(MediaType.APPLICATION_JSON).
                 content("{\"comment\":\"This is a text\"}").
@@ -91,8 +92,8 @@ public class TextAnalysisWebServiceTest {
                     .body("status", Matchers.equalTo("submitted"));
 
         //test content parts
-        Assert.assertNotNull(content);
-        Assert.assertEquals("This is a text", new String(((ByteArrayOutputStream)content.getOutputStream()).toByteArray()));
+        Assert.assertNotNull(part);
+        Assert.assertEquals("This is a text", new String(((ByteArrayOutputStream)part.getAsset().getOutputStream()).toByteArray()));
     }
 
     @Test
