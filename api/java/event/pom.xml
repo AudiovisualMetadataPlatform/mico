@@ -144,7 +144,7 @@
                     <arguments>
                       <argument>--java_out=src/main/java/</argument>
                       <argument>-I=${basedir}/../../shared/event/</argument>
-                      <argument>${basedir}/../../shared/event/event.proto</argument>
+                      <argument>${basedir}/../../shared/event/Event.proto</argument>
                     </arguments>
                   </configuration>
                 </execution>
