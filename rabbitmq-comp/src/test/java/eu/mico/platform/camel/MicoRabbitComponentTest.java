@@ -17,6 +17,9 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.impl.JndiRegistry;
+import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
+import org.apache.camel.language.Bean;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.RoutesDefinition;
 import org.apache.camel.test.junit4.CamelTestSupport;
@@ -33,6 +36,7 @@ import org.openrdf.repository.RepositoryException;
 import de.fraunhofer.idmt.camel.MicoCamel;
 import eu.mico.platform.anno4j.model.impl.body.MultiMediaBody;
 import eu.mico.platform.anno4j.model.impl.micotarget.InitialTarget;
+import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
 import eu.mico.platform.persistence.metadata.MICOProvenance;
 import eu.mico.platform.persistence.model.Content;
 import eu.mico.platform.persistence.model.ContentItem;
@@ -124,6 +128,19 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         assertMockEndpointsSatisfied();
     }
 
+    @Test(timeout = 20000)
+    public void testAutomaticXmlRoute() throws Exception {
+        MockEndpoint mock2 = getMockEndpoint("mock:workflow-WORKFLOW_ID-pipeline-2");
+        mock2.expectedMinimumMessageCount(1);
+        mock2.expectedMessageCount(2);
+        MockEndpoint mock3 = getMockEndpoint("mock:workflow-WORKFLOW_ID-pipeline-3");
+        mock3.expectedMessageCount(2);
+
+        template.send("direct:mico/test", createExchange());
+        template.send("direct:mico/test", createExchange());
+        assertMockEndpointsSatisfied();
+    }
+
     /** test ner sample route defined in xml
      * @throws Exception
      */
@@ -139,10 +156,19 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         assertMockEndpointsSatisfied();
     }
 
+    @Bean(ref="aggregatorStrategy")
+    public static SimpleAggregationStrategy aggregatorStrategy = new SimpleAggregationStrategy();
+    
     @Override
     protected RouteBuilder createRouteBuilder() throws Exception {
         return new RouteBuilder() {
             public void configure() {
+                JndiRegistry registry = (JndiRegistry) (
+                        (PropertyPlaceholderDelegateRegistry)context.getRegistry()).getRegistry();
+
+                        //and here, it is bound to the registry
+                        registry.bind("aggregatorStrategy", aggregatorStrategy);
+                        
                 loadXmlSampleRoutes();
                 
                 from("direct:a").pipeline()
@@ -165,12 +191,13 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
 
             private void loadXmlSampleRoutes() {
                 ModelCamelContext context = getContext();
-                context.setDelayer(400L);
+                context.setDelayer(40L);
                 String[] testFiles = {
-                        "src/test/resources/routes/sampleSplitRoute_2.xml",
+                        "src/test/resources/routes/sampleSplitRoute.xml",
                         "src/test/resources/routes/videoNerRoute_v1.xml",
-			"src/test/resources/routes/automaticCreation_sampleSplitRoute.xml",
-                        "src/test/resources/routes/sampleRoute.xml" };
+                        "src/test/resources/routes/automaticCreation_sampleSplitRoute.xml",
+                        "src/test/resources/routes/sampleRoute.xml" 
+                        };
                 try {
                     for (int i =0 ; i< testFiles.length; i++){
                         InputStream is = new FileInputStream(testFiles[i]);
