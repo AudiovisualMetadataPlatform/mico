@@ -31,6 +31,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -87,7 +88,13 @@ public class AnimalDetectionWebService {
         mimetypesMap.addMimeTypes("image/jpeg jpeg jpg");
 
         this.persistenceService = eventManager.getPersistenceService();
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectTimeout(5 * 1000)
+                .setConnectionRequestTimeout(5 * 1000)
+                .setSocketTimeout(5 * 1000)
+                .build();
         this.httpClient = HttpClientBuilder.create()
+                .setDefaultRequestConfig(requestConfig)
                 .setUserAgent("MicoPlatform (ZooniverseWebService)")
                 .build();
     }
@@ -155,9 +162,12 @@ public class AnimalDetectionWebService {
 
             try (OutputStream outputStream = contentPart.getOutputStream()) {
                 IOUtils.copy(postBody, outputStream);
+                outputStream.close();
             } catch (IOException e) {
                 log.error("Could not persist binary data for ContentPart {}: {}", contentPart.getURI(), e.getMessage());
                 throw e;
+            } finally {
+                postBody.close();
             }
 
             eventManager.injectContentItem(ci);
