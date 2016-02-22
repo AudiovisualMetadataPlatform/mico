@@ -381,7 +381,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
                 log.info("- triggering analysis process for initial states ...");
                 ContentItemManager mgr = new ContentItemManager(item,state,channel);
-                Thread t = new Thread(mgr);
+                Thread t = new Thread(mgr, "ContentItemManager_" + item.getURI().toString());
                 t.start();
 
                 getChannel().basicAck(envelope.getDeliveryTag(), false);
