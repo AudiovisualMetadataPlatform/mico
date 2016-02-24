@@ -1,0 +1,15 @@
+version: '2'
+services:
+  broker:
+    image: mico/mico-broker
+    links:
+      - marmotta:mico-marmotta
+    extra_hosts:
+      - "mico-broker:127.0.0.1"
+    ports:
+      - "8080"
+      - "15672"
+  marmotta:
+    image: mico/mico-marmotta
+    ports:
+      - "8080"
