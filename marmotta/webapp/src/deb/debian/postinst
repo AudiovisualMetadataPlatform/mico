@@ -25,7 +25,7 @@ exists_pg_database () {
     return 0
   else
     return 1
-  fi    
+  fi
 }
 
 case "$1" in
@@ -63,6 +63,25 @@ kiwi.host = http://$HOSTNAME:8080/marmotta/
 kiwi.context = http://$HOSTNAME:8080/marmotta/
 EOF
         fi
+
+        MIN_SHARED_BUFFERS=$((256 * 1024 * 1024))
+        SHARED_BUFFERS=$(pg_conftool -s get shared_buffers |numfmt --from=iec --suffix=B)
+        if [ -z "$SHARED_BUFFERS" ] || [ "${SHARED_BUFFERS::-1}" -lt "$MIN_SHARED_BUFFERS" ]; then
+            echo "Changing PostgreSQL shared_buffers to $(numfmt --to=iec --suffix=B $MIN_SHARED_BUFFERS)"
+            pg_conftool set shared_buffers $(numfmt --to=iec --suffix=B $MIN_SHARED_BUFFERS)
+            service postgresql status 1>/dev/null && service postgresql reload
+        fi
+
+        MIN_WORK_MEM=$((8 * 1024 * 1024))
+        WORK_MEM=$(pg_conftool -s get work_mem |numfmt --from=iec --suffix=B)
+        if [ -z "$WORK_MEM" ] || [ "${WORK_MEM::-1}" -lt "$MIN_WORK_MEM" ]; then
+            echo "Changing PostgreSQL work_mem to $(numfmt --to=iec --suffix=B $MIN_WORK_MEM)"
+            pg_conftool set work_mem $(numfmt --to=iec --suffix=B $MIN_WORK_MEM)
+            service postgresql status 1>/dev/null && service postgresql reload
+        fi
+
+        #Setting default value -Xmx128g of JAVA_OPTS to -Xmx2g
+        sed -i 's/^JAVA_OPTS=\"\(.*\)-Xmx128m\(.*\)\"/JAVA_OPTS=\"\1-Xmx2g\2"/' /etc/default/tomcat7
 
         db_stop
 
