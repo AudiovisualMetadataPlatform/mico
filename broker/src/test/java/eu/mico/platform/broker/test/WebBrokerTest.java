@@ -55,11 +55,11 @@ public class WebBrokerTest extends BaseBrokerTest {
 
         // create a content item with a single part of type "A"; it should walk through the registered mock services and
         // eventually finish analysis; we simply wait until we receive an event on the output queue.
-        PersistenceService svc = new PersistenceServiceAnno4j(testHost);
+        PersistenceService svc = new PersistenceServiceAnno4j();
         Item item = svc.createItem();
         try {
-            Part partA = item.createPart();
-            partA.setType("A");
+            Part partA = item.createPart(item.getURI());
+            partA.setSyntacticalType("A");
 
             eventManager.injectItem(item);
 
@@ -67,7 +67,7 @@ public class WebBrokerTest extends BaseBrokerTest {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery(1000);
             Assert.assertNotNull(delivery);
 
-            Event.PartEvent event = Event.PartEvent.parseFrom(delivery.getBody());
+            Event.ItemEvent event = Event.ItemEvent.parseFrom(delivery.getBody());
 
             Assert.assertEquals(item.getURI().stringValue(), event.getItemUri());
 

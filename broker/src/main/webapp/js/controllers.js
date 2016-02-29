@@ -86,7 +86,7 @@ brokerApp.controller("InjectItemCtrl", function($scope,$http,$upload) {
         document.getElementById("file").value = '';
     };
 
-    $scope.createContentItem = function() {
+    $scope.createItem = function() {
         $http.post("inject/create").success(function(data) {
             $scope.itemUri = data["uri"];
         });
@@ -99,7 +99,7 @@ brokerApp.controller("InjectItemCtrl", function($scope,$http,$upload) {
         }
     };
 
-    $scope.addContentPart = function(){
+    $scope.addPart = function(){
         for (var i = 0; i < $scope.files.length; i++) {
             var file = $scope.files[i];
             var fileReader = new FileReader();

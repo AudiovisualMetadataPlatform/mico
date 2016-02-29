@@ -81,6 +81,33 @@ public class InjectionWebService {
         return Response.ok(ImmutableMap.of("uri", item.getURI().stringValue())).build();
 
     }
+    /**
+     * Add a new content part to the content item using the request body as content. Return the URI of the new part in
+     * the "uri" field of the JSON response.
+     *
+     * @return
+     */
+    @POST
+    @Path("/add")
+    @Produces("application/json")
+    public Response addContentPart(@QueryParam("ci")String contentItem, @QueryParam("type") String type, @QueryParam("name") String fileName, @Context HttpServletRequest request) throws RepositoryException, IOException {
+        PersistenceService ps = eventManager.getPersistenceService();
+
+        Item item = ps.getItem(new URIImpl(contentItem));
+
+        Asset asset = item.getAsset();
+        item.setSyntacticalType(type);
+        asset.setFormat(type);
+        OutputStream out = asset.getOutputStream();
+        int bytes = IOUtils.copy(request.getInputStream(), out);
+        out.close();
+
+        log.info("item {}: uploaded {} bytes", item.getURI(), bytes);
+        if (item != null) {
+            eventManager.injectItem(item);
+        }
+        return Response.ok(ImmutableMap.of("uri", item.getURI().stringValue())).build();
+    }
 
     /**
      * Submit the item for analysis by notifying the broker about its parts.
