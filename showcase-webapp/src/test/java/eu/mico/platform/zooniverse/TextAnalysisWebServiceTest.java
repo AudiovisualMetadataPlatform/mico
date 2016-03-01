@@ -156,9 +156,8 @@ public class TextAnalysisWebServiceTest {
 
                 RepositoryConnection connection = repository.getConnection();
                 TupleQuery q = connection.prepareTupleQuery(QueryLanguage.SPARQL, query);
-                TupleQueryResult result = q.evaluate();
 
-                return result;
+                return q.evaluate();
             }
         });
         return metadata;

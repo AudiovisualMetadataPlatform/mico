@@ -18,10 +18,7 @@ public class TextAnalysisOutput {
     public List topics;
     public List entities;
 
-    public TextAnalysisOutput(Item ci) {
-        this.id = ci.getID();
+    public TextAnalysisOutput(Item item) {
+        this.id = item.getURI().toString();
     }
-
-
-
 }

@@ -2,13 +2,12 @@ package eu.mico.platform.zooniverse;
 
 import com.google.common.collect.ImmutableMap;
 import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.model.ContentItemState;
+import eu.mico.platform.broker.model.ItemState;
 import eu.mico.platform.broker.model.ServiceGraph;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
-import eu.mico.platform.persistence.model.Metadata;
+import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.zooniverse.model.TextAnalysisInput;
 import eu.mico.platform.zooniverse.model.TextAnalysisOutput;
 import org.apache.commons.io.IOUtils;
@@ -16,7 +15,6 @@ import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
@@ -51,13 +49,11 @@ public class TextAnalysisWebService {
 
     private final EventManager eventManager;
     private final MICOBroker broker;
-    private final String marmottaBaseUri;
     private final PersistenceService persistenceService;
 
-    public TextAnalysisWebService(EventManager eventManager, MICOBroker broker, String marmottaBaseUri) {
+    public TextAnalysisWebService(EventManager eventManager, MICOBroker broker) {
         this.eventManager = eventManager;
         this.broker = broker;
-        this.marmottaBaseUri = marmottaBaseUri;
         this.persistenceService = eventManager.getPersistenceService();
     }
 
@@ -84,24 +80,22 @@ public class TextAnalysisWebService {
                 .build();
 
         try {
-            final ContentItem ci = persistenceService.createContentItem();
+            final Item item = persistenceService.createItem();
 
-            final Content contentPart = ci.createContentPart();
-            contentPart.setType("text/plain");
-            contentPart.setRelation(DCTERMS.CREATOR, new URIImpl("http://www.mico-project.eu/broker/zooniverse-text-analysis-web-service"));
-            contentPart.setProperty(DCTERMS.CREATED, ISO8601FORMAT.format(new Date()));
-            try (OutputStream outputStream = contentPart.getOutputStream()) {
+            final Part part = item.createPart(ExtractorURI);
+            part.setSyntacticalType("text/plain");
+            try (OutputStream outputStream = part.getAsset().getOutputStream()) {
                 IOUtils.copy(IOUtils.toInputStream(input.comment), outputStream);
             } catch (IOException e) {
-                log.error("Could not persist text data for ContentPart {}: {}", contentPart.getURI(), e.getMessage());
+                log.error("Could not persist text data for ContentPart {}: {}", part.getURI(), e.getMessage());
                 throw e;
             }
 
-            eventManager.injectContentItem(ci);
+            eventManager.injectItem(item);
 
             return Response.status(Response.Status.CREATED)
-                    .entity(ImmutableMap.of("id",ci.getID(),"status","submitted"))
-                    .link(java.net.URI.create(ci.getURI().stringValue()), "contentItem")
+                    .entity(ImmutableMap.of("id",item.getURI(),"status","submitted"))
+                    .link(java.net.URI.create(item.getURI().stringValue()), "contentItem")
                     .build();
         } catch (RepositoryException | IOException e) {
             log.error("Could not create ContentItem");
@@ -112,44 +106,36 @@ public class TextAnalysisWebService {
     @GET
     @Produces("application/json")
     @Path("{id:[^/]+}")
-    public Response getResult(@PathParam("id") final String contentItemId) {
+    public Response getResult(@PathParam("id") final String itemURI) {
 
-        final URI contentItemUri;
+        final Item item;
         try {
-            contentItemUri = concatUrlWithPath(marmottaBaseUri, contentItemId);
-        } catch (URISyntaxException e) {
-            log.error("Error creating uri for {}: {}", contentItemId, e);
-            return Response.status(Response.Status.BAD_REQUEST).entity(e).build();
-        }
-
-        final ContentItem contentItem;
-        try {
-            contentItem = persistenceService.getContentItem(contentItemUri);
-            if (contentItem == null)
-                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'", contentItemUri.stringValue())).build();
+            item = persistenceService.getItem(new URIImpl(itemURI));
+            if (item == null)
+                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'", itemURI)).build();
         } catch (RepositoryException e) {
-            log.error("Error getting content item {}: {}", contentItemUri, e);
+            log.error("Error getting content item {}: {}", itemURI, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
 
         //test if it is still in progress
-        final ContentItemState state = broker.getStates().get(contentItemUri.stringValue());
+        final ItemState state = broker.getStates().get(itemURI);
         if (state != null && !state.isFinalState()) {
             return Response.status(Response.Status.ACCEPTED)
-                    .entity(ImmutableMap.of("id",contentItemId,"status","inProgress"))
+                    .entity(ImmutableMap.of("id",itemURI,"status","inProgress"))
                     .build();
         }
 
         final TextAnalysisOutput out;
         try {
-            out = getResult(contentItem);
+            out = getTextResult(item);
 
             if(out == null) {
                 throw new Exception("Analysis result is empty");
             }
 
         } catch (Exception e) {
-            log.error("Cannot load analysis results for '{}'",contentItem, e);
+            log.error("Cannot load analysis results for '{}'",item, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
 
@@ -185,69 +171,65 @@ public class TextAnalysisWebService {
             "  ?body a fam:SentimentAnnotation; fam:sentiment ?sentiment.\n" +
             "}";
 
-    private TextAnalysisOutput getResult(ContentItem ci) throws Exception {
-        final Metadata metadata = persistenceService.getMetadata();
-
+    // TODO: refactor, because model changed: Metadata object does not exist anymore. Dont use sparql queries, use anno4j
+    private TextAnalysisOutput getTextResult(Item item) throws Exception {
         try {
-            TextAnalysisOutput out = new TextAnalysisOutput(ci);
+            TextAnalysisOutput out = new TextAnalysisOutput(item);
 
-            out.sentiment = querySentiment(metadata,ci);
-            out.entities = queryList(queryEntities, metadata,ci);
-            out.topics = queryList(queryTopics, metadata,ci);
+            out.sentiment = querySentiment(item);
+            out.entities = queryList(item);
+            out.topics = queryList(item);
 
             return out;
         } catch (MalformedQueryException | QueryEvaluationException e) {
             log.error("Error querying objects; {}", e);
             throw new Exception(e);
-        } finally {
-            metadata.close();
         }
     }
 
-    private List queryList(String query, Metadata metadata, ContentItem ci) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
-        query = String.format(query, ci.getURI().stringValue());
+    private List queryList(Item ci) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
 
         List res = new ArrayList<>();
-        final TupleQueryResult result = metadata.query(query);
-
-        try {
-            while (result.hasNext()) {
-                HashMap map = new HashMap<>();
-                BindingSet bindings = result.next();
-                for(String name : result.getBindingNames()) {
-                    Value v = bindings.getBinding(name).getValue();
-                    if(v instanceof Literal) {
-                        Literal l = (Literal) v;
-                        try {
-                            map.put(name,l.doubleValue());//workaround !
-                        } catch (IllegalArgumentException e) {
-                            map.put(name,l.stringValue());
-                        }
-                    } else {
-                        map.put(name, v.stringValue());
-                    }
-                }
-                res.add(map);
-            }
-        } finally {
-            result.close();
-        }
+//        final TupleQueryResult result = metadata.query(query);
+//
+//        try {
+//            while (result.hasNext()) {
+//                HashMap map = new HashMap<>();
+//                BindingSet bindings = result.next();
+//                for(String name : result.getBindingNames()) {
+//                    Value v = bindings.getBinding(name).getValue();
+//                    if(v instanceof Literal) {
+//                        Literal l = (Literal) v;
+//                        try {
+//                            map.put(name,l.doubleValue());//workaround !
+//                        } catch (IllegalArgumentException e) {
+//                            map.put(name,l.stringValue());
+//                        }
+//                    } else {
+//                        map.put(name, v.stringValue());
+//                    }
+//                }
+//                res.add(map);
+//            }
+//        } finally {
+//            result.close();
+//        }
         return res;
     }
 
-    private Object querySentiment(Metadata metadata, ContentItem ci) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
+    private Object querySentiment(Item item) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
 
-        String query = String.format(querySentiment, ci.getURI().stringValue());
-
-        final TupleQueryResult result = metadata.query(query);
-
-        try {
-            if (result.hasNext()) {
-                return ((Literal)result.next().getBinding(result.getBindingNames().get(0)).getValue()).doubleValue();
-            }
-        } finally {
-            result.close();
-        }
+//        String query = String.format(querySentiment, ci.getURI().stringValue());
+//
+//        final TupleQueryResult result = metadata.query(query);
+//
+//        try {
+//            if (result.hasNext()) {
+//                return ((Literal)result.next().getBinding(result.getBindingNames().get(0)).getValue()).doubleValue();
+//            }
+//        } finally {
+//            result.close();
+//        }
 
         return null;
     }

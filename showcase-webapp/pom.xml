@@ -49,7 +49,7 @@
         <dependency>
             <groupId>eu.mico-project.platform</groupId>
             <artifactId>event</artifactId>
-            <version>1.3.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

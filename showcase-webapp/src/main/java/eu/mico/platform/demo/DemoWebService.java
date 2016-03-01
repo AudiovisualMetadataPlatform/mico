@@ -150,7 +150,7 @@ public class DemoWebService {
             Object result = createImageResult(ci.getURI().stringValue());
 
             return Response.status(Response.Status.CREATED)
-                    .entity(ImmutableMap.of("id", ci.getID(), "uri", ci.getURI().stringValue(), "result", result, "status", "done"))
+                    .entity(ImmutableMap.of("id", ci.getURI(), "uri", ci.getURI().stringValue(), "result", result, "status", "done"))
                     .build();
         } catch (RepositoryException | IOException e) {
             log.error("Could not create Item");
@@ -223,14 +223,11 @@ public class DemoWebService {
 
     private boolean isPrivateHost(String host) throws UnknownHostException {
         InetAddress addr = InetAddress.getByName(host);
-        if (addr.isMulticastAddress() ||
+        return addr.isMulticastAddress() ||
                 addr.isAnyLocalAddress() ||
                 addr.isLoopbackAddress() ||
                 addr.isLinkLocalAddress() ||
-                addr.isSiteLocalAddress()) {
-            return true;
-        }
-        return false;
+                addr.isSiteLocalAddress();
     }
 
     private Item injectContentItem(String mediaType, InputStream istream, String filename) throws RepositoryException, IOException {
@@ -262,9 +259,7 @@ public class DemoWebService {
 
                 String[] tmp = name.split("=");
 
-                String fileName = tmp[1].trim().replaceAll("\"","");
-
-                return fileName;
+                return tmp[1].trim().replaceAll("\"","");
             }
         }
         return "randomName." + type.getSubtype();
