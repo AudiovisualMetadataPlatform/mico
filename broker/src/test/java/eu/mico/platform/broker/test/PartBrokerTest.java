@@ -15,13 +15,16 @@ package eu.mico.platform.broker.test;
 
 import com.google.common.collect.ImmutableSet;
 import com.rabbitmq.client.QueueingConsumer;
+
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.model.Event;
+import eu.mico.platform.event.model.Event.AnalysisEvent;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
+
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -63,8 +66,8 @@ public class PartBrokerTest extends BaseBrokerTest {
         PersistenceService svc = broker.getPersistenceService();
         Item item = svc.createItem();
         try {
-            Part partA = item.createPart();
-            partA.setType("A");
+            Part partA = item.createPart(item.getURI());
+            partA.setSemanticType("A");
 
             eventManager.injectItem(item);
 
@@ -72,9 +75,9 @@ public class PartBrokerTest extends BaseBrokerTest {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery(1000);
             Assert.assertNotNull(delivery);
 
-            Event.PartEvent event = Event.PartEvent.parseFrom(delivery.getBody());
+            AnalysisEvent event = AnalysisEvent.parseFrom(delivery.getBody());
 
-            Assert.assertEquals(item.getURI().stringValue(), event.getItemUri());
+            Assert.assertEquals(item.getURI().stringValue(), event.getNew().getItemUri());
 
             // each service should have added a part, so there are now four different parts
             Set<Part> parts = ImmutableSet.copyOf(item.getParts());

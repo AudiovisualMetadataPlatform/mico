@@ -58,6 +58,13 @@ public class ItemState {
      */
     private void initState() {
         try {
+            if (item.hasAsset()){
+                try {
+                    states.put(item.getURI(), graph.getState(item.getAsset().getFormat()));
+                } catch (StateNotFoundException e) {
+                    log.warn("no starting state found for part type {}", item.getAsset().getFormat());
+                }
+            }
             for(Part part : item.getParts()) {
                 try {
                     states.put(part.getURI(), graph.getState(part.getSyntacticalType()));

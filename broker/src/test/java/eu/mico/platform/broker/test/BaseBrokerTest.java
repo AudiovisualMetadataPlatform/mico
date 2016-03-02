@@ -133,14 +133,14 @@ public abstract class BaseBrokerTest {
         }
 
         @Override
-        public void call(AnalysisResponse resp, Item ci, URI object) throws AnalysisException, IOException {
-            log.info("mock analysis request for content item {}, object {}", ci.getURI(), object);
+        public void call(AnalysisResponse resp, Item item, java.util.List<eu.mico.platform.persistence.model.Resource> resourceList, java.util.Map<String,String> params) throws AnalysisException ,IOException{
+            log.info("mock analysis request for content item {}, object {}", item.getURI(), resourceList.get(0).getURI());
             Part c = null;
             try {
-                c = ci.createPart();
-                c.setType(getProvides());
+                c = item.createPart(item.getURI());
+                c.setSemanticType(getProvides());
 
-                resp.sendMessage(ci,c.getURI());
+                resp.sendNew(item,c.getURI());
                 called = true;
             } catch (RepositoryException e) {
                 throw new AnalysisException("could not access triple store");

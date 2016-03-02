@@ -3,13 +3,12 @@ package eu.mico.platform.demo;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.model.ItemState;
 import eu.mico.platform.broker.model.EmailThread;
+import eu.mico.platform.broker.model.ItemState;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
-import eu.mico.platform.persistence.model.Metadata;
+import eu.mico.platform.persistence.model.Part;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.http.Header;
@@ -23,13 +22,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.openrdf.model.URI;
-import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.DCTERMS;
-import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,7 +145,7 @@ public class DemoWebService {
             Object result = createImageResult(ci.getURI().stringValue());
 
             return Response.status(Response.Status.CREATED)
-                    .entity(ImmutableMap.of("id", ci.getID(), "uri", ci.getURI().stringValue(), "result", result, "status", "done"))
+                    .entity(ImmutableMap.of("id", ci.getURI(), "uri", ci.getURI().stringValue(), "result", result, "status", "done"))
                     .build();
         } catch (RepositoryException | IOException e) {
             log.error("Could not create Item");
@@ -223,33 +218,28 @@ public class DemoWebService {
 
     private boolean isPrivateHost(String host) throws UnknownHostException {
         InetAddress addr = InetAddress.getByName(host);
-        if (addr.isMulticastAddress() ||
+        return addr.isMulticastAddress() ||
                 addr.isAnyLocalAddress() ||
                 addr.isLoopbackAddress() ||
                 addr.isLinkLocalAddress() ||
-                addr.isSiteLocalAddress()) {
-            return true;
-        }
-        return false;
+                addr.isSiteLocalAddress();
     }
 
     private Item injectContentItem(String mediaType, InputStream istream, String filename) throws RepositoryException, IOException {
-        final Item ci = persistenceService.createItem();
+        final Item item = persistenceService.createItem();
 
-        final Part part = ci.createPart();
-        part.setType(mediaType);
-        part.setProperty(DCTERMS.TITLE, filename);
-        part.setRelation(DCTERMS.CREATOR, new URIImpl(INJECTOR));
-        part.setProperty(DCTERMS.CREATED, ISO8601FORMAT.format(new Date()));
-        try (OutputStream outputStream = part.getOutputStream()) {
+        final Part part = item.createPart(ExtractorURI);
+        part.setSyntacticalType(mediaType);
+        part.getAsset().setFormat(mediaType);
+        try (OutputStream outputStream = part.getAsset().getOutputStream()) {
             IOUtils.copy(istream, outputStream);
         } catch (IOException e) {
             log.error("Could not persist text data for ContentPart {}: {}", part.getURI(), e.getMessage());
             throw e;
         }
 
-        eventManager.injectItem(ci);
-        return ci;
+        eventManager.injectItem(item);
+        return item;
     }
 
     // Parse Part-Disposition header to get the original file name
@@ -262,9 +252,7 @@ public class DemoWebService {
 
                 String[] tmp = name.split("=");
 
-                String fileName = tmp[1].trim().replaceAll("\"","");
-
-                return fileName;
+                return tmp[1].trim().replaceAll("\"","");
             }
         }
         return "randomName." + type.getSubtype();
@@ -321,7 +309,7 @@ public class DemoWebService {
                 }
 
                 return Response.status(Response.Status.CREATED)
-                        .entity(ImmutableMap.of("id", ci.getID(), "uri", ci.getURI().stringValue(), "status", "injected", "email", email != null))
+                        .entity(ImmutableMap.of("id", ci.getURI(), "uri", ci.getURI().stringValue(), "status", "injected", "email", email != null))
                         .build();
             } catch (RepositoryException | IOException e) {
                 log.error("Could not create Item");
@@ -362,7 +350,7 @@ public class DemoWebService {
         try {
             Object result = createImageResult(uriString);
             return Response.status(Response.Status.CREATED)
-                    .entity(ImmutableMap.of("id", item.getID(), "uri", item.getURI().stringValue(), "result", result, "status", "done"))
+                    .entity(ImmutableMap.of("id", item.getURI(), "uri", item.getURI().stringValue(), "result", result, "status", "done"))
                     .build();
         } catch (Exception e) {
             e.printStackTrace();
@@ -399,7 +387,7 @@ public class DemoWebService {
         try {
             Object result = createVideoResult(uriString);
             return Response.status(Response.Status.CREATED)
-                    .entity(ImmutableMap.of("id", item.getID(), "uri", item.getURI().stringValue(), "result", result, "status", "done"))
+                    .entity(ImmutableMap.of("id", item.getURI(), "uri", item.getURI().stringValue(), "result", result, "status", "done"))
                     .build();
         } catch (Exception e) {
             e.printStackTrace();
@@ -408,53 +396,54 @@ public class DemoWebService {
 
     }
 
+    // TODO: refactor to model v2 impl
     private Object createImageResult(String uri) throws Exception {
 
-        final Metadata metadata;
+//        final Metadata metadata;
         Map<String,Object> result = new HashMap<>();
-        try {
-            metadata = persistenceService.getMetadata();
-
-            try {
-                result.put("type", "image");
-                result.put("part_uri", queryString(queryMediaPartURI, metadata, uri));
-                result.put("faces", queryList(queryFaces, metadata, uri));
-                result.put("animals", queryMapList(animals, metadata, uri));
-
-            } catch (MalformedQueryException | QueryEvaluationException e) {
-                log.error("Error querying objects; {}", e);
-                throw new Exception(e);
-            }
-
-        } catch (RepositoryException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            metadata = persistenceService.getMetadata();
+//
+//            try {
+//                result.put("type", "image");
+//                result.put("part_uri", queryString(queryMediaPartURI, metadata, uri));
+//                result.put("faces", queryList(queryFaces, metadata, uri));
+//                result.put("animals", queryMapList(animals, metadata, uri));
+//
+//            } catch (MalformedQueryException | QueryEvaluationException e) {
+//                log.error("Error querying objects; {}", e);
+//                throw new Exception(e);
+//            }
+//
+//        } catch (RepositoryException e) {
+//            e.printStackTrace();
+//        }
 
         return result;
     }
 
     private Object createVideoResult(String uri) throws Exception {
 
-        final Metadata metadata;
+//        final Metadata metadata;
         Map<String,Object> result = new HashMap<>();
-        try {
-            metadata = persistenceService.getMetadata();
-
-            try {
-                result.put("type", "video");
-                result.put("part_uri", queryString(queryMediaPartURI, metadata, uri));
-                result.put("faces", queryMapList(timedFaces, metadata, uri));
-                result.put("shotImages", queryMapList(shotImages, metadata, uri));
-                //result.put("shots", queryMapList(shots, metadata, uri));
-                result.put("timedText", queryMapList(timedText, metadata, uri));
-            } catch (MalformedQueryException | QueryEvaluationException e) {
-                log.error("Error querying objects; {}", e);
-                throw new Exception(e);
-            }
-
-        } catch (RepositoryException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            metadata = persistenceService.getMetadata();
+//
+//            try {
+//                result.put("type", "video");
+//                result.put("part_uri", queryString(queryMediaPartURI, metadata, uri));
+//                result.put("faces", queryMapList(timedFaces, metadata, uri));
+//                result.put("shotImages", queryMapList(shotImages, metadata, uri));
+//                //result.put("shots", queryMapList(shots, metadata, uri));
+//                result.put("timedText", queryMapList(timedText, metadata, uri));
+//            } catch (MalformedQueryException | QueryEvaluationException e) {
+//                log.error("Error querying objects; {}", e);
+//                throw new Exception(e);
+//            }
+//
+//        } catch (RepositoryException e) {
+//            e.printStackTrace();
+//        }
 
         return result;
     }
@@ -575,59 +564,59 @@ public class DemoWebService {
             "                ?pcp dct:type \"text/vnd.fhg-ccv-facedetection+xml\"}\n" +
             "} ORDER BY mm:getStart(?timestamp)";
 
-    private String queryString(String query, Metadata metadata, String uri) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
-        query = String.format(query, uri);
-
-        final TupleQueryResult result = metadata.query(query);
-
-        try {
-            if (result.hasNext()) {
-                BindingSet bindings = result.next();
-                return bindings.getBinding(result.getBindingNames().get(0)).getValue().stringValue();
-            }
-        } finally {
-            result.close();
-        }
+    private String queryString(String uri) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
+//        query = String.format(query, uri);
+//
+//        final TupleQueryResult result = metadata.query(query);
+//
+//        try {
+//            if (result.hasNext()) {
+//                BindingSet bindings = result.next();
+//                return bindings.getBinding(result.getBindingNames().get(0)).getValue().stringValue();
+//            }
+//        } finally {
+//            result.close();
+//        }
         return null;
     }
 
-    private List queryMapList(String query, Metadata metadata, String uri) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
-        query = String.format(query, uri);
-
+    private List queryMapList(String uri) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
+//        query = String.format(query, uri);
+//
         List res = new ArrayList<>();
-        final TupleQueryResult result = metadata.query(query);
-
-        try {
-            while (result.hasNext()) {
-                HashMap map = new HashMap<>();
-                BindingSet bindings = result.next();
-                for (String name : result.getBindingNames()) {
-                    Value v = bindings.getBinding(name).getValue();
-                    map.put(name, v.stringValue());
-                }
-                res.add(map);
-            }
-        } finally {
-            result.close();
-        }
+//        final TupleQueryResult result = metadata.query(query);
+//
+//        try {
+//            while (result.hasNext()) {
+//                HashMap map = new HashMap<>();
+//                BindingSet bindings = result.next();
+//                for (String name : result.getBindingNames()) {
+//                    Value v = bindings.getBinding(name).getValue();
+//                    map.put(name, v.stringValue());
+//                }
+//                res.add(map);
+//            }
+//        } finally {
+//            result.close();
+//        }
         return res;
     }
 
-    private List queryList(String query, Metadata metadata, String uri) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
-        query = String.format(query, uri);
+    private List queryList(String uri) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
+//        query = String.format(query, uri);
 
         List res = new ArrayList<>();
-        final TupleQueryResult result = metadata.query(query);
-
-        try {
-            while (result.hasNext()) {
-                BindingSet bindings = result.next();
-                Value v = bindings.getBinding(result.getBindingNames().get(0)).getValue();
-                res.add(v.stringValue());
-            }
-        } finally {
-            result.close();
-        }
+//        final TupleQueryResult result = metadata.query(query);
+//
+//        try {
+//            while (result.hasNext()) {
+//                BindingSet bindings = result.next();
+//                Value v = bindings.getBinding(result.getBindingNames().get(0)).getValue();
+//                res.add(v.stringValue());
+//            }
+//        } finally {
+//            result.close();
+//        }
         return res;
     }
 }

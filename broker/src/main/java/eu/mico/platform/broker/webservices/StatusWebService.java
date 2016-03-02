@@ -19,6 +19,7 @@ import eu.mico.platform.broker.model.ServiceDescriptor;
 import eu.mico.platform.broker.model.Transition;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Resource;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileSystemException;
@@ -29,11 +30,14 @@ import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.anno4j.model.Target;
+
 import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+
 import java.awt.Dimension;
 import java.io.IOException;
 import java.io.InputStream;
@@ -158,11 +162,11 @@ public class StatusWebService {
     private Map<String,Object> wrapContentStatus(ItemState state, Part part) throws RepositoryException {
         Map<String,Object> sprops = new HashMap<>();
         sprops.put("uri", part.getURI().stringValue());
-        sprops.put("title", part.getProperty(DCTERMS.TITLE));
-        sprops.put("type",  part.getType());
-        sprops.put("creator",  stringValue(part.getRelation(DCTERMS.CREATOR)));
-        sprops.put("created",  part.getProperty(DCTERMS.CREATED));
-        sprops.put("source",  stringValue(part.getRelation(DCTERMS.SOURCE)));
+        sprops.put("title", part.getRDFObject().getResourceAsString());
+        sprops.put("type",  part.getSemanticType() + "/" + part.getSyntacticalType());
+        sprops.put("creator",  part.getSerializedBy());
+        sprops.put("created",  part.getSerializedAt());
+        sprops.put("source",  stringValue(part.getInputs().toArray(new Resource[0])[0].getURI()));
 
         if(state != null) {
             if(state.getStates().get(part.getURI()) != null) {
@@ -204,7 +208,7 @@ public class StatusWebService {
             throw new NotFoundException("Part Part with URI " + partUri + " not found in system");
         }
         try {
-            final InputStream is = part.getInputStream();
+            final InputStream is = part.getAsset().getInputStream();
             if(is != null) {
                 StreamingOutput entity = new StreamingOutput() {
                     @Override
@@ -213,7 +217,7 @@ public class StatusWebService {
                     }
                 };
 
-                return Response.ok(entity, part.getType()).build();
+                return Response.ok(entity, part.getAsset().getFormat()).build();
             } else {
                 throw new NotFoundException("Part Part with URI " + partUri + " has no binary content");
             }
