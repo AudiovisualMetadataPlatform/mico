@@ -3,13 +3,11 @@ package eu.mico.platform.zooniverse;
 import com.google.common.io.Resources;
 import com.jayway.restassured.RestAssured;
 import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.model.ContentItemState;
+import eu.mico.platform.broker.model.ItemState;
 import eu.mico.platform.broker.model.ServiceGraph;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
-import eu.mico.platform.persistence.model.Metadata;
+import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.zooniverse.testutils.TestServer;
 import org.hamcrest.Matchers;
@@ -22,7 +20,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.*;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -59,8 +58,7 @@ public class TextAnalysisWebServiceTest {
         //init webservice with mocked environment
         TextAnalysisWebService textAnalysisWebService = new TextAnalysisWebService(
                 mockEvenmanager(),
-                mockBroker(),
-                "http://mico-platform:8080/marmotta");
+                mockBroker());
 
         //init in memory repository
         repository = initializeRepository();
@@ -89,20 +87,20 @@ public class TextAnalysisWebServiceTest {
                 then().
                 assertThat()
                 .body("id", Matchers.equalTo("d9347936-30ac-42f7-a0d5-4a2bfd908256"))
-                    .body("status", Matchers.equalTo("submitted"));
+                .body("status", Matchers.equalTo("submitted"));
 
         //test content parts
         Assert.assertNotNull(part);
-        Assert.assertEquals("This is a text", new String(((ByteArrayOutputStream)part.getAsset().getOutputStream()).toByteArray()));
+        Assert.assertEquals("This is a text", new String(((ByteArrayOutputStream) part.getAsset().getOutputStream()).toByteArray()));
     }
 
     @Test
     public void testGetResult() {
-        String contentItemId = "d9347936-30ac-42f7-a0d5-4a2bfd908256";
+        String itemID = "d9347936-30ac-42f7-a0d5-4a2bfd908256";
 
         com.jayway.restassured.RestAssured.when().
-                get(server.getUrl() + "zooniverse/textanalysis/" + contentItemId).
-        then().
+                get(server.getUrl() + "zooniverse/textanalysis/" + itemID).
+                then().
                 assertThat()
                 .body("id", Matchers.equalTo("d9347936-30ac-42f7-a0d5-4a2bfd908256"))
                 .body("sentiment", Matchers.equalTo(-0.26978558F))
@@ -114,7 +112,7 @@ public class TextAnalysisWebServiceTest {
     private static MICOBroker mockBroker() {
         MICOBroker broker = Mockito.mock(MICOBroker.class);
         Map states = Mockito.mock(Map.class);
-        ContentItemState state = Mockito.mock(ContentItemState.class);
+        ItemState state = Mockito.mock(ItemState.class);
         ServiceGraph serviceGraph = Mockito.mock(ServiceGraph.class);
         Mockito.when(serviceGraph.getDescriptorURIs()).thenReturn(Collections.<URI>singleton(new URIImpl("http://www.mico-project.eu/services/ner-text")));
         Mockito.when(state.isFinalState()).thenReturn(true);
@@ -133,60 +131,40 @@ public class TextAnalysisWebServiceTest {
 
     private static PersistenceService mockPersistenceService() throws RepositoryException, IOException, QueryEvaluationException, MalformedQueryException {
         PersistenceService persistenceService = Mockito.mock(PersistenceService.class);
-        ContentItem contentItem = mockCreateContentItem();
-        Metadata metadata = mockMetadata();
-        Mockito.when(persistenceService.createContentItem()).thenReturn(contentItem);
-        Mockito.when(persistenceService.getContentItem(org.mockito.Matchers.<URI>any())).thenAnswer(new Answer<ContentItem>() {
+        Item item = mockCreateItem();
+        Mockito.when(persistenceService.createItem()).thenReturn(item);
+        Mockito.when(persistenceService.getItem(org.mockito.Matchers.<URI>any())).thenAnswer(new Answer<Item>() {
             @Override
-            public ContentItem answer(InvocationOnMock invocationOnMock) throws Throwable {
+            public Item answer(InvocationOnMock invocationOnMock) throws Throwable {
                 URI uri = (URI) invocationOnMock.getArguments()[0];
-                return mockContentItem(uri);
+                return mockItem(uri);
             }
         });
-        Mockito.when(persistenceService.getMetadata()).thenReturn(metadata);
         return persistenceService;
     }
 
-    private static Metadata mockMetadata() throws QueryEvaluationException, MalformedQueryException, RepositoryException {
-        Metadata metadata = Mockito.mock(Metadata.class);
-        Mockito.when(metadata.query(org.mockito.Matchers.anyString())).thenAnswer(new Answer<TupleQueryResult>() {
-            @Override
-            public TupleQueryResult answer(InvocationOnMock invocation) throws Throwable {
-                String query = (String) invocation.getArguments()[0];
 
-                RepositoryConnection connection = repository.getConnection();
-                TupleQuery q = connection.prepareTupleQuery(QueryLanguage.SPARQL, query);
-                TupleQueryResult result = q.evaluate();
-
-                return result;
-            }
-        });
-        return metadata;
-    }
-
-    private static ContentItem mockCreateContentItem() throws RepositoryException, IOException {
+    private static Item mockCreateItem() throws RepositoryException, IOException {
         URI uri = Mockito.mock(URI.class);
-        Mockito.when(uri.stringValue()).thenReturn("http://localhost/contentitem/d9347936-30ac-42f7-a0d5-4a2bfd908256");
-        ContentItem contentItem = Mockito.mock(ContentItem.class);
-        Content content = mockContent();
-        Mockito.when(contentItem.createContentPart()).thenReturn(content);
-        Mockito.when(contentItem.getID()).thenReturn("d9347936-30ac-42f7-a0d5-4a2bfd908256");
-        Mockito.when(contentItem.getURI()).thenReturn(uri);
-        return contentItem;
+        Mockito.when(uri.stringValue()).thenReturn("http://localhost/item/d9347936-30ac-42f7-a0d5-4a2bfd908256");
+        Item item = Mockito.mock(Item.class);
+        Part part = mockContent();
+        Mockito.when(item.createPart(new URIImpl("http://mico-project.eu/part-mock"))).thenReturn(part);
+        Mockito.when(item.getURI()).thenReturn(uri);
+        return item;
     }
 
-    private static ContentItem mockContentItem(URI uri) throws RepositoryException, IOException {
-        ContentItem contentItem = Mockito.mock(ContentItem.class);
-        Mockito.when(contentItem.getID()).thenReturn("d9347936-30ac-42f7-a0d5-4a2bfd908256");
-        Mockito.when(contentItem.getURI()).thenReturn(uri);
-        return contentItem;
+    private static Item mockItem(URI uri) throws RepositoryException, IOException {
+        Item item = Mockito.mock(Item.class);
+        Mockito.when(item.getURI()).thenReturn(uri);
+        return item;
     }
 
-    private static Content mockContent() throws IOException {
-        content = Mockito.mock(Content.class);
+    private static Part mockContent() throws IOException, RepositoryException {
+        part = Mockito.mock(Part.class);
         OutputStream os = new ByteArrayOutputStream();
-        Mockito.when(content.getOutputStream()).thenReturn(os);
-        return content;
+        Mockito.when(part.getAsset().getOutputStream()).thenReturn(os);
+        return part;
     }
 
     private static Repository initializeRepository() throws RepositoryException, IOException, RDFParseException {

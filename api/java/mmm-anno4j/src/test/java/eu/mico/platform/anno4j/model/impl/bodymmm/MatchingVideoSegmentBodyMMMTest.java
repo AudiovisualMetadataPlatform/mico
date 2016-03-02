@@ -84,7 +84,7 @@ public class MatchingVideoSegmentBodyMMMTest {
         // Query for non existing Items
         List<ItemMMM> result = queryService.execute(ItemMMM.class);
 
-        // Test does not work because Items have been stored somehow already
+        // Test does not work because Items have been auto-persisted by Alibaba, as they were used as targets of setters
 //        assertEquals(0, result.size());
 
         anno4j.persist(item2);

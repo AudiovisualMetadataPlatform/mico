@@ -174,4 +174,60 @@ public class MMM {
 
     public final static String MEDIA_INFO_BODY = NS + "MediaInfoBody";
 
+    /*
+    ExtractorMMM Model
+     */
+
+    public final static String EXTRACTOR = NS + "Extractor";
+
+    public final static String MODE = NS + "Mode";
+
+    public final static String IO_DATA = NS + "IOData";
+
+    public final static String INPUT = NS + "Input";
+
+    public final static String OUTPUT = NS + "Output";
+
+    public final static String SEMANTIC_TYPE = NS + "SemanticType";
+
+    public final static String SYNTACTIC_TYPE = NS + "SyntacticType";
+
+    public final static String MIME_TYPE = NS + "MimeType";
+
+    public final static String HAS_MIME_TYPE = NS + "hasMimeType";
+
+    public final static String HAS_SYNTACTIC_TYPE = NS + "hasSyntacticType";
+
+    public final static String HAS_SEMANTIC_DATA_TYPE = NS + "hasSemanticType";
+
+    public final static String HAS_MODE = NS + "hasMode";
+
+    public final static String HAS_INPUT_DATA = NS + "hasInputData";
+
+    public final static String HAS_OUTPUT_DATA = NS + "hasOutputData";
+
+    public final static String HAS_NAME = NS + "hasName";
+
+    public final static String HAS_VERSION = NS + "hasVersion";
+
+    public final static String HAS_STRING_ID = NS + "hasStringId";
+
+    public final static String HAS_CONFIG_SCHEMA_URI = NS + "hasConfigSchemaURI";
+
+    public final static String HAS_OUTPUT_SCHEMA_URI = NS + "hasOutputSchemaURI";
+
+    public final static String HAS_DESCRIPTION = NS + "hasDescription";
+
+    public final static String HAS_INDEX = NS + "hasIndex";
+
+    public final static String HAS_CMD_LINE_SWITCH = NS + "hasCmdLineSwitch";
+
+    public final static String HAS_SEMANTIC_TYPE_URI = NS + "hasSemanticTypeURI";
+
+    public final static String HAS_SYNTACTIC_TYPE_URI = NS + "hasSyntacticTypeURI";
+
+    public final static String HAS_FORMAT_CONVERSION_SCHEMA_URI = NS + "hasFormatConversionSchemaURI";
+
+    public final static String HAS_ANNOTATION_CONVERSION_SCHEMA_URI = NS + "hasAnnotationConversionSchemaURI";
+
 }
