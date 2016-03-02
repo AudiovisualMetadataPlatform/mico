@@ -19,10 +19,10 @@
 
     <link rel="stylesheet" href="webjars/bootstrap/3.1.1/css/bootstrap.css"/>
 
-    <script src="webjars/angular-file-upload/1.6.5/angular-file-upload-shim.min.js"></script>
-    <script src="webjars/angularjs/1.2.15/angular.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/2.2.2/angular-file-upload-shim.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.15/angular.js"></script>
     <script src="webjars/angular-ui-bootstrap/0.12.1/ui-bootstrap-tpls.js"></script>
-    <script src="webjars/angular-file-upload/1.6.5/angular-file-upload.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/2.2.2/angular-file-upload.js"></script>
     <script src="js/controllers.js"></script>
 
     <!-- fix Bootstrap CSS for AngularJS -->
@@ -73,17 +73,30 @@
     </ul>
 </div>
 
-<div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;" ng-show="!itemUri">
-    <button ng-click="createItem()">Create New</button>
+
+<div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;" ng-hide="itemUri">
+    <h3>Item</h3>
+    <p>
+        Create a Item with attached Asset. The type for the asset must be given and correspond to the type names (requires, provides) used by the analysis services registered with the broker. Typically, this means a MIME type like image/jpeg, image/png or text/plain.
+    </p>
+
+    <table>
+        <tr><th>File</th><th>MIME Type</th><th></th></tr>
+        <tr><td><input id="itemAsset" type="file" ng-file-select="itemAssetfiles = $files; itemAssetType = $files[0].type; itemAssetName = $files[0].name"></td><td><input type="text" id="itemAssetType" name="type" value="{{itemAssetType}}"/></td> <td><button ng-click="createItem()">Create Item</button></td></tr>
+    </table>
 </div>
 
-
-
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;" ng-show="itemUri">
-    <h3>Metadata</h3>
+    <h3>Item Created</h3>
 
     <table>
         <tr><th>URI</th><td>{{itemUri}}</td></tr>
+        <tr><th>Asset Name</th><td>{{itemAssetName}}</td></tr>
+        <tr><th>Asset Type</th><td>{{itemAssetType}}</td></tr>
+        <tr><th>Asset Location</th><td>{{assetLocation}}</td></tr>
+        <tr><th>Created</th><td>{{itemCreated}}</td></tr>
+        <tr><th>Actions</th><td><a href="/marmotta/resource?uri={{itemUri}}">Metadata</a> - <a href="inject/download?&itemUri={{itemUri}}">Download</a></td></tr>
+
         <tr>
             <th>State</th>
             <td>
@@ -94,41 +107,10 @@
 </div>
 
 
-<div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px; border: 1px solid darkgray;" ng-repeat="part in itemData.parts">
-    <h3>Part {{$index}}</h3>
-
-    <table>
-        <tr><th>URI</th><td><a href="/marmotta/resource?uri={{part.uri}}">{{part.uri}}</a></td></tr>
-        <tr><th>Source</th><td>{{part.source}}</td></tr>
-        <tr><th>Type</th><td>{{part.type}}</td></tr>
-        <tr><th>Created</th><td>{{part.created}}</td></tr>
-        <tr><th>Creator</th><td>{{part.creator}}</td></tr>
-        <tr><th>Actions</th><td><a href="/marmotta/resource?uri={{part.uri}}">Metadata</a> - <a href="inject/download?partUri={{part.uri}}&itemUri={{itemUri}}">Download</a></td></tr>
-    </table>
-</div>
-
-
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;" ng-show="itemUri && state != 'Submitted'">
-    <h3>Add Part</h3>
-
+    <h3>Submit Item</h3>
     <p>
-        Add one or more parts to the item before starting analysis. The type for each part must be given and correspond to the type names
-        (requires, provides) used by the analysis services registered with the broker. Typically, this means a MIME type like image/jpeg, image/png or text/plain.
-    </p>
-
-
-    <table>
-        <tr><th>File</th><th>MIME Type</th><th></th></tr>
-        <tr><td><input id="file" type="file" ng-file-select="onFileSelect($files)"></td><td><input type="text" id="type" name="type" value="{{type}}"/></td> <td><button ng-click="addPart()">Add Part</button></td></tr>
-    </table>
-</div>
-
-
-<div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;" ng-show="itemData.parts.length > 0  && state != 'Submitted'">
-    <h3>Submit Part</h3>
-
-    <p>
-        Clicking on "Submit" will trigger analysis for the item and its parts.
+        Clicking on "Submit" will trigger analysis for the item and its asset.
     </p>
 
     <button ng-click="submitItem()">Submit</button>

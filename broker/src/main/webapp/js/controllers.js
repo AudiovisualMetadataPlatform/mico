@@ -65,66 +65,34 @@ brokerApp.controller("ShowItemCtrl", function($scope,$http) {
 brokerApp.controller("InjectItemCtrl", function($scope,$http,$upload) {
 
     $scope.itemUri;
-
-    $scope.itemData;
-
+    $scope.itemAssetfiles;
+    $scope.itemAssetType;
+    $scope.itemAssetName;
     $scope.state = "Created";
-
-    $scope.files;
-
-    $scope.type="";
-
-    $scope.updateItem = function() {
-        if($scope.itemUri) {
-            $http.get("inject/items?parts=true&uri=" + $scope.itemUri).success(function (data) {
-                $scope.itemData = data[0];
-            });
-        }
-
-        $scope.type="";
-        $scope.files=[];
-        document.getElementById("file").value = '';
-    };
+    $scope.itemAssetLocation
+    $scope.itemCreated
 
     $scope.createItem = function() {
-        $http.post("inject/create").success(function(data) {
-            $scope.itemUri = data["uri"];
-        });
-    };
+        var file = $scope.itemAssetfiles[0];
+        var fileReader = new FileReader();
+        fileReader.readAsArrayBuffer(file);
 
-    $scope.onFileSelect = function($files) {
-        $scope.files = $files;
-        if($files.length > 0) {
-            $scope.type = $files[0].type;
+        fileReader.onload = function(e) {
+            $upload.http({
+                url: "inject/create" + "&type=" + $scope.type + "&name=" + file.name,
+                method: 'POST',
+                data: e.target.result
+            }).success(function (data) {
+                $scope.itemUri = data["itemUri"];
+                $scope.assetLocation = data["assetLocation"];
+                $scope.itemCreated = data["created"];
+            });
         }
     };
 
-    $scope.addPart = function(){
-        for (var i = 0; i < $scope.files.length; i++) {
-            var file = $scope.files[i];
-            var fileReader = new FileReader();
-            fileReader.readAsArrayBuffer(file);
-            fileReader.onload = function(e) {
-                $upload.http({
-                    url: "inject/add?ci=" + $scope.itemUri + "&type=" + $scope.type + "&name=" + file.name,
-                    method: 'POST',
-                    data: e.target.result
-                }).success(function (data) {
-                    $scope.updateItem();
-                });
-            }
-        }
-
-    };
-
-    $scope.submitContentItem = function() {
+    $scope.submitItem = function() {
         $http.post("inject/submit?ci=" + $scope.itemUri).success(function() {
             $scope.state = "Submitted";
         });
     };
-
-    $scope.$watch('itemUri', function(newValue, oldValue) {
-        $scope.updateItem();
-    });
-
 });

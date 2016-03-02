@@ -63,7 +63,7 @@ public class InjectionWebService {
     @POST
     @Path("/create")
     @Produces("application/json")
-    public Response createItem(@QueryParam("type") String type, @Context HttpServletRequest request) throws RepositoryException, IOException {
+    public Response createItem(@QueryParam("type") String type, @QueryParam("name") String fileName, @Context HttpServletRequest request) throws RepositoryException, IOException {
         PersistenceService ps = eventManager.getPersistenceService();
 
         Item item = ps.createItem();
@@ -76,60 +76,10 @@ public class InjectionWebService {
         int bytes = IOUtils.copy(request.getInputStream(), out);
         out.close();
 
-        log.info("item {}: uploaded {} bytes", item.getURI(), bytes);
+        log.info("item created {}: uploaded {} bytes", item.getURI(), bytes);
 
-        return Response.ok(ImmutableMap.of("uri", item.getURI().stringValue())).build();
-
+        return Response.ok(ImmutableMap.of("itemUri", item.getURI().stringValue(), "assetLocation", item.getAsset().getLocation().stringValue(), "created", item.getSerializedAt())).build();
     }
-    /**
-     * Add a new content part to the content item using the request body as content. Return the URI of the new part in
-     * the "uri" field of the JSON response.
-     *
-     * @return
-     */
-    @POST
-    @Path("/add")
-    @Produces("application/json")
-    public Response addContentPart(@QueryParam("ci")String contentItem, @QueryParam("type") String type, @QueryParam("name") String fileName, @Context HttpServletRequest request) throws RepositoryException, IOException {
-        PersistenceService ps = eventManager.getPersistenceService();
-
-        Item item = ps.getItem(new URIImpl(contentItem));
-
-        Asset asset = item.getAsset();
-        item.setSyntacticalType(type);
-        asset.setFormat(type);
-        OutputStream out = asset.getOutputStream();
-        int bytes = IOUtils.copy(request.getInputStream(), out);
-        out.close();
-
-        log.info("item {}: uploaded {} bytes", item.getURI(), bytes);
-        if (item != null) {
-            eventManager.injectItem(item);
-        }
-        return Response.ok(ImmutableMap.of("uri", item.getURI().stringValue())).build();
-    }
-
-    /**
-     * Submit the item for analysis by notifying the broker about its parts.
-     *
-     * @return
-     */
-    @POST
-    @Path("/submit")
-    public Response submitItem(@QueryParam("item") String itemString) throws RepositoryException, IOException {
-
-        PersistenceService ps = eventManager.getPersistenceService();
-        Item item = ps.getItem(new URIImpl(itemString));
-
-        if (item != null) {
-            eventManager.injectItem(item);
-        }
-
-        log.info("submitted item {}", item.getURI());
-
-        return Response.ok().build();
-    }
-
 
     @GET
     @Path("/items")
@@ -150,6 +100,58 @@ public class InjectionWebService {
         }
         return result;
     }
+
+    /**
+     * Submit the item for analysis by notifying the broker about its parts.
+     *
+     * @return
+     */
+    @POST
+    @Path("/submit")
+    public Response submitItem(@QueryParam("item") String itemURI) throws RepositoryException, IOException {
+
+        PersistenceService ps = eventManager.getPersistenceService();
+        Item item = ps.getItem(new URIImpl(itemURI));
+
+        if (item != null) {
+            eventManager.injectItem(item);
+        }
+
+        log.info("submitted item {}", item.getURI());
+
+        return Response.ok().build();
+    }
+
+
+    /**
+     * Add a new content part to the item using the request body as content. Return the URI of the new part in
+     * the "uri" field of the JSON response.
+     *
+     * @return
+     */
+    @POST
+    @Path("/add")
+    @Produces("application/json")
+    public Response addPart(@QueryParam("itemUri")String itemURI, @QueryParam("type") String type, @QueryParam("name") String fileName, @Context HttpServletRequest request) throws RepositoryException, IOException {
+        PersistenceService ps = eventManager.getPersistenceService();
+
+        Item item = ps.getItem(new URIImpl(itemURI));
+
+        Part part = item.createPart(extratorID);
+        part.setSyntacticalType(type);
+
+        Asset partAsset = part.getAsset();
+        partAsset.setFormat(type);
+
+        OutputStream out = partAsset.getOutputStream();
+        int bytes = IOUtils.copy(request.getInputStream(), out);
+        out.close();
+
+        log.info("item {}, part created {} : uploaded {} bytes", item.getURI(), part.getURI(), bytes);
+
+        return Response.ok(ImmutableMap.of("itemURI", item.getURI().stringValue(),"partURI", part.getURI().stringValue(), "assetLocation", partAsset.getLocation().stringValue(), "created", part.getSerializedAt())).build();
+    }
+
 
     private Map<String, Object> wrapItem(Item item, boolean showParts) throws RepositoryException {
         Map<String, Object> sprops = new HashMap<>();
@@ -187,7 +189,7 @@ public class InjectionWebService {
 
     @GET
     @Path("/download")
-    public Response downloadPart(@QueryParam("itemUri") String itemUri, @QueryParam("resourceUri") String resourceUri) throws RepositoryException {
+    public Response downloadPart(@QueryParam("itemUri") String itemUri, @QueryParam("partUri") String partUri) throws RepositoryException {
         PersistenceService ps = eventManager.getPersistenceService();
 
         final Item item = ps.getItem(new URIImpl(itemUri));
@@ -195,9 +197,16 @@ public class InjectionWebService {
         if (item == null) {
             throw new NotFoundException("Item with URI " + itemUri + " not found in system");
         }
+
+        // return item asset
+        if(partUri == null){
+
+        } else {
+            // return part asset
+        }
         StreamingOutput entity;
         String type;
-        if (itemUri.equals(resourceUri)) {
+        if (partUri == null) {
             entity = new StreamingOutput() {
                 @Override
                 public void write(OutputStream output) throws IOException, WebApplicationException {
@@ -211,9 +220,9 @@ public class InjectionWebService {
 
             type = item.getAsset().getFormat();
         } else {
-            final Part part = item.getPart(new URIImpl(resourceUri));
+            final Part part = item.getPart(new URIImpl(partUri));
             if (part == null) {
-                throw new NotFoundException("Part with URI " + resourceUri + " not found in system");
+                throw new NotFoundException("Part with URI " + partUri + " not found in system");
             }
 
             entity = new StreamingOutput() {
