@@ -88,6 +88,7 @@ public class InjectionWebService {
         PersistenceService ps = eventManager.getPersistenceService();
 
         List<Map<String, Object>> result = new ArrayList<>();
+        
         if (itemUri == null) {
             // retrieve a list of all items
             for (Item item : ps.getItems()) {
@@ -198,12 +199,6 @@ public class InjectionWebService {
             throw new NotFoundException("Item with URI " + itemUri + " not found in system");
         }
 
-        // return item asset
-        if(partUri == null){
-
-        } else {
-            // return part asset
-        }
         StreamingOutput entity;
         String type;
         if (partUri == null) {
