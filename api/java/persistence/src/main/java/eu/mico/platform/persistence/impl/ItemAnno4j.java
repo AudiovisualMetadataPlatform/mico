@@ -52,7 +52,7 @@ public class ItemAnno4j implements Item {
 
             this.itemMMM.addPart(partMMM);
 
-            log.info("Created Part with id {} in the context graph {} - Creator {}", partMMM.getResourceAsString(), this.getURI(), extractorID);
+            log.trace("Created Part with id {} in the context graph {} - Creator {}", partMMM.getResourceAsString(), this.getURI(), extractorID);
 
             return new PartAnno4j(partMMM, this, persistenceService);
         } catch (IllegalAccessException e) {
@@ -126,7 +126,7 @@ public class ItemAnno4j implements Item {
 
                 this.itemMMM.setAsset(assetMMM);
 
-                log.info("No Asset available for Item {} - Created new Asset with id {} and location {}", this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
+                log.trace("No Asset available for Item {} - Created new Asset with id {} and location {}", this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
             } catch (IllegalAccessException e) {
                 throw new RepositoryException("Illegal access", e);
             } catch (InstantiationException e) {

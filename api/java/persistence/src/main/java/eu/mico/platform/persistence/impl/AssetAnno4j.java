@@ -43,7 +43,7 @@ public class AssetAnno4j implements Asset {
     @Override
     public OutputStream getOutputStream() throws IOException {
         try {
-            log.debug("Open Outputstream for Asset with id {} and location {}", assetMMM.getResourceAsString(), getLocation());
+            log.trace("Open Outputstream for Asset with id {} and location {}", assetMMM.getResourceAsString(), getLocation());
             return this.persistenceService.getStorage().getOutputStream(new java.net.URI(this.assetMMM.getLocation()));
         } catch (URISyntaxException e) {
             throw new IllegalStateException("Cant parse URI from " + this.assetMMM.getLocation(), e);
@@ -53,7 +53,7 @@ public class AssetAnno4j implements Asset {
     @Override
     public InputStream getInputStream() throws IOException {
         try {
-            log.debug("Open Inputstream for Asset with id {} and location {}", assetMMM.getResourceAsString(), getLocation());
+            log.trace("Open Inputstream for Asset with id {} and location {}", assetMMM.getResourceAsString(), getLocation());
             return this.persistenceService.getStorage().getInputStream(new java.net.URI(this.assetMMM.getLocation()));
         } catch (java.net.URISyntaxException e) {
             throw new IllegalStateException("Cant parse URI from " + this.assetMMM.getLocation(), e);

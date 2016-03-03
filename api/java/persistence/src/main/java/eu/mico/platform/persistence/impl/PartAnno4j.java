@@ -154,7 +154,7 @@ public class PartAnno4j implements Part {
 
                 this.partMMM.setAsset(assetMMM);
 
-                log.info("No Asset available for Part {} - Created new Asset with id {} and location {}", this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
+                log.trace("No Asset available for Part {} - Created new Asset with id {} and location {}", this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
             } catch (IllegalAccessException e) {
                 throw new RepositoryException("Illegal access", e);
             } catch (InstantiationException e) {

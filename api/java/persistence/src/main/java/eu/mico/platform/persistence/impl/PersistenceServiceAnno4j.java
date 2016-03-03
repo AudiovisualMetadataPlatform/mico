@@ -104,7 +104,7 @@ public class PersistenceServiceAnno4j implements PersistenceService {
             URIImpl context = new URIImpl(itemMMM.getResourceAsString());
             anno4j.persist(itemMMM, context);
 
-            log.info("Created Item with id {} in the corresponding context graph", itemMMM.getResourceAsString());
+            log.trace("Created Item with id {} in the corresponding context graph", itemMMM.getResourceAsString());
 
             return new ItemAnno4j(itemMMM, this);
         } catch (IllegalAccessException e) {
@@ -133,7 +133,7 @@ public class PersistenceServiceAnno4j implements PersistenceService {
     @Override
     public void deleteItem(URI id) throws RepositoryException {
         anno4j.clearContext(id);
-        log.info("Deleted item with id {} including all triples in the corresponding context graph", id.toString());
+        log.trace("Deleted item with id {} including all triples in the corresponding context graph", id.toString());
     }
 
     /**
