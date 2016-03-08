@@ -95,6 +95,7 @@ public class AnimalDetectionWebService {
                 .build();
         this.httpClient = HttpClientBuilder.create()
                 .setDefaultRequestConfig(requestConfig)
+                .setMaxConnPerRoute(10)
                 .setUserAgent("MicoPlatform (ZooniverseWebService)")
                 .build();
     }
