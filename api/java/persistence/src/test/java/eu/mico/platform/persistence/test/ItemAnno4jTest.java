@@ -87,4 +87,17 @@ public class ItemAnno4jTest {
 
         assertEquals(format, persistenceService.getItem(itemAnno4j.getURI()).getAsset().getFormat());
     }
+
+    @Test
+    public void hasAssetTest() throws RepositoryException {
+        final Item tmpItem = persistenceService.createItem();
+        assertFalse(tmpItem.hasAsset());
+
+        final Asset asset = tmpItem.getAsset();
+        assertNotNull(asset);
+        assertTrue(tmpItem.hasAsset());
+
+        final Item queriedItem = persistenceService.getItem(new URIImpl(tmpItem.getURI().toString()));
+        assertTrue(queriedItem.hasAsset());
+    }
 }

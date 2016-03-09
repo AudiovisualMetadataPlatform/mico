@@ -167,6 +167,6 @@ public class PartAnno4j implements Part {
 
     @Override
     public boolean hasAsset() throws RepositoryException {
-        return this.partMMM.getAsset() == null;
+        return this.partMMM.getAsset() != null;
     }
 }
