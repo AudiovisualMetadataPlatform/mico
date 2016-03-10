@@ -438,7 +438,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
                     Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.newBuilder()
                             .setItemUri(item.getURI().toString())
-                            .setPartUri(0, item.getURI().stringValue())
+                            .addPartUri(item.getURI().stringValue())
                             .setServiceId(t.getService().getUri().stringValue()).build();
 
                     getChannel().basicPublish("", t.getService().getQueueName(), ciProps, analysisEvent.toByteArray());
