@@ -1,6 +1,7 @@
 package eu.mico.platform.persistence.test;
 
 import com.google.common.collect.Iterables;
+import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.anno4j.model.PartMMM;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Asset;
@@ -47,6 +48,22 @@ public class ItemAnno4jTest {
         assertEquals(initialPart.getSemanticType(), retrievedPart.getSemanticType());
         assertEquals(initialPart.getSyntacticalType(), retrievedPart.getSyntacticalType());
         assertEquals(initialPart.getSerializedBy().getResource(), extractorID);
+    }
+
+    @Test
+    public void subGraphTest() throws RepositoryException {
+        int initialItemCount = persistenceService.getAnno4j().findAll(PartMMM.class).size();
+
+        final Item tmpItem1 = persistenceService.createItem();
+        final Item tmpItem2 = persistenceService.createItem();
+
+        tmpItem1.createPart(new URIImpl("http://test-extractor-id.org/1"));
+        tmpItem2.createPart(new URIImpl("http://test-extractor-id.org/2"));
+
+        assertEquals(initialItemCount + 2, persistenceService.getAnno4j().findAll(PartMMM.class).size());
+
+        assertEquals(1, persistenceService.getAnno4j().findAll(PartMMM.class, tmpItem1.getURI()).size());
+        assertEquals(1, persistenceService.getAnno4j().findAll(PartMMM.class, tmpItem2.getURI()).size());
     }
 
     @Test
