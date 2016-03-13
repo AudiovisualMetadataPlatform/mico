@@ -6,7 +6,6 @@
   <groupId>eu.mico.platform.camel</groupId>
   <artifactId>mico-rabbitmq-comp</artifactId>
   <packaging>bundle</packaging>
-  <version>1.0-SNAPSHOT</version>
 
   <name>Camel MicoRabbit Component</name>
   <url>http://www.mico-project.eu</url>
@@ -14,7 +13,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <mico-project.version>1.2.10</mico-project.version>
+    <mico-project.version>2.0.0-SNAPSHOT</mico-project.version>
     <camel.version>2.15.2</camel.version>
   </properties>
 
