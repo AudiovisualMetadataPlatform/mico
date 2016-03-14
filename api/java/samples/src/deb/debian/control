@@ -1,0 +1,10 @@
+Section: contrib/devel
+Priority: optional
+Maintainer: Marcel Sieland <marcel.sieland@idmt.fraunhofer.de>
+Homepage: http://mico-project.eu
+Package: [[name]]
+Architecture: all
+Version: [[version]]
+Depends: openjdk-8-jre-headless | java8-runtime-headless, jsvc, adduser, debconf, lsb-base (>= 3.2-13), mico-platform (>= 2.0)
+Description: Mico-extractor-wordcount
+ This package contains the mico wordcount sample extractor.
