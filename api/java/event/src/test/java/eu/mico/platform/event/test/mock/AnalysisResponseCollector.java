@@ -2,12 +2,9 @@ package eu.mico.platform.event.test.mock;
 
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.model.Event.ErrorCodes;
-import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
 
-import org.apache.commons.io.IOUtils;
 import org.openrdf.model.URI;
-import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +18,10 @@ public class AnalysisResponseCollector implements AnalysisResponse {
     private static Logger log = LoggerFactory.getLogger(AnalysisResponseCollector.class);
 
     private Map<URI, String> responses,progresses,errors;
+
+    private boolean finished = false;
+
+    private boolean hasError = false;
 
     public AnalysisResponseCollector() {
         responses = new HashMap<>();
@@ -57,6 +58,16 @@ public class AnalysisResponseCollector implements AnalysisResponse {
             throws IOException {
         // TODO Auto-generated method stub
         
+    }
+
+    @Override
+    public boolean isFinished() {
+        return finished;
+    }
+
+    @Override
+    public boolean isError() {
+        return hasError ;
     }
 
 }

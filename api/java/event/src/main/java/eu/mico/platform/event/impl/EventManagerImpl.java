@@ -16,9 +16,11 @@ package eu.mico.platform.event.impl;
 import com.google.common.base.Preconditions;
 import com.rabbitmq.client.*;
 import com.rabbitmq.client.AMQP.BasicProperties;
+
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
+import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.event.model.Event.AnalysisEvent;
 import eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry;
@@ -28,6 +30,7 @@ import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Resource;
+
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -300,6 +303,8 @@ public class EventManagerImpl implements EventManager {
     private class AnalysisConsumer extends DefaultConsumer {
 
         private final class AnalysisResponseImpl implements AnalysisResponse {
+            private Boolean finished = false;
+            private Boolean hasError = false;
             private final BasicProperties properties;
             private final BasicProperties replyProps;
             private long progressSentMS = 0;
@@ -324,6 +329,7 @@ public class EventManagerImpl implements EventManager {
                         .build();
 
                 getChannel().basicPublish("", properties.getReplyTo(), replyProps, analysisEvent.toByteArray());
+                finished=true;
             }
 
             @Override
@@ -371,6 +377,7 @@ public class EventManagerImpl implements EventManager {
 
             @Override
             public void sendError(Item item, ErrorCodes code, String msg, String desc) throws IOException {
+                hasError = true;
                 AnalysisEvent.Error responseEvent = AnalysisEvent.Error.newBuilder()
                         .setItemUri(item.getURI().stringValue())
                         .setServiceId(service.getServiceID().stringValue())
@@ -378,6 +385,16 @@ public class EventManagerImpl implements EventManager {
                         .setDescription(desc).build();
 
                 getChannel().basicPublish("", properties.getReplyTo(), replyProps, responseEvent.toByteArray());
+            }
+
+            @Override
+            public boolean isFinished() {
+                return finished;
+            }
+
+            @Override
+            public boolean isError() {
+                return hasError;
             }
         }
 
@@ -433,13 +450,33 @@ public class EventManagerImpl implements EventManager {
 
                 try {
                     service.call(response, item, resourceList, params);
-                } catch (Throwable t) {
-                    log.error("could not analyse item with URI {}, requeuing (message: {})", analysisRequest.getItemUri(), t.getMessage());
-                    log.debug("Exception:", t);
-                    response.sendError(item, ErrorCodes.UNEXPECTED_ERROR, t.getMessage(), "could not analyse item with URI " + item.getURI());
+                    if(!response.isFinished()){
+                        response.sendFinish(item);
+                   }
+                    getChannel().basicAck(envelope.getDeliveryTag(), false);
+                } catch (RuntimeException | AnalysisException e) {
+                    log.error(
+                            "could not analyse item with URI {}, requeuing (message: {})",
+                            analysisRequest.getItemUri(), e.getMessage());
+                    log.debug("Exception:", e);
+                    response.sendError(item, ErrorCodes.UNEXPECTED_ERROR,
+                            "could not analyse item with URI " + item.getURI(),
+                            e.getMessage());
+                    getChannel().basicNack(envelope.getDeliveryTag(), false,
+                            true);
+                } finally {
+                    if (!response.isFinished() && !response.isError()) {
+                        response.sendError(
+                                item,
+                                ErrorCodes.UNEXPECTED_ERROR,
+                                "Analyze process aborted",
+                                "Unable to finish analyse item "
+                                        + item.getURI());
+                        getChannel().basicNack(envelope.getDeliveryTag(),
+                                false, true);
+                    }
                 }
 
-                getChannel().basicAck(envelope.getDeliveryTag(), false);
             } catch (RepositoryException e) {
                 log.error("could not access content item with URI {}, requeuing (message: {})", analysisRequest.getItemUri(), e.getMessage());
                 log.debug("Exception:", e);
