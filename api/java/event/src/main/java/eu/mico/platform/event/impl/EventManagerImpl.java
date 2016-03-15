@@ -146,11 +146,11 @@ public class EventManagerImpl implements EventManager {
             svc.getValue().getChannel().close();
         }
 
-        if (registryChannel.isOpen()) {
+        if (registryChannel != null && registryChannel.isOpen()) {
             registryChannel.close();
         }
 
-        if (connection.isOpen()) {
+        if (connection != null && connection.isOpen()) {
             connection.close();
         }
     }
@@ -163,6 +163,11 @@ public class EventManagerImpl implements EventManager {
     @Override
     public void registerService(AnalysisService service) throws IOException {
         log.info("registering new service {} with message brokers ...", service.getServiceID());
+
+
+        if (service instanceof AnalysisServiceAnno4j) {
+            ((AnalysisServiceAnno4j) service).setAnno4j(persistenceService.getAnno4j());
+        }
 
         Channel chan = connection.createChannel();
 
@@ -421,13 +426,9 @@ public class EventManagerImpl implements EventManager {
                 final Item item = persistenceService.getItem(new URIImpl(analysisRequest.getItemUri()));
 
                 final List<Resource> resourceList = parseResourceList(analysisRequest.getPartUriList(), item);
-                final Map<String, String> params = new HashMap();
+                final Map<String, String> params = new HashMap<String, String>();
                 for (ParamEntry entry : analysisRequest.getParamsList()) {
                     params.put(entry.getKey(), entry.getValue());
-                }
-
-                if (service instanceof AnalysisServiceAnno4j) {
-                    ((AnalysisServiceAnno4j) service).setAnno4j(persistenceService.getAnno4j());
                 }
 
                 try {
