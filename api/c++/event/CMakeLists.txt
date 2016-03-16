@@ -31,7 +31,7 @@ endforeach()
 include_directories(
   ${MICO_EVENT_PB_OUT_DIR}
 )
-
+link_directories("${CMAKE_CURRENT_BINARY_DIR}/../../../anno4cpp/")
 add_library(mico_event SHARED 
   ${MICO_EVENT_PB_OUTPUT_SRC_FILES}
   EventManager.cpp

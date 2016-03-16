@@ -1,6 +1,6 @@
 find_package( Boost QUIET REQUIRED COMPONENTS program_options)
 include_directories(../rdf ../persistence ../event ${CMAKE_CURRENT_BINARY_DIR}/../event/protobuf_out ../daemon ../logging ${Boost_INCLUDE_DIRS})
-
+link_directories("${CMAKE_CURRENT_BINARY_DIR}/../../../anno4cpp/")
 add_executable(mico_ocr_service mico_ocr_service.cpp)
 target_link_libraries(mico_ocr_service mico_event mico_daemon ${TESSERACT_LIBRARIES} ${AMQPCPP_LIBRARIES} ${Boost_LIBRARIES})
 
