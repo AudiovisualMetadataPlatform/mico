@@ -5,17 +5,16 @@ import com.google.common.collect.ImmutableMap;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.zooniverse.model.TextAnalysisInput;
+import eu.mico.platform.reco.model.PioEventData;
+import eu.mico.platform.reco.model.RequestBody;
 import io.prediction.Event;
 import io.prediction.EventClient;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
@@ -53,8 +52,8 @@ public class RecoWebService {
     @Produces("text/plain")
     public Response getDockerStatus() {
 
-        String response = DockerUtils.getCmdOutput("ps aux");
-        String docker_cmd = DockerUtils.getDockerCmd(response);
+        String response = RecoUtils.getCmdOutput("ps aux");
+        String docker_cmd = RecoUtils.getDockerCmd(response);
 
         boolean dockerRunning = true;
         if (docker_cmd == null) {
@@ -73,7 +72,7 @@ public class RecoWebService {
     @Produces("text/plain")
     public Response getPioStatus() {
         try {
-            String response = DockerUtils.forwardGET(DockerConf.PIO_EVENT_API);
+            String response = RecoUtils.forwardGET(DockerConf.PIO_EVENT_API);
             return Response.ok(response).build();
 
         } catch (IOException e) {
@@ -88,7 +87,7 @@ public class RecoWebService {
 
         try {
             URI eventspath = new URI(DockerConf.PIO_EVENT_API.toString() + "/events.json?accessKey=micoaccesskey&limit=30000");
-            String response = DockerUtils.forwardGET(eventspath);
+            String response = RecoUtils.forwardGET(eventspath);
             return Response.ok(response).build();
 
         } catch (IOException | URISyntaxException e) {
@@ -108,7 +107,7 @@ public class RecoWebService {
         try {
             URI recopath = new URI(DockerConf.PIO_RECO_API.toString() + "/queries.json");
             String data = "{ \"user\": \"" + userId + "\", \"num\": "+ length + " }";
-            String response = DockerUtils.forwardPOST(recopath, data);
+            String response = RecoUtils.forwardPOST(recopath, data);
             return Response.ok(response).build();
 
         } catch (IOException | URISyntaxException e) {
@@ -117,39 +116,47 @@ public class RecoWebService {
     }
 
 
-    @GET
+    @POST
     @Path("/createentity")
     @Produces("text/plain")
-    public Response createEvent(TextAnalysisInput input) {
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createEvent(RequestBody input) {
 
-        //TODO!
+        PioEventData eventData;
+        try {
+            eventData = PioEventData.fromJSON(input.body);
+        } catch (IOException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
+        }
 
         Event pioEvent = new Event()
-                .event("buy")
+                .event(eventData.event)
                 .eventTime(DateTime.now())
-                .entityId("435345345")
-                .entityType("user")
-                .targetEntityId("TargetWebsite")
-                .targetEntityType("item");
+                .entityId(eventData.entityId)
+                .entityType(eventData.entityType)
+                .targetEntityId(eventData.targetEntityId)
+                .targetEntityType(eventData.targetEntityType);
 
 
-        System.out.println(pioEvent.toJsonString());
 
         EventClient ec = new EventClient("micoaccesskey", DockerConf.PIO_EVENT_API.toString());
-        String eventId = null;
+        String eventId;
         try {
             eventId = ec.createEvent(pioEvent);
         } catch (ExecutionException | InterruptedException | IOException e) {
-            return Response.ok(e.getMessage()).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(e.getMessage())
+                    .build();
         }
 
         ec.close();
 
 
         return Response.status(Response.Status.CREATED)
-                .entity(ImmutableMap.of("entity_id", eventId, "entity", pioEvent.toString(), "input", input.comment))
+                .entity(ImmutableMap.of("entity_id", eventId, "entity", pioEvent.toString(), "input", input.body))
                 .build();
-
     }
 
 }

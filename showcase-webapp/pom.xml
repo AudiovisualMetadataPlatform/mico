@@ -54,15 +54,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-        </dependency>
-
-
-
-
-
-        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>1.10.19</version>
@@ -158,11 +149,13 @@
 
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>
+                <version>2.2</version>
                 <artifactId>tomcat7-maven-plugin</artifactId>
                 <configuration>
                     <url>http://mico-platform:8080/manager/text</url>
                     <server>mico-deployment</server>
                     <update>true</update>
+                    <skip>false</skip>
                 </configuration>
             </plugin>
 

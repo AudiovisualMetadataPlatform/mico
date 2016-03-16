@@ -1,14 +1,7 @@
 package eu.mico.platform.reco;
 
-import io.prediction.EngineClient;
-import io.prediction.Event;
-import io.prediction.EventClient;
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +16,7 @@ import java.util.Map;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class DockerUtilsTest {
+public class RecoUtilsTest {
     @Test
     public void testGrepper() throws Exception {
         String psaux = "USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND\n" +
@@ -41,7 +34,7 @@ public class DockerUtilsTest {
                 "daemon     506  0.0  0.0  19024  1796 ?        Ss   18:43   0:00 /usr/sbin/atd -f\n";
 
 
-        Assert.assertNotNull(DockerUtils.getDockerCmd(psaux));
+        Assert.assertNotNull(RecoUtils.getDockerCmd(psaux));
     }
 
 }

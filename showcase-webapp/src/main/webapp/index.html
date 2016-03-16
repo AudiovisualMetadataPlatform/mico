@@ -53,7 +53,33 @@ GET
 
 <br />
 
-<a href="reco/createentity">Prediction IO - Create Entity</a>
+<script type="text/javascript">
+
+    function create_event() {
+
+        var requestBody = `{
+  "event" : "rate",
+  "entityType" : "user",
+  "entityId" : "1",
+  "targetEntityType" : "item",
+  "targetEntityId" : "1",
+  "properties" : {
+    "rating" : 4
+  }
+}`;
+
+        var request = new XMLHttpRequest();
+        request.onreadystatechange = function() {
+          document.getElementById("createEventResult").innerHTML = request.responseText;
+        };
+        request.open('POST', 'reco/createentity', true);
+        request.setRequestHeader('Content-Type', '*/*');
+        request.send(requestBody);
+    }
+
+</script>
+<a href="#" onclick="create_event()">Prediction IO - Create Entity</a>
+<div id="createEventResult" />
 
 </body>
 </html>
