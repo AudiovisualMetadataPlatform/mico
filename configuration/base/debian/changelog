@@ -1,3 +1,10 @@
+mico-base (1.2.0) unstable; urgency=medium
+
+  * Added config file for rsyslog (C++ daemon extractors)
+  * Added config file for logrotate (extractors)
+
+ -- Horst Stadler <horst.stadler@salzburgresearch.at>  Wed, 16 Mar 2016 16:23:18 +0100
+
 mico-base (1.1.0) unstable; urgency=medium
 
   * Using full functional user home directory instead of/tmp

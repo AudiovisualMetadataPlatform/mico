@@ -66,8 +66,33 @@ case "$1" in
 	chpasswd <<EOF
 $MICO_USER:$MICO_PASS
 EOF
-	db_stop
 
+	#Create rsyslog config for C++ daemon extractors
+	if [ -d /etc/rsyslog.d ] && [ ! -f /etc/rsyslog.d/mico-extractors.conf ]; then
+		cat >/etc/rsyslog.d/mico-extractors.conf <<EOF
+template (name="MicoExtractorFile" type="string" string="/var/log/%programname%/%programname%.log")
+:programname, startswith, "mico-extractor-" ?MicoExtractorFile
+& stop
+EOF
+		service rsyslog status 1>/dev/null && service rsyslog restart
+	fi
+
+	#Create logrotate for extractors
+	if [ -d /etc/logrotate.d ] && [ ! -f /etc/logrotate.d/mico-extractors ]; then
+		cat >/etc/logrotate.d/mico-extractors <<EOF
+/var/log/mico-extractor-*/*.log /var/log/mico-extractor-*/*.err {
+  copytruncate
+  daily
+  rotate 7
+  compress
+  missingok
+  notifempty
+  create 600 root root
+}
+EOF
+	fi
+
+	db_stop
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
