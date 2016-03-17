@@ -81,18 +81,18 @@ bool ptr_contains(T* ptr, T** arr, int len) {
 TEST_F(PersistenceServiceTest,Metadata) {
   PersistenceMetadata& m = svc->getMetadata();
   
-  m.update("INSERT DATA { <http://example.org/resource/R1> <http://example.org/property/P1> \"Value 1\" } ");
-  assertAskM("ASK { <http://example.org/resource/R1> <http://example.org/property/P1> \"Value 1\" }");
+  //m.update("INSERT DATA { <http://example.org/resource/R1> <http://example.org/property/P1> \"Value 1\" } ");
+  //assertAskM("ASK { <http://example.org/resource/R1> <http://example.org/property/P1> \"Value 1\" }");
 }
 
 
-TEST_F(PersistenceServiceTest,CreateDeleteContentItem) {
+//TEST_F(PersistenceServiceTest,CreateDeleteContentItem) {
   
-  ASSERT_EQ(svc->begin(), svc->end());
+//  ASSERT_EQ(svc->begin(), svc->end());
 
-  Item* item = svc->createItem();
+//  Item* item = svc->createItem();
 
-  ASSERT_NE(svc->begin(), svc->end());
+//  ASSERT_NE(svc->begin(), svc->end());
 
 //  map<string,string> params;
 //  params["g"] = base_url;
@@ -105,11 +105,11 @@ TEST_F(PersistenceServiceTest,CreateDeleteContentItem) {
 //  ASSERT_EQ(svc->begin(), svc->end());
 //  assertAskMN(sparql_format_query("ASK { GRAPH <$(g)> { <$(g)> <http://www.w3.org/ns/ldp#contains> <$(ci)> } }",params));
 
-  delete item;
-}
+//  delete item;
+//}
 
 
-TEST_F(PersistenceServiceTest,ListContentItems) {
+//TEST_F(PersistenceServiceTest,ListContentItems) {
   
 //  ASSERT_EQ(svc->begin(), svc->end());
 
@@ -126,4 +126,4 @@ TEST_F(PersistenceServiceTest,ListContentItems) {
 //  }
 
 
-}
+//}

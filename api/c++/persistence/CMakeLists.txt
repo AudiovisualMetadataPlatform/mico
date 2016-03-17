@@ -27,6 +27,8 @@ target_link_libraries(mico_persistence
 )
 
 set_target_properties(mico_persistence PROPERTIES VERSION "${MICO_PLATFORM_VERSION}" SOVERSION "${MICO_PLATFORM_SOVERSION}")
+set_target_properties(mico_persistence PROPERTIES COMPILE_DEFINITIONS "JNIPP_USE_TYPE_TRAITS")
+set_target_properties(mico_persistence PROPERTIES COMPILE_OPTIONS "-O3;-std=c++11;-ffunction-sections;-fdata-sections")
 
 
 install (TARGETS mico_persistence DESTINATION lib)

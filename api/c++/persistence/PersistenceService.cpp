@@ -70,26 +70,31 @@ namespace mico {
         void PersistenceService::initService()
         {
             std::string JavaClassPath="-Djava.class.path=";
-            JavaClassPath +=  std::string("");
+            JavaClassPath +=  std::string("/home/christian/mico/anno4cpp/java/anno4jdependencies/target/anno4jdependencies-2.0.0-SNAPSHOT.jar");
 
-            //TODO: add classpath mechanism for persitence service
 
-            JavaVMOption options[1];    // JVM invocation options
-            options[0].optionString = (char *) JavaClassPath.c_str();
+            if (!m_sEnv || ! m_sJvm) {
+                //TODO: add classpath mechanism for persitence service
 
-            JavaVMInitArgs vm_args;
+                JavaVMOption options[1];    // JVM invocation options
+                options[0].optionString = (char *) JavaClassPath.c_str();
 
-            vm_args.version = JNI_VERSION_1_6;              // minimum Java version
-            vm_args.nOptions = 1;
-            vm_args.options = options;
-            vm_args.ignoreUnrecognized = false;
+                JavaVMInitArgs vm_args;
 
-            jint rc = JNI_CreateJavaVM(&PersistenceService::m_sJvm, (void**)&PersistenceService::m_sEnv, &vm_args);
+                vm_args.version = JNI_VERSION_1_6;              // minimum Java version
+                vm_args.nOptions = 1;
+                vm_args.options = options;
+                vm_args.ignoreUnrecognized = false;
+
+                jint rc = JNI_CreateJavaVM(&PersistenceService::m_sJvm, (void**)&PersistenceService::m_sEnv, &vm_args);
+            }
 
             jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
+            jnipp::LocalRef<JavaLangString> jURIString = jnipp::String::create(marmottaServerUrl);
+
             jnipp::LocalRef<OrgOpenrdfIdGeneratorIDGenerator> gen =
-                EuMicoPlatformPersistenceImplIDGeneratorAnno4j::construct(jnipp::String::create(marmottaServerUrl));
+                EuMicoPlatformPersistenceImplIDGeneratorAnno4j::construct(jURIString);
 
             this->m_anno4j = ComGithubAnno4jAnno4j::construct(gen);
 
