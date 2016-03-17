@@ -21,7 +21,7 @@ namespace mico {
          * Return the parent content item.
          * @return
          */
-        virtual const Item& getItem() = 0;
+        virtual Item* getItem() = 0;
 
         virtual jnipp::LocalRef<ComGithubAnno4jModelBody> getBody() = 0;
 

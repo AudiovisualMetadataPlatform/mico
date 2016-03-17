@@ -9,11 +9,11 @@ namespace mico {
     class ItemAnno4cpp: public Item
     {
     private:
-      const PersistenceService& m_persistenceService;
+      PersistenceService& m_persistenceService;
       jnipp::LocalRef<EuMicoPlatformAnno4jModelItemMMM> m_itemMMM;
 
     public:
-      ItemAnno4cpp(jnipp::LocalRef<EuMicoPlatformAnno4jModelItemMMM> itemMMM, const PersistenceService& persistenceService)
+      ItemAnno4cpp(jnipp::LocalRef<EuMicoPlatformAnno4jModelItemMMM> itemMMM, PersistenceService& persistenceService)
         : m_persistenceService(persistenceService),
           m_itemMMM(itemMMM)
       {
@@ -23,12 +23,14 @@ namespace mico {
       Part* createPart(mico::rdf::model::URI extractorID);
 
       Part* getPart(mico::rdf::model::URI uri) {
-        //EuMicoPlatformAnno4jModelPartMMM = persistenceService.getAnno4j().findByID(PartMMM.class, uri);
-        //return new PartAnno4cpp(partMMM, this, persistenceService);
+        jnipp::LocalRef<JavaLangString> juri = JavaLangString::create( uri.stringValue() );
+        jnipp::LocalRef<EuMicoPlatformAnno4jModelPartMMM> partMMM = m_persistenceService.getAnno4j()->findByID(EuMicoPlatformAnno4jModelPartMMM::clazz(), juri);
+        return new PartAnno4cpp(partMMM, this, m_persistenceService);
       }
 
       mico::rdf::model::URI getURI() {
-        //return new URIImpl(itemMMM.getResourceAsString());
+        jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri = OrgOpenrdfModelImplURIImpl::construct( static_cast< jnipp::LocalRef<ComGithubAnno4jModelImplResourceObject> >(m_itemMMM)->getResourceAsString() );
+        return mico::rdf::model::URI( juri->stringValue()->std_str() );
       }
 
       jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> getRDFObject() {
@@ -64,6 +66,15 @@ namespace mico {
 
       std::string getSerializedAt() {
         return m_itemMMM->getSerializedAt()->std_str();
+      }
+
+      // helper function to get time stamp
+      std::string getTimestamp() {
+        time_t now;
+        time(&now);
+        char buf[sizeof "2016-03-17T09:42:09Z"];
+        strftime(buf, sizeof buf, "%FT%TZ", gmtime(&now));
+        return std::string(buf);
       }
     };
   }

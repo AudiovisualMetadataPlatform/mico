@@ -5,23 +5,27 @@ namespace mico {
 
     Part* ItemAnno4cpp::createPart(mico::rdf::model::URI extractorID)
     {
-      //try {
-        //EuMicoPlatformAnno4jModelPartMMM partMMM = persistenceService.getAnno4j().createObject(PartMMM.class, this.getURI());
-        //std::string dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
-        //partMMM.setSerializedAt(dateTime);
+      try {
+        jnipp::LocalRef<JavaLangString> jsuri = JavaLangString::create(this->getURI().stringValue());
+        jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri = OrgOpenrdfModelImplURIImpl::construct( jsuri );
+        jnipp::LocalRef<EuMicoPlatformAnno4jModelPartMMM> partMMM = m_persistenceService.getAnno4j()->createObject(EuMicoPlatformAnno4jModelPartMMM::clazz(), juri);
+        jnipp::LocalRef<JavaLangString> dateTime = JavaLangString::create( getTimestamp() );
+        static_cast< jnipp::LocalRef<ComGithubAnno4jModelAnnotation> >(partMMM)->setSerializedAt( dateTime );
 
-        //ComGithubAnno4jModelAgent agent = this.persistenceService.getAnno4j().createObject(Agent.class, this.getURI());
-        //agent.setResource(extractorID);
-        //partMMM.setSerializedBy(agent);
+        jnipp::LocalRef<ComGithubAnno4jModelAgent> agent = m_persistenceService.getAnno4j()->createObject(ComGithubAnno4jModelAgent::clazz(), juri);
+        jnipp::LocalRef<JavaLangString> jsextractorID = JavaLangString::create(extractorID.stringValue());
+        jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> jextractorID = OrgOpenrdfModelImplURIImpl::construct( jsextractorID );
+        static_cast< jnipp::LocalRef<ComGithubAnno4jModelImplResourceObject> >(agent)->setResource( jextractorID );
+        static_cast< jnipp::LocalRef<ComGithubAnno4jModelAnnotation> >(partMMM)->setSerializedBy(agent);
 
-        //m_itemMMM.addPart(partMMM);
+        m_itemMMM->addPart(partMMM);
 
         //log.trace("Created Part with id {} in the context graph {} - Creator {}", partMMM.getResourceAsString(), this.getURI(), extractorID);
 
-      //  return new PartAnno4cpp(partMMM, this, persistenceService);
-      //} catch (...) {
-        throw std::runtime_error("ItemAnno4cpp::createPart(): Not yet implemented!");
-      //}
+        return new PartAnno4cpp(partMMM, this, m_persistenceService);
+      } catch (...) {
+        throw std::runtime_error("ItemAnno4cpp::createPart(): something went wrong )-;");
+      }
     }
 
     //Iterable<? extends Part> ItemAnno4cpp::getParts() {

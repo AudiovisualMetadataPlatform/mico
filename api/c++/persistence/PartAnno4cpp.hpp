@@ -11,18 +11,18 @@ namespace mico {
     {
 
     private:
-      const PersistenceService& m_persistenceService;
-      const Item& m_item;
+      PersistenceService& m_persistenceService;
+      Item* m_item;
       jnipp::LocalRef<EuMicoPlatformAnno4jModelPartMMM> m_partMMM;
 
     public:
-      PartAnno4cpp(jnipp::LocalRef<EuMicoPlatformAnno4jModelPartMMM> partMMM, const Item& item, const PersistenceService& persistenceService)
+      PartAnno4cpp(jnipp::LocalRef<EuMicoPlatformAnno4jModelPartMMM> partMMM, Item* item, PersistenceService& persistenceService)
         : m_persistenceService(persistenceService),
           m_item(item),
           m_partMMM(partMMM)
       {}
 
-      const Item& getItem() {
+      Item* getItem() {
         return m_item;
       }
 
