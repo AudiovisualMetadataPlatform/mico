@@ -154,5 +154,16 @@ namespace mico {
             return new ContentItem(baseUrl, contentDirectory, *dynamic_cast<const URI*>( result->at(pos).at("p") ) );
         }
 
+        jnipp::LocalRef<ComGithubAnno4jAnno4j> PersistenceService::getAnno4j()
+        {
+          //return m_anno4j;
+          throw runtime_error("Not yet implemented");
+        }
+
+        std::string PersistenceService::getStoragePrefix()
+        {
+          return m_storagePrefix;
+        }
+
     }
 }

@@ -20,6 +20,8 @@ ADD_DEFINITIONS(
     -DBOOST_LOG_DYN_LINK
 )
 
+set (CMAKE_POSITION_INDEPENDENT_CODE TRUE)
+
 find_package (Threads)
 find_package(CURL REQUIRED)
 find_package(HDFS)
@@ -31,6 +33,7 @@ find_package(LibMagic)
 find_package(AMQPCPP REQUIRED)
 find_package(Doxygen)
 find_package(LibDaemon)
+find_package(JNI REQUIRED)
 
 #this line creates the links file info with the current version for the debian packaging
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/debian/libmico-api1.links.in ${CMAKE_CURRENT_SOURCE_DIR}/debian/libmico-api1.links @ONLY)
@@ -56,8 +59,13 @@ if(MICO_PLATFORM_BUILD_DOCUMENTATION AND DOXYGEN_FOUND)
     install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc/libmico-api1)
 endif()
 
-include_directories(${AMQPCPP_INCLUDE_DIRS})
+include_directories(
+  ${AMQPCPP_INCLUDE_DIRS}
+  ${JNI_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_BINARY_DIR}/../../anno4cpp/generated
+)
 
+link_directories("${CMAKE_CURRENT_BINARY_DIR}/../../anno4cpp/")
 
 add_subdirectory(logging)
 add_subdirectory(rdf)

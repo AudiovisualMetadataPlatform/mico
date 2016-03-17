@@ -17,11 +17,7 @@ namespace mico {
         : m_persistenceService(persistenceService),
           m_itemMMM(itemMMM)
       {
-        jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> context = OrgOpenrdfModelImplURIImpl::construct( static_cast< jnipp::LocalRef<ComGithubAnno4jModelImplResourceObject> >(m_itemMMM)->getResourceAsString() );
-        jnipp::LocalRef<OrgOpenrdfRepositoryObjectObjectConnection> objectConnection = static_cast< jnipp::LocalRef<OrgOpenrdfRepositoryObjectRDFObject> >(m_itemMMM)->getObjectConnection();
-        objectConnection->setInsertContext(context);
-        //itemMMM.getObjectConnection().setReadContexts(context);
-        //itemMMM.getObjectConnection().setRemoveContexts(context);
+        EuMicoPlatformPersistenceImplItemAnno4j::initContexts( itemMMM );
       }
 
       Part* createPart(mico::rdf::model::URI extractorID);

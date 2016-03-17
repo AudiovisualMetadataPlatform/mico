@@ -3,7 +3,6 @@
 
 #include "Asset.hpp"
 #include "PersistenceService.hpp"
-#include "anno4cpp.h"
 
 namespace mico {
   namespace persistence {

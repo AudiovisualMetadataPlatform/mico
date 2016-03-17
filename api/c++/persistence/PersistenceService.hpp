@@ -9,6 +9,7 @@
 
 #include "Metadata.hpp"
 #include "ContentItem.hpp"
+#include "anno4cpp.h"
 
 #include "rdf_model.hpp"
 #include "rdf_query.hpp"
@@ -45,6 +46,9 @@ namespace mico {
             std::string marmottaServerUrl;
             std::string contentDirectory;
             PersistenceMetadata metadata;
+            //jnipp::LocalRef<ComGithubAnno4jAnno4j> m_anno4j;
+            std::string m_storagePrefix;
+
 
         public:
 
@@ -132,7 +136,9 @@ namespace mico {
             content_item_iterator end();
 
 
+            jnipp::LocalRef<ComGithubAnno4jAnno4j> getAnno4j();
 
+            std::string getStoragePrefix();
         };
 
 

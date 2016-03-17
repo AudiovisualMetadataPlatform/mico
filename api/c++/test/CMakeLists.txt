@@ -1,8 +1,11 @@
 find_package(Protobuf)
 
-include_directories(../rdf ../persistence ../event ${CMAKE_CURRENT_BINARY_DIR}/../event/protobuf_out)
-
-link_directories("${CMAKE_CURRENT_BINARY_DIR}/../../../anno4cpp/")
+include_directories(
+  ../rdf
+  ../persistence
+  ../event
+  ${CMAKE_CURRENT_BINARY_DIR}/../event/protobuf_out
+)
 
 add_library(gtest STATIC gtest-all.cc)
 

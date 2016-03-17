@@ -14,13 +14,8 @@ ENDFOREACH()
 
 #set_source_files_properties(${COMPILED_RESOURCES} PROPERTIES GENERATED TRUE)
 
-include_directories(
-  ../rdf ../logging ${HDFS_INCLUDE_DIRS}
-  ${JNI_INCLUDE_DIRS}
-  ${CMAKE_CURRENT_BINARY_DIR}/../../../anno4cpp/generated
-)
-link_directories("${CMAKE_CURRENT_BINARY_DIR}/../../../anno4cpp/")
-set (CMAKE_POSITION_INDEPENDENT_CODE TRUE)
+include_directories(../rdf ../logging ${HDFS_INCLUDE_DIRS})
+
 add_library(mico_persistence SHARED
   ItemAnno4cpp
   PartAnno4cpp

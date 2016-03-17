@@ -1,7 +1,5 @@
 include_directories(../event ${CMAKE_CURRENT_BINARY_DIR}/../event/protobuf_out ../rdf ../persistence ../logging)
 
-link_directories("${CMAKE_CURRENT_BINARY_DIR}/../../../anno4cpp/")
-
 add_library(mico_daemon SHARED Daemon.cpp)
 
 target_link_libraries(mico_daemon mico_event ${CMAKE_THREAD_LIBS_INIT} ${LIBDAEMON_LIBRARY})
