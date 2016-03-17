@@ -1,5 +1,3 @@
-find_package(JNI REQUIRED)
-
 SET(RESOURCE_COMPILER "${CMAKE_SOURCE_DIR}/sparqlToC.sh")
 FILE(GLOB COMPILED_RESOURCES "../../shared/persistence/sparql/*.sparql")
 FOREACH(INPUT_FILE ${COMPILED_RESOURCES})

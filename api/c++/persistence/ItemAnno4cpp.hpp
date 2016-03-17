@@ -69,7 +69,7 @@ namespace mico {
       }
 
       // helper function to get time stamp
-      std::string getTimestamp() {
+      static std::string getTimestamp() {
         time_t now;
         time(&now);
         char buf[sizeof "2016-03-17T09:42:09Z"];

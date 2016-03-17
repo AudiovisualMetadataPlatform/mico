@@ -27,7 +27,8 @@ namespace mico {
       }
 
       mico::rdf::model::URI getURI() {
-        //return new URIImpl(m_partMMM.getResourceAsString());
+        jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri = OrgOpenrdfModelImplURIImpl::construct( static_cast< jnipp::LocalRef<ComGithubAnno4jModelImplResourceObject> >(m_partMMM)->getResourceAsString() );
+        return mico::rdf::model::URI( juri->stringValue()->std_str() );
       }
 
       jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> getRDFObject() {
