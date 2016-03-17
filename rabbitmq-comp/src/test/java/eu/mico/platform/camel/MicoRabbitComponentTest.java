@@ -34,6 +34,7 @@ import eu.mico.platform.persistence.model.Item;;
 public class MicoRabbitComponentTest extends TestBase {
 
     private static String textItemUri;
+    private static String htmlItemUri;
     private static String imageItemUri;
     private static String videoItemUri;
 
@@ -76,6 +77,19 @@ public class MicoRabbitComponentTest extends TestBase {
         mock.expectedMinimumMessageCount(1);
 
         template.send("direct:text",createExchange(textItemUri));
+        assertMockEndpointsSatisfied();
+    }
+
+    /**
+     * @throws Exception
+     */
+    @Ignore("ignored, because a mico_wordcount must be connected to run this test")
+    @Test(timeout=10000)
+    public void testMicroformatsRoute() throws Exception {
+        MockEndpoint mock = getMockEndpoint("mock:result_text");
+        mock.expectedMinimumMessageCount(1);
+
+        template.send("direct:text_html",createExchange(htmlItemUri));
         assertMockEndpointsSatisfied();
     }
 
@@ -164,6 +178,11 @@ public class MicoRabbitComponentTest extends TestBase {
                 .to("mico-comp:vbox2?host=mico-platform&user=mico&password=mico&serviceId=wordcount")
                 .to("mock:result_text");
 
+                from("direct:text_html")
+                .pipeline()
+                .to("mico-comp:vbox2?host=mico-box&user=mico&password=mico&serviceId=microformats")
+                .to("mock:result_text");
+
             }
 
             private void loadXmlSampleRoutes() {
@@ -197,6 +216,7 @@ public class MicoRabbitComponentTest extends TestBase {
         micoCamel = new MicoCamel();
         micoCamel.init();
         createTextItem();
+        createHtmlItem();
         createImageItem();
         createVideoItem();
    }
@@ -206,7 +226,8 @@ public class MicoRabbitComponentTest extends TestBase {
         resetDataFolder();
 
         // remove test items from platform
-//        micoCamel.deleteContentItem(textItemUri);
+        micoCamel.deleteContentItem(textItemUri);
+//        micoCamel.deleteContentItem(htmlItemUri);
         micoCamel.deleteContentItem(imageItemUri);
         micoCamel.deleteContentItem(videoItemUri);
 
@@ -262,6 +283,22 @@ public class MicoRabbitComponentTest extends TestBase {
         textItemUri = item.getURI().toString();
     }
 
+    /**
+     * create and inject test item containing an image and 
+     * store item and part uri in class
+     * @throws IOException
+     * @throws RepositoryException
+     */
+    private static void createHtmlItem() throws IOException, RepositoryException {
+        Item item = micoCamel.createItem();
+        InputStream content = new FileInputStream(TEST_DATA_FOLDER+SAMPLE_HTML);
+        String type = "text/html";
+        micoCamel.addAsset(IOUtils.toByteArray(content), item, type);
+
+        htmlItemUri = item.getURI().toString();
+        System.out.println("htmlItem: " + htmlItemUri);
+    }
+    
     /**
      * create and inject test item containing an image and 
      * store item and part uri in class
