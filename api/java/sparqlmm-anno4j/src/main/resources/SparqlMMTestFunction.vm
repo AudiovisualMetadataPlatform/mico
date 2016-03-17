@@ -1,0 +1,14 @@
+package com.github.anno4j.extension.sparqlmm;
+
+import com.hp.hpl.jena.sparql.expr.Expr;
+import org.apache.marmotta.ldpath.api.functions.TestFunction;
+
+/**
+ * @author Thomas Kurz (tkurz@apache.org)
+ * @since 06.10.15.
+ */
+public interface SparqlMMTestFunction {
+
+    public Class<? extends Expr> getExpression();
+
+}
