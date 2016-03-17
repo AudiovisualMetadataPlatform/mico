@@ -20,7 +20,8 @@ namespace mico {
       {}
 
       mico::rdf::model::URI getLocation() {
-      //  return new URIImpl(m_assetMMM->getLocation());
+        jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri = OrgOpenrdfModelImplURIImpl::construct( m_assetMMM->getLocation() );
+        return mico::rdf::model::URI( juri->stringValue()->std_str() );
       }
 
       std::string getFormat() {
