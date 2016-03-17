@@ -65,5 +65,19 @@ public interface AnalysisResponse {
      */
     public void sendNew(Item ci, URI object) throws IOException;
 
+    /**
+     * Indicates if broker was informed, that extraction process has finished.
+     * 
+     * @return true if {@link sendFinish(...)} has be called, false otherwise
+     */
+    public boolean isFinished();
+
+    /**
+     * Indicates if broker was informed, that an error occurred during analysis process.
+     * 
+     * @return true if {@link sendError(...)} has be called, false otherwise
+     */
+    public boolean isError();
+
 
 }
