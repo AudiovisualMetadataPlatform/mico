@@ -62,7 +62,7 @@ public class PersistenceServiceAnno4j implements PersistenceService {
         SPARQLRepository sparqlRepository = new SPARQLRepository(sparqlBaseURI.toString() + "/sparql/select", sparqlBaseURI.toString() + "/sparql/update");
 
         try {
-            this.anno4j = new Anno4j(sparqlRepository, idGenerator);
+            this.anno4j = new Anno4j(sparqlRepository, idGenerator, null);
         } catch (RepositoryException | RepositoryConfigException e) {
             throw new IllegalStateException("Couldn't instantiate Anno4j");
         }
@@ -98,12 +98,12 @@ public class PersistenceServiceAnno4j implements PersistenceService {
         try {
             ItemMMM itemMMM = anno4j.createObject(ItemMMM.class);
             String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
-            itemMMM.setSerializedAt(dateTime);
 
             // call persist to move item to corresponding sub-graph
             URIImpl context = new URIImpl(itemMMM.getResourceAsString());
             anno4j.persist(itemMMM, context);
 
+            itemMMM.setSerializedAt(dateTime);
             log.trace("Created Item with id {} in the corresponding context graph", itemMMM.getResourceAsString());
 
             return new ItemAnno4j(itemMMM, this);

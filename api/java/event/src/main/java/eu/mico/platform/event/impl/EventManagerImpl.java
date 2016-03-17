@@ -13,6 +13,7 @@
  */
 package eu.mico.platform.event.impl;
 
+import com.github.anno4j.Anno4j;
 import com.google.common.base.Preconditions;
 import com.rabbitmq.client.*;
 import com.rabbitmq.client.AMQP.BasicProperties;
@@ -34,6 +35,7 @@ import eu.mico.platform.persistence.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryConfigException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -448,6 +450,11 @@ public class EventManagerImpl implements EventManager {
                     params.put(entry.getKey(), entry.getValue());
                 }
 
+                if (service instanceof AnalysisServiceAnno4j) {
+                    final Anno4j tmpAnno4j = persistenceService.getAnno4j();
+                    ((AnalysisServiceAnno4j) service).setAnno4j(new Anno4j(tmpAnno4j.getRepository(), tmpAnno4j.getIdGenerator(), item.getURI()));
+                }
+
                 try {
                     service.call(response, item, resourceList, params);
                     if(!response.isFinished()){
@@ -481,6 +488,11 @@ public class EventManagerImpl implements EventManager {
                 log.error("could not access content item with URI {}, requeuing (message: {})", analysisRequest.getItemUri(), e.getMessage());
                 log.debug("Exception:", e);
                 getChannel().basicNack(envelope.getDeliveryTag(), false, true);
+            } catch (RepositoryConfigException e) {
+                log.error("could not create an Anno4j instance for item with URI {}, requeuing (message: {})", analysisRequest.getItemUri(), e.getMessage());
+                log.debug("Exception:", e);
+                getChannel().basicNack(envelope.getDeliveryTag(), false, true);
+
             }
         }
 
