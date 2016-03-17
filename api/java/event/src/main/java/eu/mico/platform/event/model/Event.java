@@ -315,6 +315,11 @@ public final class Event {
 
   /**
    * Protobuf enum {@code mico.event.model.ErrorCodes}
+   *
+   * <pre>
+   **
+   * A list of errors, that can occur during extraction, where the broker should react on
+   * </pre>
    */
   public enum ErrorCodes
       implements com.google.protobuf.ProtocolMessageEnum {
@@ -322,7 +327,7 @@ public final class Event {
      * <code>UNSUPPORTED_CONTENT_TYPE = 30;</code>
      *
      * <pre>
-     * could be a bug in broker or in an extractor which provided that content (created content with different type then stated in annotation)
+     * asset content has different type then stated in annotation (could be a bug in broker or in an extractor which provided that content )
      * </pre>
      */
     UNSUPPORTED_CONTENT_TYPE(0, 30),
@@ -343,13 +348,21 @@ public final class Event {
      */
     DECODING_ERROR(2, 32),
     /**
+     * <code>MISSING_ASSET = 33;</code>
+     *
+     * <pre>
+     * a required asset is not available during extraction
+     * </pre>
+     */
+    MISSING_ASSET(3, 33),
+    /**
      * <code>MISSING_ANNOTATION = 35;</code>
      *
      * <pre>
      * extractor depends on non-existing annotation from other extractor
      * </pre>
      */
-    MISSING_ANNOTATION(3, 35),
+    MISSING_ANNOTATION(4, 35),
     /**
      * <code>INSUFFICIENT_RESOURCE = 40;</code>
      *
@@ -357,7 +370,7 @@ public final class Event {
      * extractor is not able to process this part
      * </pre>
      */
-    INSUFFICIENT_RESOURCE(4, 40),
+    INSUFFICIENT_RESOURCE(5, 40),
     /**
      * <code>INSUFFICIENT_STORAGE = 41;</code>
      *
@@ -365,7 +378,7 @@ public final class Event {
      * more detailed info then INSUFFICIENT_RESOURCE
      * </pre>
      */
-    INSUFFICIENT_STORAGE(5, 41),
+    INSUFFICIENT_STORAGE(6, 41),
     /**
      * <code>UNEXPECTED_ERROR = 50;</code>
      *
@@ -373,14 +386,14 @@ public final class Event {
      * unknown / non-resolvable error
      * </pre>
      */
-    UNEXPECTED_ERROR(6, 50),
+    UNEXPECTED_ERROR(7, 50),
     ;
 
     /**
      * <code>UNSUPPORTED_CONTENT_TYPE = 30;</code>
      *
      * <pre>
-     * could be a bug in broker or in an extractor which provided that content (created content with different type then stated in annotation)
+     * asset content has different type then stated in annotation (could be a bug in broker or in an extractor which provided that content )
      * </pre>
      */
     public static final int UNSUPPORTED_CONTENT_TYPE_VALUE = 30;
@@ -400,6 +413,14 @@ public final class Event {
      * </pre>
      */
     public static final int DECODING_ERROR_VALUE = 32;
+    /**
+     * <code>MISSING_ASSET = 33;</code>
+     *
+     * <pre>
+     * a required asset is not available during extraction
+     * </pre>
+     */
+    public static final int MISSING_ASSET_VALUE = 33;
     /**
      * <code>MISSING_ANNOTATION = 35;</code>
      *
@@ -441,6 +462,7 @@ public final class Event {
         case 30: return UNSUPPORTED_CONTENT_TYPE;
         case 31: return UNSUPPORTED_CONTENT_VARIANT;
         case 32: return DECODING_ERROR;
+        case 33: return MISSING_ASSET;
         case 35: return MISSING_ANNOTATION;
         case 40: return INSUFFICIENT_RESOURCE;
         case 41: return INSUFFICIENT_STORAGE;
@@ -4067,7 +4089,6 @@ public final class Event {
    * Protobuf type {@code mico.event.model.AnalysisEvent}
    *
    * <pre>
-   *
    * AnalysisEvents are sent both, by the message broker to notify services that they should start
    * analysing an object, and by services to notify the message broker that they added a new object.
    * </pre>
@@ -8601,7 +8622,6 @@ public final class Event {
      * Protobuf type {@code mico.event.model.AnalysisEvent}
      *
      * <pre>
-     *
      * AnalysisEvents are sent both, by the message broker to notify services that they should start
      * analysing an object, and by services to notify the message broker that they added a new object.
      * </pre>
@@ -11381,12 +11401,13 @@ public final class Event {
       "P\020\002\022\n\n\006PYTHON\020\003*0\n\020RegistrationType\022\014\n\010R" +
       "EGISTER\020\001\022\016\n\nUNREGISTER\020\002*@\n\013MessageType" +
       "\022\014\n\010PROGRESS\020\001\022\n\n\006FINISH\020\002\022\014\n\010NEW_PART\020\003" +
-      "\022\t\n\005ERROR\020\004*\302\001\n\nErrorCodes\022\034\n\030UNSUPPORTE" +
+      "\022\t\n\005ERROR\020\004*\325\001\n\nErrorCodes\022\034\n\030UNSUPPORTE" +
       "D_CONTENT_TYPE\020\036\022\037\n\033UNSUPPORTED_CONTENT_" +
-      "VARIANT\020\037\022\022\n\016DECODING_ERROR\020 \022\026\n\022MISSING" +
-      "_ANNOTATION\020#\022\031\n\025INSUFFICIENT_RESOURCE\020(" +
-      "\022\030\n\024INSUFFICIENT_STORAGE\020)\022\024\n\020UNEXPECTED" +
-      "_ERROR\0202B\036\n\034eu.mico.platform.event.model"
+      "VARIANT\020\037\022\022\n\016DECODING_ERROR\020 \022\021\n\rMISSING" +
+      "_ASSET\020!\022\026\n\022MISSING_ANNOTATION\020#\022\031\n\025INSU" +
+      "FFICIENT_RESOURCE\020(\022\030\n\024INSUFFICIENT_STOR" +
+      "AGE\020)\022\024\n\020UNEXPECTED_ERROR\0202B\036\n\034eu.mico.p",
+      "latform.event.model"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

@@ -1,0 +1,94 @@
+#!/bin/sh
+# postinst script for mico-extractor-wordcount
+
+set -e
+
+# summary of how this script can be called:
+#        * <postinst> `configure' <most-recently-configured-version>
+#        * <old-postinst> `abort-upgrade' <new version>
+#        * <conflictor's-postinst> `abort-remove' `in-favour' <package>
+#          <new-version>
+#        * <postinst> `abort-remove'
+#        * <deconfigured's-postinst> `abort-deconfigure' `in-favour'
+#          <failed-install-package> <version> `removing'
+#          <conflicting-package> <version>
+# for details, see http://www.debian.org/doc/debian-policy/ or
+# the debian-policy package
+
+NAME="mico-extractor-wordcount"
+GROUP="mico"
+USER="mico"
+DATADIR=/var/lib/mico-extractor-wordcount
+DEFAULT=/etc/default/mico-extractor-wordcount
+
+case "$1" in
+    configure)
+
+    # Source debconf library.
+    . /usr/share/debconf/confmodule
+
+    db_get mico-base/username
+    MICO_USERNAME="$RET"
+
+    db_get mico-base/password
+    MICO_PASSWORD="$RET"
+
+    db_get mico-marmotta/host-name
+    MICO_HOSTNAME="$RET"
+
+    db_stop
+
+    cat > $DEFAULT <<EOF
+MICO_USERNAME="$MICO_USERNAME"
+MICO_PASSWORD="$MICO_PASSWORD"
+MICO_HOSTNAME="$MICO_HOSTNAME"
+EOF
+    
+    # shamelessly copied from debian mysql-server package...
+    if ! getent group $GROUP >/dev/null ; then
+            # Adding system group
+            addgroup --system $GROUP >/dev/null
+    fi
+
+    # creating user if he isn't already there
+    if ! getent passwd $USER >/dev/null ; then
+            # Adding system user
+            adduser \
+        --system \
+        --disabled-login \
+        --ingroup $GROUP \
+        --home $DATADIR \
+        --gecos "mico" \
+        --shell /bin/false \
+        $USER  >/dev/null
+    fi
+
+    mkdir -p /var/log/$NAME
+    mkdir -p $DATADIR
+    mkdir -p $DATADIR/dist
+
+    chown $USER:$GROUP -R /var/log/$NAME
+    chown $USER:$GROUP -R /var/lib/$NAME
+
+    db_stop
+
+    ;;
+    
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+# shamelessly copied from debian apache2 package...
+if [ -x "/etc/init.d/mico-extractor-wordcount" ] || [ -e "/etc/init/mico-extractor-wordcount.conf" ]; then
+    if [ ! -e "/etc/init/mico-extractor-wordcount.conf" ]; then
+        update-rc.d mico-extractor-wordcount defaults >/dev/null
+    fi
+    invoke-rc.d mico-extractor-wordcount start || exit $?
+fi
+
+exit 0

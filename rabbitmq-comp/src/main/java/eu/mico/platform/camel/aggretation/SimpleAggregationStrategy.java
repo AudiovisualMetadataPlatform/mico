@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 /**
  * simple Aggregator does nothing
  *
- * @version 
  */
 public class SimpleAggregationStrategy implements AggregationStrategy {
 

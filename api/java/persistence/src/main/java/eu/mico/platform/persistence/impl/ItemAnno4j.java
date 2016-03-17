@@ -31,12 +31,17 @@ public class ItemAnno4j implements Item {
     public ItemAnno4j(ItemMMM itemMMM, PersistenceService persistenceService) {
         this.itemMMM = itemMMM;
 
+        this.initContexts(itemMMM);
+
+        this.persistenceService = persistenceService;
+    }
+
+    static public void initContexts(ItemMMM itemMMM) {
+
         URIImpl context = new URIImpl(itemMMM.getResourceAsString());
         itemMMM.getObjectConnection().setInsertContext(context);
         itemMMM.getObjectConnection().setReadContexts(context);
         itemMMM.getObjectConnection().setRemoveContexts(context);
-
-        this.persistenceService = persistenceService;
     }
 
     @Override
@@ -139,7 +144,7 @@ public class ItemAnno4j implements Item {
 
     @Override
     public boolean hasAsset() throws RepositoryException {
-        return this.itemMMM.getAsset() == null;
+        return this.itemMMM.getAsset() != null;
     }
 
     @Override
