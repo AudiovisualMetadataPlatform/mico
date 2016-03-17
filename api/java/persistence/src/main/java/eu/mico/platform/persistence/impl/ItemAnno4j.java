@@ -36,7 +36,7 @@ public class ItemAnno4j implements Item {
         this.persistenceService = persistenceService;
     }
 
-    public void initContexts(ItemMMM itemMMM) {
+    static public void initContexts(ItemMMM itemMMM) {
 
         URIImpl context = new URIImpl(itemMMM.getResourceAsString());
         itemMMM.getObjectConnection().setInsertContext(context);
