@@ -14,12 +14,15 @@
 #include "rdf_model.hpp"
 #include "rdf_query.hpp"
 
+
+
 namespace mico {
     namespace persistence {
 
         using namespace mico::rdf::query;
 
         class content_item_iterator;
+        class Item;
 
         /**
         * Specialised support for persistence service metadata. Might in the future be extended with
@@ -46,8 +49,13 @@ namespace mico {
             std::string marmottaServerUrl;
             std::string contentDirectory;
             PersistenceMetadata metadata;
-            //jnipp::LocalRef<ComGithubAnno4jAnno4j> m_anno4j;
+            jnipp::GlobalRef<ComGithubAnno4jAnno4j> m_anno4j;
             std::string m_storagePrefix;
+
+            static JNIEnv* m_sEnv;
+            static JavaVM* m_sJvm;
+
+            void initService();
 
 
         public:
@@ -57,10 +65,7 @@ namespace mico {
             * the MICO platform with Marmotta at port 8080 under context /marmotta, RabbitMQ at port 5672, and
             * an HDFS server, all with login/password mico/mico.
             */
-            PersistenceService(std::string serverAddress)
-                    : marmottaServerUrl("http://" + serverAddress + ":8080/marmotta")
-                    , contentDirectory("hdfs://" + serverAddress)
-                    , metadata("http://" + serverAddress + ":8080/marmotta") {};
+            PersistenceService(std::string serverAddress);
 
 
             /**
@@ -68,10 +73,7 @@ namespace mico {
             * the MICO platform with Marmotta at port 8080 under context /marmotta, RabbitMQ at port 5672, and
             * an HDFS server, all with login/password mico/mico.
             */
-            PersistenceService(std::string serverAddress, int marmottaPort, std::string user, std::string password)
-                    : marmottaServerUrl("http://" + serverAddress + ":" + std::to_string(marmottaPort) + "/marmotta")
-                    , contentDirectory("hdfs://" + serverAddress)
-                    , metadata("http://" + serverAddress + ":" + std::to_string(marmottaPort) + "/marmotta") {};
+            PersistenceService(std::string serverAddress, int marmottaPort, std::string user, std::string password);
 
 
             /**
@@ -80,8 +82,7 @@ namespace mico {
             *
             * @param marmottaServerUrl the URL of the Apache Marmotta server, e.g. http://localhost:8080/marmotta
             */
-            PersistenceService(std::string marmottaServerUrl, std::string contentDirectory)
-                    : marmottaServerUrl(marmottaServerUrl), contentDirectory(contentDirectory), metadata(marmottaServerUrl) {};
+            PersistenceService(std::string marmottaServerUrl, std::string contentDirectory);
 
 
             /**
@@ -98,16 +99,7 @@ namespace mico {
             *
             * @return a handle to the newly created ContentItem
             */
-            ContentItem* createContentItem();
-
-            /**
-            * Create a new content item with the given URI and return it. The content item should be suitable for reading and
-            * updating and write all updates to the underlying low-level persistence layer.
-            *
-            * @return a handle to the newly created ContentItem
-            */
-            ContentItem* createContentItem(const mico::rdf::model::URI& id);
-
+            Item* createItem();
 
             /**
             * Return the content item with the given URI if it exists. The content item should be suitable for reading and

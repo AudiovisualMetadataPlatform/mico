@@ -23,7 +23,7 @@ add_library(mico_persistence SHARED
 )
 target_link_libraries(mico_persistence
   anno4cpp
-  mico_marmotta mico_rdf mico_logging ${CURL_LIBRARIES} ${HDFS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_THREAD_LIBS_INIT}
+  mico_marmotta mico_rdf mico_logging ${CURL_LIBRARIES} ${HDFS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_THREAD_LIBS_INIT} ${JNI_LIBRARIES} ${JAVA_AWT_LIBRARY}
 )
 
 set_target_properties(mico_persistence PROPERTIES VERSION "${MICO_PLATFORM_VERSION}" SOVERSION "${MICO_PLATFORM_SOVERSION}")

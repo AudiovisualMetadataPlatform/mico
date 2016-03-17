@@ -62,10 +62,15 @@ endif()
 include_directories(
   ${AMQPCPP_INCLUDE_DIRS}
   ${JNI_INCLUDE_DIRS}
-  ${CMAKE_CURRENT_BINARY_DIR}/../../anno4cpp/generated
+  /home/christian/mico/anno4cpp/build-cpp-Desktop-Debug/generated
 )
 
-link_directories("${CMAKE_CURRENT_BINARY_DIR}/../../anno4cpp/")
+if (UNIX)
+  get_filename_component(JAVA_AWT_PATH ${JAVA_AWT_LIBRARY} DIRECTORY)
+  link_directories(${JAVA_AWT_PATH}/xawt/ )
+endif()
+
+link_directories(/home/christian/mico/anno4cpp/build-cpp-Desktop-Debug/)
 
 add_subdirectory(logging)
 add_subdirectory(rdf)

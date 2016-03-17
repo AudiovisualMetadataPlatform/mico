@@ -74,51 +74,51 @@ int main(int argc, char **argv) {
     char *mico_pass = argv[3];
 
 
-	// initialise event manager; throws an exception on failure
-	try {
-		EventManager eventManager(argv[1], mico_user, mico_pass);
+//	// initialise event manager; throws an exception on failure
+//	try {
+//		EventManager eventManager(argv[1], mico_user, mico_pass);
 		
-		ContentItem* item = eventManager.getPersistenceService()->createContentItem();
+//		ContentItem* item = eventManager.getPersistenceService()->createItem();
 		
-		for(int i=4; i<argc; i++) {
-			int fd = open(argv[i], O_RDONLY);
+//		for(int i=4; i<argc; i++) {
+//			int fd = open(argv[i], O_RDONLY);
 
 			
-			if(fd >= 0) {
-				struct stat st;
-				fstat(fd,&st);
+//			if(fd >= 0) {
+//				struct stat st;
+//				fstat(fd,&st);
 			
-				size_t len = st.st_size;
-				char* buffer = (char*)mmap(NULL, len, PROT_READ, MAP_SHARED, fd, 0);
+//				size_t len = st.st_size;
+//				char* buffer = (char*)mmap(NULL, len, PROT_READ, MAP_SHARED, fd, 0);
 				
-				std::cout << "creating new content part for file " << argv[i] << " of size " << len << " with type " << getMimeType(buffer,len) << std::endl;
+//				std::cout << "creating new content part for file " << argv[i] << " of size " << len << " with type " << getMimeType(buffer,len) << std::endl;
 				
-				Content* c = item->createContentPart();
-				c->setType(getMimeType(buffer,len));
-				c->setProperty(DC::source, argv[i]);
-				c->setRelation(DC::creator, URI("http://www.mico-project.org/tools/mico_inject"));
-				c->setProperty(DC::created, getTimestamp());
-				std::ostream* os = c->getOutputStream();
-				os->write(buffer, len);
-				delete os;
+//				Content* c = item->createContentPart();
+//				c->setType(getMimeType(buffer,len));
+//				c->setProperty(DC::source, argv[i]);
+//				c->setRelation(DC::creator, URI("http://www.mico-project.org/tools/mico_inject"));
+//				c->setProperty(DC::created, getTimestamp());
+//				std::ostream* os = c->getOutputStream();
+//				os->write(buffer, len);
+//				delete os;
 				
-				std::cout << "content part URI: " << c->getURI().stringValue() << std::endl;
+//				std::cout << "content part URI: " << c->getURI().stringValue() << std::endl;
 				
-				delete c;
-				munmap(buffer, len);
-			} else {
-				std::cerr << "could not open file " << argv[i] << std::endl;
-			}			
-		}
+//				delete c;
+//				munmap(buffer, len);
+//			} else {
+//				std::cerr << "could not open file " << argv[i] << std::endl;
+//			}
+//		}
 		
-		eventManager.injectContentItem(*item);
+//		eventManager.injectContentItem(*item);
 		
-		std::cout << "created content item with URI " << item->getURI().stringValue() << std::endl;
+//		std::cout << "created content item with URI " << item->getURI().stringValue() << std::endl;
 		
-		delete item;
-	} catch(EventManagerException ex) {
-		std::cerr << "could not initialise event manager: " << ex.getMessage() << std::endl;
-	} catch (std::string ex) {
-		std::cerr << "other error: " << ex << std::endl;
-	}
+//		delete item;
+//	} catch(EventManagerException ex) {
+//		std::cerr << "could not initialise event manager: " << ex.getMessage() << std::endl;
+//	} catch (std::string ex) {
+//		std::cerr << "other error: " << ex << std::endl;
+//	}
 }
