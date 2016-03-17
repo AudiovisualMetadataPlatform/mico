@@ -13,12 +13,15 @@
  */
 package eu.mico.platform.event.impl;
 
+import com.github.anno4j.Anno4j;
 import com.google.common.base.Preconditions;
 import com.rabbitmq.client.*;
 import com.rabbitmq.client.AMQP.BasicProperties;
+
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
+import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.event.model.Event.AnalysisEvent;
 import eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry;
@@ -28,9 +31,11 @@ import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Resource;
+
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryConfigException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,11 +151,11 @@ public class EventManagerImpl implements EventManager {
             svc.getValue().getChannel().close();
         }
 
-        if (registryChannel.isOpen()) {
+        if (registryChannel != null && registryChannel.isOpen()) {
             registryChannel.close();
         }
 
-        if (connection.isOpen()) {
+        if (connection != null && connection.isOpen()) {
             connection.close();
         }
     }
@@ -163,6 +168,11 @@ public class EventManagerImpl implements EventManager {
     @Override
     public void registerService(AnalysisService service) throws IOException {
         log.info("registering new service {} with message brokers ...", service.getServiceID());
+
+
+        if (service instanceof AnalysisServiceAnno4j) {
+            ((AnalysisServiceAnno4j) service).setAnno4j(persistenceService.getAnno4j());
+        }
 
         Channel chan = connection.createChannel();
 
@@ -295,6 +305,8 @@ public class EventManagerImpl implements EventManager {
     private class AnalysisConsumer extends DefaultConsumer {
 
         private final class AnalysisResponseImpl implements AnalysisResponse {
+            private Boolean finished = false;
+            private Boolean hasError = false;
             private final BasicProperties properties;
             private final BasicProperties replyProps;
             private long progressSentMS = 0;
@@ -319,6 +331,7 @@ public class EventManagerImpl implements EventManager {
                         .build();
 
                 getChannel().basicPublish("", properties.getReplyTo(), replyProps, analysisEvent.toByteArray());
+                finished=true;
             }
 
             @Override
@@ -366,6 +379,7 @@ public class EventManagerImpl implements EventManager {
 
             @Override
             public void sendError(Item item, ErrorCodes code, String msg, String desc) throws IOException {
+                hasError = true;
                 AnalysisEvent.Error responseEvent = AnalysisEvent.Error.newBuilder()
                         .setItemUri(item.getURI().stringValue())
                         .setServiceId(service.getServiceID().stringValue())
@@ -373,6 +387,16 @@ public class EventManagerImpl implements EventManager {
                         .setDescription(desc).build();
 
                 getChannel().basicPublish("", properties.getReplyTo(), replyProps, responseEvent.toByteArray());
+            }
+
+            @Override
+            public boolean isFinished() {
+                return finished;
+            }
+
+            @Override
+            public boolean isError() {
+                return hasError;
             }
         }
 
@@ -421,28 +445,54 @@ public class EventManagerImpl implements EventManager {
                 final Item item = persistenceService.getItem(new URIImpl(analysisRequest.getItemUri()));
 
                 final List<Resource> resourceList = parseResourceList(analysisRequest.getPartUriList(), item);
-                final Map<String, String> params = new HashMap();
+                final Map<String, String> params = new HashMap<String, String>();
                 for (ParamEntry entry : analysisRequest.getParamsList()) {
                     params.put(entry.getKey(), entry.getValue());
                 }
 
                 if (service instanceof AnalysisServiceAnno4j) {
-                    ((AnalysisServiceAnno4j) service).setAnno4j(persistenceService.getAnno4j());
+                    final Anno4j tmpAnno4j = persistenceService.getAnno4j();
+                    ((AnalysisServiceAnno4j) service).setAnno4j(new Anno4j(tmpAnno4j.getRepository(), tmpAnno4j.getIdGenerator(), item.getURI()));
                 }
 
                 try {
                     service.call(response, item, resourceList, params);
-                } catch (Throwable t) {
-                    log.error("could not analyse item with URI {}, requeuing (message: {})", analysisRequest.getItemUri(), t.getMessage());
-                    log.debug("Exception:", t);
-                    response.sendError(item, ErrorCodes.UNEXPECTED_ERROR, t.getMessage(), "could not analyse item with URI " + item.getURI());
+                    if(!response.isFinished()){
+                        response.sendFinish(item);
+                   }
+                    getChannel().basicAck(envelope.getDeliveryTag(), false);
+                } catch (RuntimeException | AnalysisException e) {
+                    log.error(
+                            "could not analyse item with URI {}, requeuing (message: {})",
+                            analysisRequest.getItemUri(), e.getMessage());
+                    log.debug("Exception:", e);
+                    response.sendError(item, ErrorCodes.UNEXPECTED_ERROR,
+                            "could not analyse item with URI " + item.getURI(),
+                            e.getMessage());
+                    getChannel().basicNack(envelope.getDeliveryTag(), false,
+                            true);
+                } finally {
+                    if (!response.isFinished() && !response.isError()) {
+                        response.sendError(
+                                item,
+                                ErrorCodes.UNEXPECTED_ERROR,
+                                "Analyze process aborted",
+                                "Unable to finish analyse item "
+                                        + item.getURI());
+                        getChannel().basicNack(envelope.getDeliveryTag(),
+                                false, true);
+                    }
                 }
 
-                getChannel().basicAck(envelope.getDeliveryTag(), false);
             } catch (RepositoryException e) {
                 log.error("could not access content item with URI {}, requeuing (message: {})", analysisRequest.getItemUri(), e.getMessage());
                 log.debug("Exception:", e);
                 getChannel().basicNack(envelope.getDeliveryTag(), false, true);
+            } catch (RepositoryConfigException e) {
+                log.error("could not create an Anno4j instance for item with URI {}, requeuing (message: {})", analysisRequest.getItemUri(), e.getMessage());
+                log.debug("Exception:", e);
+                getChannel().basicNack(envelope.getDeliveryTag(), false, true);
+
             }
         }
 

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
@@ -15,13 +16,16 @@ import org.slf4j.LoggerFactory;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+
 import de.fraunhofer.idmt.mico.DummyExtractor;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Asset;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Resource;
 
 public class MicoCamel {
     private static Logger log = LoggerFactory.getLogger(MicoCamel.class);
@@ -51,8 +55,8 @@ public class MicoCamel {
     public void init() throws IOException, TimeoutException, URISyntaxException {
         String testHost = System.getenv("test.host");
         if (testHost == null) {
-            log.warn("'test.host' environment variable not defined, using default of mico-platform");
-            testHost = "mico-platform";
+            log.warn("'test.host' environment variable not defined, using default of mico-box");
+            testHost = "mico-box";
         }
         eventManager = new EventManagerImpl(testHost);
         eventManager.init();
@@ -76,24 +80,29 @@ public class MicoCamel {
 
     }
 
-    public ContentItem createItem() throws RepositoryException {
+    public Item createItem() throws RepositoryException {
         if (eventManager == null) {
             log.warn("Init mico camel befor calling: 'createItem(..)'");
             return null;
         }
         PersistenceService svc = eventManager.getPersistenceService();
-        ContentItem item = svc.createContentItem();
+        Item item = svc.createItem();
         return item;
     }
 
     public void deleteContentItem(String item) {
         PersistenceService svc = eventManager.getPersistenceService();
         try {
-            svc.deleteContentItem(new URIImpl(item));
+            svc.deleteItem(new URIImpl(item));
         } catch (RepositoryException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    public <T> T createObject(Class<T> clazz) throws Exception{
+        PersistenceService svc = eventManager.getPersistenceService();
+        return svc.getAnno4j().createObject(clazz);
     }
 
     /**
@@ -106,15 +115,22 @@ public class MicoCamel {
      * @throws RepositoryException
      * @throws IOException
      */
-    public Content addPart(byte[] content, String type, ContentItem item)
+    public Part addPart(byte[] content, String type, Item item, URI extractorId)
             throws RepositoryException, IOException {
-        Content partA = item.createContentPart();
-        partA.setType(type);
-        OutputStream outputStream = partA.getOutputStream();
+        Part part = item.createPart(extractorId);
+        part.setSyntacticalType(type);
+        addAsset(content, part, type);
+        return part;
+    }
+
+    public void addAsset(byte[] content, Resource part, String format) throws IOException,
+            RepositoryException {
+        Asset asset = part.getAsset();
+        asset.setFormat(format);
+        OutputStream outputStream = asset.getOutputStream();
         outputStream.write(content);
         outputStream.flush();
         outputStream.close();
-        return partA;
     }
 
     /**

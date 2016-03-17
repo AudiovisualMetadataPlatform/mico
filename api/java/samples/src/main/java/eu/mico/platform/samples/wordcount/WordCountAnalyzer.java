@@ -13,12 +13,10 @@
  */
 package eu.mico.platform.samples.wordcount;
 
-import com.github.anno4j.Anno4j;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Target;
 import com.github.anno4j.model.impl.targets.SpecificResource;
 import eu.mico.platform.event.api.AnalysisResponse;
-import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.AnalysisServiceAnno4j;
 import eu.mico.platform.event.impl.EventManagerImpl;

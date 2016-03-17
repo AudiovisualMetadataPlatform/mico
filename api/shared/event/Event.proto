@@ -20,10 +20,14 @@ enum MessageType {
   ERROR    = 4; //!< indicates, that the processing failed and the message contains an error and further description
 }
 
-enum ErrorCodes{
-  UNSUPPORTED_CONTENT_TYPE    = 30; // could be a bug in broker or in an extractor which provided that content (created content with different type then stated in annotation)
+/**
+ * A list of errors, that can occur during extraction, where the broker should react on
+ */
+ enum ErrorCodes{
+  UNSUPPORTED_CONTENT_TYPE    = 30; // asset content has different type then stated in annotation (could be a bug in broker or in an extractor which provided that content )
   UNSUPPORTED_CONTENT_VARIANT = 31; // e.g. an animated 32bit HDR TIFF that cannot be read by an extractor using libtiff, while a 8bit RGB TIFF can be read without problem
   DECODING_ERROR              = 32; // error in binary data / stream
+  MISSING_ASSET               = 33; // a required asset is not available during extraction
   MISSING_ANNOTATION          = 35; // extractor depends on non-existing annotation from other extractor
   INSUFFICIENT_RESOURCE       = 40; // extractor is not able to process this part
   INSUFFICIENT_STORAGE        = 41; // more detailed info then INSUFFICIENT_RESOURCE

@@ -7,14 +7,9 @@ import java.io.InputStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.DateFormatSymbols;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.Message;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.JndiRegistry;
@@ -22,42 +17,26 @@ import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
 import org.apache.camel.language.Bean;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.RoutesDefinition;
-import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.commons.io.IOUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.repository.RepositoryException;
-
 import de.fraunhofer.idmt.camel.MicoCamel;
-import eu.mico.platform.anno4j.model.impl.body.MultiMediaBody;
-import eu.mico.platform.anno4j.model.impl.micotarget.InitialTarget;
 import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
-import eu.mico.platform.persistence.metadata.MICOProvenance;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
-import static eu.mico.platform.camel.MicoRabbitProducer.KEY_MICO_ITEM;
-import static eu.mico.platform.camel.MicoRabbitProducer.KEY_MICO_PART;;
+import eu.mico.platform.persistence.model.Item;;
 
 /**
  * @author sld
  *
  */
-public class MicoRabbitComponentTest extends CamelTestSupport {
+public class MicoRabbitComponentTest extends TestBase {
 
-    private static final String SAMPLE_PNG = "sample.png";
-    private static final String SAMPLE_MP4 = "sample-video.mp4";
-    private static final String TEST_DATA_FOLDER = "src/test/resources/data/";
-    private static MicoCamel micoCamel;
-    private static String textItemUri,textPartUri;
-    private static String imageItemUri,imagePartUri;
-    private static String videoItemUri,videoPartUri;
+    private static String textItemUri;
+    private static String imageItemUri;
+    private static String videoItemUri;
 
-    private static SimpleDateFormat isodate = new SimpleDateFormat("yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'", DateFormatSymbols.getInstance(Locale.US));
     static {
         isodate.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
@@ -83,7 +62,7 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         MockEndpoint mock = getMockEndpoint("mock:result_image");
         mock.expectedMinimumMessageCount(1);
 
-        template.send("direct:image",createExchange(imageItemUri, imagePartUri));
+        template.send("direct:image",createExchange(imageItemUri));
         assertMockEndpointsSatisfied();
     }
 
@@ -96,7 +75,7 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         MockEndpoint mock = getMockEndpoint("mock:result_text");
         mock.expectedMinimumMessageCount(1);
 
-        template.send("direct:text",createExchange(textItemUri, textPartUri));
+        template.send("direct:text",createExchange(textItemUri));
         assertMockEndpointsSatisfied();
     }
 
@@ -119,10 +98,8 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
     public void testSampleSplitRoute() throws Exception {
         MockEndpoint mock2 = getMockEndpoint("mock:result_split2");
         MockEndpoint mock3 = getMockEndpoint("mock:result_split3");
-	MockEndpoint mock4 = getMockEndpoint("mock:result_multicast");
         mock2.expectedMinimumMessageCount(1);
         mock3.expectedMinimumMessageCount(1);
-	mock4.expectedMinimumMessageCount(2);
 
         template.send("direct:test_split",createExchange());
         assertMockEndpointsSatisfied();
@@ -152,7 +129,7 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         mock2.expectedMinimumMessageCount(1);
         mock3.expectedMinimumMessageCount(1);
 
-        template.send("direct:video_mp4",createExchange(videoItemUri,videoPartUri));
+        template.send("direct:video_mp4",createExchange(videoItemUri));
         assertMockEndpointsSatisfied();
     }
 
@@ -229,7 +206,7 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         resetDataFolder();
 
         // remove test items from platform
-        micoCamel.deleteContentItem(textItemUri);
+//        micoCamel.deleteContentItem(textItemUri);
         micoCamel.deleteContentItem(imageItemUri);
         micoCamel.deleteContentItem(videoItemUri);
 
@@ -262,8 +239,12 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
         }
     }
     
-    public static URI getServiceID() {
-        return new URIImpl("http://example.org/services/CAMEL-TEST-injector");
+    /**
+     * create exchange containing item and part uri of sample text content
+     * @return an exchange containing item and part uri in headers
+     */
+    private Exchange createExchange() {
+        return createExchange(textItemUri);
     }
 
     /**
@@ -273,22 +254,12 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
      * @throws RepositoryException
      */
     private static void createTextItem() throws IOException, RepositoryException {
-        ContentItem item = micoCamel.createItem();
+        Item item = micoCamel.createItem();
         String content = "This is a sample text for testing ...";
         String type = "text/plain";
-        Content part = micoCamel.addPart(content.getBytes(), type, item);
-        part.setProperty(DCTERMS.SOURCE, "file://test-data.txt");              // set the analyzed content part as source for the new content part
-        part.setProperty(DCTERMS.CREATED, isodate.format(new Date()));         // set the created date for the new content part
-        part.setType(type);
-        
-        MultiMediaBody multiMediaBody = new MultiMediaBody();
-        multiMediaBody.setFormat(type);
-        InitialTarget target = new InitialTarget("test-data.txt");
-        part.createAnnotation(multiMediaBody, null, getProvenance(), target);
+        micoCamel.addAsset(content.getBytes(), item, type);
 
         textItemUri = item.getURI().toString();
-        textPartUri = part.getURI().toString();
-        System.out.println("textPart: " + textPartUri);
     }
 
     /**
@@ -298,23 +269,13 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
      * @throws RepositoryException
      */
     private static void createImageItem() throws IOException, RepositoryException {
-        ContentItem item = micoCamel.createItem();
+        Item item = micoCamel.createItem();
         InputStream content = new FileInputStream(TEST_DATA_FOLDER+SAMPLE_PNG);
         String type = "image/png";
-        Content part = micoCamel.addPart(IOUtils.toByteArray(content), type, item);
-        part.setProperty(DCTERMS.SOURCE, "file://" + SAMPLE_PNG);              // set the analyzed content part as source for the new content part
-        part.setProperty(DCTERMS.CREATED, isodate.format(new Date()));         // set the created date for the new content part
-        part.setType(type);
-
-        MultiMediaBody multiMediaBody = new MultiMediaBody();
-        multiMediaBody.setFormat(type);
-        InitialTarget target = new InitialTarget(SAMPLE_PNG);
-        part.createAnnotation(multiMediaBody, null, getProvenance(), target);
+        micoCamel.addAsset(IOUtils.toByteArray(content), item, type);
 
         imageItemUri = item.getURI().toString();
-        imagePartUri = part.getURI().toString();
         System.out.println("imageItem: " + imageItemUri);
-        System.out.println("imagePart: " + imagePartUri);
     }
     
 
@@ -325,47 +286,14 @@ public class MicoRabbitComponentTest extends CamelTestSupport {
      * @throws RepositoryException
      */
     private static void createVideoItem() throws IOException, RepositoryException {
-        ContentItem item = micoCamel.createItem();
+        Item item = micoCamel.createItem();
         InputStream content = new FileInputStream(TEST_DATA_FOLDER+SAMPLE_MP4);
         String type = "video/mp4";
-        Content part = micoCamel.addPart(IOUtils.toByteArray(content), type, item);
-        part.setProperty(DCTERMS.SOURCE, "file://test-video.mp4");              // set the analyzed content part as source for the new content part
-        part.setProperty(DCTERMS.CREATED, isodate.format(new Date()));          // set the created date for the new content part
-        part.setType(type);
-        
-        MultiMediaBody multiMediaBody = new MultiMediaBody();
-        multiMediaBody.setFormat(type);
-        InitialTarget target = new InitialTarget("test-video.mp4");
-        part.createAnnotation(multiMediaBody, null, getProvenance(), target);
+        micoCamel.addAsset(IOUtils.toByteArray(content), item, type);
 
         videoItemUri = item.getURI().toString();
-        videoPartUri = part.getURI().toString();
-        System.out.println("videoPart: " + videoPartUri);
+        System.out.println("videoItem: " + videoItemUri);
     }
     
-    /**
-     * create exchange containing item and part uri of sample text content
-     * @return an exchange containing item and part uri in headers
-     */
-    private Exchange createExchange() {
-        return createExchange(textItemUri, textPartUri);
-    }
-    /**
-     * create exchange containing item and part uri of sample/test content
-     * @return an exchange containing item and part uri in headers
-     */
-    private Exchange createExchange(String itemUri, String partUri) {
-        Exchange exchange = context.getEndpoint("direct:a").createExchange();
-        Message msg = exchange.getIn();
-        msg.setHeader(KEY_MICO_ITEM, itemUri);
-        msg.setHeader(KEY_MICO_PART, partUri);
-        return exchange;
-    }
-    
-    private static MICOProvenance getProvenance() {
-        MICOProvenance micoProvenance = new MICOProvenance();
-        micoProvenance.setExtractorName(getServiceID().toString());
-        return micoProvenance;
-    }
     
 }
