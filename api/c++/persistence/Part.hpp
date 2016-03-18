@@ -27,7 +27,7 @@ namespace mico {
 
         virtual void setBody(const jnipp::LocalRef<ComGithubAnno4jModelBody> &body) = 0;
 
-        //virtual std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > getTargets() = 0;
+        virtual std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > getTargets() = 0;
 
         virtual void setTargets(std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > targets) = 0;
 

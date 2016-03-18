@@ -3,6 +3,18 @@
 namespace mico {
   namespace persistence {
 
+    std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > PartAnno4cpp::getTargets() {
+      std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > list;
+
+      jnipp::LocalRef<JavaUtilSet> jset = m_partMMM->getTarget();
+      jnipp::LocalRef< jnipp::Array<JavaLangObject> > jarray = static_cast< jnipp::LocalRef<JavaUtilHashSet> >(jset)->toArray();
+      for (jsize i = 0; i < jarray->length(); i++) {
+        jnipp::LocalRef<JavaLangObject> jobject = jarray->get(i);
+        list.push_back( jobject );
+      }
+      return list;
+    }
+
     //std::list<Resource> PartAnno4cpp::getInputs()
     //{
     //  std::list<Resource> resourceSet;

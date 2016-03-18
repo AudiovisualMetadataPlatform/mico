@@ -61,9 +61,7 @@ namespace mico {
         m_partMMM->setBody(body);
       }
 
-      //std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > getTargets() {
-      //  throw std::runtime_error("PartAnno4cpp::getTargets(): Not yet implemented!");
-      //}
+      std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > getTargets();
 
       void setTargets(std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > targets) {
         throw std::runtime_error("PartAnno4cpp::setTargets(): Not yet implemented!");
