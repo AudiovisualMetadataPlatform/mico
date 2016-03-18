@@ -38,7 +38,7 @@ namespace mico {
         return m_itemMMM;
       }
 
-      //Iterable<? extends Part> ItemAnno4cpp::getParts();
+      std::list< std::shared_ptr<Part> > getParts();
 
       std::string getSyntacticalType() {
         return static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->getSyntacticalType()->std_str();

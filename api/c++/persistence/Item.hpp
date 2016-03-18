@@ -32,11 +32,11 @@ namespace mico {
         virtual std::shared_ptr<Part> getPart(mico::rdf::model::URI uri) = 0;
 
         /**
-         * Return an iterator over all content parts contained in this content item.
+         * Return a list over all content parts contained in this item.
          *
-         * @return an iterable that (lazily) iterates over the content parts
+         * @return a list that holds the content parts
          */
-        //Iterable<? extends Part> getParts();
+        virtual std::list< std::shared_ptr<Part> > getParts() = 0;
 
         virtual std::string getSerializedAt() = 0;
     };

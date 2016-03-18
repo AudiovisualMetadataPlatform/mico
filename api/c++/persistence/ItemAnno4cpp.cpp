@@ -29,14 +29,19 @@ namespace mico {
       }
     }
 
-    //Iterable<? extends Part> ItemAnno4cpp::getParts() {
-    //  ArrayList<PartAnno4j> partsAnno4j = new ArrayList<>();
-    //  List<PartMMM> partsMMM = persistenceService.getAnno4j().findAll(PartMMM.class, this.getURI());
-    //  for (PartMMM partMMM : partsMMM) {
-    //    partsAnno4j.add(new PartAnno4j(partMMM, this, persistenceService));
-    //  }
-    //  return partsAnno4j;
-    //}
+    std::list< std::shared_ptr<Part> > ItemAnno4cpp::getParts()
+    {
+      std::list< std::shared_ptr<Part> > partSet;
+      jnipp::LocalRef<JavaLangString> jsuri = JavaLangString::create(this->getURI().stringValue());
+      jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri = OrgOpenrdfModelImplURIImpl::construct( jsuri );
+      jnipp::LocalRef<JavaUtilList> jpartList = m_persistenceService.getAnno4j()->findAll(EuMicoPlatformAnno4jModelPartMMM::clazz(), juri);
+      for (jsize i = 0; i < jpartList->size(); i++) {
+        jnipp::LocalRef<JavaLangObject> jobject = jpartList->get(i);
+        std::shared_ptr<PartAnno4cpp> part(new PartAnno4cpp(jobject, std::dynamic_pointer_cast<Item>( shared_from_this() ), m_persistenceService));
+        partSet.push_back( part );
+      }
+      return partSet;
+    }
 
     std::shared_ptr<Asset> ItemAnno4cpp::getAsset() {
       //if (m_itemMMM.getAsset() == null) {
