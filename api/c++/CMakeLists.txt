@@ -5,6 +5,18 @@ if (NOT DEFINED MICO_PLATFORM_VERSION)
     set(MICO_PLATFORM_VERSION "2.0.0")
 endif()
 
+include(ExternalProject)
+
+ExternalProject_Add(anno4cpp_ext
+    PREFIX externals
+    GIT_REPOSITORY git@gitserv00.idmt.fraunhofer.de:wgl/anno4cpp.git
+    GIT_TAG update_cpp_api_anno4cpp
+    CMAKE_ARGS
+      -DCMAKE_BUILD_TYPE=Debug
+      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/install
+)
+
+
 string(REPLACE "." ";" VERSION_LIST ${MICO_PLATFORM_VERSION})
 list(GET VERSION_LIST 0 MICO_PLATFORM_VERSION_MAJOR)
 list(GET VERSION_LIST 1 MICO_PLATFORM_VERSION_MINOR)
@@ -72,6 +84,7 @@ endif()
 
 link_directories(/home/christian/mico/anno4cpp/build-cpp-Desktop-Debug/)
 
+add_subdirectory(commons)
 add_subdirectory(logging)
 add_subdirectory(rdf)
 add_subdirectory(persistence)
