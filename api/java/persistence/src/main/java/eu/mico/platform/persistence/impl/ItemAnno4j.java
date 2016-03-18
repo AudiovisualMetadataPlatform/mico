@@ -139,7 +139,7 @@ public class ItemAnno4j implements Item {
 
     @Override
     public boolean hasAsset() throws RepositoryException {
-        return this.itemMMM.getAsset() == null;
+        return this.itemMMM.getAsset() != null;
     }
 
     @Override
