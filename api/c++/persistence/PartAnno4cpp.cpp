@@ -16,6 +16,15 @@ namespace mico {
       return list;
     }
 
+    void PartAnno4cpp::setTargets(std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > targets)
+    {
+      jnipp::LocalRef< JavaUtilHashSet > jtargetSet = JavaUtilHashSet::construct();
+      for(auto iter = targets.begin(); iter != targets.end(); iter++) {
+        jtargetSet->add(*iter);
+      }
+      m_partMMM->setTarget(jtargetSet);
+    }
+
     std::list< std::shared_ptr<Resource> > PartAnno4cpp::getInputs()
     {
       std::list< std::shared_ptr<Resource> > resourceSet;
@@ -35,15 +44,13 @@ namespace mico {
       return resourceSet;
     }
 
-    void PartAnno4cpp::setInputs(std::list<Resource> inputs)
+    void PartAnno4cpp::setInputs(std::list< std::shared_ptr<Resource> > inputs)
     {
-      std::list< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> > resourceMMMSet;
-      //jnipp::LocalRef< JavaUtilSet > jresourceMMMSet;
-      //for(Resource resource : inputs) {
-      //    resourceMMMSet.push_back(resource.getRDFObject());
-      //}
-      //m_partMMM->setInputs(jresourceMMMSet);
-      throw std::runtime_error("PartAnno4cpp::setInputs(): Not yet implemented!");
+      jnipp::LocalRef< JavaUtilHashSet > jresourceMMMSet = JavaUtilHashSet::construct();
+      for(auto iter = inputs.begin(); iter != inputs.end(); iter++) {
+          jresourceMMMSet->add( (*iter)->getRDFObject() );
+      }
+      m_partMMM->setInputs(jresourceMMMSet);
     }
 
     std::shared_ptr<Asset> PartAnno4cpp::getAsset()

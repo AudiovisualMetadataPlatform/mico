@@ -63,9 +63,7 @@ namespace mico {
 
       std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > getTargets();
 
-      void setTargets(std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > targets) {
-        throw std::runtime_error("PartAnno4cpp::setTargets(): Not yet implemented!");
-      }
+      void setTargets(std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > targets);
 
       void addTarget(const jnipp::LocalRef<ComGithubAnno4jModelTarget> &target) {
         m_partMMM->addTarget(target);
@@ -73,7 +71,7 @@ namespace mico {
 
       std::list< std::shared_ptr<Resource> > getInputs();
 
-      void setInputs(std::list<Resource> inputs);
+      void setInputs(std::list<std::shared_ptr<Resource> > inputs);
 
       void addInput(Resource& input) {
         m_partMMM->addInput( input.getRDFObject() );

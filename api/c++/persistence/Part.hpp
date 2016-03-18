@@ -34,7 +34,7 @@ namespace mico {
 
         virtual std::list< std::shared_ptr<Resource> > getInputs() = 0;
 
-        virtual void setInputs(std::list<Resource> inputs) = 0;
+        virtual void setInputs(std::list< std::shared_ptr<Resource> > inputs) = 0;
 
         virtual void addInput(Resource& input) = 0;
 
