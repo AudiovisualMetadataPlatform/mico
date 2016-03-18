@@ -60,6 +60,11 @@
             <email>horst.stadler@salzburgresearch.at</email>
             <organization>Salzburg Research</organization>
         </developer>
+        <developer>
+          <name>Rupert Westenthaler</name>
+          <email>rupert.westenthaler@salzburgresearch.at</email>
+          <organization>Salzburg Research</organization>
+        </developer>
     </developers>
 
     <organization>
@@ -126,6 +131,7 @@
         <module>spring</module>
         <module>samples</module>
         <module>mmm-anno4j</module>
+        <module>fam-anno4j</module>
     </modules>
 
     <profiles>
