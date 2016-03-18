@@ -7,13 +7,18 @@ endif()
 
 include(ExternalProject)
 
+set(ANNO4CPPDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/install)
+if (DEFINED CMAKE_INSTALL_PREFIX)
+    set(ANNO4CPPDEPS_ROOT ${CMAKE_INSTALL_PREFIX})
+endif()
+
 ExternalProject_Add(anno4cpp_ext
     PREFIX externals
     GIT_REPOSITORY git@gitserv00.idmt.fraunhofer.de:wgl/anno4cpp.git
     GIT_TAG update_cpp_api_anno4cpp
     CMAKE_ARGS
       -DCMAKE_BUILD_TYPE=Debug
-      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/install
+      -DCMAKE_INSTALL_PREFIX:PATH=${ANNO4CPPDEPS_ROOT}
 )
 
 
