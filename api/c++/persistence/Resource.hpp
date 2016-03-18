@@ -1,6 +1,7 @@
 #ifndef RESOURCE_HPP
 #define RESOURCE_HPP 1
 
+#include<memory>
 #include "Asset.hpp"
 #include "anno4cpp.h"
 
@@ -15,7 +16,7 @@ namespace mico {
     /**
      * Super type of items and parts
      */
-    class Resource
+    class Resource: public std::enable_shared_from_this<Resource>
     {
       public:
         /**
@@ -39,7 +40,7 @@ namespace mico {
 
         virtual void setSemanticType(std::string semanticType) = 0;
 
-        virtual Asset* getAsset() = 0;
+        virtual std::shared_ptr<Asset> getAsset() = 0;
 
         virtual bool hasAsset() = 0;
     };

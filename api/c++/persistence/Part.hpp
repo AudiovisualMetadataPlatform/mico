@@ -2,7 +2,6 @@
 #define PART_HPP 1
 
 #include <list>
-
 #include "Resource.hpp"
 
 namespace mico {
@@ -21,7 +20,7 @@ namespace mico {
          * Return the parent content item.
          * @return
          */
-        virtual Item* getItem() = 0;
+        virtual std::shared_ptr<Item> getItem() = 0;
 
         virtual jnipp::LocalRef<ComGithubAnno4jModelBody> getBody() = 0;
 
@@ -33,7 +32,7 @@ namespace mico {
 
         virtual void addTarget(const jnipp::LocalRef<ComGithubAnno4jModelTarget> &target) = 0;
 
-        //virtual std::list<Resource> getInputs() = 0;
+        virtual std::list< std::shared_ptr<Resource> > getInputs() = 0;
 
         virtual void setInputs(std::list<Resource> inputs) = 0;
 

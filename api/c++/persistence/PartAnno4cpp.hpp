@@ -12,17 +12,17 @@ namespace mico {
 
     private:
       PersistenceService& m_persistenceService;
-      Item* m_item;
+      std::shared_ptr<Item> m_item;
       jnipp::LocalRef<EuMicoPlatformAnno4jModelPartMMM> m_partMMM;
 
     public:
-      PartAnno4cpp(jnipp::LocalRef<EuMicoPlatformAnno4jModelPartMMM> partMMM, Item* item, PersistenceService& persistenceService)
+      PartAnno4cpp(jnipp::LocalRef<EuMicoPlatformAnno4jModelPartMMM> partMMM, std::shared_ptr<Item> item, PersistenceService& persistenceService)
         : m_persistenceService(persistenceService),
           m_item(item),
           m_partMMM(partMMM)
       {}
 
-      Item* getItem() {
+      std::shared_ptr<Item> getItem() {
         return m_item;
       }
 
@@ -71,7 +71,7 @@ namespace mico {
         m_partMMM->addTarget(target);
       }
 
-      //std::list<Resource> getInputs();
+      std::list< std::shared_ptr<Resource> > getInputs();
 
       void setInputs(std::list<Resource> inputs);
 
@@ -87,7 +87,7 @@ namespace mico {
         return static_cast< jnipp::LocalRef<ComGithubAnno4jModelAnnotation> >(m_partMMM)->getSerializedBy();
       }
 
-      Asset* getAsset();
+      std::shared_ptr<Asset> getAsset();
 
       bool hasAsset() {
         jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> asset = static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_partMMM)->getAsset();

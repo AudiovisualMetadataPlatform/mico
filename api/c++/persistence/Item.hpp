@@ -20,7 +20,7 @@ namespace mico {
          * @param extractorID The id of the extractor which creates the current part
          * @return a handle to a ContentPart object that is suitable for reading and updating
          */
-        virtual Part* createPart(mico::rdf::model::URI extractorID) = 0;
+        virtual std::shared_ptr<Part> createPart(mico::rdf::model::URI extractorID) = 0;
 
         /**
          * Return a handle to the ContentPart with the given URI, or null in case the content item does not have this
@@ -29,7 +29,7 @@ namespace mico {
          * @param uri the URI of the content part to return
          * @return a handle to a ContentPart object that is suitable for reading and updating
          */
-        virtual Part* getPart(mico::rdf::model::URI uri) = 0;
+        virtual std::shared_ptr<Part> getPart(mico::rdf::model::URI uri) = 0;
 
         /**
          * Return an iterator over all content parts contained in this content item.
