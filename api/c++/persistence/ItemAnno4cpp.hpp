@@ -20,12 +20,13 @@ namespace mico {
         EuMicoPlatformPersistenceImplItemAnno4j::initContexts( itemMMM );
       }
 
-      Part* createPart(mico::rdf::model::URI extractorID);
+      std::shared_ptr<Part> createPart(mico::rdf::model::URI extractorID);
 
-      Part* getPart(mico::rdf::model::URI uri) {
+      std::shared_ptr<Part> getPart(mico::rdf::model::URI uri) {
         jnipp::LocalRef<JavaLangString> juri = JavaLangString::create( uri.stringValue() );
         jnipp::LocalRef<EuMicoPlatformAnno4jModelPartMMM> partMMM = m_persistenceService.getAnno4j()->findByID(EuMicoPlatformAnno4jModelPartMMM::clazz(), juri);
-        return new PartAnno4cpp(partMMM, this, m_persistenceService);
+        std::shared_ptr<PartAnno4cpp> part( new PartAnno4cpp(partMMM, std::dynamic_pointer_cast<Item>( shared_from_this() ), m_persistenceService) );
+        return part;
       }
 
       mico::rdf::model::URI getURI() {
@@ -57,7 +58,7 @@ namespace mico {
         static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->setSemanticType(jsemanticType);
       }
 
-      Asset* getAsset();
+      std::shared_ptr<Asset> getAsset();
 
       bool hasAsset() {
         jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> asset = static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->getAsset();

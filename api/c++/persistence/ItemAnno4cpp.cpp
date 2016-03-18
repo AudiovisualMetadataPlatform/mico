@@ -3,7 +3,7 @@
 namespace mico {
   namespace persistence {
 
-    Part* ItemAnno4cpp::createPart(mico::rdf::model::URI extractorID)
+    std::shared_ptr<Part> ItemAnno4cpp::createPart(mico::rdf::model::URI extractorID)
     {
       try {
         jnipp::LocalRef<JavaLangString> jsuri = JavaLangString::create(this->getURI().stringValue());
@@ -22,7 +22,8 @@ namespace mico {
 
         //log.trace("Created Part with id {} in the context graph {} - Creator {}", partMMM.getResourceAsString(), this.getURI(), extractorID);
 
-        return new PartAnno4cpp(partMMM, this, m_persistenceService);
+        std::shared_ptr<PartAnno4cpp> part(new PartAnno4cpp(partMMM, std::dynamic_pointer_cast<Item>( shared_from_this() ), m_persistenceService));
+        return part;
       } catch (...) {
         throw std::runtime_error("ItemAnno4cpp::createPart(): something went wrong )-;");
       }
@@ -37,7 +38,7 @@ namespace mico {
     //  return partsAnno4j;
     //}
 
-    Asset* ItemAnno4cpp::getAsset() {
+    std::shared_ptr<Asset> ItemAnno4cpp::getAsset() {
       //if (m_itemMMM.getAsset() == null) {
       //  try {
       //    Anno4j anno4j = m_persistenceService.getAnno4j();
@@ -56,7 +57,8 @@ namespace mico {
       //      throw new RepositoryException("Couldn´t instantiate AssetMMM", e);
       //  }
       //}
-      return new AssetAnno4cpp(static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->getAsset(), m_persistenceService);
+      //return new AssetAnno4cpp(static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->getAsset(), m_persistenceService);
+      throw std::runtime_error("ItemAnno4cpp::getAsset(): Not yet implemented!");
     }
   }
 }
