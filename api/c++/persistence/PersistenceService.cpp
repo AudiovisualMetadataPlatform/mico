@@ -18,6 +18,7 @@
 
 #include "PersistenceService.hpp"
 #include "SPARQLUtil.hpp"
+#include "FileOperations.h"
 
 #include "Item.hpp"
 
@@ -69,12 +70,20 @@ namespace mico {
 
         void PersistenceService::initService()
         {
-            std::string JavaClassPath="-Djava.class.path=";
-            JavaClassPath +=  std::string("/home/christian/mico/anno4cpp/java/anno4jdependencies/target/anno4jdependencies-2.0.0-SNAPSHOT.jar");
-
-
             if (!m_sEnv || ! m_sJvm) {
-                //TODO: add classpath mechanism for persitence service
+                std::vector<std::string> filePatterns = {std::string(".*anno4jdependencies.*")};
+                std::vector<std::string> paths =
+                    {std::string(ANNO4JDEPENDENCIES_PATH),"/usr/share","/usr/local/share"};
+
+                std::map<std::string,std::string> jar_file =
+                      commons::FileOperations::findFiles(filePatterns, paths);
+
+                if (jar_file.size() == 0) {
+                    throw std::runtime_error("Could not find appropriate anno4jdependencies jar.");
+                }
+
+                std::string JavaClassPath="-Djava.class.path=";
+                JavaClassPath +=  jar_file[".*anno4jdependencies.*"];
 
                 JavaVMOption options[1];    // JVM invocation options
                 options[0].optionString = (char *) JavaClassPath.c_str();

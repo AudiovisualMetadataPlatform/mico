@@ -8,7 +8,7 @@ if (UNIX)
   add_definitions(-std=c++11)
 endif()
 
-find_package( Boost REQUIRED COMPONENTS system log log_setup filesystem )
+find_package( Boost REQUIRED COMPONENTS system log log_setup filesystem regex)
 
 include_directories(
   .

@@ -79,7 +79,7 @@ endif()
 include_directories(
   ${AMQPCPP_INCLUDE_DIRS}
   ${JNI_INCLUDE_DIRS}
-  /home/christian/mico/anno4cpp/build-cpp-Desktop-Debug/generated
+  ${ANNO4CPPDEPS_ROOT}/include
 )
 
 if (UNIX)
@@ -87,7 +87,7 @@ if (UNIX)
   link_directories(${JAVA_AWT_PATH}/xawt/ )
 endif()
 
-link_directories(/home/christian/mico/anno4cpp/build-cpp-Desktop-Debug/)
+link_directories(${ANNO4CPPDEPS_ROOT}/lib/)
 
 add_subdirectory(commons)
 add_subdirectory(logging)

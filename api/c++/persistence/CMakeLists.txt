@@ -12,7 +12,14 @@ ENDFOREACH()
 
 #set_source_files_properties(${COMPILED_RESOURCES} PROPERTIES GENERATED TRUE)
 
-include_directories(../rdf ../logging ${HDFS_INCLUDE_DIRS})
+include_directories(../rdf ../logging ../commons ${HDFS_INCLUDE_DIRS})
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+message(STATUS "Using [${ANNODEPS_JAR}], version ${ANNO4JDEPENDENCIES_VERSION} based on anno4j ${ANNO4JDEPENDENCIES_ANNO4J_VERSION}.")
+
+add_definitions(-DANNO4JDEPENDENCIES_PATH="${ANNO4CPPDEPS_ROOT}/usr/share/mico")
+
 
 add_library(mico_persistence SHARED
   ItemAnno4cpp
@@ -20,8 +27,13 @@ add_library(mico_persistence SHARED
   ${COMPILED_RESOURCES} SPARQLUtil.cpp Metadata.cpp Content.cpp ContentItem.cpp PersistenceService.cpp URLStream.cpp FileStream.cpp WebStream.cpp HDFSStream.cpp
 )
 target_link_libraries(mico_persistence
+  micoapicommons
   anno4cpp
   mico_marmotta mico_rdf mico_logging ${CURL_LIBRARIES} ${HDFS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_THREAD_LIBS_INIT} ${JNI_LIBRARIES} ${JAVA_AWT_LIBRARY}
+)
+
+add_dependencies(mico_persistence
+    anno4cpp_ext
 )
 
 set_target_properties(mico_persistence PROPERTIES VERSION "${MICO_PLATFORM_VERSION}" SOVERSION "${MICO_PLATFORM_SOVERSION}")
