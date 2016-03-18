@@ -51,14 +51,11 @@ brokerApp.controller("ShowItemCtrl", function($scope,$http) {
 
     $scope.itemData;
 
-
-    $scope.$watch('itemUri', function(newValue, oldValue) {
-
+    $scope.$watch('itemUri', function() {
         $http.get("status/items?parts=true&uri=" + $scope.itemUri).success(function (data) {
             $scope.itemData = data[0];
         });
     });
-
 });
 
 
@@ -73,13 +70,13 @@ brokerApp.controller("InjectItemCtrl", function($scope,$http,$upload) {
     $scope.itemCreated
 
     $scope.createItem = function() {
+
         var file = $scope.itemAssetfiles[0];
         var fileReader = new FileReader();
         fileReader.readAsArrayBuffer(file);
-
         fileReader.onload = function(e) {
             $upload.http({
-                url: "inject/create" + "&type=" + $scope.type + "&name=" + file.name,
+                url: "inject/create" + "?type=" + $scope.itemAssetType + "&name=" + file.name,
                 method: 'POST',
                 data: e.target.result
             }).success(function (data) {
@@ -91,7 +88,7 @@ brokerApp.controller("InjectItemCtrl", function($scope,$http,$upload) {
     };
 
     $scope.submitItem = function() {
-        $http.post("inject/submit?ci=" + $scope.itemUri).success(function() {
+        $http.post("inject/submit?item=" + $scope.itemUri).success(function() {
             $scope.state = "Submitted";
         });
     };

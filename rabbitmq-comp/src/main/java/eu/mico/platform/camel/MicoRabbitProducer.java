@@ -17,7 +17,7 @@ import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.ShutdownSignalException;
 
 import eu.mico.platform.event.model.Event;
-import eu.mico.platform.event.model.Event.AnalysisEvent;
+import eu.mico.platform.event.model.Event.AnalysisRequest;
 
 /**
  * The MicoRabbitProducer produces mico analyze events 
@@ -40,28 +40,21 @@ public class MicoRabbitProducer extends DefaultProducer {
     @Override
     public void process(Exchange exchange) throws Exception {
         LOG.info("P R O D U C E analyze event for {} and put it to msg body", serviceId);
-        AnalysisEvent event;
+        AnalysisRequest event;
         Message inItem = exchange.getIn();
         String item = inItem.getHeader(KEY_MICO_ITEM, String.class);
         String part = inItem.getHeader(KEY_MICO_PART, String.class);
         try {
-            if (item != null && part != null) {
-                log.debug("found content part in msg HEADER: {}" , part);
-            }else{
-                // try to read item and part uri from msg body
-                String content = inItem.getBody(String.class);
-                String[] lines = content.split("\r\n");
-                item = lines[0];
-                part = lines[1];
-                inItem.setHeader(KEY_MICO_ITEM, item);
-                inItem.setHeader(KEY_MICO_PART, part);
-                if (item != null && part != null) {
-                    log.debug("found content part in msg BODY: {}" , part);
-                }
+            if (item == null){
+                throw new Exception("no item found in header");
             }
-            event = generateEvent(item, part);
+            if (part == null) {
+                log.debug("process item without part");
+                part = item;
+            }
+            event = generateRequest(item, part);
         } catch (Exception e) {
-            log.error("unable to extract content item and part uri from message: {}", e.getLocalizedMessage());
+            log.error("unable to extract content item and part uri from message: {}", e.getMessage());
             return;
         }
         inItem.setBody(event);
@@ -72,7 +65,7 @@ public class MicoRabbitProducer extends DefaultProducer {
         AnalyseManager manager = new AnalyseManager(event, channel);
         manager.sendEvent();
         if(exchange.getPattern().equals(ExchangePattern.InOut)||true){
-            while (!manager.hasResponse()) {
+            while (!manager.hasFinished()) {
                 LOG.debug("..waiting for response..");
 
                 synchronized (serviceId){
@@ -87,11 +80,11 @@ public class MicoRabbitProducer extends DefaultProducer {
     }
 
 
-    private AnalysisEvent generateEvent(String item, String part) {
+    private AnalysisRequest generateRequest(String item, String part) {
         LOG.info("generate event for {} {}", serviceId, part);
-        Event.AnalysisEvent analysisEvent = Event.AnalysisEvent.newBuilder()
-                .setContentItemUri(item)
-                .setObjectUri(part)
+        Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.newBuilder()
+                .setItemUri(item)
+                .addPartUri(part)
                 .setServiceId(serviceId).build();
     	
     	return analysisEvent;
@@ -104,13 +97,13 @@ public class MicoRabbitProducer extends DefaultProducer {
      */
     private class AnalyseManager extends DefaultConsumer {
         private String           queue;
-        private AnalysisEvent    event;
-        private boolean response = false;
+        private AnalysisRequest    req;
+        private boolean finished = false;
         private String newObjectUri = null;
 
-        public AnalyseManager(AnalysisEvent event, Channel channel) throws IOException {
+        public AnalyseManager(AnalysisRequest event, Channel channel) throws IOException {
             super(channel);
-            this.event = event;
+            this.req = event;
 
             // create a reply-to queue for this content item and attach a transition consumer to it
             queue = getChannel().queueDeclare().getQueue();
@@ -125,8 +118,8 @@ public class MicoRabbitProducer extends DefaultProducer {
             AMQP.BasicProperties ciProps = new AMQP.BasicProperties.Builder()
                     .correlationId(correlationId).replyTo(queue).build();
 
-            getChannel().basicPublish("", event.getServiceId(), ciProps,
-                    event.toByteArray());
+            getChannel().basicPublish("", req.getServiceId(), ciProps,
+                    req.toByteArray());
 
         }
 
@@ -137,19 +130,29 @@ public class MicoRabbitProducer extends DefaultProducer {
         public void handleDelivery(String consumerTag, Envelope envelope,
                 AMQP.BasicProperties properties, byte[] body)
                 throws IOException {
-            Event.AnalysisEvent analysisResponse = Event.AnalysisEvent
+            Event.AnalysisEvent response = Event.AnalysisEvent
                     .parseFrom(body);
-            newObjectUri = analysisResponse.getObjectUri();
-            log.debug(
-                    "received processing result from service {} for content item {}: new object {}",
-                    analysisResponse.getServiceId(),
-                    analysisResponse.getContentItemUri(), newObjectUri);
-            getChannel().basicAck(envelope.getDeliveryTag(), false);
-            
-            //analyze process finished, notify waiting threads to continue camel route
-            response = true;
-            synchronized(serviceId){
-                serviceId.notify();
+
+            switch (response.getType()) {
+            case PROGRESS:
+            case ERROR:
+                log.warn(response.getError().getMessage(), response.getError()
+                        .getDescription());
+            case NEW_PART:
+                newObjectUri = response.getNew().getPartUri();
+                log.debug(
+                        "received processing result from service {} for content item {}: new object {}",
+                        response.getNew().getServiceId(), response.getNew()
+                                .getItemUri(), newObjectUri);
+                getChannel().basicAck(envelope.getDeliveryTag(), false);
+
+            case FINISH:
+                // analyze process finished, notify waiting threads to continue
+                // camel route
+                finished = true;
+                synchronized (serviceId) {
+                    serviceId.notify();
+                }
             }
         }
 
@@ -184,8 +187,8 @@ public class MicoRabbitProducer extends DefaultProducer {
             super.handleShutdownSignal(consumerTag, sig);
         }
 
-        public boolean hasResponse() {
-            return response;
+        public boolean hasFinished() {
+            return finished;
         }
 
         public String getNewObjectUri() {

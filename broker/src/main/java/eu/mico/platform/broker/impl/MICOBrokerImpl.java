@@ -115,6 +115,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
         log.info("initialising RabbitMQ connection ...");
 
+
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(host);
         factory.setPort(rabbitPort);
@@ -377,7 +378,7 @@ public class MICOBrokerImpl implements MICOBroker {
                 Channel channel = connection.createChannel();
 
                 log.info("- triggering analysis process for initial states ...");
-                ContentItemManager mgr = new ContentItemManager(item, state, channel);
+                ItemManager mgr = new ItemManager(item, state, channel);
                 Thread t = new Thread(mgr);
                 t.start();
 
@@ -396,13 +397,13 @@ public class MICOBrokerImpl implements MICOBroker {
      * analysis events to appropriate analysers as found in the dependency graph. A thread loop waits and only terminates
      * once all service requests are finished. In this case, the manager sends a content event response to the output queue
      */
-    private class ContentItemManager extends DefaultConsumer implements Runnable {
+    private class ItemManager extends DefaultConsumer implements Runnable {
         private Item item;
         private ItemState state;
         private String queue;
         private String queueTag;
 
-        public ContentItemManager(Item item, ItemState state, Channel channel) throws IOException {
+        public ItemManager(Item item, ItemState state, Channel channel) throws IOException {
             super(channel);
             this.item = item;
             this.state = state;
@@ -417,6 +418,7 @@ public class MICOBrokerImpl implements MICOBroker {
             log.info("looking for possible state transitions ...");
             if (state.isFinalState()) {
                 // send finish event
+                log.info("state is final state ...");
                 getChannel().basicPublish("", EventManager.QUEUE_PART_OUTPUT, null, Event.ItemEvent.newBuilder().setItemUri(item.getURI().stringValue()).build().toByteArray());
 
                 synchronized (this) {
@@ -436,7 +438,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
                     Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.newBuilder()
                             .setItemUri(item.getURI().toString())
-                            .setPartUri(0, item.getURI().stringValue())
+                            .addPartUri(item.getURI().stringValue())
                             .setServiceId(t.getService().getUri().stringValue()).build();
 
                     getChannel().basicPublish("", t.getService().getQueueName(), ciProps, analysisEvent.toByteArray());

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# global setup variables
+EXTRACTOR_NAME="${project.artifactId}.jar"
+EXTRACTOR_DESC="Sample extractor showing interaction with mico platform, by counting words from text assets"
+EXTRACTOR_SYSTEM=java
+
+
+EXTRACTOR_CLASS="${mainClass}"
+EXTRACTOR_CLASS_PATH="/usr/share/java/commons-daemon.jar":"/usr/share/mico/$EXTRACTOR_NAME"

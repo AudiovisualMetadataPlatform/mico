@@ -27,10 +27,11 @@ public class PartAnno4jTest {
     private static Anno4j anno4j;
     private static Item item;
     private static Part part;
+    private static PersistenceService persistenceService;
 
     @BeforeClass
     public static void setUp() throws URISyntaxException, RepositoryException {
-        PersistenceService persistenceService = new PersistenceServiceAnno4j();
+        persistenceService = new PersistenceServiceAnno4j();
         anno4j = persistenceService.getAnno4j();
         item = persistenceService.createItem();
         part = item.createPart(new URIImpl("http://www.example.com/extractor"));
@@ -125,7 +126,24 @@ public class PartAnno4jTest {
 
         AssetMMM assetMMM = anno4j.findByID(PartMMM.class, part.getURI()).getAsset();
         assertEquals(format, assetMMM.getFormat());
-
     }
 
+    @Test
+    public void subGraphTest() throws RepositoryException {
+        int initialItemCount = persistenceService.getAnno4j().findAll(AssetMMM.class).size();
+
+        final Item tmpItem1 = persistenceService.createItem();
+        final Item tmpItem2 = persistenceService.createItem();
+
+        final Part part1 = tmpItem1.createPart(new URIImpl("http://test-extractor-id.org/1"));
+        final Part part2 = tmpItem2.createPart(new URIImpl("http://test-extractor-id.org/2"));
+
+        part1.getAsset();
+        part2.getAsset();
+
+        assertEquals(initialItemCount + 2, anno4j.findAll(AssetMMM.class).size());
+
+        assertEquals(1, persistenceService.getAnno4j().findAll(AssetMMM.class, tmpItem1.getURI()).size());
+        assertEquals(1, persistenceService.getAnno4j().findAll(AssetMMM.class, tmpItem2.getURI()).size());
+    }
 }

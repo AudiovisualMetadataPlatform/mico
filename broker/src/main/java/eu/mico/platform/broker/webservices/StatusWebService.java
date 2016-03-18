@@ -163,8 +163,8 @@ public class StatusWebService {
         Map<String,Object> sprops = new HashMap<>();
         sprops.put("uri", part.getURI().stringValue());
         sprops.put("title", part.getRDFObject().getResourceAsString());
-        sprops.put("type",  part.getSemanticType() + "/" + part.getSyntacticalType());
-        sprops.put("creator",  part.getSerializedBy());
+        sprops.put("type",  part.getSyntacticalType());
+        sprops.put("creator",  part.getSerializedBy().getResourceAsString());
         sprops.put("created",  part.getSerializedAt());
         sprops.put("source",  stringValue(part.getInputs().toArray(new Resource[0])[0].getURI()));
 

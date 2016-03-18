@@ -132,6 +132,7 @@
         <module>samples</module>
         <module>mmm-anno4j</module>
         <module>fam-anno4j</module>
+        <module>sparqlmm-anno4j</module>
     </modules>
 
     <profiles>

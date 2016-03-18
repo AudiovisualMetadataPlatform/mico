@@ -1,30 +1,35 @@
 package de.fraunhofer.idmt.mico;
 
 import eu.mico.platform.event.api.AnalysisResponse;
-import eu.mico.platform.event.api.AnalysisService;
+import eu.mico.platform.event.impl.AnalysisServiceAnno4j;
 import eu.mico.platform.event.model.AnalysisException;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Resource;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.openrdf.annotations.Iri;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.anno4j.model.Body;
+import com.github.anno4j.model.Target;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.TimeZone;
 
 
-public class DummyExtractor implements AnalysisService {
+public class DummyExtractor extends AnalysisServiceAnno4j {
 
 	private static Logger log = LoggerFactory.getLogger(DummyExtractor.class);
     private boolean called = false;
@@ -69,44 +74,78 @@ public class DummyExtractor implements AnalysisService {
     }
 
     @Override
-    public void call(AnalysisResponse resp, ContentItem ci, URI object)
-            throws AnalysisException, IOException {
-        if (ci == null) {
-            log.warn("contentItem is null");
+    public void call(AnalysisResponse resp, Item item, java.util.List<Resource> objs, java.util.Map<String,String> params) throws AnalysisException ,IOException {
+        if (item == null) {
+            log.warn("Item is null");
             return;
         }
-        if (object == null) {
+        if (objs == null) {
             log.warn("object is null");
             return;
         }
-        log.info("mock analysis request for content item {}, object {}", ci.getURI(), object);
-        Content cp = null;
+        if (objs.size() < 1) {
+            log.warn("object is null");
+            return;
+        }
+        Resource obj = objs.get(0);
         try {
-            cp = ci.createContentPart();
-            cp.setType(getProvides());
-            cp.setRelation(DCTERMS.CREATOR, getServiceID());
-            cp.setRelation(DCTERMS.SOURCE, object);
-            cp.setProperty(DCTERMS.CREATED, isodate.format(new Date()));
+            if (!obj.hasAsset()) {
+                log.warn("object {} of item {}", item.getURI(), obj.getURI());
+                return;
+            }
+        } catch (RepositoryException e1) {
+            log.warn("unable to acces asset info of {}", obj.getURI());
+            return;
+        }
+        log.info("mock analysis request for content item {}, object {}", item.getURI(), obj.getURI());
+        Part part = null;
+        try {
+            part = item.createPart(getServiceID());
+            part.setSyntacticalType(getProvides());
+            part.setSemanticType(getQueueName());
+            part.setInputs(new HashSet<Resource>(objs));
 
-            OutputStream os = cp.getOutputStream();
+            DummyExtractorBody body = getAnno4j().createObject(DummyExtractorBody.class);
+            body.setValue(getServiceID().stringValue());
+            part.setBody(body);
+            DummyExtractorTarget target = getAnno4j().createObject(DummyExtractorTarget.class);
+            part.addTarget(target);
+
+
+            OutputStream os = part.getAsset().getOutputStream();
             try{
-                ci.getContentPart(object).getInputStream();
-                IOUtils.copy(ci.getContentPart(object).getInputStream(), os);
+                InputStream is = obj.getAsset().getInputStream();
+                IOUtils.copy(is, os);
             }catch(Exception e){
                 log.warn("unable to access content part data",e);
             }
             os.write(("\nData added by: " + getServiceID() + "\n").getBytes());
             os.flush();
             os.close();
-            log.info("new contentpart added: {}", cp.getURI());
+            log.info("new contentpart added: {}", part.getURI());
 
-            resp.sendMessage(ci, cp.getURI());
+            resp.sendFinish(item);
             setCalled(true);
         } catch (RepositoryException e) {
             throw new AnalysisException("could not access triple store");
+        } catch (IllegalAccessException | InstantiationException e) {
+            throw new AnalysisException("could not create body/target class",e);
         }
 
     }
 
+    @Iri("http://example.org/services/dummy-exctractor-body")
+    public interface DummyExtractorBody extends Body {
+        @Iri("http://example.org/services/dummy-exctractor-body#value")
+        void setValue(String value);
+
+        @Iri("http://example.org/services/dummy-exctractor-body#value")
+        String getValue();
+    }
+
+    @Iri("http://example.org/services/dummy-exctractor-target")
+    public interface DummyExtractorTarget extends Target {
+
+    }
 
 }
