@@ -1,6 +1,9 @@
 package eu.mico.platform.anno4j.model.fam;
 
+import java.util.Set;
+
 import org.openrdf.annotations.Iri;
+import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -19,14 +22,19 @@ public interface TopicBody extends FAMBody {
      * @return the name
      */
     @Iri(FAM.TOPIC_LABEL)
-    public LangString getName();
+    public Set<LangString> getTopicLabels();
     
     /**
      * Setter for the name (<code>fam:topic-label</code>) of the topic 
      * @param name the name
      */
     @Iri(FAM.TOPIC_LABEL)
-    public void setName(LangString name);
+    public void setTopicLabels(Set<LangString> name);
+    
+    public void addTopicLabel(LangString name);
+    
+    public void addTopicLabel(Literal label);
+    
     /**
      * Getter for the reference (<code>fam:topic-reference</code>) of the topic
      * @return the reference
