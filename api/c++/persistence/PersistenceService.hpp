@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iterator>
+#include <memory>
 
 #include <boost/iterator/iterator_facade.hpp>
 
@@ -99,7 +100,7 @@ namespace mico {
             *
             * @return a handle to the newly created ContentItem
             */
-            Item* createItem();
+            std::shared_ptr<Item> createItem();
 
             /**
             * Return the content item with the given URI if it exists. The content item should be suitable for reading and

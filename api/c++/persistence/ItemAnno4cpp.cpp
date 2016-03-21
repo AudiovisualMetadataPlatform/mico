@@ -1,5 +1,7 @@
 #include "ItemAnno4cpp.hpp"
 
+#include "TimeInfo.h"
+
 namespace mico {
   namespace persistence {
 
@@ -9,7 +11,7 @@ namespace mico {
         jnipp::LocalRef<JavaLangString> jsuri = JavaLangString::create(this->getURI().stringValue());
         jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri = OrgOpenrdfModelImplURIImpl::construct( jsuri );
         jnipp::LocalRef<EuMicoPlatformAnno4jModelPartMMM> partMMM = m_persistenceService.getAnno4j()->createObject(EuMicoPlatformAnno4jModelPartMMM::clazz(), juri);
-        jnipp::LocalRef<JavaLangString> dateTime = JavaLangString::create( getTimestamp() );
+        jnipp::LocalRef<JavaLangString> dateTime = JavaLangString::create( commons::TimeInfo::getTimestamp() );
         static_cast< jnipp::LocalRef<ComGithubAnno4jModelAnnotation> >(partMMM)->setSerializedAt( dateTime );
 
         jnipp::LocalRef<ComGithubAnno4jModelAgent> agent = m_persistenceService.getAnno4j()->createObject(ComGithubAnno4jModelAgent::clazz(), juri);

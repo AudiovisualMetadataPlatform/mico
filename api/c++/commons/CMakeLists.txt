@@ -16,6 +16,7 @@ include_directories(
 )
 
 add_library(${TARGET_NAME} SHARED
+  TimeInfo.h
   FileOperations.h
   FileOperations.cpp
 )

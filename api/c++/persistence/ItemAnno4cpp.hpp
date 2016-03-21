@@ -69,14 +69,6 @@ namespace mico {
         return m_itemMMM->getSerializedAt()->std_str();
       }
 
-      // helper function to get time stamp
-      static std::string getTimestamp() {
-        time_t now;
-        time(&now);
-        char buf[sizeof "2016-03-17T09:42:09Z"];
-        strftime(buf, sizeof buf, "%FT%TZ", gmtime(&now));
-        return std::string(buf);
-      }
     };
   }
 }

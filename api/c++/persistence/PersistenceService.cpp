@@ -11,6 +11,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <ctime>
+#include <iomanip>
+
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/uuid_generators.hpp>
@@ -19,8 +23,14 @@
 #include "PersistenceService.hpp"
 #include "SPARQLUtil.hpp"
 #include "FileOperations.h"
+#include "TimeInfo.h"
 
-#include "Item.hpp"
+#include "ItemAnno4cpp.hpp"
+
+
+#ifndef ANNO4JDEPENDENCIES_PATH
+    #define ANNO4JDEPENDENCIES_PATH ""
+#endif
 
 using namespace std;
 using namespace boost;
@@ -87,6 +97,7 @@ namespace mico {
 
                 JavaVMOption options[1];    // JVM invocation options
                 options[0].optionString = (char *) JavaClassPath.c_str();
+                //options[1].optionString = "-Xint";
 
                 JavaVMInitArgs vm_args;
 
@@ -126,37 +137,24 @@ namespace mico {
         *
         * @return a handle to the newly created ContentItem
         */
-        Item *PersistenceService::createItem() {
+        std::shared_ptr<Item> PersistenceService::createItem() {
             uuid UUID = rnd_gen();
 
             jnipp::LocalRef<EuMicoPlatformAnno4jModelItemMMM> jItemMMM =
                     this->m_anno4j->createObject(EuMicoPlatformAnno4jModelItemMMM::clazz());
 
-            //String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
+            jnipp::LocalRef<jnipp::String> jDateTime = jnipp::String::create(commons::TimeInfo::getTimestamp());
 
-            // call persist to move item to corresponding sub-graph
-//            URIImpl context = new URIImpl(itemMMM.getResourceAsString());
-//            anno4j.persist(itemMMM, context);
+            jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri =
+                    OrgOpenrdfModelImplURIImpl::construct( static_cast< jnipp::LocalRef<ComGithubAnno4jModelImplResourceObject> >(jItemMMM)->getResourceAsString() );
 
-//            itemMMM.setSerializedAt(dateTime);
-//            log.trace("Created Item with id {} in the corresponding context graph", itemMMM.getResourceAsString());
+            this->m_anno4j->persist(jItemMMM, juri);
+            jItemMMM->setSerializedAt(jDateTime);
 
-//            return new ItemAnno4j(itemMMM, this);
-//                 } catch (IllegalAccessException e) {
-//                     throw new RepositoryException("Illegal access", e);
-//                 } catch (InstantiationException e) {
-//                     throw new RepositoryException("Could not instantiate ItemMMM", e);
-//                 }
+            auto newItem = std::make_shared<ItemAnno4cpp>(jItemMMM, *this);
 
-//            ContentItem* ci = new ContentItem(marmottaServerUrl,contentDirectory,UUID);
+            return newItem;
 
-//            map<string,string> params;
-//            params["g"] = marmottaServerUrl;
-//            params["ci"] = marmottaServerUrl + "/" + boost::uuids::to_string(UUID);
-
-//            metadata.update(SPARQL_FORMAT(createItem, params));
-
-//            return ci;
         }      
 
         /**
