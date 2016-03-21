@@ -11,8 +11,9 @@
         <relativePath>../../../parent</relativePath>
     </parent>
 
-    <name>MICO Platform: mmm-anno4j</name>
-    <artifactId>mmm-anno4j</artifactId>
+    <name>MICO Platform: fam-anno4j</name>
+    <artifactId>fam-anno4j</artifactId>
+    <description>Fusepool Annotation Model (FAM) beans for Anno4j</description>
 
     <build>
         <plugins>
@@ -45,20 +46,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>eu.mico-project.platform</groupId>
-                <artifactId>sparqlmm-anno4j</artifactId>
-                <version>${project.version}</version>
-                <executions>
-                    <execution>
-                        <id>generate-vocabularies</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -69,18 +56,11 @@
     </build>
 
     <dependencies>
-        <!-- add sparql-mm functions -->
         <dependency>
             <groupId>eu.mico-project.platform</groupId>
-            <artifactId>sparqlmm-anno4j</artifactId>
+            <artifactId>mmm-anno4j</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.github.tkurz</groupId>
-            <artifactId>sparql-mm</artifactId>
-            <version>${sparqlmm.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>com.github.anno4j</groupId>
             <artifactId>anno4j-core</artifactId>

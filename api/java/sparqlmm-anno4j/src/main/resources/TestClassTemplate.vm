@@ -1,0 +1,40 @@
+package com.github.anno4j.extension.sparqlmm.functions;
+
+import com.github.anno4j.extension.sparqlmm.SparqlMMTestFunction;
+import com.github.anno4j.extension.sparqlmm.expression.${expression_name};
+import com.hp.hpl.jena.sparql.expr.Expr;
+import org.apache.marmotta.ldpath.api.backend.RDFBackend;
+import org.apache.marmotta.ldpath.api.functions.TestFunction;
+
+import java.util.Collection;
+
+/**
+ * @author Thomas Kurz (tkurz@apache.org)
+ * Rendered by velocity based in SPARQL-MM
+ */
+public class $class_name<Node> extends TestFunction<Node> implements SparqlMMTestFunction {
+    @Override
+    public String getLocalName() {
+        return "$name";
+    }
+
+    @Override
+    public Boolean apply(RDFBackend<Node> rdfBackend, Node node, Collection<Node>... collections) throws IllegalArgumentException {
+        return true;
+    }
+
+    @Override
+    public String getSignature() {
+        return "fn:"+getLocalName()+"(Node n) :: Boolean";
+    }
+
+    @Override
+    public String getDescription() {
+        return "$description";
+    }
+
+    @Override
+    public Class<? extends Expr> getExpression() {
+        return ${expression_name}.class;
+    }
+}

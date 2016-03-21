@@ -54,6 +54,7 @@
         <junit.version>4.11</junit.version>
         <hamcrest.version>1.3</hamcrest.version>
         <restassured.version>2.3.4</restassured.version>
+        <sparqlmm.version>1.0</sparqlmm.version>
     </properties>
 
     <distributionManagement>
