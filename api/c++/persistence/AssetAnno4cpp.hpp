@@ -3,6 +3,7 @@
 
 #include "Asset.hpp"
 #include "PersistenceService.hpp"
+#include "URLStream.hpp"
 
 namespace mico {
   namespace persistence {
@@ -32,11 +33,13 @@ namespace mico {
       }
 
       std::ostream* getOutputStream() {
-        //->in old Content.cpp
+        std::string id = this->getLocation().stringValue().substr(/* baseUrl.length() + */ 1);
+        return new mico::io::url_ostream(/* contentDirectory  + */ "/" + id + ".bin");
       }
 
       std::istream* getInputStream() {
-        //->in old Content.cpp
+        std::string id = this->getLocation().stringValue().substr(/* baseUrl.length() + */ 1);
+        return new mico::io::url_istream(/* contentDirectory  + */ "/" + id + ".bin");
       }
     };
   }
