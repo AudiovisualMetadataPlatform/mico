@@ -43,27 +43,36 @@ namespace mico {
       return partSet;
     }
 
-    std::shared_ptr<Asset> ItemAnno4cpp::getAsset() {
-      //if (m_itemMMM.getAsset() == null) {
-      //  try {
-      //    Anno4j anno4j = m_persistenceService.getAnno4j();
-      //    EuMicoPlatformAnno4jModelAssetMMM assetMMM = anno4j.createObject(AssetMMM.class, this.getURI());
-      //    StringBuilder location = new StringBuilder()
-      //            .append(persistenceService.getStoragePrefix())
-      //            .append(this.getURI().getLocalName())
-      //            .append("/")
-      //            .append(new URIImpl(assetMMM.getResourceAsString()).getLocalName());
-      //    assetMMM.setLocation(location.toString());
-      //    m_itemMMM.setAsset(assetMMM);
-      //      log.trace("No Asset available for Item {} - Created new Asset with id {} and location {}", this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
-      //  } catch (IllegalAccessException e) {
-      //      throw new RepositoryException("Illegal access", e);
-      //  } catch (InstantiationException e) {
-      //      throw new RepositoryException("Couldn´t instantiate AssetMMM", e);
-      //  }
-      //}
-      //return new AssetAnno4cpp(static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->getAsset(), m_persistenceService);
-      throw std::runtime_error("ItemAnno4cpp::getAsset(): Not yet implemented!");
+    std::shared_ptr<Asset> ItemAnno4cpp::getAsset()
+    {
+      jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> asset = static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->getAsset();
+      if ((jobject)asset == nullptr) {
+        try {
+          jnipp::LocalRef<ComGithubAnno4jAnno4j> anno4j = m_persistenceService.getAnno4j();
+          jnipp::LocalRef<JavaLangString> jsuri_item = JavaLangString::create(this->getURI().stringValue());
+          jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri_item = OrgOpenrdfModelImplURIImpl::construct( jsuri_item );
+          jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> assetMMM = anno4j->createObject(EuMicoPlatformAnno4jModelAssetMMM::clazz(), juri_item);
+
+          std::string location = m_persistenceService.getStoragePrefix();
+          location += this->getURI().getLocalName();
+          location += "/";
+          jnipp::LocalRef<JavaLangString> jsasset = static_cast< jnipp::LocalRef<ComGithubAnno4jModelImplResourceObject> >(assetMMM)->getResourceAsString();
+          jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri_asset = OrgOpenrdfModelImplURIImpl::construct( jsasset );
+          jnipp::LocalRef<JavaLangString> jsuri_asset = juri_asset->getLocalName();
+          location += jsuri_asset->std_str();
+
+          assetMMM->setLocation( JavaLangString::create(location) );
+
+          static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->setAsset(assetMMM);
+
+          //log.trace("No Asset available for Item {} - Created new Asset with id {} and location {}", this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
+        } catch (...) {
+            throw std::runtime_error("creation of new Asset failed");
+        }
+      }
+
+      std::shared_ptr<AssetAnno4cpp> passet( new AssetAnno4cpp(static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->getAsset()) );
+      return passet;
     }
   }
 }

@@ -10,13 +10,11 @@ namespace mico {
     class AssetAnno4cpp: public Asset
     {
     private:
-      const PersistenceService& m_persistenceService;
       jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> m_assetMMM;
 
     public:
-      AssetAnno4cpp(jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> assetMMM, const PersistenceService& persistenceService)
-        : m_persistenceService(persistenceService),
-          m_assetMMM(assetMMM)
+      AssetAnno4cpp(jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> assetMMM)
+        : m_assetMMM(assetMMM)
       {}
 
       mico::rdf::model::URI getLocation() {

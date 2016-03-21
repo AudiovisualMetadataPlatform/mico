@@ -62,7 +62,7 @@ namespace mico {
 
       bool hasAsset() {
         jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> asset = static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->getAsset();
-        throw std::runtime_error("ItemAnno4cpp::hasAsset(): Not yet implemented!");
+        return (jobject)asset != nullptr;
       }
 
       std::string getSerializedAt() {
