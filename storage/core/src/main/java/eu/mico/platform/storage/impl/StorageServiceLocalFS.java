@@ -58,7 +58,22 @@ public class StorageServiceLocalFS implements StorageService {
     }
 
     private File getContentPartPath(URI contentPath) {
-        String path = Paths.get(contentPath.getPath()).normalize().toString();
+        String contentPathPath = contentPath.getPath();
+        if (contentPathPath == null)    {
+            throw new IllegalArgumentException("contentPath must contain path");
+        }
+
+        // "plain" usage of URI.get keeps trailing slash. Paths.get() therefore fails  with
+        // java.nio.file.InvalidPathException: Illegal char <:> at index 2: /X:/workspace/bla
+
+        // checks for "windows-style" /C:/... paths
+        if(contentPathPath.matches("/\\p{Upper}:/.*"))    {
+            // and removes trailing slash:
+            contentPathPath = contentPathPath.substring(1);
+
+        }
+
+        String path = Paths.get(contentPathPath).normalize().toString();
         while(path.startsWith(File.separator))
             path = path.substring(File.separator.length());
         if (contentPath.getPath().endsWith(File.separator) || path.isEmpty())
