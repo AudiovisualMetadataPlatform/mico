@@ -4,6 +4,7 @@
 #include "Asset.hpp"
 #include "PersistenceService.hpp"
 #include "URLStream.hpp"
+#include "Logging.hpp"
 
 namespace mico {
   namespace persistence {
@@ -11,11 +12,13 @@ namespace mico {
     class AssetAnno4cpp: public Asset
     {
     private:
+      PersistenceService& m_persistenceService;
       jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> m_assetMMM;
 
     public:
-      AssetAnno4cpp(jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> assetMMM)
-        : m_assetMMM(assetMMM)
+      AssetAnno4cpp(jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> assetMMM, PersistenceService& persistenceService)
+        : m_persistenceService(persistenceService),
+          m_assetMMM(assetMMM)
       {}
 
       mico::rdf::model::URI getLocation() {
@@ -34,12 +37,14 @@ namespace mico {
 
       std::ostream* getOutputStream() {
         std::string id = this->getLocation().stringValue().substr(/* baseUrl.length() + */ 1);
-        return new mico::io::url_ostream(/* contentDirectory  + */ "/" + id + ".bin");
+        LOG_DEBUG("new output stream connection to %s/%s.bin", m_persistenceService.getContentDirectory().c_str(), id.c_str());
+        return new mico::io::url_ostream( m_persistenceService.getContentDirectory() + "/" + id + ".bin");
       }
 
       std::istream* getInputStream() {
         std::string id = this->getLocation().stringValue().substr(/* baseUrl.length() + */ 1);
-        return new mico::io::url_istream(/* contentDirectory  + */ "/" + id + ".bin");
+        LOG_DEBUG("new input stream connection to %s/%s.bin", m_persistenceService.getContentDirectory().c_str(), id.c_str());
+        return new mico::io::url_istream( m_persistenceService.getContentDirectory() + "/" + id + ".bin");
       }
     };
   }

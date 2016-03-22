@@ -243,5 +243,10 @@ namespace mico {
           return m_storagePrefix;
         }
 
+        std::string PersistenceService::getContentDirectory()
+        {
+          return contentDirectory;
+        }
+
     }
 }
