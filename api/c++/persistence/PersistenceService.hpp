@@ -133,6 +133,8 @@ namespace mico {
             jnipp::LocalRef<ComGithubAnno4jAnno4j> getAnno4j();
 
             std::string getStoragePrefix();
+
+            std::string getContentDirectory();
         };
 
 
