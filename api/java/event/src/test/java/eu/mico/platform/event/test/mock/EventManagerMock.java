@@ -2,7 +2,6 @@ package eu.mico.platform.event.test.mock;
 
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
-import eu.mico.platform.event.impl.AnalysisServiceAnno4j;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
@@ -37,17 +36,11 @@ public class EventManagerMock implements EventManager {
 
     @Override
     public void registerService(AnalysisService service) throws IOException {
-        if(service instanceof AnalysisServiceAnno4j){
-            ((AnalysisServiceAnno4j)service).setAnno4j(persistenceService.getAnno4j());
-        }
         services.add(service);
     }
 
     @Override
     public void unregisterService(AnalysisService service) throws IOException {
-        if(service instanceof AnalysisServiceAnno4j){
-            ((AnalysisServiceAnno4j)service).setAnno4j(null);
-        }
         services.remove(service);
     }
 

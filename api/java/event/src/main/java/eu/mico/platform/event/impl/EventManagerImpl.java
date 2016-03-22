@@ -169,11 +169,6 @@ public class EventManagerImpl implements EventManager {
     public void registerService(AnalysisService service) throws IOException {
         log.info("registering new service {} with message brokers ...", service.getServiceID());
 
-
-        if (service instanceof AnalysisServiceAnno4j) {
-            ((AnalysisServiceAnno4j) service).setAnno4j(persistenceService.getAnno4j());
-        }
-
         Channel chan = connection.createChannel();
 
         // first declare a new input queue for this service using the service queue name, and register a callback
@@ -450,11 +445,6 @@ public class EventManagerImpl implements EventManager {
                     params.put(entry.getKey(), entry.getValue());
                 }
 
-                if (service instanceof AnalysisServiceAnno4j) {
-                    final Anno4j tmpAnno4j = persistenceService.getAnno4j();
-                    ((AnalysisServiceAnno4j) service).setAnno4j(new Anno4j(tmpAnno4j.getRepository(), tmpAnno4j.getIdGenerator(), item.getURI()));
-                }
-
                 try {
                     service.call(response, item, resourceList, params);
                     if(!response.isFinished()){
@@ -488,11 +478,6 @@ public class EventManagerImpl implements EventManager {
                 log.error("could not access content item with URI {}, requeuing (message: {})", analysisRequest.getItemUri(), e.getMessage());
                 log.debug("Exception:", e);
                 getChannel().basicNack(envelope.getDeliveryTag(), false, true);
-            } catch (RepositoryConfigException e) {
-                log.error("could not create an Anno4j instance for item with URI {}, requeuing (message: {})", analysisRequest.getItemUri(), e.getMessage());
-                log.debug("Exception:", e);
-                getChannel().basicNack(envelope.getDeliveryTag(), false, true);
-
             }
         }
 
