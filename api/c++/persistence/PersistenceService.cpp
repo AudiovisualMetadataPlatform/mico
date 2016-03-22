@@ -14,6 +14,7 @@
 
 #include <ctime>
 #include <iomanip>
+#include <cassert>
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -24,6 +25,8 @@
 #include "SPARQLUtil.hpp"
 #include "FileOperations.h"
 #include "TimeInfo.h"
+#include "Logging.hpp"
+#include "JnippExcpetionHandling.hpp"
 
 #include "ItemAnno4cpp.hpp"
 
@@ -52,6 +55,8 @@ static random_generator rnd_gen;
 //static init
 JNIEnv* mico::persistence::PersistenceService::m_sEnv = nullptr;
 JavaVM* mico::persistence::PersistenceService::m_sJvm = nullptr;
+jnipp::GlobalRef<ComGithubAnno4jAnno4j> mico::persistence::PersistenceService::m_sAnno4j;
+
 
 namespace mico {
     namespace persistence {
@@ -80,6 +85,10 @@ namespace mico {
 
         void PersistenceService::initService()
         {
+            std::string exceptionMsg;
+
+            log::set_log_level(log::DEBUG);
+
             if (!m_sEnv || ! m_sJvm) {
                 std::vector<std::string> filePatterns = {std::string(".*anno4jdependencies.*")};
                 std::vector<std::string> paths =
@@ -109,52 +118,108 @@ namespace mico {
                 jint rc = JNI_CreateJavaVM(&PersistenceService::m_sJvm, (void**)&PersistenceService::m_sEnv, &vm_args);
             }
 
+            LOG_DEBUG("######################################################## JavaVM initialized");
+
             jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
             jnipp::LocalRef<JavaLangString> jURIString = jnipp::String::create(marmottaServerUrl);
 
+            checkJavaExcpetionNoThrow(exceptionMsg);
+            assert((jobject)jURIString != 0);
+
+            LOG_DEBUG("######################################################## jURIString created");
+
             jnipp::LocalRef<OrgOpenrdfIdGeneratorIDGenerator> gen =
                 EuMicoPlatformPersistenceImplIDGeneratorAnno4j::construct(jURIString);
 
-            this->m_anno4j = ComGithubAnno4jAnno4j::construct(gen);
+            checkJavaExcpetionNoThrow(exceptionMsg);
+            assert((jobject)gen != 0);
 
-            while (jnipp::Env::hasException()) {
-                jnipp::LocalRef<JavaLangException> ex =  jnipp::Env::getException();
-                std::string collected_exeptions;
-                std::string collected_messages;
-                collected_exeptions += ", " + ex->getClass()->getName()->std_str();
-                collected_messages += ", " + ex->getMessage()->std_str();
+            LOG_DEBUG("######################################################## IDGeneratorAnno4j  created");
 
-                throw std::runtime_error("Java exceptions occured: " + collected_exeptions +
-                                         ", messages: " + collected_messages);
-            }
+            jnipp::LocalRef<OrgOpenrdfRepositorySparqlSPARQLRepository> sparqlRepository =
+                   OrgOpenrdfRepositorySparqlSPARQLRepository::construct(
+                  jnipp::String::create(marmottaServerUrl + std::string("/sparql/select")),
+                  jnipp::String::create(marmottaServerUrl + std::string("/sparql/update")));
+
+            LOG_DEBUG("######################################################## SPARQLRepository  created");
+
+            checkJavaExcpetionNoThrow(exceptionMsg);
+            assert((jobject)sparqlRepository != 0);
+
+            sparqlRepository->initialize();
+
+            assert(sparqlRepository->isInitialized());
+
+            m_sAnno4j = ComGithubAnno4jAnno4j::construct(sparqlRepository,gen);
+            checkJavaExcpetionNoThrow(exceptionMsg);
+
+            LOG_DEBUG("######################################################## anno4j object created.");
         }
 
 
         /**
-        * Create a new content item with a random URI and return it. The content item should be suitable for reading and
+        * Create a new item with a random URI and return it. The item should be suitable for reading and
         * updating and write all updates to the underlying low-level persistence layer.
         *
-        * @return a handle to the newly created ContentItem
+        * @return a handle to the newly created Item
         */
         std::shared_ptr<Item> PersistenceService::createItem() {
+
+            std::string exceptionMsg;
+
+            LOG_DEBUG("######################################################## createItem called");
+            assert((jobject) m_sAnno4j);
+
+            jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+
             uuid UUID = rnd_gen();
 
-            jnipp::LocalRef<EuMicoPlatformAnno4jModelItemMMM> jItemMMM =
-                    this->m_anno4j->createObject(EuMicoPlatformAnno4jModelItemMMM::clazz());
+            auto jItemMMM =
+                    m_sAnno4j->createObject(EuMicoPlatformAnno4jModelItemMMM::clazz());
 
-            jnipp::LocalRef<jnipp::String> jDateTime = jnipp::String::create(commons::TimeInfo::getTimestamp());
+            checkJavaExcpetionNoThrow(exceptionMsg);
+            assert((jobject) jItemMMM);
 
-            jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri =
-                    OrgOpenrdfModelImplURIImpl::construct( static_cast< jnipp::LocalRef<ComGithubAnno4jModelImplResourceObject> >(jItemMMM)->getResourceAsString() );
+            LOG_DEBUG("########################################################  ItemMMM created");
 
-            this->m_anno4j->persist(jItemMMM, juri);
-            jItemMMM->setSerializedAt(jDateTime);
+            jnipp::LocalRef<jnipp::String> jDateTime =
+                    jnipp::String::create(commons::TimeInfo::getTimestamp());
 
-            auto newItem = std::make_shared<ItemAnno4cpp>(jItemMMM, *this);
+            checkJavaExcpetionNoThrow(exceptionMsg);
+            assert((jobject) jDateTime);
 
-            return newItem;
+            LOG_DEBUG("########################################################  jDateTime created");
 
+            auto sContextURI =
+                    ((jnipp::Ref<ComGithubAnno4jModelImplResourceObject>) jItemMMM )->getResourceAsString();
+
+            checkJavaExcpetionNoThrow(exceptionMsg);
+            assert((jobject) sContextURI);
+
+            LOG_DEBUG("########################################################  sContextURI retrieved");
+
+             jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> contextFromInject =
+                    OrgOpenrdfModelImplURIImpl::construct(sContextURI);
+
+            LOG_DEBUG("########################################################  contextFromInject created");
+
+            checkJavaExcpetionNoThrow(exceptionMsg);
+            assert((jobject) contextFromInject);
+
+            m_sAnno4j->persist(jItemMMM);
+
+            LOG_DEBUG("########################################################  persist called ");
+
+            ((jnipp::Ref<EuMicoPlatformAnno4jModelItemMMM>) jItemMMM)->setSerializedAt(jDateTime);
+
+            checkJavaExcpetionNoThrow(exceptionMsg);
+
+            //auto newItem = std::make_shared<ItemAnno4cpp>(jItemMMM, *this);
+
+            LOG_DEBUG("######################################################## ItemMMM created and Item wrapper returned");
+
+            return nullptr;
         }      
 
         /**

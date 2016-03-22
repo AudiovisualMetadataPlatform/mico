@@ -11,12 +11,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "gtest.h"
+//#include "gtest.h"
 
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <map>
+#include <memory>
 #include <boost/algorithm/string.hpp>
 
 #include "http_client.hpp"
@@ -35,9 +36,10 @@ extern std::string mico_user;
 extern std::string mico_pass;
 
 
-class PersistenceServiceTest : public ::testing::Test {
+class PersistenceServiceTest /*: public ::testing::Test */{
 
-protected:
+//protected:
+public:
   std::string base_url = "http://" + mico_host + ":8080/marmotta";
   std::string content_dir = "hdfs://" + mico_host;
   HTTPClient client;
@@ -59,10 +61,10 @@ protected:
   }
 
   void assertAskM(std::string query) {
-    ASSERT_TRUE(svc->getMetadata().ask(query));
+    //ASSERT_TRUE(svc->getMetadata().ask(query));
   }
   void assertAskMN(std::string query) {
-    ASSERT_FALSE(svc->getMetadata().ask(query));
+    //ASSERT_FALSE(svc->getMetadata().ask(query));
   }
 
 
@@ -78,12 +80,19 @@ bool ptr_contains(T* ptr, T** arr, int len) {
   return false;
 }
 
-TEST_F(PersistenceServiceTest,Metadata) {
-  PersistenceMetadata& m = svc->getMetadata();
+//TEST_F(PersistenceServiceTest,Init) {
+//  PersistenceMetadata& m = svc->getMetadata();
   
-  //m.update("INSERT DATA { <http://example.org/resource/R1> <http://example.org/property/P1> \"Value 1\" } ");
-  //assertAskM("ASK { <http://example.org/resource/R1> <http://example.org/property/P1> \"Value 1\" }");
-}
+//  //m.update("INSERT DATA { <http://example.org/resource/R1> <http://example.org/property/P1> \"Value 1\" } ");
+//  //assertAskM("ASK { <http://example.org/resource/R1> <http://example.org/property/P1> \"Value 1\" }");
+//}
+
+//TEST_F(PersistenceServiceTest,CreateItem) {
+//  std::shared_ptr<Item> newItem = svc->createItem();
+
+////  //m.update("INSERT DATA { <http://example.org/resource/R1> <http://example.org/property/P1> \"Value 1\" } ");
+////  //assertAskM("ASK { <http://example.org/resource/R1> <http://example.org/property/P1> \"Value 1\" }");
+//}
 
 
 //TEST_F(PersistenceServiceTest,CreateDeleteContentItem) {
@@ -127,3 +136,28 @@ TEST_F(PersistenceServiceTest,Metadata) {
 
 
 //}
+
+std::string mico_host;
+std::string mico_user;
+std::string mico_pass;
+
+int main(int argc, char **argv) {
+    if(argc == 4) {
+        mico_host = argv[1];
+        mico_user = argv[2];
+        mico_pass = argv[3];
+
+        PersistenceServiceTest test;
+
+        test.SetUp();
+
+        for (int i=0; i<100; ++i) {
+            test.svc->createItem();
+        }
+
+
+    } else {
+        std::cerr << "usage: <testcmd> <host> <user> <password>" << std::endl;
+    }
+
+}

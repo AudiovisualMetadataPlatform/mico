@@ -44,17 +44,18 @@ namespace mico {
         * with ContentItems should only use instances of this class for accessing the persistence API.
         */
         class PersistenceService {
+            friend class ItemAnno4cpp;
 
         private:
 
             std::string marmottaServerUrl;
             std::string contentDirectory;
             PersistenceMetadata metadata;
-            jnipp::GlobalRef<ComGithubAnno4jAnno4j> m_anno4j;
             std::string m_storagePrefix;
 
             static JNIEnv* m_sEnv;
             static JavaVM* m_sJvm;
+            static jnipp::GlobalRef<ComGithubAnno4jAnno4j> m_sAnno4j;
 
             void initService();
 

@@ -21,7 +21,10 @@ target_link_libraries(client_tests gtest mico_rdf mico_marmotta curl boost_syste
 add_executable(sparql_tests rdf_tests.cpp sparql_client_tests.cpp )
 target_link_libraries(sparql_tests gtest mico_rdf mico_marmotta curl boost_system boost_log boost_log_setup)
 
-add_executable(persistence_service_tests  persistence_tests.cpp persistence_service_tests.cpp  )
+add_executable(persistence_service_tests
+    # persistence_tests.cpp
+    persistence_service_tests.cpp
+)
 target_link_libraries(persistence_service_tests gtest mico_rdf mico_marmotta mico_persistence curl boost_system boost_log boost_log_setup)
 
 add_executable(metadata_tests  persistence_tests.cpp metadata_tests.cpp )

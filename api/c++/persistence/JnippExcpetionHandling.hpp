@@ -1,0 +1,34 @@
+#ifndef JNI_EXCEPTION_HANDLING_H
+#define JNI_EXCEPTION_HANDLING_H
+
+#include <exception>
+#include <jnipp.h>
+
+namespace mico {
+    namespace persistence {
+
+    bool checkJavaExcpetionNoThrow(std::string& error_msg) {
+        bool failure = false;
+        error_msg.clear();
+        while (jnipp::Env::hasException()) {
+            failure = true;
+            jnipp::LocalRef<JavaLangException> ex =  jnipp::Env::getException();
+            ex->printStackTrace();
+            error_msg += ex->getClass()->getName()->std_str() + "(msg: " + ex->getMessage()->std_str();
+            error_msg += "), ";
+        }       
+        return failure;
+    }
+
+    void checkJavaExcpetionThrow() {
+        std::string msg;
+
+        if (checkJavaExcpetionNoThrow(msg))
+            throw std::runtime_error(msg);
+    }
+
+
+}}
+
+
+#endif

@@ -10,14 +10,15 @@ namespace mico {
     {
     private:
       PersistenceService& m_persistenceService;
-      jnipp::LocalRef<EuMicoPlatformAnno4jModelItemMMM> m_itemMMM;
+      jnipp::GlobalRef<EuMicoPlatformAnno4jModelItemMMM> m_itemMMM;
 
     public:
-      ItemAnno4cpp(jnipp::LocalRef<EuMicoPlatformAnno4jModelItemMMM> itemMMM, PersistenceService& persistenceService)
+      ItemAnno4cpp(jnipp::Ref<EuMicoPlatformAnno4jModelItemMMM> itemMMM, PersistenceService& persistenceService)
         : m_persistenceService(persistenceService),
           m_itemMMM(itemMMM)
       {
-        EuMicoPlatformPersistenceImplItemAnno4j::initContexts( itemMMM );
+        jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+        //EuMicoPlatformPersistenceImplItemAnno4j::initContexts( itemMMM );
       }
 
       std::shared_ptr<Part> createPart(mico::rdf::model::URI extractorID);
