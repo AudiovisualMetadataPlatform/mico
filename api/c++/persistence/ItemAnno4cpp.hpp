@@ -4,6 +4,8 @@
 #include "Item.hpp"
 #include "PartAnno4cpp.hpp"
 
+#include "JnippExcpetionHandling.hpp"
+
 namespace mico {
   namespace persistence {
     class ItemAnno4cpp: public Item
@@ -11,6 +13,7 @@ namespace mico {
     private:
       PersistenceService& m_persistenceService;
       jnipp::GlobalRef<EuMicoPlatformAnno4jModelItemMMM> m_itemMMM;
+      std::string m_jnippErrorMessage;
 
     public:
       ItemAnno4cpp(jnipp::Ref<EuMicoPlatformAnno4jModelItemMMM> itemMMM, PersistenceService& persistenceService)
@@ -18,7 +21,10 @@ namespace mico {
           m_itemMMM(itemMMM)
       {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-        //EuMicoPlatformPersistenceImplItemAnno4j::initContexts( itemMMM );
+
+        EuMicoPlatformPersistenceImplItemAnno4j::initContexts( itemMMM );
+
+        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
       }
 
       std::shared_ptr<Part> createPart(mico::rdf::model::URI extractorID);

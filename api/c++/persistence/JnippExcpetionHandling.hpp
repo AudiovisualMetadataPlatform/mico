@@ -7,7 +7,7 @@
 namespace mico {
     namespace persistence {
 
-    bool checkJavaExcpetionNoThrow(std::string& error_msg) {
+    static bool checkJavaExcpetionNoThrow(std::string& error_msg) {
         bool failure = false;
         error_msg.clear();
         while (jnipp::Env::hasException()) {
@@ -20,7 +20,7 @@ namespace mico {
         return failure;
     }
 
-    void checkJavaExcpetionThrow() {
+    static void checkJavaExcpetionThrow() {
         std::string msg;
 
         if (checkJavaExcpetionNoThrow(msg))

@@ -215,11 +215,11 @@ namespace mico {
 
             checkJavaExcpetionNoThrow(exceptionMsg);
 
-            //auto newItem = std::make_shared<ItemAnno4cpp>(jItemMMM, *this);
+            auto newItem = std::make_shared<ItemAnno4cpp>(jItemMMM, *this);
 
             LOG_DEBUG("######################################################## ItemMMM created and Item wrapper returned");
 
-            return nullptr;
+            return newItem;
         }      
 
         /**

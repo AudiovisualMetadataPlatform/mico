@@ -152,8 +152,11 @@ int main(int argc, char **argv) {
         test.SetUp();
 
         for (int i=0; i<100; ++i) {
-            test.svc->createItem();
+            std::shared_ptr<mico::persistence::Item> currItem = test.svc->createItem();
+            assert(currItem != 0);
         }
+
+
 
 
     } else {
