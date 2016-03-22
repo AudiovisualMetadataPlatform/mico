@@ -52,7 +52,7 @@ public class FunctionBuilderTest {
         Assert.assertTrue(interface_file.exists());
         Assert.assertFalse(interface_file.isDirectory());
 
-        Assert.assertEquals(3923, main_file.length());
+        Assert.assertEquals(4090, main_file.length());
 
         File function_dir = Paths.get(folder.getRoot().getAbsolutePath(),"com/github/anno4j/extension/sparqlmm/functions").toFile();
 

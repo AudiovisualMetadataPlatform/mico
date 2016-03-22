@@ -46,8 +46,10 @@ public class SparqlMMFunctionTest implements QueryEvaluator {
         Var annotation2 = Var.alloc(VarIDGenerator.createID());
 
         if(functionTest.getArgSelectors().size() != 0) {
-            NodeSelector arg1 = (NodeSelector) functionTest.getArgSelectors().get(0);
-            annotation2 = LDPathEvaluator.evaluate(arg1, elementGroup, annotation2, evaluatorConfiguration);
+            throw new RuntimeException("Function " + functionTest.getSignature() + " does currently not support a paremeter");
+            //NodeSelector arg1 = (NodeSelector) functionTest.getArgSelectors().get(0);
+            //annotation2 = LDPathEvaluator.evaluate(arg1, elementGroup, annotation2, evaluatorConfiguration);
+            //TODO: this should evaluate the internal stuff, but it returns root. Maybe an issue in anno4j?
         }
 
         Var rightSide = LDPathEvaluator.evaluate(

@@ -80,6 +80,7 @@ public class FunctionBuilder {
             Context context = new VelocityContext();
 
             context.put("name",function.getURI().substring(Constants.NAMESPACE.length()));
+            context.put("uri",function.getURI());
             context.put("class_name", function.getClass().getSimpleName() + "Test");
             context.put("expression_name", "E_" + function.getClass().getSimpleName());
 
