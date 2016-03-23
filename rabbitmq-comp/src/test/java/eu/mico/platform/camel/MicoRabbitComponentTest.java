@@ -83,7 +83,7 @@ public class MicoRabbitComponentTest extends TestBase {
     /**
      * @throws Exception
      */
-   //  @Ignore("ignored, because a mico_wordcount must be connected to run this test")
+    @Ignore("ignored, because a mico_microformats must be connected to run this test")
     @Test(timeout=20000)
     public void testMicroformatsRoute() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:result_text_html");
