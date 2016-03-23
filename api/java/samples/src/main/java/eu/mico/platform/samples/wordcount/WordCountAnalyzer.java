@@ -13,18 +13,20 @@
  */
 package eu.mico.platform.samples.wordcount;
 
+import com.github.anno4j.Anno4j;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Target;
 import com.github.anno4j.model.impl.targets.SpecificResource;
 import eu.mico.platform.event.api.AnalysisResponse;
+import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
-import eu.mico.platform.event.impl.AnalysisServiceAnno4j;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Resource;
 import org.apache.commons.io.IOUtils;
+
 
 import org.openrdf.annotations.Iri;
 import org.openrdf.model.URI;
@@ -53,7 +55,7 @@ import java.util.regex.Pattern;
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
-public class WordCountAnalyzer extends AnalysisServiceAnno4j {
+public class WordCountAnalyzer implements AnalysisService {
     
     private static Boolean simulateSlow = true;
 
@@ -86,6 +88,7 @@ public class WordCountAnalyzer extends AnalysisServiceAnno4j {
 
     @Override
     public void call(AnalysisResponse analysisResponse, Item item, List<Resource> resourceList, Map<String, String> params) throws AnalysisException, IOException {
+        Anno4j contextedAnno4j = item.getContextedAnno4j();
         try {
             if(resourceList.size() > 1) {
                 throw new IllegalArgumentException("Resource list only allows one item to be processed.");
@@ -119,12 +122,12 @@ public class WordCountAnalyzer extends AnalysisServiceAnno4j {
             part.setSyntacticalType(getProvides());
 
             // create example wordcount body and setting the result of the analyzer
-            WordCountBody wordCountBody = getAnno4j().createObject(WordCountBody.class);
+            WordCountBody wordCountBody = contextedAnno4j.createObject(WordCountBody.class);
             wordCountBody.setCount(count);
             part.setBody(wordCountBody);
 
             // create the target and set a reference to the part/item on which the body refers to
-            SpecificResource specificResource = getAnno4j().createObject(SpecificResource.class);
+            SpecificResource specificResource = contextedAnno4j.createObject(SpecificResource.class);
             specificResource.setSource(resource.getRDFObject());
 
             // adding the target to the part

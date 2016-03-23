@@ -13,8 +13,10 @@
  */
 package eu.mico.platform.persistence.model;
 
+import com.github.anno4j.Anno4j;
 import org.openrdf.model.URI;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryConfigException;
 
 /**
  * Representation of a Item. A Item is a collection of ContentParts, e.g. an HTML page together with
@@ -52,4 +54,6 @@ public interface Item extends Resource {
     Iterable<? extends Part> getParts() throws RepositoryException;
 
     String getSerializedAt();
+
+    Anno4j getContextedAnno4j();
 }

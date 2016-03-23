@@ -13,6 +13,7 @@ import eu.mico.platform.persistence.model.Part;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryConfigException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,5 +151,15 @@ public class ItemAnno4j implements Item {
     @Override
     public String getSerializedAt() {
         return this.itemMMM.getSerializedAt();
+    }
+
+    @Override
+    public Anno4j getContextedAnno4j() {
+        Anno4j tmpAnno4j = persistenceService.getAnno4j();
+        try {
+            return  new Anno4j(tmpAnno4j.getRepository(), tmpAnno4j.getIdGenerator(), this.getURI());
+        } catch (RepositoryConfigException | RepositoryException e) {
+            throw new IllegalStateException("Couldn't instantiate Anno4j");
+        }
     }
 }

@@ -5,11 +5,9 @@ import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
-import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Resource;
 import eu.mico.platform.persistence.model.Item;
 
-import org.openrdf.model.URI;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,23 +49,28 @@ public class EventManagerMock implements EventManager {
         try {
         	Map<String, String> params = new HashMap<String, String>();
             log.debug("Injecting content item {}...", item.getURI());
-            for (Part part : item.getParts()) {
-                for (AnalysisService service: services) {
-                    if (service.getRequires().equals(part.getSyntacticalType())) {
-                        Resource uri = item.getParts().iterator().next();
-                        List<Resource> parts = new LinkedList<Resource>();
-                        parts.add(uri);
-                        try {
-                            log.debug("calling service {} to analyze {}...", service.getServiceID(), part.getURI());
-                            service.call(responsesCollector, item, parts, params);
-                        } catch (AnalysisException e) {
-                            log.error("Analysis Exception processing {}: {}", uri, e.getMessage());
-                        }
-                    }
-                }
+            analyseItemResource(item, item, params);
+            for (Resource part : item.getParts()) {
+                analyseItemResource(item, part, params);
             }
         } catch (RepositoryException e) {
             log.error("Repository Exception: {}", e.getMessage(), e);
+        }
+    }
+
+    private void analyseItemResource(Item item, Resource resource,
+            Map<String, String> params) throws RepositoryException, IOException {
+        for (AnalysisService service: services) {
+            if (service.getRequires().equals(resource.getSyntacticalType())) {
+                List<Resource> parts = new LinkedList<Resource>();
+                parts.add(resource);
+                try {
+                    log.debug("calling service {} to analyze {}...", service.getServiceID(), resource.getURI());
+                    service.call(responsesCollector, item, parts, params);
+                } catch (AnalysisException e) {
+                    log.error("Analysis Exception processing {}: {}", resource, e.getMessage());
+                }
+            }
         }
     }
 
