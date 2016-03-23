@@ -51,10 +51,14 @@ namespace mico {
             std::string contentDirectory;
             PersistenceMetadata metadata;
             std::string m_storagePrefix;
+            std::string m_jniErrorMessage;
 
             static JNIEnv* m_sEnv;
-            static jnipp::GlobalRef<ComGithubAnno4jAnno4j> m_sAnno4j;
 
+            jnipp::GlobalRef<ComGithubAnno4jAnno4j> m_anno4j;
+
+
+            /** Inits Java VM and connects to Marmotta via JNI->anno4j */
             void initService();
 
 
@@ -103,12 +107,12 @@ namespace mico {
             std::shared_ptr<Item> createItem();
 
             /**
-            * Return the content item with the given URI if it exists. The content item should be suitable for reading and
+            * Return the item with the given URI if it exists. The item should be suitable for reading and
             * updating and write all updates to the underlying low-level persistence layer.
             *
-            * @return a handle to the ContentItem with the given URI, or null if it does not exist
+            * @return A handle to the Item with the given URI, or null if it does not exist
             */
-            ContentItem* getContentItem(const mico::rdf::model::URI& id);
+            std::shared_ptr<Item> getItem(const mico::rdf::model::URI& id);
 
             /**
             * Delete the content item with the given URI. If the content item does not exist, do nothing.

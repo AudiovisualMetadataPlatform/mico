@@ -28,6 +28,8 @@
 #include "Logging.hpp"
 #include "JnippExcpetionHandling.hpp"
 
+#include <anno4cpp.h>
+
 #include "ItemAnno4cpp.hpp"
 
 
@@ -55,7 +57,6 @@ static random_generator rnd_gen;
 //static init
 JNIEnv* mico::persistence::PersistenceService::m_sEnv = nullptr;
 JavaVM* mico::persistence::PersistenceService::m_sJvm = nullptr;
-jnipp::GlobalRef<ComGithubAnno4jAnno4j> mico::persistence::PersistenceService::m_sAnno4j;
 
 
 namespace mico {
@@ -85,8 +86,6 @@ namespace mico {
 
         void PersistenceService::initService()
         {
-            std::string exceptionMsg;
-
             log::set_log_level(log::DEBUG);
 
             if (!m_sEnv || ! m_sJvm) {
@@ -124,7 +123,7 @@ namespace mico {
 
             jnipp::LocalRef<JavaLangString> jURIString = jnipp::String::create(marmottaServerUrl);
 
-            checkJavaExcpetionNoThrow(exceptionMsg);
+            checkJavaExcpetionNoThrow(m_jniErrorMessage);
             assert((jobject)jURIString != 0);
 
             LOG_DEBUG("######################################################## jURIString created");
@@ -132,7 +131,7 @@ namespace mico {
             jnipp::LocalRef<OrgOpenrdfIdGeneratorIDGenerator> gen =
                 EuMicoPlatformPersistenceImplIDGeneratorAnno4j::construct(jURIString);
 
-            checkJavaExcpetionNoThrow(exceptionMsg);
+            checkJavaExcpetionNoThrow(m_jniErrorMessage);
             assert((jobject)gen != 0);
 
             LOG_DEBUG("######################################################## IDGeneratorAnno4j  created");
@@ -144,15 +143,15 @@ namespace mico {
 
             LOG_DEBUG("######################################################## SPARQLRepository  created");
 
-            checkJavaExcpetionNoThrow(exceptionMsg);
+            checkJavaExcpetionNoThrow(m_jniErrorMessage);
             assert((jobject)sparqlRepository != 0);
 
             sparqlRepository->initialize();
 
             assert(sparqlRepository->isInitialized());
 
-            m_sAnno4j = ComGithubAnno4jAnno4j::construct(sparqlRepository,gen);
-            checkJavaExcpetionNoThrow(exceptionMsg);
+            m_anno4j = ComGithubAnno4jAnno4j::construct(sparqlRepository,gen);
+            checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
             LOG_DEBUG("######################################################## anno4j object created.");
         }
@@ -166,19 +165,17 @@ namespace mico {
         */
         std::shared_ptr<Item> PersistenceService::createItem() {
 
-            std::string exceptionMsg;
-
             LOG_DEBUG("######################################################## createItem called");
-            assert((jobject) m_sAnno4j);
+            assert((jobject) m_anno4j);
 
             jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
             uuid UUID = rnd_gen();
 
             auto jItemMMM =
-                    m_sAnno4j->createObject(EuMicoPlatformAnno4jModelItemMMM::clazz());
+                    m_anno4j->createObject(EuMicoPlatformAnno4jModelItemMMM::clazz());
 
-            checkJavaExcpetionNoThrow(exceptionMsg);
+            checkJavaExcpetionNoThrow(m_jniErrorMessage);
             assert((jobject) jItemMMM);
 
             LOG_DEBUG("########################################################  ItemMMM created");
@@ -186,7 +183,7 @@ namespace mico {
             jnipp::LocalRef<jnipp::String> jDateTime =
                     jnipp::String::create(commons::TimeInfo::getTimestamp());
 
-            checkJavaExcpetionNoThrow(exceptionMsg);
+            checkJavaExcpetionNoThrow(m_jniErrorMessage);
             assert((jobject) jDateTime);
 
             LOG_DEBUG("########################################################  jDateTime created");
@@ -194,7 +191,7 @@ namespace mico {
             auto sContextURI =
                     ((jnipp::Ref<ComGithubAnno4jModelImplResourceObject>) jItemMMM )->getResourceAsString();
 
-            checkJavaExcpetionNoThrow(exceptionMsg);
+            checkJavaExcpetionNoThrow(m_jniErrorMessage);
             assert((jobject) sContextURI);
 
             LOG_DEBUG("########################################################  sContextURI retrieved");
@@ -204,18 +201,20 @@ namespace mico {
 
             LOG_DEBUG("########################################################  contextFromInject created");
 
-            checkJavaExcpetionNoThrow(exceptionMsg);
+            checkJavaExcpetionNoThrow(m_jniErrorMessage);
             assert((jobject) contextFromInject);
 
-            m_sAnno4j->persist(jItemMMM);
+            m_anno4j->persist(jItemMMM);
 
             LOG_DEBUG("########################################################  persist called ");
 
             ((jnipp::Ref<EuMicoPlatformAnno4jModelItemMMM>) jItemMMM)->setSerializedAt(jDateTime);
 
-            checkJavaExcpetionNoThrow(exceptionMsg);
+            checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
             auto newItem = std::make_shared<ItemAnno4cpp>(jItemMMM, *this);
+
+            checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
             LOG_DEBUG("######################################################## ItemMMM created and Item wrapper returned");
 
@@ -223,12 +222,29 @@ namespace mico {
         }      
 
         /**
-        * Return the content item with the given URI if it exists. The content item should be suitable for reading and
+        * Return the item with the given URI if it exists. The item should be suitable for reading and
         * updating and write all updates to the underlying low-level persistence layer.
         *
-        * @return a handle to the ContentItem with the given URI, or null if it does not exist
+        * @return A handle to the Item with the given URI, or null if it does not exist
         */
-        ContentItem* PersistenceService::getContentItem(const URI& id) {
+
+        std::shared_ptr<Item> PersistenceService::getItem(const URI& id) {
+
+             jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+
+             jnipp::Ref<EuMicoPlatformAnno4jModelItemMMM> jItemMMM=
+                     this->m_anno4j->findByID(EuMicoPlatformAnno4jModelItemMMM::clazz(), (jnipp::Ref<JavaLangString>) jnipp::String::create(id.stringValue()));
+
+             checkJavaExcpetionNoThrow(m_jniErrorMessage);
+
+             auto newItem = std::make_shared<ItemAnno4cpp>(jItemMMM, *this);
+
+
+//            public Item getItem(URI id) throws RepositoryException {
+//                   ItemMMM itemMMM = anno4j.findByID(ItemMMM.class, id.toString());
+//                   return new ItemAnno4j(itemMMM, this);
+//               }
+
 //            map<string,string> params;
 //            params["g"]  = marmottaServerUrl;
 //            params["ci"] = id.stringValue();
