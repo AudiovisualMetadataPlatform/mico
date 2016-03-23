@@ -23,6 +23,7 @@
 #include "http_client.hpp"
 
 #include "PersistenceService.hpp"
+#include "Item.hpp"
 #include "ContentItem.hpp"
 #include "SPARQLUtil.hpp"
 
@@ -151,12 +152,26 @@ int main(int argc, char **argv) {
 
         test.SetUp();
 
-        for (int i=0; i<100; ++i) {
-            std::shared_ptr<mico::persistence::Item> currItem = test.svc->createItem();
-            assert(currItem != 0);
-        }
-
-
+        //for (int i=0; i<100; ++i)
+          std::shared_ptr<mico::persistence::Item> currItem = test.svc->createItem();
+        assert(currItem != 0);
+        auto uri = currItem->getURI();
+        jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+        auto itemMMM = currItem->getRDFObject();
+        assert( (jobject)itemMMM != nullptr );
+        currItem->setSemanticType("testType1");
+        auto semanticType = currItem->getSemanticType();
+        assert( semanticType.compare("testType1") == 0 );
+        currItem->setSyntacticalType("testType2");
+        auto synType = currItem->getSyntacticalType();
+        assert( synType.compare("testType2") == 0 );
+        auto stime = currItem->getSerializedAt();
+        assert( stime.size() );
+        bool hasAsset = currItem->hasAsset();
+        //std::shared_ptr<Part> part = currItem->createPart(uri);
+        //std::shared_ptr<Asset> asset = currItem->getAsset();
+        //std::shared_ptr<Part> part2 = currItem->getPart(uri);
+        //std::list< std::shared_ptr<Part> > parts = currItem->getParts();
 
 
     } else {

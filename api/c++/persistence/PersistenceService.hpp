@@ -44,7 +44,6 @@ namespace mico {
         * with ContentItems should only use instances of this class for accessing the persistence API.
         */
         class PersistenceService {
-            friend class ItemAnno4cpp;
 
         private:
 
@@ -54,13 +53,13 @@ namespace mico {
             std::string m_storagePrefix;
 
             static JNIEnv* m_sEnv;
-            static JavaVM* m_sJvm;
             static jnipp::GlobalRef<ComGithubAnno4jAnno4j> m_sAnno4j;
 
             void initService();
 
 
         public:
+            static JavaVM* m_sJvm;
 
             /**
             * Initialise persistence service with the address of a server running the standard installation of
