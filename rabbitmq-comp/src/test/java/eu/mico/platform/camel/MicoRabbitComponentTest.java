@@ -83,10 +83,10 @@ public class MicoRabbitComponentTest extends TestBase {
     /**
      * @throws Exception
      */
-    @Ignore("ignored, because a mico_wordcount must be connected to run this test")
-    @Test(timeout=10000)
+   //  @Ignore("ignored, because a mico_wordcount must be connected to run this test")
+    @Test(timeout=20000)
     public void testMicroformatsRoute() throws Exception {
-        MockEndpoint mock = getMockEndpoint("mock:result_text");
+        MockEndpoint mock = getMockEndpoint("mock:result_text_html");
         mock.expectedMinimumMessageCount(1);
 
         template.send("direct:text_html",createExchange(htmlItemUri));
@@ -181,7 +181,7 @@ public class MicoRabbitComponentTest extends TestBase {
                 from("direct:text_html")
                 .pipeline()
                 .to("mico-comp:vbox2?host=mico-box&user=mico&password=mico&serviceId=microformats")
-                .to("mock:result_text");
+                .to("mock:result_text_html");
 
             }
 
