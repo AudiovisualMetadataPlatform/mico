@@ -14,15 +14,21 @@
 package eu.mico.platform.persistence.impl;
 
 import com.github.anno4j.Anno4j;
+import com.github.anno4j.querying.QueryService;
+
 import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.storage.api.StorageService;
 import eu.mico.platform.storage.impl.StorageServiceBuilder;
+
+import org.openrdf.idGenerator.IDGenerator;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.config.RepositoryConfigException;
+import org.openrdf.repository.object.ObjectConnection;
+import org.openrdf.repository.object.RDFObject;
 import org.openrdf.repository.sparql.SPARQLRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,24 +101,35 @@ public class PersistenceServiceAnno4j implements PersistenceService {
      */
     @Override
     public Item createItem() throws RepositoryException {
+        ObjectConnection itemConn = null;
+        boolean error = true;
         try {
-            ItemMMM itemMMM = anno4j.createObject(ItemMMM.class);
+            itemConn = anno4j.getObjectRepository().getConnection();
+            itemConn.begin();
+            ItemMMM itemMMM = itemConn.getObjectFactory().createObject(IDGenerator.BLANK_RESOURCE, ItemMMM.class);
             String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
-
-            // call persist to move item to corresponding sub-graph
-            URIImpl context = new URIImpl(itemMMM.getResourceAsString());
-            anno4j.persist(itemMMM, context);
-
+            URI itemURI = (URI)itemMMM.getResource(); //if this is not a URI use a different IDGenerator!
+            setContext(itemConn, itemURI);
             itemMMM.setSerializedAt(dateTime);
-            log.trace("Created Item with id {} in the corresponding context graph", itemMMM.getResourceAsString());
-
+            itemConn.addObject(itemMMM); //store the new item
+            log.trace("Created Item <{}>", itemMMM.getResourceAsString());
+            error = false;
             return new ItemAnno4j(itemMMM, this);
-        } catch (IllegalAccessException e) {
-            throw new RepositoryException("Illegal access", e);
-        } catch (InstantiationException e) {
-            throw new RepositoryException("Could not instantiate ItemMMM", e);
+        } catch (RepositoryException | RuntimeException e){
+            error = true;
+            throw e;
+        } finally {
+            if(itemConn != null){
+                if(error){
+                    itemConn.rollback(); //rollback any triples created during this method
+                    itemConn.close(); //in case we have not succeeded we can close the connection
+                } else {
+                    itemConn.commit(); //commit the item before returning
+                }
+            } //failed to open connection
         }
     }
+
 
     /**
      * Return the item with the given URI if it exists. The item should be suitable for reading and
@@ -123,8 +140,14 @@ public class PersistenceServiceAnno4j implements PersistenceService {
      */
     @Override
     public Item getItem(URI id) throws RepositoryException {
-        ItemMMM itemMMM = anno4j.findByID(ItemMMM.class, id.toString());
-        return new ItemAnno4j(itemMMM, this);
+        //we need to create a ObjectConnection and configure it for the created item
+        ObjectConnection itemConn = anno4j.getObjectRepository().getConnection();
+        setContext(itemConn, id);
+        //we do not parse here a explicit class as a getter method assumes that
+        //the parsed resource already has the necessary rdf:type assigned!
+        RDFObject object = itemConn.getObjectFactory().createObject(id);
+        //if not we will get a ClssCastException in the next line
+        return new ItemAnno4j(ItemMMM.class.cast(object), this);
     }
 
     /**
@@ -159,12 +182,23 @@ public class PersistenceServiceAnno4j implements PersistenceService {
     }
 
     @Override
-    public Anno4j getAnno4j() {
-        return anno4j;
+    public String getStoragePrefix() {
+        return storagePrefix;
+    }
+    
+    /**
+     * Sets the read/insert and remove context on the parsed conntection to the parsed URI
+     * @param con
+     * @param context
+     */
+    private void setContext(ObjectConnection con, URI context) {
+        con.setReadContexts(context);
+        con.setInsertContext(context);
+        con.setRemoveContexts(context);
     }
 
     @Override
-    public String getStoragePrefix() {
-        return storagePrefix;
+    public QueryService createQuery(URI context) throws RepositoryException {
+        return anno4j.createQueryService(context);
     }
 }

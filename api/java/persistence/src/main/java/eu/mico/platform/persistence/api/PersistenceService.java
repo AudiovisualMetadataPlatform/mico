@@ -14,6 +14,8 @@
 package eu.mico.platform.persistence.api;
 
 import com.github.anno4j.Anno4j;
+import com.github.anno4j.querying.QueryService;
+
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.storage.api.StorageService;
 import org.openrdf.model.URI;
@@ -54,9 +56,27 @@ public interface PersistenceService {
      */
     Iterable<? extends Item> getItems() throws RepositoryException;
 
+    /**
+     * Creates an {@link QueryService query} that can be used to construct and
+     * execute a query
+     * @param context the context the query is executed in or <code>null</code>
+     * to query all contexts
+     * @return the query service (actually a combination of a query builder and
+     * a query executor that should only be used once).
+     * @throws RepositoryException
+     */
+    QueryService createQuery(URI context) throws RepositoryException;
+    
+    /**
+     * Getter for the storage service
+     * @return the storage service
+     */
     StorageService getStorage();
 
-    Anno4j getAnno4j();
-
+    /**
+     * The URI prefix used by the Storage service
+     * TODO: why is this method not part of the {@link StorageService}?
+     * @return
+     */
     String getStoragePrefix();
 }
