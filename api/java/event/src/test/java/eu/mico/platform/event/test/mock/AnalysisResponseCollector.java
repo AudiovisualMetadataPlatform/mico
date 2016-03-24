@@ -4,44 +4,87 @@ import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.model.Event.ErrorCodes;
 import eu.mico.platform.persistence.model.Item;
 
+import org.junit.Assert;
 import org.openrdf.model.URI;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.object.ObjectConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+/**
+ * Test implementation of the {@link AnalysisResponse} interface that takes care
+ * of:<ul>
+ * <li> transaction management (commit/rollback calls in the according send**() methods)
+ * <li> asserts parameters to send**() methods
+ * <li> asserts state send**() methods are called
+ * </ul>
+ * 
+ * @author Rupert Westenthaler
+ * @author Marcel Sielang
+ * @author Andreas Wisenkolb
+ * @author Sergio Fernández
+ */
 public class AnalysisResponseCollector implements AnalysisResponse {
 
     private static Logger log = LoggerFactory.getLogger(AnalysisResponseCollector.class);
 
-    private Map<URI, String> responses,progresses,errors;
+    private Map<URI, String> progresses;
+    private Set<URI> newItems;
 
-    private boolean finished = false;
+    private boolean isFinished;
+    private boolean isError;
 
-    private boolean hasError = false;
 
     public AnalysisResponseCollector() {
-        responses = new HashMap<>();
         progresses = new HashMap<>();
-        errors = new HashMap<>();
+        newItems = new HashSet<>();
     }
 
     @Override
     public void sendFinish(Item ci) throws IOException {
-            log.debug("sent message about {}", ci.getURI().stringValue());
-            responses.put(ci.getURI(), ci.getSemanticType());
+        Assert.assertNotNull(ci);
+        Assert.assertFalse(isFinished);
+        Assert.assertFalse(isError);
+        log.debug("sent message about {}", ci.getURI().stringValue());
+        isFinished = true;
+        ObjectConnection con = ci.getObjectConnection();
+        try {
+            Assert.assertTrue(con.isActive());
+            con.commit();
+            con.close();
+        } catch (RepositoryException e) {
+            log.warn(e.getMessage(),e);
+        }
     }
 
-    public Map<URI, String> getResponses() {
-        return Collections.unmodifiableMap(responses);
+    public Set<URI> getNewItemResponses() {
+        return Collections.unmodifiableSet(newItems);
+    }
+    
+    public Map<URI,String> getProgressResponses() {
+        return Collections.unmodifiableMap(progresses);
     }
 
     @Override
     public void sendProgress(Item ci, URI object, float progress)
             throws IOException {
+        Assert.assertNotNull(ci);
+        Assert.assertNotNull(object);
+        Assert.assertFalse(isFinished);
+        Assert.assertFalse(isError);
+        ObjectConnection con = ci.getObjectConnection();
+        try {
+            Assert.assertTrue(con.isActive());
+        } catch (RepositoryException e){
+            log.warn(e.getMessage(),e);
+        }
         log.debug("sent progress message about {}", object.stringValue());
         progresses.put(object, String.valueOf(progress));
     }
@@ -49,25 +92,53 @@ public class AnalysisResponseCollector implements AnalysisResponse {
     @Override
     public void sendError(Item ci, ErrorCodes code, String msg, String desc)
             throws IOException {
+        Assert.assertNotNull(ci);
+        Assert.assertNotNull(code);
+        Assert.assertFalse(isFinished);
+        Assert.assertFalse(isError);
         log.debug("sent error message about {}", ci.getURI().stringValue());
-        errors.put(ci.getURI(), msg);
+        ObjectConnection con = ci.getObjectConnection();
+        isError = true;
+        try {
+            Assert.assertTrue(con.isActive());
+            con.rollback();
+            con.close();
+        } catch (RepositoryException e) {
+            log.warn(e.getMessage(),e);
+        }
     }
 
     @Override
     public void sendNew(Item ci, URI object)
             throws IOException {
-        // TODO Auto-generated method stub
-        
+        Assert.assertNotNull(ci);
+        Assert.assertNotNull(object);
+        Assert.assertFalse(isFinished);
+        Assert.assertFalse(isError);
+        ObjectConnection con = ci.getObjectConnection();
+        Assert.assertTrue("sendNew was called twice for "+ object, newItems.add(object));
+        try {
+            Assert.assertTrue(con.isActive());
+            con.commit();
+            con.begin();
+        } catch (RepositoryException e) {
+            log.warn(e.getMessage(),e);
+        }
     }
 
     @Override
     public boolean isFinished() {
-        return finished;
+        return isFinished;
     }
 
     @Override
     public boolean isError() {
-        return hasError ;
+        return isError ;
+    }
+
+    @Override
+    public boolean hasNew() {
+        return !newItems.isEmpty();
     }
 
 }

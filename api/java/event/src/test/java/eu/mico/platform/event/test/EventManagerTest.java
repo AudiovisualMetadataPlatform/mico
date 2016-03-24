@@ -29,6 +29,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.repository.RepositoryException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -119,8 +120,12 @@ public class EventManagerTest extends BaseCommunicationTest {
 
         @Override
         public void call(AnalysisResponse resp, Item ci, List<Resource> object, Map<String,String> params) throws AnalysisException, IOException {
-            resp.sendFinish(ci);
             called = true;
+            try {
+                resp.sendFinish(ci);
+            } catch (RepositoryException e) {
+                throw new IOException(e);
+            }
         }
 
     }
