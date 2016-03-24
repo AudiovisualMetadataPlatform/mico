@@ -17,6 +17,7 @@ import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Resource;
 import org.openrdf.model.URI;
+import org.openrdf.repository.RepositoryException;
 
 import java.io.IOException;
 import java.util.List;
@@ -74,7 +75,13 @@ public interface AnalysisService {
      * resolving the content item in the persistence service.
      *
      * @param resp   a response object that can be used to send back notifications about new objects to the broker
+     * @throws AnalysisException if the AnalysisService fails for some reason (e.g. the media file was corrupted;
+     * processed annotations in the Item where incomplete; ...). Also IO exceptions while accessing
+     * external resource should be wrapped as {@link AnalysisException}s.
+     * @throws RepositoryException if writing RDF data to the Repository failed for some reason
+     * @throws IOException if sending events via the AnalysisResponse failed for some reason
+     * @throws RuntimeException the caller takes also care of runtime exceptions 
      */
-    void call(AnalysisResponse resp, Item item,  List<Resource> resourceList,  Map<String, String> params) throws AnalysisException, IOException;
+    void call(AnalysisResponse resp, Item item,  List<Resource> resourceList,  Map<String, String> params) throws AnalysisException, IOException, RepositoryException;
 
 }

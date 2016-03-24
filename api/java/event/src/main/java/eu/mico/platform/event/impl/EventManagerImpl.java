@@ -13,7 +13,6 @@
  */
 package eu.mico.platform.event.impl;
 
-import com.github.anno4j.Anno4j;
 import com.google.common.base.Preconditions;
 import com.rabbitmq.client.*;
 import com.rabbitmq.client.AMQP.BasicProperties;
@@ -35,7 +34,7 @@ import eu.mico.platform.persistence.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.config.RepositoryConfigException;
+import org.openrdf.repository.object.ObjectConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +69,7 @@ public class EventManagerImpl implements EventManager {
 
     private Map<AnalysisService, AnalysisConsumer> services;
 
-    private DiscoveryConsumer discovery;
+    private DiscoveryConsumer discovery; //TODO: what was this for?
 
     public EventManagerImpl(String amqpHost) throws IOException {
         this(amqpHost, "mico", "mico");
@@ -300,21 +299,39 @@ public class EventManagerImpl implements EventManager {
     private class AnalysisConsumer extends DefaultConsumer {
 
         private final class AnalysisResponseImpl implements AnalysisResponse {
-            private Boolean finished = false;
-            private Boolean hasError = false;
+            private boolean finished = false;
+            private boolean hasNew = false;
+            private AnalysisEvent.Error errorMessage = null;
+            private boolean sentError = false;
             private final BasicProperties properties;
             private final BasicProperties replyProps;
             private long progressSentMS = 0;
             private final long progressDeltaMS = 1000;
 
-            private AnalysisResponseImpl(BasicProperties properties,
-                                         BasicProperties replyProps) {
+            private AnalysisResponseImpl(BasicProperties properties, BasicProperties replyProps) {
                 this.properties = properties;
                 this.replyProps = replyProps;
             }
 
             @Override
-            public void sendFinish(Item item) throws IOException {
+            public void sendFinish(Item item) throws IOException, RepositoryException {
+                if(item == null){
+                    throw new NullPointerException("The parsed Item MUST NOT be NULL!");
+                }
+                if(isFinished() | isError()){
+                    throw new IllegalStateException("Unable to send finished as this AnalysisResponse is already in " +
+                            (isError() ? "an error" : "a finished") +"  state");
+                }
+                // NOTE: This does NOT close or rollback the connection in case
+                //       of an IOException. It is expected that the AnalysisService
+                //       does deal with IOExceptions and try sendError
+                ObjectConnection con = item.getObjectConnection();
+                //first commit the RDF data to the RDF repository
+                if(con.isActive()){
+                    con.commit();
+                } //else no transaction active we do not need to commit
+
+                //send the finished event
                 AnalysisEvent.Finish finishMsg = AnalysisEvent.Finish.newBuilder()
                         .setServiceId(service.getServiceID().stringValue())
                         .setItemUri(item.getURI().stringValue())
@@ -327,10 +344,26 @@ public class EventManagerImpl implements EventManager {
 
                 getChannel().basicPublish("", properties.getReplyTo(), replyProps, analysisEvent.toByteArray());
                 finished=true;
+                //after finishing a response we need to close the connection as
+                //the analysis service MUST NOT modify the Item after sending a
+                //finished event!
+                try { //
+                    con.close(); 
+                } catch(RepositoryException e){/* do not fail on closing connections */}
             }
 
             @Override
             public void sendProgress(Item item, URI part, float progress) throws IOException {
+                if(item == null){
+                    throw new NullPointerException("The parsed Item MUST NOT be NULL!");
+                }
+                if(part == null){
+                    throw new NullPointerException("The parsed part URI MUST NOT be NULL!");
+                }
+                if(isFinished() | isError()){
+                    throw new IllegalStateException("Unable to send progress as this AnalysisResponse is already in " +
+                            (isError() ? "an error" : "a finished") +"  state");
+                }
                 long current = System.currentTimeMillis();
                 if (current < progressDeltaMS + progressSentMS) {
                     // prevent broker from progress flooding and wait at least deltaMS millis
@@ -338,8 +371,9 @@ public class EventManagerImpl implements EventManager {
                     return;
                 }
                 log.trace("sending progress of: {} for object: {}", progress, part);
-                if (progress > 1.0001f) {
+                if (progress > 1f) {
                     log.warn("progress should not be grater then 1.0 but is: {}", progress);
+                    //TODO: maybe we should set progress to 1f here!
                 }
                 AnalysisEvent.Progress progressMsg = AnalysisEvent.Progress.newBuilder()
                         .setItemUri(item.getURI().stringValue())
@@ -357,7 +391,22 @@ public class EventManagerImpl implements EventManager {
             }
 
             @Override
-            public void sendNew(Item item, URI part) throws IOException {
+            public void sendNew(Item item, URI part) throws IOException, RepositoryException {
+                if(item == null){
+                    throw new NullPointerException("The parsed Item MUST NOT be NULL!");
+                }
+                if(part == null){
+                    throw new NullPointerException("The parsed part URI MUST NOT be NULL!");
+                }
+                if(isFinished() | isError()){
+                    throw new IllegalStateException("Unable to send progress as this AnalysisResponse is already in " +
+                            (isError() ? "an error" : "a finished") +"  state");
+                }
+                ObjectConnection con = item.getObjectConnection();
+                if(con.isActive()){
+                    con.commit(); //save the current state
+                    con.begin(); //start a new transaction
+                }  //else no transaction active we do not need to commit
                 AnalysisEvent.NewPart newPartMsg = AnalysisEvent.NewPart.newBuilder()
                         .setItemUri(item.getURI().stringValue())
                         .setPartUri(part.stringValue())
@@ -370,20 +419,56 @@ public class EventManagerImpl implements EventManager {
                         .build();
 
                 getChannel().basicPublish("", properties.getReplyTo(), replyProps, analysisEvent.toByteArray());
+                hasNew = true;
+                log.debug(" - sentNew [service: {} | item: {} | part: {}]",service, item.getURI(), part);
             }
 
             @Override
             public void sendError(Item item, ErrorCodes code, String msg, String desc) throws IOException {
-                hasError = true;
-                AnalysisEvent.Error responseEvent = AnalysisEvent.Error.newBuilder()
-                        .setItemUri(item.getURI().stringValue())
-                        .setServiceId(service.getServiceID().stringValue())
-                        .setMessage(msg)
-                        .setDescription(desc).build();
-
-                getChannel().basicPublish("", properties.getReplyTo(), replyProps, responseEvent.toByteArray());
+                if(sentError){ //ignore additional errors if already in an error state
+                    return;
+                }
+                if(item == null){
+                    throw new NullPointerException("The parsed Item MUST NOT be NULL!");
+                }
+                ObjectConnection con = item.getObjectConnection();
+                try {
+                    try {
+                        if(con.isActive()){
+                            con.rollback();
+                        }
+                    } catch(RepositoryException e){
+                        //we MUST NOT Fail if we can't rollback as we need to send the error response!
+                        //actually getting RepositoryExceptions from the connection might be the
+                        //reason why the caller has called sendError() in the first place
+                        log.warn("Unable to rollback transaction for Item {} after Error[code: {}, msg: {}] - reason: {}",
+                                item.getURI(), code, msg, e.getMessage());
+                        log.debug("TACKTRACE: ",e);
+                    }
+                    if(errorMessage == null){
+                        errorMessage = AnalysisEvent.Error.newBuilder()
+                                .setItemUri(item.getURI().stringValue())
+                                .setServiceId(service.getServiceID().stringValue())
+                                .setMessage(msg)
+                                .setDescription(desc).build();
+                    } //else ... always try to send the first error
+    
+                    getChannel().basicPublish("", properties.getReplyTo(), replyProps, errorMessage.toByteArray());
+                    log.debug(" - sentError [service: {} | item: {} | code: {}]",service, item.getURI(), 
+                            errorMessage.getErrorCode());
+                } finally {
+                    //after an error the connection is no longer needed so close it
+                    try {
+                        con.close();
+                    } catch (RepositoryException e) {/* ignore */}
+                }
             }
 
+            @Override
+            public boolean hasNew(){
+                return hasNew;
+            }
+            
             @Override
             public boolean isFinished() {
                 return finished;
@@ -391,7 +476,19 @@ public class EventManagerImpl implements EventManager {
 
             @Override
             public boolean isError() {
-                return hasError;
+                return errorMessage != null;
+            }
+            /**
+             * If an error message was successfully sent. NOTE: In difference to
+             * {@link #isError()} this will only return <code>true</code> if
+             * {@link #sendError(Item, ErrorCodes, String, String)} was called
+             * and successfully sent the error message. {@link #isError()}
+             * returns <code>true</code> as soon as 
+             * {@link #sendError(Item, ErrorCodes, String, String)} was called.
+             * @return only <code>true</code> if an error message was successfully sent
+             */
+            boolean sentError(){
+                return sentError;
             }
         }
 
@@ -433,51 +530,98 @@ public class EventManagerImpl implements EventManager {
                     .correlationId(properties.getCorrelationId())
                     .build();
 
-            final AnalysisResponse response = new AnalysisResponseImpl(properties, replyProps);
+            ObjectConnection con = null;
+            Item item = null;
+            AnalysisResponseImpl response = null;
 
             try {
-
-                final Item item = persistenceService.getItem(new URIImpl(analysisRequest.getItemUri()));
-
+                //(1) get the item of the Event from the persistenceService
+                final URI itemUri = new URIImpl(analysisRequest.getItemUri());
+                item = persistenceService.getItem(itemUri);
+                //NOTE: The persistenceService creates a new connection for every 
+                //    requested Item. This is not perfect, but works for now
+                con = item.getRDFObject().getObjectConnection();
+                response = new AnalysisResponseImpl(properties, replyProps);
+            } catch (RepositoryException e){
+                log.warn("RepositoryException while creating Item {} on "
+                        + "RepositoryService (message: {})", 
+                        analysisRequest.getItemUri(), e.getMessage());
+            } finally { //make sure we have everything we need to continue
+                if(item == null || con == null || response == null){ //nope ... re-queue
+                    log.info("Requeue message: {}[item: {}]", envelope.getDeliveryTag(),
+                            analysisRequest.getItemUri());
+                    log.trace(" - item: {} | con: {} | response: {}", item, con, response); 
+                    getChannel().basicNack(envelope.getDeliveryTag(), false, true);
+                    return; //stop here
+                } //else everything we need was correctly initialized
+            }
+            log.debug("> process Item {} (message: {})", item.getURI(), envelope.getDeliveryTag());
+            boolean reEnqueue = false; //if the message should be re-enqueued
+            try {
                 final List<Resource> resourceList = parseResourceList(analysisRequest.getPartUriList(), item);
                 final Map<String, String> params = new HashMap<String, String>();
                 for (ParamEntry entry : analysisRequest.getParamsList()) {
                     params.put(entry.getKey(), entry.getValue());
                 }
-
-                try {
-                    service.call(response, item, resourceList, params);
-                    if(!response.isFinished()){
-                        response.sendFinish(item);
-                   }
-                    getChannel().basicAck(envelope.getDeliveryTag(), false);
-                } catch (RuntimeException | AnalysisException e) {
-                    log.error(
-                            "could not analyse item with URI {}, requeuing (message: {})",
-                            analysisRequest.getItemUri(), e.getMessage());
-                    log.debug("Exception:", e);
+                con.begin(); //start a transaction on the connection
+                log.debug(" - call {} with Item {}", service.getClass().getName(), item.getURI());
+                service.call(response, item, resourceList, params);
+                if(!response.isFinished() && !response.isError()){
+                    //the lazy AnalysisService implementor was not calling
+                    //response.sendFinish(item) ... so lets help him out
+                    // ... but not without complaining!
+                    log.info("AnalysisService {} has not sent a finished message "
+                            + "for Item {}. Please adapt the implementation to "
+                            + "that finished events are sent. Until than the "
+                            + "EventManager will care about sending the finished "
+                            + "event on behalf of the AnalysisService",
+                            service.getClass().getName(), analysisRequest.getItemUri());
+                    response.sendFinish(item);
+                }
+            } catch (RuntimeException | AnalysisException e) {
+                log.error("could not analyse item with URI {}, requeuing (message: {})",
+                        analysisRequest.getItemUri(), e.getMessage());
+                log.debug("STACKTRACE:", e);
+                //for those errors we do not want to try again
+                if(!response.sentError()){ //so just check if no error was sent yet
                     response.sendError(item, ErrorCodes.UNEXPECTED_ERROR,
                             "could not analyse item with URI " + item.getURI(),
                             e.getMessage());
-                    getChannel().basicNack(envelope.getDeliveryTag(), false,
-                            true);
-                } finally {
-                    if (!response.isFinished() && !response.isError()) {
-                        response.sendError(
-                                item,
-                                ErrorCodes.UNEXPECTED_ERROR,
-                                "Analyze process aborted",
-                                "Unable to finish analyse item "
-                                        + item.getURI());
-                        getChannel().basicNack(envelope.getDeliveryTag(),
-                                false, true);
+                } //else an error message was already sent
+            } catch (RepositoryException e) {
+                log.warn("Encountered error while reading/writing to RDF repository while processing "
+                        + "Item {} (message: {})", analysisRequest.getItemUri(), e.getMessage());
+                log.debug("STACKTRACE:",e);
+                //for RepositoryExceptions we actually would like to try again.
+                //however we can only to this if we have not sent any messages
+                //to the broker
+                reEnqueue = !response.sentError() && !response.isFinished() && !response.hasNew();
+            } finally { //make sure we come to a clean end whatever happend ...
+                if(reEnqueue){
+                    log.info("Requeue message: {}[item: {}]", envelope.getDeliveryTag(),
+                            analysisRequest.getItemUri());
+                    getChannel().basicNack(envelope.getDeliveryTag(), false, true);
+                } else { //we need to ack the message ...
+                    try { // ... but first check if we might also need to send an error
+                        if(!response.isFinished() || !response.sentError()){
+                            //somehow now response was sent up to now ...
+                            if(!response.isError()){
+                                // ... this can happen in case of an Error (e.g. OutOfMemoryError)
+                                log.warn("Analysis request for service {} and item {} (message:{}) "
+                                        + "terminated unfinished and without an error. EventManager "
+                                        + "will sent an Error message", service.getClass().getName(),
+                                        item.getURI(), envelope.getDeliveryTag());
+                            } //else error was raised but not sent (because of an IOException)
+                            response.sendError(item, ErrorCodes.UNEXPECTED_ERROR,
+                                    "Analyze process of " + service.getClass().getName() 
+                                    + " has not finished for an unknown reason", "");
+                        }
+                    } finally {
+                        getChannel().basicAck(envelope.getDeliveryTag(), false);
+                        log.trace("ack message: {}[item: {}]", envelope.getDeliveryTag(),
+                                analysisRequest.getItemUri());
                     }
                 }
-
-            } catch (RepositoryException e) {
-                log.error("could not access content item with URI {}, requeuing (message: {})", analysisRequest.getItemUri(), e.getMessage());
-                log.debug("Exception:", e);
-                getChannel().basicNack(envelope.getDeliveryTag(), false, true);
             }
         }
 
