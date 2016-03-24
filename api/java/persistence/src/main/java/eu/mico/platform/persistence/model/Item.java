@@ -17,6 +17,7 @@ import com.github.anno4j.Anno4j;
 import org.openrdf.model.URI;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.config.RepositoryConfigException;
+import org.openrdf.repository.object.ObjectConnection;
 
 /**
  * Representation of a Item. A Item is a collection of ContentParts, e.g. an HTML page together with
@@ -55,5 +56,9 @@ public interface Item extends Resource {
 
     String getSerializedAt();
 
-    Anno4j getContextedAnno4j();
+    /**
+     * The {@link ObjectConnection} used by this Item
+     * @return the ObjectConnection
+     */
+    ObjectConnection getObjectConnection();
 }
