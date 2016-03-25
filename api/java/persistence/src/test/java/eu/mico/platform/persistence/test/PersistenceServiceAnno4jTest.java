@@ -13,16 +13,23 @@
  */
 package eu.mico.platform.persistence.test;
 
+import com.github.anno4j.querying.QueryService;
 import com.google.common.collect.Iterables;
 import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Item;
+
+import org.apache.marmotta.ldpath.parser.ParseException;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.object.ObjectConnection;
 
 import java.net.URISyntaxException;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -37,16 +44,18 @@ public class PersistenceServiceAnno4jTest {
     }
 
     @Test
-    public void createItemTest() throws RepositoryException {
+    public void createItemTest() throws RepositoryException, MalformedQueryException, QueryEvaluationException, ParseException {
         Item item = persistenceService.createItem();
         assertNotNull(item.getURI());
         assertNotNull(item.getSerializedAt());
 
         item.setSyntacticalType("syntactical-type");
         item.setSemanticType("semantic-type");
-
-        ItemMMM itemMMM = persistenceService.getAnno4j().findByID(ItemMMM.class, item.getURI());
-        assertNotNull(itemMMM);
+        
+        QueryService query = persistenceService.createQuery(item.getURI());
+        List<ItemMMM> itemMMMs = query.execute(ItemMMM.class);
+        assertEquals(1, itemMMMs.size());
+        ItemMMM itemMMM = itemMMMs.get(0);
         assertEquals(item.getSerializedAt(), itemMMM.getSerializedAt());
         assertEquals(item.getSemanticType(), itemMMM.getSemanticType());
         assertEquals(item.getSyntacticalType(), itemMMM.getSyntacticalType());
@@ -66,8 +75,9 @@ public class PersistenceServiceAnno4jTest {
     }
 
     @Test
-    public void getItemsTest() throws RepositoryException {
-        int initialItemCount = persistenceService.getAnno4j().findAll(ItemMMM.class).size();
+    public void getItemsTest() throws RepositoryException, MalformedQueryException, QueryEvaluationException, ParseException {
+        QueryService query = persistenceService.createQuery(null);
+        int initialItemCount = query.execute(ItemMMM.class).size();
 
         persistenceService.createItem();
         persistenceService.createItem();
@@ -78,33 +88,55 @@ public class PersistenceServiceAnno4jTest {
     }
 
     @Test
-    public void subGraphTest() throws RepositoryException {
-        int initialItemCount = persistenceService.getAnno4j().findAll(ItemMMM.class).size();
+    public void subGraphTest() throws RepositoryException, MalformedQueryException, QueryEvaluationException, ParseException {
+        QueryService query = persistenceService.createQuery(null);
+        int initialItemCount = query.execute(ItemMMM.class).size();
 
         Item item1 = persistenceService.createItem();
         Item item2 = persistenceService.createItem();
 
-        assertEquals(initialItemCount + 2, persistenceService.getAnno4j().findAll(ItemMMM.class).size());
+        query = persistenceService.createQuery(null);
+        
+        //the two new items are created in their own named graph so we should also
+        //see them in the union graph
+        assertEquals(initialItemCount + 2, query.execute(ItemMMM.class).size());
 
-        assertEquals(1, persistenceService.getAnno4j().findAll(ItemMMM.class, item1.getURI()).size());
-        assertEquals(1, persistenceService.getAnno4j().findAll(ItemMMM.class, item2.getURI()).size());
+        query = persistenceService.createQuery(item1.getURI());
+        assertEquals(1, query.execute(ItemMMM.class).size());
+
+        query = persistenceService.createQuery(item2.getURI());
+        assertEquals(1, query.execute(ItemMMM.class).size());
     }
 
     @Test
-    public void deleteItemTest() throws RepositoryException {
-
-        int intialItemCount = Iterables.size(persistenceService.getItems());
+    public void deleteItemTest() throws RepositoryException, MalformedQueryException, QueryEvaluationException, ParseException {
+        QueryService query = persistenceService.createQuery(null);
+        int initialItemCount = query.execute(ItemMMM.class).size();
 
         Item item1 = persistenceService.createItem();
         Item item2 = persistenceService.createItem();
 
-        assertEquals(intialItemCount + 2, Iterables.size(persistenceService.getItems()));
+        //check if we see the two now Items (in the union graph)
+        query = persistenceService.createQuery(null);
+        assertEquals(initialItemCount + 2, query.execute(ItemMMM.class).size());
 
+        //now check for Item1 in its own graph
+        query = persistenceService.createQuery(item1.getURI());
+        assertEquals(1, query.execute(ItemMMM.class).size());
+
+        //delete item1
         persistenceService.deleteItem(item1.getURI());
 
-        assertEquals(intialItemCount + 1, Iterables.size(persistenceService.getItems()));
+        //check that it is no longer present
+        query = persistenceService.createQuery(item1.getURI());
+        assertEquals(0, query.execute(ItemMMM.class).size());
 
-        assertEquals(0, persistenceService.getAnno4j().findAll(ItemMMM.class, item1.getURI()).size());
-        assertEquals(1, persistenceService.getAnno4j().findAll(ItemMMM.class, item2.getURI()).size());
+        //check that item2 is still present
+        query = persistenceService.createQuery(item2.getURI());
+        assertEquals(1, query.execute(ItemMMM.class).size());
+
+        //check that their is one additional item left in the union grpah
+        query = persistenceService.createQuery(null);
+        assertEquals(initialItemCount + 1, query.execute(ItemMMM.class).size());
     }
 }

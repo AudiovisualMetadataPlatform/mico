@@ -3,11 +3,14 @@ package eu.mico.platform.event.test.mock;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.model.AnalysisException;
+import eu.mico.platform.event.model.Event.ErrorCodes;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Resource;
 import eu.mico.platform.persistence.model.Item;
 
+import org.apache.hadoop.hdfs.protocol.proto.DatanodeProtocolProtos.ErrorReportRequestProto.ErrorCode;
+import org.junit.Assert;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,17 +61,32 @@ public class EventManagerMock implements EventManager {
         }
     }
 
-    private void analyseItemResource(Item item, Resource resource,
-            Map<String, String> params) throws RepositoryException, IOException {
+    private void analyseItemResource(Item item, Resource resource, Map<String, String> params) throws IOException {
         for (AnalysisService service: services) {
             if (service.getRequires().equals(resource.getSyntacticalType())) {
                 List<Resource> parts = new LinkedList<Resource>();
                 parts.add(resource);
+                log.debug("calling service {} to analyze {}...", service.getServiceID(), resource.getURI());
+                boolean success = false;
                 try {
-                    log.debug("calling service {} to analyze {}...", service.getServiceID(), resource.getURI());
+                    item.getObjectConnection().begin();
                     service.call(responsesCollector, item, parts, params);
-                } catch (AnalysisException e) {
-                    log.error("Analysis Exception processing {}: {}", resource, e.getMessage());
+                    success = true;
+                } catch (RepositoryException | AnalysisException | RuntimeException e) {
+                    responsesCollector.sendError(item, ErrorCodes.UNEXPECTED_ERROR, e.getClass().getName() +": "+e.getMessage(),"");
+                } finally {
+                    try {
+                        if(item.getObjectConnection().isActive()){
+                            if(success){
+                                item.getObjectConnection().commit();
+                            } else {
+                                item.getObjectConnection().rollback();
+                            }
+                        }
+                    } catch(RepositoryException e) {/* ignore */}
+                    //NOTE: do not close here as in tests one might want to call
+                    //      methods on this Item for assertions
+                    //item.getObjectConnection().close();
                 }
             }
         }

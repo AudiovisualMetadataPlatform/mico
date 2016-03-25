@@ -106,10 +106,13 @@ public class PersistenceServiceAnno4j implements PersistenceService {
         try {
             itemConn = anno4j.getObjectRepository().getConnection();
             itemConn.begin();
-            ItemMMM itemMMM = itemConn.getObjectFactory().createObject(IDGenerator.BLANK_RESOURCE, ItemMMM.class);
+            //we need to do a 2 step creation to ensure that the rdf:type goes into the correct context
+            RDFObject itemObj = itemConn.getObjectFactory().createObject(IDGenerator.BLANK_RESOURCE, ItemMMM.class);
+            URI itemURI = (URI)itemObj.getResource(); //if this is not a URI use a different IDGenerator!
+            setContext(itemConn, itemURI); //now set the correct context on the connection
+            ItemMMM itemMMM = itemConn.addDesignation(itemObj, ItemMMM.class); //add the correct rdf:type
+            //and set all the other required metadata
             String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
-            URI itemURI = (URI)itemMMM.getResource(); //if this is not a URI use a different IDGenerator!
-            setContext(itemConn, itemURI);
             itemMMM.setSerializedAt(dateTime);
             itemConn.addObject(itemMMM); //store the new item
             log.trace("Created Item <{}>", itemMMM.getResourceAsString());
@@ -145,7 +148,7 @@ public class PersistenceServiceAnno4j implements PersistenceService {
         setContext(itemConn, id);
         //we do not parse here a explicit class as a getter method assumes that
         //the parsed resource already has the necessary rdf:type assigned!
-        RDFObject object = itemConn.getObjectFactory().createObject(id);
+        Object object = itemConn.getObject(id);
         //if not we will get a ClssCastException in the next line
         return new ItemAnno4j(ItemMMM.class.cast(object), this);
     }

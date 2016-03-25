@@ -29,9 +29,12 @@ import org.apache.commons.io.IOUtils;
 
 
 import org.openrdf.annotations.Iri;
+import org.openrdf.idGenerator.IDGenerator;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.object.ObjectConnection;
+import org.openrdf.repository.object.ObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,67 +90,58 @@ public class WordCountAnalyzer implements AnalysisService {
     }
 
     @Override
-    public void call(AnalysisResponse analysisResponse, Item item, List<Resource> resourceList, Map<String, String> params) throws AnalysisException, IOException {
-        Anno4j contextedAnno4j = item.getContextedAnno4j();
-        try {
-            if(resourceList.size() > 1) {
-                throw new IllegalArgumentException("Resource list only allows one item to be processed.");
-            }
-
-            Resource resource = resourceList.get(0);
-
-            log.info("Retrieved analysis call for {}", resource.getURI());
-
-            // get the input stream and read it into a string
-            String text = IOUtils.toString(item.getAsset().getInputStream(), "utf-8");
-            log.debug("Loaded text of {} to count words", resource.getURI());
-
-            // count the words using a regular expression pattern
-            Pattern p_wordcount = Pattern.compile("\\w+");
-            Matcher m = p_wordcount.matcher(text);
-
-            // we are progressing ... inform broker
-            analysisResponse.sendProgress(item, resource.getURI(), 0.25f);
-            if (simulateSlow == true) {
-                simulateLongTask(analysisResponse, item, resource.getURI());
-            }
-
-            int count;
-            for(count = 0; m.find(); count++);
-
-            log.debug("Counted {} words in {}", count, resource.getURI());
-
-            // create a new part for assigning the metadata
-            Part part = item.createPart(getServiceID());
-            part.setSyntacticalType(getProvides());
-
-            // create example wordcount body and setting the result of the analyzer
-            WordCountBody wordCountBody = contextedAnno4j.createObject(WordCountBody.class);
-            wordCountBody.setCount(count);
-            part.setBody(wordCountBody);
-
-            // create the target and set a reference to the part/item on which the body refers to
-            SpecificResource specificResource = contextedAnno4j.createObject(SpecificResource.class);
-            specificResource.setSource(resource.getRDFObject());
-
-            // adding the target to the part
-            part.addTarget(specificResource);
-
-            // adding the input
-            part.addInput(resource);
-            analysisResponse.sendNew(item, part.getURI());
-
-            analysisResponse.sendFinish(item);
-            log.debug("Done for {}", resource.getURI());
-        } catch (RepositoryException e) {
-            log.error("error accessing repository",e);
-            throw new AnalysisException("error accessing repository",e);
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-            throw new AnalysisException("", e);
-        } catch (IllegalAccessException e) {
-            throw new AnalysisException("", e);
+    public void call(AnalysisResponse analysisResponse, Item item, List<Resource> resourceList, Map<String, String> params) throws RepositoryException, AnalysisException, IOException {
+        ObjectConnection con = item.getObjectConnection();
+        ObjectFactory factory = con.getObjectFactory();
+        if(resourceList.size() > 1) {
+            throw new IllegalArgumentException("Resource list only allows one item to be processed.");
         }
+
+        Resource resource = resourceList.get(0);
+
+        log.info("Retrieved analysis call for {}", resource.getURI());
+
+        // get the input stream and read it into a string
+        String text = IOUtils.toString(item.getAsset().getInputStream(), "utf-8");
+        log.debug("Loaded text of {} to count words", resource.getURI());
+
+        // count the words using a regular expression pattern
+        Pattern p_wordcount = Pattern.compile("\\w+");
+        Matcher m = p_wordcount.matcher(text);
+
+        // we are progressing ... inform broker
+        analysisResponse.sendProgress(item, resource.getURI(), 0.25f);
+        if (simulateSlow == true) {
+            simulateLongTask(analysisResponse, item, resource.getURI());
+        }
+
+        int count;
+        for(count = 0; m.find(); count++);
+
+        log.debug("Counted {} words in {}", count, resource.getURI());
+
+        // create a new part for assigning the metadata
+        Part part = item.createPart(getServiceID());
+        part.setSyntacticalType(getProvides());
+
+        // create example wordcount body and setting the result of the analyzer
+        WordCountBody wordCountBody = factory.createObject(IDGenerator.BLANK_RESOURCE, WordCountBody.class);
+        wordCountBody.setCount(count);
+        part.setBody(wordCountBody);
+
+        // create the target and set a reference to the part/item on which the body refers to
+        SpecificResource specificResource = factory.createObject(IDGenerator.BLANK_RESOURCE, SpecificResource.class);
+        specificResource.setSource(resource.getRDFObject());
+
+        // adding the target to the part
+        part.addTarget(specificResource);
+
+        // adding the input
+        part.addInput(resource);
+        analysisResponse.sendNew(item, part.getURI());
+
+        analysisResponse.sendFinish(item);
+        log.debug("Done for {}", resource.getURI());
     }
 
     /**

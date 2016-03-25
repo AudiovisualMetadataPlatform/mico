@@ -58,7 +58,7 @@ public class AnalysisResponseCollector implements AnalysisResponse {
         try {
             Assert.assertTrue(con.isActive());
             con.commit();
-            con.close();
+            //con.close(); //do not close connection in unit tests
         } catch (RepositoryException e) {
             log.warn(e.getMessage(),e);
         }
@@ -102,7 +102,7 @@ public class AnalysisResponseCollector implements AnalysisResponse {
         try {
             Assert.assertTrue(con.isActive());
             con.rollback();
-            con.close();
+            //con.close(); //do not close connection in unit tests
         } catch (RepositoryException e) {
             log.warn(e.getMessage(),e);
         }

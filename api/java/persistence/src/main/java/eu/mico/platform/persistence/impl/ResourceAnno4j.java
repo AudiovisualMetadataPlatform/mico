@@ -4,6 +4,7 @@ import org.openrdf.idGenerator.IDGenerator;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.object.ObjectConnection;
 import org.openrdf.repository.object.RDFObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,8 +82,13 @@ public abstract class ResourceAnno4j implements Resource {
         return resourceMMM.getAsset() != null;
     }
     
-    protected <T extends RDFObject> T createObject(Class<T> clazz){
-        return resourceMMM.getObjectConnection().getObjectFactory().createObject(IDGenerator.BLANK_RESOURCE, clazz);
+    protected <T extends RDFObject> T createObject(Class<T> clazz) throws RepositoryException{
+        return createObject(null,clazz);
+    }
+    protected <T extends RDFObject> T createObject(URI resource, Class<T> clazz) throws RepositoryException{
+        ObjectConnection con = resourceMMM.getObjectConnection();
+        return con.addDesignation(con.getObjectFactory().createObject(
+                resource == null ? IDGenerator.BLANK_RESOURCE : resource , clazz), clazz);
     }
 
 }
