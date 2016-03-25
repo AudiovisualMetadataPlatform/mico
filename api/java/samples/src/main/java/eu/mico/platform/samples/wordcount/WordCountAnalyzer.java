@@ -125,12 +125,16 @@ public class WordCountAnalyzer implements AnalysisService {
         part.setSyntacticalType(getProvides());
 
         // create example wordcount body and setting the result of the analyzer
-        WordCountBody wordCountBody = factory.createObject(IDGenerator.BLANK_RESOURCE, WordCountBody.class);
+        WordCountBody wordCountBody = con.addDesignation(
+                factory.createObject(IDGenerator.BLANK_RESOURCE, WordCountBody.class),
+                WordCountBody.class);
         wordCountBody.setCount(count);
         part.setBody(wordCountBody);
 
         // create the target and set a reference to the part/item on which the body refers to
-        SpecificResource specificResource = factory.createObject(IDGenerator.BLANK_RESOURCE, SpecificResource.class);
+        SpecificResource specificResource = con.addDesignation(
+                factory.createObject(IDGenerator.BLANK_RESOURCE, SpecificResource.class),
+                SpecificResource.class);
         specificResource.setSource(resource.getRDFObject());
 
         // adding the target to the part
