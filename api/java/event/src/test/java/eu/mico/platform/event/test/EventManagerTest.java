@@ -14,6 +14,7 @@
 package eu.mico.platform.event.test;
 
 import com.rabbitmq.client.*;
+
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
@@ -47,30 +48,52 @@ public class EventManagerTest extends BaseCommunicationTest {
     private static Connection connection;
     private static MockBrokerRegisterEvents brokerRegister;
     private static MockBrokerConfigEvents brokerConfig;
+    private static Channel registrationChannel;
+    private static Channel configChannel;
 
     @BeforeClass
     public static void setupLocal() throws IOException {
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(testHost);
-        factory.setUsername("mico");
-        factory.setPassword("mico");
+        ConnectionFactory testFactory = new ConnectionFactory();
+        testFactory.setHost(testHost);
+        testFactory.setUsername(testUsr);
+        testFactory.setPassword(testPwd);
 
-        connection = factory.newConnection();
+        connection = testFactory.newConnection();
 
-        brokerRegister = new MockBrokerRegisterEvents(connection.createChannel());
-        brokerConfig = new MockBrokerConfigEvents(connection.createChannel());
+        Channel initChannel = connection.createChannel();
+        try {
+            // create the exchange in case it does not exist
+            initChannel.exchangeDeclare(EventManager.EXCHANGE_SERVICE_REGISTRY, "fanout", true);
+            // create the exchange in case it does not exist
+            initChannel.exchangeDeclare(EventManager.EXCHANGE_SERVICE_DISCOVERY, "fanout", true);
+            // create the input and output queue with a defined name
+            initChannel.queueDeclare(EventManager.QUEUE_CONTENT_INPUT, true, false, false, null);
+            initChannel.queueDeclare(EventManager.QUEUE_PART_OUTPUT, true, false, false, null);
+            // create the configuration queue with a defined name
+            initChannel.queueDeclare(EventManager.QUEUE_CONFIG_REQUEST, false, true, false, null);
+        } finally {
+            initChannel.close();
+        }
+        
+        registrationChannel = connection.createChannel();
+        brokerRegister = new MockBrokerRegisterEvents(registrationChannel);
+        configChannel = connection.createChannel();
+        brokerConfig = new MockBrokerConfigEvents(configChannel);
     }
+
 
 
     @AfterClass
     public static void teardownLocal() throws IOException {
+        registrationChannel.close();
+        configChannel.close();
         connection.close();
     }
 
 
     @Test
     public void testCreateEventManager() throws IOException, URISyntaxException, TimeoutException {
-        EventManager mgr = new EventManagerImpl(testHost);
+        EventManager mgr = new EventManagerImpl(testHost, testUsr, testPwd, testVHost);
         mgr.init();
         mgr.shutdown();
     }
@@ -79,7 +102,7 @@ public class EventManagerTest extends BaseCommunicationTest {
     public void testRegisterService() throws IOException, InterruptedException, URISyntaxException, TimeoutException {
         AnalysisService mock = new MockService();
 
-        EventManager mgr = new EventManagerImpl(testHost);
+        EventManager mgr = new EventManagerImpl(testHost, testUsr, testPwd, testVHost);
         mgr.init();
 
         mgr.registerService(mock);
@@ -139,7 +162,7 @@ public class EventManagerTest extends BaseCommunicationTest {
             super(channel);
 
             String queueName = channel.queueDeclare().getQueue();
-            channel.queueBind(queueName, "service_registry", "");
+            channel.queueBind(queueName, EventManager.EXCHANGE_SERVICE_REGISTRY, "");
             channel.basicConsume(queueName, true, this);
         }
 

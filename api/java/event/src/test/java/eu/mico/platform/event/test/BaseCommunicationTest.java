@@ -33,20 +33,37 @@ public abstract class BaseCommunicationTest {
     private static Logger log = LoggerFactory.getLogger(BaseCommunicationTest.class);
 
     protected static String testHost;
-
+    protected static String testUsr;
+    protected static String testPwd;
+    protected static String testVHost;
 
     @BeforeClass
     public static void setupBase() throws URISyntaxException, IOException, RDFParseException, RepositoryException {
-        testHost = System.getenv("test.host");
-        if(testHost == null) {
-            testHost = System.getProperty("test.host");
-            if(testHost == null) {
-                testHost = "127.0.0.1";
-                log.warn("test.host variable not defined, falling back to default one: {}", testHost);
-            }
-        }
-
+        testHost = getConf("test.host","127.0.0.1");
+        testVHost = getConf("text.vhost", null);
+        testUsr = getConf("test.usr", "guest");
+        testPwd = getConf("test.pwd", "guest", false); //to not log the pwd
         VFSUtils.configure();
+    }
+
+    private static String getConf(String var, String defVal) {
+        return getConf(var, defVal, true);
+    }
+
+    private static String getConf(String var, String defVal, boolean logVal) {
+        String val = System.getenv(var);
+        if(val == null) {
+            val = System.getProperty(var);
+            if(val == null) {
+                val = defVal;
+                log.warn("{} variable not defined, falling back to default one: {}", var, defVal);
+            } else {
+                log.info(" - {}: {} (from system property)", var, logVal ? val : "< not logged >");
+            }
+        } else {
+            log.info(" - {}: {} (from ENV param)", var, logVal ? val : "< not logged >");
+        }
+        return val;
     }
 
 }
