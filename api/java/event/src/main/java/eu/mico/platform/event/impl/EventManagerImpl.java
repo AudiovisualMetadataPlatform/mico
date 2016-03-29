@@ -54,10 +54,11 @@ public class EventManagerImpl implements EventManager {
 
     private static Logger log = LoggerFactory.getLogger(EventManagerImpl.class);
 
-    private String amqpHost;
-    private int amqpPort;
-    private String amqpUser;
-    private String amqpPassword;
+    private final String amqpHost;
+    private final String amqpVHost;
+    private final int amqpPort;
+    private final String amqpUser;
+    private final String amqpPassword;
 
     private java.net.URI marmottaBaseUri;
     private java.net.URI storageBaseUri;
@@ -69,20 +70,24 @@ public class EventManagerImpl implements EventManager {
 
     private Map<AnalysisService, AnalysisConsumer> services;
 
-    private DiscoveryConsumer discovery; //TODO: what was this for?
+    private DiscoveryConsumer discovery; //TODO: do we need this in the EventManagerImpl?
 
     public EventManagerImpl(String amqpHost) throws IOException {
         this(amqpHost, "mico", "mico");
     }
 
-
     public EventManagerImpl(String amqpHost, String amqpUser, String amqpPassword) throws IOException {
-        this(amqpHost, 5672, amqpUser, amqpPassword);
+        this(amqpHost, 5672, null, amqpUser, amqpPassword);
     }
 
-    public EventManagerImpl(String amqpHost, int amqpPort, String amqpUser, String amqpPassword) throws IOException {
+    public EventManagerImpl(String amqpHost, String amqpUser, String amqpPassword, String amqpVHost) throws IOException {
+        this(amqpHost, 5672, amqpVHost, amqpUser, amqpPassword);
+    }
+
+    public EventManagerImpl(String amqpHost, int amqpPort, String amqpVHost, String amqpUser, String amqpPassword) throws IOException {
         this.amqpHost = amqpHost;
         this.amqpPort = amqpPort;
+        this.amqpVHost = amqpVHost;
         this.amqpUser = amqpUser;
         this.amqpPassword = amqpPassword;
 
@@ -104,6 +109,10 @@ public class EventManagerImpl implements EventManager {
         factory.setPort(amqpPort);
         factory.setUsername(amqpUser);
         factory.setPassword(amqpPassword);
+        
+        if(amqpVHost != null){
+            factory.setVirtualHost(amqpVHost);
+        }
 
         connection = factory.newConnection();
 
@@ -245,6 +254,8 @@ public class EventManagerImpl implements EventManager {
      * A consumer reacting to service discovery requests. Upon initialisation, it creates its own queue and binds it to
      * the service discovery exchange. Upon a discovery event, it simply sends back its list of services to the replyTo
      * queue provided in the discovery request.
+     * 
+     * TODO: currently this is unused by this implementation ... should we remove this cass?
      */
     private class DiscoveryConsumer extends DefaultConsumer {
         public DiscoveryConsumer() throws IOException {
