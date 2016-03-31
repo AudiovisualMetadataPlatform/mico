@@ -13,11 +13,8 @@
  */
 package eu.mico.platform.event.api;
 
-import eu.mico.platform.event.model.AnalysisException;
-import eu.mico.platform.event.model.Event.ErrorCodes;
-import eu.mico.platform.persistence.model.Asset;
-import eu.mico.platform.persistence.model.Item;
-import eu.mico.platform.persistence.model.Part;
+import java.io.IOException;
+import java.io.OutputStream;
 
 import org.openrdf.model.URI;
 import org.openrdf.repository.RepositoryException;
@@ -26,8 +23,11 @@ import com.github.anno4j.model.Annotation;
 import com.github.anno4j.model.Selector;
 import com.github.anno4j.model.impl.targets.SpecificResource;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import eu.mico.platform.event.model.AnalysisException;
+import eu.mico.platform.event.model.Event.ErrorCodes;
+import eu.mico.platform.persistence.model.Asset;
+import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Part;
 
 /**
  * An object passed to the AnalysisService callback method to interact with the message broker using the proper channel.

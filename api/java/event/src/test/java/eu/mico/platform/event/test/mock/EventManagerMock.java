@@ -1,20 +1,5 @@
 package eu.mico.platform.event.test.mock;
 
-import eu.mico.platform.event.api.AnalysisService;
-import eu.mico.platform.event.api.EventManager;
-import eu.mico.platform.event.model.AnalysisException;
-import eu.mico.platform.event.model.Event.ErrorCodes;
-import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
-import eu.mico.platform.persistence.model.Resource;
-import eu.mico.platform.persistence.model.Item;
-
-import org.apache.hadoop.hdfs.protocol.proto.DatanodeProtocolProtos.ErrorReportRequestProto.ErrorCode;
-import org.junit.Assert;
-import org.openrdf.repository.RepositoryException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -23,6 +8,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.openrdf.repository.RepositoryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import eu.mico.platform.event.api.AnalysisService;
+import eu.mico.platform.event.api.EventManager;
+import eu.mico.platform.event.model.AnalysisException;
+import eu.mico.platform.event.model.Event.ErrorCodes;
+import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
+import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Resource;
 
 /**
  * Simple Event Manager Mock for testing AnalysisService implementations

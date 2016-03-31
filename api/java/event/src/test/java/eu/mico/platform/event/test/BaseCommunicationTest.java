@@ -13,15 +13,16 @@
  */
 package eu.mico.platform.event.test;
 
-import eu.mico.platform.storage.util.VFSUtils;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import org.junit.BeforeClass;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+import eu.mico.platform.storage.util.VFSUtils;
 
 /**
  * Add file description here!

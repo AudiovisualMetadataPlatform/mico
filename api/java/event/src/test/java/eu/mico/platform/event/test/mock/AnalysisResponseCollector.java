@@ -1,17 +1,5 @@
 package eu.mico.platform.event.test.mock;
 
-import eu.mico.platform.event.api.AnalysisResponse;
-import eu.mico.platform.event.model.AnalysisException;
-import eu.mico.platform.event.model.Event.ErrorCodes;
-import eu.mico.platform.persistence.model.Item;
-
-import org.junit.Assert;
-import org.openrdf.model.URI;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.object.ObjectConnection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -20,6 +8,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.junit.Assert;
+import org.openrdf.model.URI;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.object.ObjectConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import eu.mico.platform.event.api.AnalysisResponse;
+import eu.mico.platform.event.model.AnalysisException;
+import eu.mico.platform.event.model.Event.ErrorCodes;
+import eu.mico.platform.persistence.model.Item;
 
 /**
  * Test implementation of the {@link AnalysisResponse} interface that takes care

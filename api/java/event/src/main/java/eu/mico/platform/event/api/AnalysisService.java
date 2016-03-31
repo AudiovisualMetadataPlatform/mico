@@ -13,15 +13,16 @@
  */
 package eu.mico.platform.event.api;
 
-import eu.mico.platform.event.model.AnalysisException;
-import eu.mico.platform.persistence.model.Item;
-import eu.mico.platform.persistence.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.repository.RepositoryException;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
+import org.openrdf.model.URI;
+import org.openrdf.repository.RepositoryException;
+
+import eu.mico.platform.event.model.AnalysisException;
+import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Resource;
 
 /**
  * Interface to be implemented by services. Consists of some informational methods as well as a callback which is called
