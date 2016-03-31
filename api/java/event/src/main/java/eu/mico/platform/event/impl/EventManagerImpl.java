@@ -31,6 +31,8 @@ import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Resource;
 
+import org.apache.hadoop.hdfs.protocol.proto.DatanodeProtocolProtos.ErrorReportRequestProto.ErrorCode;
+import org.jboss.weld.bean.StringBeanIdentifier;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -39,9 +41,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
+
+import javax.xml.bind.DatatypeConverter;
 
 /**
  * Add file description here!
@@ -117,7 +123,8 @@ public class EventManagerImpl implements EventManager {
         connection = factory.newConnection();
 
         getConfiguration();
-        Preconditions.checkArgument(marmottaBaseUri.getPort() == 8080, "The marmotta port has to be 8080.");
+        // no longer needed as we do now have the configuration service
+        //Preconditions.checkArgument(marmottaBaseUri.getPort() == 8080, "The marmotta port has to be 8080.");
         this.persistenceService = new PersistenceServiceAnno4j(marmottaBaseUri, storageBaseUri);
 
         registryChannel = connection.createChannel();
@@ -131,16 +138,23 @@ public class EventManagerImpl implements EventManager {
     }
 
     private void getConfiguration() throws IOException, TimeoutException, java.net.URISyntaxException {
-        Channel configChannel = connection.createChannel();
-        RpcClient configClient = new RpcClient(configChannel, "", QUEUE_CONFIG_REQUEST, RPC_CONFIG_TIMEOUT);
-
         log.info("Retrieving Marmotta and storage configuration...");
+        Channel configChannel = null;
         Event.ConfigurationEvent config;
+        RpcClient configClient = null;
         try {
+            configChannel = connection.createChannel();
+            configClient = new RpcClient(configChannel, "", QUEUE_CONFIG_REQUEST, RPC_CONFIG_TIMEOUT);
             config = Event.ConfigurationEvent.parseFrom(configClient.primitiveCall(Event.ConfigurationDiscoverEvent.newBuilder().build().toByteArray()));
         } finally {
-            configClient.close();
-            configChannel.close();
+            try { //do not fail in close operations
+                if(configClient != null) {
+                    configClient.close();
+                }
+                if(configChannel != null){
+                    configChannel.close();
+                }
+            } catch(IOException e) {/*ignore*/}
         }
 
         log.info("Got Marmotta base URI: {}", config.getMarmottaBaseUri());
@@ -435,6 +449,25 @@ public class EventManagerImpl implements EventManager {
             }
 
             @Override
+            public void sendError(Item item, AnalysisException e) throws IOException {
+                if(e != null){
+                    sendError(item, e.getCode(), e.getMessage(), e.getCause());
+                } else {
+                    sendError(item, ErrorCodes.UNEXPECTED_ERROR, "","");
+                }
+            }
+            
+            @Override
+            public void sendError(Item item, ErrorCodes code, String msg, Throwable t) throws IOException {
+                if(t != null){
+                    StringWriter writer = new StringWriter();
+                    t.printStackTrace(new PrintWriter(writer));
+                    sendError(item, code, msg, writer.toString());
+                } else {
+                    sendError(item, code, msg,"");
+                }
+            }
+            @Override
             public void sendError(Item item, ErrorCodes code, String msg, String desc) throws IOException {
                 if(sentError){ //ignore additional errors if already in an error state
                     return;
@@ -460,11 +493,15 @@ public class EventManagerImpl implements EventManager {
                         errorMessage = AnalysisEvent.Error.newBuilder()
                                 .setItemUri(item.getURI().stringValue())
                                 .setServiceId(service.getServiceID().stringValue())
+                                .setErrorCode(code)
                                 .setMessage(msg)
                                 .setDescription(desc).build();
                     } //else ... always try to send the first error
-    
-                    getChannel().basicPublish("", properties.getReplyTo(), replyProps, errorMessage.toByteArray());
+                    AnalysisEvent event = AnalysisEvent.newBuilder()
+                            .setType(MessageType.ERROR)
+                            .setError(errorMessage).build();
+                    getChannel().basicPublish("", properties.getReplyTo(), replyProps, event.toByteArray());
+                    sentError = true;
                     log.debug(" - sentError [service: {} | item: {} | code: {}]",service, item.getURI(), 
                             errorMessage.getErrorCode());
                 } finally {
@@ -589,15 +626,28 @@ public class EventManagerImpl implements EventManager {
                             service.getClass().getName(), analysisRequest.getItemUri());
                     response.sendFinish(item);
                 }
-            } catch (RuntimeException | AnalysisException e) {
-                log.error("could not analyse item with URI {}, requeuing (message: {})",
-                        analysisRequest.getItemUri(), e.getMessage());
+            } catch (AnalysisException e) {
+                String errorMsg = new StringBuilder("AnalysisException while processing item ")
+                        .append(analysisRequest.getItemUri()).append(" with service ")
+                        .append(service.getServiceID()).append(" (message: ")
+                        .append(e.getMessage()).append(")").toString();
+                log.error(errorMsg);
                 log.debug("STACKTRACE:", e);
                 //for those errors we do not want to try again
                 if(!response.sentError()){ //so just check if no error was sent yet
-                    response.sendError(item, ErrorCodes.UNEXPECTED_ERROR,
-                            "could not analyse item with URI " + item.getURI(),
-                            e.getMessage());
+                    response.sendError(item, e);
+                } //else an error message was already sent
+            } catch (RuntimeException e) {
+                String errorMsg = new StringBuilder("Could not analyse item with URI ")
+                        .append(analysisRequest.getItemUri()).append(" with service ")
+                        .append(service.getServiceID()).append(" (exception: ")
+                        .append(e.getClass().getSimpleName()).append(" | message: ")
+                        .append(e.getMessage()).append(")").toString();
+                log.error(errorMsg);
+                log.debug("STACKTRACE:", e);
+                //for those errors we do not want to try again
+                if(!response.sentError()){ //so just check if no error was sent yet
+                    response.sendError(item, ErrorCodes.UNEXPECTED_ERROR, errorMsg, e);
                 } //else an error message was already sent
             } catch (RepositoryException e) {
                 log.warn("Encountered error while reading/writing to RDF repository while processing "
@@ -614,13 +664,13 @@ public class EventManagerImpl implements EventManager {
                     getChannel().basicNack(envelope.getDeliveryTag(), false, true);
                 } else { //we need to ack the message ...
                     try { // ... but first check if we might also need to send an error
-                        if(!response.isFinished() || !response.sentError()){
+                        if(!response.isFinished() && !response.sentError()){
                             //somehow now response was sent up to now ...
                             if(!response.isError()){
                                 // ... this can happen in case of an Error (e.g. OutOfMemoryError)
                                 log.warn("Analysis request for service {} and item {} (message:{}) "
                                         + "terminated unfinished and without an error. EventManager "
-                                        + "will sent an Error message", service.getClass().getName(),
+                                        + "will sent an Error message", service,
                                         item.getURI(), envelope.getDeliveryTag());
                             } //else error was raised but not sent (because of an IOException)
                             response.sendError(item, ErrorCodes.UNEXPECTED_ERROR,

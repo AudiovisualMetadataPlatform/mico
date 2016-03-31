@@ -32,17 +32,17 @@ public abstract class BaseCommunicationTest {
 
     private static Logger log = LoggerFactory.getLogger(BaseCommunicationTest.class);
 
-    protected static String testHost;
-    protected static String testUsr;
-    protected static String testPwd;
-    protected static String testVHost;
+    protected static String amqpHost;
+    protected static String amqpUsr;
+    protected static String amqpPwd;
+    protected static String amqpVHost;
 
     @BeforeClass
     public static void setupBase() throws URISyntaxException, IOException, RDFParseException, RepositoryException {
-        testHost = getConf("test.host","127.0.0.1");
-        testVHost = getConf("text.vhost", null);
-        testUsr = getConf("test.usr", "guest");
-        testPwd = getConf("test.pwd", "guest", false); //to not log the pwd
+        amqpHost = getConf("amqp.host","127.0.0.1");
+        amqpVHost = getConf("amqp.vhost", null);
+        amqpUsr = getConf("amqp.usr", "guest");
+        amqpPwd = getConf("amqp.pwd", "guest", false); //to not log the pwd
         VFSUtils.configure();
     }
 

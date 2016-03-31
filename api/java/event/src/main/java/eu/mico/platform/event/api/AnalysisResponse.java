@@ -13,6 +13,7 @@
  */
 package eu.mico.platform.event.api;
 
+import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event.ErrorCodes;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
@@ -74,12 +75,48 @@ public interface AnalysisResponse {
      * After calling this method no further changes to the Item will be possible.
      * Method calls on the Item or any connected Object will result in Exceptions.
      *
-     * @param ci     the processed content item
+     * @param item   the processed content item
+     * @param code   the error code
      * @param msg    the error message
      * @param desc   further information about the error
      * @throws IOException if something with the used communication channel is wrong
      */
-    public void sendError(Item ci, ErrorCodes code, String msg, String desc) throws IOException;
+    public void sendError(Item item, ErrorCodes code, String msg, String desc) throws IOException;
+    
+    /**
+     * Sends a message to the broker's callback queue that the given content item 
+     * and object could not be processed. Also tries to rollback any changes
+     * to the Item performed by the AnalysisService.
+     * <p>
+     * After calling this method no further changes to the Item will be possible.
+     * Method calls on the Item or any connected Object will result in Exceptions.
+     *
+     * @param item     the processed content item
+     * @param msg    the error message
+     * @param t      the original exception to be reported. The 
+     *               {@link Throwable#printStackTrace(java.io.PrintWriter) stacktrace}
+     *               will be used as description of the error message
+     * @throws IOException if something with the used communication channel is wrong
+     */
+    public void sendError(Item item, AnalysisException e) throws IOException;
+
+    /**
+     * Sends a message to the broker's callback queue that the given content item 
+     * and object could not be processed. Also tries to rollback any changes
+     * to the Item performed by the AnalysisService.
+     * <p>
+     * After calling this method no further changes to the Item will be possible.
+     * Method calls on the Item or any connected Object will result in Exceptions.
+     *
+     * @param item   the processed item
+     * @param code   the error code
+     * @param msg    the error message
+     * @param t      the original exception to be reported. The 
+     *               {@link Throwable#printStackTrace(java.io.PrintWriter) stacktrace}
+     *               will be used as description of the error message
+     * @throws IOException if something with the used communication channel is wrong
+     */
+    public void sendError(Item item, ErrorCodes code, String msg, Throwable t) throws IOException;
 
     /**
      * Commits the current state of the Item and sends a message to the broker's 

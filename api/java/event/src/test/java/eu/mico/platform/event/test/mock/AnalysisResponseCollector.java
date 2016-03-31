@@ -1,6 +1,7 @@
 package eu.mico.platform.event.test.mock;
 
 import eu.mico.platform.event.api.AnalysisResponse;
+import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event.ErrorCodes;
 import eu.mico.platform.persistence.model.Item;
 
@@ -12,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -87,6 +90,27 @@ public class AnalysisResponseCollector implements AnalysisResponse {
         }
         log.debug("sent progress message about {}", object.stringValue());
         progresses.put(object, String.valueOf(progress));
+    }
+    
+    @Override
+    public void sendError(Item item, AnalysisException e)throws IOException {
+        if(e != null){
+            sendError(item, e.getCode(), e.getMessage(), e.getCause());
+        } else {
+            sendError(item,ErrorCodes.UNEXPECTED_ERROR, "", "");
+        }
+    }
+
+    @Override
+    public void sendError(Item item, ErrorCodes code, String msg, Throwable t)
+            throws IOException {
+        if(t != null){
+            StringWriter writer = new StringWriter();
+            t.printStackTrace(new PrintWriter(writer));
+            sendError(item,code,msg,writer.toString());
+        } else {
+            sendError(item,code,msg,"");
+        }
     }
 
     @Override

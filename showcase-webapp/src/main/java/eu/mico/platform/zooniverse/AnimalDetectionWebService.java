@@ -17,7 +17,6 @@
  */
 package eu.mico.platform.zooniverse;
 
-import com.sun.jersey.api.client.ClientResponse;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.model.ItemState;
 import eu.mico.platform.event.api.EventManager;
@@ -123,7 +122,7 @@ public class AnimalDetectionWebService {
             });
         } catch (ClientProtocolException e) {
             log.error("Could not fetch image to create content item: %s", e.toString());
-            return Response.status(ClientResponse.Status.BAD_GATEWAY)
+            return Response.status(Response.Status.BAD_GATEWAY)
                     .entity(e.getMessage())
                     .build();
         } catch (IOException e) {
