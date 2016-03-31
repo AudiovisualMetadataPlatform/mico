@@ -136,6 +136,7 @@ public class EventManagerTest extends BaseCommunicationTest {
         //Now initialize RabbitMQ
         ConnectionFactory testFactory = new ConnectionFactory();
         testFactory.setHost(amqpHost);
+        testFactory.setVirtualHost(amqpVHost);
         testFactory.setUsername(amqpUsr);
         testFactory.setPassword(amqpPwd);
 

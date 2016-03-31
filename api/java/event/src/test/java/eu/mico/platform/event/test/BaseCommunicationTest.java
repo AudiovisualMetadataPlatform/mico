@@ -41,7 +41,7 @@ public abstract class BaseCommunicationTest {
     @BeforeClass
     public static void setupBase() throws URISyntaxException, IOException, RDFParseException, RepositoryException {
         amqpHost = getConf("amqp.host","127.0.0.1");
-        amqpVHost = getConf("amqp.vhost", null);
+        amqpVHost = getConf("amqp.vhost", "/");
         amqpUsr = getConf("amqp.usr", "guest");
         amqpPwd = getConf("amqp.pwd", "guest", false); //to not log the pwd
         VFSUtils.configure();
