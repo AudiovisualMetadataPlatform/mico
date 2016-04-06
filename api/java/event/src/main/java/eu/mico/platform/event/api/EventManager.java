@@ -13,12 +13,12 @@
  */
 package eu.mico.platform.event.api;
 
-import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.Item;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.concurrent.TimeoutException;
+
+import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.persistence.model.Item;
 
 /**
  * Add file description here!

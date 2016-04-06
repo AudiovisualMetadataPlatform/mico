@@ -18,9 +18,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openrdf.idGenerator.IDGenerator;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.object.ObjectConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +76,7 @@ public class MultiThreadingTest {
     }
     
     @Test
-    public void concurrencyTst() throws InterruptedException, ExecutionException, RepositoryException{
+    public void concurrencyTest() throws InterruptedException, ExecutionException, RepositoryException{
         
         log.info("> start processing ({} threads):",NUM_THREADS);
         List<Future<AnnotationWriter>> tasks = new LinkedList<>();
@@ -89,6 +91,7 @@ public class MultiThreadingTest {
                 log.info("processed {}/{} items",i,NUM_ITEMS);
             }
         }
+        i=0;
         for(Pair<Item, long[]> pair : testItems){
             //we need to retrieve the item here to read it from the repository
             Item item = persistenceService.getItem(pair.getKey().getURI());
@@ -110,6 +113,11 @@ public class MultiThreadingTest {
                     Assert.fail(" - unexpected part "+part.getURI()+" in Item "+item.getURI()+"!");
                 }
             }
+            item.getObjectConnection().close();
+            i++;
+            if(i%1000 == 0){
+                log.info("validated {}/{} items",i,NUM_ITEMS);
+            }
         }
     }
     
@@ -123,6 +131,7 @@ public class MultiThreadingTest {
 
         
         private Item item;
+        private ObjectConnection con;
         private long[] size;
         private URI extractorUri;
 
@@ -130,12 +139,14 @@ public class MultiThreadingTest {
             this.extractorUri = extractorUri;
             this.item = item;
             this.size = size;
+            this.con = item.getObjectConnection();
         }
         
         @Override
         public AnnotationWriter call() throws Exception {
             Part part = item.createPart(extractorUri);
-            ImageDimensionBodyMMM imgDimensionAnno = persistenceService.getAnno4j().createObject(ImageDimensionBodyMMM.class);
+            ImageDimensionBodyMMM imgDimensionAnno = con.addDesignation(con.getObjectFactory().createObject(
+                    IDGenerator.BLANK_RESOURCE, ImageDimensionBodyMMM.class),ImageDimensionBodyMMM.class);
             imgDimensionAnno.setWidth(size[0]);
             imgDimensionAnno.setHeight(size[1]);
             part.setBody(imgDimensionAnno);

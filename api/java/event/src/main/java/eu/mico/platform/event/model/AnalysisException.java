@@ -13,6 +13,8 @@
  */
 package eu.mico.platform.event.model;
 
+import eu.mico.platform.event.model.Event.ErrorCodes;
+
 /**
  * Thrown when a problem occurs during analysis. In this case, the event manager will send a NACK to the broker
  * to re-queue the task.
@@ -21,14 +23,30 @@ package eu.mico.platform.event.model;
  */
 public class AnalysisException extends Exception {
 
+    private ErrorCodes code;
+
     public AnalysisException() {
+        this(null,null,null);
     }
 
     public AnalysisException(String message) {
-        super(message);
+        this(null,message,null);
     }
 
     public AnalysisException(String message, Throwable cause) {
-        super(message, cause);
+        this(null, message, cause);
     }
+
+    public AnalysisException(ErrorCodes code, String message, Throwable cause) {
+        super(message, cause);
+        this.code = code == null ? ErrorCodes.UNEXPECTED_ERROR : code;
+    }
+    /**
+     * The ErrorCode
+     * @return
+     */
+    public ErrorCodes getCode() {
+        return code;
+    }
+
 }

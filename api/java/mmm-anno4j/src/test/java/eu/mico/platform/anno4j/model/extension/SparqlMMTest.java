@@ -12,6 +12,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import org.apache.marmotta.ldpath.parser.ParseException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.annotations.Iri;
 import org.openrdf.query.MalformedQueryException;
@@ -35,7 +36,6 @@ public class SparqlMMTest {
     public void setUp() throws Exception {
         this.anno4j = new Anno4j();
         queryService = anno4j.createQueryService();
-        queryService.addPrefix("mm", Constants.NAMESPACE);//TODO should be added with the plugin
         queryService.addPrefix("ex", "http://www.example.com/schema#");
 
         //create some annotations
@@ -53,7 +53,7 @@ public class SparqlMMTest {
     @Test
     public void testQueryEvalutation() throws RepositoryException, QueryEvaluationException, MalformedQueryException, ParseException {
         List<Annotation> list = queryService.addCriteria("oa:hasBody/ex:value", "1")
-                .addCriteria(".[fn:leftBeside(.)]")
+                .addCriteria(".[fn:leftBeside()]")
                 .execute();
         assertEquals(3, list.size());
 
