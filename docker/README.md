@@ -11,4 +11,4 @@ Extends from mico/mico-base and provides the MICO Marmotta package including Pos
 
 ##mico/mico-broker
 Extends from mico/mico-base and provides the MICO broker including RabbitMQ. Use the `--add-host`, otherwise it will fail:
-`docker run -it -p 8080 -p 15672 --add-host mico-broker:127.0.0.1 mico/mico-broker-test`
+`docker run -it -p 8080 -p 15672 --add-host mico-broker:127.0.0.1 mico/mico-broker`
