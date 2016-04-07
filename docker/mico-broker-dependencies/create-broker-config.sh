@@ -3,6 +3,7 @@ MICO_USER=$(echo "GET mico-base/username" |debconf-communicate |cut -d " " -f2-)
 MICO_PASS=$(echo "GET mico-base/password" |debconf-communicate |cut -d " " -f2-)
 MICO_HOST="mico-broker"
 
+mkdir -p /usr/share/mico
 cat > /etc/tomcat7/Catalina/localhost/broker.xml <<EOF
 <!--
 
