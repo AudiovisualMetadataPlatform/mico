@@ -29,6 +29,7 @@ Create image and copy Marmotta WAR:
 
 ##docker.mico-project.eu/mico/mico-marmotta
 Extends from mico/mico-marmotta-dependencies and provides the MICO Marmotta package including PostgreSQL as backend.
+
 `docker run -t docker.mico-project.eu/mico/mico-marmotta`
 
 ##docker.mico-project.eu/mico/mico-broker-dependencies
@@ -46,5 +47,5 @@ Create image and copy broker WAR:
 
 ##docker.mico-project.eu/mico/mico-broker
 Extends from mico/mico-broker-dependencies and provides the MICO broker including RabbitMQ. Use the `--add-host`, otherwise it will fail:
-`docker run -it -p 8080 -p 15672 --add-host mico-broker:127.0.0.1 mico/mico-broker`
 
+`docker run -it -p 8080 -p 15672 --add-host mico-broker:127.0.0.1 mico/mico-broker`
