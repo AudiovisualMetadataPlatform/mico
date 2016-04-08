@@ -133,6 +133,7 @@
         <module>mmm-anno4j</module>
         <module>fam-anno4j</module>
         <module>sparqlmm-anno4j</module>
+        <module>inject-tool</module>
     </modules>
 
     <profiles>
