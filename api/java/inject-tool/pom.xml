@@ -25,7 +25,7 @@
     </parent>
 
     <artifactId>inject-tool</artifactId>
-    <name>MICO Platform: API Spring Bindings</name>
+    <name>MICO Platform: cli inject tool</name>
 
     <developers>
         <developer>
@@ -44,7 +44,7 @@
             <organization>University of Passau</organization>
         </developer>
     </developers>
-    <inceptionYear>2014</inceptionYear>
+    <inceptionYear>2016</inceptionYear>
 
 
     <build>
