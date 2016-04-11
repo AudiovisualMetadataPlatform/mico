@@ -5,6 +5,6 @@ Homepage: https://bitbucket.org/mico-project/mico-platform-config
 Package: [[name]]
 Architecture: all
 Version: [[version]]
-Depends: tomcat7 (>= 7.0.52), openjdk-7-jre | openjdk-7-jre-headless, mico-broker, mico-extractor-configurations
+Depends: tomcat7 (>= 7.0.52), java8-runtime-headless, mico-broker, mico-extractor-configurations
 Description: MICO platform configuration webapp
  This package contains the distribution of the MICO Platform Configuration Web Application.

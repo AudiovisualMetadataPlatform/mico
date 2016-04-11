@@ -1,7 +1,6 @@
 Source: libmico-api
 Priority: optional
-Maintainer: Jakob Frank <jakob.frank@salzburgresearch.at>
-Uploaders: Sebastian Schaffert <sebastian.schaffert@gmail.com> 
+Maintainer: Horst Stadler <horst.stadler@salzburgresearch.at>
 Build-Depends: debhelper (>= 9), libstdc++-4.9-dev, libboost1.55-dev, libboost-system1.55-dev, libboost-log1.55-dev, libexpat1-dev, libprotobuf-dev, libleptonica-dev, libmagic-dev, libtesseract-dev, libdaemon-dev, doxygen, cdbs, cmake (>=3), libamqpcpp-dev, libhdfs3-dev, libcurl4-gnutls-dev | libcurl-dev
 Standards-Version: 3.9.5
 Section: libs
