@@ -14,6 +14,8 @@ import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Resource;
+
+import org.openrdf.idGenerator.IDGenerator;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -24,53 +26,17 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Set;
 
-public class PartAnno4j implements Part {
+public class PartAnno4j extends ResourceAnno4j implements Part {
 
     private static Logger log = LoggerFactory.getLogger(PartAnno4j.class);
 
-    private final PersistenceService persistenceService;
     private final Item item;
     private final PartMMM partMMM;
 
     public PartAnno4j(PartMMM partMMM, Item item, PersistenceService persistenceService) {
+        super(partMMM, persistenceService);
         this.partMMM = partMMM;
         this.item = item;
-        this.persistenceService = persistenceService;
-    }
-
-    @Override
-    public Item getItem() {
-        return item;
-    }
-
-    @Override
-    public URI getURI() {
-        return new URIImpl(partMMM.getResourceAsString());
-    }
-
-    @Override
-    public ResourceMMM getRDFObject() {
-        return partMMM;
-    }
-
-    @Override
-    public String getSyntacticalType() {
-        return partMMM.getSyntacticalType();
-    }
-
-    @Override
-    public void setSyntacticalType(String syntacticalType) throws RepositoryException {
-        partMMM.setSyntacticalType(syntacticalType);
-    }
-
-    @Override
-    public String getSemanticType() {
-        return partMMM.getSemanticType();
-    }
-
-    @Override
-    public void setSemanticType(String semanticType) throws RepositoryException {
-        partMMM.setSemanticType(semanticType);
     }
 
     @Override
@@ -127,46 +93,17 @@ public class PartAnno4j implements Part {
 
     @Override
     public String getSerializedAt() {
-        return this.partMMM.getSerializedAt();
+        return partMMM.getSerializedAt();
     }
 
     @Override
     public Agent getSerializedBy() {
-        return this.partMMM.getSerializedBy();
+        return partMMM.getSerializedBy();
     }
-
+    
     @Override
-    public Asset getAsset() throws RepositoryException {
-        if (this.partMMM.getAsset() == null) {
-            try {
-                Anno4j anno4j = this.persistenceService.getAnno4j();
-                AssetMMM assetMMM = anno4j.createObject(AssetMMM.class, this.item.getURI());
-
-                StringBuilder location = new StringBuilder()
-                        .append(persistenceService.getStoragePrefix())
-                        .append(this.item.getURI().getLocalName())
-                        .append("/")
-                        .append(this.getURI().getLocalName())
-                        .append("/")
-                        .append(new URIImpl(assetMMM.getResourceAsString()).getLocalName());
-
-                assetMMM.setLocation(location.toString());
-
-                this.partMMM.setAsset(assetMMM);
-
-                log.trace("No Asset available for Part {} - Created new Asset with id {} and location {}", this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
-            } catch (IllegalAccessException e) {
-                throw new RepositoryException("Illegal access", e);
-            } catch (InstantiationException e) {
-                throw new RepositoryException("Couldn´t instantiate AssetMMM", e);
-            }
-        }
-
-        return new AssetAnno4j(this.partMMM.getAsset(), this.persistenceService);
+    public Item getItem() {
+        return item;
     }
 
-    @Override
-    public boolean hasAsset() throws RepositoryException {
-        return this.partMMM.getAsset() != null;
-    }
 }

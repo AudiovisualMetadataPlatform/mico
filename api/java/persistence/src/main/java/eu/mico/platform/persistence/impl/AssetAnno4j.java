@@ -3,6 +3,8 @@ package eu.mico.platform.persistence.impl;
 import eu.mico.platform.anno4j.model.AssetMMM;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
+import eu.mico.platform.storage.api.StorageService;
+
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.slf4j.Logger;
@@ -17,12 +19,12 @@ public class AssetAnno4j implements Asset {
 
     private static Logger log = LoggerFactory.getLogger(AssetAnno4j.class);
 
-    private final PersistenceService persistenceService;
+    private final StorageService storageService;
     private final AssetMMM assetMMM;
 
-    public AssetAnno4j(AssetMMM assetMMM, PersistenceService persistenceService) {
+    public AssetAnno4j(AssetMMM assetMMM, StorageService storageService) {
         this.assetMMM = assetMMM;
-        this.persistenceService = persistenceService;
+        this.storageService = storageService;
     }
 
     @Override
@@ -44,7 +46,7 @@ public class AssetAnno4j implements Asset {
     public OutputStream getOutputStream() throws IOException {
         try {
             log.trace("Open Outputstream for Asset with id {} and location {}", assetMMM.getResourceAsString(), getLocation());
-            return this.persistenceService.getStorage().getOutputStream(new java.net.URI(this.assetMMM.getLocation()));
+            return storageService.getOutputStream(new java.net.URI(this.assetMMM.getLocation()));
         } catch (URISyntaxException e) {
             throw new IllegalStateException("Cant parse URI from " + this.assetMMM.getLocation(), e);
         }
@@ -54,7 +56,7 @@ public class AssetAnno4j implements Asset {
     public InputStream getInputStream() throws IOException {
         try {
             log.trace("Open Inputstream for Asset with id {} and location {}", assetMMM.getResourceAsString(), getLocation());
-            return this.persistenceService.getStorage().getInputStream(new java.net.URI(this.assetMMM.getLocation()));
+            return storageService.getInputStream(new java.net.URI(this.assetMMM.getLocation()));
         } catch (java.net.URISyntaxException e) {
             throw new IllegalStateException("Cant parse URI from " + this.assetMMM.getLocation(), e);
         }

@@ -1,154 +1,92 @@
 package eu.mico.platform.persistence.impl;
 
-import com.github.anno4j.Anno4j;
 import com.github.anno4j.model.Agent;
-import eu.mico.platform.anno4j.model.AssetMMM;
 import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.anno4j.model.PartMMM;
-import eu.mico.platform.anno4j.model.ResourceMMM;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
+
 import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
+import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.object.ObjectConnection;
+import org.openrdf.result.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-public class ItemAnno4j implements Item {
+public class ItemAnno4j extends ResourceAnno4j implements Item {
 
     private static Logger log = LoggerFactory.getLogger(ItemAnno4j.class);
 
-    private final PersistenceService persistenceService;
     private final ItemMMM itemMMM;
-
+    
     public ItemAnno4j(ItemMMM itemMMM, PersistenceService persistenceService) {
+        super(itemMMM, persistenceService);
         this.itemMMM = itemMMM;
-
-        this.initContexts(itemMMM);
-
-        this.persistenceService = persistenceService;
-    }
-
-    static public void initContexts(ItemMMM itemMMM) {
-
-        URIImpl context = new URIImpl(itemMMM.getResourceAsString());
-        itemMMM.getObjectConnection().setInsertContext(context);
-        itemMMM.getObjectConnection().setReadContexts(context);
-        itemMMM.getObjectConnection().setRemoveContexts(context);
     }
 
     @Override
     public Part createPart(URI extractorID) throws RepositoryException {
-        try {
-            PartMMM partMMM = persistenceService.getAnno4j().createObject(PartMMM.class, this.getURI());
-            String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
-            partMMM.setSerializedAt(dateTime);
+        PartMMM partMMM = createObject(PartMMM.class);
+        String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
+        partMMM.setSerializedAt(dateTime);
 
-            Agent agent = this.persistenceService.getAnno4j().createObject(Agent.class, this.getURI());
-            agent.setResource(extractorID);
-            partMMM.setSerializedBy(agent);
+        Agent agent = createObject(extractorID, Agent.class);
+        partMMM.setSerializedBy(agent);
 
-            this.itemMMM.addPart(partMMM);
+        this.itemMMM.addPart(partMMM);
 
-            log.trace("Created Part with id {} in the context graph {} - Creator {}", partMMM.getResourceAsString(), this.getURI(), extractorID);
+        log.trace("Created Part with id {} in the context graph {} - Creator {}", partMMM.getResourceAsString(), this.getURI(), extractorID);
 
-            return new PartAnno4j(partMMM, this, persistenceService);
-        } catch (IllegalAccessException e) {
-            throw new RepositoryException("Illegal access", e);
-        } catch (InstantiationException e) {
-            throw new RepositoryException("Couldn´t instantiate PartMMM class", e);
-        }
+        return new PartAnno4j(partMMM, this, persistenceService);
     }
 
+    
     @Override
     public Part getPart(URI uri) throws RepositoryException {
-        PartMMM partMMM = persistenceService.getAnno4j().findByID(PartMMM.class, uri);
-        return new PartAnno4j(partMMM, this, persistenceService);
+        try {
+            PartMMM partMMM = itemMMM.getObjectConnection().getObject(PartMMM.class, uri);
+            return new PartAnno4j(partMMM, this, persistenceService);
+        } catch (QueryEvaluationException e) {
+            throw new RepositoryException(e);
+        }
     }
 
     @Override
     public Iterable<? extends Part> getParts() throws RepositoryException {
-        ArrayList<PartAnno4j> partsAnno4j = new ArrayList<>();
 
-        List<PartMMM> partsMMM = persistenceService.getAnno4j().findAll(PartMMM.class, this.getURI());
-
-        for (PartMMM partMMM : partsMMM) {
-            partsAnno4j.add(new PartAnno4j(partMMM, this, persistenceService));
-        }
-
-        return partsAnno4j;
-    }
-
-    @Override
-    public URI getURI() {
-        return new URIImpl(itemMMM.getResourceAsString());
-    }
-
-    @Override
-    public ResourceMMM getRDFObject() {
-        return itemMMM;
-    }
-
-    @Override
-    public String getSyntacticalType() {
-        return itemMMM.getSyntacticalType();
-    }
-
-    @Override
-    public void setSyntacticalType(String syntacticalType) throws RepositoryException {
-        itemMMM.setSyntacticalType(syntacticalType);
-    }
-
-    @Override
-    public String getSemanticType() {
-        return itemMMM.getSemanticType();
-    }
-
-    @Override
-    public void setSemanticType(String semanticType) throws RepositoryException {
-        itemMMM.setSemanticType(semanticType);
-    }
-
-    @Override
-    public Asset getAsset() throws RepositoryException {
-        if (this.itemMMM.getAsset() == null) {
-            try {
-                Anno4j anno4j = this.persistenceService.getAnno4j();
-                AssetMMM assetMMM = anno4j.createObject(AssetMMM.class, this.getURI());
-                StringBuilder location = new StringBuilder()
-                        .append(persistenceService.getStoragePrefix())
-                        .append(this.getURI().getLocalName())
-                        .append("/")
-                        .append(new URIImpl(assetMMM.getResourceAsString()).getLocalName());
-                assetMMM.setLocation(location.toString());
-
-                this.itemMMM.setAsset(assetMMM);
-
-                log.trace("No Asset available for Item {} - Created new Asset with id {} and location {}", this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
-            } catch (IllegalAccessException e) {
-                throw new RepositoryException("Illegal access", e);
-            } catch (InstantiationException e) {
-                throw new RepositoryException("Couldn´t instantiate AssetMMM", e);
+        Result<PartMMM> partsMMM = null;
+        try {
+            ArrayList<PartAnno4j> partsAnno4j = new ArrayList<>();
+            partsMMM = itemMMM.getObjectConnection().getObjects(PartMMM.class);
+            while(partsMMM.hasNext()){
+                partsAnno4j.add(new PartAnno4j(partsMMM.next(), this, persistenceService));
+            }
+            return partsAnno4j;
+        } catch(QueryEvaluationException e){
+            throw new RepositoryException(e);
+        } finally {
+            if(partsMMM != null){
+                try {
+                    partsMMM.close();
+                } catch (QueryEvaluationException e) {/*ignore*/}
             }
         }
-
-        return new AssetAnno4j(this.itemMMM.getAsset(), this.persistenceService);
-    }
-
-    @Override
-    public boolean hasAsset() throws RepositoryException {
-        return this.itemMMM.getAsset() != null;
     }
 
     @Override
     public String getSerializedAt() {
         return this.itemMMM.getSerializedAt();
     }
+
+    @Override
+    public ObjectConnection getObjectConnection(){
+        return itemMMM.getObjectConnection();
+    }
+ 
 }
