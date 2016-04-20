@@ -59,8 +59,9 @@ public abstract class BaseBrokerTest {
     public static void setupBase() throws URISyntaxException, IOException, RDFParseException, RepositoryException {
         testHost = System.getenv("test.host");
         if(testHost == null) {
-            log.warn("test.host environment variable not defined, using default of 192.168.56.102");
-            testHost = "192.168.56.102";
+            testHost = "127.0.0.1";
+            log.warn("test.host environment variable not defined, using default of {}", testHost);
+
         }
 
         FileSystemOptions opts = new FileSystemOptions();
