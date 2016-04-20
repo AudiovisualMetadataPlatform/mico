@@ -87,6 +87,9 @@ public class Main {
 
         System.out.printf("Created Item %s with Asset %s (%s, %d bytes)\n", item.getURI(), asset.getLocation(), asset.getFormat(), bytes);
 
+        // inform broker about new item
+        eventManager.injectItem(item);
+
         // shutdown event manager properly
         eventManager.shutdown();
         System.exit(0);
