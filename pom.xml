@@ -205,6 +205,7 @@
         <module>broker</module>
         <module>storage</module>
         <module>platform-config-webapp</module>
+        <module>workflow-creation-webapp</module>
     </modules>
 
 </project>
