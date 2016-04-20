@@ -9,6 +9,7 @@
   </parent>
 
   <groupId>de.fraunhofer.idmt.mico</groupId>
+  <name>MICO Platform: mico-platform-config</name>
   <artifactId>mico-platform-config</artifactId>
 
     <packaging>war</packaging>
