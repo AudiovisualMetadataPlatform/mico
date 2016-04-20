@@ -13,10 +13,11 @@
  */
 package eu.mico.platform.broker.test;
 
-import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.impl.MICOBrokerImpl;
 import eu.mico.platform.broker.webservices.SwingImageCreator;
+
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.awt.*;
@@ -24,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 
 /**
  * Add file description here!
@@ -32,9 +34,28 @@ import java.net.URISyntaxException;
  */
 public class SimpleBrokerTest extends BaseBrokerTest {
 
+    private static final String TMP_FOLDER = "target/tmp/";
+    private static final String TEST_PNG = TMP_FOLDER + "test.png";
+
+    @BeforeClass
+    public static void prepare() throws IOException{
+        Files.createDirectories(new File(TMP_FOLDER).toPath());
+    }
+
+    @AfterClass
+    public static void cleanup() throws IOException{
+        File file = new File(TEST_PNG);
+        File folder = file.getParentFile();
+        if (file.exists()){
+            file.delete();
+        }
+        if (folder.exists()){
+            folder.delete();
+        }
+    }
+
     @Test
     public void testInit() throws IOException, InterruptedException, URISyntaxException {
-        MICOBroker broker = new MICOBrokerImpl(testHost);
 
         setupMockAnalyser("A","B");
         setupMockAnalyser("B","C");
@@ -49,7 +70,7 @@ public class SimpleBrokerTest extends BaseBrokerTest {
         Assert.assertEquals(3, broker.getDependencies().edgeSet().size());
         Assert.assertEquals(3, broker.getDependencies().vertexSet().size());
 
-        FileOutputStream out = new FileOutputStream(new File("/tmp/test.png"));
+        FileOutputStream out = new FileOutputStream(new File(TEST_PNG));
         SwingImageCreator.createGraph(broker.getDependencies(), new Dimension(640,480), "png", out);
         out.close();
     }
@@ -60,8 +81,6 @@ public class SimpleBrokerTest extends BaseBrokerTest {
         setupMockAnalyser("A","B");
         setupMockAnalyser("B","C");
         setupMockAnalyser("A","C");
-
-        MICOBroker broker = new MICOBrokerImpl(testHost);
 
         // wait for broker to finish with discovery ...
         Thread.sleep(500);

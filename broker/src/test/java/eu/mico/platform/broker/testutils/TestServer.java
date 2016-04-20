@@ -26,9 +26,9 @@ public class TestServer {
         TestApplication.webservices.add(o);
     }
 
-    public String getUrl() {
-        return "http://localhost:" + server.getConnectors()[0].getLocalPort() + "/";
-    }
+//    public String getUrl() {
+//        return "http://localhost:" + server.getConnectors()[0].getLocalPort() + "/";
+//    }
 
     public void start() throws Exception {
         server.start();

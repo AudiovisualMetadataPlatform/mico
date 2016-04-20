@@ -8,10 +8,12 @@
 
 
     <logger name="org.openrdf" level="WARN" />
+    <logger name="org.reflections.Reflections" level="INFO"/>
+    <logger name="httpclient.wire.header" level="INFO"/>
     <logger name="org.xml" level="WARN" />
     <logger name="eu.mico" level="DEBUG" />
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>

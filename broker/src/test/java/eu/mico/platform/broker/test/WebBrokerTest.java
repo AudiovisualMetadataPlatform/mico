@@ -15,12 +15,14 @@ package eu.mico.platform.broker.test;
 
 import com.google.common.collect.ImmutableSet;
 import com.rabbitmq.client.QueueingConsumer;
+
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
+import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
+
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -55,17 +57,19 @@ public class WebBrokerTest extends BaseBrokerTest {
 
         // create a content item with a single part of type "A"; it should walk through the registered mock services and
         // eventually finish analysis; we simply wait until we receive an event on the output queue.
-        PersistenceService svc = new PersistenceServiceAnno4j();
+        PersistenceService svc = broker.getPersistenceService();
         Item item = svc.createItem();
         try {
-            Part partA = item.createPart(item.getURI());
-            partA.setSyntacticalType("A");
+            item.setSyntacticalType("A");
+            item.setSemanticType("A");
+            Asset partA = item.getAsset();
+            partA.setFormat("A");
 
             eventManager.injectItem(item);
 
             // wait for result notification and verify it contains what we expect
-            QueueingConsumer.Delivery delivery = consumer.nextDelivery(1000);
-            Assert.assertNotNull(delivery);
+            QueueingConsumer.Delivery delivery = consumer.nextDelivery(20000);
+            Assert.assertNotNull("Analysis results should be present",delivery);
 
             Event.ItemEvent event = Event.ItemEvent.parseFrom(delivery.getBody());
 
@@ -73,10 +77,10 @@ public class WebBrokerTest extends BaseBrokerTest {
 
             // each service should have added a part, so there are now four different parts
             Set<Part> parts = ImmutableSet.copyOf(item.getParts());
-            Assert.assertEquals(4, parts.size());
-            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("type", equalTo("A"))));
-            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("type", equalTo("B"))));
-            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("type", equalTo("C"))));
+            Assert.assertEquals(3, parts.size());
+            Assert.assertThat(parts, Matchers.not(Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("A")))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("B"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("C"))));
 
         } finally {
             svc.deleteItem(item.getURI());
