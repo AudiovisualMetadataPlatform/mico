@@ -49,6 +49,7 @@
                     <groupId>org.apache.tomcat.maven</groupId>
                     <artifactId>tomcat7-maven-plugin</artifactId>
                     <configuration>
+                        <server>localhost</server>
                         <port>${javaee.port}</port>
                         <path>/workflow-creation</path>
                     </configuration>
