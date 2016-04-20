@@ -1,0 +1,79 @@
+<html lang="en">
+  <head>
+    <meta content="text/html">
+    <meta charset="utf-8">
+    
+    <link rel="icon" href="img/mico_logo.ico">
+    <title>MICO Workflow Creation</title>
+    
+    <!-- external css styles -->
+    <link rel="stylesheet" href="css/lib/bootstrap.css">
+    <link rel="stylesheet" href="css/lib/bootstrap-theme.css">
+    
+    <!-- own css styles -->
+    <link rel="stylesheet" href="css/own/main.css">
+    <link rel="stylesheet" href="css/own/graph.css">
+    
+    <!-- external js libraries -->
+    <script src="js/lib/d3.min.js"></script>
+    <script src="js/lib/jquery-2.2.0.js"></script>
+    <script src="js/lib/bootstrap.js"></script>
+    <script src="js/lib/validator.js"></script>
+    <script src="js/lib/xmlwriter.js"></script>
+    
+    <!-- own js scripts -->
+    <script src="js/own/globals.js"></script>
+    <script src="js/own/utils.js"></script>
+    <script src="js/own/transitions.js"></script>
+    
+  </head>
+  <body>
+    <div class="header">
+  	  <img src="img/mico_logo.png" alt="logo">
+  	</div>
+  	<div class="container">
+  	  	<div class="panel-body row">
+  			<h1>Overview Graph</h1> 
+  			<button type="button" class="btn btn-primary" style="float: right;" onclick="Workflow.setup();console.log(Workflow.sendCamelRoute());">Submit workflow</button>
+  		</div>
+  		<div class="panel panel-default">
+  			<div id="overview-graph" class="panel-body">
+  			</div>
+  		</div>
+  		
+  		
+		<div class="panel-body row">
+  			<h1>Selected Extractors</h1>
+  		</div>			
+  		<div class="panel">
+  			<div class="panel-body">
+	  			<div id="selectedExtractors" class="row">
+	  			</div>
+  			</div>
+  		</div>
+  		
+  		
+  		<div class="panel-body row">
+  			<h1>Planned Workflow</h1>
+  		</div>
+  		<div class="panel panel-default">
+  			<div id="configuration-graph" class="panel-body">
+  			</div>
+  		</div>
+  	</div>
+  </body>
+  
+  <!-- own js scripts -->
+  <script src="js/own/broker.js"></script>
+  <script src="js/own/overview-graph.js"></script>
+  <script src="js/own/configuration-form.js"></script>
+  <script src="js/own/configuration-graph.js"></script>
+  <script src="js/own/workflow-planner.js"></script>
+  
+  <script type="text/javascript">
+  
+	Broker.drawBrokerGraph();
+  
+  </script>
+
+</html>

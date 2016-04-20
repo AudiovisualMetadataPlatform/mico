@@ -1,0 +1,99 @@
+{
+	"name": "OCR extractor",
+	"version": "1.0.0",
+	"id": "mico_ocr_service",
+	"mode": [{
+		"id": "OCR-png",
+		"description": "Sample OCR for PNG images containing English text",
+		"input": [{
+			"semanticType": {
+				"name": "Image",
+				"description": "Image containing text"
+			},
+			"dataType": {
+				"mimeType": ["image/png"],
+				"syntacticType": "mico:Image",
+				"cmdLineSwitch": null
+			},
+			"constraint": []
+		}],
+		"output": [{
+			"semanticType": {
+				"name": "Words",
+				"description": "Detected English words within the input image"
+			},
+			"dataType": {
+				"mimeType": ["text/plain"],
+				"syntacticType": "mico:Text",
+				"cmdLineSwitch": null
+			},
+			"location": "Dummy Location",
+			"annotatedProperty": []
+		}],
+		"param": []
+	},
+	{
+		"id": "OCR-jpeg",
+		"description": "Sample OCR for JPEG images containing English text",
+		"input": [{
+			"semanticType": {
+				"name": "Image",
+				"description": "Image containing text"
+			},
+			"dataType": {
+				"mimeType": ["image/jpeg"],
+				"syntacticType": "mico:Image",
+				"cmdLineSwitch": null
+			},
+			"constraint": []
+		}],
+		"output": [{
+			"semanticType": {
+				"name": "Words",
+				"description": "Detected English words within the input image"
+			},
+			"dataType": {
+				"mimeType": ["text/plain",
+				"text/xml"],
+				"syntacticType": "mico:Text",
+				"cmdLineSwitch": null
+			},
+			"location": "Dummy Location",
+			"annotatedProperty": []
+		}],
+		"param": []
+	},
+	{
+		"id": "OCR-image",
+		"description": "Sample OCR for PNG or JPEG images containing English text",
+		"input": [{
+			"semanticType": {
+				"name": "Image",
+				"description": "Image containing text"
+			},
+			"dataType": {
+				"mimeType": ["image/png",
+				"image/jpeg"],
+				"syntacticType": "mico:Image",
+				"cmdLineSwitch": null
+			},
+			"constraint": []
+		}],
+		"output": [{
+			"semanticType": {
+				"name": "Words",
+				"description": "Detected English words within the input image"
+			},
+			"dataType": {
+				"mimeType": ["text/plain"],
+				"syntacticType": "mico:Text",
+				"cmdLineSwitch": null
+			},
+			"location": "Dummy Location",
+			"annotatedProperty": []
+		}],
+		"param": []
+	}],
+	"deployedAt": [],
+	"isSingleton": false
+}

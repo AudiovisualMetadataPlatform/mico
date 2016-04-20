@@ -1,0 +1,182 @@
+{
+	"name": "Mico range param JSON test",
+	"version": "1.0.0",
+	"id": "mico-extractor-test",
+	"mode": [{
+		"id": "TestExtractor",
+		"description": "Test extractor for workflow creation",
+		"input": [{
+			"semanticType": {
+				"name": "TestData",
+				"description": "TestData"
+			},
+			"dataType": {
+				"mimeType": ["mico/test"],
+				"syntacticType": "mico:inputTestType1",
+				"cmdLineSwitch": null
+			},
+			"constraint": []
+		},{
+			"semanticType": {
+				"name": "TestData",
+				"description": "TestData"
+			},
+			"dataType": {
+				"mimeType": ["mico/test"],
+				"syntacticType": "mico:inputTestType2",
+				"cmdLineSwitch": null
+			},
+			"constraint": []
+		}],
+		"output": [{
+			"semanticType": {
+				"name": "TestData",
+				"description": "TestData"
+			},
+			"dataType": {
+				"mimeType": ["mico/test"],
+				"syntacticType": "mico:outputTestType1",
+				"cmdLineSwitch": null
+			},
+			"location": "mmm:hasPart [ mmm:hasAsset / rdf:type is mico:Test ]",
+			"annotatedProperty": [{
+				"name": "Fake annotated value",
+				"dataLocation": "mmm:hasAsset / mao:testParam",
+				"type": {
+					"primitive": "int",
+					"primitiveArray": null,
+					"enumerationArray": [],
+					"enum": []
+				}
+			}]
+		}],
+		"param": [{
+			"name": "(single-value)",
+			"description": "Single value from list of allowed values",
+			"primitiveType": {
+				"primitive": "int",
+				"primitiveArray": null,
+				"enumerationArray": [],
+				"enum": []
+			},
+			"allowedValue": ["8000",
+			"16000",
+			"24000"],
+			"allowedRange": [],
+			"selectedParameter": null,
+			"cmdLineSwitch": "freq",
+			"isSimpleFlag": null
+		},
+		{
+			"name": "(Array-from-list)",
+			"description": "Array from list of allowed values. Multiple values can be selected",
+			"primitiveType": {
+				"primitive": null,
+				"primitiveArray": "int[]",
+				"enumerationArray": [],
+				"enum": []
+			},
+			"allowedValue": ["8000",
+			"16000",
+			"24000"],
+			"allowedRange": [],
+			"selectedParameter": null,
+			"cmdLineSwitch": "freqArray",
+			"isSimpleFlag": null
+		},
+		{
+			"name": "(EnumArray)",
+			"description": "as (Array-from-list), but displying enum logical labels",
+			"primitiveType": {
+				"primitive": null,
+				"primitiveArray": null,
+				"enumerationArray": [{
+					"enumeration": ["mico::AudioDemux::SamplingFrequency"]
+				}],
+				"enum": []
+			},
+			"allowedValue": ["_8kHz",
+			"_16kHz",
+			"_24kHz"],
+			"allowedRange": [],
+			"selectedParameter": null,
+			"cmdLineSwitch": "freqEnum",
+			"isSimpleFlag": null
+		},
+		{
+			"name": "(BooleanSwitch)",
+			"description": "Choose to enable or disable",
+			"primitiveType": {
+				"primitive": "int",
+				"primitiveArray": null,
+				"enumerationArray": [],
+				"enum": []
+			},
+			"allowedValue": [""],
+			"allowedRange": [],
+			"selectedParameter": null,
+			"cmdLineSwitch": "keepFreq",
+			"isSimpleFlag": true
+		},{
+			"name": "(range-based-single-float-value)",
+			"description": "Superfake parameter",
+			"primitiveType": {
+				"primitive": "float",
+				"primitiveArray": null,
+				"enumerationArray": [],
+				"enum": []
+			},
+			"allowedValue": [],
+			"allowedRange": [{
+				"minIncl": null,
+				"maxIncl": "10.0"
+				
+			},
+			{
+				"minIncl": "50.0",
+				"maxIncl": "75.0"
+				
+			},
+			{
+				"minIncl": "100.0",
+				"maxIncl": null
+				
+			}],
+			"selectedParameter": null,
+			"cmdLineSwitch": "ohMyGod",
+			"isSimpleFlag": null
+		},{
+			"name": "(range-based-multiple-int-values)",
+			"description": "Superfake parameters",
+			"primitiveType": {
+				"primitive": null,
+				"primitiveArray": "int[]",
+				"enumerationArray": [],
+				"enum": []
+			},
+			"allowedValue": [],
+			"allowedRange": [{
+				"minIncl": null,
+				"maxIncl": "10"
+				
+			},
+			{
+				"minIncl": "50",
+				"maxIncl": "75"
+				
+			},
+			{
+				"minIncl": "100",
+				"maxIncl": null
+				
+			}],
+			"selectedParameter": null,
+			"cmdLineSwitch": "ohMyGod",
+			"isSimpleFlag": null
+		}]
+	}],
+	"deployedAt": [],
+	"isSingleton": false
+}
+
+
