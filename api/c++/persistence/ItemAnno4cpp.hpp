@@ -21,7 +21,7 @@ namespace mico {
           m_itemMMM(itemMMM)
       {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-        EuMicoPlatformPersistenceImplItemAnno4j::initContexts( itemMMM );
+        //EuMicoPlatformPersistenceImplItemAnno4j::initContexts( itemMMM );
         checkJavaExcpetionNoThrow(m_jnippErrorMessage);
       }
 

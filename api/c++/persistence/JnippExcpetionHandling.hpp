@@ -15,6 +15,7 @@ namespace mico {
       while (jnipp::Env::hasException()) {
         jnipp::LocalRef<JavaLangException> ex =  jnipp::Env::getException();
         ex->printStackTrace();
+        ex->getCause();
         for(auto exceptionName = exceptionNames.begin();exceptionName != exceptionNames.end(); exceptionName++)
           if (ex->getClass()->getName()->std_str().compare(exceptionName->c_str()) == 0) {
             error_msg += ex->getClass()->getName()->std_str() + "(msg: " + ex->getMessage()->std_str() + "), ";

@@ -61,6 +61,8 @@ namespace mico {
             /** Inits Java VM and connects to Marmotta via JNI->anno4j */
             void initService();
 
+            void setContext(jnipp::Ref<OrgOpenrdfRepositoryObjectObjectConnection> con, jnipp::Ref<OrgOpenrdfModelURI> context);
+
 
         public:
             static JavaVM* m_sJvm;

@@ -14,8 +14,8 @@ endif()
 
 ExternalProject_Add(anno4cpp_ext
     PREFIX externals
-    GIT_REPOSITORY git@gitserv00.idmt.fraunhofer.de:wgl/anno4cpp.git
-    GIT_TAG update_cpp_api_anno4cpp
+    GIT_REPOSITORY git@bitbucket.org:mico-project/anno4cpp.git
+    GIT_TAG update_cpp_api_anno4cpp_ns
     CMAKE_ARGS
       -DCMAKE_BUILD_TYPE=Debug
       -DCMAKE_INSTALL_PREFIX:PATH=${ANNO4CPPDEPS_ROOT}
@@ -51,6 +51,9 @@ find_package(AMQPCPP REQUIRED)
 find_package(Doxygen)
 find_package(LibDaemon)
 find_package(JNI REQUIRED)
+
+message(STATUS "Using JNI_INCLUDE_DIRS = " ${JNI_INCLUDE_DIRS})
+message(STATUS "Using JNI_LIBRARIES = " ${JNI_LIBRARIES})
 
 #this line creates the links file info with the current version for the debian packaging
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/debian/libmico-api1.links.in ${CMAKE_CURRENT_SOURCE_DIR}/debian/libmico-api1.links @ONLY)
