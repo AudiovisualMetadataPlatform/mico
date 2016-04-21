@@ -293,7 +293,7 @@ var WorkflowPrinter = function() {
 				var aggregate = XmlElement('aggregate', correlationExpression
 						+ to, {
 					strategyRef : 'itemAggregatorStrategy',
-					completionSize : '2'
+					completionSize : ''+aggregator.from.length
 				})
 
 				out = out + XmlElement('route', from + aggregate, {
