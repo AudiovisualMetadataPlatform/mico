@@ -56,6 +56,6 @@ Runs an HDFS server (version 2.7.2) on `localhost` (not accessible from remote h
 
 `docker run -it -p 8020:8020 -p 50010:50010 -p 50070:50070 -p 50075:50075 -p 50090:50090 docker.mico-project.eu/mico/mico-persistence-hdfs`
 
-To access the HDFS server from remote systems, add options `-h hdfs_host_name` and `-e HDFS_USE_HOSTNAME=true` to `docker run` and make sure *all* hosts accessing the HDFS server have a proper name resolution of **your_host_name** (e.g. by adding this to `/etc/hosts`).
+To access the HDFS server from remote systems, add options `-h hdfs_host_name` and `-e HDFS_USE_HOSTNAME=true` to `docker run` and make sure **all** hosts accessing the HDFS server have a proper name resolution of *your_host_name* (e.g. by adding this to `/etc/hosts`).
 
 
