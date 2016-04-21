@@ -127,7 +127,7 @@
 				"description": "TestData"
 			},
 			"dataType": {
-				"mimeType": ["mico/test"],
+				"mimeType": ["mico/test","mico/test2"],
 				"syntacticType": "C",
 				"cmdLineSwitch": null
 			},

@@ -13,27 +13,32 @@ var WorkflowPrinter = function() {
 	this.createPipelineRoutes = function() {
 		var out = ''
 		for ( var p in Workflow.pipelines) {
-			var pString = '';
-
-			pString = pString + this.createSimplePipeline(Workflow.pipelines[p]);
-			var strCheck = this.createMulticast(Workflow.pipelines[p],
-					Workflow.multicasts);
-			if (strCheck.length > 0) {
-				pString = pString + strCheck
-			} else {
-				pString = pString
-						+ this.createAggregatorcast(Workflow.pipelines, p,
-								Workflow.aggregators);
-			}
-
-			var from = XmlElement('from', '', {
-				uri : 'direct:workflow-' + WORKFLOW_PREFIX + '-pipeline-' + p
-			});
-
-			if (pString != '') {
-				out = out + XmlElement('route', from + pString, {
-					id : 'workflow-' + WORKFLOW_PREFIX + '-pipeline-' + p
-				})
+			
+			var pipe=Workflow.pipelines[p];
+			if (pipe[0].id != ConfigurationGraph.USER_LABEL || (pipe[1] != undefined && pipe[0].requireMulticast == false)) {
+			
+				var pString = '';
+	
+				pString = pString + this.createSimplePipeline(Workflow.pipelines[p]);
+				var strCheck = this.createMulticast(Workflow.pipelines[p],
+						Workflow.multicasts);
+				if (strCheck.length > 0) {
+					pString = pString + strCheck
+				} else {
+					pString = pString
+							+ this.createAggregatorcast(Workflow.pipelines, p,
+									Workflow.aggregators);
+				}
+	
+				var from = XmlElement('from', '', {
+					uri : 'direct:workflow-' + WORKFLOW_PREFIX + '-pipeline-' + p
+				});
+	
+				if (pString != '') {
+					out = out + XmlElement('route', from + pString, {
+						id : 'workflow-' + WORKFLOW_PREFIX + '-pipeline-' + p
+					})
+				}
 			}
 		}
 		return out;
@@ -217,7 +222,7 @@ var WorkflowPrinter = function() {
 	 * 
 	 */
 	this.createAggregatorRoutes = function() {
-		var out = '\n';
+		var out = '';
 		for ( var a in Workflow.aggregators) {
 			var aggregator = Workflow.aggregators[a];
 			if (aggregator.isSimple == true) {
@@ -296,10 +301,12 @@ var WorkflowPrinter = function() {
 				});
 			}
 		}
-		return out + '\n' + XmlElement('bean', '', {
+		if(out.length > 0)
+		out =  out + '' + XmlElement('bean', '', {
 			id : "aggregatorStrategy",
 			class : "org.apache.camel.processor.BodyInAggregatingStrategy"
 		});
+		return out;
 	}
 
 	/*
@@ -315,7 +322,7 @@ var WorkflowPrinter = function() {
 	 */
 	this.createPipelineStartingPoints = function() {
 
-		var out = '\n\n';
+		var out = '';
 
 		for ( var p in Workflow.pipelines) {
 			var pipe = Workflow.pipelines[p];
@@ -332,7 +339,7 @@ var WorkflowPrinter = function() {
 							var mimeType = mimeTypes[j]
 
 							var from = XmlElement('from', '', {
-								uri : 'direct:' + mimeType
+								uri : 'direct:mimeType=' + mimeType + ',syntacticType=' + Object.keys(pipe[0].outputSyntacticTypes)[0]
 							});
 							var correlationExpression = XmlElement(
 									'correlationExpression',
@@ -355,52 +362,143 @@ var WorkflowPrinter = function() {
 												id : 'workflow-'
 														+ WORKFLOW_PREFIX
 														+ '-starting-point-for-pipeline-'
-														+ p + '-' + mimeType
+														+ p + '-mimeType=' + mimeType 
+														+ ',syntacticType=' + Object.keys(pipe[0].outputSyntacticTypes)[0]
 											});
 						}
 					}
 				} else {
-					// otherwise, you need a multicast to the correct targets
+
+					// otherwise, you probably need a multicast to the correct targets
 					if (pipe[0].requireMulticast) {
-						console.log(this.createMulticast(pipe, Workflow.multicasts))
+						
+						var multicast = Workflow.multicasts[pipe[0].isMulticastNumber]
+						
+						var syntacticType=Object.keys(pipe[0].outputSyntacticTypes)[0];
+						
+						var multicastTargets=multicast.to;
+						var mimeTypesRequestedBy={}
+						
+						//first, iterate for every target and detect the necessary mimetypes
+						for (var i in multicastTargets) {
+							var currTarget=Workflow.pipelines[multicastTargets[i]][0];
+							var mimeTypes=currTarget.form.getSelectedInputMimeTypes()[syntacticType]
+							
+							for (var m in mimeTypes){
+								mimeTypesRequestedBy[mimeTypes[m]]=[];
+							}
+						}
+						//then re-iterate creating for each mimetype an array of target detectors
+						for (var i in multicastTargets) {
+							var currTarget=Workflow.pipelines[multicastTargets[i]][0];
+							var mimeTypes=currTarget.form.getSelectedInputMimeTypes()[syntacticType]
+							
+							for (var m in mimeTypes){
+								mimeTypesRequestedBy[mimeTypes[m]].push(multicastTargets[i]);
+							}
+						}
+						
+						//now each mimetype is mapped to the extractor(s) able to handle it
+						// e.g. png->(A,B), jpeg->(B,C), bmp->(A,C)
+						
+						for(var mimeType in mimeTypesRequestedBy) {
+							var from = XmlElement('from', '', {
+								uri : 'direct:mimeType=' + mimeType + ',syntacticType=' + syntacticType
+							});
+							var to = XmlElement('multicast', this.createMulticastTarget(Workflow.pipelines,{from : multicast.from, 
+								                                                         to: mimeTypesRequestedBy[mimeType] }));
+							
+							out = out
+							+ XmlElement(
+									'route',
+									from + to,
+									{
+										id : 'workflow-'
+												+ WORKFLOW_PREFIX
+												+ '-starting-point-for-multicast-'
+												+ pipe[0].isMulticastNumber + '-mimeType=' + mimeType 
+												+ ',syntacticType=' + syntacticType
+									});
+						}
+
+					}
+					
+
+					// if the user node is there as a single
+					// pipeline, but it's not a multicasts,
+					// we needs to connected it to the target aggregator
+					else {
+						var to = '';
+						var found = false;
+						var inputIndex = -1;
+						var aggregatorIndex = -1;
+						for ( var a in Workflow.aggregators) {
+							var aggregator = Workflow.aggregators[a];
+							to = a;
+							for ( var j in aggregator.from) {
+								if (aggregator.from[j] instanceof Array) {
+									for ( var k = 0; k < aggregator.from[j].length
+											&& !found; k++) {
+										if (aggregator.from[j][k] == p) {
+											found = true;
+											inputIndex = j;
+											aggregatorIndex = a;
+											to = to + '-' + j;
+										}
+									}
+								} else {
+									if (aggregator.from[j] == p) {
+										found = true;
+										inputIndex = j;
+										aggregatorIndex = a;
+									}
+								}
+								if (found)
+									break;
+							}
+							if (found)
+								break;
+						}
+
+						var syntacticType=Object.keys(pipe[0].outputSyntacticTypes)[0];
+						var pipe = Workflow.pipelines[Workflow.aggregators[aggregatorIndex].to]
+
+						var mimeTypes = pipe[0].form
+								.getSelectedInputMimeTypes()
+						mimeTypes = mimeTypes[Object.keys(mimeTypes)[inputIndex]];
+						for ( var j in mimeTypes) {
+							var mimeType = mimeTypes[j]
+
+							var from = XmlElement('from', '', {
+								uri : 'direct:mimeType=' + mimeType + ',syntacticType=' + syntacticType
+							});
+							var xmlto = XmlElement('to', '', {
+								uri : 'direct:workflow-' + WORKFLOW_PREFIX + '-aggregator-' + to
+							});
+
+							out = out
+									+ XmlElement(
+											'route',
+											from + xmlto,
+											{
+												id : 'workflow-'
+														+ WORKFLOW_PREFIX
+														+ '-starting-point-for-aggregator-' + to
+														+ '-mimeType=' + mimeType 
+														+ ',syntacticType=' + syntacticType
+											});
+						}
 					}
 				}
 
-				/*
-				 * { //TODO: find the freaking aggregator =) var to=''; var
-				 * found=false; var inputIndex=-1; var aggregatorIndex=-1;
-				 * for(var a in Workflow.aggregators){ var
-				 * aggregator=Workflow.aggregators[a]; to=a; for(var j in
-				 * aggregator.from){ if(aggregator.from[j] instanceof Array){
-				 * for(var k=0; k< aggregator.from[j].length && !found; k++){
-				 * if(aggregator.from[j][k]==p){ found=true; inputIndex=j;
-				 * aggregatorIndex=a; to=to+'-'+j; } } } else{
-				 * if(aggregator.from[j]==p){ found=true; inputIndex=j;
-				 * aggregatorIndex=a; } } if (found) break; } if(found) break; }
-				 * 
-				 * var
-				 * pipe=Workflow.pipelines[Workflow.aggregators[aggregatorIndex].to]
-				 * 
-				 * var mimeTypes=pipe[0].form.getSelectedInputMimeTypes()
-				 * mimeTypes=mimeTypes[Object.keys(mimeTypes)[inputIndex]]; for
-				 * (var j in mimeTypes){ var mimeType=mimeTypes[j]
-				 * 
-				 * var from=XmlElement('from','',{uri: 'direct:'+mimeType}); var
-				 * correlationExpression=XmlElement('correlationExpression','<simple>header.id</simple>');
-				 * var to=XmlElement('to','',{uri:
-				 * 'direct:workflow-'+WORKFLOW_PREFIX+'-pipeline-'+p}); var
-				 * aggregate=XmlElement('aggregate',correlationExpression+to,{strategyRef:
-				 * 'aggregatorStrategy', completionSize:'1'})
-				 * 
-				 * out=out+XmlElement('route',from+aggregate,{id:
-				 * 'workflow-'+WORKFLOW_PREFIX+'-starting-point-for-pipeline-'+p+'-'+mimeType
-				 * }); } }
-				 */
+				
+
+				 
 			}
 
 		}
 
-		return out + '\n';
+		return out + '';
 	};
 
 };
