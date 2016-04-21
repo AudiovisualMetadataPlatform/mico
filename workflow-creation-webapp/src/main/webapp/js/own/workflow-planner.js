@@ -34,34 +34,61 @@ var Workflow = function() {
 
 		var activeNodes={};
 		
-		for (var i in activeLinks )
-		{
+		for (var i in activeLinks ){
 			var link=activeLinks[i];
-			if(activeNodes[link.source.id] == undefined){
-				activeNodes[link.source.id]=link.source;
-			}
-			if ( activeNodes[link.source.id].targets == undefined ){
-				activeNodes[link.source.id].targets={};
-			}
-			activeNodes[link.source.id].targets[link.target.id]=link.target;	//flag the connection to target nodes
+			link.source.connectionWeight=0;
+			link.target.connectionWeight=0;
 			
-			if ( activeNodes[link.source.id].outputSyntacticTypes == undefined ){
+			//create one node for each mode, and for mico user
+			if(activeNodes[link.source.id] == undefined){
+				activeNodes[link.source.id]=jQuery.extend({}, link.source);
+				activeNodes[link.source.id].sources={};
+				activeNodes[link.source.id].targets={};
 				activeNodes[link.source.id].outputSyntacticTypes={};
 			}
-			if ( activeNodes[link.source.id].outputSyntacticTypes[link.syntacticType] == undefined ){
-				activeNodes[link.source.id].outputSyntacticTypes[link.syntacticType]=[];
+			
+			//create one node for mico system
+			if(activeNodes[ConfigurationGraph.MICO_SYSTEM_LABEL] == undefined){
+				if( link.target.id == ConfigurationGraph.MICO_SYSTEM_LABEL){
+					activeNodes[link.target.id]=jQuery.extend({}, link.target);
+					activeNodes[link.target.id].sources={};
+					activeNodes[link.target.id].targets={};
+					activeNodes[link.target.id].outputSyntacticTypes={};
+				}
 			}
-			if(! arrayContains(activeNodes[link.source.id].outputSyntacticTypes[link.syntacticType],link.target.id)){
-				activeNodes[link.source.id].outputSyntacticTypes[link.syntacticType].push(link.target.id);	//flag the connection to output types
+			
+		}
+		
+		for (var i in activeLinks )
+		{
+			var link=jQuery.extend(true, {}, activeLinks[i]);
+			if(activeNodes[link.target.id].sources[link.source.id] != undefined ){
+				link.source=activeNodes[link.target.id].sources[link.source.id];
 			}
-						
-			if(activeNodes[link.target.id] == undefined){
-				activeNodes[link.target.id]=link.target;
+			if(activeNodes[link.source.id] != undefined){
+				
+				//flag the connection to source node
+				activeNodes[link.target.id].sources[link.source.id]=link.source;
+				if (activeNodes[link.target.id].sources[link.source.id].connectionWeight == undefined ){
+					activeNodes[link.target.id].sources[link.source.id].connectionWeight = 1;
+				}
+				else{
+					activeNodes[link.target.id].sources[link.source.id].connectionWeight = activeNodes[link.target.id].sources[link.source.id].connectionWeight +1;
+				}
+				
+				//flag the connection to target node
+				if(activeNodes[link.target.id]!=undefined){
+					activeNodes[link.source.id].targets[link.target.id]=link.target;	
+				}
+				
+				//flag the connection to output types
+				if ( activeNodes[link.source.id].outputSyntacticTypes[link.syntacticType] == undefined ){
+					activeNodes[link.source.id].outputSyntacticTypes[link.syntacticType]=[];
+				}
+				if(! arrayContains(activeNodes[link.source.id].outputSyntacticTypes[link.syntacticType],link.target.id)){
+					activeNodes[link.source.id].outputSyntacticTypes[link.syntacticType].push(link.target.id);	
+				}
 			}
-			if ( activeNodes[link.target.id].sources == undefined ){
-				activeNodes[link.target.id].sources={};
-			}
-			activeNodes[link.target.id].sources[link.source.id]=link.source;	//flag the connection to source nodes
 		}
 		
 //		delete activeNodes[ConfigurationGraph.MICO_SYSTEM_LABEL];
@@ -85,6 +112,10 @@ var Workflow = function() {
 			//aggregator is straightforward
 			if(Object.size(this.nodes[i].sources)>1){
 				this.nodes[i].requireAggregator=true;
+			} else if (Object.size(this.nodes[i].sources)==1){
+				if(this.nodes[i].sources[Object.keys(this.nodes[i].sources)[0]].connectionWeight > 1){
+					this.nodes[i].requireAggregator=true;
+				}				
 			}
 			
 			//while multicasts needs to manually exclude the mico system node from the targets
@@ -107,18 +138,25 @@ var Workflow = function() {
 		var newUserNode={};
 		for(var i in this.nodes[ConfigurationGraph.USER_LABEL].outputSyntacticTypes){
 			
-			//make an exact copy of the node (without any reference, tho) 
+			//make an exact copy of the node (without any reference) 
 			newUserNode =jQuery.extend({} , this.nodes[ConfigurationGraph.USER_LABEL]);
 			
 			if(this.nodes[ConfigurationGraph.USER_LABEL].outputSyntacticTypes[i].length>1){
 				newUserNode.requireMulticast=true;
 			}
 			newUserNode.targets={};
+			
 			for( var j in this.nodes[ConfigurationGraph.USER_LABEL].outputSyntacticTypes[i])
 			{
-				newUserNode.targets[this.nodes[ConfigurationGraph.USER_LABEL].outputSyntacticTypes[i][j]]=this.nodes[this.nodes[ConfigurationGraph.USER_LABEL].outputSyntacticTypes[i][j]];
+				if( this.nodes[this.nodes[ConfigurationGraph.USER_LABEL].outputSyntacticTypes[i][j]] != undefined ){ 
+					newUserNode.targets[this.nodes[ConfigurationGraph.USER_LABEL].outputSyntacticTypes[i][j]]=this.nodes[this.nodes[ConfigurationGraph.USER_LABEL].outputSyntacticTypes[i][j]];
+				}
 			}
-			out.push([newUserNode]);
+			if(Object.size(newUserNode.targets)>0){
+				newUserNode.outputSyntacticTypes={}
+				newUserNode.outputSyntacticTypes[i] = jQuery.extend({} , this.nodes[ConfigurationGraph.USER_LABEL].outputSyntacticTypes[i]);
+				out.push([newUserNode]);
+			}
 		}
 		
 		return (out);
@@ -319,332 +357,8 @@ var Workflow = function() {
 	
 	//generateConnections
 	this.sendCamelRoute=function(){
-		
-		var out=''
-		
-		
-		var createPipelineRoutes = function(){
-			var out=''
-			for (var p in Workflow.pipelines){
-				var pString='';
-				
-				pString=pString+createSimplePipeline(Workflow.pipelines[p]);
-				var strCheck=createMulticast(Workflow.pipelines[p],Workflow.multicasts);
-				if(strCheck.length>0){
-					pString=pString+strCheck
-				}
-				else{
-					pString=pString+createAggregatorcast(Workflow.pipelines,p,Workflow.aggregators);
-				}
-				
-				var from=XmlElement('from','',{uri: 'direct:workflow-'+WORKFLOW_PREFIX+'-pipeline-'+p});
-				
-				if(pString != ''){
-					out=out+XmlElement('route',from+pString,{id: 'workflow-'+WORKFLOW_PREFIX+'-pipeline-'+p})
-				}
-			}
-			return out;
-		}
-		
-		
-		/*
-		 * Example returned string:
-		 * 
-		 * <pipeline>
-         *   <to uri="mico-comp:vbox1?host=mico-platform&amp;user=mico&amp;password=mico&amp;serviceId=http://www.mico-project.org/services/audiodemux-queue-8kHz-mp4" />
-         *   <to uri="mico-comp:vbox1?host=mico-platform&amp;user=mico&amp;password=mico&amp;serviceId=speakerdiarization" />
-         *   <to uri="mico-comp:vbox1?host=mico-platform&ampserviceId=kaldicpp" />
-         * </pipeline>
-		 * 
-		 * 
-		 * using var XmlElement=function(name,content,attributes){
-		 */
-			
-		var createSimplePipeline = function(pipe){
-			
-			var extractors='';
-			for (var node in pipe)
-			{
-				var brokerExtractor=Broker.brokerNodes[pipe[node].originalNode.title];
-				if(brokerExtractor!=undefined){
-					var extractorId=brokerExtractor.extractorId;
-					var extractorVersion=brokerExtractor.extractorVersion;
-					var modeId=brokerExtractor.modeId;
-					var queueName=modeId;
-					  
-					extractors=extractors+
-							XmlElement("to",'',{uri:"mico-comp:vbox1?serviceId="+queueName+
-													   "&amp;extractorId="+extractorId+
-													   "&amp;extractorVersion="+extractorVersion+
-													   "&amp;modeId="+modeId});
-				}
-			}
-			if(extractors != '')  {
-				extractors=XmlElement('pipeline',extractors);
-			}
-			return extractors
-		}
-		
-		/*
-		 * Example returned strings:
-		 * 
-		 * <multicast>
-         *   <to uri="direct:pipeline-identifier-number-1" />	
-         *   <to uri="direct:aggregator-identifier-number-2" />
-         * </multicast>
-         * 
-		 */
-		var createMulticast = function(pipe,multicasts){
-			var targets='';
-			if( pipe[pipe.length-1].requireMulticast ){
-				var multicast=multicasts[pipe[pipe.length-1].isMulticastNumber]
-				targets=targets+createMulticastTarget(Workflow.pipelines,multicast);
-				return XmlElement('multicast',targets);
-			}
-			return targets;
-		}
-		
-		var createMulticastTarget = function(pipelines,multicast){
-			
-			var out='';
-			for (var i in multicast.to){
-				var to=multicast.to[i];
-				
-				if(pipelines[to][0].requireAggregator == false){
-					out=out+XmlElement('to','',{uri: 'direct:workflow-'+WORKFLOW_PREFIX+'-pipeline-'+to});
-				}
-				else{
-					
-					var aggregator=Workflow.aggregators[pipelines[to][0].needsAggregateNumber];
-					to=pipelines[to][0].needsAggregateNumber;
-					if(aggregator.isSimple == false){
-						for(var j in aggregator.from){
-							if(aggregator.from[j] instanceof Array){
-								for(var k=0; k< aggregator.from[j].length; k++){
-									if(aggregator.from[j][k]==multicast.from){
-										to=to+'-'+j;
-									}
-								}
-							}
-						}
-					}
-					out=out+XmlElement('to','',{uri: 'direct:workflow-'+WORKFLOW_PREFIX+'-aggregator-'+to});
-				}
-				
-			}
-			return out;
-		}
-		
-		/*
-		 * Example returned strings:
-		 * 
-		 * <to uri="direct:aggregator-identifier-number-2" />
-         * 
-		 */
-		var createAggregatorcast = function(pipelines,currPipeIdx,aggregators){
-
-			for(var a in aggregators){
-				var aggregator=aggregators[a];
-				var to=a;
-				for(var j in aggregator.from){
-					if(aggregator.from[j] instanceof Array){
-						for(var k=0; k< aggregator.from[j].length; k++){
-							if(aggregator.from[j][k]==currPipeIdx){
-								if(aggregator.from[j].length>1){
-									to=to+'-'+j;
-								}
-								return XmlElement('to','',{uri: 'direct:workflow-'+WORKFLOW_PREFIX+'-aggregator-'+to});
-							}
-						}
-					}
-					else{
-						if(aggregator.from[j]==currPipeIdx){
-							return XmlElement('to','',{uri: 'direct:workflow-'+WORKFLOW_PREFIX+'-aggregator-'+to});
-						}
-					}
-				}
-			}
-			return '';
-		}
-		
-		/*
-		 * Example returned strings
-		 * 
-		 * for simple Aggregators:
-		 * 
-		 * <route id="workflow-'+WORKFLOW_PREFIX+'-aggregator-'+IDENTIFIER"
-		 * 	 <from uri="direct:workflow-'+WORKFLOW_PREFIX+'-pipeline-'+IDENTIFIER"/>
-	     *   <aggregate strategyRef="aggregatorStrategy" completionSize="1">
-	     *      <correlationExpression>
-	     *        <simple>header.id</simple>
-	     *      </correlationExpression>
-	     *      <to uri="direct:TARGET_PIPELINE"/>
-	     *   </aggregate>
-	     * </route>
-	     * 
-	     * for complex Aggregators:
-	     *
-	     * one (or more)
-	     *
-	     * <route id="workflow-'+WORKFLOW_PREFIX+'-aggregator-'+IDENTIFIER"
-		 * 	 <from uri="direct:workflow-'+WORKFLOW_PREFIX+'-aggregator-'+IDENTIFIER+SUBIDENTIFIER"/>
-	     *   <aggregate strategyRef="aggregatorStrategy" completionSize="1">
-	     *      <correlationExpression>
-	     *        <simple>header.id</simple>
-	     *      </correlationExpression>
-	     *      <to uri="direct:workflow-'+WORKFLOW_PREFIX+'-aggregator-'+IDENTIFIER"/>
-	     *   </aggregate>
-	     * <route>
-	     * 
-	     * plus
-	     * 
-	     * <route id="workflow-'+WORKFLOW_PREFIX+'-aggregator-'+IDENTIFIER"
-		 * 	 <from uri="direct:workflow-'+WORKFLOW_PREFIX+'-aggregator-'+IDENTIFIER"/>
-	     *   <aggregate strategyRef="aggregatorStrategy" completionPolicy="COMPLEX">
-	     *      <correlationExpression>
-	     *        <simple>header.id</simple>
-	     *      </correlationExpression>
-	     *      <to uri="direct:TARGET_PIPELINE"/>
-	     *   </aggregate>
-	     * <route>
-	     * 
-	     */
-		var createAggregatorRoutes = function(){
-			var out='\n';
-			for(var a in Workflow.aggregators){
-				var aggregator=Workflow.aggregators[a];
-				if(aggregator.isSimple == true){
-					
-					var from=XmlElement('from','',{uri: 'direct:workflow-'+WORKFLOW_PREFIX+'-aggregator-'+a});
-					var correlationExpression=XmlElement('correlationExpression','<simple>header.id</simple>');
-					var to=XmlElement('to','',{uri: 'direct:workflow-'+WORKFLOW_PREFIX+'-pipeline-'+aggregator.to});
-					var aggregate=XmlElement('aggregate',correlationExpression+to,{strategyRef: 'aggregatorStrategy', completionSize:'1'})
-					
-					out=out+XmlElement('route',from+aggregate,{id: 'workflow-'+WORKFLOW_PREFIX+'-aggregator-'+a });
-					
-				}else{
-					
-					//first simple sub-Aggregators:
-					for(var i in aggregator.from){
-						var currInput=aggregator.from[i];
-						if(currInput.length>1){
-
-							var from=XmlElement('from','',{uri: 'direct:workflow-'+WORKFLOW_PREFIX+'-aggregator-'+a+'-'+i});
-							var correlationExpression=XmlElement('correlationExpression','<simple>header.id</simple>');
-							var to=XmlElement('to','',{uri: 'direct:workflow-'+WORKFLOW_PREFIX+'-aggregator-'+a});
-							var aggregate=XmlElement('aggregate',correlationExpression+to,{strategyRef: 'aggregatorStrategy', completionSize:'1'})
-							
-							out=out+XmlElement('route',from+aggregate,{id: 'workflow-'+WORKFLOW_PREFIX+'-aggregator-'+a+'-'+i});
-						}
-					}
-					
-					var from=XmlElement('from','',{uri: 'direct:workflow-'+WORKFLOW_PREFIX+'-aggregator-'+a});
-					var correlationExpression=XmlElement('correlationExpression','<simple>header.id</simple>');
-					var to=XmlElement('to','',{uri: 'direct:workflow-'+WORKFLOW_PREFIX+'-pipeline-'+aggregator.to});
-					var aggregate=XmlElement('aggregate',correlationExpression+to,{strategyRef: 'aggregatorStrategy', completionPolicy:'COMPLEX'})
-					
-					out=out+XmlElement('route',from+aggregate,{id: 'workflow-'+WORKFLOW_PREFIX+'-aggregator-'+a });
-				}
-			}
-			return out+'\n'+XmlElement('bean','',{ id:"aggregatorStrategy", class: "org.apache.camel.processor.BodyInAggregatingStrategy"});
-		}
-		
-		
-		/*
-		 * Example returned strings
-		 * 
-		 * <route id="workflow-'+WORKFLOW_PREFIX+'-starting-point-for-pipeline-'+IDENTIFIER"
-		 * 	 <from uri="direct:MIME_TYPE"/>
-	     *   <aggregate strategyRef="aggregatorStrategy" completionSize="1">
-	     *      <correlationExpression>
-	     *        <simple>header.id</simple>
-	     *      </correlationExpression>
-	     *      <to uri="direct:TARGET"/>
-	     *   </aggregate>
-	     * </route>
-	     * 
-	     */
-		var createPipelineStartingPoints = function(){
-			
-			var out='\n\n';
-			
-			for (var p in Workflow.pipelines){
-				var pipe=Workflow.pipelines[p];
-				
-				if(pipe[0].id == ConfigurationGraph.USER_LABEL){ 
-					if(pipe[1] != undefined){
-						for(var i in pipe[1].form.getSelectedInputMimeTypes()){
-							
-							var mimeTypes=pipe[1].form.getSelectedInputMimeTypes()[i]
-							for (var j in mimeTypes){
-								var mimeType=mimeTypes[j]
-			
-								var from=XmlElement('from','',{uri: 'direct:'+mimeType});
-								var correlationExpression=XmlElement('correlationExpression','<simple>header.id</simple>');
-								var to=XmlElement('to','',{uri: 'direct:workflow-'+WORKFLOW_PREFIX+'-pipeline-'+p});
-								var aggregate=XmlElement('aggregate',correlationExpression+to,{strategyRef: 'aggregatorStrategy', completionSize:'1'})
-								
-								out=out+XmlElement('route',from+aggregate,{id: 'workflow-'+WORKFLOW_PREFIX+'-starting-point-for-pipeline-'+p+'-'+mimeType });
-							}
-						}
-					}
-					else{
-						//TODO: find the freaking aggregator =)
-						var to='';
-						var found=false;
-						var inputIndex=-1;
-						var aggregatorIndex=-1;
-						for(var a in Workflow.aggregators){
-							var aggregator=Workflow.aggregators[a];
-							to=a;
-							for(var j in aggregator.from){
-								if(aggregator.from[j] instanceof Array){
-									for(var k=0; k< aggregator.from[j].length && !found; k++){
-										if(aggregator.from[j][k]==p){
-											found=true;
-											inputIndex=j;
-											aggregatorIndex=a;
-											to=to+'-'+j;
-										}
-									}
-								}
-								else{
-									if(aggregator.from[j]==p){
-										found=true;
-										inputIndex=j;
-										aggregatorIndex=a;
-									}
-								}
-								if (found) break;
-							}
-							if(found) break;
-						}
-										
-						var pipe=Workflow.pipelines[Workflow.aggregators[aggregatorIndex].to]
-
-						var mimeTypes=pipe[0].form.getSelectedInputMimeTypes()
-						mimeTypes=mimeTypes[Object.keys(mimeTypes)[inputIndex]];
-						for (var j in mimeTypes){
-							var mimeType=mimeTypes[j]
-				
-							var from=XmlElement('from','',{uri: 'direct:'+mimeType});
-							var correlationExpression=XmlElement('correlationExpression','<simple>header.id</simple>');
-							var to=XmlElement('to','',{uri: 'direct:workflow-'+WORKFLOW_PREFIX+'-pipeline-'+p});
-							var aggregate=XmlElement('aggregate',correlationExpression+to,{strategyRef: 'aggregatorStrategy', completionSize:'1'})
-								
-							out=out+XmlElement('route',from+aggregate,{id: 'workflow-'+WORKFLOW_PREFIX+'-starting-point-for-pipeline-'+p+'-'+mimeType });
-						}
-					}
-				}
- 
-				
-			}
-			
-			return out+'\n';
-		}
-
-		
-		return XmlPrettyPrint(XmlElement('routes',createPipelineStartingPoints()+createPipelineRoutes()+createAggregatorRoutes(),{xmlns:'http://camel.apache.org/schema/spring'}));
+		var xmlRoute=WorkflowPrinter.printXmlString()
+		return xmlRoute;
 	}
 	
 	
