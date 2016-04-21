@@ -10,7 +10,7 @@ namespace mico {
   namespace persistence {
     class ItemAnno4cpp: public Item
     {
-    private:
+    public:
       PersistenceService& m_persistenceService;
       jnipp::GlobalRef<EuMicoPlatformAnno4jModelItemMMM> m_itemMMM;
       std::string m_jnippErrorMessage;

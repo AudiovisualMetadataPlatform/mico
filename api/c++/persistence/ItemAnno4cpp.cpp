@@ -34,6 +34,7 @@ namespace mico {
     {
       jnipp::Env::Scope scope(PersistenceService::m_sJvm);
       jnipp::LocalRef<JavaLangString> juri = JavaLangString::create( uri.stringValue() );
+
       jnipp::LocalRef<EuMicoPlatformAnno4jModelPartMMM> partMMM = m_persistenceService.getAnno4j()->findByID(EuMicoPlatformAnno4jModelPartMMM::clazz(), juri);
       std::shared_ptr<PartAnno4cpp> part( new PartAnno4cpp(partMMM, std::dynamic_pointer_cast<Item>( shared_from_this() ), m_persistenceService) );
       return part;
@@ -42,13 +43,15 @@ namespace mico {
     mico::rdf::model::URI ItemAnno4cpp::getURI() {
       jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
-      jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri =
-          OrgOpenrdfModelImplURIImpl::construct( static_cast< jnipp::LocalRef<ComGithubAnno4jModelImplResourceObject> >(m_itemMMM)->getResourceAsString() );
+    jnipp::LocalRef<OrgOpenrdfModelURI> jItemURIRet =
+          ((jnipp::Ref<OrgOpenrdfRepositoryObjectRDFObject>)m_itemMMM)->getResource();
 
-      checkJavaExcpetionNoThrow(m_jnippErrorMessage);
-      assert((jobject) juri);
+    checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+    assert((jobject) jItemURIRet);
 
-      return mico::rdf::model::URI( juri->stringValue()->std_str() );
+      std::cout << "ItemAnno4cpp::getURI() URI string is [" << jItemURIRet->toString()->std_str() << "] called."  << std::endl;
+
+      return mico::rdf::model::URI( jItemURIRet->toString()->std_str() );
     }
 
     std::list< std::shared_ptr<Part> > ItemAnno4cpp::getParts()

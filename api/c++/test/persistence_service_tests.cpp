@@ -149,33 +149,67 @@ int main(int argc, char **argv) {
         mico_pass = argv[3];
 
 
-        PersistenceServiceTest test;
+        PersistenceServiceTest persistenceServiceTest;
 
-        test.SetUp();
+        persistenceServiceTest.SetUp();
 
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
+        size_t numTestItems = 100;
 
-        //for (int i=0; i<100; ++i)
-        std::shared_ptr<mico::persistence::Item> currItem = test.svc->createItem();
-        assert(currItem != 0);
+        std::vector<std::string> itemURIS;
+        itemURIS.reserve(numTestItems);
 
-        auto uri = currItem->getURI();
-        auto itemMMM = currItem->getRDFObject();
-        assert( (jobject)itemMMM != nullptr );
 
-        currItem->setSemanticType("testType1");
-        auto semanticType = currItem->getSemanticType();
-        assert( semanticType.compare("testType1") == 0 );
+        for (size_t i=0; i < numTestItems; ++i) {
 
-        currItem->setSyntacticalType("testType2");
-        auto synType = currItem->getSyntacticalType();
-        assert( synType.compare("testType2") == 0 );
+            // create check
 
-        auto stime = currItem->getSerializedAt();
-        //assert( stime.size() );
+            std::shared_ptr<mico::persistence::Item> currItem = persistenceServiceTest.svc->createItem();
+            assert(currItem != 0);
 
-        bool hasAsset = currItem->hasAsset();
+            auto uri = currItem->getURI();
+
+            itemURIS.push_back(uri.stringValue());
+
+            auto itemMMM = currItem->getRDFObject();
+            assert( (jobject)itemMMM != nullptr );
+
+            auto stime = currItem->getSerializedAt();
+            assert( stime.size() );
+
+
+            // set/get type check
+            std::stringstream ss_sem_type, ss_syn_type;
+            ss_sem_type << "semantic_type_item_" << i;
+            ss_syn_type << "syntactic_type_item_" << i;
+
+            currItem->setSemanticType(ss_sem_type.str().c_str());
+            auto semanticType = currItem->getSemanticType();
+            assert( semanticType.compare(ss_sem_type.str().c_str()) == 0 );
+
+            currItem->setSyntacticalType(ss_sem_type.str().c_str());
+            auto synType = currItem->getSyntacticalType();
+            assert( synType.compare(ss_sem_type.str().c_str()) == 0 );
+        }
+
+
+        // check item retrieval
+        for (auto itemURI : itemURIS) {
+            mico::rdf::model::URI asURI(itemURI);
+
+            std::shared_ptr<mico::persistence::Item> retrievedItem  =
+                        persistenceServiceTest.svc->getItem(asURI);
+
+            assert(retrievedItem);
+
+            auto uri = retrievedItem->getURI();
+
+            assert(retrievedItem->getURI().stringValue() == itemURI);
+        }
+
+
+
         //std::shared_ptr<Part> part = currItem->createPart(uri);
         //std::shared_ptr<Asset> asset = currItem->getAsset();
         //std::shared_ptr<Part> part2 = currItem->getPart(uri);
