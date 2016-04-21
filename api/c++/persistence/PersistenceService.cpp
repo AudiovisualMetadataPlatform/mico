@@ -103,6 +103,7 @@ namespace mico {
 
                 std::string JavaClassPath="-Djava.class.path=";
                 JavaClassPath +=  jar_file[".*anno4jdependencies.*"];
+                //JavaClassPath +=  "/home/christian/mico/anno4cpp/java/anno4jdependencies/target/anno4jdependencies-2.0.0-SNAPSHOT.jar";
 
                 JavaVMOption options[1];    // JVM invocation options
                 options[0].optionString = (char *) JavaClassPath.c_str();
@@ -254,11 +255,22 @@ namespace mico {
             jnipp::GlobalRef<EuMicoPlatformAnno4jModelItemMMM> jItemMMM=
                     this->m_anno4j->findByID(EuMicoPlatformAnno4jModelItemMMM::clazz(), itemURI);
 
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
+            bool isInstance = jItemMMM->isInstanceOf(EuMicoPlatformAnno4jModelItemMMM::clazz());
+            bool except = checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
-            auto newItem = std::make_shared<ItemAnno4cpp>(jItemMMM, *this);
+            if (!isInstance || except) {
+                LOG_DEBUG("returned RDF object is NOT an instance of ItemMMM");
+                return  std::shared_ptr<Item>();
+            } else {
+                LOG_DEBUG("returned RDF object is instance of ItemMMM");
+            }
 
-            return newItem;
+            jnipp::LocalRef<OrgOpenrdfModelURI> jItemURIRet =
+                ((jnipp::Ref<OrgOpenrdfRepositoryObjectRDFObject>)jItemMMM)->getResource();
+
+            LOG_DEBUG("Got item with URI [%s]", jItemURIRet->toString()->std_str().c_str());
+
+            return std::make_shared<ItemAnno4cpp>(jItemMMM, *this);
         }
 
         /**
@@ -320,8 +332,7 @@ namespace mico {
 
         jnipp::LocalRef<ComGithubAnno4jAnno4j> PersistenceService::getAnno4j()
         {
-          //return m_anno4j;
-          throw runtime_error("Not yet implemented");
+          return m_anno4j;
         }
 
         std::string PersistenceService::getStoragePrefix()

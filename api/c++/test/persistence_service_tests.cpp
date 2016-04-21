@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
 
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
-        size_t numTestItems = 100;
+        size_t numTestItems = 1;
 
         std::vector<std::string> itemURIS;
         itemURIS.reserve(numTestItems);
@@ -208,9 +208,32 @@ int main(int argc, char **argv) {
             assert(retrievedItem->getURI().stringValue() == itemURI);
         }
 
+        // check non existing item retrieval
+        std::shared_ptr<mico::persistence::Item> notExistingItem  =
+            persistenceServiceTest.svc->getItem(mico::rdf::model::URI("http://does_not_exist_at_all"));
+
+        assert(!notExistingItem);
+
+        //part creation
+        for (auto itemURI : itemURIS) {
+            mico::rdf::model::URI asURI(itemURI);
+
+            std::shared_ptr<mico::persistence::Item> retrievedItem  =
+                        persistenceServiceTest.svc->getItem(asURI);
 
 
-        //std::shared_ptr<Part> part = currItem->createPart(uri);
+            assert(retrievedItem);
+
+            retrievedItem->createPart(mico::rdf::model::URI("http://my_test_extractor"));
+
+
+        }
+
+
+
+
+
+
         //std::shared_ptr<Asset> asset = currItem->getAsset();
         //std::shared_ptr<Part> part2 = currItem->getPart(uri);
         //std::list< std::shared_ptr<Part> > parts = currItem->getParts();

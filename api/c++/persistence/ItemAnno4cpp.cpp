@@ -8,26 +8,78 @@ namespace mico {
     std::shared_ptr<Part> ItemAnno4cpp::createPart(mico::rdf::model::URI extractorID)
     {
       jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-      jnipp::LocalRef<JavaLangString> jsuri = JavaLangString::create(this->getURI().stringValue());
-      jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri = OrgOpenrdfModelImplURIImpl::construct( jsuri );
-      jnipp::LocalRef<EuMicoPlatformAnno4jModelPartMMM> partMMM = m_persistenceService.getAnno4j()->createObject(EuMicoPlatformAnno4jModelPartMMM::clazz(), juri);
-      jnipp::LocalRef<JavaLangString> dateTime = JavaLangString::create( commons::TimeInfo::getTimestamp() );
-      static_cast< jnipp::LocalRef<ComGithubAnno4jModelAnnotation> >(partMMM)->setSerializedAt( dateTime );
 
-      jnipp::LocalRef<ComGithubAnno4jModelAgent> agent = m_persistenceService.getAnno4j()->createObject(ComGithubAnno4jModelAgent::clazz(), juri);
-      jnipp::LocalRef<JavaLangString> jsextractorID = JavaLangString::create(extractorID.stringValue());
-      jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> jextractorID = OrgOpenrdfModelImplURIImpl::construct( jsextractorID );
-      static_cast< jnipp::LocalRef<ComGithubAnno4jModelImplResourceObject> >(agent)->setResource( jextractorID );
-      static_cast< jnipp::LocalRef<ComGithubAnno4jModelAnnotation> >(partMMM)->setSerializedBy(agent);
+//    PartMMM partMMM = createObject(PartMMM.class);
+//    String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
+//    partMMM.setSerializedAt(dateTime);
 
-      m_itemMMM->addPart(partMMM);
+//    Agent agent = createObject(extractorID, Agent.class);
+//    partMMM.setSerializedBy(agent);
 
-      //log.trace("Created Part with id {} in the context graph {} - Creator {}", partMMM.getResourceAsString(), this.getURI(), extractorID);
+//    this.itemMMM.addPart(partMMM);
+
+//    log.trace("Created Part with id {} in the context graph {} - Creator {}", partMMM.getResourceAsString(), this.getURI(), extractorID);
+
+//    return new PartAnno4j(partMMM, this, persistenceService);
+
+      jnipp::GlobalRef<EuMicoPlatformAnno4jModelItemMMM> jNewPartMMM =
+              m_persistenceService.getAnno4j()->createObject(EuMicoPlatformAnno4jModelPartMMM::clazz());
+
+      checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+      assert((jobject) jNewPartMMM);
+
+      auto jItemConn = ((jnipp::Ref<OrgOpenrdfRepositoryObjectRDFObject>)jNewPartMMM)->getObjectConnection();
+      checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+      assert((jobject) jItemConn);
+
+      jnipp::LocalRef<OrgOpenrdfSailMemoryModelMemValueFactory> jMemValueFactory =
+              OrgOpenrdfSailMemoryModelMemValueFactory::construct();
+      checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+      assert((jobject) jMemValueFactory);
+
+      jnipp::Ref<OrgOpenrdfModelResource> jResourceBlank =
+              jMemValueFactory->createURI(jnipp::String::create("urn:anno4j:BLANK"));
+
+      checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+      assert((jobject) jResourceBlank);
+
+      LOG_DEBUG("blank resource created");
+
+      jnipp::LocalRef<OrgOpenrdfModelURI> jPartURI =
+              ((jnipp::Ref<OrgOpenrdfRepositoryObjectRDFObject>)jNewPartMMM)->getResource();
+
+      checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+      assert((jobject) jPartURI);
+      LOG_DEBUG("Part URI retrieved: %s", jPartURI->toString()->std_str().c_str());
+
+      jItemConn->addDesignation((jnipp::Ref<OrgOpenrdfRepositoryObjectRDFObject>) jNewPartMMM,
+                                (jnipp::Ref<JavaLangClass>) EuMicoPlatformAnno4jModelPartMMM::clazz());
 
       checkJavaExcpetionThrow({"IllegalAccessException", "InstantiationException"});
 
-      std::shared_ptr<PartAnno4cpp> part(new PartAnno4cpp(partMMM, std::dynamic_pointer_cast<Item>( shared_from_this() ), m_persistenceService));
-      return part;
+
+      LOG_DEBUG("Created Part in context %s", jItemConn->getInsertContext()->toString()->std_str().c_str());
+
+//      jnipp::LocalRef<JavaLangString> jsuri = JavaLangString::create(this->getURI().stringValue());
+//      jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri = OrgOpenrdfModelImplURIImpl::construct( jsuri );
+//      jnipp::LocalRef<EuMicoPlatformAnno4jModelPartMMM> partMMM = m_persistenceService.getAnno4j()->createObject(EuMicoPlatformAnno4jModelPartMMM::clazz(), juri);
+//      jnipp::LocalRef<JavaLangString> dateTime = JavaLangString::create( commons::TimeInfo::getTimestamp() );
+//      static_cast< jnipp::LocalRef<ComGithubAnno4jModelAnnotation> >(partMMM)->setSerializedAt( dateTime );
+
+//      jnipp::LocalRef<ComGithubAnno4jModelAgent> agent = m_persistenceService.getAnno4j()->createObject(ComGithubAnno4jModelAgent::clazz(), juri);
+//      jnipp::LocalRef<JavaLangString> jsextractorID = JavaLangString::create(extractorID.stringValue());
+//      jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> jextractorID = OrgOpenrdfModelImplURIImpl::construct( jsextractorID );
+//      static_cast< jnipp::LocalRef<ComGithubAnno4jModelImplResourceObject> >(agent)->setResource( jextractorID );
+//      static_cast< jnipp::LocalRef<ComGithubAnno4jModelAnnotation> >(partMMM)->setSerializedBy(agent);
+
+//      m_itemMMM->addPart(partMMM);
+
+      //log.trace("Created Part with id {} in the context graph {} - Creator {}", partMMM.getResourceAsString(), this.getURI(), extractorID);
+
+
+
+      //std::shared_ptr<PartAnno4cpp> part(new PartAnno4cpp(partMMM, std::dynamic_pointer_cast<Item>( shared_from_this() ), m_persistenceService));
+      return nullptr;
     }
 
     std::shared_ptr<Part> ItemAnno4cpp::getPart(mico::rdf::model::URI uri)
@@ -43,15 +95,14 @@ namespace mico {
     mico::rdf::model::URI ItemAnno4cpp::getURI() {
       jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
-    jnipp::LocalRef<OrgOpenrdfModelURI> jItemURIRet =
-          ((jnipp::Ref<OrgOpenrdfRepositoryObjectRDFObject>)m_itemMMM)->getResource();
+        jnipp::LocalRef<OrgOpenrdfModelURI> jItemURIRet =
+            ((jnipp::Ref<OrgOpenrdfRepositoryObjectRDFObject>)m_itemMMM)->getResource();
 
-    checkJavaExcpetionNoThrow(m_jnippErrorMessage);
-    assert((jobject) jItemURIRet);
+        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        assert((jobject) jItemURIRet);
 
-      std::cout << "ItemAnno4cpp::getURI() URI string is [" << jItemURIRet->toString()->std_str() << "] called."  << std::endl;
 
-      return mico::rdf::model::URI( jItemURIRet->toString()->std_str() );
+        return mico::rdf::model::URI( jItemURIRet->toString()->std_str() );
     }
 
     std::list< std::shared_ptr<Part> > ItemAnno4cpp::getParts()
