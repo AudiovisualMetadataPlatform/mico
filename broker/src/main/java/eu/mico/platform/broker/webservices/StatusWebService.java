@@ -25,12 +25,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileSystemException;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.github.anno4j.model.Target;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.*;
@@ -69,6 +66,23 @@ public class StatusWebService {
         this.broker = broker;
     }
 
+    @GET
+    @Path("/info")
+    @Produces("text/plain")
+    public Response getInfo(){
+        String info = null;
+        try{
+            InputStream resourceAsStream = servletContext
+                    .getResourceAsStream("/META-INF/MANIFEST.MF");
+            Manifest mf = new Manifest();
+            mf.read(resourceAsStream);
+            Attributes atts = mf.getMainAttributes();
+            info = atts.getValue("Implementation-Title") + " ("+ atts.getValue("Implementation-Version")+")";
+        }catch(IOException e ){
+            info = "Version 2.x";
+        }
+        return Response.ok(info).build();
+    }
 
     @GET
     @Path("/dependencies")
@@ -148,8 +162,10 @@ public class StatusWebService {
         if(showParts) {
             List<Map<String, Object>> parts = new ArrayList<>();
             Item item = broker.getPersistenceService().getItem(new URIImpl(uri));
+            log.trace("collect {} collect parts of item: {}",uri);
             if (item != null) {
                 for (Part part : item.getParts()) {
+                    log.trace("    - part: {} - {} ({})",part.getURI(),part.getSerializedBy(), part.getSerializedAt());
                     parts.add(wrapContentStatus(state, part));
                 }
             }

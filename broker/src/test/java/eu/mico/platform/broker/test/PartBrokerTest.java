@@ -155,8 +155,8 @@ public class PartBrokerTest extends BaseBrokerTest {
 
             // same test as above ... parts should not have changed
             parts = ImmutableSet.copyOf(item.getParts());
-            Assert.assertEquals(4, parts.size());
-            Assert.assertThat("injecting 2nd item should not change this",parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("A"))));
+            Assert.assertEquals("injecting 2nd item should not change this",4, parts.size());
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("A"))));
             Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("B"))));
             Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("C"))));
             Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("A"))));
@@ -176,6 +176,7 @@ public class PartBrokerTest extends BaseBrokerTest {
 
         } finally {
             svc.deleteItem(item.getURI());
+            svc.deleteItem(item2.getURI());
         }
     }
 }
