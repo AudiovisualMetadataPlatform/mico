@@ -20,9 +20,12 @@ RUN mkdir -p /var/lib/hadoop/datanode /var/lib/hadoop/namenode /var/lib/hadoop/h
     sudo -u hadoop cp /var/lib/hadoop/home/.ssh/id_dsa.pub /var/lib/hadoop/home/.ssh/authorized_keys && \
     service ssh start && echo exit |sudo -u hadoop ssh -o StrictHostKeyChecking=no localhost && echo exit |sudo -u hadoop ssh -o StrictHostKeyChecking=no 0.0.0.0 && service ssh stop
 
-COPY core-site.xml hdfs-site.xml /etc/hadoop/
+COPY core-site.xml.tmpl hdfs-site.xml.tmpl slaves.tmpl /etc/hadoop/
 RUN sed -i 's/\${JAVA_HOME}/\/usr\/lib\/jvm\/default-java\/jre/g' /etc/hadoop/hadoop-env.sh && \
-    sed -i 's/#export HADOOP_LOG_DIR=\${HADOOP_LOG_DIR}\/\$USER/export HADOOP_LOG_DIR=\/var\/log\/hadoop/g' /etc/hadoop/hadoop-env.sh
+    sed -i 's/#export HADOOP_LOG_DIR=\${HADOOP_LOG_DIR}\/\$USER/export HADOOP_LOG_DIR=\/var\/log\/hadoop/g' /etc/hadoop/hadoop-env.sh && \
+    sed 's/%HDFS_HOSTNAME%/localhost/g' /etc/hadoop/core-site.xml.tmpl > /etc/hadoop/core-site.xml && \
+    sed 's/%HDFS_HOSTNAME%/localhost/g' /etc/hadoop/hdfs-site.xml.tmpl > /etc/hadoop/hdfs-site.xml && \
+    sed 's/%HDFS_HOSTNAME%/localhost/g' /etc/hadoop/slaves.tmpl > /etc/hadoop/slaves
 COPY hdfs /etc/init.d/
 
 RUN sudo -u hadoop /opt/hadoop/bin/hdfs namenode -format && \
