@@ -150,7 +150,11 @@ public class PersistenceServiceAnno4j implements PersistenceService {
         //the parsed resource already has the necessary rdf:type assigned!
         Object object = itemConn.getObject(id);
         //if not we will get a ClssCastException in the next line
-        return new ItemAnno4j(ItemMMM.class.cast(object), this);
+        if(object instanceof ItemMMM){
+            return new ItemAnno4j(ItemMMM.class.cast(object), this);
+        } else {
+            return null; //not an Item
+        }
     }
 
     /**
