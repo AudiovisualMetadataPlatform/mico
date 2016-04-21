@@ -260,14 +260,14 @@ var WorkflowPrinter = function() {
 						});
 						var correlationExpression = XmlElement(
 								'correlationExpression',
-								'<simple>header.id</simple>');
+								'<simple>header.mico_item</simple>');
 						var to = XmlElement('to', '', {
 							uri : 'direct:workflow-' + WORKFLOW_PREFIX
 									+ '-aggregator-' + a
 						});
 						var aggregate = XmlElement('aggregate',
 								correlationExpression + to, {
-									strategyRef : 'aggregatorStrategy',
+									strategyRef : 'simpleAggregatorStrategy',
 									completionSize : '1'
 								})
 
@@ -285,15 +285,15 @@ var WorkflowPrinter = function() {
 							+ a
 				});
 				var correlationExpression = XmlElement('correlationExpression',
-						'<simple>header.id</simple>');
+						'<simple>header.mico_item</simple>');
 				var to = XmlElement('to', '', {
 					uri : 'direct:workflow-' + WORKFLOW_PREFIX + '-pipeline-'
 							+ aggregator.to
 				});
 				var aggregate = XmlElement('aggregate', correlationExpression
 						+ to, {
-					strategyRef : 'aggregatorStrategy',
-					completionPolicy : 'COMPLEX'
+					strategyRef : 'itemAggregatorStrategy',
+					completionSize : '2'
 				})
 
 				out = out + XmlElement('route', from + aggregate, {
