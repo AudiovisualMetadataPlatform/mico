@@ -1,3 +1,9 @@
+mico-persistence (1.0.2) unstable; urgency=medium
+
+  * Minor postinst script fix to work with Docker
+
+ -- Horst Stadler <horst.stadler@salzburgresearch.at>  Thu, 21 Apr 2016 11:37:39 +0200
+
 mico-persistence (1.0.1) unstable; urgency=medium
 
   * depend on mico-base

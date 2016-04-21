@@ -29,6 +29,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -83,7 +84,14 @@ public class AnimalDetectionWebService {
         mimetypesMap.addMimeTypes("image/jpeg jpeg jpg");
 
         this.persistenceService = eventManager.getPersistenceService();
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectTimeout(5 * 1000)
+                .setConnectionRequestTimeout(5 * 1000)
+                .setSocketTimeout(5 * 1000)
+                .build();
         this.httpClient = HttpClientBuilder.create()
+                .setDefaultRequestConfig(requestConfig)
+                .setMaxConnPerRoute(10)
                 .setUserAgent("MicoPlatform (ZooniverseWebService)")
                 .build();
     }
@@ -103,8 +111,9 @@ public class AnimalDetectionWebService {
                         if (cType != null && !MediaType.valueOf(cType.getValue()).equals(MediaType.APPLICATION_OCTET_STREAM_TYPE)) {
                             type = MediaType.valueOf(cType.getValue());
                         } else {
-                            type = MediaType.valueOf(mimetypesMap.getContentType(imageUrl.getPath()));
+                            type = MediaType.valueOf(mimetypesMap.getContentType(imageUrl.getPath().toLowerCase()));
                         }
+                        log.debug("Content type for URL {} is {}, proceeding with type {}", imageUrl.toString(), cType.getValue(), type.toString());
 
                         if (type.toString().equalsIgnoreCase("image/jpeg")) {
                             try (InputStream is = httpResponse.getEntity().getContent()) {
@@ -126,7 +135,7 @@ public class AnimalDetectionWebService {
                     .entity(e.getMessage())
                     .build();
         } catch (IOException e) {
-            log.error("Could not fetch image to create content item: %s", e.toString());
+            log.error("Could not fetch image to create content item: {}", e.toString());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
     }
@@ -148,9 +157,12 @@ public class AnimalDetectionWebService {
 
             try (OutputStream outputStream = part.getAsset().getOutputStream()) {
                 IOUtils.copy(postBody, outputStream);
+                outputStream.close();
             } catch (IOException e) {
                 log.error("Could not persist binary data for ContentPart {}: {}", part.getURI(), e.getMessage());
                 throw e;
+            } finally {
+                postBody.close();
             }
 
             eventManager.injectItem(item);

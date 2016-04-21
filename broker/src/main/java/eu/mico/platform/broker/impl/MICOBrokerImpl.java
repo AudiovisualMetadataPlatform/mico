@@ -15,6 +15,7 @@ package eu.mico.platform.broker.impl;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.rabbitmq.client.*;
+
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.exception.StateNotFoundException;
 import eu.mico.platform.broker.model.*;
@@ -69,6 +70,7 @@ public class MICOBrokerImpl implements MICOBroker {
     private static Logger log = LoggerFactory.getLogger(MICOBrokerImpl.class);
 
     private String host;
+    private String vhost;
     private String user;
     private String password;
     private int rabbitPort;
@@ -100,9 +102,13 @@ public class MICOBrokerImpl implements MICOBroker {
     public MICOBrokerImpl(String host, String user, String password) throws IOException, URISyntaxException {
         this(host, user, password, 5672, "http://" + host + ":8080/marmotta", "hdfs://" + host + ("/"));
     }
-
     public MICOBrokerImpl(String host, String user, String password, int rabbitPort, String marmottaBaseUri, String storageBaseUri) throws IOException, URISyntaxException {
+        this(host, "/", user, password, rabbitPort, marmottaBaseUri, storageBaseUri);
+    }
+
+    public MICOBrokerImpl(String host, String vhost, String user, String password, int rabbitPort, String marmottaBaseUri, String storageBaseUri) throws IOException, URISyntaxException {
         this.host = host;
+        this.vhost = vhost;
         this.user = user;
         this.password = password;
         this.rabbitPort = rabbitPort;
@@ -117,10 +123,11 @@ public class MICOBrokerImpl implements MICOBroker {
 
 
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(host);
-        factory.setPort(rabbitPort);
-        factory.setUsername(user);
-        factory.setPassword(password);
+        factory.setHost(this.host);
+        factory.setVirtualHost(this.vhost);
+        factory.setPort(this.rabbitPort);
+        factory.setUsername(this.user);
+        factory.setPassword(this.password);
 
         connection = factory.newConnection();
 
@@ -129,8 +136,17 @@ public class MICOBrokerImpl implements MICOBroker {
         initDiscoveryQueue();
         initItemQueue();
 
-        log.info("initialising persistence service ...");
-        persistenceService = new PersistenceServiceAnno4j(new java.net.URI(this.marmottaBaseUri), new java.net.URI(this.storageBaseUri));
+        log.info("try initialising persistence service ...");
+        try{
+            persistenceService = new PersistenceServiceAnno4j(new java.net.URI(this.marmottaBaseUri), new java.net.URI(this.storageBaseUri));
+            log.info("initialising persistence service ... finished: {}", persistenceService);
+        }catch(Throwable e){
+            log.error("unable to initialize persistenceService",e);
+        }finally{
+            if (persistenceService == null ){
+                log.info("-------- persistenceService should be initialized ------- ");
+            }
+        }
     }
 
 
@@ -366,7 +382,26 @@ public class MICOBrokerImpl implements MICOBroker {
 
             log.info("new content item injected (URI: {}), preparing for analysis!", partEvent.getItemUri());
             try {
+                if (persistenceService == null){
+                    // happens during broker startup, if new Items where injected during broker down time
+                    int i=0;
+                    while (persistenceService == null){
+                        if(i>10){
+                            throw new RepositoryException("persistenceService initialization timeout");
+                        }
+                        log.warn("persistenceService not yet initialized!!! ... wait five seconds ({})", ++i);
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new RuntimeException("process was stopped during wait for persistenceService initialization");
+                        }
+                    }
+                    log.info("persistenceService available: {}", persistenceService.getStoragePrefix());
+                }
+
                 Item item = persistenceService.getItem(new URIImpl(partEvent.getItemUri()));
+                traceItem(item);
 
                 log.info("- adding initial content item state ...");
                 ItemState state = new ItemState(dependencies, item);
@@ -379,15 +414,21 @@ public class MICOBrokerImpl implements MICOBroker {
 
                 log.info("- triggering analysis process for initial states ...");
                 ItemManager mgr = new ItemManager(item, state, channel);
-                Thread t = new Thread(mgr);
+                Thread t = new Thread(mgr, "ItemManager_" + item.getURI().toString());
                 t.start();
 
                 getChannel().basicAck(envelope.getDeliveryTag(), false);
 
             } catch (RepositoryException e) {
-                log.error("could not load content item from persistence layer (message: {})", e.getMessage());
+                log.error("could not load item from persistence layer (message: {})", e.getMessage());
                 log.debug("Exception:", e);
+            } catch (ClassCastException e) {
+                log.error("could not cast item ({}) from persistence layer (message: {})",partEvent.getItemUri(), e.getMessage());
             }
+        }
+
+        private void traceItem(Item item) {
+            log.trace("Item: {} semantic: {}  syntactic: {}",item.getURI(),item.getSemanticType(), item.getSyntacticalType());
         }
     }
 
@@ -463,12 +504,14 @@ public class MICOBrokerImpl implements MICOBroker {
                         case ERROR:
                             log.warn(analysisResponse.getError().getMessage(),
                                     analysisResponse.getError().getDescription());
+                            break;
                         case NEW_PART:
                             setStateForContent(analysisResponse.getNew());
                             break;
                         case FINISH:
                             // this is the last message we are waiting for
                             state.removeProgress(properties.getCorrelationId());
+                            break;
                         case PROGRESS:
                             Event.AnalysisEvent.Progress progress = analysisResponse.getProgress();
                             log.trace("got progress event ({}) for {}", progress.getProgress(), progress.getPartUri());

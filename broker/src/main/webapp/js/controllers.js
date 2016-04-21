@@ -27,6 +27,11 @@ brokerApp.controller("StatusCtrl", function($scope,$http) {
       $scope.filteredItems = $scope.items.slice(begin, end);
     };
 
+    $scope.version = "Broker Version 2.x";
+    $http.get("status/info").success(function(data) {
+        $scope.version = data;
+    });
+
     $scope.services = [];
     $http.get("status/services").success(function(data) {
         $scope.services = data;

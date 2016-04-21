@@ -62,14 +62,14 @@ public class ItemState {
                 try {
                     states.put(item.getURI(), graph.getState(item.getAsset().getFormat()));
                 } catch (StateNotFoundException e) {
-                    log.warn("no starting state found for part type {}", item.getAsset().getFormat());
+                    log.warn("no starting state found for item with asset type {}", item.getAsset().getFormat());
                 }
             }
             for(Part part : item.getParts()) {
                 try {
                     states.put(part.getURI(), graph.getState(part.getSyntacticalType()));
                 } catch (StateNotFoundException e) {
-                    log.warn("no starting state found for part type {}", part.getSyntacticalType());
+                    log.warn("no starting state found for part with asset type {}", part.getSyntacticalType());
                 }
             }
         } catch (RepositoryException e) {

@@ -1,0 +1,37 @@
+{
+	"name": "Word Count extractor",
+	"version": "1.0.0",
+	"id": "mico_wordcount_service",
+	"mode": [{
+		"id": "WC-txt",
+		"description": "Sample WORD COUNTER for TXT text files",
+		"input": [{
+			"semanticType": {
+				"name": "Text",
+				"description": "Any text with words"
+			},
+			"dataType": {
+				"mimeType": ["text/plain"],
+				"syntacticType": "mico:Text",
+				"cmdLineSwitch": null
+			},
+			"constraint": []
+		}],
+		"output": [{
+			"semanticType": {
+				"name": "Word Count",
+				"description": "Detected amount of words within the input text"
+			},
+			"dataType": {
+				"mimeType": ["application/rdf+xml"],
+				"syntacticType": "mico:WordCount",
+				"cmdLineSwitch": null
+			},
+			"location": "Dummy Location",
+			"annotatedProperty": []
+		}],
+		"param": []
+	}],
+	"deployedAt": [],
+	"isSingleton": false
+}

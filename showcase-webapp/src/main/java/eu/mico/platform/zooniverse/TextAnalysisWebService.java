@@ -86,6 +86,7 @@ public class TextAnalysisWebService {
             part.setSyntacticalType("text/plain");
             try (OutputStream outputStream = part.getAsset().getOutputStream()) {
                 IOUtils.copy(IOUtils.toInputStream(input.comment), outputStream);
+                outputStream.close();
             } catch (IOException e) {
                 log.error("Could not persist text data for ContentPart {}: {}", part.getURI(), e.getMessage());
                 throw e;

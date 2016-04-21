@@ -16,11 +16,8 @@ package eu.mico.platform.broker.test;
 import com.google.common.collect.ImmutableSet;
 import com.rabbitmq.client.QueueingConsumer;
 
-import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.impl.MICOBrokerImpl;
 import eu.mico.platform.event.api.EventManager;
-import eu.mico.platform.event.model.Event;
-import eu.mico.platform.event.model.Event.AnalysisEvent;
+import eu.mico.platform.event.model.Event.ItemEvent;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
@@ -47,7 +44,6 @@ public class PartBrokerTest extends BaseBrokerTest {
 
     @Test
     public void testSimpleAnalyse() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
-        MICOBroker broker = new MICOBrokerImpl(testHost);
 
         setupMockAnalyser("A","B");
         setupMockAnalyser("B","C");
@@ -65,29 +61,122 @@ public class PartBrokerTest extends BaseBrokerTest {
         // eventually finish analysis; we simply wait until we receive an event on the output queue.
         PersistenceService svc = broker.getPersistenceService();
         Item item = svc.createItem();
+        item.setSemanticType("A");
+        item.setSyntacticalType("A");
         try {
             Part partA = item.createPart(item.getURI());
             partA.setSemanticType("A");
+            partA.setSyntacticalType("A");
 
             eventManager.injectItem(item);
 
             // wait for result notification and verify it contains what we expect
-            QueueingConsumer.Delivery delivery = consumer.nextDelivery(1000);
+            QueueingConsumer.Delivery delivery = consumer.nextDelivery(200000);
             Assert.assertNotNull(delivery);
 
-            AnalysisEvent event = AnalysisEvent.parseFrom(delivery.getBody());
+            ItemEvent event = ItemEvent.parseFrom(delivery.getBody());
 
-            Assert.assertEquals(item.getURI().stringValue(), event.getNew().getItemUri());
+            Assert.assertEquals(item.getURI().stringValue(), event.getItemUri());
 
             // each service should have added a part, so there are now four different parts
             Set<Part> parts = ImmutableSet.copyOf(item.getParts());
             Assert.assertEquals(4, parts.size());
-            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("type", equalTo("A"))));
-            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("type", equalTo("B"))));
-            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("type", equalTo("C"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("A"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("B"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("C"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("A"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("B"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("C"))));
 
         } finally {
             svc.deleteItem(item.getURI());
+        }
+    }
+
+    @Test
+    public void test2ItemAnalyse() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
+
+        setupMockAnalyser("A","B");
+        setupMockAnalyser("B","C");
+        setupMockAnalyser("A","C");
+
+        // wait for broker to finish
+        synchronized (broker) {
+            broker.wait(500);
+        }
+
+        QueueingConsumer consumer = new QueueingConsumer(channel);
+        channel.basicConsume(EventManager.QUEUE_PART_OUTPUT, true, consumer);
+
+        // create a item with a single part of type "A"; it should walk through the registered mock services and
+        // eventually finish analysis; we simply wait until we receive an event on the output queue.
+        PersistenceService svc = broker.getPersistenceService();
+        Item item = svc.createItem();
+        item.setSemanticType("A");
+        item.setSyntacticalType("A");
+        Item item2 = svc.createItem();
+        item2.setSemanticType("A");
+        item2.setSyntacticalType("A");
+        item2.getAsset().setFormat("A");
+        try {
+            Part partA = item.createPart(item.getURI());
+            partA.setSemanticType("A");
+            partA.setSyntacticalType("A");
+
+            eventManager.injectItem(item);
+
+            // wait for result notification and verify it contains what we expect
+            QueueingConsumer.Delivery delivery = consumer.nextDelivery(200000);
+            Assert.assertNotNull(delivery);
+
+            ItemEvent event = ItemEvent.parseFrom(delivery.getBody());
+
+            Assert.assertEquals(item.getURI().stringValue(), event.getItemUri());
+
+            // each service should have added a part, so there are now four different parts
+            Set<Part> parts = ImmutableSet.copyOf(item.getParts());
+            Assert.assertEquals(4, parts.size());
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("A"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("B"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("C"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("A"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("B"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("C"))));
+
+            //inject item2
+            eventManager.injectItem(item2);
+
+            // wait for result notification and verify it contains what we expect
+            delivery = consumer.nextDelivery(200000);
+            Assert.assertNotNull(delivery);
+
+            event = ItemEvent.parseFrom(delivery.getBody());
+            Assert.assertEquals(item2.getURI().stringValue(), event.getItemUri());
+
+            // same test as above ... parts should not have changed
+            parts = ImmutableSet.copyOf(item.getParts());
+            Assert.assertEquals("injecting 2nd item should not change this",4, parts.size());
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("A"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("B"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("C"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("A"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("B"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("C"))));
+
+
+            //item2 only has 3 parts, the first asset is direct on the item
+            parts = ImmutableSet.copyOf(item2.getParts());
+            Assert.assertEquals(3, parts.size());
+            Assert.assertThat(parts, Matchers.not(Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("A")))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("B"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("C"))));
+            Assert.assertThat(parts, Matchers.not(Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("A")))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("B"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("C"))));
+
+        } finally {
+            svc.deleteItem(item.getURI());
+            svc.deleteItem(item2.getURI());
         }
     }
 }
