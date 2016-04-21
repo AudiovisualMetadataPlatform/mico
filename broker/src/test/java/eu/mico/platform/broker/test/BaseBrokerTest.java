@@ -96,16 +96,12 @@ public abstract class BaseBrokerTest {
         amqpUsr = getConf("amqp.usr", "mico");
         amqpPwd = getConf("amqp.pwd", "mico", false); // to not log the pwd
         rabbitPort = Integer.parseInt(getConf("rabbitPort", "5672"));
-        VFSUtils.configure();
 
-        FileSystemOptions opts = new FileSystemOptions();
-        FtpFileSystemConfigBuilder.getInstance().setPassiveMode(opts, true);
-        FtpFileSystemConfigBuilder.getInstance().setUserDirIsRoot(opts, true);
 
         // we need a Marmotta instance for testing the MicoBrokerImpl
         if (marmotta == null) {
-            marmotta = new JettyMarmotta("/marmotta", 8088,
-                    SparqlWebService.class);
+            marmotta = new JettyMarmotta("/marmotta", 8088
+                    );
             marmottaBaseUrl = "http://localhost:8088/marmotta";
 
             storageDir = Files.createTempDirectory("mico-event-manager-test");
