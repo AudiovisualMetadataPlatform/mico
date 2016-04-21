@@ -27,6 +27,7 @@ namespace mico {
         }
 
         FileOStream::FileOStream(const char *path) {
+            umask(0);
             mkdirs(path);
             open(path, std::ios::out);
             //close gets called by the destructor of the parent class.
@@ -41,9 +42,8 @@ namespace mico {
             /*
             * Create all directories in the path excluding the last (which is a file).
             */
-                static void mkdirs(const char*_path) {
-                char
-                        * path = strdup(_path); // temporary buffer which we can modify
+            static void mkdirs(const char*_path) {
+                char *path = strdup(_path); // temporary buffer which we can modify
                 char *last = 0, *cur = path;
 
                 if(*path == '/' && chdir("/") != 0) {

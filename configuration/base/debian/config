@@ -9,6 +9,7 @@ db_settitle mico-base/title
 
 db_input critical mico-base/username || true
 db_input critical mico-base/password || true
+db_input critical mico-base/userhome || true
 
 db_go || true
 

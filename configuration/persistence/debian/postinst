@@ -23,16 +23,19 @@ case "$1" in
 	# Source debconf library.
 	. /usr/share/debconf/confmodule
 
-	mkdir -p /data
+	if [ ! -e /data ]; then
+		mkdir -p /data
 	
-        db_get mico-base/username
-        MICO_USER="$RET"
+	        db_get mico-base/username
+	        MICO_USER="$RET"
 	
-	chown $MICO_USER:$MICO_USER /data
+		chown $MICO_USER:$MICO_USER /data
+	fi
 
-	echo "DefaultRoot /data" > /etc/proftpd/conf.d/mico.conf
-
-	service proftpd restart
+	if [ ! -e /etc/proftpd/conf.d/mico.conf ]; then
+		echo "DefaultRoot /data" > /etc/proftpd/conf.d/mico.conf
+		service proftpd status 1>/dev/null && service proftpd restart
+	fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

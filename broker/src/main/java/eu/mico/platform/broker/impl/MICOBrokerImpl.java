@@ -414,7 +414,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
                 log.info("- triggering analysis process for initial states ...");
                 ItemManager mgr = new ItemManager(item, state, channel);
-                Thread t = new Thread(mgr);
+                Thread t = new Thread(mgr, "ItemManager_" + item.getURI().toString());
                 t.start();
 
                 getChannel().basicAck(envelope.getDeliveryTag(), false);

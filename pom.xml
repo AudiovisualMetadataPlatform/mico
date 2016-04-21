@@ -206,6 +206,7 @@
         <module>storage</module>
         <module>platform-config-webapp</module>
         <module>showcase-webapp</module>
+        <module>workflow-creation-webapp</module>
     </modules>
 
 </project>

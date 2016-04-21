@@ -1,3 +1,9 @@
+libmico-api (1.2.11) unstable; urgency=medium
+
+  * Fixed umask (set to 0) for file and directory permissions for file:// handler
+
+ -- Horst Stadler <horst.stadler@salzburgresearch.at>  Fri, 26 Feb 2016 11:38:45 +0100
+
 libmico-api (1.2.10) unstable; urgency=medium
 
   * Fixed file and directory permission as well as path handling for file:// persistance handler

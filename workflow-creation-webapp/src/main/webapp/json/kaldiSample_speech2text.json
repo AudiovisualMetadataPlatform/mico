@@ -1,0 +1,150 @@
+{
+	"name": "Kaldi-Automatic-Speech-Recognition",
+	"version": "1.0.0",
+	"id": "kaldi_speech_to_text",
+	"mode": [{
+		"id": "kaldi-speech2text-english",
+		"description": "Produces a transcript of the input wav file. Available language is: English",
+		"input": [{
+			"semanticType": {
+				"name": "Audio",
+				"description": "Audio wav file"
+			},
+			"dataType": {
+				"mimeType": ["audio/wav"],
+				"syntacticType": "mico:Audio",
+				"cmdLineSwitch": null
+			},
+			"constraint": []
+		},{
+			"semanticType": {
+				"name": "Diarization",
+				"description": "Diarization of the input wav file with rdf annotations"
+			},
+			"dataType": {
+				"mimeType": ["application/rdf+xml"],
+				"syntacticType": "mmmterms:DiarizationBody",
+				"cmdLineSwitch": null
+			},
+			"location": "Dummy Location",
+			"annotatedProperty": []
+		}],
+		"output": [{
+			"semanticType": {
+				"name": "Transcript",
+				"description": "Transcript of the input wav file with xml annotations"
+			},
+			"dataType": {
+				"mimeType": ["text/xml"],
+				"syntacticType": "mico:KaldiSpeechTranscript",
+				"cmdLineSwitch": null
+			},
+			"location": "Dummy Location",
+			"annotatedProperty": []
+		}],
+		"param": []
+	},{
+		"id": "kaldi-speech2text-italian",
+		"description": "Produces a transcript of the input wav file. Available language is: Italian",
+		"input": [{
+			"semanticType": {
+				"name": "Audio",
+				"description": "Audio wav file"
+			},
+			"dataType": {
+				"mimeType": ["audio/wav"],
+				"syntacticType": "mico:Audio",
+				"cmdLineSwitch": null
+			},
+			"constraint": []
+		},{
+			"semanticType": {
+				"name": "Diarization",
+				"description": "Diarization of the input wav file with rdf annotations"
+			},
+			"dataType": {
+				"mimeType": ["application/rdf+xml"],
+				"syntacticType": "mmmterms:DiarizationBody",
+				"cmdLineSwitch": null
+			},
+			"location": "Dummy Location",
+			"annotatedProperty": []
+		}],
+		"output": [{
+			"semanticType": {
+				"name": "Transcript",
+				"description": "Transcript of the input wav file with xml annotations"
+			},
+			"dataType": {
+				"mimeType": ["text/xml"],
+				"syntacticType": "mico:KaldiSpeechTranscript",
+				"cmdLineSwitch": null
+			},
+			"location": "Dummy Location",
+			"annotatedProperty": []
+		}],
+		"param": []
+	},{
+		"id": "kaldi2txt",
+		"description": "Transform the xml output from kaldi in a txt text",
+		"input": [{
+			"semanticType": {
+				"name": "Transcript",
+				"description": "Transcript of the input wav file with xml annotations"
+			},
+			"dataType": {
+				"mimeType": ["text/xml"],
+				"syntacticType": "mico:KaldiSpeechTranscript",
+				"cmdLineSwitch": null
+			},
+			"location": "Dummy Location",
+			"annotatedProperty": []
+		}],
+		"output": [{
+			"semanticType": {
+				"name": "Transcript",
+				"description": "Transcript of the input wav file as plain txt"
+			},
+			"dataType": {
+				"mimeType": ["text/plain"],
+				"syntacticType": "mico:Text",
+				"cmdLineSwitch": null
+			},
+			"location": "Dummy Location",
+			"annotatedProperty": []
+		}],
+		"param": []
+	},{
+		"id": "kaldi2rdf",
+		"description": "Transform the xml output from kaldi in rdf tuples",
+		"input": [{
+			"semanticType": {
+				"name": "Transcript",
+				"description": "Transcript of the input wav file with xml annotations"
+			},
+			"dataType": {
+				"mimeType": ["text/xml"],
+				"syntacticType": "mico:KaldiSpeechTranscript",
+				"cmdLineSwitch": null
+			},
+			"location": "Dummy Location",
+			"annotatedProperty": []
+		}],
+		"output": [{
+			"semanticType": {
+				"name": "Transcript",
+				"description": "Transcript of the input wav file as rdf entities"
+			},
+			"dataType": {
+				"mimeType": ["application/rdf+xml"],
+				"syntacticType": "mmmterms:SpeechToTextBody",
+				"cmdLineSwitch": null
+			},
+			"location": "Dummy Location",
+			"annotatedProperty": []
+		}],
+		"param": []
+	}],
+	"deployedAt": [],
+	"isSingleton": false
+}
