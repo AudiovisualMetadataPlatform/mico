@@ -1,8 +1,13 @@
 #ifndef PART_HPP
 #define PART_HPP 1
 
-#include <list>
 #include "Resource.hpp"
+
+#include <list>
+#include <memory>
+#include <jnipp.h>
+#include <anno4cpp.h>
+
 
 namespace mico {
   namespace persistence {
@@ -13,7 +18,7 @@ namespace mico {
      * Binary content, offered through inputstreams and outputstreams. Can be used for representing any kind of non-RDF
      * content.
      */
-    class Part: public Resource
+    class Part
     {
       public:
         /**

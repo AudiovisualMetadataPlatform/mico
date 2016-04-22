@@ -27,7 +27,7 @@ namespace mico {
          */
         virtual mico::rdf::model::URI getURI() = 0;
 
-        virtual jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> getRDFObject() = 0;
+        virtual jnipp::Ref<jnipp::eu::mico::platform::anno4j::model::ResourceMMM> getRDFObject() = 0;
 
         /**
          * the mime type, e.g. "image/jpeg"

@@ -241,7 +241,7 @@ namespace mico {
         * @return A handle to the Item with the given URI, or null if it does not exist
         */
 
-        std::shared_ptr<Item> PersistenceService::getItem(const URI& id) {
+        std::shared_ptr<Item> PersistenceService::getItem(const  mico::rdf::model::URI& id) {
 
             LOG_DEBUG("PersistenceService::getItem for [%s] requested.",  id.stringValue().c_str());
 

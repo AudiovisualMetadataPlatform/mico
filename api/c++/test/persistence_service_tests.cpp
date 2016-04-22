@@ -166,13 +166,14 @@ int main(int argc, char **argv) {
             // create check
 
             std::shared_ptr<mico::persistence::Item> currItem = persistenceServiceTest.svc->createItem();
+            std::shared_ptr<mico::persistence::Resource> currItemResource = std::dynamic_pointer_cast<Resource>(currItem);
             assert(currItem != 0);
 
-            auto uri = currItem->getURI();
+            mico::rdf::model::URI uri = currItemResource->getURI();
 
             itemURIS.push_back(uri.stringValue());
 
-            auto itemMMM = currItem->getRDFObject();
+            auto itemMMM = currItemResource->getRDFObject();
             assert( (jobject)itemMMM != nullptr );
 
             auto stime = currItem->getSerializedAt();
@@ -184,12 +185,12 @@ int main(int argc, char **argv) {
             ss_sem_type << "semantic_type_item_" << i;
             ss_syn_type << "syntactic_type_item_" << i;
 
-            currItem->setSemanticType(ss_sem_type.str().c_str());
-            auto semanticType = currItem->getSemanticType();
+            currItemResource->setSemanticType(ss_sem_type.str().c_str());
+            auto semanticType = currItemResource->getSemanticType();
             assert( semanticType.compare(ss_sem_type.str().c_str()) == 0 );
 
-            currItem->setSyntacticalType(ss_sem_type.str().c_str());
-            auto synType = currItem->getSyntacticalType();
+            currItemResource->setSyntacticalType(ss_sem_type.str().c_str());
+            auto synType = currItemResource->getSyntacticalType();
             assert( synType.compare(ss_sem_type.str().c_str()) == 0 );
         }
 
@@ -201,11 +202,15 @@ int main(int argc, char **argv) {
             std::shared_ptr<mico::persistence::Item> retrievedItem  =
                         persistenceServiceTest.svc->getItem(asURI);
 
-            assert(retrievedItem);
 
-            auto uri = retrievedItem->getURI();
+            std::shared_ptr<mico::persistence::Resource> retrievedItemResource =
+                std::dynamic_pointer_cast<Resource>(retrievedItem);
 
-            assert(retrievedItem->getURI().stringValue() == itemURI);
+            assert(retrievedItemResource);
+
+            auto uri = retrievedItemResource->getURI();
+
+            assert(retrievedItemResource->getURI().stringValue() == itemURI);
         }
 
         // check non existing item retrieval

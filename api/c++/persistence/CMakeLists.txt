@@ -22,8 +22,13 @@ add_definitions(-DANNO4JDEPENDENCIES_PATH="${ANNO4CPPDEPS_ROOT}/usr/share/mico")
 
 
 add_library(mico_persistence SHARED
+  Item
+  Part
+  Asset
+  Resource
   ItemAnno4cpp
   PartAnno4cpp
+  ResourceAnno4cpp
   ${COMPILED_RESOURCES} SPARQLUtil.cpp Metadata.cpp Content.cpp ContentItem.cpp PersistenceService.cpp URLStream.cpp FileStream.cpp WebStream.cpp HDFSStream.cpp
 )
 target_link_libraries(mico_persistence

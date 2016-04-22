@@ -5,7 +5,7 @@
 namespace mico {
   namespace persistence {
 
-    std::shared_ptr<Part> ItemAnno4cpp::createPart(mico::rdf::model::URI extractorID)
+    std::shared_ptr<Part> ItemAnno4cpp::createPart(const rdf::model::URI &extractorID)
     {
       jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
@@ -82,7 +82,7 @@ namespace mico {
       return nullptr;
     }
 
-    std::shared_ptr<Part> ItemAnno4cpp::getPart(mico::rdf::model::URI uri)
+    std::shared_ptr<Part> ItemAnno4cpp::getPart(const rdf::model::URI &uri)
     {
       jnipp::Env::Scope scope(PersistenceService::m_sJvm);
       jnipp::LocalRef<JavaLangString> juri = JavaLangString::create( uri.stringValue() );
@@ -92,18 +92,18 @@ namespace mico {
       return part;
     }
 
-    mico::rdf::model::URI ItemAnno4cpp::getURI() {
-      jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+//    mico::rdf::model::URI ItemAnno4cpp::getURI() {
+//      jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
-        jnipp::LocalRef<OrgOpenrdfModelURI> jItemURIRet =
-            ((jnipp::Ref<OrgOpenrdfRepositoryObjectRDFObject>)m_itemMMM)->getResource();
+//        jnipp::LocalRef<OrgOpenrdfModelURI> jItemURIRet =
+//            ((jnipp::Ref<OrgOpenrdfRepositoryObjectRDFObject>)m_itemMMM)->getResource();
 
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
-        assert((jobject) jItemURIRet);
+//        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+//        assert((jobject) jItemURIRet);
 
 
-        return mico::rdf::model::URI( jItemURIRet->toString()->std_str() );
-    }
+//        return mico::rdf::model::URI( jItemURIRet->toString()->std_str() );
+//    }
 
     std::list< std::shared_ptr<Part> > ItemAnno4cpp::getParts()
     {
@@ -123,32 +123,36 @@ namespace mico {
 
     std::shared_ptr<Asset> ItemAnno4cpp::getAsset()
     {
-      jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-      jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> asset = static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->getAsset();
-      if ((jobject)asset == nullptr) {
-        jnipp::LocalRef<ComGithubAnno4jAnno4j> anno4j = m_persistenceService.getAnno4j();
-        jnipp::LocalRef<JavaLangString> jsuri_item = JavaLangString::create(this->getURI().stringValue());
-        jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri_item = OrgOpenrdfModelImplURIImpl::construct( jsuri_item );
-        jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> assetMMM = anno4j->createObject(EuMicoPlatformAnno4jModelAssetMMM::clazz(), juri_item);
+//      jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+//      jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> asset = static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->getAsset();
+//      if ((jobject)asset == nullptr) {
+//        jnipp::LocalRef<ComGithubAnno4jAnno4j> anno4j = m_persistenceService.getAnno4j();
+//        jnipp::LocalRef<JavaLangString> jsuri_item = JavaLangString::create(this->getURI().stringValue());
+//        jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri_item = OrgOpenrdfModelImplURIImpl::construct( jsuri_item );
+//        jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> assetMMM = anno4j->createObject(EuMicoPlatformAnno4jModelAssetMMM::clazz(), juri_item);
 
-        std::string location = m_persistenceService.getStoragePrefix();
-        location += this->getURI().getLocalName();
-        location += "/";
-        jnipp::LocalRef<JavaLangString> jsasset = static_cast< jnipp::LocalRef<ComGithubAnno4jModelImplResourceObject> >(assetMMM)->getResourceAsString();
-        jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri_asset = OrgOpenrdfModelImplURIImpl::construct( jsasset );
-        jnipp::LocalRef<JavaLangString> jsuri_asset = juri_asset->getLocalName();
-        location += jsuri_asset->std_str();
+//        std::string location = m_persistenceService.getStoragePrefix();
+//        location += this->getURI().getLocalName();
+//        location += "/";
+//        jnipp::LocalRef<JavaLangString> jsasset = static_cast< jnipp::LocalRef<ComGithubAnno4jModelImplResourceObject> >(assetMMM)->getResourceAsString();
+//        jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri_asset = OrgOpenrdfModelImplURIImpl::construct( jsasset );
+//        jnipp::LocalRef<JavaLangString> jsuri_asset = juri_asset->getLocalName();
+//        location += jsuri_asset->std_str();
 
-        assetMMM->setLocation( JavaLangString::create(location) );
+//        assetMMM->setLocation( JavaLangString::create(location) );
 
-        static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->setAsset(assetMMM);
+//        static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->setAsset(assetMMM);
 
-        //log.trace("No Asset available for Item {} - Created new Asset with id {} and location {}", this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
-        checkJavaExcpetionThrow({"IllegalAccessException", "InstantiationException"});
-      }
+//        //log.trace("No Asset available for Item {} - Created new Asset with id {} and location {}", this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
+//        checkJavaExcpetionThrow({"IllegalAccessException", "InstantiationException"});
+//      }
 
-      std::shared_ptr<AssetAnno4cpp> passet( new AssetAnno4cpp(static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->getAsset(), m_persistenceService) );
-      return passet;
+//      std::shared_ptr<AssetAnno4cpp> passet( new AssetAnno4cpp(static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->getAsset(), m_persistenceService) );
+//      return passet;
+//    }
+      throw std::runtime_error("Not implementend yet");
+      return std::shared_ptr<Asset>();
+//  }
     }
   }
 }
