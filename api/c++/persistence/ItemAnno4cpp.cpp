@@ -28,9 +28,12 @@ namespace mico {
       checkJavaExcpetionNoThrow(m_jnippErrorMessage);
       assert((jobject) jNewPartMMM);
 
-      auto jItemConn = ((jnipp::Ref<OrgOpenrdfRepositoryObjectRDFObject>)jNewPartMMM)->getObjectConnection();
+      jnipp::LocalRef<OrgOpenrdfRepositoryObjectObjectConnection> jItemConn =
+          ((jnipp::Ref<OrgOpenrdfRepositoryObjectRDFObject>)jNewPartMMM)->getObjectConnection();
       checkJavaExcpetionNoThrow(m_jnippErrorMessage);
       assert((jobject) jItemConn);
+
+      LOG_DEBUG("Creating part using object connection with object identity hash %d", JavaLangSystem::identityHashCode(jItemConn));
 
       jnipp::LocalRef<OrgOpenrdfSailMemoryModelMemValueFactory> jMemValueFactory =
               OrgOpenrdfSailMemoryModelMemValueFactory::construct();

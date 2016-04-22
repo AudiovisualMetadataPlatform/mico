@@ -33,6 +33,7 @@ namespace mico {
             LOG_WARN("ResourceAnno4cpp::ResourceAnno4cpp for unknown MMM implementation created");
           }
         }
+
     public:
         virtual mico::rdf::model::URI getURI();
 
@@ -45,6 +46,9 @@ namespace mico {
         virtual std::string getSemanticType();
 
         virtual void setSemanticType(std::string semanticType);
+
+
+
 
 //        @Override
 //        public final Asset getAsset() throws RepositoryException {

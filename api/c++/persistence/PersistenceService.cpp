@@ -152,7 +152,7 @@ namespace mico {
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
-            m_anno4j = ComGithubAnno4jAnno4j::construct(sparqlRepository,gen);
+            m_anno4j = ComGithubAnno4jAnno4j::construct(sparqlRepository, gen);
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
@@ -250,7 +250,7 @@ namespace mico {
             jnipp::LocalRef<OrgOpenrdfModelURI> itemURI =
                     OrgOpenrdfModelImplURIImpl::construct((jnipp::Ref<JavaLangString>) jnipp::String::create(id.stringValue()));
 
-             checkJavaExcpetionNoThrow(m_jniErrorMessage);
+            checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
             jnipp::GlobalRef<EuMicoPlatformAnno4jModelItemMMM> jItemMMM=
                     this->m_anno4j->findByID(EuMicoPlatformAnno4jModelItemMMM::clazz(), itemURI);
@@ -347,6 +347,10 @@ namespace mico {
 
         void PersistenceService::setContext(jnipp::Ref<OrgOpenrdfRepositoryObjectObjectConnection> con, jnipp::Ref<OrgOpenrdfModelURI> context) {
             jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+
+            LOG_DEBUG("Setting context for object connection with object identity hash %d", JavaLangSystem::identityHashCode(con));
+
+            checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
             con->setReadContexts(context);
             con->setInsertContext(context);

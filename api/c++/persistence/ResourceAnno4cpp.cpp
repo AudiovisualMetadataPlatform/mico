@@ -63,6 +63,15 @@ namespace mico {
       checkJavaExcpetionNoThrow(m_jnippErrorMessage);
     }
 
+//    protected <T extends RDFObject> T createObject(Class<T> clazz) throws RepositoryException{
+//          return createObject(null,clazz);
+//      }
+//      protected <T extends RDFObject> T createObject(URI resource, Class<T> clazz) throws RepositoryException{
+//          ObjectConnection con = resourceMMM.getObjectConnection();
+//          return con.addDesignation(con.getObjectFactory().createObject(
+//                  resource == null ? IDGenerator.BLANK_RESOURCE : resource , clazz), clazz);
+//      }
+
 
 
   }
