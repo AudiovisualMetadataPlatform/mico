@@ -32,6 +32,6 @@ COPY run-tomcat7.sh run-mico-broker.sh /
 #Cleanup
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-#Tomcat and RabbitMQ port
-EXPOSE 8080 5672
+#Tomcat, RabbitMQ port including Web-Interface
+EXPOSE 8080 5672 15672
 ENTRYPOINT ["/run-mico-broker.sh"]
