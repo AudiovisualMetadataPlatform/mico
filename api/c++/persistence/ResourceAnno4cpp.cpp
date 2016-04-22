@@ -24,5 +24,46 @@ namespace mico {
 
       return mico::rdf::model::URI(jResourceURI->toString()->std_str());
     }
+
+    jnipp::Ref<jnipp::eu::mico::platform::anno4j::model::ResourceMMM> ResourceAnno4cpp::getRDFObject() {
+      return static_cast<jnipp::Ref<jnipp::eu::mico::platform::anno4j::model::ResourceMMM>>(m_resourceMMM);
+    }
+
+    std::string ResourceAnno4cpp::getSyntacticalType() {
+      jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+      std::string type = static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_resourceMMM)->getSyntacticalType()->std_str();
+      LOG_DEBUG("ResourceAnno4cpp::getSyntacticalType() delivers %s", type.c_str());
+      return type;
+    }
+
+    void ResourceAnno4cpp::setSyntacticalType(std::string syntacticalType) {
+      jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+      jnipp::LocalRef<JavaLangString> jsyntacticalType = JavaLangString::create(syntacticalType);
+      checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+      assert((jobject) jsyntacticalType);
+      static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_resourceMMM)->setSyntacticalType(jsyntacticalType);
+      checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+    }
+
+    std::string ResourceAnno4cpp::getSemanticType() {
+      jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+      checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+      std::string type = static_cast< jnipp::LocalRef<jnipp::eu::mico::platform::anno4j::model::ResourceMMM> >(m_resourceMMM)->getSemanticType()->std_str();
+      LOG_DEBUG("ResourceAnno4cpp::getSemanticType() delivers %s", type.c_str());
+      checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+      return type;
+    }
+
+    void ResourceAnno4cpp::setSemanticType(std::string semanticType) {
+      jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+      jnipp::LocalRef<JavaLangString> jsemanticType = JavaLangString::create(semanticType);
+      checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+      assert((jobject) jsemanticType);
+      static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_resourceMMM)->setSemanticType(jsemanticType);
+      checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+    }
+
+
+
   }
 }

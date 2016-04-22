@@ -13,6 +13,8 @@ namespace mico {
     {
     protected:
       //PersistenceService& m_persistenceService;
+
+      //the item hold the Global JNI reference to the ItemMMM object
       jnipp::GlobalRef<EuMicoPlatformAnno4jModelItemMMM> m_itemMMM;
 
     public:

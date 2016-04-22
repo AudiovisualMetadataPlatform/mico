@@ -14,7 +14,7 @@ namespace mico {
     class ResourceAnno4cpp : public Resource {
 
     private:
-        jnipp::GlobalRef<EuMicoPlatformAnno4jModelResourceMMM> m_resourceMMM;
+        jnipp::WeakRef<EuMicoPlatformAnno4jModelResourceMMM> m_resourceMMM;
 
     protected:
         PersistenceService& m_persistenceService;
@@ -25,79 +25,26 @@ namespace mico {
         m_persistenceService(persistenceService),
         m_resourceMMM(resourceMMM)
         {
-          LOG_DEBUG("ResourceAnno4cpp::ResourceAnno4cpp of type [%s] created", resourceMMM->getClass()->toString()->std_str().c_str());
-
-          if (resourceMMM->isInstanceOf(EuMicoPlatformAnno4jModelItemMMM::clazz()))
-            LOG_DEBUG("ResourceAnno4cpp::ResourceAnno4cpp of type [%s] created", resourceMMM->getClass()->toString()->std_str().c_str());
+          if (resourceMMM->isInstanceOf(EuMicoPlatformAnno4jModelItemMMM::clazz())) {
+            LOG_DEBUG("ResourceAnno4cpp::ResourceAnno4cpp for ItemMMM created");
+          } else if (resourceMMM->isInstanceOf(EuMicoPlatformAnno4jModelPartMMM::clazz())) {
+            LOG_DEBUG("ResourceAnno4cpp::ResourceAnno4cpp for PartMMM created");
+          } else {
+            LOG_WARN("ResourceAnno4cpp::ResourceAnno4cpp for unknown MMM implementation created");
+          }
         }
     public:
         virtual mico::rdf::model::URI getURI();
 
-        virtual jnipp::Ref<jnipp::eu::mico::platform::anno4j::model::ResourceMMM> getRDFObject() {
-          return m_resourceMMM;
-        }
+        virtual jnipp::Ref<jnipp::eu::mico::platform::anno4j::model::ResourceMMM> getRDFObject();
 
-        virtual std::string getSyntacticalType() {
-          jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-          std::string type = static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_resourceMMM)->getSyntacticalType()->std_str();
-          LOG_DEBUG("ResourceAnno4cpp::getSyntacticalType() delivers %s", type.c_str());
-          return type;
-        }
+        virtual std::string getSyntacticalType();
 
-        virtual void setSyntacticalType(std::string syntacticalType) {
-          jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-          jnipp::LocalRef<JavaLangString> jsyntacticalType = JavaLangString::create(syntacticalType);
-          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
-          assert((jobject) jsyntacticalType);
-          static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_resourceMMM)->setSyntacticalType(jsyntacticalType);
-          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
-        }
+        virtual void setSyntacticalType(std::string syntacticalType);
 
-        virtual std::string getSemanticType() {
-          jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
-          std::string type = static_cast< jnipp::LocalRef<jnipp::eu::mico::platform::anno4j::model::ResourceMMM> >(m_resourceMMM)->getSemanticType()->std_str();
-          LOG_DEBUG("ResourceAnno4cpp::getSemanticType() delivers %s", type.c_str());
-          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
-          return type;
-        }
+        virtual std::string getSemanticType();
 
-        virtual void setSemanticType(std::string semanticType) {
-          jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-          jnipp::LocalRef<JavaLangString> jsemanticType = JavaLangString::create(semanticType);
-          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
-          assert((jobject) jsemanticType);
-          static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_resourceMMM)->setSemanticType(jsemanticType);
-          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
-        }
-
-
-
-
-//        @Override
-//        public final ResourceMMM getRDFObject() {
-//            return resourceMMM;
-//        }
-
-//        @Override
-//        public final String getSyntacticalType() {
-//            return resourceMMM.getSyntacticalType();
-//        }
-
-//        @Override
-//        public final void setSyntacticalType(String syntacticalType) throws RepositoryException {
-//            resourceMMM.setSyntacticalType(syntacticalType);
-//        }
-
-//        @Override
-//        public final String getSemanticType() {
-//            return resourceMMM.getSemanticType();
-//        }
-
-//        @Override
-//        public final void setSemanticType(String semanticType) throws RepositoryException {
-//            resourceMMM.setSemanticType(semanticType);
-//        }
+        virtual void setSemanticType(std::string semanticType);
 
 //        @Override
 //        public final Asset getAsset() throws RepositoryException {
