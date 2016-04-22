@@ -184,6 +184,21 @@ public class PartAnno4jTest {
         
         QueryService query = persistenceService.createQuery(null);
         Assert.assertEquals(initialItemCount + 2, query.execute(PartMMM.class).size());
+        
+        Iterable<? extends Part> parts = tmpItem1.getParts();
+        int num = 0;
+        for(Part part : parts){
+            num++;
+            Assert.assertEquals(tmpItem1,part.getItem());
+        }
+        Assert.assertEquals(1, num);
+        parts = tmpItem2.getParts();
+        num = 0;
+        for(Part part : parts){
+            num++;
+            Assert.assertEquals(tmpItem2,part.getItem());
+        }
+        Assert.assertEquals(1, num);
     }
 
 }
