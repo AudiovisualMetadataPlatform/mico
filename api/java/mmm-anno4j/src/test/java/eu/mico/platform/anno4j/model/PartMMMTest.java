@@ -46,16 +46,8 @@ public class PartMMMTest {
         part.setBody(body);
         part.addTarget(spec);
 
-        // Query for no existing Part
-        List<PartMMM> result = queryService.execute(PartMMM.class);
-
-        assertEquals(0, result.size());
-
-        // Persist the Part
-        anno4j.persist(part);
-
         // Query for one existing Part
-        result = queryService.execute(PartMMM.class);
+        List<PartMMM> result = queryService.execute(PartMMM.class);
 
         assertEquals(1, result.size());
         assertTrue(result.get(0).getTarget() != null);

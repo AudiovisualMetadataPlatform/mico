@@ -27,13 +27,10 @@ import static org.junit.Assert.assertEquals;
 public class FAMTest {
 
     private Anno4j anno4j;
-    private QueryService queryService;
 
     @Before
     public void setUp() throws Exception {
         this.anno4j = new Anno4j();
-        queryService = anno4j.createQueryService();
-        queryService.addPrefix(FAM.PREFIX, FAM.NS);
     }
 
     @Test
@@ -47,16 +44,7 @@ public class FAMTest {
         sentAnno.setConfidence(0.78d);
         
         // Query for non existing Items
-        List<FAMBody> result = queryService.execute(FAMBody.class);
-
-        assertEquals(0, result.size());
-
-        // Persist the ItemMMM
-        anno4j.persist(langAnno);
-        anno4j.persist(sentAnno);
-
-        // Query for now one existing ItemMMM
-        result = queryService.execute(FAMBody.class);
+        List<FAMBody> result = anno4j.findAll(FAMBody.class);
 
         assertEquals(2, result.size());
     }
