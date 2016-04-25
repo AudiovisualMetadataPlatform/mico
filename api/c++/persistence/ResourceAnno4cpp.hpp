@@ -15,25 +15,14 @@ namespace mico {
       class ResourceAnno4cpp : public Resource {
 
       private:
-          jnipp::WeakRef<EuMicoPlatformAnno4jModelResourceMMM> m_resourceMMM;
+          jnipp::WeakRef<jnipp::eu::mico::platform::anno4j::model::ResourceMMM> m_resourceMMM;
 
       protected:
           PersistenceService& m_persistenceService;
           std::string m_jnippErrorMessage;
 
-          ResourceAnno4cpp(jnipp::Ref<EuMicoPlatformAnno4jModelResourceMMM> resourceMMM,
-                           PersistenceService& persistenceService) :
-          m_persistenceService(persistenceService),
-          m_resourceMMM(resourceMMM)
-          {
-            if (resourceMMM->isInstanceOf(EuMicoPlatformAnno4jModelItemMMM::clazz())) {
-              LOG_DEBUG("ResourceAnno4cpp::ResourceAnno4cpp for ItemMMM created");
-            } else if (resourceMMM->isInstanceOf(EuMicoPlatformAnno4jModelPartMMM::clazz())) {
-              LOG_DEBUG("ResourceAnno4cpp::ResourceAnno4cpp for PartMMM created");
-            } else {
-              LOG_WARN("ResourceAnno4cpp::ResourceAnno4cpp for unknown MMM implementation created");
-            }
-          }
+          ResourceAnno4cpp(jnipp::Ref<jnipp::eu::mico::platform::anno4j::model::ResourceMMM> resourceMMM,
+                           PersistenceService& persistenceService);
 
       public:
           virtual mico::rdf::model::URI getURI();
