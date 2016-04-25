@@ -22,7 +22,7 @@ namespace mico {
 
         using namespace mico::rdf::query;
 
-        class content_item_iterator;
+        class item_iterator;
 
         namespace model {
           class Item;
@@ -125,21 +125,28 @@ namespace mico {
             */
             void deleteItem(const mico::rdf::model::URI& id);
 
-            /**
-            * Return an iterator over all currently available content items.
-            *public void deleteItem(URI id) throws RepositoryException {
-        anno4j.clearContext(id);
-        log.trace("Deleted item with id {} including all triples in the corresponding context graph", id.toString());
-    }
-            * @return iterable
-            */
-            content_item_iterator begin();
-
 
             /**
-            * Return the end iterator for checking when iteration has completed.
+            * Get all items of the persistence service connection
+            * Notice that this implementation might be rather slow since it fetches all items first
+            * and then creates new ItemMMM object out of it.
+            *
+            * @returns A std::vector<Item>
             */
-            content_item_iterator end();
+            std::vector<std::shared_ptr<model::Item> > getItems();
+
+//            /**
+//            * Return an iterator over all currently available content items.
+//            *
+//            * @return iterable
+//            */
+//            item_iterator begin();
+
+
+//            /**
+//            * Return the end iterator for checking when iteration has completed.
+//            */
+//            item_iterator end();
 
 
             jnipp::LocalRef<jnipp::com::github::anno4j::Anno4j> getAnno4j();
@@ -152,34 +159,34 @@ namespace mico {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
         /**
-        * 	Internal implementation of iterators over the content items managed by a PersistenceService
+        * 	Internal implementation of iterators over the items managed by a PersistenceService
         */
-        class content_item_iterator  : public boost::iterator_facade<content_item_iterator, ContentItem*, boost::forward_traversal_tag, ContentItem*> {
-        private:
-            int pos;
-            const std::string& baseUrl;
-            const std::string& contentDirectory;
-            const mico::rdf::query::TupleResult* result;
+//        class item_iterator  : public boost::iterator_facade<item_iterator, Item*, boost::forward_traversal_tag, Item*> {
+//        private:
+//            int pos;
+//            const std::string& baseUrl;
+//            const std::string& contentDirectory;
+//            const mico::rdf::query::TupleResult* result;
 
-        public:
-            content_item_iterator(const std::string& baseUrl, const std::string& contentDirectory)
-                    : pos(-1), baseUrl(baseUrl), contentDirectory(contentDirectory), result(NULL) {};
+//        public:
+//            item_iterator(const std::string& baseUrl, const std::string& contentDirectory)
+//                    : pos(-1), baseUrl(baseUrl), contentDirectory(contentDirectory), result(NULL) {};
 
-            content_item_iterator(const std::string& baseUrl, const std::string& contentDirectory, const mico::rdf::query::TupleResult* r)
-                    : pos(0), baseUrl(baseUrl), contentDirectory(contentDirectory), result(r) {};
+//            item_iterator(const std::string& baseUrl, const std::string& contentDirectory, const mico::rdf::query::TupleResult* r)
+//                    : pos(0), baseUrl(baseUrl), contentDirectory(contentDirectory), result(r) {};
 
-            ~content_item_iterator() { if(result) { delete result; } };
+//            ~item_iterator() { if(result) { delete result; } };
 
 
-        private:
+//        private:
 
-            friend class boost::iterator_core_access;
+//            friend class boost::iterator_core_access;
 
-            void increment();
-            bool equal(content_item_iterator const& other) const;
-            ContentItem* dereference() const;
+//            void increment();
+//            bool equal(item_iterator const& other) const;
+//            Item* dereference() const;
 
-        };
+//        };
 #endif
     }
 }

@@ -295,40 +295,66 @@ namespace mico {
           LOG_DEBUG("Deleted item with id %s including all triples in the corresponding context graph", id.stringValue().c_str());
         }
 
-        /**
-        * Return an iterator over all currently available content items.
-        *
-        * @return iterable
-        */
-//        content_item_iterator PersistenceService::begin() {
+        std::vector< std::shared_ptr<model::Item> > PersistenceService::getItems()
+        {
+          std::vector< std::shared_ptr<model::Item> > resultVec;
+
+          jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+
+          jnipp::LocalRef<jnipp::java::util::List> jItemsMMM = m_anno4j->findAll(ItemMMM::clazz());
+
+          checkJavaExcpetionNoThrow(m_jniErrorMessage);
+          assert((jobject) jItemsMMM);
+
+          jint jNumItems = jItemsMMM->size();
+
+          checkJavaExcpetionNoThrow(m_jniErrorMessage);
+
+          LOG_DEBUG("Found %d items.", jNumItems);
+
+          resultVec.reserve(jNumItems);
+
+          for (jint idx_item; idx_item < jNumItems; ++idx_item) {
+              jnipp::GlobalRef<ItemMMM> jItemMMM = jItemsMMM->get(idx_item);
+              resultVec.push_back(std::make_shared<model::ItemAnno4cpp>(jItemMMM, *this));
+          }
+
+          return resultVec;
+        }
+
+
+//        /**
+//        * Return an iterator over all currently available content items.
+//        *
+//        * @return iterable
+//        */
+//        item_iterator PersistenceService::begin() {
 //            map<string,string> params;
 //            params["g"] = marmottaServerUrl;
 
 //            const TupleResult* r = metadata.query(SPARQL_FORMAT(listContentItems,params));
 //            if(r->size() > 0) {
-//                return content_item_iterator(marmottaServerUrl,contentDirectory,r);
+//                return item_iterator(marmottaServerUrl,contentDirectory,r);
 //            } else {
 //                delete r;
-//                return content_item_iterator(marmottaServerUrl,contentDirectory);
+//                return item_iterator(marmottaServerUrl,contentDirectory);
 //            }
 //        }
 
 
-//        content_item_iterator PersistenceService::end() {
-//            return content_item_iterator(marmottaServerUrl,contentDirectory);
+//        item_iterator PersistenceService::end() {
+//            return item_iterator(marmottaServerUrl,contentDirectory);
 //        }
 
-
-
-//        void content_item_iterator::increment() {
+//        void item_iterator::increment() {
 //            pos = pos+1 == result->size() ? -1 : pos + 1;
 //        };
 
-//        bool content_item_iterator::equal(content_item_iterator const& other) const {
+//        bool item_iterator::equal(item_iterator const& other) const {
 //            return this->pos == other.pos;
 //        };
 
-//        ContentItem* content_item_iterator::dereference() const {
+//        Item *item_iterator::dereference() const {
 //            return new ContentItem(baseUrl, contentDirectory, *dynamic_cast<const URI*>( result->at(pos).at("p") ) );
 //        }
 

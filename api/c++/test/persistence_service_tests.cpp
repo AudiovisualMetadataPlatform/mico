@@ -214,18 +214,28 @@ int main(int argc, char **argv) {
             assert(retrievedItemResource->getURI().stringValue() == itemURI);
         }
 
+        // check item retrieval at once
+        std::vector< std::shared_ptr<model::Item> > resultItems = persistenceServiceTest.svc->getItems();
+
+        assert(resultItems.size() == itemURIS.size());
+
+        for (auto item : resultItems) {
+          std::string sItemURI = std::dynamic_pointer_cast<mico::persistence::model::Resource>(item)->getURI().stringValue();
+          assert(std::find(itemURIS.begin(),itemURIS.end(), sItemURI) != itemURIS.end());
+        }
+
         // check item deletion
         for (auto itemURI : itemURIS) {
            persistenceServiceTest.svc->deleteItem(itemURI);
         }
-
-        return 0;
 
         // check non existing item retrieval
         std::shared_ptr<mico::persistence::model::Item> notExistingItem  =
             persistenceServiceTest.svc->getItem(mico::rdf::model::URI("http://does_not_exist_at_all"));
 
         assert(!notExistingItem);
+
+        return 0;
 
         //part creation
         for (auto itemURI : itemURIS) {
@@ -234,12 +244,9 @@ int main(int argc, char **argv) {
             std::shared_ptr<mico::persistence::model::Item> retrievedItem  =
                         persistenceServiceTest.svc->getItem(asURI);
 
-
             assert(retrievedItem);
 
             retrievedItem->createPart(mico::rdf::model::URI("http://my_test_extractor"));
-
-
         }
 
 
