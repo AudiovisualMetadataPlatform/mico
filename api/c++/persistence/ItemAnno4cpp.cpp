@@ -13,6 +13,8 @@ using namespace jnipp::org::openrdf::sail::memory::model;
 using namespace jnipp::com::github::anno4j;
 using namespace jnipp::eu::mico::platform::anno4j::model;
 using namespace jnipp::eu::mico::platform::persistence::impl;
+using namespace jnipp::com::github::anno4j::model;
+using namespace jnipp::com::github::anno4j::model::impl;
 
 namespace mico {
   namespace persistence {
@@ -20,82 +22,67 @@ namespace mico {
 
       std::shared_ptr<Part> ItemAnno4cpp::createPart(const rdf::model::URI &extractorID)
       {
+        bool error = false;
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
-  //    PartMMM partMMM = createObject(PartMMM.class);
-  //    String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
-  //    partMMM.setSerializedAt(dateTime);
+        jnipp::LocalRef<Transaction> jTransaction = m_persistenceService.getAnno4j()->createTransaction();
 
-  //    Agent agent = createObject(extractorID, Agent.class);
-  //    partMMM.setSerializedBy(agent);
+        error = error & checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        assert((jobject) jTransaction);
 
-  //    this.itemMMM.addPart(partMMM);
+        jTransaction->begin();
+        jTransaction->setAllContexts(((jnipp::Ref<RDFObject>)m_itemMMM)->getResource());
+        jnipp::GlobalRef <PartMMM> jNewPartMMM = jTransaction->createObject(PartMMM::clazz());
 
-  //    log.trace("Created Part with id {} in the context graph {} - Creator {}", partMMM.getResourceAsString(), this.getURI(), extractorID);
-
-  //    return new PartAnno4j(partMMM, this, persistenceService);
-
-        jnipp::GlobalRef<ItemMMM> jNewPartMMM =
-                m_persistenceService.getAnno4j()->createObject(PartMMM::clazz());
-
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        error = error & checkJavaExcpetionNoThrow(m_jnippErrorMessage);
         assert((jobject) jNewPartMMM);
 
-        jnipp::LocalRef<ObjectConnection> jItemConn =
-            ((jnipp::Ref<RDFObject>)jNewPartMMM)->getObjectConnection();
+        jnipp::LocalRef<jnipp::String> jDateTime =
+                jnipp::String::create(commons::TimeInfo::getTimestamp());
+
+        error = error & checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        assert((jobject) jDateTime);
+
+        ((jnipp::Ref<Annotation>)jNewPartMMM)->setSerializedAt(jDateTime);
+        error = error & checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+
+        jnipp::LocalRef<URI> jExtractorURI = URIImpl::construct(jnipp::String::create(extractorID.stringValue()));
+        error = error & checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        assert((jobject) jExtractorURI);
+
+        jnipp::LocalRef<Agent> jAgent = jTransaction->createObject(Agent::clazz(), (jnipp::Ref<jnipp::org::openrdf::model::Resource>) jExtractorURI);
+
+
+        error = error & checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        assert((jobject) jAgent);
+
+        ((jnipp::Ref<Annotation>)jNewPartMMM)->setSerializedBy(jAgent);
+
+        error = error & checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+
+        if (error) {
+          jTransaction->rollback(); //rollback any triples created during this method
+          jTransaction->close(); //in case we have not succeeded we can close the connection
+        } else {
+          jTransaction->commit(); //commit the item before returning
+        }
+
+        this->m_itemMMM->addPart(jNewPartMMM);
+
+        LOG_DEBUG("Created Part with id %s in the context graph %s - Creator %s",
+                  ((jnipp::Ref<ResourceObject>) jNewPartMMM)->getResourceAsString()->std_str().c_str(),
+                  this->getURI().stringValue().c_str(), extractorID.stringValue().c_str());
+
+
         checkJavaExcpetionNoThrow(m_jnippErrorMessage);
-        assert((jobject) jItemConn);
 
-        LOG_DEBUG("Creating part using object connection with object identity hash %d", System::identityHashCode(jItemConn));
+        std::shared_ptr<Item> this_ptr= std::dynamic_pointer_cast<Item>(shared_from_this());
 
-        jnipp::LocalRef<MemValueFactory> jMemValueFactory =
-                MemValueFactory::construct();
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
-        assert((jobject) jMemValueFactory);
+        auto newPart = std::make_shared<model::PartAnno4cpp>(jNewPartMMM, this_ptr, m_persistenceService);
 
-        jnipp::Ref<jnipp::org::openrdf::model::Resource> jResourceBlank =
-                jMemValueFactory->createURI(jnipp::String::create("urn:anno4j:BLANK"));
+        LOG_INFO("PartMMM created and Part wrapper returned");
 
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
-        assert((jobject) jResourceBlank);
-
-        LOG_DEBUG("blank resource created");
-
-        jnipp::LocalRef<URI> jPartURI =
-                ((jnipp::Ref<RDFObject>)jNewPartMMM)->getResource();
-
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
-        assert((jobject) jPartURI);
-        LOG_DEBUG("Part URI retrieved: %s", jPartURI->toString()->std_str().c_str());
-
-        jItemConn->addDesignation((jnipp::Ref<RDFObject>) jNewPartMMM,
-                                  (jnipp::Ref<Class>) PartMMM::clazz());
-
-        checkJavaExcpetionThrow({"IllegalAccessException", "InstantiationException"});
-
-
-        LOG_DEBUG("Created Part in context %s", jItemConn->getInsertContext()->toString()->std_str().c_str());
-
-  //      jnipp::LocalRef<String> jsuri = String::create(this->getURI().stringValue());
-  //      jnipp::LocalRef<ImplURIImpl> juri = ImplURIImpl::construct( jsuri );
-  //      jnipp::LocalRef<PartMMM> partMMM = m_persistenceService.getAnno4j()->createObject(PartMMM::clazz(), juri);
-  //      jnipp::LocalRef<String> dateTime = String::create( commons::TimeInfo::getTimestamp() );
-  //      static_cast< jnipp::LocalRef<ComGithubAnno4jModelAnnotation> >(partMMM)->setSerializedAt( dateTime );
-
-  //      jnipp::LocalRef<ComGithubAnno4jModelAgent> agent = m_persistenceService.getAnno4j()->createObject(ComGithubAnno4jModelAgent::clazz(), juri);
-  //      jnipp::LocalRef<String> jsextractorID = String::create(extractorID.stringValue());
-  //      jnipp::LocalRef<ImplURIImpl> jextractorID = ImplURIImpl::construct( jsextractorID );
-  //      static_cast< jnipp::LocalRef<ComGithubAnno4jModelImplResourceObject> >(agent)->setResource( jextractorID );
-  //      static_cast< jnipp::LocalRef<ComGithubAnno4jModelAnnotation> >(partMMM)->setSerializedBy(agent);
-
-  //      m_itemMMM->addPart(partMMM);
-
-        //log.trace("Created Part with id {} in the context graph {} - Creator {}", partMMM.getResourceAsString(), this.getURI(), extractorID);
-
-
-
-        //std::shared_ptr<PartAnno4cpp> part(new PartAnno4cpp(partMMM, std::dynamic_pointer_cast<Item>( shared_from_this() ), m_persistenceService));
-        return nullptr;
+        return newPart;
       }
 
       std::shared_ptr<Part> ItemAnno4cpp::getPart(const rdf::model::URI &uri)

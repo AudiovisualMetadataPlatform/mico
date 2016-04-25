@@ -16,7 +16,7 @@ namespace mico {
         jnipp::LocalRef<EuMicoPlatformAnno4jModelPartMMM> m_partMMM;
 
       public:
-        PartAnno4cpp(jnipp::LocalRef<EuMicoPlatformAnno4jModelPartMMM> partMMM, std::shared_ptr<Item> item, PersistenceService& persistenceService)
+        PartAnno4cpp(jnipp::Ref<EuMicoPlatformAnno4jModelPartMMM> partMMM, std::shared_ptr<Item> item, PersistenceService& persistenceService)
           : m_persistenceService(persistenceService),
             m_item(item),
             m_partMMM(partMMM)
