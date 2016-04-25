@@ -120,6 +120,8 @@ public class MarmottaContent implements Content {
         } catch (UpdateExecutionException e) {
             log.error("the SPARQL update could not be executed:", e);
             throw new RepositoryException("the SPARQL update could not be executed", e);
+        } finally {
+            m.close();
         }
     }
 
@@ -143,6 +145,8 @@ public class MarmottaContent implements Content {
         } catch (QueryEvaluationException e) {
             log.error("the SPARQL query could not be executed:", e);
             throw new RepositoryException("the SPARQL query could not be executed", e);
+        } finally {
+            m.close();
         }
     }
 
@@ -164,6 +168,8 @@ public class MarmottaContent implements Content {
         } catch (UpdateExecutionException e) {
             log.error("the SPARQL update could not be executed:", e);
             throw new RepositoryException("the SPARQL update could not be executed", e);
+        } finally {
+            m.close();
         }
     }
 
@@ -186,12 +192,20 @@ public class MarmottaContent implements Content {
         } catch (QueryEvaluationException e) {
             log.error("the SPARQL query could not be executed:", e);
             throw new RepositoryException("the SPARQL query could not be executed", e);
+        } finally {
+            m.close();
         }
     }
 
     @Override
     public void addMetadata(Model metadata) throws RepositoryException {
-        item.getMetadata().load(metadata);
+        Metadata m = item.getMetadata();
+        try {
+            m.load(metadata);
+        } finally {
+            m.close();
+
+        }
     }
 
     /**
@@ -211,6 +225,8 @@ public class MarmottaContent implements Content {
         } catch (UpdateExecutionException e) {
             log.error("the SPARQL update could not be executed:", e);
             throw new RepositoryException("the SPARQL update could not be executed", e);
+        } finally {
+            m.close();
         }
     }
 
@@ -233,6 +249,8 @@ public class MarmottaContent implements Content {
         } catch (QueryEvaluationException e) {
             log.error("the SPARQL query could not be executed:", e);
             throw new RepositoryException("the SPARQL query could not be executed", e);
+        } finally {
+            m.close();
         }
     }
 
@@ -322,6 +340,8 @@ public class MarmottaContent implements Content {
         } catch (UpdateExecutionException e) {
             log.error("the SPARQL update could not be executed:", e);
             throw new RepositoryException("the SPARQL update could not be executed", e);
+        } finally {
+            m.close();
         }
 
         return annotation;

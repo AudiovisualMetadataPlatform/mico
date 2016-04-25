@@ -381,7 +381,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
                 log.info("- triggering analysis process for initial states ...");
                 ContentItemManager mgr = new ContentItemManager(item,state,channel);
-                Thread t = new Thread(mgr);
+                Thread t = new Thread(mgr, "ContentItemManager_" + item.getURI().toString());
                 t.start();
 
                 getChannel().basicAck(envelope.getDeliveryTag(), false);
@@ -403,6 +403,7 @@ public class MICOBrokerImpl implements MICOBroker {
         private ContentItem      item;
         private ContentItemState state;
         private String           queue;
+        private String           queueTag;
 
         public ContentItemManager(ContentItem item, ContentItemState state, Channel channel) throws IOException {
             super(channel);
@@ -411,19 +412,19 @@ public class MICOBrokerImpl implements MICOBroker {
 
             // create a reply-to queue for this content item and attach a transition consumer to it
             queue = getChannel().queueDeclare().getQueue();
-            getChannel().basicConsume(queue, false, this);
+            queueTag = getChannel().basicConsume(queue, false, this);
         }
 
 
         private void executeStateTransitions() throws IOException {
             log.info("looking for possible state transitions ...");
             if(state.isFinalState()) {
+                // send finish event
+                getChannel().basicPublish("", EventManager.QUEUE_CONTENT_OUTPUT, null, Event.ContentEvent.newBuilder().setContentItemUri(item.getURI().stringValue()).build().toByteArray());
+
                 synchronized (this) {
                     this.notifyAll();
                 }
-
-                // send finish event
-                getChannel().basicPublish("", EventManager.QUEUE_CONTENT_OUTPUT, null, Event.ContentEvent.newBuilder().setContentItemUri(item.getURI().stringValue()).build().toByteArray());
             } else {
                 for (Transition t : state.getPossibleTransitions()) {
                     log.debug("- transition: {}", t);
@@ -486,6 +487,13 @@ public class MICOBrokerImpl implements MICOBroker {
                 log.debug("Exception:",ex);
             } catch (InterruptedException e) {
                 log.error("analysis of content item {} was interrupted ...", item.getURI().stringValue());
+            } finally {
+                try {
+                    getChannel().basicCancel(this.queueTag);
+                    getChannel().close();
+                } catch (IOException e) {
+                    log.error("unable to unregister queue and closing channel for content item {}", item.getURI().stringValue());
+                }
             }
         }
     }

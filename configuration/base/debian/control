@@ -1,7 +1,7 @@
 Source: mico-base
 Section: unknown
 Priority: optional
-Maintainer: Sebastian Schaffert <sebastian.schaffert@gmail.com>
+Maintainer: Horst Stadler <horst.stadler@salzburgresearch.at>
 Build-Depends: debhelper (>= 9)
 Standards-Version: 3.9.5
 Homepage: https://bitbucket.org/mico-project/platform

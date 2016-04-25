@@ -95,6 +95,7 @@ public class TextAnalysisWebService {
             contentPart.setProperty(DCTERMS.CREATED, ISO8601FORMAT.format(new Date()));
             try (OutputStream outputStream = contentPart.getOutputStream()) {
                 IOUtils.copy(IOUtils.toInputStream(input.comment), outputStream);
+                outputStream.close();
             } catch (IOException e) {
                 log.error("Could not persist text data for ContentPart {}: {}", contentPart.getURI(), e.getMessage());
                 throw e;
@@ -202,6 +203,8 @@ public class TextAnalysisWebService {
         } catch (MalformedQueryException | QueryEvaluationException e) {
             log.error("Error querying objects; {}", e);
             throw new Exception(e);
+        } finally {
+            metadata.close();
         }
     }
 
