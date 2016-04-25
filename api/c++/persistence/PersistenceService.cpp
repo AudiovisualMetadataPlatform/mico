@@ -249,6 +249,7 @@ namespace mico {
                     URIImpl::construct((jnipp::Ref<String>) jnipp::String::create(id.stringValue()));
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
+            assert((jobject) jItemURI);
 
             jnipp::LocalRef<Transaction> jTransaction = m_anno4j->createTransaction();
 
@@ -258,7 +259,7 @@ namespace mico {
             jTransaction->setAllContexts((jnipp::Ref<URI>) jItemURI);
 
             jnipp::GlobalRef<ItemMMM> jItemMMM=
-                    this->m_anno4j->findByID(ItemMMM::clazz(), jItemURI);
+                    jTransaction->findByID(ItemMMM::clazz(), jItemURI);
 
             bool isInstance = jItemMMM->isInstanceOf(ItemMMM::clazz());
             bool except = checkJavaExcpetionNoThrow(m_jniErrorMessage);
@@ -281,21 +282,17 @@ namespace mico {
         /**
         * Delete the content item with the given URI. If the content item does not exist, do nothing.
         */
-        void PersistenceService::deleteContentItem(const mico::rdf::model::URI& id) {
-//            map<string,string> params;
-//            params["g"] = marmottaServerUrl;
-//            params["ci"] = id.stringValue();
+        void PersistenceService::deleteItem(const mico::rdf::model::URI& id) {
+          jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
-//            metadata.update(SPARQL_FORMAT(deleteContentItem, params));
+          jnipp::LocalRef<URI> jItemURI =
+                  URIImpl::construct((jnipp::Ref<String>) jnipp::String::create(id.stringValue()));
 
-//            params["g"] = id.stringValue() + SUFFIX_METADATA;
-//            metadata.update(SPARQL_FORMAT(deleteGraph, params));
+          checkJavaExcpetionNoThrow(m_jniErrorMessage);
+          assert((jobject) jItemURI);
 
-//            params["g"] = id.stringValue() + SUFFIX_EXECUTION;
-//            metadata.update(SPARQL_FORMAT(deleteGraph, params));
-
-//            params["g"] = id.stringValue() + SUFFIX_RESULT;
-//            metadata.update(SPARQL_FORMAT(deleteGraph, params));
+          m_anno4j->clearContext(jItemURI);
+          LOG_DEBUG("Deleted item with id %s including all triples in the corresponding context graph", id.stringValue().c_str());
         }
 
         /**

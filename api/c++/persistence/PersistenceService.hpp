@@ -123,11 +123,14 @@ namespace mico {
             /**
             * Delete the content item with the given URI. If the content item does not exist, do nothing.
             */
-            void deleteContentItem(const mico::rdf::model::URI& id);
+            void deleteItem(const mico::rdf::model::URI& id);
 
             /**
             * Return an iterator over all currently available content items.
-            *
+            *public void deleteItem(URI id) throws RepositoryException {
+        anno4j.clearContext(id);
+        log.trace("Deleted item with id {} including all triples in the corresponding context graph", id.toString());
+    }
             * @return iterable
             */
             content_item_iterator begin();

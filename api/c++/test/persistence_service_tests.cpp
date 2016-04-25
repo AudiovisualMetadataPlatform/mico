@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
 
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
-        size_t numTestItems = 1;
+        size_t numTestItems = 10;
 
         std::vector<std::string> itemURIS;
         itemURIS.reserve(numTestItems);
@@ -212,6 +212,11 @@ int main(int argc, char **argv) {
             auto uri = retrievedItemResource->getURI();
 
             assert(retrievedItemResource->getURI().stringValue() == itemURI);
+        }
+
+        // check item deletion
+        for (auto itemURI : itemURIS) {
+           persistenceServiceTest.svc->deleteItem(itemURI);
         }
 
         return 0;

@@ -16,10 +16,10 @@ namespace mico {
         //PersistenceService& m_persistenceService;
 
         //the item hold the Global JNI reference to the ItemMMM object
-        jnipp::GlobalRef<EuMicoPlatformAnno4jModelItemMMM> m_itemMMM;
+        jnipp::GlobalRef<jnipp::eu::mico::platform::anno4j::model::ItemMMM> m_itemMMM;
 
       public:
-        ItemAnno4cpp(jnipp::Ref<EuMicoPlatformAnno4jModelItemMMM> itemMMM, PersistenceService& persistenceService)
+        ItemAnno4cpp(jnipp::Ref<jnipp::eu::mico::platform::anno4j::model::ItemMMM> itemMMM, PersistenceService& persistenceService)
           : ResourceAnno4cpp(itemMMM, persistenceService),
             //m_persistenceService(persistenceService),
             m_itemMMM(itemMMM)
@@ -41,7 +41,8 @@ namespace mico {
 
         bool hasAsset() {
           jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-          jnipp::LocalRef<EuMicoPlatformAnno4jModelAssetMMM> asset = static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_itemMMM)->getAsset();
+          jnipp::LocalRef<jnipp::eu::mico::platform::anno4j::model::AssetMMM> asset =
+              static_cast< jnipp::LocalRef<jnipp::eu::mico::platform::anno4j::model::ResourceMMM> >(m_itemMMM)->getAsset();
           return (jobject)asset != nullptr;
         }
 
