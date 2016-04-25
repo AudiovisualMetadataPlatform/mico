@@ -34,15 +34,16 @@ public class MicoCamel {
 
     protected EventManager eventManager;
     protected Connection connection;
-    protected Channel channel;
+//    protected Channel channel;
 
-    protected static AnalysisService extr_1 = new DummyExtractor("A", "B");
+    protected static AnalysisService extr1 = new DummyExtractor("A","B","mico-extractor-test","1.0.0","A-B-queue");
+    protected static AnalysisService extr2 = new DummyExtractor("B","C","mico-extractor-test","1.0.0","B-C-queue");
     protected static AnalysisService extr_2 = new DummyExtractor("B", "text/plain");
     protected static AnalysisService extr_a = new DummyExtractor("A", "B");
     protected static AnalysisService extr_b = new DummyExtractor("B", "C");
-    protected static AnalysisService extr_c = new DummyExtractor("C1", "D");
-    protected static AnalysisService extr_d = new DummyExtractor("D", "E");
-    protected static AnalysisService extr_e = new DummyExtractor("C2", "F");
+    protected static AnalysisService extr_c = new DummyExtractor("C1", "D","mico-extractor-test","1.0.0","C1-D-queue");
+    protected static AnalysisService extr_d = new DummyExtractor("D", "E","mico-extractor-test","1.0.0","D-E-queue");
+    protected static AnalysisService extr_e = new DummyExtractor("C2", "F","mico-extractor-test","1.0.0","C2-F-queue");
 
     /**
      * setup test environment including mico eventManager and some registered
@@ -53,11 +54,12 @@ public class MicoCamel {
      * @throws URISyntaxException
      */
     public void init() throws IOException, TimeoutException, URISyntaxException {
-        String testHost = System.getenv("test.host");
+        String testHost = System.getProperty("test.host");
         if (testHost == null) {
             log.warn("'test.host' environment variable not defined, using default of mico-box");
             testHost = "mico-box";
         }
+        log.info("initialize event manager with host: {} ....", testHost);
         eventManager = new EventManagerImpl(testHost);
         eventManager.init();
         ConnectionFactory factory = new ConnectionFactory();
@@ -66,11 +68,9 @@ public class MicoCamel {
         factory.setPassword("mico");
 
         connection = factory.newConnection();
-        channel = connection.createChannel();
-        Map<String, Object> args = new HashMap<String, Object>();
-        args.put("x-expires", 180000);
-        channel.queueDeclare("myqueue", false, false, false, args);
-        eventManager.registerService(extr_1);
+
+        eventManager.registerService(extr1);
+        eventManager.registerService(extr2);
         eventManager.registerService(extr_2);
         eventManager.registerService(extr_a);
         eventManager.registerService(extr_b);
@@ -78,6 +78,7 @@ public class MicoCamel {
         eventManager.registerService(extr_d);
         eventManager.registerService(extr_e);
 
+        log.info("event manager initialized: {}", eventManager.getPersistenceService().getStoragePrefix());
     }
 
     public Item createItem() throws RepositoryException {
@@ -98,11 +99,6 @@ public class MicoCamel {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-    }
-
-    public <T> T createObject(Class<T> clazz) throws Exception{
-        PersistenceService svc = eventManager.getPersistenceService();
-        return svc.getAnno4j().createObject(clazz);
     }
 
     /**
@@ -139,12 +135,24 @@ public class MicoCamel {
      * @throws IOException
      */
     public void shutdown() throws IOException {
-        channel.clearConfirmListeners();
-        channel.clearFlowListeners();
-        channel.clearReturnListeners();
-        channel.close();
+//        channel.clearConfirmListeners();
+//        channel.clearFlowListeners();
+//        channel.clearReturnListeners();
+//        channel.close();
         connection.clearBlockedListeners();
         connection.close();
         eventManager.shutdown();
     }
+
+    public void registerService(AnalysisService... extr) throws IOException {
+        for(AnalysisService ex : extr){
+            eventManager.registerService(ex);
+        }
+    }
+
+    public void unregisterService(AnalysisService... extr) throws IOException {
+        for(AnalysisService ex : extr){
+            eventManager.unregisterService(ex);
+        }
+       }
 }
