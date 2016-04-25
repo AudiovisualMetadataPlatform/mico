@@ -178,71 +178,58 @@ namespace mico {
         * @return a handle to the newly created Item
         */
         std::shared_ptr<model::Item> PersistenceService::createItem() {
+          bool creation_error = false;
 
-            LOG_DEBUG("PersistenceService::createItem()");
-            assert((jobject) m_anno4j);
+          jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
-            jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+          LOG_DEBUG("PersistenceService::createItem()");
+          assert((jobject) m_anno4j);
 
-            jnipp::GlobalRef<ItemMMM> jNewItemMMM =
-                    m_anno4j->createObject(ItemMMM::clazz());
+          jnipp::LocalRef<Resource> jItemResource =
+              m_anno4j->getIdGenerator()->generateID(jnipp::java::util::HashSet::construct());
 
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
-            assert((jobject) jNewItemMMM);
+          jnipp::LocalRef<Transaction> jTransaction = m_anno4j->createTransaction();
 
-            LOG_DEBUG("item created with anno4j");
+          creation_error = creation_error & checkJavaExcpetionNoThrow(m_jniErrorMessage);
+          assert((jobject) jTransaction);
 
-            auto jItemConn = ((jnipp::Ref<RDFObject>)jNewItemMMM)->getObjectConnection();
+          jTransaction->begin();
 
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
-            assert((jobject) jItemConn);
-            LOG_DEBUG("item connection retrieved");
+          jTransaction->setAllContexts((jnipp::Ref<URI>) jItemResource);
 
-            jnipp::LocalRef<MemValueFactory> jMemValueFactory =
-                    MemValueFactory::construct();
+          jnipp::GlobalRef<ItemMMM> jNewItemMMM =
+                  jTransaction->createObject(ItemMMM::clazz(),jItemResource);
 
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
-            assert((jobject) jMemValueFactory);
+          creation_error = creation_error & checkJavaExcpetionNoThrow(m_jniErrorMessage);
+          assert((jobject) jNewItemMMM);
 
-            jnipp::Ref<Resource> jResourceBlank =
-                    jMemValueFactory->createURI(jnipp::String::create("urn:anno4j:BLANK"));
+          LOG_DEBUG("ItemMMM created with anno4j");
 
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
-            assert((jobject) jResourceBlank);
 
-            LOG_DEBUG("blank resource created");
+          jnipp::LocalRef<jnipp::String> jDateTime =
+                  jnipp::String::create(commons::TimeInfo::getTimestamp());
 
-            jnipp::LocalRef<URI> jItemURI =
-                    ((jnipp::Ref<RDFObject>)jNewItemMMM)->getResource();
+          assert((jobject) jDateTime);
 
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
-            assert((jobject) jItemURI);
-            LOG_DEBUG("Item URI retrieved: %s", jItemURI->toString()->std_str().c_str());
+          jNewItemMMM->setSerializedAt(jDateTime);
+          creation_error = creation_error & checkJavaExcpetionNoThrow(m_jniErrorMessage);
+          LOG_DEBUG("date time object create and set");
 
-            setContext(jItemConn, jItemURI); //now set the correct context on the connection
+          if (!creation_error) {
+            jTransaction->commit();
+            LOG_DEBUG("Transaction for ItemMMM commited");
+          } else {
+            if ((jobject) jTransaction) {
+              jTransaction->rollback();
+              jTransaction->close();
+            }
+          }
 
-            LOG_DEBUG("context set");
+          auto newItem = std::make_shared<model::ItemAnno4cpp>(jNewItemMMM, *this);
 
-                jItemConn->addDesignation((jnipp::Ref<RDFObject>) jNewItemMMM,
-                                          (jnipp::Ref<Class>) ItemMMM::clazz());
+          LOG_INFO("ItemMMM created and Item wrapper returned");
 
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
-            LOG_DEBUG("designation added");
-
-            jnipp::LocalRef<jnipp::String> jDateTime =
-                    jnipp::String::create(commons::TimeInfo::getTimestamp());
-
-            assert((jobject) jDateTime);
-
-            jNewItemMMM->setSerializedAt(jDateTime);
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
-            LOG_DEBUG("date time object create and set");
-
-            auto newItem = std::make_shared<model::ItemAnno4cpp>(jNewItemMMM, *this);
-
-            LOG_INFO("ItemMMM created and Item wrapper returned");
-
-            return newItem;
+          return newItem;
         }      
 
         /**
@@ -258,13 +245,20 @@ namespace mico {
 
             jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
-            jnipp::LocalRef<URI> itemURI =
+            jnipp::LocalRef<URI> jItemURI =
                     URIImpl::construct((jnipp::Ref<String>) jnipp::String::create(id.stringValue()));
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
+            jnipp::LocalRef<Transaction> jTransaction = m_anno4j->createTransaction();
+
+            checkJavaExcpetionNoThrow(m_jniErrorMessage);
+            assert((jobject) jTransaction);
+
+            jTransaction->setAllContexts((jnipp::Ref<URI>) jItemURI);
+
             jnipp::GlobalRef<ItemMMM> jItemMMM=
-                    this->m_anno4j->findByID(ItemMMM::clazz(), itemURI);
+                    this->m_anno4j->findByID(ItemMMM::clazz(), jItemURI);
 
             bool isInstance = jItemMMM->isInstanceOf(ItemMMM::clazz());
             bool except = checkJavaExcpetionNoThrow(m_jniErrorMessage);

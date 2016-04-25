@@ -37,9 +37,7 @@ namespace mico {
       }
 
       mico::rdf::model::URI ResourceAnno4cpp::getURI() {
-        LOG_DEBUG("ResourceAnno4cpp::getURI()");
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-
 
         jnipp::LocalRef<URI> jResourceURI =
             ((jnipp::Ref<RDFObject>)m_resourceMMM)->getResource();
