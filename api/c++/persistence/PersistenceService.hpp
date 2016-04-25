@@ -23,7 +23,11 @@ namespace mico {
         using namespace mico::rdf::query;
 
         class content_item_iterator;
-        class Item;
+
+        namespace model {
+          class Item;
+        }
+
 
         /**
         * Specialised support for persistence service metadata. Might in the future be extended with
@@ -106,7 +110,7 @@ namespace mico {
             *
             * @return a handle to the newly created ContentItem
             */
-            std::shared_ptr<Item> createItem();
+            std::shared_ptr<model::Item> createItem();
 
             /**
             * Return the item with the given URI if it exists. The item should be suitable for reading and
@@ -114,7 +118,7 @@ namespace mico {
             *
             * @return A handle to the Item with the given URI, or null if it does not exist
             */
-            std::shared_ptr<Item> getItem(const mico::rdf::model::URI& id);
+            std::shared_ptr<model::Item> getItem(const mico::rdf::model::URI& id);
 
             /**
             * Delete the content item with the given URI. If the content item does not exist, do nothing.
@@ -135,7 +139,7 @@ namespace mico {
             content_item_iterator end();
 
 
-            jnipp::LocalRef<ComGithubAnno4jAnno4j> getAnno4j();
+            jnipp::LocalRef<jnipp::com::github::anno4j::Anno4j> getAnno4j();
 
             std::string getStoragePrefix();
 

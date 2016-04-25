@@ -21,6 +21,7 @@ using std::string;
 using boost::asio::ip::tcp;
 using namespace boost::asio;
 using namespace mico::persistence;
+using namespace mico::persistence::model;
 using namespace mico::rdf::model;
 
 namespace mico {

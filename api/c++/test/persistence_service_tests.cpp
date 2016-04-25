@@ -165,8 +165,9 @@ int main(int argc, char **argv) {
 
             // create check
 
-            std::shared_ptr<mico::persistence::Item> currItem = persistenceServiceTest.svc->createItem();
-            std::shared_ptr<mico::persistence::Resource> currItemResource = std::dynamic_pointer_cast<Resource>(currItem);
+            std::shared_ptr<mico::persistence::model::Item> currItem = persistenceServiceTest.svc->createItem();
+            std::shared_ptr<mico::persistence::model::Resource> currItemResource =
+                std::dynamic_pointer_cast<mico::persistence::model::Resource>(currItem);
             assert(currItem != 0);
 
             mico::rdf::model::URI uri = currItemResource->getURI();
@@ -199,12 +200,12 @@ int main(int argc, char **argv) {
         for (auto itemURI : itemURIS) {
             mico::rdf::model::URI asURI(itemURI);
 
-            std::shared_ptr<mico::persistence::Item> retrievedItem  =
+            std::shared_ptr<mico::persistence::model::Item> retrievedItem  =
                         persistenceServiceTest.svc->getItem(asURI);
 
 
-            std::shared_ptr<mico::persistence::Resource> retrievedItemResource =
-                std::dynamic_pointer_cast<Resource>(retrievedItem);
+            std::shared_ptr<mico::persistence::model::Resource> retrievedItemResource =
+                std::dynamic_pointer_cast<mico::persistence::model::Resource>(retrievedItem);
 
             assert(retrievedItemResource);
 
@@ -214,7 +215,7 @@ int main(int argc, char **argv) {
         }
 
         // check non existing item retrieval
-        std::shared_ptr<mico::persistence::Item> notExistingItem  =
+        std::shared_ptr<mico::persistence::model::Item> notExistingItem  =
             persistenceServiceTest.svc->getItem(mico::rdf::model::URI("http://does_not_exist_at_all"));
 
         assert(!notExistingItem);
@@ -223,7 +224,7 @@ int main(int argc, char **argv) {
         for (auto itemURI : itemURIS) {
             mico::rdf::model::URI asURI(itemURI);
 
-            std::shared_ptr<mico::persistence::Item> retrievedItem  =
+            std::shared_ptr<mico::persistence::model::Item> retrievedItem  =
                         persistenceServiceTest.svc->getItem(asURI);
 
 

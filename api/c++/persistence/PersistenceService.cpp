@@ -40,9 +40,20 @@
 using namespace std;
 using namespace boost;
 using namespace uuids;
-using namespace mico::util;
-using namespace mico::rdf::model;
-using namespace mico::rdf::query;
+
+using namespace jnipp::java::lang;
+using namespace jnipp::org::openrdf::idGenerator;
+using namespace jnipp::org::openrdf::repository::sparql;
+using namespace jnipp::org::openrdf::model;
+using namespace jnipp::org::openrdf::model::impl;
+using namespace jnipp::org::openrdf::repository::object;
+using namespace jnipp::org::openrdf::sail::memory::model;
+using namespace jnipp::com::github::anno4j;
+using namespace jnipp::eu::mico::platform::anno4j::model;
+using namespace jnipp::eu::mico::platform::persistence::impl;
+
+
+
 
 
 // extern references to constant SPARQL templates
@@ -128,23 +139,23 @@ namespace mico {
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
-            jnipp::LocalRef<JavaLangString> jURIString = jnipp::String::create(marmottaServerUrl);
+            jnipp::LocalRef<String> jURIString = jnipp::String::create(marmottaServerUrl);
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
             assert((jobject)jURIString != 0);
 
             LOG_INFO("Using Marmotta URI: %s", jURIString->std_str().c_str());
 
-            jnipp::LocalRef<OrgOpenrdfIdGeneratorIDGenerator> gen =
-                EuMicoPlatformPersistenceImplIDGeneratorAnno4j::construct(jURIString);
+            jnipp::LocalRef<IDGenerator> gen =
+                IDGeneratorAnno4j::construct(jURIString);
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
             assert((jobject)gen != 0);
 
             LOG_DEBUG("IDGeneratorAnno4j  created");
 
-            jnipp::LocalRef<OrgOpenrdfRepositorySparqlSPARQLRepository> sparqlRepository =
-                   OrgOpenrdfRepositorySparqlSPARQLRepository::construct(
+            jnipp::LocalRef<SPARQLRepository> sparqlRepository =
+                   SPARQLRepository::construct(
                   jnipp::String::create(marmottaServerUrl + std::string("/sparql/select")),
                   jnipp::String::create(marmottaServerUrl + std::string("/sparql/update")));
 
@@ -152,7 +163,7 @@ namespace mico {
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
-            m_anno4j = ComGithubAnno4jAnno4j::construct(sparqlRepository, gen);
+            m_anno4j = Anno4j::construct(sparqlRepository, gen);
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
@@ -166,34 +177,34 @@ namespace mico {
         *
         * @return a handle to the newly created Item
         */
-        std::shared_ptr<Item> PersistenceService::createItem() {           
+        std::shared_ptr<model::Item> PersistenceService::createItem() {
 
             LOG_DEBUG("PersistenceService::createItem()");
             assert((jobject) m_anno4j);
 
             jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
-            jnipp::GlobalRef<EuMicoPlatformAnno4jModelItemMMM> jNewItemMMM =
-                    m_anno4j->createObject(EuMicoPlatformAnno4jModelItemMMM::clazz());
+            jnipp::GlobalRef<ItemMMM> jNewItemMMM =
+                    m_anno4j->createObject(ItemMMM::clazz());
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
             assert((jobject) jNewItemMMM);
 
             LOG_DEBUG("item created with anno4j");
 
-            auto jItemConn = ((jnipp::Ref<OrgOpenrdfRepositoryObjectRDFObject>)jNewItemMMM)->getObjectConnection();
+            auto jItemConn = ((jnipp::Ref<RDFObject>)jNewItemMMM)->getObjectConnection();
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
             assert((jobject) jItemConn);
             LOG_DEBUG("item connection retrieved");
 
-            jnipp::LocalRef<OrgOpenrdfSailMemoryModelMemValueFactory> jMemValueFactory =
-                    OrgOpenrdfSailMemoryModelMemValueFactory::construct();
+            jnipp::LocalRef<MemValueFactory> jMemValueFactory =
+                    MemValueFactory::construct();
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
             assert((jobject) jMemValueFactory);
 
-            jnipp::Ref<OrgOpenrdfModelResource> jResourceBlank =
+            jnipp::Ref<Resource> jResourceBlank =
                     jMemValueFactory->createURI(jnipp::String::create("urn:anno4j:BLANK"));
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
@@ -201,8 +212,8 @@ namespace mico {
 
             LOG_DEBUG("blank resource created");
 
-            jnipp::LocalRef<OrgOpenrdfModelURI> jItemURI =
-                    ((jnipp::Ref<OrgOpenrdfRepositoryObjectRDFObject>)jNewItemMMM)->getResource();
+            jnipp::LocalRef<URI> jItemURI =
+                    ((jnipp::Ref<RDFObject>)jNewItemMMM)->getResource();
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
             assert((jobject) jItemURI);
@@ -212,8 +223,8 @@ namespace mico {
 
             LOG_DEBUG("context set");
 
-                jItemConn->addDesignation((jnipp::Ref<OrgOpenrdfRepositoryObjectRDFObject>) jNewItemMMM,
-                                          (jnipp::Ref<JavaLangClass>) EuMicoPlatformAnno4jModelItemMMM::clazz());
+                jItemConn->addDesignation((jnipp::Ref<RDFObject>) jNewItemMMM,
+                                          (jnipp::Ref<Class>) ItemMMM::clazz());
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
             LOG_DEBUG("designation added");
@@ -227,7 +238,7 @@ namespace mico {
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
             LOG_DEBUG("date time object create and set");
 
-            auto newItem = std::make_shared<ItemAnno4cpp>(jNewItemMMM, *this);
+            auto newItem = std::make_shared<model::ItemAnno4cpp>(jNewItemMMM, *this);
 
             LOG_INFO("ItemMMM created and Item wrapper returned");
 
@@ -241,42 +252,42 @@ namespace mico {
         * @return A handle to the Item with the given URI, or null if it does not exist
         */
 
-        std::shared_ptr<Item> PersistenceService::getItem(const  mico::rdf::model::URI& id) {
+        std::shared_ptr<model::Item> PersistenceService::getItem(const  mico::rdf::model::URI& id) {
 
             LOG_DEBUG("PersistenceService::getItem for [%s] requested.",  id.stringValue().c_str());
 
             jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
-            jnipp::LocalRef<OrgOpenrdfModelURI> itemURI =
-                    OrgOpenrdfModelImplURIImpl::construct((jnipp::Ref<JavaLangString>) jnipp::String::create(id.stringValue()));
+            jnipp::LocalRef<URI> itemURI =
+                    URIImpl::construct((jnipp::Ref<String>) jnipp::String::create(id.stringValue()));
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
-            jnipp::GlobalRef<EuMicoPlatformAnno4jModelItemMMM> jItemMMM=
-                    this->m_anno4j->findByID(EuMicoPlatformAnno4jModelItemMMM::clazz(), itemURI);
+            jnipp::GlobalRef<ItemMMM> jItemMMM=
+                    this->m_anno4j->findByID(ItemMMM::clazz(), itemURI);
 
-            bool isInstance = jItemMMM->isInstanceOf(EuMicoPlatformAnno4jModelItemMMM::clazz());
+            bool isInstance = jItemMMM->isInstanceOf(ItemMMM::clazz());
             bool except = checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
             if (!isInstance || except) {
                 LOG_DEBUG("returned RDF object is NOT an instance of ItemMMM");
-                return  std::shared_ptr<Item>();
+                return  std::shared_ptr<model::Item>();
             } else {
                 LOG_DEBUG("returned RDF object is instance of ItemMMM");
             }
 
-            jnipp::LocalRef<OrgOpenrdfModelURI> jItemURIRet =
-                ((jnipp::Ref<OrgOpenrdfRepositoryObjectRDFObject>)jItemMMM)->getResource();
+            jnipp::LocalRef<URI> jItemURIRet =
+                ((jnipp::Ref<RDFObject>)jItemMMM)->getResource();
 
             LOG_DEBUG("Got item with URI [%s]", jItemURIRet->toString()->std_str().c_str());
 
-            return std::make_shared<ItemAnno4cpp>(jItemMMM, *this);
+            return std::make_shared<model::ItemAnno4cpp>(jItemMMM, *this);
         }
 
         /**
         * Delete the content item with the given URI. If the content item does not exist, do nothing.
         */
-        void PersistenceService::deleteContentItem(const URI& id) {
+        void PersistenceService::deleteContentItem(const mico::rdf::model::URI& id) {
 //            map<string,string> params;
 //            params["g"] = marmottaServerUrl;
 //            params["ci"] = id.stringValue();
@@ -298,7 +309,7 @@ namespace mico {
         *
         * @return iterable
         */
-        content_item_iterator PersistenceService::begin() {
+//        content_item_iterator PersistenceService::begin() {
 //            map<string,string> params;
 //            params["g"] = marmottaServerUrl;
 
@@ -307,30 +318,30 @@ namespace mico {
 //                return content_item_iterator(marmottaServerUrl,contentDirectory,r);
 //            } else {
 //                delete r;
-                return content_item_iterator(marmottaServerUrl,contentDirectory);
+//                return content_item_iterator(marmottaServerUrl,contentDirectory);
 //            }
-        }
+//        }
 
 
-        content_item_iterator PersistenceService::end() {
-            return content_item_iterator(marmottaServerUrl,contentDirectory);
-        }
+//        content_item_iterator PersistenceService::end() {
+//            return content_item_iterator(marmottaServerUrl,contentDirectory);
+//        }
 
 
 
-        void content_item_iterator::increment() {
-            pos = pos+1 == result->size() ? -1 : pos + 1;
-        };
+//        void content_item_iterator::increment() {
+//            pos = pos+1 == result->size() ? -1 : pos + 1;
+//        };
 
-        bool content_item_iterator::equal(content_item_iterator const& other) const {
-            return this->pos == other.pos;
-        };
+//        bool content_item_iterator::equal(content_item_iterator const& other) const {
+//            return this->pos == other.pos;
+//        };
 
-        ContentItem* content_item_iterator::dereference() const {
-            return new ContentItem(baseUrl, contentDirectory, *dynamic_cast<const URI*>( result->at(pos).at("p") ) );
-        }
+//        ContentItem* content_item_iterator::dereference() const {
+//            return new ContentItem(baseUrl, contentDirectory, *dynamic_cast<const URI*>( result->at(pos).at("p") ) );
+//        }
 
-        jnipp::LocalRef<ComGithubAnno4jAnno4j> PersistenceService::getAnno4j()
+        jnipp::LocalRef<Anno4j> PersistenceService::getAnno4j()
         {
           return m_anno4j;
         }
@@ -345,10 +356,10 @@ namespace mico {
           return contentDirectory;
         }
 
-        void PersistenceService::setContext(jnipp::Ref<OrgOpenrdfRepositoryObjectObjectConnection> con, jnipp::Ref<OrgOpenrdfModelURI> context) {
+        void PersistenceService::setContext(jnipp::Ref<ObjectConnection> con, jnipp::Ref<URI> context) {
             jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
-            LOG_DEBUG("Setting context for object connection with object identity hash %d", JavaLangSystem::identityHashCode(con));
+            LOG_DEBUG("Setting context for object connection with object identity hash %d", System::identityHashCode(con));
 
             checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
