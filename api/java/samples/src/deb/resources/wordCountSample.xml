@@ -26,7 +26,17 @@
 				<mimeType>application/rdf+xml</mimeType>
 				<syntacticType>mico:WordCount</syntacticType>
 			</dataType>
-			<location>Dummy Location</location>
+			<location> <![CDATA[ . / mmm:hasPart [mmm:hasBody / rdf:type is <http://www.mico-project.eu/wordcount-body>] ]]> </location>
+			<annotatedProperty>
+					<name>word amount</name>
+					<!-- dataLocation referring to the Part defined by location ? -->
+					<dataLocation>
+	                 <![CDATA[ mmm:hasBody / <http://www.mico-project.eu/wordcount-body#count> :: xsd:int ]]>
+					</dataLocation>
+					<type>
+							<primitive>int</primitive>
+					</type>
+			</annotatedProperty>
 		</output>
 	</mode>
 	<deployedAt>127.0.0.1</deployedAt>

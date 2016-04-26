@@ -29,17 +29,17 @@ public class MicoRabbitProducer extends DefaultProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(MicoRabbitProducer.class);
     private MicoRabbitEndpoint endpoint;
-    private String serviceId;
+    private String queueId;
 
     public MicoRabbitProducer(MicoRabbitEndpoint endpoint) {
         super(endpoint);
         this.endpoint = endpoint;
-        this.serviceId = endpoint.getServiceId();
+        this.queueId = endpoint.getQueueId();
     }
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        LOG.info("P R O D U C E analyze event for {} and put it to msg body", serviceId);
+        LOG.info("P R O D U C E analyze event for {} and put it to msg body", queueId);
         AnalysisRequest event;
         Message inItem = exchange.getIn();
         String item = inItem.getHeader(KEY_MICO_ITEM, String.class);
@@ -68,9 +68,9 @@ public class MicoRabbitProducer extends DefaultProducer {
             while (!manager.hasFinished()) {
                 LOG.debug("..waiting for response..");
 
-                synchronized (serviceId){
+                synchronized (queueId){
                     //Thread.sleep(300);
-                    serviceId.wait();
+                    queueId.wait();
                 }
             }
             // save new part in header to tell next extractor to process that part
@@ -81,11 +81,11 @@ public class MicoRabbitProducer extends DefaultProducer {
 
 
     private AnalysisRequest generateRequest(String item, String part) {
-        LOG.info("generate event for {} {}", serviceId, part);
+        LOG.info("generate event for {} {}", queueId, part);
         Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.newBuilder()
                 .setItemUri(item)
                 .addPartUri(part)
-                .setServiceId(serviceId).build();
+                .setServiceId(queueId).build();
     	
     	return analysisEvent;
     }
@@ -150,8 +150,8 @@ public class MicoRabbitProducer extends DefaultProducer {
                 // analyze process finished, notify waiting threads to continue
                 // camel route
                 finished = true;
-                synchronized (serviceId) {
-                    serviceId.notify();
+                synchronized (queueId) {
+                    queueId.notify();
                 }
             }
         }

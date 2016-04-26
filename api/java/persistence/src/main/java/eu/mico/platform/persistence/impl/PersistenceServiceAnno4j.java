@@ -14,6 +14,7 @@
 package eu.mico.platform.persistence.impl;
 
 import com.github.anno4j.Anno4j;
+import com.github.anno4j.Transaction;
 import com.github.anno4j.querying.QueryService;
 
 import eu.mico.platform.anno4j.model.ItemMMM;
@@ -23,6 +24,7 @@ import eu.mico.platform.storage.api.StorageService;
 import eu.mico.platform.storage.impl.StorageServiceBuilder;
 
 import org.openrdf.idGenerator.IDGenerator;
+import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -37,16 +39,9 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
-/**
- * An implementation of the persistence service using an FTP file system
- * and a Marmotta triple store for representing  item data.
- *
- * @author Sebastian Schaffert
- * @author Sergio Fernández
- * @author Horst Stadler
- */
 public class PersistenceServiceAnno4j implements PersistenceService {
 
     private static Logger log = LoggerFactory.getLogger(PersistenceServiceAnno4j.class);
@@ -68,7 +63,7 @@ public class PersistenceServiceAnno4j implements PersistenceService {
         SPARQLRepository sparqlRepository = new SPARQLRepository(sparqlBaseURI.toString() + "/sparql/select", sparqlBaseURI.toString() + "/sparql/update");
 
         try {
-            this.anno4j = new Anno4j(sparqlRepository, idGenerator, null);
+            this.anno4j = new Anno4j(sparqlRepository, idGenerator);
         } catch (RepositoryException | RepositoryConfigException e) {
             throw new IllegalStateException("Couldn't instantiate Anno4j");
         }
@@ -101,33 +96,35 @@ public class PersistenceServiceAnno4j implements PersistenceService {
      */
     @Override
     public Item createItem() throws RepositoryException {
-        ObjectConnection itemConn = null;
-        boolean error = true;
+        Transaction transaction = null;
+        boolean error = false;
         try {
-            itemConn = anno4j.getObjectRepository().getConnection();
-            itemConn.begin();
-            //we need to do a 2 step creation to ensure that the rdf:type goes into the correct context
-            RDFObject itemObj = itemConn.getObjectFactory().createObject(IDGenerator.BLANK_RESOURCE, ItemMMM.class);
-            URI itemURI = (URI)itemObj.getResource(); //if this is not a URI use a different IDGenerator!
-            setContext(itemConn, itemURI); //now set the correct context on the connection
-            ItemMMM itemMMM = itemConn.addDesignation(itemObj, ItemMMM.class); //add the correct rdf:type
-            //and set all the other required metadata
+            Resource itemResource = anno4j.getIdGenerator().generateID(new HashSet<>());
+
+            transaction = anno4j.createTransaction();
+            transaction.begin();
+
+            transaction.setAllContexts((URI) itemResource);
+            ItemMMM itemMMM = transaction.createObject(ItemMMM.class, itemResource);
+
             String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
             itemMMM.setSerializedAt(dateTime);
-            itemConn.addObject(itemMMM); //store the new item
+
             log.trace("Created Item <{}>", itemMMM.getResourceAsString());
-            error = false;
-            return new ItemAnno4j(itemMMM, this);
-        } catch (RepositoryException | RuntimeException e){
+            return new ItemAnno4j(itemMMM, this, anno4j);
+        } catch (RepositoryException | RuntimeException e ) {
             error = true;
             throw e;
+        } catch (IllegalAccessException | InstantiationException e) {
+            error = true;
+            throw new IllegalStateException(e);
         } finally {
-            if(itemConn != null){
+            if(transaction != null){
                 if(error){
-                    itemConn.rollback(); //rollback any triples created during this method
-                    itemConn.close(); //in case we have not succeeded we can close the connection
+                    transaction.rollback(); //rollback any triples created during this method
+                    transaction.close(); //in case we have not succeeded we can close the connection
                 } else {
-                    itemConn.commit(); //commit the item before returning
+                    transaction.commit(); //commit the item before returning
                 }
             } //failed to open connection
         }
@@ -143,17 +140,14 @@ public class PersistenceServiceAnno4j implements PersistenceService {
      */
     @Override
     public Item getItem(URI id) throws RepositoryException {
-        //we need to create a ObjectConnection and configure it for the created item
-        ObjectConnection itemConn = anno4j.getObjectRepository().getConnection();
-        setContext(itemConn, id);
-        //we do not parse here a explicit class as a getter method assumes that
-        //the parsed resource already has the necessary rdf:type assigned!
-        Object object = itemConn.getObject(id);
-        //if not we will get a ClssCastException in the next line
-        if(object instanceof ItemMMM){
-            return new ItemAnno4j(ItemMMM.class.cast(object), this);
+        Transaction transaction = anno4j.createTransaction();
+        transaction.setAllContexts(id);
+        ItemMMM itemMMM = transaction.findByID(ItemMMM.class, id);
+
+        if(itemMMM != null) {
+            return new ItemAnno4j(itemMMM, this, anno4j);
         } else {
-            return null; //not an Item
+            return null;
         }
     }
 
@@ -177,7 +171,7 @@ public class PersistenceServiceAnno4j implements PersistenceService {
         List<ItemMMM> itemsMMM = anno4j.findAll(ItemMMM.class);
 
         for (ItemMMM itemMMM : itemsMMM) {
-            itemsAnno4j.add(new ItemAnno4j(itemMMM, this));
+            itemsAnno4j.add(new ItemAnno4j(itemMMM, this, anno4j));
         }
 
         return itemsAnno4j;
@@ -191,17 +185,6 @@ public class PersistenceServiceAnno4j implements PersistenceService {
     @Override
     public String getStoragePrefix() {
         return storagePrefix;
-    }
-    
-    /**
-     * Sets the read/insert and remove context on the parsed conntection to the parsed URI
-     * @param con
-     * @param context
-     */
-    private void setContext(ObjectConnection con, URI context) {
-        con.setReadContexts(context);
-        con.setInsertContext(context);
-        con.setRemoveContexts(context);
     }
 
     @Override

@@ -103,8 +103,6 @@ public class PartAnno4jTest {
                 SpeechToTextBodyMMM.class);
         part.setBody(body);
 
-        
-        TestUtils.debugRDF(log, con);
         // check if body was created in the correct sub graph
         query = persistenceService.createQuery(item.getURI());
         assertEquals(initialSpeechToTextBodiesSubGraph + 1, query.execute(SpeechToTextBodyMMM.class).size());

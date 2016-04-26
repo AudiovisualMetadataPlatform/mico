@@ -1,0 +1,41 @@
+<routes xmlns='http://camel.apache.org/schema/spring'>
+  <route id='workflow-aggregateSimple-starting-point-for-multicast-0-mimeType=mico/test,syntacticType=A'>
+    <from uri='direct:aggregateSimple-mimeType=mico/test,syntacticType=A'/>
+    <multicast>
+      <to uri='direct:workflow-aggregateSimple-pipeline-3'/>
+      <to uri='direct:workflow-aggregateSimple-pipeline-4'/>
+    </multicast>
+  </route>
+  <route id='workflow-aggregateSimple-pipeline-0'>
+    <from uri='direct:workflow-aggregateSimple-pipeline-0'/>
+    <pipeline>
+      <to uri='mico-comp:vbox1?serviceId=B-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=B-C'/>
+    </pipeline>
+  </route>
+  <route id='workflow-aggregateSimple-pipeline-3'>
+    <from uri='direct:workflow-aggregateSimple-pipeline-3'/>
+    <pipeline>
+      <to uri='mico-comp:vbox1?serviceId=A-B1-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=A-B1'/>
+    </pipeline>
+    <to uri='direct:workflow-aggregateSimple-aggregator-0'/>
+  </route>
+  <route id='workflow-aggregateSimple-pipeline-4'>
+    <from uri='direct:workflow-aggregateSimple-pipeline-4'/>
+    <pipeline>
+      <to uri='mico-comp:vbox1?serviceId=A-B2-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=A-B2'/>
+    </pipeline>
+    <to uri='direct:workflow-aggregateSimple-aggregator-0'/>
+  </route>
+  <route id='workflow-aggregateSimple-aggregator-0'>
+    <from uri='direct:workflow-aggregateSimple-aggregator-0'/>
+    <aggregate strategyRef='simpleAggregatorStrategy' completionSize='1'>
+      <correlationExpression>
+        <simple>header.mico_item</simple>
+      </correlationExpression>
+      <to uri='direct:workflow-aggregateSimple-pipeline-0'/>
+      <to uri="mock:result_aggregateSimple_1"/>
+    </aggregate>
+  </route>
+<!--   <bean id= "simpleAggregatorStrategy" class = "eu.mico.platform.camel.aggretation.SimpleAggregationStrategy"> -->
+<!--   </bean> -->
+</routes>

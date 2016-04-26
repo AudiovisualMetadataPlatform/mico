@@ -1,8 +1,9 @@
 package de.fraunhofer.idmt.mico;
 
 import eu.mico.platform.event.api.AnalysisResponse;
-import eu.mico.platform.event.impl.AnalysisServiceAnno4j;
+import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.model.AnalysisException;
+import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Resource;
@@ -10,9 +11,12 @@ import eu.mico.platform.persistence.model.Resource;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openrdf.annotations.Iri;
+import org.openrdf.idGenerator.IDGenerator;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.object.ObjectConnection;
+import org.openrdf.repository.object.ObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,11 +33,12 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 
-public class DummyExtractor extends AnalysisServiceAnno4j {
+public class DummyExtractor implements AnalysisService {
 
 	private static Logger log = LoggerFactory.getLogger(DummyExtractor.class);
     private boolean called = false;
     private String source, target;
+    private String extractorId, version, mode;
 
     private static SimpleDateFormat isodate = new SimpleDateFormat("yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'", DateFormatSymbols.getInstance(Locale.US));
     static {
@@ -48,9 +53,15 @@ public class DummyExtractor extends AnalysisServiceAnno4j {
 		this.called = called;
 	}
 
-	public DummyExtractor(String source, String target) {
+    public DummyExtractor(String source, String target) {
+        this(source, target, source+"-"+target+"-queue", "0.0.0", "");
+    }
+	public DummyExtractor(String source, String target, String extractorID, String version, String mode) {
         this.source = source;
         this.target = target;
+        this.extractorId = extractorID;
+        this.version = version;
+        this.mode = mode;
     }
 
     @Override
@@ -70,7 +81,7 @@ public class DummyExtractor extends AnalysisServiceAnno4j {
 
     @Override
     public String getQueueName() {
-        return source + "-" + target + "-queue";
+        return extractorId +"-" + version +"-"+ mode;
     }
 
     @Override
@@ -90,7 +101,7 @@ public class DummyExtractor extends AnalysisServiceAnno4j {
         Resource obj = objs.get(0);
         try {
             if (!obj.hasAsset()) {
-                log.warn("object {} of item {}", item.getURI(), obj.getURI());
+                log.warn("object {} of item {} has not asset", item.getURI(), obj.getURI());
                 return;
             }
         } catch (RepositoryException e1) {
@@ -100,22 +111,34 @@ public class DummyExtractor extends AnalysisServiceAnno4j {
         log.info("mock analysis request for content item {}, object {}", item.getURI(), obj.getURI());
         Part part = null;
         try {
+            ObjectConnection con = item.getObjectConnection();
+            ObjectFactory factory = con.getObjectFactory();
             part = item.createPart(getServiceID());
             part.setSyntacticalType(getProvides());
             part.setSemanticType(getQueueName());
             part.setInputs(new HashSet<Resource>(objs));
 
-            DummyExtractorBody body = getAnno4j().createObject(DummyExtractorBody.class);
+            DummyExtractorBody body = con.addDesignation(factory.createObject(
+                    IDGenerator.BLANK_RESOURCE, DummyExtractorBody.class),
+                    DummyExtractorBody.class);
             body.setValue(getServiceID().stringValue());
             part.setBody(body);
-            DummyExtractorTarget target = getAnno4j().createObject(DummyExtractorTarget.class);
+            DummyExtractorTarget target = con.addDesignation(factory
+                    .createObject(IDGenerator.BLANK_RESOURCE,
+                            DummyExtractorTarget.class),
+                    DummyExtractorTarget.class);
             part.addTarget(target);
 
 
-            OutputStream os = part.getAsset().getOutputStream();
+            Asset asset = part.getAsset();
+            log.info("create binary asset for part: [{}]", part.getURI());
+            OutputStream os = asset.getOutputStream();
+            asset.setFormat(getProvides());
             try{
-                InputStream is = obj.getAsset().getInputStream();
-                IOUtils.copy(is, os);
+                if(obj.hasAsset()){
+                    InputStream is = obj.getAsset().getInputStream();
+                    IOUtils.copy(is, os);
+                }
             }catch(Exception e){
                 log.warn("unable to access content part data",e);
             }
@@ -128,8 +151,6 @@ public class DummyExtractor extends AnalysisServiceAnno4j {
             setCalled(true);
         } catch (RepositoryException e) {
             throw new AnalysisException("could not access triple store");
-        } catch (IllegalAccessException | InstantiationException e) {
-            throw new AnalysisException("could not create body/target class",e);
         }
 
     }

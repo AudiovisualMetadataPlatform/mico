@@ -33,19 +33,31 @@ public class MicoRabbitEndpoint extends DefaultEndpoint {
     @UriParam(defaultValue = "10")
     private int option = 10;
 
-    @UriParam(name="host", defaultValue = "mico-platform")
-    private String host = "mico-platform";
+    @UriParam(name="host", defaultValue = "mico-box")
+    private String host = "mico-box";
     @UriParam(name="user", defaultValue = "mico")
     private String user = "mico";
     @UriParam(defaultValue = "mico")
     private String password = "mico";
     @UriParam(defaultValue = "5672", description = "the port where the rabbitmq broker listens for connections")
     private int rabbitPort = 5672;
-    /**
-     * each extractor service has is own id, in rabbitmq this id is used a routing key
-     */
-    @UriParam(description = "the unique id of an extractor service")
-    private String serviceId = "wordcount";
+
+    @UriParam(name="modeId")
+    @Metadata(required = "true")
+    private String modeId ="";
+
+    @UriParam(name="extractorVersion")
+    @Metadata(required = "true")
+    private String extractorVersion = "0.0.0";
+
+    @UriParam(name="parameters")
+    @Metadata(required = "false")
+    private String parameters;
+
+    @UriParam(name="extractorId")
+    @Metadata(required = "true")
+    private String extractorId;
+
     
     private Connection connection = null;
 
@@ -135,12 +147,44 @@ public class MicoRabbitEndpoint extends DefaultEndpoint {
 		this.host = host;
 	}
 
-    public String getServiceId() {
-        return serviceId;
+    /**
+     * each extractor service has is own id, in rabbitmq this id is used a routing key
+     */
+    public String getQueueId() {
+        return getExtractorId() + "-" +getExtractorVersion()+ "-" + getModeId();
     }
 
-    public void setServiceId(String serviceId) {
-        this.serviceId = serviceId;
+    public String getModeId() {
+        return modeId;
     }
+
+    public void setModeId(String mode) {
+        this.modeId = mode;
+    }
+
+    public String getExtractorVersion() {
+        return extractorVersion;
+    }
+
+    public void setExtractorVersion(String extractorVersion) {
+        this.extractorVersion = extractorVersion;
+    }
+
+    public String getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(String parameters) {
+        this.parameters = parameters;
+    }
+
+    public String getExtractorId() {
+        return extractorId;
+    }
+
+    public void setExtractorId(String extractorId) {
+        this.extractorId = extractorId;
+    }
+
 
 }

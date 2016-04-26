@@ -23,8 +23,12 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
+
 import de.fraunhofer.idmt.camel.MicoCamel;
+import de.fraunhofer.idmt.mico.DummyExtractor;
+import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
 import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
+import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.persistence.model.Item;;
 
 /**
@@ -97,59 +101,48 @@ public class MicoRabbitComponentTest extends TestBase {
      * @throws Exception
      */
     @Test(timeout=5000)
-    public void testSampleXmlRoute() throws Exception {
-        MockEndpoint mock2 = getMockEndpoint("mock:bar");
+    public void testParallelFlowsRoute() throws Exception {
+        MockEndpoint mock1 = getMockEndpoint("mock:result_parallel_2");
+        mock1.expectedMinimumMessageCount(1);
+        MockEndpoint mock2 = getMockEndpoint("mock:result_parallel_2");
         mock2.expectedMinimumMessageCount(1);
 
-        template.send("direct:foo",createExchange());
+        template.send("direct:parallelFlows-mimeType=mico/test,syntacticType=A",createExchange());
+        template.send("direct:parallelFlows-mimeType=mico/test,syntacticType=C",createExchange());
         assertMockEndpointsSatisfied();
     }
 
     /** test route defined in xml
      * @throws Exception
      */
-    @Test(timeout=20000)
+    @Test(timeout=200000)
     public void testSampleSplitRoute() throws Exception {
-        MockEndpoint mock2 = getMockEndpoint("mock:result_split2");
-        MockEndpoint mock3 = getMockEndpoint("mock:result_split3");
-        mock2.expectedMinimumMessageCount(1);
-        mock3.expectedMinimumMessageCount(1);
+        MockEndpoint mock2 = getMockEndpoint("mock:result_multicast_1");
+        mock2.expectedMessageCount(2);
+        MockEndpoint mock3 = getMockEndpoint("mock:result_multicast_2");
+        mock3.expectedMessageCount(2);
 
-        template.send("direct:test_split",createExchange());
+        template.send("direct:simpleMulticast-mimeType=mico/test,syntacticType=C", createExchange());
+        template.send("direct:simpleMulticast-mimeType=mico/test,syntacticType=C", createExchange());
         assertMockEndpointsSatisfied();
     }
 
     @Test(timeout = 20000)
-    public void testAutomaticXmlRoute() throws Exception {
-        MockEndpoint mock2 = getMockEndpoint("mock:workflow-WORKFLOW_ID-pipeline-2");
-        mock2.expectedMinimumMessageCount(1);
-        mock2.expectedMessageCount(2);
-        MockEndpoint mock3 = getMockEndpoint("mock:workflow-WORKFLOW_ID-pipeline-3");
-        mock3.expectedMessageCount(2);
-
-        template.send("direct:mico/test", createExchange());
-        template.send("direct:mico/test", createExchange());
-        assertMockEndpointsSatisfied();
+    public void testSimpleXmlRoute() throws Exception {
+            MockEndpoint mock2 = getMockEndpoint("mock:result_simple1");
+            mock2.expectedMessageCount(2);
+    
+            template.send("direct:simple1-mimeType=mico/test,syntacticType=A", createExchange());
+            template.send("direct:simple1-mimeType=mico/test,syntacticType=A", createExchange());
+            assertMockEndpointsSatisfied();
     }
 
-    /** test ner sample route defined in xml
-     * @throws Exception
-     */
-    @Ignore("all extractors for video-kaldi-ner pipeline must be connected")
-    @Test(timeout=400000l)
-    public void testSampleNerRoute() throws Exception {
-        MockEndpoint mock2 = getMockEndpoint("mock:result_kaldi_rdf");
-        MockEndpoint mock3 = getMockEndpoint("mock:result_kaldi_ner");
-        mock2.expectedMinimumMessageCount(1);
-        mock3.expectedMinimumMessageCount(1);
-
-        template.send("direct:video_mp4",createExchange(videoItemUri));
-        assertMockEndpointsSatisfied();
-    }
-
-    @Bean(ref="aggregatorStrategy")
+    @Bean(ref="simpleAggregatorStrategy")
     public static SimpleAggregationStrategy aggregatorStrategy = new SimpleAggregationStrategy();
     
+    @Bean(ref = "itemAggregatorStrategy")
+    public static ItemAggregationStrategy itemAggregatorStrategy = new ItemAggregationStrategy();
+
     @Override
     protected RouteBuilder createRouteBuilder() throws Exception {
         return new RouteBuilder() {
@@ -157,30 +150,32 @@ public class MicoRabbitComponentTest extends TestBase {
                 JndiRegistry registry = (JndiRegistry) (
                         (PropertyPlaceholderDelegateRegistry)context.getRegistry()).getRegistry();
 
-                        //and here, it is bound to the registry
-                        registry.bind("aggregatorStrategy", aggregatorStrategy);
+                //and here, it is bound to the registry
+                registry.bind("simpleAggregatorStrategy", aggregatorStrategy);
+                //and here, it is bound to the registry
+                registry.bind("itemAggregatorStrategy", itemAggregatorStrategy);
                         
                 loadXmlSampleRoutes();
                 
                 from("direct:a").pipeline()
-                        .to("mico-comp://foo1?serviceId=A-B-queue")
-                        .to("mico-comp://foo2?serviceId=B-text/plain-queue")
+                        .to("mico-comp://foo1?extractorId=A-B-queue")
+                        .to("mico-comp://foo2?extractorId=B-text/plain-queue")
                         .to("mock:result");
 
                 from("direct:image")
                         .pipeline()
-                        .to("mico-comp:vbox1?host=mico-platform&user=mico&password=mico&serviceId=ocr-queue-png")
-                        .to("mico-comp:vbox2?host=mico-platform&user=mico&password=mico&serviceId=wordcount")
+                        .to("mico-comp:vbox1?extractorId=ocr-queue-png")
+                        .to("mico-comp:vbox2?extractorId=wordcount")
                         .to("mock:result_image");
             
                 from("direct:text")
                 .pipeline()
-                .to("mico-comp:vbox2?host=mico-platform&user=mico&password=mico&serviceId=wordcount")
+                .to("mico-comp:vbox2?extractorId=wordcount")
                 .to("mock:result_text");
 
                 from("direct:text_html")
                 .pipeline()
-                .to("mico-comp:vbox2?host=mico-box&user=mico&password=mico&serviceId=microformats")
+                .to("mico-comp:vbox2?extractorId=microformats")
                 .to("mock:result_text_html");
 
             }
@@ -189,10 +184,11 @@ public class MicoRabbitComponentTest extends TestBase {
                 ModelCamelContext context = getContext();
                 context.setDelayer(40L);
                 String[] testFiles = {
+                        "src/test/resources/routes/containing_complex_aggregator.xml",
+                        "src/test/resources/routes/containing_simple_aggregator.xml",
+                        "src/test/resources/routes/parallel_different_input.xml", 
                         "src/test/resources/routes/sampleSplitRoute.xml",
-                        "src/test/resources/routes/videoNerRoute_v1.xml",
-                        "src/test/resources/routes/automaticCreation_sampleSplitRoute.xml",
-                        "src/test/resources/routes/sampleRoute.xml" 
+                        "src/test/resources/routes/simple_pipeline.xml" 
                         };
                 try {
                     for (int i =0 ; i< testFiles.length; i++){
@@ -213,12 +209,17 @@ public class MicoRabbitComponentTest extends TestBase {
     static public void init() throws Exception {
         resetDataFolder();
 
+        try{
         micoCamel = new MicoCamel();
         micoCamel.init();
         createTextItem();
         createHtmlItem();
         createImageItem();
         createVideoItem();
+        }catch (Exception e){
+            e.printStackTrace();
+            fail("unable to setup test env");
+        }
    }
     
     @AfterClass
@@ -281,6 +282,7 @@ public class MicoRabbitComponentTest extends TestBase {
         micoCamel.addAsset(content.getBytes(), item, type);
 
         textItemUri = item.getURI().toString();
+        System.out.println("textItem: " + textItemUri);
     }
 
     /**
