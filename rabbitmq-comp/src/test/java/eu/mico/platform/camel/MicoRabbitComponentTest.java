@@ -100,6 +100,19 @@ public class MicoRabbitComponentTest extends TestBase {
     /** test route defined in xml
      * @throws Exception
      */
+    @Test(timeout=20000)
+    public void testSimpleAggregateRoute() throws Exception {
+        MockEndpoint mock1 = getMockEndpoint("mock:result_aggregateSimple_1");
+        mock1.expectedMessageCount(4);
+        MockEndpoint mock2 = getMockEndpoint("mock:result_aggregateSimple_2");
+        mock2.expectedMessageCount(4);
+
+        template.send("direct:aggregateSimple-mimeType=mico/test,syntacticType=A",createExchange());
+        template.send("direct:aggregateSimple-mimeType=mico/test,syntacticType=A",createExchange());
+        assertMockEndpointsSatisfied();
+    }
+
+    
     @Test(timeout=5000)
     public void testParallelFlowsRoute() throws Exception {
         MockEndpoint mock1 = getMockEndpoint("mock:result_parallel_2");
@@ -124,6 +137,11 @@ public class MicoRabbitComponentTest extends TestBase {
 
         template.send("direct:simpleMulticast-mimeType=mico/test,syntacticType=C", createExchange());
         template.send("direct:simpleMulticast-mimeType=mico/test,syntacticType=C", createExchange());
+        assertMockEndpointsSatisfied();
+
+        template.send("direct:mimeType=mico/test2,syntacticType=C", createExchange());
+        mock2.expectedMessageCount(3);
+        mock3.expectedMessageCount(2);
         assertMockEndpointsSatisfied();
     }
 

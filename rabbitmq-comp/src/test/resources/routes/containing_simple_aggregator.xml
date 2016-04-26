@@ -9,7 +9,7 @@
   <route id='workflow-aggregateSimple-pipeline-0'>
     <from uri='direct:workflow-aggregateSimple-pipeline-0'/>
     <pipeline>
-      <to uri='mico-comp:vbox1?serviceId=B-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=B-C'/>
+      <to uri='mico-comp:vbox1?serviceId=B-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=B-C-queue'/>
     </pipeline>
   </route>
   <route id='workflow-aggregateSimple-pipeline-3'>
@@ -35,6 +35,7 @@
       <to uri='direct:workflow-aggregateSimple-pipeline-0'/>
       <to uri="mock:result_aggregateSimple_1"/>
     </aggregate>
+    <to uri="mock:result_aggregateSimple_2"/>
   </route>
 <!--   <bean id= "simpleAggregatorStrategy" class = "eu.mico.platform.camel.aggretation.SimpleAggregationStrategy"> -->
 <!--   </bean> -->

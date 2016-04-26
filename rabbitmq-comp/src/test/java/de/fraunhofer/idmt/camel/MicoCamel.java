@@ -41,6 +41,8 @@ public class MicoCamel {
     protected static AnalysisService extr_2 = new DummyExtractor("B", "text/plain");
     protected static AnalysisService extr_a = new DummyExtractor("A", "B");
     protected static AnalysisService extr_b = new DummyExtractor("B", "C");
+    protected static AnalysisService extr_ab1 = new DummyExtractor("A", "B1","mico-extractor-test","1.0.0","A-B1");
+    protected static AnalysisService extr_ab2 = new DummyExtractor("A", "B2","mico-extractor-test","1.0.0","A-B2");
     protected static AnalysisService extr_c = new DummyExtractor("C1", "D","mico-extractor-test","1.0.0","C1-D-queue");
     protected static AnalysisService extr_d = new DummyExtractor("D", "E","mico-extractor-test","1.0.0","D-E-queue");
     protected static AnalysisService extr_e = new DummyExtractor("C2", "F","mico-extractor-test","1.0.0","C2-F-queue");
@@ -74,6 +76,8 @@ public class MicoCamel {
         eventManager.registerService(extr_2);
         eventManager.registerService(extr_a);
         eventManager.registerService(extr_b);
+        eventManager.registerService(extr_ab1);
+        eventManager.registerService(extr_ab2);
         eventManager.registerService(extr_c);
         eventManager.registerService(extr_d);
         eventManager.registerService(extr_e);
