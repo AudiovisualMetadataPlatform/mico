@@ -66,7 +66,7 @@ var WorkflowPrinter = function() {
 				var extractorId = brokerExtractor.extractorId;
 				var extractorVersion = brokerExtractor.extractorVersion;
 				var modeId = brokerExtractor.modeId;
-				var queueName = modeId;
+				var queueName = 'queue-for-' + modeId;
 
 				extractors = extractors
 						+ XmlElement("to", '', {
@@ -189,7 +189,7 @@ var WorkflowPrinter = function() {
 	 *   <from uri="direct:workflow-'+WORKFLOW_PREFIX+'-pipeline-'+IDENTIFIER"/>
 	 *     <aggregate strategyRef="aggregatorStrategy" completionSize="1">
 	 *       <correlationExpression> 
-	 *         <simple>header.id</simple>
+	 *         <simple>header.mico_item</simple>
 	 *       </correlationExpression> 
 	 *     <to uri="direct:TARGET_PIPELINE"/>
 	 *   </aggregate>
@@ -203,7 +203,7 @@ var WorkflowPrinter = function() {
 	 *   <from uri="direct:workflow-'+WORKFLOW_PREFIX+'-aggregator-'+IDENTIFIER+SUBIDENTIFIER"/>
 	 *     <aggregate strategyRef="aggregatorStrategy" completionSize="1">
 	 *       <correlationExpression>
-	 *         <simple>header.id</simple>
+	 *         <simple>header.mico_item</simple>
 	 *       </correlationExpression> 
 	 *     <to uri="direct:workflow-'+WORKFLOW_PREFIX+'-aggregator-'+IDENTIFIER"/>
 	 * </aggregate> <route>
@@ -214,7 +214,7 @@ var WorkflowPrinter = function() {
 	 *   <from uri="direct:workflow-'+WORKFLOW_PREFIX+'-aggregator-'+IDENTIFIER"/>
 	 *     <aggregate strategyRef="aggregatorStrategy" completionPolicy="COMPLEX">
 	 *     <correlationExpression> 
-	 *       <simple>header.id</simple>  
+	 *       <simple>header.mico_item</simple>  
 	 *     </correlationExpression>
 	 *     <to uri="direct:TARGET_PIPELINE"/>
 	 *   </aggregate>
@@ -232,14 +232,14 @@ var WorkflowPrinter = function() {
 							+ a
 				});
 				var correlationExpression = XmlElement('correlationExpression',
-						'<simple>header.id</simple>');WORKFLOW_PREFIX
+						'<simple>header.mico_item</simple>');WORKFLOW_PREFIX
 				var to = XmlElement('to', '', {
 					uri : 'direct:workflow-' + WORKFLOW_PREFIX + '-pipeline-'
 							+ aggregator.to
 				});
 				var aggregate = XmlElement('aggregate', correlationExpression
 						+ to, {
-					strategyRef : 'aggregatorStrategy',
+					strategyRef : 'simpleAggregatorStrategy',
 					completionSize : '1'
 				})
 
@@ -293,7 +293,7 @@ var WorkflowPrinter = function() {
 				var aggregate = XmlElement('aggregate', correlationExpression
 						+ to, {
 					strategyRef : 'itemAggregatorStrategy',
-					completionSize : '2'
+					completionSize : ''+aggregator.from.length
 				})
 
 				out = out + XmlElement('route', from + aggregate, {
@@ -301,7 +301,7 @@ var WorkflowPrinter = function() {
 				});
 			}
 		}
-		if(out.length > 0)
+		if(false && out.length > 0)
 		out =  out + '' + XmlElement('bean', '', {
 			id : "aggregatorStrategy",
 			class : "org.apache.camel.processor.BodyInAggregatingStrategy"
@@ -316,7 +316,7 @@ var WorkflowPrinter = function() {
 	 * id="workflow-'+WORKFLOW_PREFIX+'-starting-point-for-pipeline-'+IDENTIFIER"
 	 * <from uri="direct:MIME_TYPE"/> <aggregate
 	 * strategyRef="aggregatorStrategy" completionSize="1">
-	 * <correlationExpression> <simple>header.id</simple>
+	 * <correlationExpression> <simple>header.mico_item</simple>
 	 * </correlationExpression> <to uri="direct:TARGET"/> </aggregate> </route>
 	 * 
 	 */
@@ -341,18 +341,10 @@ var WorkflowPrinter = function() {
 							var from = XmlElement('from', '', {
 								uri : 'direct:mimeType=' + mimeType + ',syntacticType=' + Object.keys(pipe[0].outputSyntacticTypes)[0]
 							});
-							var correlationExpression = XmlElement(
-									'correlationExpression',
-									'<simple>header.id</simple>');
 							var to = XmlElement('to', '', {
 								uri : 'direct:workflow-' + WORKFLOW_PREFIX
 										+ '-pipeline-' + p
 							});
-							var aggregate = XmlElement('aggregate',
-									correlationExpression + to, {
-										strategyRef : 'aggregatorStrategy',
-										completionSize : '1'
-									})
 
 							out = out
 									+ XmlElement(
