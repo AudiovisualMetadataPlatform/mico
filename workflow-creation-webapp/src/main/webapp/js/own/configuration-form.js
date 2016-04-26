@@ -348,8 +348,7 @@ var Form=function(extractorNodeId){
 					    errors: {
 					    	range: 'parameter out of defined range'
 					    }
-					}
-					);
+					});
 					
 				}
 				else{
