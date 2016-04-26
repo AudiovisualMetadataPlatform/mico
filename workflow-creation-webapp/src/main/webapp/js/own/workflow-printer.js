@@ -67,14 +67,22 @@ var WorkflowPrinter = function() {
 				var extractorVersion = brokerExtractor.extractorVersion;
 				var modeId = brokerExtractor.modeId;
 				var queueName = modeId;
+				
+				var uri = "mico-comp:vbox1?serviceId=" + queueName
+						+ "&amp;extractorId=" + extractorId
+						+ "&amp;extractorVersion="
+						+ extractorVersion + "&amp;modeId="
+						+ modeId;
+				
+				//add parameter selection to the uri, if any are present
+				var params = pipe[node].form.getSelectedParameters();
+				if(Object.size(params)>0){
+					uri = uri + "&amp;parameters=" + JSON.stringify(params)
+				}
 
 				extractors = extractors
 						+ XmlElement("to", '', {
-							uri : "mico-comp:vbox1?serviceId=" + queueName
-									+ "&amp;extractorId=" + extractorId
-									+ "&amp;extractorVersion="
-									+ extractorVersion + "&amp;modeId="
-									+ modeId
+							uri : uri
 						});
 			}
 		}
