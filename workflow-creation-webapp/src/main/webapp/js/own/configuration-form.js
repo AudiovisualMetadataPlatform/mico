@@ -235,14 +235,21 @@ var Form=function(extractorNodeId){
 			  }
 			  else if(allowedRange.length>0)
 			  {
-				  //if input list of ranges
+				  //if input list of ranges				  		  
 
+				  
 				  var range2String=function(range){
+					  
+					  //create an easy access for the values of minIncl and maxIncl
+					  for (var contentIdx in range.content ){
+						  range[range.content[contentIdx].name]=range.content[contentIdx].value;
+					  }
+					  
 					  var out = 'x';
-					  if(range.maxIncl != null) 
+					  if(range.maxIncl != undefined) 
 					  {
 						  out=out+' ≤ '+range.maxIncl;
-						  if(range.minIncl != null){
+						  if(range.minIncl != undefined){
 							  out= range.minIncl + ' ≤ ' + out;
 						  }
 					  }
@@ -256,6 +263,8 @@ var Form=function(extractorNodeId){
 				  for(var r=1; r < allowedRange.length ; r++){
 					  validRangeDescription=validRangeDescription+' OR ( '+range2String(allowedRange[r])+' )';
 				  }
+				  
+				  
 
 					
 				  
@@ -493,6 +502,11 @@ var Form=function(extractorNodeId){
 		
 		return out;
 	};
+	
+	this.getSelectedParameters = function(){
+		var out={};
+		var inputs=this.thumbnail.getElementsByClassName('extractor-param-data');
+	}
 	
 	this.init(extractorNodeId);
 };
