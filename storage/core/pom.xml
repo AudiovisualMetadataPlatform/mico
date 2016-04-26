@@ -212,6 +212,12 @@
                     <groupId>commons-configuration</groupId>
                     <artifactId>commons-configuration</artifactId>
                 </exclusion>
+                
+                <!-- Exclude code quality dependencies -->
+                <exclusion>
+                    <groupId>com.google.code.findbugs</groupId>
+                    <artifactId>jsr305</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
