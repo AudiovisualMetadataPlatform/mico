@@ -1,7 +1,7 @@
 #This is the base for a broker image, including all dependencies and configuration files.
 #Only the broker itself (/usr/share/mico/broker.war) is missing.
 
-FROM mico/mico-base
+FROM mico/mico-base:dev
 MAINTAINER Horst Stadler "horst.stadler@salzburgresearch.at"
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -17,7 +17,8 @@ RUN apt-get -y install rabbitmq-server && \
     service rabbitmq-server stop
 
 #Install dependencies of mico-broker, excluding mico-marmotta and mico-persistence
-RUN apt-get -y install `apt-cache depends mico-broker | awk '/[^\|]Depends:/{print$2}' |grep -v mico-marmotta | grep -v mico-persistence`
+RUN apt-get -t jessie-backports -y install openjdk-8-jre-headless
+RUN apt-get -y install `apt-cache depends mico-broker | awk '/[^\|]Depends:/{print$2}' |grep -v \< |grep -v mico-marmotta | grep -v mico-persistence`
 
 #Config Tomcat
 COPY create-broker-config.sh /
@@ -32,6 +33,6 @@ COPY run-tomcat7.sh run-mico-broker.sh /
 #Cleanup
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-#Tomcat, RabbitMQ port including Web-Interface
-EXPOSE 8080 5672 15672
+#Tomcat and RabbitMQ port
+EXPOSE 8080 5672
 ENTRYPOINT ["/run-mico-broker.sh"]
