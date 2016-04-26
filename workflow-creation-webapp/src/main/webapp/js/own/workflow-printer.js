@@ -339,7 +339,7 @@ var WorkflowPrinter = function() {
 							var mimeType = mimeTypes[j]
 
 							var from = XmlElement('from', '', {
-								uri : 'direct:mimeType=' + mimeType + ',syntacticType=' + Object.keys(pipe[0].outputSyntacticTypes)[0]
+								uri : 'direct:workflow-' + WORKFLOW_PREFIX + ',mimeType=' + mimeType + ',syntacticType=' + Object.keys(pipe[0].outputSyntacticTypes)[0]
 							});
 							var correlationExpression = XmlElement(
 									'correlationExpression',
@@ -403,7 +403,7 @@ var WorkflowPrinter = function() {
 						
 						for(var mimeType in mimeTypesRequestedBy) {
 							var from = XmlElement('from', '', {
-								uri : 'direct:mimeType=' + mimeType + ',syntacticType=' + syntacticType
+								uri : 'direct:workflow-' + WORKFLOW_PREFIX + ',mimeType=' + mimeType + ',syntacticType=' + syntacticType
 							});
 							var to = XmlElement('multicast', this.createMulticastTarget(Workflow.pipelines,{from : multicast.from, 
 								                                                         to: mimeTypesRequestedBy[mimeType] }));
@@ -470,7 +470,7 @@ var WorkflowPrinter = function() {
 							var mimeType = mimeTypes[j]
 
 							var from = XmlElement('from', '', {
-								uri : 'direct:mimeType=' + mimeType + ',syntacticType=' + syntacticType
+								uri : 'direct:workflow-' + WORKFLOW_PREFIX + ',mimeType=' + mimeType + ',syntacticType=' + syntacticType
 							});
 							var xmlto = XmlElement('to', '', {
 								uri : 'direct:workflow-' + WORKFLOW_PREFIX + '-aggregator-' + to
