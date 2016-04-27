@@ -24,3 +24,8 @@ add_library(${TARGET_NAME} SHARED
 target_link_libraries(${TARGET_NAME}
   ${Boost_LIBRARIES}
 )
+
+set_target_properties(micoapicommons PROPERTIES VERSION "${MICO_PLATFORM_VERSION}" SOVERSION "${MICO_PLATFORM_SOVERSION}")
+
+install (TARGETS micoapicommons DESTINATION lib)
+install (FILES TimeInfo.h FileOperations.h DESTINATION include)
