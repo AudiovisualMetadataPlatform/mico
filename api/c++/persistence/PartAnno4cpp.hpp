@@ -35,11 +35,15 @@ namespace mico {
         }
 
         jnipp::LocalRef<Body> getBody() {
-          return m_partMMM->getBody();
+          jnipp::LocalRef<Body> jBody = m_partMMM->getBody();
+          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+          assert((jobject) jBody);
+          return jBody;
         }
 
         void setBody(const jnipp::LocalRef<Body> &body) {
           m_partMMM->setBody(body);
+          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
         }
 
         std::list< jnipp::LocalRef<Target> > getTargets();
@@ -48,6 +52,7 @@ namespace mico {
 
         void addTarget(const jnipp::LocalRef<Target> &target) {
           m_partMMM->addTarget(target);
+          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
         }
 
         std::list< std::shared_ptr<Resource> > getInputs();
@@ -56,14 +61,20 @@ namespace mico {
 
         void addInput(Resource& input) {
           m_partMMM->addInput( input.getRDFObject() );
+          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
         }
 
          std::string getSerializedAt() {
-          return static_cast< jnipp::LocalRef<Annotation> >(m_partMMM)->getSerializedAt()->std_str();
+          std::string sSerializedAt = static_cast< jnipp::LocalRef<Annotation> >(m_partMMM)->getSerializedAt()->std_str();
+          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+          return sSerializedAt;
         }
 
         jnipp::LocalRef<Agent> getSerializedBy() {
-          return static_cast< jnipp::LocalRef<Annotation> >(m_partMMM)->getSerializedBy();
+          jnipp::LocalRef<Agent> jAgent = static_cast< jnipp::LocalRef<Annotation> >(m_partMMM)->getSerializedBy();
+          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+          assert((jobject) jAgent);
+          return jAgent;
         }
 
 
