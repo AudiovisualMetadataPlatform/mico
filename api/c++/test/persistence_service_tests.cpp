@@ -243,15 +243,15 @@ int main(int argc, char **argv) {
             ss_extractor_name << "http://my_test_extractor___" << retrievedItem;
 
 
-            std::shared_ptr<mico::persistence::model::Part> part1  = retrievedItem->createPart(mico::rdf::model::URI(ss_extractor_name.str()));
-            std::shared_ptr<mico::persistence::model::Part> part2  = retrievedItem->createPart(mico::rdf::model::URI(ss_extractor_name.str()));
+//            std::shared_ptr<mico::persistence::model::Part> part1  = retrievedItem->createPart(mico::rdf::model::URI(ss_extractor_name.str()));
+//            std::shared_ptr<mico::persistence::model::Part> part2  = retrievedItem->createPart(mico::rdf::model::URI(ss_extractor_name.str()));
 
-            assert(part1->getSerializedAt().length());
-            assert(part2->getSerializedAt().length());
+//            assert(part1->getSerializedAt().length());
+//            assert(part2->getSerializedAt().length());
 
-            std::string createdBy = part1->getSerializedBy()->toString()->std_str();
+//            std::string createdBy = part1->getSerializedBy()->toString()->std_str();
 
-            assert(createdBy.compare( ss_extractor_name.str() ) == 0);
+//            assert(createdBy.compare( ss_extractor_name.str() ) == 0);
         }
 
         // check item deletion

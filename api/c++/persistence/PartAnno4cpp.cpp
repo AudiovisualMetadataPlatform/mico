@@ -4,17 +4,21 @@
 namespace mico {
   namespace persistence {
     namespace model {
-      std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > PartAnno4cpp::getTargets() {
-        std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > list;
 
-        jnipp::LocalRef<JavaUtilSet> jset = m_partMMM->getTarget();
-        jnipp::LocalRef< jnipp::Array<JavaLangObject> > jarray = static_cast< jnipp::LocalRef<JavaUtilHashSet> >(jset)->toArray();
-        for (jsize i = 0; i < jarray->length(); i++) {
-          jnipp::LocalRef<JavaLangObject> jobject = jarray->get(i);
-          list.push_back( jobject );
-        }
-        return list;
+      jnipp::LocalRef<Body> PartAnno4cpp::getBody() {
+        jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+        jnipp::LocalRef<Body> jBody = m_partMMM->getBody();
+        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        assert((jobject) jBody);
+        return jBody;
       }
+
+      void PartAnno4cpp::setBody(const jnipp::LocalRef<Body> &body) {
+        jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+        m_partMMM->setBody(body);
+        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+      }
+
 
       void PartAnno4cpp::setTargets(std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > targets)
       {
@@ -23,6 +27,12 @@ namespace mico {
           jtargetSet->add(*iter);
         }
         m_partMMM->setTarget(jtargetSet);
+      }
+
+      void PartAnno4cpp::addTarget(const jnipp::LocalRef<Target> &target) {
+        jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+        m_partMMM->addTarget(target);
+        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
       }
 
       std::list< std::shared_ptr<Resource> > PartAnno4cpp::getInputs()
@@ -53,7 +63,39 @@ namespace mico {
         m_partMMM->setInputs(jresourceMMMSet);
       }
 
+      void PartAnno4cpp::addInput(Resource& input) {
+        jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+        m_partMMM->addInput( input.getRDFObject() );
+        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+      }
 
+       std::string PartAnno4cpp::getSerializedAt() {
+         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+        std::string sSerializedAt = static_cast< jnipp::LocalRef<Annotation> >(m_partMMM)->getSerializedAt()->std_str();
+        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        return sSerializedAt;
+      }
+
+      jnipp::LocalRef<Agent> PartAnno4cpp::getSerializedBy() {
+        jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+        jnipp::LocalRef<Agent> jAgent = static_cast< jnipp::LocalRef<Annotation> >(m_partMMM)->getSerializedBy();
+        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        assert((jobject) jAgent);
+        return jAgent;
+      }
+
+
+      std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > PartAnno4cpp::getTargets() {
+        std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > list;
+
+        jnipp::LocalRef<JavaUtilSet> jset = m_partMMM->getTarget();
+        jnipp::LocalRef< jnipp::Array<JavaLangObject> > jarray = static_cast< jnipp::LocalRef<JavaUtilHashSet> >(jset)->toArray();
+        for (jsize i = 0; i < jarray->length(); i++) {
+          jnipp::LocalRef<JavaLangObject> jobject = jarray->get(i);
+          list.push_back( jobject );
+        }
+        return list;
+      }
     }
   }
 }
