@@ -39,7 +39,7 @@ namespace mico {
 
           virtual void setInputs(std::list< std::shared_ptr<Resource> > inputs) = 0;
 
-          virtual void addInput(Resource& input) = 0;
+          virtual void addInput(std::shared_ptr<Resource> input) = 0;
 
           virtual std::string getSerializedAt() = 0;
 

@@ -1,6 +1,13 @@
 #include "PartAnno4cpp.hpp"
 #include "ItemAnno4cpp.hpp"
 
+using namespace jnipp::java::lang;
+using namespace jnipp::org::openrdf::model::impl;
+using namespace jnipp::eu::mico::platform::anno4j::model;
+using namespace jnipp::com::github::anno4j::model;
+using namespace jnipp::com::github::anno4j::model::impl;
+
+
 namespace mico {
   namespace persistence {
     namespace model {
@@ -54,7 +61,7 @@ namespace mico {
         return resourceSet;
       }
 
-      void PartAnno4cpp::setInputs(std::list< std::shared_ptr<Resource> > inputs)
+      void PartAnno4cpp::setInputs(std::list< std::shared_ptr<mico::persistence::model::Resource> > inputs)
       {
         jnipp::LocalRef< JavaUtilHashSet > jresourceMMMSet = JavaUtilHashSet::construct();
         for(auto iter = inputs.begin(); iter != inputs.end(); iter++) {
@@ -63,9 +70,9 @@ namespace mico {
         m_partMMM->setInputs(jresourceMMMSet);
       }
 
-      void PartAnno4cpp::addInput(Resource& input) {
+      void PartAnno4cpp::addInput( std::shared_ptr<mico::persistence::model::Resource> input) {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-        m_partMMM->addInput( input.getRDFObject() );
+        m_partMMM->addInput( input->getRDFObject() );
         checkJavaExcpetionNoThrow(m_jnippErrorMessage);
       }
 

@@ -5,11 +5,6 @@
 #include "AssetAnno4cpp.hpp"
 #include "ResourceAnno4cpp.hpp"
 
-using namespace jnipp::java::lang;
-using namespace jnipp::org::openrdf::model::impl;
-using namespace jnipp::eu::mico::platform::anno4j::model;
-using namespace jnipp::com::github::anno4j::model;
-using namespace jnipp::com::github::anno4j::model::impl;
 
 namespace mico {
   namespace persistence {
@@ -20,10 +15,11 @@ namespace mico {
       private:
         PersistenceService& m_persistenceService;
         std::shared_ptr<Item> m_item;
-        jnipp::GlobalRef<PartMMM> m_partMMM;
+        jnipp::GlobalRef<jnipp::eu::mico::platform::anno4j::model::PartMMM> m_partMMM;
 
       public:
-        PartAnno4cpp(jnipp::Ref<PartMMM> partMMM, std::shared_ptr<Item> item, PersistenceService& persistenceService)
+        PartAnno4cpp(jnipp::Ref<jnipp::eu::mico::platform::anno4j::model::PartMMM> partMMM,
+                     std::shared_ptr<Item> item, PersistenceService& persistenceService)
           : ResourceAnno4cpp(partMMM, persistenceService),
             m_persistenceService(persistenceService),
             m_item(item),
@@ -34,25 +30,25 @@ namespace mico {
           return m_item;
         }
 
-        jnipp::LocalRef<Body> getBody();
+        jnipp::LocalRef<jnipp::com::github::anno4j::model::Body> getBody();
 
-        void setBody(const jnipp::LocalRef<Body> &body);
+        void setBody(const jnipp::LocalRef<jnipp::com::github::anno4j::model::Body> &body);
 
-        std::list< jnipp::LocalRef<Target> > getTargets();
+        std::list< jnipp::LocalRef<jnipp::com::github::anno4j::model::Target> > getTargets();
 
-        void setTargets(std::list< jnipp::LocalRef<Target> > targets);
+        void setTargets(std::list< jnipp::LocalRef<jnipp::com::github::anno4j::model::Target> > targets);
 
-        void addTarget(const jnipp::LocalRef<Target> &target);
+        void addTarget(const jnipp::LocalRef<jnipp::com::github::anno4j::model::Target> &target);
 
         std::list< std::shared_ptr<Resource> > getInputs();
 
         void setInputs(std::list<std::shared_ptr<Resource> > inputs);
 
-        void addInput(Resource& input);
+        void addInput(std::shared_ptr<Resource> input);
 
          std::string getSerializedAt();
 
-        jnipp::LocalRef<Agent> getSerializedBy();
+        jnipp::LocalRef<jnipp::com::github::anno4j::model::Agent> getSerializedBy();
 
       };
     }
