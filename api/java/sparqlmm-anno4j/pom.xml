@@ -34,7 +34,18 @@
             <groupId>com.github.tkurz</groupId>
             <artifactId>sparql-mm</artifactId>
             <version>${sparqlmm.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>xml-apis</artifactId>
+                    <groupId>xmlParserAPIs</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
+        <!--<dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <version>2.0.2</version>
+        </dependency>-->
         <dependency>
             <groupId>org.apache.marmotta</groupId>
             <artifactId>ldpath-core</artifactId>

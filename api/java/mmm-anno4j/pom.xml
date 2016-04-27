@@ -70,11 +70,11 @@
 
     <dependencies>
         <!-- add sparql-mm functions -->
-        <dependency>
+        <!-- dependency> - this is a maven plug-in
             <groupId>eu.mico-project.platform</groupId>
             <artifactId>sparqlmm-anno4j</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency -->
         <dependency>
             <groupId>com.github.tkurz</groupId>
             <artifactId>sparql-mm</artifactId>
