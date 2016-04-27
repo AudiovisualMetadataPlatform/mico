@@ -4,6 +4,12 @@
 #include "Part.hpp"
 #include "AssetAnno4cpp.hpp"
 
+using namespace jnipp::java::lang;
+using namespace jnipp::org::openrdf::model::impl;
+using namespace jnipp::eu::mico::platform::anno4j::model;
+using namespace jnipp::com::github::anno4j::model;
+using namespace jnipp::com::github::anno4j::model::impl;
+
 namespace mico {
   namespace persistence {
     namespace model {
@@ -13,10 +19,10 @@ namespace mico {
       private:
         PersistenceService& m_persistenceService;
         std::shared_ptr<Item> m_item;
-        jnipp::GlobalRef<EuMicoPlatformAnno4jModelPartMMM> m_partMMM;
+        jnipp::GlobalRef<PartMMM> m_partMMM;
 
       public:
-        PartAnno4cpp(jnipp::Ref<EuMicoPlatformAnno4jModelPartMMM> partMMM, std::shared_ptr<Item> item, PersistenceService& persistenceService)
+        PartAnno4cpp(jnipp::Ref<PartMMM> partMMM, std::shared_ptr<Item> item, PersistenceService& persistenceService)
           : m_persistenceService(persistenceService),
             m_item(item),
             m_partMMM(partMMM)
@@ -27,45 +33,45 @@ namespace mico {
         }
 
         mico::rdf::model::URI getURI() {
-          jnipp::LocalRef<OrgOpenrdfModelImplURIImpl> juri = OrgOpenrdfModelImplURIImpl::construct( static_cast< jnipp::LocalRef<ComGithubAnno4jModelImplResourceObject> >(m_partMMM)->getResourceAsString() );
+          jnipp::LocalRef<URIImpl> juri = URIImpl::construct( static_cast< jnipp::LocalRef<ResourceObject> >(m_partMMM)->getResourceAsString() );
           return mico::rdf::model::URI( juri->stringValue()->std_str() );
         }
 
-        jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> getRDFObject() {
-          return static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_partMMM);
+        jnipp::LocalRef<ResourceMMM> getRDFObject() {
+          return static_cast< jnipp::LocalRef<ResourceMMM> >(m_partMMM);
         }
 
         std::string getSyntacticalType() {
-          return static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_partMMM)->getSyntacticalType()->std_str();
+          return static_cast< jnipp::LocalRef<ResourceMMM> >(m_partMMM)->getSyntacticalType()->std_str();
         }
 
         void setSyntacticalType(std::string syntacticalType) {
-          jnipp::LocalRef<JavaLangString> jsyntacticalType = JavaLangString::create(syntacticalType);
-          static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_partMMM)->setSyntacticalType(jsyntacticalType);
+          jnipp::LocalRef<String> jsyntacticalType = String::create(syntacticalType);
+          static_cast< jnipp::LocalRef<ResourceMMM> >(m_partMMM)->setSyntacticalType(jsyntacticalType);
         }
 
         std::string getSemanticType() {
-          return static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_partMMM)->getSemanticType()->std_str();
+          return static_cast< jnipp::LocalRef<ResourceMMM> >(m_partMMM)->getSemanticType()->std_str();
         }
 
         void setSemanticType(std::string semanticType) {
-          jnipp::LocalRef<JavaLangString> jsemanticType = JavaLangString::create(semanticType);
-          static_cast< jnipp::LocalRef<EuMicoPlatformAnno4jModelResourceMMM> >(m_partMMM)->setSemanticType(jsemanticType);
+          jnipp::LocalRef<String> jsemanticType = String::create(semanticType);
+          static_cast< jnipp::LocalRef<ResourceMMM> >(m_partMMM)->setSemanticType(jsemanticType);
         }
 
-        jnipp::LocalRef<ComGithubAnno4jModelBody> getBody() {
+        jnipp::LocalRef<Body> getBody() {
           return m_partMMM->getBody();
         }
 
-        void setBody(const jnipp::LocalRef<ComGithubAnno4jModelBody> &body) {
+        void setBody(const jnipp::LocalRef<Body> &body) {
           m_partMMM->setBody(body);
         }
 
-        std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > getTargets();
+        std::list< jnipp::LocalRef<Target> > getTargets();
 
-        void setTargets(std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > targets);
+        void setTargets(std::list< jnipp::LocalRef<Target> > targets);
 
-        void addTarget(const jnipp::LocalRef<ComGithubAnno4jModelTarget> &target) {
+        void addTarget(const jnipp::LocalRef<Target> &target) {
           m_partMMM->addTarget(target);
         }
 
@@ -78,11 +84,11 @@ namespace mico {
         }
 
          std::string getSerializedAt() {
-          return static_cast< jnipp::LocalRef<ComGithubAnno4jModelAnnotation> >(m_partMMM)->getSerializedAt()->std_str();
+          return static_cast< jnipp::LocalRef<Annotation> >(m_partMMM)->getSerializedAt()->std_str();
         }
 
-        jnipp::LocalRef<ComGithubAnno4jModelAgent> getSerializedBy() {
-          return static_cast< jnipp::LocalRef<ComGithubAnno4jModelAnnotation> >(m_partMMM)->getSerializedBy();
+        jnipp::LocalRef<Agent> getSerializedBy() {
+          return static_cast< jnipp::LocalRef<Annotation> >(m_partMMM)->getSerializedBy();
         }
 
 
