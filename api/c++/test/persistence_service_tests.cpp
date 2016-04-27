@@ -24,6 +24,7 @@
 
 #include "PersistenceService.hpp"
 #include "Item.hpp"
+#include "Part.hpp"
 #include "ContentItem.hpp"
 #include "SPARQLUtil.hpp"
 
@@ -252,6 +253,22 @@ int main(int argc, char **argv) {
             std::string createdBy = part1->getSerializedBy()->toString()->std_str();
 
             assert(createdBy.compare( ss_extractor_name.str() ) == 0);
+
+        }
+
+        //part retrieval and body creation
+        for (auto itemURI : itemURIS) {
+            mico::rdf::model::URI asURI(itemURI);
+
+            std::shared_ptr<mico::persistence::model::Item> retrievedItem  =
+                        persistenceServiceTest.svc->getItem(asURI);
+
+            assert(retrievedItem);
+
+            std::list< std::shared_ptr<mico::persistence::model::Part> > itemParts = retrievedItem->getParts();
+
+            assert(itemParts.size() == 2);
+
         }
 
         // check item deletion

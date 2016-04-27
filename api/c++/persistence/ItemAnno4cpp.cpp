@@ -95,20 +95,30 @@ namespace mico {
         return part;
       }
 
-      std::list< std::shared_ptr<Part> > ItemAnno4cpp::getParts()
+      std::list< std::shared_ptr<mico::persistence::model::Part> > ItemAnno4cpp::getParts()
       {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-        std::list< std::shared_ptr<Part> > partSet;
-        jnipp::LocalRef<String> jsuri = String::create(this->getURI().stringValue());
-        jnipp::LocalRef<URIImpl> juri = URIImpl::construct( jsuri );
-        jnipp::LocalRef<List> jpartList = m_persistenceService.getAnno4j()->findAll(PartMMM::clazz(), juri);
-        for (jsize i = 0; i < jpartList->size(); i++) {
-          jnipp::LocalRef<Object> jobject = jpartList->get(i);
-          std::shared_ptr<PartAnno4cpp> part(new PartAnno4cpp(jobject, std::dynamic_pointer_cast<Item>( shared_from_this() ), m_persistenceService));
-          partSet.push_back( part );
+        std::list< std::shared_ptr<Part> > nativePartSet;
+
+        jnipp::LocalRef<Set> jpartSet = m_itemMMM->getParts();
+
+        jnipp::LocalRef< jnipp::Array<JavaLangObject> > jpartArray = jpartSet->toArray();
+        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        assert((jobject) jpartArray);
+
+        LOG_DEBUG("Retrieved %d part(s) in array for item %s", jpartArray->length(), this->getURI().stringValue().c_str());
+
+        for (auto it = jpartArray->begin();  it!= jpartArray->end(); ++it) {
+          jnipp::LocalRef<Object> jObject = *it;
+          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+          assert((jobject) jObject);
+          std::shared_ptr<Part> part =
+              std::make_shared<PartAnno4cpp> (jObject, std::dynamic_pointer_cast<Item>( shared_from_this() ), m_persistenceService);
+
+          nativePartSet.push_back( part );
         }
         checkJavaExcpetionNoThrow(m_jnippErrorMessage);
-        return partSet;
+        return nativePartSet;
       }
     }
   }
