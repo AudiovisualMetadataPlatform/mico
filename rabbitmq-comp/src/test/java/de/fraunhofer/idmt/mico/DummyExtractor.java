@@ -30,6 +30,7 @@ import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 
@@ -39,6 +40,7 @@ public class DummyExtractor implements AnalysisService {
     private boolean called = false;
     private String source, target;
     private String extractorId, version, mode;
+    private Map<String,String> parameters;
 
     private static SimpleDateFormat isodate = new SimpleDateFormat("yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'", DateFormatSymbols.getInstance(Locale.US));
     static {
@@ -85,7 +87,7 @@ public class DummyExtractor implements AnalysisService {
     }
 
     @Override
-    public void call(AnalysisResponse resp, Item item, java.util.List<Resource> objs, java.util.Map<String,String> params) throws AnalysisException ,IOException {
+    public void call(AnalysisResponse resp, Item item, java.util.List<Resource> objs, Map<String,String> params) throws AnalysisException ,IOException {
         if (item == null) {
             log.warn("Item is null");
             return;
@@ -98,6 +100,7 @@ public class DummyExtractor implements AnalysisService {
             log.warn("object is null");
             return;
         }
+        parameters = params;
         Resource obj = objs.get(0);
         try {
             if (!obj.hasAsset()) {
@@ -153,6 +156,14 @@ public class DummyExtractor implements AnalysisService {
             throw new AnalysisException("could not access triple store");
         }
 
+    }
+
+    public Map<String,String> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Map<String,String> parameters) {
+        this.parameters = parameters;
     }
 
     @Iri("http://example.org/services/dummy-exctractor-body")

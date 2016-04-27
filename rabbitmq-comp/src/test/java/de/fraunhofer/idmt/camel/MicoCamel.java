@@ -34,7 +34,6 @@ public class MicoCamel {
 
     protected EventManager eventManager;
     protected Connection connection;
-//    protected Channel channel;
 
     protected static AnalysisService extr1 = new DummyExtractor("A","B","mico-extractor-test","1.0.0","A-B-queue");
     protected static AnalysisService extr2 = new DummyExtractor("B","C","mico-extractor-test","1.0.0","B-C-queue");
@@ -141,10 +140,6 @@ public class MicoCamel {
      * @throws IOException
      */
     public void shutdown() throws IOException {
-//        channel.clearConfirmListeners();
-//        channel.clearFlowListeners();
-//        channel.clearReturnListeners();
-//        channel.close();
         connection.clearBlockedListeners();
         connection.close();
         eventManager.shutdown();
