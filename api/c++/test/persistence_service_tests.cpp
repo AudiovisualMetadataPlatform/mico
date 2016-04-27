@@ -256,7 +256,8 @@ int main(int argc, char **argv) {
 
         }
 
-        //part retrieval and body creation
+        //part retrieval and body creation - BIG ITEM LOOP!!
+
         for (auto itemURI : itemURIS) {
             mico::rdf::model::URI asURI(itemURI);
 
@@ -274,12 +275,30 @@ int main(int argc, char **argv) {
 
             // iterate parts, get uri retrieve part with URI and compare if same
             for (std::shared_ptr<mico::persistence::model::Part> part : itemParts) {
+
+              // existing parts
               std::shared_ptr<mico::persistence::model::Resource> partResource =
                   std::dynamic_pointer_cast<mico::persistence::model::Resource>(part);
               std::shared_ptr<mico::persistence::model::Resource> p_retrieved_as_res =
                   std::dynamic_pointer_cast<mico::persistence::model::Resource>(retrievedItem->getPart(partResource->getURI()));
               assert(partResource->getURI().stringValue().compare(partResource->getURI().stringValue()) == 0);
+
+              part->addInput(std::dynamic_pointer_cast<mico::persistence::model::Resource>(retrievedItem));
+
+              std::list< std::shared_ptr<mico::persistence::model::Resource> > partInputResources =  part->getInputs();
+
+              assert(partInputResources.size() == 1);
+
             }
+
+            // non existing parts check
+            std::shared_ptr<mico::persistence::model::Part> notExistingPart  =
+                retrievedItem->getPart(mico::rdf::model::URI("http://does_not_exist_at_all"));
+
+
+
+
+            assert(!notExistingPart);
 
         }
 
