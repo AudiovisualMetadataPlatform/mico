@@ -15,10 +15,7 @@ namespace mico {
 
       class Item;
 
-      /**
-       * Binary content, offered through inputstreams and outputstreams. Can be used for representing any kind of non-RDF
-       * content.
-       */
+
       class Part
       {
         public:
@@ -28,15 +25,15 @@ namespace mico {
            */
           virtual std::shared_ptr<Item> getItem() = 0;
 
-          virtual jnipp::LocalRef<ComGithubAnno4jModelBody> getBody() = 0;
+          virtual jnipp::LocalRef<jnipp::com::github::anno4j::model::Body> getBody() = 0;
 
-          virtual void setBody(const jnipp::LocalRef<ComGithubAnno4jModelBody> &body) = 0;
+          virtual void setBody(const jnipp::LocalRef<jnipp::com::github::anno4j::model::Body> &body) = 0;
 
-          virtual std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > getTargets() = 0;
+          virtual std::list< jnipp::LocalRef<jnipp::com::github::anno4j::model::Target> > getTargets() = 0;
 
-          virtual void setTargets(std::list< jnipp::LocalRef<ComGithubAnno4jModelTarget> > targets) = 0;
+          virtual void setTargets(std::list< jnipp::LocalRef<jnipp::com::github::anno4j::model::Target> > targets) = 0;
 
-          virtual void addTarget(const jnipp::LocalRef<ComGithubAnno4jModelTarget> &target) = 0;
+          virtual void addTarget(const jnipp::LocalRef<jnipp::com::github::anno4j::model::Target> &target) = 0;
 
           virtual std::list< std::shared_ptr<Resource> > getInputs() = 0;
 
@@ -46,7 +43,7 @@ namespace mico {
 
           virtual std::string getSerializedAt() = 0;
 
-          jnipp::LocalRef<ComGithubAnno4jModelAgent> getSerializedBy();
+          jnipp::LocalRef<jnipp::com::github::anno4j::model::Agent> getSerializedBy();
       };
     }
   }

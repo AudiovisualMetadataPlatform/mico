@@ -34,11 +34,6 @@ namespace mico {
           return m_item;
         }
 
-        mico::rdf::model::URI getURI() {
-          jnipp::LocalRef<URIImpl> juri = URIImpl::construct( static_cast< jnipp::LocalRef<ResourceObject> >(m_partMMM)->getResourceAsString() );
-          return mico::rdf::model::URI( juri->stringValue()->std_str() );
-        }
-
         jnipp::LocalRef<Body> getBody() {
           return m_partMMM->getBody();
         }
