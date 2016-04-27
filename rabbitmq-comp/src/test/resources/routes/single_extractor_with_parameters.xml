@@ -1,0 +1,13 @@
+<routes xmlns='http://camel.apache.org/schema/spring'>
+  <route id='workflow-simpleParams-starting-point-for-pipeline-0-mimeType=video/mp4,syntacticType=mico:Video'>
+    <from uri='direct:workflow-simpleParams,mimeType=video/mp4,syntacticType=mico:Video'/>
+    <to uri='direct:workflow-simpleParams-pipeline-0'/>
+  </route>
+  <route id='workflow-simpleParams-pipeline-0'>
+    <from uri='direct:workflow-simpleParams-pipeline-0'/>
+    <pipeline>
+      <to uri="mico-comp:vbox1?serviceId=ParamTest&amp;extractorId=parameter-selection-test&amp;extractorVersion=1.0.0&amp;modeId=ParamTest&amp;parameters={&quot;value-param-0&quot;:&quot;8000&quot;,&quot;value-param-1&quot;:&quot;8000&quot;,&quot;value-param-2&quot;:&quot;_8kHz&quot;,&quot;value-param-3&quot;:&quot;enabled&quot;,&quot;value-param-4&quot;:&quot;1&quot;,&quot;value-param-5&quot;:&quot;3,7,56&quot;}"/>
+      <to uri="mock:result_simpleParams"/>
+    </pipeline>
+  </route>
+</routes>

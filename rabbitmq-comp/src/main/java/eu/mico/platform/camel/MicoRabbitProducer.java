@@ -1,6 +1,10 @@
 package eu.mico.platform.camel;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.camel.Exchange;
@@ -10,6 +14,8 @@ import org.apache.camel.impl.DefaultProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
@@ -18,6 +24,7 @@ import com.rabbitmq.client.ShutdownSignalException;
 
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.event.model.Event.AnalysisRequest;
+import eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry;
 
 /**
  * The MicoRabbitProducer produces mico analyze events 
@@ -30,11 +37,29 @@ public class MicoRabbitProducer extends DefaultProducer {
     private static final Logger LOG = LoggerFactory.getLogger(MicoRabbitProducer.class);
     private MicoRabbitEndpoint endpoint;
     private String queueId;
+    private Map<String,String> parameters = new HashMap<String, String>();
+    private ObjectMapper mapper = new ObjectMapper();
 
     public MicoRabbitProducer(MicoRabbitEndpoint endpoint) {
         super(endpoint);
         this.endpoint = endpoint;
         this.queueId = endpoint.getQueueId();
+        readParamsFromEndpoint();
+    }
+
+    private void readParamsFromEndpoint() {
+        String paramString = endpoint.getParameters();
+        if(paramString != null && paramString.length() > 1){
+            try {
+                log.info("params         = {}",paramString);
+                paramString = URLDecoder.decode(paramString,"UTF-8");
+                log.info("params decoded = {}",paramString);
+                this.parameters = mapper.readValue(paramString,
+                        new TypeReference<HashMap<String, String>>() {});
+            } catch (IOException e) {
+                log.info("Unable to parse parameters:{} ", paramString, e);
+            }
+        }
     }
 
     @Override
@@ -85,9 +110,19 @@ public class MicoRabbitProducer extends DefaultProducer {
         Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.newBuilder()
                 .setItemUri(item)
                 .addPartUri(part)
+                .addAllParams(getParamEntries())
                 .setServiceId(queueId).build();
     	
     	return analysisEvent;
+    }
+
+    private Iterable<? extends ParamEntry> getParamEntries() {
+        ArrayList<ParamEntry> entries = new ArrayList<ParamEntry>();
+        eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.Builder builder = Event.AnalysisRequest.ParamEntry.newBuilder();
+        for(Map.Entry<String, String> entry : parameters.entrySet()){
+            entries.add(builder.setKey(entry.getKey()).setValue(entry.getValue()).build());
+        }  
+        return entries;
     }
 
     /**
