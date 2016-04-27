@@ -95,19 +95,6 @@ namespace mico {
         return part;
       }
 
-  //    mico::rdf::model::URI ItemAnno4cpp::getURI() {
-  //      jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-
-  //        jnipp::LocalRef<URI> jItemURIRet =
-  //            ((jnipp::Ref<RDFObject>)m_itemMMM)->getResource();
-
-  //        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
-  //        assert((jobject) jItemURIRet);
-
-
-  //        return mico::rdf::model::URI( jItemURIRet->toString()->std_str() );
-  //    }
-
       std::list< std::shared_ptr<Part> > ItemAnno4cpp::getParts()
       {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
@@ -122,40 +109,6 @@ namespace mico {
         }
         checkJavaExcpetionNoThrow(m_jnippErrorMessage);
         return partSet;
-      }
-
-      std::shared_ptr<Asset> ItemAnno4cpp::getAsset()
-      {
-  //      jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-  //      jnipp::LocalRef<AssetMMM> asset = static_cast< jnipp::LocalRef<ResourceMMM> >(m_itemMMM)->getAsset();
-  //      if ((jobject)asset == nullptr) {
-  //        jnipp::LocalRef<ComGithubAnno4jAnno4j> anno4j = m_persistenceService.getAnno4j();
-  //        jnipp::LocalRef<String> jsuri_item = String::create(this->getURI().stringValue());
-  //        jnipp::LocalRef<ImplURIImpl> juri_item = ImplURIImpl::construct( jsuri_item );
-  //        jnipp::LocalRef<AssetMMM> assetMMM = anno4j->createObject(AssetMMM::clazz(), juri_item);
-
-  //        std::string location = m_persistenceService.getStoragePrefix();
-  //        location += this->getURI().getLocalName();
-  //        location += "/";
-  //        jnipp::LocalRef<String> jsasset = static_cast< jnipp::LocalRef<ComGithubAnno4jModelImplResourceObject> >(assetMMM)->getResourceAsString();
-  //        jnipp::LocalRef<ImplURIImpl> juri_asset = ImplURIImpl::construct( jsasset );
-  //        jnipp::LocalRef<String> jsuri_asset = juri_asset->getLocalName();
-  //        location += jsuri_asset->std_str();
-
-  //        assetMMM->setLocation( String::create(location) );
-
-  //        static_cast< jnipp::LocalRef<ResourceMMM> >(m_itemMMM)->setAsset(assetMMM);
-
-  //        //log.trace("No Asset available for Item {} - Created new Asset with id {} and location {}", this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
-  //        checkJavaExcpetionThrow({"IllegalAccessException", "InstantiationException"});
-  //      }
-
-  //      std::shared_ptr<AssetAnno4cpp> passet( new AssetAnno4cpp(static_cast< jnipp::LocalRef<ResourceMMM> >(m_itemMMM)->getAsset(), m_persistenceService) );
-  //      return passet;
-  //    }
-        throw std::runtime_error("Not implementend yet");
-        return std::shared_ptr<Asset>();
-  //  }
       }
     }
   }

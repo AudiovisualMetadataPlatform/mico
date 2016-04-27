@@ -38,6 +38,9 @@ namespace mico {
           virtual void setSemanticType(std::string semanticType);
 
 
+          virtual std::shared_ptr<Asset> getAsset();
+
+          virtual bool hasAsset();
 
 
   //        @Override

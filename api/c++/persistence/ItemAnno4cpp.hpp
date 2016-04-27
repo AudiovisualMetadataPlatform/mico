@@ -37,14 +37,7 @@ namespace mico {
         std::list< std::shared_ptr<Part> > getParts();
 
 
-        std::shared_ptr<Asset> getAsset();
 
-        bool hasAsset() {
-          jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-          jnipp::LocalRef<jnipp::eu::mico::platform::anno4j::model::AssetMMM> asset =
-              static_cast< jnipp::LocalRef<jnipp::eu::mico::platform::anno4j::model::ResourceMMM> >(m_itemMMM)->getAsset();
-          return (jobject)asset != nullptr;
-        }
 
         std::string getSerializedAt() {
           jnipp::Env::Scope scope(PersistenceService::m_sJvm);
