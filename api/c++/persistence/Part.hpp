@@ -43,7 +43,7 @@ namespace mico {
 
           virtual std::string getSerializedAt() = 0;
 
-          jnipp::LocalRef<jnipp::com::github::anno4j::model::Agent> getSerializedBy();
+          virtual jnipp::LocalRef<jnipp::com::github::anno4j::model::Agent> getSerializedBy() = 0;
       };
     }
   }

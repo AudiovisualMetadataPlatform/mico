@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
 
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
-        size_t numTestItems = 10;
+        size_t numTestItems = 1;
 
         std::vector<std::string> itemURIS;
         itemURIS.reserve(numTestItems);
@@ -239,7 +239,19 @@ int main(int argc, char **argv) {
 
             assert(retrievedItem);
 
-            retrievedItem->createPart(mico::rdf::model::URI("http://my_test_extractor"));
+            std::stringstream ss_extractor_name;
+            ss_extractor_name << "http://my_test_extractor___" << retrievedItem;
+
+
+            std::shared_ptr<mico::persistence::model::Part> part1  = retrievedItem->createPart(mico::rdf::model::URI(ss_extractor_name.str()));
+            std::shared_ptr<mico::persistence::model::Part> part2  = retrievedItem->createPart(mico::rdf::model::URI(ss_extractor_name.str()));
+
+            assert(part1->getSerializedAt().length());
+            assert(part2->getSerializedAt().length());
+
+            std::string createdBy = part1->getSerializedBy()->toString()->std_str();
+
+            assert(createdBy.compare( ss_extractor_name.str() ) == 0);
         }
 
         // check item deletion
