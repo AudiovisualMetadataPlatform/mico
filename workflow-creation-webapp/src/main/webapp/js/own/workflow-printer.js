@@ -66,15 +66,23 @@ var WorkflowPrinter = function() {
 				var extractorId = brokerExtractor.extractorId;
 				var extractorVersion = brokerExtractor.extractorVersion;
 				var modeId = brokerExtractor.modeId;
-				var queueName = 'queue-for-' + modeId;
+				var queueName = modeId;
+				
+				var uri = "mico-comp:vbox1?serviceId=" + queueName
+						+ "&amp;extractorId=" + extractorId
+						+ "&amp;extractorVersion="
+						+ extractorVersion + "&amp;modeId="
+						+ modeId;
+				
+				//add parameter selection to the uri, if any are present
+				var params = pipe[node].form.getSelectedParameters();
+				if(Object.size(params)>0){
+					uri = uri + "&amp;parameters=" + JSON.stringify(params)
+				}
 
 				extractors = extractors
 						+ XmlElement("to", '', {
-							uri : "mico-comp:vbox1?serviceId=" + queueName
-									+ "&amp;extractorId=" + extractorId
-									+ "&amp;extractorVersion="
-									+ extractorVersion + "&amp;modeId="
-									+ modeId
+							uri : uri
 						});
 			}
 		}
@@ -339,7 +347,7 @@ var WorkflowPrinter = function() {
 							var mimeType = mimeTypes[j]
 
 							var from = XmlElement('from', '', {
-								uri : 'direct:mimeType=' + mimeType + ',syntacticType=' + Object.keys(pipe[0].outputSyntacticTypes)[0]
+								uri : 'direct:workflow-' + WORKFLOW_PREFIX + ',mimeType=' + mimeType + ',syntacticType=' + Object.keys(pipe[0].outputSyntacticTypes)[0]
 							});
 							var to = XmlElement('to', '', {
 								uri : 'direct:workflow-' + WORKFLOW_PREFIX
@@ -395,7 +403,7 @@ var WorkflowPrinter = function() {
 						
 						for(var mimeType in mimeTypesRequestedBy) {
 							var from = XmlElement('from', '', {
-								uri : 'direct:mimeType=' + mimeType + ',syntacticType=' + syntacticType
+								uri : 'direct:workflow-' + WORKFLOW_PREFIX + ',mimeType=' + mimeType + ',syntacticType=' + syntacticType
 							});
 							var to = XmlElement('multicast', this.createMulticastTarget(Workflow.pipelines,{from : multicast.from, 
 								                                                         to: mimeTypesRequestedBy[mimeType] }));
@@ -462,7 +470,7 @@ var WorkflowPrinter = function() {
 							var mimeType = mimeTypes[j]
 
 							var from = XmlElement('from', '', {
-								uri : 'direct:mimeType=' + mimeType + ',syntacticType=' + syntacticType
+								uri : 'direct:workflow-' + WORKFLOW_PREFIX + ',mimeType=' + mimeType + ',syntacticType=' + syntacticType
 							});
 							var xmlto = XmlElement('to', '', {
 								uri : 'direct:workflow-' + WORKFLOW_PREFIX + '-aggregator-' + to

@@ -19,7 +19,7 @@ var Workflow = function() {
 			if(e.name=="Invalid workflow configuration"){
 				alert('---- '+e.name +'----\n'+ e.message);
 			}
-			else throw e;
+			throw e;
 		}
 	};
 	
@@ -29,6 +29,10 @@ var Workflow = function() {
 		//check for validity
 		if(ConfigurationGraph.svg.selectAll('.link.broken')[0].length > 0)
 			throw { name: "Invalid workflow configuration", message: "Broken links are present. Unable to provide a routing"}
+		
+		$("[data-toggle=validator]").validator('validate');
+		if(document.getElementsByClassName('form-group has-error').length > 0)
+			throw { name: "Invalid workflow configuration", message: "Invalid parameter configurations are present. Unable to provide a routing"}
 			
 		var activeLinks=ConfigurationGraph.svg.selectAll('.link:not(.warning)').data();
 

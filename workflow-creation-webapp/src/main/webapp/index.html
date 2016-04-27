@@ -34,7 +34,7 @@
   	<div class="container">
   	  	<div class="panel-body row">
   			<h1>Overview Graph</h1> 
-  			<button type="button" class="btn btn-primary" style="float: right;" onclick="Workflow.setup();console.log(Workflow.sendCamelRoute());">Submit workflow</button>
+  			<button type="button" class="btn btn-primary" style="float: right;" onclick="try{Workflow.setup();console.log(Workflow.sendCamelRoute());}catch(e){console.error(e.name+': '+e.message)}">Submit workflow</button>
   		</div>
   		<div class="panel panel-default">
   			<div id="overview-graph" class="panel-body">
