@@ -32,7 +32,7 @@ case "$1" in
 	echo "creating MICO user in RabbitMQ ..."
 	rabbitmqctl add_user $MICO_USER $MICO_PASS
 	rabbitmqctl set_user_tags $MICO_USER administrator
-	rabbitmqctl set_permissions  mico ".*" ".*" ".*"
+	rabbitmqctl set_permissions  $MICO_USER ".*" ".*" ".*"
 
 	echo "enabling RabbitMQ management plugins ..."
 	rabbitmq-plugins enable rabbitmq_management rabbitmq_management_visualiser

@@ -28,6 +28,10 @@
     <appender-ref ref="STDOUT" />
   </logger>
 
+  <logger name="eu.mico.platform.event" level="DEBUG" additivity="false">
+    <appender-ref ref="STDOUT" />
+  </logger>
+
   <logger name="de.fraunhofer.idmt" level="DEBUG" additivity="false">
     <appender-ref ref="STDOUT" />
   </logger>

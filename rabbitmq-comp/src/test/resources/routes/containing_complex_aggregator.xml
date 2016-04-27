@@ -1,0 +1,26 @@
+<routes xmlns='http://camel.apache.org/schema/spring'>
+  <route id='workflow-aggregateComplex-starting-point-for-aggregator-0-mimeType=mico/test,syntacticType=A'>
+    <from uri='direct:aggregateComplex-mimeType=mico/test,syntacticType=A'/>
+    <to uri='direct:workflow-aggregateComplex-aggregator-0'/>
+  </route>
+  <route id='workflow-aggregateComplex-starting-point-for-aggregator-0-mimeType=mico/test,syntacticType=B'>
+    <from uri='direct:aggregateComplex-mimeType=mico/test,syntacticType=B'/>
+    <to uri='direct:workflow-aggregateComplex-aggregator-0'/>
+  </route>
+  <route id='workflow-aggregateComplex-pipeline-0'>
+    <from uri='direct:workflow-aggregateComplex-pipeline-0'/>
+    <pipeline>
+      <to uri='mico-comp:vbox1?serviceId=AB-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=AB-C-queue'/>
+    </pipeline>
+  </route>
+  <route id='workflow-aggregateComplex-aggregator-0'>
+    <from uri='direct:workflow-aggregateComplex-aggregator-0'/>
+    <aggregate strategyRef='itemAggregatorStrategy' completionSize='2'>
+      <correlationExpression>
+        <simple>header.mico_item</simple>
+      </correlationExpression>
+      <to uri='direct:workflow-aggregateComplex-pipeline-0'/>
+      <to uri="mock:result_aggregateComplex_1"/>
+    </aggregate>
+  </route>
+</routes>

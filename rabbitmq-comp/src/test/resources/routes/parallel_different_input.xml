@@ -1,0 +1,25 @@
+<routes xmlns='http://camel.apache.org/schema/spring'>
+  <route id='workflow-parallelFlows-starting-point-for-pipeline-1-mimeType=mico/test,syntacticType=C'>
+    <from uri='direct:parallelFlows-mimeType=mico/test,syntacticType=C'/>
+    <to uri='direct:workflow-parallelFlows-pipeline-1'/>
+  </route>
+  <route id='workflow-parallelFlows-starting-point-for-pipeline-2-mimeType=mico/test,syntacticType=A'>
+    <from uri='direct:parallelFlows-mimeType=mico/test,syntacticType=A'/>
+    <to uri='direct:workflow-parallelFlows-pipeline-2'/>
+  </route>
+  <route id='workflow-parallelFlows-pipeline-1'>
+    <from uri='direct:workflow-parallelFlows-pipeline-1'/>
+    <pipeline>
+      <to uri='mico-comp:vbox1?serviceId=C1-D-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=C1-D-queue'/>
+      <to uri='mico-comp:vbox1?serviceId=D-E-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=D-E-queue'/>
+      <to uri="mock:result_parallel_1"/>
+    </pipeline>
+  </route>
+  <route id='workflow-parallelFlows-pipeline-2'>
+    <from uri='direct:workflow-parallelFlows-pipeline-2'/>
+    <pipeline>
+      <to uri='mico-comp:vbox1?serviceId=A-B-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=A-B-queue'/>
+      <to uri="mock:result_parallel_2"/>
+    </pipeline>
+  </route>
+</routes>
