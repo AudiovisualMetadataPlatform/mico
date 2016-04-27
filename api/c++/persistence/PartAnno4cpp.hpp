@@ -3,6 +3,7 @@
 
 #include "Part.hpp"
 #include "AssetAnno4cpp.hpp"
+#include "ResourceAnno4cpp.hpp"
 
 using namespace jnipp::java::lang;
 using namespace jnipp::org::openrdf::model::impl;
@@ -13,7 +14,7 @@ using namespace jnipp::com::github::anno4j::model::impl;
 namespace mico {
   namespace persistence {
     namespace model {
-      class PartAnno4cpp: public Part
+      class PartAnno4cpp: public Part, public ResourceAnno4cpp
       {
 
       private:
@@ -23,7 +24,8 @@ namespace mico {
 
       public:
         PartAnno4cpp(jnipp::Ref<PartMMM> partMMM, std::shared_ptr<Item> item, PersistenceService& persistenceService)
-          : m_persistenceService(persistenceService),
+          : ResourceAnno4cpp(partMMM, persistenceService),
+            m_persistenceService(persistenceService),
             m_item(item),
             m_partMMM(partMMM)
         {}
@@ -35,28 +37,6 @@ namespace mico {
         mico::rdf::model::URI getURI() {
           jnipp::LocalRef<URIImpl> juri = URIImpl::construct( static_cast< jnipp::LocalRef<ResourceObject> >(m_partMMM)->getResourceAsString() );
           return mico::rdf::model::URI( juri->stringValue()->std_str() );
-        }
-
-        jnipp::LocalRef<ResourceMMM> getRDFObject() {
-          return static_cast< jnipp::LocalRef<ResourceMMM> >(m_partMMM);
-        }
-
-        std::string getSyntacticalType() {
-          return static_cast< jnipp::LocalRef<ResourceMMM> >(m_partMMM)->getSyntacticalType()->std_str();
-        }
-
-        void setSyntacticalType(std::string syntacticalType) {
-          jnipp::LocalRef<String> jsyntacticalType = String::create(syntacticalType);
-          static_cast< jnipp::LocalRef<ResourceMMM> >(m_partMMM)->setSyntacticalType(jsyntacticalType);
-        }
-
-        std::string getSemanticType() {
-          return static_cast< jnipp::LocalRef<ResourceMMM> >(m_partMMM)->getSemanticType()->std_str();
-        }
-
-        void setSemanticType(std::string semanticType) {
-          jnipp::LocalRef<String> jsemanticType = String::create(semanticType);
-          static_cast< jnipp::LocalRef<ResourceMMM> >(m_partMMM)->setSemanticType(jsemanticType);
         }
 
         jnipp::LocalRef<Body> getBody() {
