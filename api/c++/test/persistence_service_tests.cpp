@@ -263,11 +263,23 @@ int main(int argc, char **argv) {
             std::shared_ptr<mico::persistence::model::Item> retrievedItem  =
                         persistenceServiceTest.svc->getItem(asURI);
 
+            std::shared_ptr<mico::persistence::model::Resource> retrievedItemResource =
+                std::dynamic_pointer_cast<mico::persistence::model::Resource>(retrievedItem);
+
             assert(retrievedItem);
 
             std::list< std::shared_ptr<mico::persistence::model::Part> > itemParts = retrievedItem->getParts();
 
             assert(itemParts.size() == 2);
+
+            // iterate parts, get uri retrieve part with URI and compare if same
+            for (std::shared_ptr<mico::persistence::model::Part> part : itemParts) {
+              std::shared_ptr<mico::persistence::model::Resource> partResource =
+                  std::dynamic_pointer_cast<mico::persistence::model::Resource>(part);
+              std::shared_ptr<mico::persistence::model::Resource> p_retrieved_as_res =
+                  std::dynamic_pointer_cast<mico::persistence::model::Resource>(retrievedItem->getPart(partResource->getURI()));
+              assert(partResource->getURI().stringValue().compare(partResource->getURI().stringValue()) == 0);
+            }
 
         }
 

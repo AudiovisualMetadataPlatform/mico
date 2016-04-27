@@ -88,11 +88,27 @@ namespace mico {
       std::shared_ptr<Part> ItemAnno4cpp::getPart(const rdf::model::URI &uri)
       {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-        jnipp::LocalRef<String> juri = String::create( uri.stringValue() );
+        jnipp::LocalRef<Transaction> jTransaction = m_persistenceService.getAnno4j()->createTransaction();
+        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        assert((jobject) jTransaction);
 
-        jnipp::LocalRef<PartMMM> partMMM = m_persistenceService.getAnno4j()->findByID(PartMMM::clazz(), juri);
-        std::shared_ptr<PartAnno4cpp> part( new PartAnno4cpp(partMMM, std::dynamic_pointer_cast<Item>( shared_from_this() ), m_persistenceService) );
-        return part;
+        jnipp::LocalRef<PartMMM> jPartMMM =
+            jTransaction->findByID(PartMMM::clazz(), (jnipp::Ref<String>) jnipp::String::create(uri.stringValue()));
+
+        bool isInstance = jPartMMM->isInstanceOf(PartMMM::clazz());
+        bool except = checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+
+        if (!isInstance || except) {
+            LOG_DEBUG("ItemAnno4cpp::getPart - Returned RDF object is NOT an instance of PartMMM or null");
+            return  std::shared_ptr<model::Part>();
+        }
+
+        jnipp::LocalRef<URI> jPartURIRet =
+            ((jnipp::Ref<RDFObject>)jPartMMM)->getResource();
+
+        LOG_DEBUG("Got part with URI [%s]", jPartURIRet->toString()->std_str().c_str());
+
+        return std::make_shared<PartAnno4cpp> (jPartMMM, std::dynamic_pointer_cast<Item>( shared_from_this() ), m_persistenceService);
       }
 
       std::list< std::shared_ptr<mico::persistence::model::Part> > ItemAnno4cpp::getParts()

@@ -42,8 +42,6 @@ namespace mico {
         jnipp::LocalRef<URI> jResourceURI =
             ((jnipp::Ref<RDFObject>)m_resourceMMM)->getResource();
 
-        LOG_DEBUG("ResourceAnno4cpp::getURI() - URI is [%s]", jResourceURI->toString()->std_str().c_str());
-
         checkJavaExcpetionNoThrow(m_jnippErrorMessage);
         assert((jobject)jResourceURI);
 

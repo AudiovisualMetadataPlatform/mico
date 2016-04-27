@@ -265,10 +265,8 @@ namespace mico {
             bool except = checkJavaExcpetionNoThrow(m_jniErrorMessage);
 
             if (!isInstance || except) {
-                LOG_DEBUG("returned RDF object is NOT an instance of ItemMMM");
+                LOG_WARN("PersistenceService::getItem - returned RDF object is NOT an instance of ItemMMM or null");
                 return  std::shared_ptr<model::Item>();
-            } else {
-                LOG_DEBUG("returned RDF object is instance of ItemMMM");
             }
 
             jnipp::LocalRef<URI> jItemURIRet =
