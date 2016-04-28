@@ -27,38 +27,38 @@ namespace mico {
 
         jnipp::LocalRef<Transaction> jTransaction = m_persistenceService.getAnno4j()->createTransaction();
 
-        error = error & checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        error = error & m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject) jTransaction);
 
         jTransaction->begin();
         jTransaction->setAllContexts(((jnipp::Ref<RDFObject>)m_itemMMM)->getResource());
         jnipp::GlobalRef <PartMMM> jNewPartMMM = jTransaction->createObject(PartMMM::clazz());
 
-        error = error & checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        error = error & m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject) jNewPartMMM);
 
         jnipp::LocalRef<jnipp::String> jDateTime =
                 jnipp::String::create(commons::TimeInfo::getTimestamp());
 
-        error = error & checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        error = error & m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject) jDateTime);
 
         ((jnipp::Ref<Annotation>)jNewPartMMM)->setSerializedAt(jDateTime);
-        error = error & checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        error = error & m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
 
         jnipp::LocalRef<URI> jExtractorURI = URIImpl::construct(jnipp::String::create(extractorID.stringValue()));
-        error = error & checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        error = error & m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject) jExtractorURI);
 
         jnipp::LocalRef<Agent> jAgent = jTransaction->createObject(Agent::clazz(), (jnipp::Ref<jnipp::org::openrdf::model::Resource>) jExtractorURI);
 
 
-        error = error & checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        error = error & m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject) jAgent);
 
         ((jnipp::Ref<Annotation>)jNewPartMMM)->setSerializedBy(jAgent);
 
-        error = error & checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        error = error & m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
 
         if (error) {
           jTransaction->rollback(); //rollback any triples created during this method
@@ -74,7 +74,7 @@ namespace mico {
                   this->getURI().stringValue().c_str(), extractorID.stringValue().c_str());
 
 
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
 
         std::shared_ptr<Item> this_ptr= std::dynamic_pointer_cast<Item>(shared_from_this());
 
@@ -89,14 +89,14 @@ namespace mico {
       {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
         jnipp::LocalRef<Transaction> jTransaction = m_persistenceService.getAnno4j()->createTransaction();
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject) jTransaction);
 
         jnipp::LocalRef<PartMMM> jPartMMM =
             jTransaction->findByID(PartMMM::clazz(), (jnipp::Ref<String>) jnipp::String::create(uri.stringValue()));
 
         bool isInstance = jPartMMM->isInstanceOf(PartMMM::clazz());
-        bool except = checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        bool except = m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
 
         if (!isInstance || except) {
             LOG_DEBUG("ItemAnno4cpp::getPart - Returned RDF object is NOT an instance of PartMMM or null");
@@ -119,21 +119,21 @@ namespace mico {
         jnipp::LocalRef<Set> jpartSet = m_itemMMM->getParts();
 
         jnipp::LocalRef< jnipp::Array<JavaLangObject> > jpartArray = jpartSet->toArray();
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject) jpartArray);
 
         LOG_DEBUG("Retrieved %d part(s) in array for item %s", jpartArray->length(), this->getURI().stringValue().c_str());
 
         for (auto it = jpartArray->begin();  it!= jpartArray->end(); ++it) {
           jnipp::LocalRef<Object> jObject = *it;
-          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+          m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
           assert((jobject) jObject);
           std::shared_ptr<Part> part =
               std::make_shared<PartAnno4cpp> (jObject, std::dynamic_pointer_cast<Item>( shared_from_this() ), m_persistenceService);
 
           nativePartSet.push_back( part );
         }
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         return nativePartSet;
       }
     }

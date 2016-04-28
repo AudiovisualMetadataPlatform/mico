@@ -3,7 +3,6 @@
 
 #include <jnipp.h>
 #include <anno4cpp.h>
-#include "JnippExcpetionHandling.hpp"
 #include "Logging.hpp"
 
 
@@ -42,7 +41,7 @@ namespace mico {
         jnipp::LocalRef<URI> jResourceURI =
             ((jnipp::Ref<RDFObject>)m_resourceMMM)->getResource();
 
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject)jResourceURI);
 
         return mico::rdf::model::URI(jResourceURI->toString()->std_str());
@@ -62,28 +61,28 @@ namespace mico {
       void ResourceAnno4cpp::setSyntacticalType(std::string syntacticalType) {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
         jnipp::LocalRef<String> jsyntacticalType = String::create(syntacticalType);
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject) jsyntacticalType);
         static_cast< jnipp::LocalRef<ResourceMMM> >(m_resourceMMM)->setSyntacticalType(jsyntacticalType);
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
       }
 
       std::string ResourceAnno4cpp::getSemanticType() {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         std::string type = static_cast< jnipp::LocalRef<ResourceMMM> >(m_resourceMMM)->getSemanticType()->std_str();
         LOG_DEBUG("ResourceAnno4cpp::getSemanticType() delivers %s", type.c_str());
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         return type;
       }
 
       void ResourceAnno4cpp::setSemanticType(std::string semanticType) {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
         jnipp::LocalRef<String> jsemanticType = String::create(semanticType);
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject) jsemanticType);
         static_cast< jnipp::LocalRef<ResourceMMM> >(m_resourceMMM)->setSemanticType(jsemanticType);
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
       }
 
       std::shared_ptr<Asset> ResourceAnno4cpp::getAsset()

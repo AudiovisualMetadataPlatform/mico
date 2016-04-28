@@ -5,7 +5,6 @@
 #include "Item.hpp"
 #include "PartAnno4cpp.hpp"
 #include "ResourceAnno4cpp.hpp"
-#include "JnippExcpetionHandling.hpp"
 
 namespace mico {
   namespace persistence {
@@ -42,7 +41,7 @@ namespace mico {
         std::string getSerializedAt() {
           jnipp::Env::Scope scope(PersistenceService::m_sJvm);
           std::string timestamp =  m_itemMMM->getSerializedAt()->std_str();
-          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+          m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
           return timestamp;
         }
 

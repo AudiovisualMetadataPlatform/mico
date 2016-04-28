@@ -3,7 +3,6 @@
 
 #include "Resource.hpp"
 #include "PersistenceService.hpp"
-#include "JnippExcpetionHandling.hpp"
 #include "Logging.hpp"
 #include <jnipp.h>
 #include <anno4cpp.h>

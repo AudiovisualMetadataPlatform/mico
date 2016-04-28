@@ -7,8 +7,9 @@
 
 namespace mico {
     namespace persistence {
+        namespace jnipputil {
 
-    static bool checkJavaExcpetionNoThrow(std::vector<std::string> exceptionNames, std::string& error_msg)
+    static bool checkJavaExceptionNoThrow(std::vector<std::string> exceptionNames, std::string& error_msg)
     {
       bool failure = false;
       error_msg.clear();
@@ -24,7 +25,7 @@ namespace mico {
       return failure;
     }
 
-    static bool checkJavaExcpetionNoThrow(std::string& error_msg)
+    static bool checkJavaExceptionNoThrow(std::string& error_msg)
     {
         bool failure = false;
         error_msg.clear();
@@ -38,23 +39,23 @@ namespace mico {
         return failure;
     }
 
-    static void checkJavaExcpetionThrow() {
+    static void checkJavaExceptionThrow() {
         std::string msg;
 
-        if (checkJavaExcpetionNoThrow(msg))
+        if (checkJavaExceptionNoThrow(msg))
             throw std::runtime_error(msg);
     }
 
-    static bool checkJavaExcpetionThrow(std::vector<std::string> exceptionNames)
+    static bool checkJavaExceptionThrow(std::vector<std::string> exceptionNames)
     {
       std::string msg;
 
-      if (checkJavaExcpetionNoThrow(exceptionNames, msg))
+      if (checkJavaExceptionNoThrow(exceptionNames, msg))
         throw std::runtime_error(msg);
     }
 
 
-}}
+}}}
 
 
 #endif

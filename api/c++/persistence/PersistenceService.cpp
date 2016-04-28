@@ -26,7 +26,7 @@
 #include "FileOperations.h"
 #include "TimeInfo.h"
 #include "Logging.hpp"
-#include "JnippExcpetionHandling.hpp"
+#include "JnippExceptionHandling.hpp"
 
 #include <anno4cpp.h>
 
@@ -137,11 +137,11 @@ namespace mico {
 
             jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
+            checkJavaExceptionNoThrow(m_jniErrorMessage);
 
             jnipp::LocalRef<String> jURIString = jnipp::String::create(marmottaServerUrl);
 
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
+            checkJavaExceptionNoThrow(m_jniErrorMessage);
             assert((jobject)jURIString != 0);
 
             LOG_INFO("Using Marmotta URI: %s", jURIString->std_str().c_str());
@@ -149,7 +149,7 @@ namespace mico {
             jnipp::LocalRef<IDGenerator> gen =
                 IDGeneratorAnno4j::construct(jURIString);
 
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
+            checkJavaExceptionNoThrow(m_jniErrorMessage);
             assert((jobject)gen != 0);
 
             LOG_DEBUG("IDGeneratorAnno4j  created");
@@ -161,11 +161,11 @@ namespace mico {
 
             LOG_DEBUG("SPARQLRepository  created");
 
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
+            checkJavaExceptionNoThrow(m_jniErrorMessage);
 
             m_anno4j = Anno4j::construct(sparqlRepository, gen);
 
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
+            checkJavaExceptionNoThrow(m_jniErrorMessage);
 
             LOG_DEBUG("anno4j object created.");
         }
@@ -190,7 +190,7 @@ namespace mico {
 
           jnipp::LocalRef<Transaction> jTransaction = m_anno4j->createTransaction();
 
-          creation_error = creation_error & checkJavaExcpetionNoThrow(m_jniErrorMessage);
+          creation_error = creation_error & checkJavaExceptionNoThrow(m_jniErrorMessage);
           assert((jobject) jTransaction);
 
           jTransaction->begin();
@@ -200,7 +200,7 @@ namespace mico {
           jnipp::GlobalRef<ItemMMM> jNewItemMMM =
                   jTransaction->createObject(ItemMMM::clazz(),jItemResource);
 
-          creation_error = creation_error & checkJavaExcpetionNoThrow(m_jniErrorMessage);
+          creation_error = creation_error & checkJavaExceptionNoThrow(m_jniErrorMessage);
           assert((jobject) jNewItemMMM);
 
           LOG_DEBUG("ItemMMM created with anno4j");
@@ -212,7 +212,7 @@ namespace mico {
           assert((jobject) jDateTime);
 
           jNewItemMMM->setSerializedAt(jDateTime);
-          creation_error = creation_error & checkJavaExcpetionNoThrow(m_jniErrorMessage);
+          creation_error = creation_error & checkJavaExceptionNoThrow(m_jniErrorMessage);
           LOG_DEBUG("date time object create and set");
 
           if (!creation_error) {
@@ -248,12 +248,12 @@ namespace mico {
             jnipp::LocalRef<URI> jItemURI =
                     URIImpl::construct((jnipp::Ref<String>) jnipp::String::create(id.stringValue()));
 
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
+            checkJavaExceptionNoThrow(m_jniErrorMessage);
             assert((jobject) jItemURI);
 
             jnipp::LocalRef<Transaction> jTransaction = m_anno4j->createTransaction();
 
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
+            checkJavaExceptionNoThrow(m_jniErrorMessage);
             assert((jobject) jTransaction);
 
             jTransaction->setAllContexts((jnipp::Ref<URI>) jItemURI);
@@ -262,7 +262,7 @@ namespace mico {
                     jTransaction->findByID(ItemMMM::clazz(), jItemURI);
 
             bool isInstance = jItemMMM->isInstanceOf(ItemMMM::clazz());
-            bool except = checkJavaExcpetionNoThrow(m_jniErrorMessage);
+            bool except = checkJavaExceptionNoThrow(m_jniErrorMessage);
 
             if (!isInstance || except) {
                 LOG_WARN("PersistenceService::getItem - returned RDF object is NOT an instance of ItemMMM or null");
@@ -286,7 +286,7 @@ namespace mico {
           jnipp::LocalRef<URI> jItemURI =
                   URIImpl::construct((jnipp::Ref<String>) jnipp::String::create(id.stringValue()));
 
-          checkJavaExcpetionNoThrow(m_jniErrorMessage);
+          checkJavaExceptionNoThrow(m_jniErrorMessage);
           assert((jobject) jItemURI);
 
           m_anno4j->clearContext(jItemURI);
@@ -301,12 +301,12 @@ namespace mico {
 
           jnipp::LocalRef<jnipp::java::util::List> jItemsMMM = m_anno4j->findAll(ItemMMM::clazz());
 
-          checkJavaExcpetionNoThrow(m_jniErrorMessage);
+          checkJavaExceptionNoThrow(m_jniErrorMessage);
           assert((jobject) jItemsMMM);
 
           jint jNumItems = jItemsMMM->size();
 
-          checkJavaExcpetionNoThrow(m_jniErrorMessage);
+          checkJavaExceptionNoThrow(m_jniErrorMessage);
 
           LOG_DEBUG("Found %d items.", jNumItems);
 
@@ -375,25 +375,25 @@ namespace mico {
         void PersistenceService::checkJavaExceptionThrow()
         {
           jnipp::Env::Scope scope(m_sJvm);
-          checkJavaExceptionThrow();
+          jnipputil::checkJavaExceptionThrow();
         }
 
         void PersistenceService::checkJavaExceptionThrow(std::vector<std::string> exceptionNames)
         {
           jnipp::Env::Scope scope(m_sJvm);
-          checkJavaExceptionThrow(exceptionNames);
+          jnipputil::checkJavaExceptionThrow(exceptionNames);
         }
 
         bool PersistenceService::checkJavaExceptionNoThrow(std::string& msg)
         {
           jnipp::Env::Scope scope(m_sJvm);
-          return checkJavaExcpetionNoThrow(msg);
+          return jnipputil::checkJavaExceptionNoThrow(msg);
         }
 
         bool PersistenceService::checkJavaExceptionNoThrow(std::vector<std::string> exceptionNames, std::string& msg)
         {
           jnipp::Env::Scope scope(m_sJvm);
-          return checkJavaExcpetionNoThrow(exceptionNames, msg);
+          return jnipputil::checkJavaExceptionNoThrow(exceptionNames, msg);
         }
 
 
@@ -402,7 +402,7 @@ namespace mico {
 
             LOG_DEBUG("Setting context for object connection with object identity hash %d", System::identityHashCode(con));
 
-            checkJavaExcpetionNoThrow(m_jniErrorMessage);
+            checkJavaExceptionNoThrow(m_jniErrorMessage);
 
             con->setReadContexts(context);
             con->setInsertContext(context);

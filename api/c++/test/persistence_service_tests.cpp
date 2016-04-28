@@ -29,8 +29,6 @@
 #include "SPARQLUtil.hpp"
 #include <anno4cpp.h>
 #include <jnipp.h>
-#include "JnippExcpetionHandling.hpp"
-
 
 
 using namespace std;
@@ -315,10 +313,10 @@ int main(int argc, char **argv) {
                 persistenceServiceTest.svc->getAnno4j()->createObject(ns_bodymmm::FaceDetectionBodyMMM::clazz());
 
               // !!!! always check Java excpetions through persistence service and returned Java objects for null!!!
-              if (persistenceServiceTest.svc->checkJavaExceptionNoThrow(exceptMsg)) {
-                std::cout << "################# JAVA exception :" << exceptMsg << std::endl;
-                std::cout.flush();
-              }
+              persistenceServiceTest.svc->checkJavaExceptionThrow();
+//              if (persistenceServiceTest.svc->checkJavaExceptionNoThrow(exceptMsg)) {
+//                std::cout << "################# JAVA exception :" << exceptMsg << std::endl;
+//              }
               assert((jobject) fd_body);
 
               part->setBody(fd_body);

@@ -18,7 +18,7 @@ namespace mico {
       jnipp::LocalRef<Body> PartAnno4cpp::getBody() {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
         jnipp::LocalRef<Body> jBody = m_partMMM->getBody();
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject) jBody);
         return jBody;
       }
@@ -26,7 +26,7 @@ namespace mico {
       void PartAnno4cpp::setBody(const jnipp::LocalRef<Body> &body) {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
         m_partMMM->setBody(body);
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
       }
 
 
@@ -42,7 +42,7 @@ namespace mico {
       void PartAnno4cpp::addTarget(const jnipp::LocalRef<Target> &target) {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
         m_partMMM->addTarget(target);
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
       }
 
       std::list< std::shared_ptr<Resource> > PartAnno4cpp::getInputs()
@@ -54,14 +54,14 @@ namespace mico {
         jnipp::LocalRef<Set> jInputSet = m_partMMM->getInputs();
 
         jnipp::LocalRef< jnipp::Array<Object> > jInputArray = jInputSet->toArray();
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject) jInputArray);
 
         LOG_DEBUG("Retrieved %d inputs(s) in array for part %s", jInputArray->length(), this->getURI().stringValue().c_str());
 
         for (auto it = jInputArray->begin();  it!= jInputArray->end(); ++it) {
           jnipp::LocalRef<Object> jObject = *it;
-          checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+          m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
           assert((jobject) jObject);
 
           std::shared_ptr<Resource> res;
@@ -94,7 +94,7 @@ namespace mico {
           nativeResourceSet.push_back( res );
         }
 
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         return nativeResourceSet;
       }
 
@@ -110,20 +110,20 @@ namespace mico {
       void PartAnno4cpp::addInput( std::shared_ptr<mico::persistence::model::Resource> input) {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
         m_partMMM->addInput( input->getRDFObject() );
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
       }
 
        std::string PartAnno4cpp::getSerializedAt() {
          jnipp::Env::Scope scope(PersistenceService::m_sJvm);
         std::string sSerializedAt = static_cast< jnipp::LocalRef<Annotation> >(m_partMMM)->getSerializedAt()->std_str();
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         return sSerializedAt;
       }
 
       jnipp::LocalRef<Agent> PartAnno4cpp::getSerializedBy() {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
         jnipp::LocalRef<Agent> jAgent = static_cast< jnipp::LocalRef<Annotation> >(m_partMMM)->getSerializedBy();
-        checkJavaExcpetionNoThrow(m_jnippErrorMessage);
+        m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject) jAgent);
         return jAgent;
       }

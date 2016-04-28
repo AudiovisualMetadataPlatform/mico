@@ -22,6 +22,7 @@ add_definitions(-DANNO4JDEPENDENCIES_PATH="${ANNO4CPPDEPS_ROOT}/usr/share/mico")
 
 
 add_library(mico_persistence SHARED
+  JnippExceptionHandling
   Item
   Part
   Asset
