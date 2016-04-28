@@ -174,11 +174,12 @@ namespace mico {
             }
         };
 
-        void AnalysisResponse::sendFinish(const ContentItem& ci) {
+        void AnalysisResponse::sendFinish(std::shared_ptr< mico::persistence::model::Item > i) {
           LOG_INFO("AnalysisResponse:sendFinish to queue %s", m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
           mico::event::model::AnalysisEvent::Finish fevent;
-          fevent.set_itemuri(ci.getURI().stringValue());
+          std::shared_ptr<mico::persistence::model::Resource> r = std::dynamic_pointer_cast<mico::persistence::model::Resource>(i);
+          fevent.set_itemuri(r->getURI().stringValue());
           fevent.set_serviceid(m_service.getServiceID().stringValue());
           event.set_type(mico::event::model::MessageType::FINISH);
           event.set_allocated_finish(&fevent);
@@ -192,12 +193,13 @@ namespace mico {
           m_channel->publish("", m_message.replyTo(), data);
         }
 
-        void AnalysisResponse::sendErrorMessage(const ContentItem& ci, const mico::event::model::ErrorCodes& errcode, const std::string& msg, const std::string& desc)
+        void AnalysisResponse::sendErrorMessage(std::shared_ptr< mico::persistence::model::Item > i, const mico::event::model::ErrorCodes& errcode, const std::string& msg, const std::string& desc)
         {
           LOG_INFO("AnalysisResponse:sendErrorMessage: \"%s\" to queue %s",msg.c_str(), m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
           mico::event::model::AnalysisEvent::Error eevent;
-          eevent.set_itemuri(ci.getURI().stringValue());
+          std::shared_ptr<mico::persistence::model::Resource> r = std::dynamic_pointer_cast<mico::persistence::model::Resource>(i);
+          eevent.set_itemuri(r->getURI().stringValue());
           eevent.set_serviceid(m_service.getServiceID().stringValue());
           eevent.set_errorcode(errcode);
           eevent.set_message(msg);
@@ -214,12 +216,13 @@ namespace mico {
           m_channel->publish("", m_message.replyTo(), data);
         }
 
-        void AnalysisResponse::sendProgress(const ContentItem& ci, const URI& part, const float& progress)
+        void AnalysisResponse::sendProgress(std::shared_ptr< mico::persistence::model::Item > i, const URI& part, const float& progress)
         {
           LOG_INFO("AnalysisResponse:sendProgress: %f to queue %s", progress, m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
           mico::event::model::AnalysisEvent::Progress pevent;
-          pevent.set_itemuri(ci.getURI().stringValue());
+          std::shared_ptr<mico::persistence::model::Resource> r = std::dynamic_pointer_cast<mico::persistence::model::Resource>(i);
+          pevent.set_itemuri(r->getURI().stringValue());
           pevent.set_parturi(part.stringValue());
           pevent.set_serviceid(m_service.getServiceID().stringValue());
           pevent.set_progress(progress);
@@ -235,11 +238,12 @@ namespace mico {
           m_channel->publish("", m_message.replyTo(), data);
         }
 
-        void AnalysisResponse::sendNew(const ContentItem& ci, const URI& part) {
+        void AnalysisResponse::sendNew(std::shared_ptr< mico::persistence::model::Item > i, const URI& part) {
           LOG_INFO("AnalysisResponse:sendNew to queue %s", m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
           mico::event::model::AnalysisEvent::NewPart nevent;
-          nevent.set_itemuri(ci.getURI().stringValue());
+          std::shared_ptr<mico::persistence::model::Resource> r = std::dynamic_pointer_cast<mico::persistence::model::Resource>(i);
+          nevent.set_itemuri(r->getURI().stringValue());
           nevent.set_parturi(part.stringValue());
           nevent.set_serviceid(m_service.getServiceID().stringValue());
           event.set_type(::mico::event::model::MessageType::NEW_PART);
@@ -634,11 +638,12 @@ namespace mico {
         * @param item content item to analyse
         * @throws IOException
         */
-        void EventManager::injectContentItem(const ContentItem& item) {
-            LOG_INFO ("injecting content item %s...", item.getURI().stringValue().c_str());
+        void EventManager::injectItem(std::shared_ptr< mico::persistence::model::Item > item) {
+            std::shared_ptr<mico::persistence::model::Resource> r = std::dynamic_pointer_cast<mico::persistence::model::Resource>(item);
+            LOG_INFO ("injecting content item %s...", r->getURI().stringValue().c_str());
 
             mico::event::model::ItemEvent contentEvent;
-            contentEvent.set_itemuri(item.getURI().stringValue());
+            contentEvent.set_itemuri(r->getURI().stringValue());
 
             char buffer[contentEvent.ByteSize()];
             contentEvent.SerializeToArray(buffer, contentEvent.ByteSize());

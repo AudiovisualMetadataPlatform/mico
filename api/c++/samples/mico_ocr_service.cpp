@@ -104,17 +104,19 @@ public:
     * resolving the content item in the persistence service.
     *
     * @param resp   a response object that can be used to send back notifications about new objects to the broker
-    * @param ci     the content item to analyse
+    * @param item  the content item to analyse
     * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
     */
-    void call(AnalysisResponse& resp, ContentItem& ci, std::list<mico::rdf::model::URI>& objects, std::map<std::string,std::string>& params) {
+    void call(AnalysisResponse& resp, std::shared_ptr< mico::persistence::model::Item > item, std::list<mico::rdf::model::URI>& objects, std::map<std::string,std::string>& params) {
         // retrieve the content part identified by the object URI
         mico::rdf::model::URI object = objects.front();
-        Content* imgPart = ci.getContentPart(object);
+        std::shared_ptr<mico::persistence::model::Part> imgPart = item->getPart(object);
 
-        if(imgPart != NULL) {
+        if(!imgPart) {
             // read content into a buffer, since tesseract cannot work with C++ streams
-            std::istream* in = imgPart->getInputStream();
+            std::shared_ptr<mico::persistence::model::Resource> imgResource = std::dynamic_pointer_cast<mico::persistence::model::Resource>(imgPart);
+            std::shared_ptr<mico::persistence::Asset> imgAsset = imgResource->getAsset();
+            std::istream* in = imgAsset->getInputStream();
             std::vector<char> buf = std::vector<char>(std::istreambuf_iterator<char>(*in), std::istreambuf_iterator<char>());
             delete in;
 
@@ -125,31 +127,26 @@ public:
             char* plainText = api.GetUTF8Text();
 
             // write plain text to a new content part
-            Content *txtPart = ci.createContentPart();
-            txtPart->setType("text/plain");
+            std::shared_ptr<mico::persistence::model::Part> txtPart = item->createPart(mico::rdf::model::URI("http://dont_know_what_to_write_here"));
+            std::shared_ptr<mico::persistence::model::Resource> txtResource = std::dynamic_pointer_cast<mico::persistence::model::Resource>(txtPart);
+            txtResource->setSyntacticalType( "text/plain" );
 
-            // set some metadata properties (provenance information etc)
-            txtPart->setRelation(DC::creator, getServiceID());
-            txtPart->setRelation(DC::provenance, getServiceID());
-            txtPart->setProperty(DC::created, getTimestamp());
-            txtPart->setRelation(DC::source, object.stringValue());
-
-            std::ostream* out = txtPart->getOutputStream();
+            std::shared_ptr<mico::persistence::Asset> asset = txtResource->getAsset();
+            std::ostream* out = asset->getOutputStream();
             *out << plainText;
             delete out;
 
             LOG_INFO("Sending OCR results");
             // notify broker that we created a new content part by calling functions from AnalysisResponse passed as argument
-            resp.sendNew(ci, txtPart->getURI());
-            resp.sendFinish(ci);
+            resp.sendNew(item, txtResource->getURI());
+            resp.sendFinish(item);
 
             // clean up
-            delete imgPart;
-            delete txtPart;
             delete pic;
             delete [] plainText;
         } else {
-            std::cerr << "content item part " << object.stringValue() << " of content item " << ci.getURI().stringValue() << " does not exist!\n";
+            std::shared_ptr<mico::persistence::model::Resource> itemResource = std::dynamic_pointer_cast<mico::persistence::model::Resource>(item);
+            std::cerr << "content item part " << object.stringValue() << " of content item " << itemResource->getURI().stringValue() << " does not exist!\n";
         }
     };
 

@@ -3,9 +3,10 @@
 
 #include <string>
 #include <list>
+#include <map>
 
 #include "rdf_model.hpp"
-#include "ContentItem.hpp"
+#include "Item.hpp"
 
 namespace mico {
     namespace event {
@@ -79,7 +80,7 @@ namespace mico {
             * @param ci     the content item to analyse
             * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
             */
-            virtual void call(mico::event::AnalysisResponse& response, mico::persistence::ContentItem& ci, std::list<mico::rdf::model::URI>& object, std::map<std::string,std::string>& params) = 0;
+            virtual void call(mico::event::AnalysisResponse& response, std::shared_ptr< mico::persistence::model::Item > item, std::list<mico::rdf::model::URI>& object, std::map<std::string,std::string>& params) = 0;
         };
 
     }

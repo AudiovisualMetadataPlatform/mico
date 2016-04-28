@@ -19,7 +19,6 @@
 #include <fstream>
 
 #include "EventManager.hpp"
-#include "ContentItem.hpp"
 #include "SPARQLUtil.hpp"
 
 
@@ -70,11 +69,12 @@ public:
      * @param ci     the content item to analyse
      * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
      */
-    void call(AnalysisResponse& resp, ContentItem& ci, std::list<mico::rdf::model::URI>& object, std::map<std::string,std::string>& params) {
+    void call(AnalysisResponse& resp, std::shared_ptr< mico::persistence::model::Item > item, std::list<mico::rdf::model::URI>& object, std::map<std::string,std::string>& params) {
 		std::cout << "analysis callback of mock service " << serviceID.stringValue() << " called!" << std::endl;
-		Content* c = ci.createContentPart();
-		c->setType(getProvides());
-        resp.sendFinish(ci);
+    std::shared_ptr<mico::persistence::model::Part> c = item->createPart(mico::rdf::model::URI("http://dont_know_what_to_write_here"));
+    std::shared_ptr<mico::persistence::model::Resource> r = std::dynamic_pointer_cast<mico::persistence::model::Resource>(c);
+    r->setSyntacticalType( getProvides() );
+    resp.sendFinish(item);
 		called = true;
 	};
 	

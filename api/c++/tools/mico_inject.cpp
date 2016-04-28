@@ -23,7 +23,6 @@
 
 #include "EventManager.hpp"
 #include "Item.hpp"
-#include "Part.hpp"
 #include "SPARQLUtil.hpp"
 #include "vocabularies.hpp"
 
@@ -108,7 +107,7 @@ int main(int argc, char **argv) {
       }
     }
 
-    //eventManager.injectContentItem(item);
+    eventManager.injectItem(item);
 
     std::shared_ptr<mico::persistence::model::Resource> itemres = std::dynamic_pointer_cast<mico::persistence::model::Resource>(item);
     std::cout << "created content item with URI " << itemres->getURI().stringValue() << std::endl;
