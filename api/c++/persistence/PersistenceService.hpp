@@ -54,7 +54,6 @@ namespace mico {
             std::string marmottaServerUrl;
             std::string contentDirectory;
             PersistenceMetadata metadata;
-            std::string m_storagePrefix;
             std::string m_jniErrorMessage;
 
             static JNIEnv* m_sEnv;

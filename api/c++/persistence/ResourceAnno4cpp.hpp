@@ -41,39 +41,6 @@ namespace mico {
 
           virtual bool hasAsset();
 
-
-  //        @Override
-  //        public final Asset getAsset() throws RepositoryException {
-  //            if (resourceMMM.getAsset() == null) {
-  //                AssetMMM assetMMM = createObject(AssetMMM.class);
-  //                StringBuilder location = new StringBuilder()
-  //                        .append(persistenceService.getStoragePrefix())
-  //                        .append(this.getURI().getLocalName())
-  //                        .append("/")
-  //                        .append(new URIImpl(assetMMM.getResourceAsString()).getLocalName());
-  //                assetMMM.setLocation(location.toString());
-
-  //                resourceMMM.setAsset(assetMMM);
-
-  //                log.trace("No Asset available for Resource {} - Created new Asset with id {} and location {}",
-  //                        this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
-  //            }
-  //            return new AssetAnno4j(this.resourceMMM.getAsset(), this.persistenceService.getStorage());
-  //        }
-
-  //        @Override
-  //        public final boolean hasAsset() throws RepositoryException {
-  //            return resourceMMM.getAsset() != null;
-  //        }
-
-  //        protected <T extends RDFObject> T createObject(Class<T> clazz) throws RepositoryException{
-  //            return createObject(null,clazz);
-  //        }
-  //        protected <T extends RDFObject> T createObject(URI resource, Class<T> clazz) throws RepositoryException{
-  //            ObjectConnection con = resourceMMM.getObjectConnection();
-  //            return con.addDesignation(con.getObjectFactory().createObject(
-  //                    resource == null ? IDGenerator.BLANK_RESOURCE : resource , clazz), clazz);
-  //        }
       };
     }
   }

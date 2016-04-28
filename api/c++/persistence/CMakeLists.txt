@@ -27,6 +27,7 @@ add_library(mico_persistence SHARED
   Part
   Asset
   Resource
+  AssetAnno4cpp
   ItemAnno4cpp
   PartAnno4cpp
   ResourceAnno4cpp

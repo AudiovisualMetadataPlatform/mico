@@ -218,7 +218,7 @@ int main(int argc, char **argv) {
             assert(retrievedItemResource->getURI().stringValue() == itemURI);
         }
 
-        // check item retrieval at once
+        // check item retrieval
         std::vector< std::shared_ptr<model::Item> > resultItems = persistenceServiceTest.svc->getItems();
         // @TODO comment back in when done
 //        assert(resultItems.size() == itemURIS.size());
@@ -227,6 +227,28 @@ int main(int argc, char **argv) {
 //          std::string sItemURI = std::dynamic_pointer_cast<mico::persistence::model::Resource>(item)->getURI().stringValue();
 //          assert(std::find(itemURIS.begin(),itemURIS.end(), sItemURI) != itemURIS.end());
 //        }
+
+
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        // +++++++++++++++++++++ Asset creation for item++++++++++++++++++++
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+        std::shared_ptr<mico::persistence::model::Resource> itemWithAssetResource =
+            std::dynamic_pointer_cast<mico::persistence::model::Resource>(persistenceServiceTest.svc->createItem());
+
+        std::shared_ptr<mico::persistence::model::Asset> newAsset = itemWithAssetResource->getAsset();
+        std::shared_ptr<mico::persistence::model::Asset> existingAsset = itemWithAssetResource->getAsset();
+        assert(newAsset);
+        assert(existingAsset);
+        assert(newAsset->getLocation().stringValue().compare(existingAsset->getLocation().stringValue()) == 0);
+
+        newAsset->setFormat("video/mp4");
+
+        assert(existingAsset->getFormat().compare("video/mp4") == 0);
+
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         // check non existing item retrieval
         std::shared_ptr<mico::persistence::model::Item> notExistingItem  =
@@ -336,6 +358,27 @@ int main(int argc, char **argv) {
               part->setBody(fd_body);
               part->addTarget(fd_target);
 
+              // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              // +++++++++++++++++++++ Asset creation for part++++++++++++++++++++
+              // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+              std::shared_ptr<mico::persistence::model::Asset> newPartAsset = partResource->getAsset();
+              std::shared_ptr<mico::persistence::model::Asset> existingPartAsset = partResource->getAsset();
+              assert(newPartAsset);
+              assert(existingPartAsset);
+              assert(newPartAsset->getLocation().stringValue().compare(existingPartAsset->getLocation().stringValue()) == 0);
+
+              newPartAsset->setFormat("image/png");
+
+              assert(existingPartAsset->getFormat().compare("image/png") == 0);
+
+
+
+              // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
               // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
               // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
               // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -355,16 +398,9 @@ int main(int argc, char **argv) {
             assert(partInputResources1.size() == 2);
             assert(partInputResources2.size() == 2);
 
-
-
-
-
             // non existing parts check
             std::shared_ptr<mico::persistence::model::Part> notExistingPart  =
                 retrievedItem->getPart(mico::rdf::model::URI("http://does_not_exist_at_all"));
-
-
-
 
             assert(!notExistingPart);
 
@@ -374,15 +410,6 @@ int main(int argc, char **argv) {
         for (auto itemURI : itemURIS) {
            persistenceServiceTest.svc->deleteItem(itemURI);
         }
-
-
-
-
-
-
-        //std::shared_ptr<Asset> asset = currItem->getAsset();
-        //std::shared_ptr<Part> part2 = currItem->getPart(uri);
-        //std::list< std::shared_ptr<Part> > parts = currItem->getParts();
 
 
     } else {

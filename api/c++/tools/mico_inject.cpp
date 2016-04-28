@@ -29,7 +29,7 @@
 #include "Logging.hpp"
 
 using namespace mico::event;
-using namespace mico::persistence;
+using namespace mico::persistence::model;
 using namespace mico::rdf::model;
 
 namespace DC = mico::rdf::vocabularies::DC;

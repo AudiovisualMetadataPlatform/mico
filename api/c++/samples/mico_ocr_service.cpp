@@ -115,7 +115,7 @@ public:
         if(!imgPart) {
             // read content into a buffer, since tesseract cannot work with C++ streams
             std::shared_ptr<mico::persistence::model::Resource> imgResource = std::dynamic_pointer_cast<mico::persistence::model::Resource>(imgPart);
-            std::shared_ptr<mico::persistence::Asset> imgAsset = imgResource->getAsset();
+            std::shared_ptr<mico::persistence::model::Asset> imgAsset = imgResource->getAsset();
             std::istream* in = imgAsset->getInputStream();
             std::vector<char> buf = std::vector<char>(std::istreambuf_iterator<char>(*in), std::istreambuf_iterator<char>());
             delete in;
@@ -131,7 +131,7 @@ public:
             std::shared_ptr<mico::persistence::model::Resource> txtResource = std::dynamic_pointer_cast<mico::persistence::model::Resource>(txtPart);
             txtResource->setSyntacticalType( "text/plain" );
 
-            std::shared_ptr<mico::persistence::Asset> asset = txtResource->getAsset();
+            std::shared_ptr<mico::persistence::model::Asset> asset = txtResource->getAsset();
             std::ostream* out = asset->getOutputStream();
             *out << plainText;
             delete out;

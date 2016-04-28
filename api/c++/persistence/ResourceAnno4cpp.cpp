@@ -1,5 +1,9 @@
 
+
 #include "ResourceAnno4cpp.hpp"
+#include "ItemAnno4cpp.hpp"
+#include "PartAnno4cpp.hpp"
+#include "AssetAnno4cpp.hpp"
 
 #include <jnipp.h>
 #include <anno4cpp.h>
@@ -14,8 +18,10 @@ using namespace jnipp::org::openrdf::model::impl;
 using namespace jnipp::org::openrdf::repository::object;
 using namespace jnipp::org::openrdf::sail::memory::model;
 using namespace jnipp::com::github::anno4j;
+using namespace jnipp::com::github::anno4j::model::impl;
 using namespace jnipp::eu::mico::platform::anno4j::model;
 using namespace jnipp::eu::mico::platform::persistence::impl;
+
 
 namespace mico {
   namespace persistence {
@@ -87,8 +93,78 @@ namespace mico {
 
       std::shared_ptr<Asset> ResourceAnno4cpp::getAsset()
       {
-          throw std::runtime_error("Not implementend yet");
-          return std::shared_ptr<Asset>();
+        jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+        std::string assetType;
+
+        jnipp::GlobalRef<AssetMMM> jAssetMMM =
+            ((jnipp::LocalRef<ResourceMMM>)m_resourceMMM)->getAsset();
+
+        bool error = false;
+
+        if (!m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage)) {
+
+          if (!(jobject) jAssetMMM) {
+
+            jnipp::LocalRef<Transaction> jTransaction = m_persistenceService.getAnno4j()->createTransaction();
+            assert(jTransaction);
+            m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
+
+            jTransaction->begin();
+
+            std::shared_ptr<Item> asItem = std::dynamic_pointer_cast<Item>(shared_from_this());
+            std::shared_ptr<Part> asPart = std::dynamic_pointer_cast<Part>(shared_from_this());
+
+            if(asItem) {
+                jTransaction->setAllContexts(((jnipp::Ref<RDFObject>)m_resourceMMM)->getResource());
+                assetType = "Item";
+            } else {
+                assert(asPart);
+                std::shared_ptr<model::Resource> parentItemResource = std::dynamic_pointer_cast<model::Resource>(asPart->getItem());
+                jTransaction->setAllContexts( ((jnipp::Ref<RDFObject>) parentItemResource->getRDFObject())->getResource());
+                assetType = "Part";
+            }
+
+            jAssetMMM = jTransaction->createObject(AssetMMM::clazz());
+
+            assert(jAssetMMM);
+            error = error & m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
+
+            std::stringstream ss;
+
+            jnipp::LocalRef<URIImpl> jUriImpl =
+                URIImpl::construct( ((jnipp::Ref<ResourceObject>)jAssetMMM)->getResourceAsString() );
+
+            jnipp::LocalRef<URIImpl> jResourceUriImpl =
+                URIImpl::construct( ((jnipp::Ref<ResourceObject>)m_resourceMMM)->getResourceAsString() );
+
+            ss << m_persistenceService.getContentDirectory()
+               << "/" << jResourceUriImpl->getLocalName()->std_str()
+               << "/" << jUriImpl->getLocalName()->std_str();
+
+            jAssetMMM->setLocation(jnipp::String::create(ss.str()));
+            error = error & m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
+
+
+            if(error){
+                jTransaction->rollback();
+                jTransaction->close();
+                return std::shared_ptr<Asset>();
+            } else {
+                jTransaction->commit();
+            }
+
+            ((jnipp::Ref<ResourceMMM>)m_resourceMMM)->setAsset(jAssetMMM);
+            m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
+
+            LOG_DEBUG("No Asset available for Resource(%s) %s - Created new Asset with id %s and location %s",
+                      assetType.c_str(),
+                      getURI().stringValue().c_str(),
+                      ((jnipp::Ref<ResourceObject>)jAssetMMM)->getResourceAsString()->std_str().c_str(),
+                      jAssetMMM->getLocation()->std_str().c_str());
+         }
+         return std::make_shared<AssetAnno4cpp>(jAssetMMM,m_persistenceService);
+        }
+        return std::shared_ptr<Asset>();
       }
 
       bool ResourceAnno4cpp::hasAsset() {

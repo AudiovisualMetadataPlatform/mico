@@ -362,11 +362,6 @@ namespace mico {
           return m_anno4j;
         }
 
-        std::string PersistenceService::getStoragePrefix()
-        {
-          return m_storagePrefix;
-        }
-
         std::string PersistenceService::getContentDirectory()
         {
           return contentDirectory;
