@@ -22,6 +22,8 @@
 #include <magic.h>
 
 #include "EventManager.hpp"
+#include "Item.hpp"
+#include "Part.hpp"
 #include "SPARQLUtil.hpp"
 #include "vocabularies.hpp"
 
@@ -63,62 +65,57 @@ void usage() {
 }
 
 int main(int argc, char **argv) {
-    mico::log::set_log_level(mico::log::LoggingLevel::INFO);
+  mico::log::set_log_level(mico::log::LoggingLevel::INFO);
 
-	if(argc < 5) {
-		usage();
-        exit(1);
-	}
+  if(argc < 5) {
+    usage();
+    exit(1);
+  }
 
-    char *mico_user = argv[2];
-    char *mico_pass = argv[3];
+  char *mico_user = argv[2];
+  char *mico_pass = argv[3];
 
+  try {
+    EventManager eventManager(argv[1], mico_user, mico_pass);
 
-//	// initialise event manager; throws an exception on failure
-//	try {
-//		EventManager eventManager(argv[1], mico_user, mico_pass);
-		
-//		ContentItem* item = eventManager.getPersistenceService()->createItem();
-		
-//		for(int i=4; i<argc; i++) {
-//			int fd = open(argv[i], O_RDONLY);
+    std::shared_ptr<mico::persistence::model::Item> item = eventManager.getPersistenceService()->createItem();
 
-			
-//			if(fd >= 0) {
-//				struct stat st;
-//				fstat(fd,&st);
-			
-//				size_t len = st.st_size;
-//				char* buffer = (char*)mmap(NULL, len, PROT_READ, MAP_SHARED, fd, 0);
+    for(int i=4; i<argc; i++) {
+      int fd = open(argv[i], O_RDONLY);
+
+      if(fd >= 0) {
+        struct stat st;
+        fstat(fd,&st);
+
+        size_t len = st.st_size;
+        char* buffer = (char*)mmap(NULL, len, PROT_READ, MAP_SHARED, fd, 0);
+
+        std::cout << "creating new content part for file " << argv[i] << " of size " << len << " with type " << getMimeType(buffer,len) << std::endl;
 				
-//				std::cout << "creating new content part for file " << argv[i] << " of size " << len << " with type " << getMimeType(buffer,len) << std::endl;
+        std::shared_ptr<mico::persistence::model::Part> c = item->createPart(mico::rdf::model::URI("http://www.mico-project.eu/tools/mico_inject"));
+        std::shared_ptr<mico::persistence::model::Resource> res = std::dynamic_pointer_cast<mico::persistence::model::Resource>(c);
+        res->setSyntacticalType( getMimeType(buffer,len) );
+        std::shared_ptr<Asset> asset = res->getAsset();
+        std::ostream* os = asset->getOutputStream();
+        os->write(buffer, len);
+        delete os;
+
+        std::cout << "content part URI: " << res->getURI().stringValue() << std::endl;
 				
-//				Content* c = item->createContentPart();
-//				c->setType(getMimeType(buffer,len));
-//				c->setProperty(DC::source, argv[i]);
-//				c->setRelation(DC::creator, URI("http://www.mico-project.org/tools/mico_inject"));
-//				c->setProperty(DC::created, getTimestamp());
-//				std::ostream* os = c->getOutputStream();
-//				os->write(buffer, len);
-//				delete os;
-				
-//				std::cout << "content part URI: " << c->getURI().stringValue() << std::endl;
-				
-//				delete c;
-//				munmap(buffer, len);
-//			} else {
-//				std::cerr << "could not open file " << argv[i] << std::endl;
-//			}
-//		}
-		
-//		eventManager.injectContentItem(*item);
-		
-//		std::cout << "created content item with URI " << item->getURI().stringValue() << std::endl;
-		
-//		delete item;
-//	} catch(EventManagerException ex) {
-//		std::cerr << "could not initialise event manager: " << ex.getMessage() << std::endl;
-//	} catch (std::string ex) {
-//		std::cerr << "other error: " << ex << std::endl;
-//	}
+        munmap(buffer, len);
+      } else {
+        std::cerr << "could not open file " << argv[i] << std::endl;
+      }
+    }
+
+    //eventManager.injectContentItem(item);
+
+    std::shared_ptr<mico::persistence::model::Resource> itemres = std::dynamic_pointer_cast<mico::persistence::model::Resource>(item);
+    std::cout << "created content item with URI " << itemres->getURI().stringValue() << std::endl;
+
+  } catch(EventManagerException ex) {
+    std::cerr << "could not initialise event manager: " << ex.getMessage() << std::endl;
+  } catch (std::string ex) {
+    std::cerr << "other error: " << ex << std::endl;
+  }
 }
