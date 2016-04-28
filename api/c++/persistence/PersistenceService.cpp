@@ -358,6 +358,7 @@ namespace mico {
 
         jnipp::LocalRef<Anno4j> PersistenceService::getAnno4j()
         {
+          jnipp::Env::Scope scope(m_sJvm);
           return m_anno4j;
         }
 

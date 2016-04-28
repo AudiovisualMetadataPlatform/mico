@@ -27,6 +27,11 @@
 #include "Part.hpp"
 #include "ContentItem.hpp"
 #include "SPARQLUtil.hpp"
+#include <anno4cpp.h>
+#include <jnipp.h>
+#include "JnippExcpetionHandling.hpp"
+
+
 
 using namespace std;
 using namespace mico::persistence;
@@ -257,7 +262,6 @@ int main(int argc, char **argv) {
         }
 
         //part retrieval and body creation - BIG ITEM LOOP!!
-
         for (auto itemURI : itemURIS) {
             mico::rdf::model::URI asURI(itemURI);
 
@@ -287,9 +291,55 @@ int main(int argc, char **argv) {
 
               std::list< std::shared_ptr<mico::persistence::model::Resource> > partInputResources =  part->getInputs();
 
+              part->addInput(std::dynamic_pointer_cast<mico::persistence::model::Resource>(retrievedItem));
+
               assert(partInputResources.size() == 1);
 
+              std::cout.flush();
+
+              // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              // ++++++++++++++ create a MICO Body and Target and add to part ++++++++++++++
+              // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+              // !!!! always set the current scope to the JVM !!!
+
+              jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+
+              namespace ns_bodymmm     = jnipp::eu::mico::platform::anno4j::model::impl::bodymmm;
+              namespace ns_anno4jmodel = jnipp::com::github::anno4j::model;
+
+
+              jnipp::LocalRef<ns_anno4jmodel::Body> fd_body=
+                persistenceServiceTest.svc->getAnno4j()->createObject(ns_bodymmm::FaceDetectionBodyMMM::clazz());
+
+              // !!!! always check Java excpetions and returned Java objects !!!
+              //checkJavaExcpetionThrow();
+              assert((jobject) fd_body);
+
+              part->setBody(fd_body);
+
+              // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+              // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
             }
+
+            //try circular part inputs -> should that be possible at all?
+            auto listIt1 = itemParts.begin();
+            auto listIt2 = listIt1++;
+
+            (*listIt1)->addInput(std::dynamic_pointer_cast<mico::persistence::model::Resource>(*listIt2));
+            (*listIt2)->addInput(std::dynamic_pointer_cast<mico::persistence::model::Resource>(*listIt1));
+
+            std::list< std::shared_ptr<mico::persistence::model::Resource> > partInputResources1 =  (*listIt1)->getInputs();
+            std::list< std::shared_ptr<mico::persistence::model::Resource> > partInputResources2 =  (*listIt2)->getInputs();
+
+            assert(partInputResources1.size() == 2);
+            assert(partInputResources2.size() == 2);
+
+
+
+
 
             // non existing parts check
             std::shared_ptr<mico::persistence::model::Part> notExistingPart  =

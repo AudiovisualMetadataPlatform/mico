@@ -71,6 +71,9 @@ namespace mico {
         public:
             static JavaVM* m_sJvm;
 
+
+            static JavaVM* getJVM() { return m_sJvm; }
+
             /**
             * Initialise persistence service with the address of a server running the standard installation of
             * the MICO platform with Marmotta at port 8080 under context /marmotta, RabbitMQ at port 5672, and
