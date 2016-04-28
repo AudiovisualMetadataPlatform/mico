@@ -372,6 +372,31 @@ namespace mico {
           return contentDirectory;
         }
 
+        void PersistenceService::checkJavaExceptionThrow()
+        {
+          jnipp::Env::Scope scope(m_sJvm);
+          checkJavaExceptionThrow();
+        }
+
+        void PersistenceService::checkJavaExceptionThrow(std::vector<std::string> exceptionNames)
+        {
+          jnipp::Env::Scope scope(m_sJvm);
+          checkJavaExceptionThrow(exceptionNames);
+        }
+
+        bool PersistenceService::checkJavaExceptionNoThrow(std::string& msg)
+        {
+          jnipp::Env::Scope scope(m_sJvm);
+          return checkJavaExcpetionNoThrow(msg);
+        }
+
+        bool PersistenceService::checkJavaExceptionNoThrow(std::vector<std::string> exceptionNames, std::string& msg)
+        {
+          jnipp::Env::Scope scope(m_sJvm);
+          return checkJavaExcpetionNoThrow(exceptionNames, msg);
+        }
+
+
         void PersistenceService::setContext(jnipp::Ref<ObjectConnection> con, jnipp::Ref<URI> context) {
             jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 

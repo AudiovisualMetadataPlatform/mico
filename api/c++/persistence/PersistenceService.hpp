@@ -157,6 +157,14 @@ namespace mico {
             std::string getStoragePrefix();
 
             std::string getContentDirectory();
+
+            void checkJavaExceptionThrow();
+
+            void checkJavaExceptionThrow(std::vector<std::string> exceptionNames);
+
+            bool checkJavaExceptionNoThrow(std::string& msg);
+
+            bool checkJavaExceptionNoThrow(std::vector<std::string> exceptionNames, std::string& msg);
         };
 
 
