@@ -305,21 +305,36 @@ int main(int argc, char **argv) {
 
               std::string exceptMsg;
 
-              namespace ns_bodymmm     = jnipp::eu::mico::platform::anno4j::model::impl::bodymmm;
-              namespace ns_anno4jmodel = jnipp::com::github::anno4j::model;
+              namespace ns_bodymmm        = jnipp::eu::mico::platform::anno4j::model::impl::bodymmm;
+              namespace ns_targetmmm      = jnipp::eu::mico::platform::anno4j::model::impl::targetmmm;
+              namespace ns_anno4jmodel    = jnipp::com::github::anno4j::model;
+              namespace ns_anno4jselector = jnipp::com::github::anno4j::model::impl::selector;
 
 
               jnipp::LocalRef<ns_anno4jmodel::Body> fd_body=
                 persistenceServiceTest.svc->getAnno4j()->createObject(ns_bodymmm::FaceDetectionBodyMMM::clazz());
 
-              // !!!! always check Java excpetions through persistence service and returned Java objects for null!!!
+              jnipp::LocalRef<ns_targetmmm::SpecificResourceMMM> fd_target=
+                persistenceServiceTest.svc->getAnno4j()->createObject(ns_targetmmm::SpecificResourceMMM::clazz());
+
+              jnipp::LocalRef<ns_anno4jselector::FragmentSelector> spatialFragmentSelector=
+                persistenceServiceTest.svc->getAnno4j()->createObject(ns_anno4jselector::FragmentSelector::clazz());
+
+              // !!!! always check Java exceptions through persistence service and returned Java objects for null!!!
               persistenceServiceTest.svc->checkJavaExceptionThrow();
-//              if (persistenceServiceTest.svc->checkJavaExceptionNoThrow(exceptMsg)) {
-//                std::cout << "################# JAVA exception :" << exceptMsg << std::endl;
-//              }
               assert((jobject) fd_body);
+              assert((jobject) fd_target);
+              assert((jobject) spatialFragmentSelector);
+
+              spatialFragmentSelector->setSpatialFragment(jnipp::java::lang::Integer::construct(100),
+                                                          jnipp::java::lang::Integer::construct(100),
+                                                          jnipp::java::lang::Integer::construct(400),
+                                                          jnipp::java::lang::Integer::construct(300));
+
+              fd_target->setSelector(spatialFragmentSelector);
 
               part->setBody(fd_body);
+              part->addTarget(fd_target);
 
               // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
               // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
