@@ -2,14 +2,19 @@ package eu.mico.platform.persistence.test;
 
 import com.github.anno4j.querying.QueryService;
 import com.google.common.collect.Iterables;
+import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.anno4j.model.PartMMM;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
+
 import org.apache.marmotta.ldpath.parser.ParseException;
+import org.apache.thrift.transport.TMemoryInputTransport;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openrdf.model.impl.URIImpl;
@@ -17,6 +22,7 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.object.ObjectConnection;
+import org.openrdf.result.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +37,8 @@ public class ItemAnno4jTest {
     private static PersistenceServiceAnno4j persistenceService;
 
     private static Item itemAnno4j;
-    private static URIImpl extractorID;
 
+    private static URIImpl extractorID;
     private static ObjectConnection con;
 
     @BeforeClass
@@ -108,6 +114,7 @@ public class ItemAnno4jTest {
         Part part1 = itemAnno4j.createPart(extractorID);
         Part part2 = itemAnno4j.createPart(extractorID);
         itemAnno4j.getObjectConnection().addObject(part1.getRDFObject());
+        TestUtils.debugRDF(log, itemAnno4j.getObjectConnection());
         int retrievedPartCount = Iterables.size(itemAnno4j.getParts());
 
         assertEquals(initialPartCount + 2, retrievedPartCount);

@@ -1,8 +1,5 @@
 package eu.mico.platform.persistence.impl;
 
-import com.github.anno4j.Anno4j;
-import com.github.anno4j.Transaction;
-import eu.mico.platform.anno4j.model.ItemMMM;
 import org.openrdf.idGenerator.IDGenerator;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -20,21 +17,25 @@ import eu.mico.platform.persistence.model.Resource;
 
 public abstract class ResourceAnno4j implements Resource {
 
-    protected final Anno4j anno4j;
     private Logger log = LoggerFactory.getLogger(getClass());
     
     private final ResourceMMM resourceMMM;
     protected final PersistenceService persistenceService;
 
-    protected ResourceAnno4j(ResourceMMM resourceMMM, PersistenceService persistenceService, Anno4j anno4j) {
+    protected ResourceAnno4j(ResourceMMM resourceMMM, PersistenceService persistenceService) {
         this.persistenceService = persistenceService;
         this.resourceMMM = resourceMMM;
-        this.anno4j = anno4j;
+        
     }
     
     @Override
     public final URI getURI() {
         return (URI)resourceMMM.getResource();
+    }
+
+    @Override
+    public final ResourceMMM getRDFObject() {
+        return resourceMMM;
     }
 
     @Override
@@ -60,39 +61,7 @@ public abstract class ResourceAnno4j implements Resource {
     @Override
     public final Asset getAsset() throws RepositoryException {
         if (resourceMMM.getAsset() == null) {
-
-            AssetMMM assetMMM;
-            Transaction transaction = null;
-            boolean error = false;
-            try {
-                transaction = anno4j.createTransaction();
-                transaction.begin();
-
-                if(this instanceof ItemAnno4j) {
-                    transaction.setAllContexts(this.getURI());
-                } else {
-                    transaction.setAllContexts(((PartAnno4j) this).getItem().getURI());
-                }
-
-                assetMMM = transaction.createObject(AssetMMM.class);
-
-            } catch (RepositoryException | RuntimeException e ) {
-                error = true;
-                throw e;
-            } catch (IllegalAccessException | InstantiationException e) {
-                error = true;
-                throw new IllegalStateException(e);
-            } finally {
-                if(transaction != null){
-                    if(error){
-                        transaction.rollback(); //rollback any triples created during this method
-                        transaction.close(); //in case we have not succeeded we can close the connection
-                    } else {
-                        transaction.commit(); //commit the item before returning
-                    }
-                } //failed to open connection
-            }
-
+            AssetMMM assetMMM = createObject(AssetMMM.class);
             StringBuilder location = new StringBuilder()
                     .append(persistenceService.getStoragePrefix())
                     .append(this.getURI().getLocalName())
@@ -105,7 +74,6 @@ public abstract class ResourceAnno4j implements Resource {
             log.trace("No Asset available for Resource {} - Created new Asset with id {} and location {}", 
                     this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
         }
-
         return new AssetAnno4j(this.resourceMMM.getAsset(), this.persistenceService.getStorage());
     }
 
@@ -113,4 +81,14 @@ public abstract class ResourceAnno4j implements Resource {
     public final boolean hasAsset() throws RepositoryException {
         return resourceMMM.getAsset() != null;
     }
+    
+    protected <T extends RDFObject> T createObject(Class<T> clazz) throws RepositoryException{
+        return createObject(null,clazz);
+    }
+    protected <T extends RDFObject> T createObject(URI resource, Class<T> clazz) throws RepositoryException{
+        ObjectConnection con = resourceMMM.getObjectConnection();
+        return con.addDesignation(con.getObjectFactory().createObject(
+                resource == null ? IDGenerator.BLANK_RESOURCE : resource , clazz), clazz);
+    }
+
 }

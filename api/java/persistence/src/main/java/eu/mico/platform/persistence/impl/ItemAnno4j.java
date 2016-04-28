@@ -1,11 +1,8 @@
 package eu.mico.platform.persistence.impl;
 
-import com.github.anno4j.Anno4j;
-import com.github.anno4j.Transaction;
 import com.github.anno4j.model.Agent;
 import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.anno4j.model.PartMMM;
-import eu.mico.platform.anno4j.model.ResourceMMM;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
@@ -21,8 +18,6 @@ import org.slf4j.LoggerFactory;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
 public class ItemAnno4j extends ResourceAnno4j implements Item {
 
@@ -30,77 +25,58 @@ public class ItemAnno4j extends ResourceAnno4j implements Item {
 
     private final ItemMMM itemMMM;
     
-    public ItemAnno4j(ItemMMM itemMMM, PersistenceService persistenceService, Anno4j anno4j) {
-        super(itemMMM, persistenceService, anno4j);
+    public ItemAnno4j(ItemMMM itemMMM, PersistenceService persistenceService) {
+        super(itemMMM, persistenceService);
         this.itemMMM = itemMMM;
     }
 
     @Override
     public Part createPart(URI extractorID) throws RepositoryException {
+        PartMMM partMMM = createObject(PartMMM.class);
+        String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
+        partMMM.setSerializedAt(dateTime);
 
-        Transaction transaction = null;
-        boolean error = false;
-
-        PartMMM partMMM;
-        try {
-            transaction = anno4j.createTransaction();
-            transaction.begin();
-
-            transaction.setAllContexts(this.getURI());
-            partMMM = transaction.createObject(PartMMM.class);
-
-            String dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
-            partMMM.setSerializedAt(dateTime);
-
-            Agent agent = transaction.createObject(Agent.class, extractorID);
-            partMMM.setSerializedBy(agent);
-
-        } catch (RepositoryException | RuntimeException e ) {
-            error = true;
-            throw e;
-        } catch (IllegalAccessException | InstantiationException e) {
-            error = true;
-            throw new IllegalStateException(e);
-        } finally {
-            if(transaction != null){
-                if(error){
-                    transaction.rollback(); //rollback any triples created during this method
-                    transaction.close(); //in case we have not succeeded we can close the connection
-                } else {
-                    transaction.commit(); //commit the item before returning
-                }
-            } //failed to open connection
-        }
+        Agent agent = createObject(extractorID, Agent.class);
+        partMMM.setSerializedBy(agent);
 
         this.itemMMM.addPart(partMMM);
+
         log.trace("Created Part with id {} in the context graph {} - Creator {}", partMMM.getResourceAsString(), this.getURI(), extractorID);
-        return new PartAnno4j(partMMM, this, persistenceService, anno4j);
+
+        return new PartAnno4j(partMMM, this, persistenceService);
     }
 
     
     @Override
     public Part getPart(URI uri) throws RepositoryException {
-        Transaction transaction = anno4j.createTransaction();
-        transaction.setAllContexts(this.getURI());
-
-        PartMMM partMMM = transaction.findByID(PartMMM.class, uri);
-        if (partMMM != null) {
-            return new PartAnno4j(partMMM, this, persistenceService, anno4j);
-        } else {
-            return null;
+        try {
+            PartMMM partMMM = itemMMM.getObjectConnection().getObject(PartMMM.class, uri);
+            return new PartAnno4j(partMMM, this, persistenceService);
+        } catch (QueryEvaluationException e) {
+            throw new RepositoryException(e);
         }
     }
 
     @Override
     public Iterable<? extends Part> getParts() throws RepositoryException {
-        List<PartAnno4j> partsAnno4j = new ArrayList<>();
-        Set<PartMMM> partsMMM = itemMMM.getParts();
 
-        for (PartMMM partMMM : partsMMM) {
-            partsAnno4j.add(new PartAnno4j(partMMM, this, persistenceService, anno4j));
+        Result<PartMMM> partsMMM = null;
+        try {
+            ArrayList<PartAnno4j> partsAnno4j = new ArrayList<>();
+            partsMMM = itemMMM.getObjectConnection().getObjects(PartMMM.class);
+            while(partsMMM.hasNext()){
+                partsAnno4j.add(new PartAnno4j(partsMMM.next(), this, persistenceService));
+            }
+            return partsAnno4j;
+        } catch(QueryEvaluationException e){
+            throw new RepositoryException(e);
+        } finally {
+            if(partsMMM != null){
+                try {
+                    partsMMM.close();
+                } catch (QueryEvaluationException e) {/*ignore*/}
+            }
         }
-
-        return partsAnno4j;
     }
 
     @Override
@@ -112,9 +88,5 @@ public class ItemAnno4j extends ResourceAnno4j implements Item {
     public ObjectConnection getObjectConnection(){
         return itemMMM.getObjectConnection();
     }
-
-    @Override
-    public ItemMMM getRDFObject() {
-        return itemMMM;
-    }
+ 
 }

@@ -31,8 +31,6 @@ public class ItemMMMTest {
 
     @Test
     public void testItem() throws RepositoryException, IllegalAccessException, InstantiationException, QueryEvaluationException, MalformedQueryException, ParseException {
-        assertEquals(0, anno4j.findAll(ItemMMM.class).size());
-        
         ItemMMM itemMMM = anno4j.createObject(ItemMMM.class);
 
         AssetMMM asset = anno4j.createObject(AssetMMM.class);
@@ -46,11 +44,18 @@ public class ItemMMMTest {
         PartMMM part3 = anno4j.createObject(PartMMM.class);
 
         itemMMM.setAsset(asset);
-        
         queryService.addCriteria("mmm:hasAsset[is-a mmm:Asset]");
 
-        // Query for now one existing ItemMMM
+        // Query for non existing Items
         List<ItemMMM> result = queryService.execute(ItemMMM.class);
+
+        assertEquals(0, result.size());
+
+        // Persist the ItemMMM
+        anno4j.persist(itemMMM);
+
+        // Query for now one existing ItemMMM
+        result = queryService.execute(ItemMMM.class);
 
         assertEquals(1, result.size());
 
