@@ -1,6 +1,6 @@
 package eu.mico.platform.anno4j.model.fam;
 
-import java.util.Collection;
+import java.util.Set;
 
 import org.openrdf.annotations.Iri;
 
@@ -24,14 +24,14 @@ public interface NamedEntityBody extends FAMBody {
      * @param types the types or <code>null</code> to remove all current types
      */
     @Iri(FAM.ENTITY_TYPE)
-    public void setTypes(Collection<RDFObject> types);
+    public void setTypes(Set<RDFObject> types);
 
     /**
      * Getter for the types.
      * @return the set of types
      */
     @Iri(FAM.ENTITY_TYPE)
-    public Collection<RDFObject> getTypes();
+    public Set<RDFObject> getTypes();
     
     public void addType(String type);
     
