@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 public class ItemAnno4j extends ResourceAnno4j implements Item {
 
@@ -59,24 +61,12 @@ public class ItemAnno4j extends ResourceAnno4j implements Item {
 
     @Override
     public Iterable<? extends Part> getParts() throws RepositoryException {
-
-        Result<PartMMM> partsMMM = null;
-        try {
-            ArrayList<PartAnno4j> partsAnno4j = new ArrayList<>();
-            partsMMM = itemMMM.getObjectConnection().getObjects(PartMMM.class);
-            while(partsMMM.hasNext()){
-                partsAnno4j.add(new PartAnno4j(partsMMM.next(), this, persistenceService));
-            }
-            return partsAnno4j;
-        } catch(QueryEvaluationException e){
-            throw new RepositoryException(e);
-        } finally {
-            if(partsMMM != null){
-                try {
-                    partsMMM.close();
-                } catch (QueryEvaluationException e) {/*ignore*/}
-            }
+        List<PartAnno4j> partsAnno4j = new ArrayList<>();
+        Set<PartMMM> partsMMM = itemMMM.getParts();
+        for (PartMMM partMMM : partsMMM) {
+            partsAnno4j.add(new PartAnno4j(partMMM, this, persistenceService));
         }
+        return partsAnno4j;
     }
 
     @Override
