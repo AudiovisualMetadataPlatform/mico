@@ -1,6 +1,7 @@
 package eu.mico.platform.anno4j.model;
 
 import com.github.anno4j.Anno4j;
+import com.github.anno4j.Transaction;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.impl.targets.SpecificResource;
 import com.github.anno4j.querying.QueryService;
@@ -35,13 +36,15 @@ public class PartMMMTest {
 
     @Test
     public void testPart() throws RepositoryException, IllegalAccessException, InstantiationException, QueryEvaluationException, ParseException, MalformedQueryException {
-        PartMMM part = anno4j.createObject(PartMMM.class);
+        Transaction transaction = anno4j.createTransaction();
+        transaction.begin();
+        PartMMM part = transaction.createObject(PartMMM.class);
 
         part.setAnnotatedAt(2015, 12, 17, 14, 51, 00);
 
-        SpecificResource spec = anno4j.createObject(SpecificResource.class);
+        SpecificResource spec = transaction.createObject(SpecificResource.class);
 
-        TestBody body = anno4j.createObject(TestBody.class);
+        TestBody body = transaction.createObject(TestBody.class);
 
         part.setBody(body);
         part.addTarget(spec);
@@ -52,7 +55,7 @@ public class PartMMMTest {
         assertEquals(0, result.size());
 
         // Persist the Part
-        anno4j.persist(part);
+        transaction.commit();
 
         // Query for one existing Part
         result = queryService.execute(PartMMM.class);
