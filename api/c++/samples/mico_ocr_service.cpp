@@ -50,12 +50,8 @@ using std::string;
 // this namespace contains EventManager and AnalysisService
 using namespace mico::event;
 
-// this namespace contains Content, ContentItem, etc
-using namespace mico::persistence;
-
-// this namespace contains the RDF data model
-using namespace mico::rdf::model;
-
+// this namespace contains Item, Part, etc
+using namespace mico::persistence::model;
 
 // define dublin core vocabulary shortcut
 namespace DC = mico::rdf::vocabularies::DC;
@@ -107,15 +103,15 @@ public:
     * @param item  the content item to analyse
     * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
     */
-    void call(AnalysisResponse& resp, std::shared_ptr< mico::persistence::model::Item > item, std::list<mico::rdf::model::URI>& objects, std::map<std::string,std::string>& params) {
+    void call(AnalysisResponse& resp, std::shared_ptr< Item > item, std::list<mico::rdf::model::URI>& objects, std::map<std::string,std::string>& params) {
         // retrieve the content part identified by the object URI
         mico::rdf::model::URI object = objects.front();
-        std::shared_ptr<mico::persistence::model::Part> imgPart = item->getPart(object);
+        std::shared_ptr<Part> imgPart = item->getPart(object);
 
-        if(!imgPart) {
+        if(imgPart) {
             // read content into a buffer, since tesseract cannot work with C++ streams
-            std::shared_ptr<mico::persistence::model::Resource> imgResource = std::dynamic_pointer_cast<mico::persistence::model::Resource>(imgPart);
-            std::shared_ptr<mico::persistence::model::Asset> imgAsset = imgResource->getAsset();
+            std::shared_ptr<Resource> imgResource = std::dynamic_pointer_cast<Resource>(imgPart);
+            std::shared_ptr<Asset> imgAsset = imgResource->getAsset();
             std::istream* in = imgAsset->getInputStream();
             std::vector<char> buf = std::vector<char>(std::istreambuf_iterator<char>(*in), std::istreambuf_iterator<char>());
             delete in;
@@ -127,11 +123,11 @@ public:
             char* plainText = api.GetUTF8Text();
 
             // write plain text to a new content part
-            std::shared_ptr<mico::persistence::model::Part> txtPart = item->createPart(mico::rdf::model::URI("http://dont_know_what_to_write_here"));
-            std::shared_ptr<mico::persistence::model::Resource> txtResource = std::dynamic_pointer_cast<mico::persistence::model::Resource>(txtPart);
+            std::shared_ptr<Part> txtPart = item->createPart(mico::rdf::model::URI("http://dont_know_what_to_write_here"));
+            std::shared_ptr<Resource> txtResource = std::dynamic_pointer_cast<Resource>(txtPart);
             txtResource->setSyntacticalType( "text/plain" );
 
-            std::shared_ptr<mico::persistence::model::Asset> asset = txtResource->getAsset();
+            std::shared_ptr<Asset> asset = txtResource->getAsset();
             std::ostream* out = asset->getOutputStream();
             *out << plainText;
             delete out;
@@ -145,7 +141,7 @@ public:
             delete pic;
             delete [] plainText;
         } else {
-            std::shared_ptr<mico::persistence::model::Resource> itemResource = std::dynamic_pointer_cast<mico::persistence::model::Resource>(item);
+            std::shared_ptr<Resource> itemResource = std::dynamic_pointer_cast<Resource>(item);
             std::cerr << "content item part " << object.stringValue() << " of content item " << itemResource->getURI().stringValue() << " does not exist!\n";
         }
     };

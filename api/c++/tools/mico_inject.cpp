@@ -30,7 +30,6 @@
 
 using namespace mico::event;
 using namespace mico::persistence::model;
-using namespace mico::rdf::model;
 
 namespace DC = mico::rdf::vocabularies::DC;
 
@@ -77,7 +76,7 @@ int main(int argc, char **argv) {
   try {
     EventManager eventManager(argv[1], mico_user, mico_pass);
 
-    std::shared_ptr<mico::persistence::model::Item> item = eventManager.getPersistenceService()->createItem();
+    std::shared_ptr<Item> item = eventManager.getPersistenceService()->createItem();
 
     for(int i=4; i<argc; i++) {
       int fd = open(argv[i], O_RDONLY);
@@ -90,9 +89,9 @@ int main(int argc, char **argv) {
         char* buffer = (char*)mmap(NULL, len, PROT_READ, MAP_SHARED, fd, 0);
 
         std::cout << "creating new content part for file " << argv[i] << " of size " << len << " with type " << getMimeType(buffer,len) << std::endl;
-				
-        std::shared_ptr<mico::persistence::model::Part> c = item->createPart(mico::rdf::model::URI("http://www.mico-project.eu/tools/mico_inject"));
-        std::shared_ptr<mico::persistence::model::Resource> res = std::dynamic_pointer_cast<mico::persistence::model::Resource>(c);
+
+        std::shared_ptr<Part> c = item->createPart(mico::rdf::model::URI("http://www.mico-project.eu/tools/mico_inject"));
+        std::shared_ptr<Resource> res = std::dynamic_pointer_cast<Resource>(c);
         res->setSyntacticalType( getMimeType(buffer,len) );
         std::shared_ptr<Asset> asset = res->getAsset();
         std::ostream* os = asset->getOutputStream();
@@ -109,7 +108,7 @@ int main(int argc, char **argv) {
 
     eventManager.injectItem(item);
 
-    std::shared_ptr<mico::persistence::model::Resource> itemres = std::dynamic_pointer_cast<mico::persistence::model::Resource>(item);
+    std::shared_ptr<Resource> itemres = std::dynamic_pointer_cast<Resource>(item);
     std::cout << "created content item with URI " << itemres->getURI().stringValue() << std::endl;
 
   } catch(EventManagerException ex) {

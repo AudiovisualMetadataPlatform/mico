@@ -49,4 +49,4 @@ set_target_properties(mico_persistence PROPERTIES COMPILE_OPTIONS "-O3;-std=c++1
 
 
 install (TARGETS mico_persistence DESTINATION lib)
-install (FILES Content.hpp ContentItem.hpp Metadata.hpp PersistenceService.hpp SPARQLUtil.hpp URLStream.hpp FileStream.hpp WebStream.hpp HDFSStream.hpp DESTINATION include)
+install (FILES Content.hpp ContentItem.hpp Metadata.hpp Item.hpp Part.hpp Resource.hpp Asset.hpp PersistenceService.hpp SPARQLUtil.hpp URLStream.hpp FileStream.hpp WebStream.hpp HDFSStream.hpp DESTINATION include)

@@ -294,7 +294,7 @@ namespace mico {
 
                     LOG_DEBUG("received analysis event (content item %s, object %s, replyTo %s)", event.itemuri().c_str(), event.parturi(0).c_str(), message.replyTo().c_str());
 
-                    std::shared_ptr<Item> ci = (*persistence).getItem(URI(event.itemuri()));
+                    std::shared_ptr<Item> item = (*persistence).getItem(URI(event.itemuri()));
 
                     std::list<URI> objects;
                     std::map<std::string,std::string> params;
@@ -306,9 +306,7 @@ namespace mico {
                     }
                     AnalysisResponse response(this->service, message, channel);
 
-                    //TODO: change service call to Item
-
-                    //service.call( response, *ci, objects, params);
+                    service.call( response, item, objects, params);
 
                     LOG_DEBUG("acknowledged finished processing of analysis event (content item %s, object %s, replyTo %s)", event.itemuri().c_str(), event.parturi(0).c_str(), message.replyTo().c_str());
                 }else{
