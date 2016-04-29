@@ -64,6 +64,7 @@ public abstract class ResourceAnno4j implements Resource {
             AssetMMM assetMMM = createObject(AssetMMM.class);
             StringBuilder location = new StringBuilder()
                     .append(persistenceService.getStoragePrefix())
+                    .append("/")
                     .append(this.getURI().getLocalName())
                     .append("/")
                     .append(new URIImpl(assetMMM.getResourceAsString()).getLocalName());
