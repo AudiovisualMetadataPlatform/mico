@@ -13,6 +13,7 @@ namespace mico {
   }
 
   namespace persistence {
+      class PersistenceService;
     namespace model {
       /**
        * Super type of items and parts
@@ -44,6 +45,8 @@ namespace mico {
           virtual std::shared_ptr<Asset> getAsset() = 0;
 
           virtual bool hasAsset() = 0;
+
+          virtual mico::persistence::PersistenceService& getPersistenceService() = 0;
       };
     }
   }

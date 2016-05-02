@@ -41,6 +41,8 @@ namespace mico {
 
           virtual bool hasAsset();
 
+          virtual mico::persistence::PersistenceService& getPersistenceService() {return m_persistenceService; }
+
       };
     }
   }
