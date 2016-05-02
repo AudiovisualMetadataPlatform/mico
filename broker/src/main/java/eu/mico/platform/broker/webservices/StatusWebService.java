@@ -77,7 +77,8 @@ public class StatusWebService {
             Manifest mf = new Manifest();
             mf.read(resourceAsStream);
             Attributes atts = mf.getMainAttributes();
-            info = atts.getValue("Implementation-Title") + " ("+ atts.getValue("Implementation-Version")+")";
+            info = atts.getValue("Implementation-Title") + " ("+ atts.getValue("Implementation-Version")+")"
+                    + "\nbuild on: " + atts.getValue("Build-Time");
         }catch(IOException e ){
             info = "Version 2.x";
         }
