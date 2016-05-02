@@ -18,11 +18,13 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.*;
+import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.object.ObjectConnection;
+import org.openrdf.repository.object.ObjectRepository;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
@@ -36,6 +38,10 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+
 
 /**
  * ...
@@ -44,9 +50,13 @@ import java.util.Map;
  */
 public class TextAnalysisWebServiceTest {
 
+    private static String itemUrlString = "http://localhost/mem/56b90661-14b5-4fe6-b2c8-af5357f729a9";
+
     private static TestServer server;
 
     private static Repository repository;
+
+    private static RepositoryConnection connection;
 
     private static Part part;
 
@@ -60,6 +70,7 @@ public class TextAnalysisWebServiceTest {
 
         //init in memory repository
         repository = initializeRepository();
+        connection = repository.getConnection();
 
         //init server
         server = new TestServer();
@@ -72,11 +83,10 @@ public class TextAnalysisWebServiceTest {
     @AfterClass
     public static void shutdown() throws Exception {
         server.stop();
+        connection.close();
         repository.shutDown();
     }
 
-    //FIXME
-    @Ignore
     @Test
     public void testUpload() throws IOException, RepositoryException {
         RestAssured.given().
@@ -86,7 +96,7 @@ public class TextAnalysisWebServiceTest {
                 post(server.getUrl() + "zooniverse/textanalysis").
                 then().
                 assertThat()
-                .body("id", Matchers.equalTo("d9347936-30ac-42f7-a0d5-4a2bfd908256"))
+                .body("id", Matchers.equalTo(itemUrlString))
                 .body("status", Matchers.equalTo("submitted"));
 
         //test content parts
@@ -94,20 +104,16 @@ public class TextAnalysisWebServiceTest {
         Assert.assertEquals("This is a text", new String(((ByteArrayOutputStream) part.getAsset().getOutputStream()).toByteArray()));
     }
 
-    //FIXME
-    @Ignore
     @Test
     public void testGetResult() {
-        String itemID = "d9347936-30ac-42f7-a0d5-4a2bfd908256";
-
         com.jayway.restassured.RestAssured.when().
-                get(server.getUrl() + "zooniverse/textanalysis/" + itemID).
+                get(server.getUrl() + "zooniverse/textanalysis/" + itemUrlString).
                 then().
                 assertThat()
-                .body("id", Matchers.equalTo("d9347936-30ac-42f7-a0d5-4a2bfd908256"))
-                .body("sentiment", Matchers.equalTo(-0.26978558F))
+                .body("id", Matchers.equalTo(itemUrlString))
+                .body("sentiment", Matchers.equalTo(-0.19203712F))
                 .body("topics.size()", Matchers.equalTo(3))
-                .body("entities.size()", Matchers.equalTo(20))
+                .body("entities.size()", Matchers.equalTo(39))
                 .body("status", Matchers.equalTo("finished"));
     }
 
@@ -148,17 +154,19 @@ public class TextAnalysisWebServiceTest {
 
     private static Item mockCreateItem() throws RepositoryException, IOException {
         URI uri = Mockito.mock(URI.class);
-        Mockito.when(uri.stringValue()).thenReturn("http://localhost/item/d9347936-30ac-42f7-a0d5-4a2bfd908256");
+        Mockito.when(uri.stringValue()).thenReturn(itemUrlString);
         Item item = Mockito.mock(Item.class);
         Part part = mockContent();
-        Mockito.when(item.createPart(new URIImpl("http://mico-project.eu/part-mock"))).thenReturn(part);
+        Mockito.when(item.createPart(anyObject())).thenReturn(part);
         Mockito.when(item.getURI()).thenReturn(uri);
         return item;
     }
 
-    private static Item mockItem(URI uri) throws RepositoryException, IOException {
+    private static Item mockItem(URI uri) throws RepositoryException, IOException, MalformedQueryException, QueryEvaluationException {
         Item item = Mockito.mock(Item.class);
         Mockito.when(item.getURI()).thenReturn(uri);
+        ObjectConnection connection = mockObjectConnection();
+        Mockito.when(item.getObjectConnection()).thenReturn(connection);
         return item;
     }
 
@@ -171,14 +179,28 @@ public class TextAnalysisWebServiceTest {
         return part;
     }
 
+    private static ObjectConnection mockObjectConnection() throws RepositoryException, MalformedQueryException, QueryEvaluationException {
+        ObjectConnection rep = Mockito.mock(ObjectConnection.class);
+        Mockito.when(rep.prepareTupleQuery(anyObject())).thenAnswer(new Answer<TupleQuery>() {
+            @Override
+            public TupleQuery answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return connection.prepareTupleQuery(QueryLanguage.SPARQL,(String)invocationOnMock.getArguments()[0]);
+            }
+        });
+
+        return rep;
+    }
+
     private static Repository initializeRepository() throws RepositoryException, IOException, RDFParseException {
+
         Repository repository = new SailRepository(new MemoryStore());
         repository.initialize();
 
         //import file
-        URL file = Resources.getResource("text_analysis/lmf-export-20151005-091437.ttl");
+        URL file = Resources.getResource("text_analysis/kiwi-export-20150429.ttl");
 
         RepositoryConnection c = repository.getConnection();
+
         repository.getConnection().add(file.openStream(), "http://mico-platform:8080/marmotta", RDFFormat.TURTLE);
         c.close();
 
