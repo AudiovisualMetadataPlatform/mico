@@ -1,7 +1,7 @@
 package eu.mico.platform.anno4j.model.fam;
 
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.openrdf.model.Resource;
 
@@ -18,7 +18,7 @@ public abstract class FAMBodySupport extends ResourceObjectSupport
         if(selector == null){
             return;
         }
-        Collection<Selector> selectors = getSelectors();
+        Set<Selector> selectors = getSelectors();
         if(selectors == null){
             selectors = new HashSet<>();
             setSelectors(selectors);
