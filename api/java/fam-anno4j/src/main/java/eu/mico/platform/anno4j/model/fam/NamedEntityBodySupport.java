@@ -1,7 +1,7 @@
 package eu.mico.platform.anno4j.model.fam;
 
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.openrdf.repository.object.RDFObject;
 
@@ -24,7 +24,7 @@ public abstract class NamedEntityBodySupport extends FAMBodySupport
         if(type == null){
             return;
         }
-        Collection<RDFObject> types = getTypes();
+        Set<RDFObject> types = getTypes();
         if(types == null){
             types = new HashSet<>();
             setTypes(types);

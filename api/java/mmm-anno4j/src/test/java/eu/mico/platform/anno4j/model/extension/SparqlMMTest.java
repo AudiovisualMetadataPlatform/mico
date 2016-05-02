@@ -80,6 +80,7 @@ public class SparqlMMTest {
         annotation.addTarget(specificResource);
         annotation.setBody(body);
 
+        anno4j.persist(annotation);
     }
 
     private String getImageURI(String id) {
