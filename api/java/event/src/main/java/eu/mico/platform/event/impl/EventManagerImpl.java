@@ -27,6 +27,7 @@ import java.util.concurrent.TimeoutException;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.UnknownTransactionStateException;
 import org.openrdf.repository.object.ObjectConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -264,6 +265,15 @@ public class EventManagerImpl implements EventManager {
      */
     @Override
     public void injectItem(Item item) throws IOException {
+        ObjectConnection con = item.getObjectConnection();
+        try {
+            if(con.isActive()){
+                con.commit(); //commit the current state of the item before notifying the broker
+                con.begin();
+            }
+        } catch (RepositoryException e) {
+            throw new IOException("Unable to commit Item data before inject",e);
+        } //else  auto commit ... nothing to do 
         Channel chan = connection.createChannel();
         chan.basicPublish("", EventManager.QUEUE_CONTENT_INPUT, null, Event.ItemEvent.newBuilder().setItemUri(item.getURI().stringValue()).build().toByteArray());
         chan.close();
