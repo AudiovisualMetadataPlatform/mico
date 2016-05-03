@@ -96,8 +96,10 @@ namespace mico {
                 configAvailableMutex.lock();
 
                 channel->onReady([this]() {
-                    if (!amqpWorkaround.isFirstCall())
-                        return;
+                    if (!amqpWorkaround.isFirstCall()) {
+                      LOG_DEBUG("prevent double execution of ConfigurationClient callback.");
+                      return;
+                    }
                     //declare config reply queue
                     this->channel->declareQueue(AMQP::autodelete + AMQP::exclusive)
                             .onSuccess([this](const std::string &name, uint32_t messageCount, uint32_t consumerCount) {
@@ -176,12 +178,12 @@ namespace mico {
         void AnalysisResponse::sendFinish(std::shared_ptr< mico::persistence::model::Item > i) {
           LOG_INFO("AnalysisResponse:sendFinish to queue %s", m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
-          mico::event::model::AnalysisEvent::Finish fevent;
+          mico::event::model::AnalysisEvent::Finish *fevent = new mico::event::model::AnalysisEvent::Finish();
           std::shared_ptr<mico::persistence::model::Resource> r = std::dynamic_pointer_cast<mico::persistence::model::Resource>(i);
-          fevent.set_itemuri(r->getURI().stringValue());
-          fevent.set_serviceid(m_service.getServiceID().stringValue());
+          fevent->set_itemuri(r->getURI().stringValue());
+          fevent->set_serviceid(m_service.getServiceID().stringValue());
           event.set_type(mico::event::model::MessageType::FINISH);
-          event.set_allocated_finish(&fevent);
+          event.set_allocated_finish(fevent);
 
           char buffer[event.ByteSize()];
           event.SerializeToArray(buffer, event.ByteSize());
@@ -196,15 +198,15 @@ namespace mico {
         {
           LOG_INFO("AnalysisResponse:sendErrorMessage: \"%s\" to queue %s",msg.c_str(), m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
-          mico::event::model::AnalysisEvent::Error eevent;
+          mico::event::model::AnalysisEvent::Error *eevent = new mico::event::model::AnalysisEvent::Error();
           std::shared_ptr<mico::persistence::model::Resource> r = std::dynamic_pointer_cast<mico::persistence::model::Resource>(i);
-          eevent.set_itemuri(r->getURI().stringValue());
-          eevent.set_serviceid(m_service.getServiceID().stringValue());
-          eevent.set_errorcode(errcode);
-          eevent.set_message(msg);
-          eevent.set_description(desc);
+          eevent->set_itemuri(r->getURI().stringValue());
+          eevent->set_serviceid(m_service.getServiceID().stringValue());
+          eevent->set_errorcode(errcode);
+          eevent->set_message(msg);
+          eevent->set_description(desc);
           event.set_type(::mico::event::model::MessageType::ERROR);
-          event.set_allocated_error(&eevent);
+          event.set_allocated_error(eevent);
 
           char buffer[event.ByteSize()];
           event.SerializeToArray(buffer, event.ByteSize());
@@ -220,14 +222,14 @@ namespace mico {
         {
           LOG_INFO("AnalysisResponse:sendProgress: %f to queue %s", progress, m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
-          mico::event::model::AnalysisEvent::Progress pevent;
+          mico::event::model::AnalysisEvent::Progress *pevent = new mico::event::model::AnalysisEvent::Progress();
           std::shared_ptr<mico::persistence::model::Resource> r = std::dynamic_pointer_cast<mico::persistence::model::Resource>(i);
-          pevent.set_itemuri(r->getURI().stringValue());
-          pevent.set_parturi(part.stringValue());
-          pevent.set_serviceid(m_service.getServiceID().stringValue());
-          pevent.set_progress(progress);
+          pevent->set_itemuri(r->getURI().stringValue());
+          pevent->set_parturi(part.stringValue());
+          pevent->set_serviceid(m_service.getServiceID().stringValue());
+          pevent->set_progress(progress);
           event.set_type(::mico::event::model::MessageType::PROGRESS);
-          event.set_allocated_progress(&pevent);
+          event.set_allocated_progress(pevent);
 
           char buffer[event.ByteSize()];
           event.SerializeToArray(buffer, event.ByteSize());
@@ -241,21 +243,46 @@ namespace mico {
         void AnalysisResponse::sendNew(std::shared_ptr< mico::persistence::model::Item > i, const mico::persistence::model::URI& part) {
           LOG_INFO("AnalysisResponse:sendNew to queue %s", m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
-          mico::event::model::AnalysisEvent::NewPart nevent;
-          std::shared_ptr<mico::persistence::model::Resource> r = std::dynamic_pointer_cast<mico::persistence::model::Resource>(i);
-          nevent.set_itemuri(r->getURI().stringValue());
-          nevent.set_parturi(part.stringValue());
-          nevent.set_serviceid(m_service.getServiceID().stringValue());
+          mico::event::model::AnalysisEvent::NewPart* nevent = new mico::event::model::AnalysisEvent::NewPart();
+          std::shared_ptr<mico::persistence::model::Resource> r =
+              std::dynamic_pointer_cast<mico::persistence::model::Resource>(i);
+
+          if (!r) {
+            LOG_DEBUG("Item resource is NULL !!!!");
+          } else {
+            LOG_DEBUG("Item resource is %s",r->getURI().stringValue().c_str());
+          }
+
+          nevent->set_itemuri(r->getURI().stringValue().c_str(), r->getURI().stringValue().size());
+          LOG_DEBUG("new event URI set");
+          nevent->set_parturi(part.stringValue());
+          LOG_DEBUG("new event part URI set");
+          nevent->set_serviceid(m_service.getServiceID().stringValue().c_str(), m_service.getServiceID().stringValue().size());
+          LOG_DEBUG("new event service id set");
           event.set_type(::mico::event::model::MessageType::NEW_PART);
-          event.set_allocated_new_(&nevent);
+          LOG_DEBUG("new event type set");
+          event.set_allocated_new_(nevent);
+          LOG_DEBUG("event set allocated new called with nevent");
 
           char buffer[event.ByteSize()];
+
+          LOG_DEBUG("buffer set to size of event: %d", event.ByteSize());
+
           event.SerializeToArray(buffer, event.ByteSize());
 
+          LOG_DEBUG("event serialized to buffer");
+
           AMQP::Envelope data(buffer, event.ByteSize());
+
+          LOG_DEBUG("AMQP envelope created");
+
           data.setCorrelationID(m_message.correlationID());
 
+          LOG_DEBUG("AMQP correlation ID set");
+
           m_channel->publish("", m_message.replyTo(), data);
+
+          LOG_DEBUG("Event published");
         }
 
         class AnalysisConsumer : public Consumer {
@@ -297,15 +324,20 @@ namespace mico {
             AnalysisConsumer(mico::persistence::PersistenceService* persistence, AnalysisService& service, std::string queue, AMQP::Channel* channel)
                     : Consumer(channel), persistence(persistence), service(service), queue(queue) {
                 channel->onReady([this, channel, queue]() {
-                    if (!amqpWorkaround.isFirstCall())
+                    if (!amqpWorkaround.isFirstCall()) {
+
                         return;
+                    }
                     channel->declareQueue(queue, AMQP::durable + AMQP::autodelete)
                             .onSuccess([this,channel, queue]() {
                                 LOG_INFO("starting to consume data for analysis service %s on queue %s", this->service.getServiceID().stringValue().c_str(), this->queue.c_str());
                                 channel->consume(queue).onReceived([this](const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
                                     this->handleDelivery(message,deliveryTag,redelivered);
                                 });
-                            });
+                            })
+                            .onError([this](const char* message) {
+                                LOG_ERROR ("Cannot consume data on queue %s: %s", this->queue.c_str(), message);
+                          });;
                 });
             }
 
@@ -516,8 +548,10 @@ namespace mico {
 
             channel    = new AMQP::Channel(connection);
             channel->onReady([this]() {
-                if (!amqpWorkaround.isFirstCall())
+                if (!amqpWorkaround.isFirstCall()) {
+                    LOG_DEBUG("prevent double execution of onConnected.");
                     return;
+                }
 
                 // check for the two exchanges we are making use of
                 channel->declareExchange(EXCHANGE_SERVICE_REGISTRY, AMQP::fanout, AMQP::passive)
