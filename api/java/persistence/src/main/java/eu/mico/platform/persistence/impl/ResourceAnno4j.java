@@ -63,7 +63,7 @@ public abstract class ResourceAnno4j implements Resource {
         if (resourceMMM.getAsset() == null) {
             AssetMMM assetMMM = createObject(AssetMMM.class);
             StringBuilder location = new StringBuilder()
-                    .append(persistenceService.getStoragePrefix())
+                    .append(persistenceService.getStoragePrefix()) //FIXME: Should not be part of location, especially for local file storage
                     .append("/")
                     .append(this.getURI().getLocalName())
                     .append("/")
