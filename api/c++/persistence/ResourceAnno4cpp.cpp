@@ -169,8 +169,11 @@ namespace mico {
       }
 
       bool ResourceAnno4cpp::hasAsset() {
-        throw std::runtime_error("Not implemented yet!");
-        return false;
+        jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+        if (!((jobject)((jnipp::LocalRef<ResourceMMM>)m_resourceMMM)->getAsset())) {
+          return false;
+        }
+        return true;
       }
     }
   }

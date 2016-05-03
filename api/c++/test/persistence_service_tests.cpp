@@ -366,8 +366,13 @@ int main(int argc, char **argv) {
               // +++++++++++++++++++++ Asset creation for part++++++++++++++++++++
               // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+              assert(!partResource->hasAsset());
+
               std::shared_ptr<mico::persistence::model::Asset> newPartAsset = partResource->getAsset();
               std::shared_ptr<mico::persistence::model::Asset> existingPartAsset = partResource->getAsset();
+
+              assert(partResource->hasAsset());
+
               assert(newPartAsset);
               assert(existingPartAsset);
               assert(newPartAsset->getLocation().stringValue().compare(existingPartAsset->getLocation().stringValue()) == 0);
