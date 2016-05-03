@@ -16,6 +16,8 @@ namespace mico {
           PersistenceService& m_persistenceService;
           jnipp::GlobalRef<jnipp::eu::mico::platform::anno4j::model::AssetMMM> m_assetMMM;
 
+          std::string m_jnippErrorMessage;
+
         public:
           AssetAnno4cpp(jnipp::Ref<jnipp::eu::mico::platform::anno4j::model::AssetMMM> assetMMM, PersistenceService& persistenceService)
             : m_persistenceService(persistenceService),
@@ -29,6 +31,18 @@ namespace mico {
                     jnipp::org::openrdf::model::impl::URIImpl::construct( m_assetMMM->getLocation() );
 
             return mico::persistence::model::URI( juri->stringValue()->std_str() );
+          }
+
+          mico::persistence::model::URI getURI() {
+            jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+
+            jnipp::LocalRef<jnipp::org::openrdf::model::URI> jAssetURI =
+                ((jnipp::Ref<jnipp::org::openrdf::repository::object::RDFObject>)m_assetMMM)->getResource();
+
+            m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
+            assert((jobject)jAssetURI);
+
+            return mico::persistence::model::URI(jAssetURI->toString()->std_str());
           }
 
           std::string getFormat() {

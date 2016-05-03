@@ -7,10 +7,10 @@ endif()
 
 include(ExternalProject)
 
-set(ANNO4CPPDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/install)
-if (DEFINED CMAKE_INSTALL_PREFIX)
-    set(ANNO4CPPDEPS_ROOT ${CMAKE_INSTALL_PREFIX})
-endif()
+set(ANNO4CPPDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/install_anno4cpp)
+#if (DEFINED CMAKE_INSTALL_PREFIX)
+#    set(ANNO4CPPDEPS_ROOT ${CMAKE_INSTALL_PREFIX})
+#endif()
 
 ExternalProject_Add(anno4cpp_ext
     PREFIX externals

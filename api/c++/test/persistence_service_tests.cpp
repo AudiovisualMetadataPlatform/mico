@@ -247,6 +247,9 @@ int main(int argc, char **argv) {
 
         assert(existingAsset->getFormat().compare("video/mp4") == 0);
 
+        assert(newAsset->getURI().stringValue().length() > 0);
+        assert(existingAsset->getURI().stringValue().length() > 0);
+
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -14,7 +14,17 @@ namespace mico {
       class Asset
       {
         public:
+          /**
+           * @brief getLocation Retrieves the storage location of this asset (should be suffixed by .bin)
+           * @return
+           */
           virtual mico::persistence::model::URI getLocation() = 0;
+
+          /**
+           * @brief getURI Retrieves the unique identifcation URI for this asset
+           * @return the identification URI
+           */
+          virtual mico::persistence::model::URI getURI() = 0;
 
           virtual std::string getFormat() = 0;
 
