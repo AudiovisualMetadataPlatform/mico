@@ -14,15 +14,14 @@
 #include "EventManager.hpp"
 
 #include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <google/protobuf/stubs/common.h>
 #include "Logging.hpp"
+#include "Uri.hpp"
 
 using std::string;
 using boost::asio::ip::tcp;
 using namespace boost::asio;
-using namespace mico::persistence;
-using namespace mico::persistence::model;
-using namespace mico::rdf::model;
 
 namespace mico {
     namespace event {
@@ -216,7 +215,8 @@ namespace mico {
           m_channel->publish("", m_message.replyTo(), data);
         }
 
-        void AnalysisResponse::sendProgress(std::shared_ptr< mico::persistence::model::Item > i, const URI& part, const float& progress)
+        void AnalysisResponse::sendProgress(std::shared_ptr< mico::persistence::model::Item > i,
+                                            const mico::persistence::model::URI& part, const float& progress)
         {
           LOG_INFO("AnalysisResponse:sendProgress: %f to queue %s", progress, m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
@@ -238,7 +238,7 @@ namespace mico {
           m_channel->publish("", m_message.replyTo(), data);
         }
 
-        void AnalysisResponse::sendNew(std::shared_ptr< mico::persistence::model::Item > i, const URI& part) {
+        void AnalysisResponse::sendNew(std::shared_ptr< mico::persistence::model::Item > i, const mico::persistence::model::URI& part) {
           LOG_INFO("AnalysisResponse:sendNew to queue %s", m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
           mico::event::model::AnalysisEvent::NewPart nevent;
@@ -262,13 +262,39 @@ namespace mico {
             friend class EventManager;
 
         private:
-            PersistenceService* persistence;
+            mico::persistence::PersistenceService* persistence;
             AnalysisService&  service;
             const std::string queue;
             AMQPCPPOnCloseBugfix amqpWorkaround;
 
+            std::vector< std::shared_ptr<mico::persistence::model::Resource> > parseResourceList(
+                std::vector<mico::persistence::model::URI> resourceURIList,
+                std::shared_ptr<mico::persistence::model::Item> item)
+            {
+              std::vector< std::shared_ptr<mico::persistence::model::Resource> > resVec;
+
+              std::shared_ptr< mico::persistence::model::Resource > itemResource =
+                  std::dynamic_pointer_cast<mico::persistence::model::Resource>(item);
+
+
+              for (auto resourceUri : resourceURIList) {
+                  if (itemResource->getURI() == resourceUri) {
+                      resVec.push_back(std::dynamic_pointer_cast<mico::persistence::model::Resource>(item));
+                  } else {
+                      std::shared_ptr<mico::persistence::model::Part> part = item->getPart(resourceUri);
+                      if (part) {
+                        resVec.push_back(std::dynamic_pointer_cast<mico::persistence::model::Resource>(part));
+                      } else {
+                        LOG_WARN("EventManger received URI which neither represents a Part or a Item");
+                      }
+                  }
+              }
+              return resVec;
+
+            }
+
         public:
-            AnalysisConsumer(PersistenceService* persistence, AnalysisService& service, std::string queue, AMQP::Channel* channel)
+            AnalysisConsumer(mico::persistence::PersistenceService* persistence, AnalysisService& service, std::string queue, AMQP::Channel* channel)
                     : Consumer(channel), persistence(persistence), service(service), queue(queue) {
                 channel->onReady([this, channel, queue]() {
                     if (!amqpWorkaround.isFirstCall())
@@ -292,21 +318,29 @@ namespace mico {
                 mico::event::model::AnalysisRequest event;
                 if (event.ParseFromArray(message.body(), message.bodySize())){
 
-                    LOG_DEBUG("received analysis event (content item %s, object %s, replyTo %s)", event.itemuri().c_str(), event.parturi(0).c_str(), message.replyTo().c_str());
+                    LOG_DEBUG("Received analysis event (content item %s, object %s, replyTo %s)",
+                              event.itemuri().c_str(), event.parturi(0).c_str(), message.replyTo().c_str());
 
-                    std::shared_ptr<Item> item = (*persistence).getItem(URI(event.itemuri()));
+                    std::vector<mico::persistence::model::URI> resourceURIList;
 
-                    std::list<URI> objects;
-                    std::map<std::string,std::string> params;
                     for (unsigned int i = 0; i < event.parturi().size(); ++i) {
-                      objects.push_back(URI(event.parturi(i)));
+                      resourceURIList.push_back(mico::persistence::model::URI(event.parturi(i)));
                     }
+
+                    std::shared_ptr<mico::persistence::model::Item> item =
+                        (*persistence).getItem(mico::persistence::model::URI(event.itemuri()));
+
+                    std::vector<std::shared_ptr<mico::persistence::model::Resource> > resources =
+                        parseResourceList(resourceURIList, item);
+
+                    std::map<std::string,std::string> params;
+
                     for (unsigned int i = 0; i < event.params().size(); ++i) {
                       params[ event.params(i).key() ] = event.params(i).value();
                     }
                     AnalysisResponse response(this->service, message, channel);
 
-                    service.call( response, item, objects, params);
+                    service.call( response, item, resources, params);
 
                     LOG_DEBUG("acknowledged finished processing of analysis event (content item %s, object %s, replyTo %s)", event.itemuri().c_str(), event.parturi(0).c_str(), message.replyTo().c_str());
                 }else{

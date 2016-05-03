@@ -20,12 +20,12 @@
 
 #include "EventManager.hpp"
 #include "SPARQLUtil.hpp"
+#include "Uri.hpp"
 
 
 using namespace std;
 using namespace mico::event;
 using namespace mico::persistence;
-using namespace mico::rdf::model;
 
 extern std::string mico_host;
 extern std::string mico_user;
@@ -57,7 +57,7 @@ public:
 	bool called;
 
 	MockAnalyser(string requires, string provides) 
-		: AnalysisService("http://example.org/services/cpp/TestService-"+provides+"-"+requires, requires, provides, "queue-"+provides+"-"+requires) {};
+    : AnalysisService("http://example.org/services/cpp/TestService-"+provides+"-"+requires, requires, provides, "queue-"+provides+"-"+requires) {}
 
 
     /**
@@ -69,9 +69,12 @@ public:
      * @param ci     the content item to analyse
      * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
      */
-    void call(AnalysisResponse& resp, std::shared_ptr< mico::persistence::model::Item > item, std::list<mico::rdf::model::URI>& object, std::map<std::string,std::string>& params) {
+    void call(mico::event::AnalysisResponse& resp,
+              std::shared_ptr< mico::persistence::model::Item > item,
+              std::vector<std::shared_ptr<mico::persistence::model::Resource>> resources,
+              std::map<std::string,std::string>& params) {
 		std::cout << "analysis callback of mock service " << serviceID.stringValue() << " called!" << std::endl;
-    std::shared_ptr<mico::persistence::model::Part> c = item->createPart(mico::rdf::model::URI("http://dont_know_what_to_write_here"));
+    std::shared_ptr<mico::persistence::model::Part> c = item->createPart(mico::persistence::model::URI("http://dont_know_what_to_write_here"));
     std::shared_ptr<mico::persistence::model::Resource> r = std::dynamic_pointer_cast<mico::persistence::model::Resource>(c);
     r->setSyntacticalType( getProvides() );
     resp.sendFinish(item);

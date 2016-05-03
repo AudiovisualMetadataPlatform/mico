@@ -239,7 +239,7 @@ namespace mico {
         * @return A handle to the Item with the given URI, or null if it does not exist
         */
 
-        std::shared_ptr<model::Item> PersistenceService::getItem(const  mico::rdf::model::URI& id) {
+        std::shared_ptr<model::Item> PersistenceService::getItem(const  mico::persistence::model::URI& id) {
 
             LOG_DEBUG("PersistenceService::getItem for [%s] requested.",  id.stringValue().c_str());
 
@@ -280,7 +280,7 @@ namespace mico {
         /**
         * Delete the content item with the given URI. If the content item does not exist, do nothing.
         */
-        void PersistenceService::deleteItem(const mico::rdf::model::URI& id) {
+        void PersistenceService::deleteItem(const model::URI& id) {
           jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
           jnipp::LocalRef<URI> jItemURI =

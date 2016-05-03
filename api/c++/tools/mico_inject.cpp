@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
 
         std::cout << "creating new content part for file " << argv[i] << " of size " << len << " with type " << getMimeType(buffer,len) << std::endl;
 
-        std::shared_ptr<Part> c = item->createPart(mico::rdf::model::URI("http://www.mico-project.eu/tools/mico_inject"));
+        std::shared_ptr<Part> c = item->createPart(mico::persistence::model::URI("http://www.mico-project.eu/tools/mico_inject"));
         std::shared_ptr<Resource> res = std::dynamic_pointer_cast<Resource>(c);
         res->setSyntacticalType( getMimeType(buffer,len) );
         std::shared_ptr<Asset> asset = res->getAsset();

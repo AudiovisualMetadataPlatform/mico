@@ -24,6 +24,7 @@
 
 #include "PersistenceService.hpp"
 #include "Item.hpp"
+#include "Uri.hpp"
 #include "Part.hpp"
 #include "ContentItem.hpp"
 #include "SPARQLUtil.hpp"
@@ -33,8 +34,8 @@
 
 using namespace std;
 using namespace mico::persistence;
-using namespace mico::http;
-using namespace mico::util;
+//using namespace mico::http;
+//using namespace mico::util;
 
 extern std::string mico_host;
 extern std::string mico_user;
@@ -47,7 +48,7 @@ class PersistenceServiceTest /*: public ::testing::Test */{
 public:
   std::string base_url = "http://" + mico_host + ":8080/marmotta";
   std::string content_dir = "hdfs://" + mico_host;
-  HTTPClient client;
+  //HTTPClient client;
   PersistenceService* svc;
 
   virtual void SetUp() {
@@ -57,10 +58,10 @@ public:
 
   virtual void TearDown() {
     // delete pre-loaded data
-    Request req(DELETE,base_url+"/context?graph="+base_url);
+//    Request req(DELETE,base_url+"/context?graph="+base_url);
     
-    Response* resp = client.execute(req);
-    delete resp;
+//    Response* resp = client.execute(req);
+//    delete resp;
 
     delete svc;
   }
@@ -174,7 +175,7 @@ int main(int argc, char **argv) {
                 std::dynamic_pointer_cast<mico::persistence::model::Resource>(currItem);
             assert(currItem != 0);
 
-            mico::rdf::model::URI uri = currItemResource->getURI();
+            mico::persistence::model::URI uri = currItemResource->getURI();
 
             itemURIS.push_back(uri.stringValue());
 
@@ -202,7 +203,7 @@ int main(int argc, char **argv) {
 
         // check item retrieval
         for (auto itemURI : itemURIS) {
-            mico::rdf::model::URI asURI(itemURI);
+            mico::persistence::model::URI asURI(itemURI);
 
             std::shared_ptr<mico::persistence::model::Item> retrievedItem  =
                         persistenceServiceTest.svc->getItem(asURI);
@@ -252,13 +253,13 @@ int main(int argc, char **argv) {
 
         // check non existing item retrieval
         std::shared_ptr<mico::persistence::model::Item> notExistingItem  =
-            persistenceServiceTest.svc->getItem(mico::rdf::model::URI("http://does_not_exist_at_all"));
+            persistenceServiceTest.svc->getItem(mico::persistence::model::URI("http://does_not_exist_at_all"));
 
         assert(!notExistingItem);
 
         //part creation
         for (auto itemURI : itemURIS) {
-            mico::rdf::model::URI asURI(itemURI);
+            mico::persistence::model::URI asURI(itemURI);
 
             std::shared_ptr<mico::persistence::model::Item> retrievedItem  =
                         persistenceServiceTest.svc->getItem(asURI);
@@ -269,8 +270,8 @@ int main(int argc, char **argv) {
             ss_extractor_name << "http://my_test_extractor___" << retrievedItem;
 
 
-            std::shared_ptr<mico::persistence::model::Part> part1  = retrievedItem->createPart(mico::rdf::model::URI(ss_extractor_name.str()));
-            std::shared_ptr<mico::persistence::model::Part> part2  = retrievedItem->createPart(mico::rdf::model::URI(ss_extractor_name.str()));
+            std::shared_ptr<mico::persistence::model::Part> part1  = retrievedItem->createPart(mico::persistence::model::URI(ss_extractor_name.str()));
+            std::shared_ptr<mico::persistence::model::Part> part2  = retrievedItem->createPart(mico::persistence::model::URI(ss_extractor_name.str()));
 
             assert(part1->getSerializedAt().length());
             assert(part2->getSerializedAt().length());
@@ -283,7 +284,7 @@ int main(int argc, char **argv) {
 
         //part retrieval and body creation - BIG ITEM LOOP!!
         for (auto itemURI : itemURIS) {
-            mico::rdf::model::URI asURI(itemURI);
+            mico::persistence::model::URI asURI(itemURI);
 
             std::shared_ptr<mico::persistence::model::Item> retrievedItem  =
                         persistenceServiceTest.svc->getItem(asURI);
@@ -400,7 +401,7 @@ int main(int argc, char **argv) {
 
             // non existing parts check
             std::shared_ptr<mico::persistence::model::Part> notExistingPart  =
-                retrievedItem->getPart(mico::rdf::model::URI("http://does_not_exist_at_all"));
+                retrievedItem->getPart(mico::persistence::model::URI("http://does_not_exist_at_all"));
 
             assert(!notExistingPart);
 

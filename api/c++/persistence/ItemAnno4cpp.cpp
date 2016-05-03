@@ -20,7 +20,7 @@ namespace mico {
   namespace persistence {
     namespace model {
 
-      std::shared_ptr<Part> ItemAnno4cpp::createPart(const rdf::model::URI &extractorID)
+      std::shared_ptr<Part> ItemAnno4cpp::createPart(const model::URI &extractorID)
       {
         bool error = false;
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
@@ -46,7 +46,7 @@ namespace mico {
         ((jnipp::Ref<Annotation>)jNewPartMMM)->setSerializedAt(jDateTime);
         error = error & m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
 
-        jnipp::LocalRef<URI> jExtractorURI = URIImpl::construct(jnipp::String::create(extractorID.stringValue()));
+        jnipp::LocalRef<jnipp::org::openrdf::model::URI> jExtractorURI = URIImpl::construct(jnipp::String::create(extractorID.stringValue()));
         error = error & m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject) jExtractorURI);
 
@@ -85,7 +85,7 @@ namespace mico {
         return newPart;
       }
 
-      std::shared_ptr<Part> ItemAnno4cpp::getPart(const rdf::model::URI &uri)
+      std::shared_ptr<Part> ItemAnno4cpp::getPart(const URI &uri)
       {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
         jnipp::LocalRef<Transaction> jTransaction = m_persistenceService.getAnno4j()->createTransaction();
@@ -103,7 +103,7 @@ namespace mico {
             return  std::shared_ptr<model::Part>();
         }
 
-        jnipp::LocalRef<URI> jPartURIRet =
+        jnipp::LocalRef<jnipp::org::openrdf::model::URI> jPartURIRet =
             ((jnipp::Ref<RDFObject>)jPartMMM)->getResource();
 
         LOG_DEBUG("Got part with URI [%s]", jPartURIRet->toString()->std_str().c_str());

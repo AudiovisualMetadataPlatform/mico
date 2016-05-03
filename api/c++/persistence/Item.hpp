@@ -6,6 +6,8 @@
 namespace mico {
   namespace persistence {
     namespace model {
+      class URI;
+
       /**
        * Representation of a Item. A Item is a collection of ContentParts, e.g. an HTML page together with
        * its embedded images. ContentParts can be either original content or created during analysis. For compatibility
@@ -21,7 +23,7 @@ namespace mico {
            * @param extractorID The id of the extractor which creates the current part
            * @return a handle to a ContentPart object that is suitable for reading and updating
            */
-          virtual std::shared_ptr<Part> createPart(const mico::rdf::model::URI& extractorID) = 0;
+          virtual std::shared_ptr<Part> createPart(const mico::persistence::model::URI& extractorID) = 0;
 
           /**
            * Return a handle to the ContentPart with the given URI, or null in case the content item does not have this
@@ -30,7 +32,7 @@ namespace mico {
            * @param uri the URI of the content part to return
            * @return a handle to a ContentPart object that is suitable for reading and updating
            */
-          virtual std::shared_ptr<Part> getPart(const mico::rdf::model::URI& uri) = 0;
+          virtual std::shared_ptr<Part> getPart(const mico::persistence::model::URI& uri) = 0;
 
           /**
            * Return a list over all content parts contained in this item.

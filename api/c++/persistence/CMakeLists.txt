@@ -27,6 +27,7 @@ add_library(mico_persistence SHARED
   Part
   Asset
   Resource
+  Uri
   AssetAnno4cpp
   ItemAnno4cpp
   PartAnno4cpp
@@ -49,4 +50,4 @@ set_target_properties(mico_persistence PROPERTIES COMPILE_OPTIONS "-O3;-std=c++1
 
 
 install (TARGETS mico_persistence DESTINATION lib)
-install (FILES Content.hpp ContentItem.hpp Metadata.hpp Item.hpp Part.hpp Resource.hpp Asset.hpp PersistenceService.hpp SPARQLUtil.hpp URLStream.hpp FileStream.hpp WebStream.hpp HDFSStream.hpp DESTINATION include)
+install (FILES Uri.hpp Metadata.hpp Item.hpp Part.hpp Resource.hpp Asset.hpp PersistenceService.hpp SPARQLUtil.hpp URLStream.hpp FileStream.hpp WebStream.hpp HDFSStream.hpp DESTINATION include)

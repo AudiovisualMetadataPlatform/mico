@@ -26,17 +26,11 @@ namespace mico {
         {
         }
 
-        std::shared_ptr<Part> createPart(const rdf::model::URI& extractorID);
+        std::shared_ptr<Part> createPart(const mico::persistence::model::URI& extractorID);
 
-        std::shared_ptr<Part> getPart(const rdf::model::URI& uri);
-
-        //mico::rdf::model::URI getURI();
-
+        std::shared_ptr<Part> getPart(const mico::persistence::model::URI& uri);
 
         std::list< std::shared_ptr<Part> > getParts();
-
-
-
 
         std::string getSerializedAt() {
           jnipp::Env::Scope scope(PersistenceService::m_sJvm);

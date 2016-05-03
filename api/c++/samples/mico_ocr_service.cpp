@@ -103,47 +103,51 @@ public:
     * @param item  the content item to analyse
     * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
     */
-    void call(AnalysisResponse& resp, std::shared_ptr< Item > item, std::list<mico::rdf::model::URI>& objects, std::map<std::string,std::string>& params) {
+    void call(mico::event::AnalysisResponse& resp,
+              std::shared_ptr< mico::persistence::model::Item > item,
+              std::vector< std::shared_ptr<mico::persistence::model::Resource> > resources,
+              std::map<std::string,std::string>& params) {
         // retrieve the content part identified by the object URI
-        mico::rdf::model::URI object = objects.front();
-        std::shared_ptr<Part> imgPart = item->getPart(object);
 
-        if(imgPart) {
-            // read content into a buffer, since tesseract cannot work with C++ streams
-            std::shared_ptr<Resource> imgResource = std::dynamic_pointer_cast<Resource>(imgPart);
-            std::shared_ptr<Asset> imgAsset = imgResource->getAsset();
-            std::istream* in = imgAsset->getInputStream();
-            std::vector<char> buf = std::vector<char>(std::istreambuf_iterator<char>(*in), std::istreambuf_iterator<char>());
-            delete in;
-
-            Pix* pic = pixReadMem((const unsigned char*)buf.data(),buf.size());
-
-            // let tesseract do its magic
-            api.SetImage(pic);
-            char* plainText = api.GetUTF8Text();
-
-            // write plain text to a new content part
-            std::shared_ptr<Part> txtPart = item->createPart(mico::rdf::model::URI("http://dont_know_what_to_write_here"));
-            std::shared_ptr<Resource> txtResource = std::dynamic_pointer_cast<Resource>(txtPart);
-            txtResource->setSyntacticalType( "text/plain" );
-
-            std::shared_ptr<Asset> asset = txtResource->getAsset();
-            std::ostream* out = asset->getOutputStream();
-            *out << plainText;
-            delete out;
-
-            LOG_INFO("Sending OCR results");
-            // notify broker that we created a new content part by calling functions from AnalysisResponse passed as argument
-            resp.sendNew(item, txtResource->getURI());
-            resp.sendFinish(item);
-
-            // clean up
-            delete pic;
-            delete [] plainText;
-        } else {
-            std::shared_ptr<Resource> itemResource = std::dynamic_pointer_cast<Resource>(item);
-            std::cerr << "content item part " << object.stringValue() << " of content item " << itemResource->getURI().stringValue() << " does not exist!\n";
+        if (resources.size() > 1) {
+          LOG_ERROR("Expected only one input to process, got %d", resources.size());
         }
+
+        std::shared_ptr<mico::persistence::model::Resource> imgResource = resources[0];
+
+
+        // read content into a buffer, since tesseract cannot work with C++ streams
+        std::shared_ptr<Asset> imgAsset = imgResource->getAsset();
+        std::istream* in = imgAsset->getInputStream();
+        std::vector<char> buf = std::vector<char>(std::istreambuf_iterator<char>(*in), std::istreambuf_iterator<char>());
+        delete in;
+
+        Pix* pic = pixReadMem((const unsigned char*)buf.data(),buf.size());
+
+        // let tesseract do its magic
+        api.SetImage(pic);
+        char* plainText = api.GetUTF8Text();
+
+        // write plain text to a new content part
+        std::shared_ptr<Part> txtPart = item->createPart(mico::persistence::model::URI("http://dont_know_what_to_write_here"));
+        std::shared_ptr<Resource> txtResource = std::dynamic_pointer_cast<Resource>(txtPart);
+        txtResource->setSyntacticalType( "text/plain" );
+
+        std::shared_ptr<Asset> asset = txtResource->getAsset();
+        std::ostream* out = asset->getOutputStream();
+        *out << plainText;
+        delete out;
+
+        LOG_INFO("Sending OCR results");
+        // notify broker that we created a new content part by calling functions from AnalysisResponse passed as argument
+        resp.sendNew(item, txtResource->getURI());
+        resp.sendFinish(item);
+
+        // clean up
+        delete pic;
+        delete [] plainText;
+
+
     };
 
 };

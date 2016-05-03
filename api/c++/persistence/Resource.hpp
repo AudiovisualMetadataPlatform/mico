@@ -5,16 +5,13 @@
 #include "Asset.hpp"
 #include "anno4cpp.h"
 
-namespace mico {
-  namespace rdf {
-    namespace model {
-      class URI;
-    }
-  }
 
+namespace mico {
   namespace persistence {
       class PersistenceService;
     namespace model {
+      class URI;
+
       /**
        * Super type of items and parts
        */
@@ -27,7 +24,7 @@ namespace mico {
            *
            * @return
            */
-          virtual mico::rdf::model::URI getURI() = 0;
+          virtual mico::persistence::model::URI getURI() = 0;
 
           virtual jnipp::Ref<jnipp::eu::mico::platform::anno4j::model::ResourceMMM> getRDFObject() = 0;
 
@@ -42,7 +39,7 @@ namespace mico {
 
           virtual void setSemanticType(std::string semanticType) = 0;
 
-          virtual std::shared_ptr<Asset> getAsset() = 0;
+          virtual std::shared_ptr<mico::persistence::model::Asset> getAsset() = 0;
 
           virtual bool hasAsset() = 0;
 

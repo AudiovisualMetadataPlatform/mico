@@ -6,19 +6,15 @@
 
 namespace mico {
 
-  namespace rdf {
-    namespace model {
-      class URI;
-    }
-  }
-
-  namespace persistence  {
+    namespace persistence  {
     namespace model  {
+
+      class URI;
 
       class Asset
       {
         public:
-          virtual mico::rdf::model::URI getLocation() = 0;
+          virtual mico::persistence::model::URI getLocation() = 0;
 
           virtual std::string getFormat() = 0;
 

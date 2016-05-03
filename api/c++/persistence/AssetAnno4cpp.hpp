@@ -22,13 +22,13 @@ namespace mico {
               m_assetMMM(assetMMM)
           {}
 
-          mico::rdf::model::URI getLocation() {
+          mico::persistence::model::URI getLocation() {
             jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
             jnipp::LocalRef<jnipp::org::openrdf::model::impl::URIImpl> juri =
                     jnipp::org::openrdf::model::impl::URIImpl::construct( m_assetMMM->getLocation() );
 
-            return mico::rdf::model::URI( juri->stringValue()->std_str() );
+            return mico::persistence::model::URI( juri->stringValue()->std_str() );
           }
 
           std::string getFormat() {

@@ -4,6 +4,7 @@
 #include "ItemAnno4cpp.hpp"
 #include "PartAnno4cpp.hpp"
 #include "AssetAnno4cpp.hpp"
+#include "Uri.hpp"
 
 #include <jnipp.h>
 #include <anno4cpp.h>
@@ -41,16 +42,16 @@ namespace mico {
         }
       }
 
-      mico::rdf::model::URI ResourceAnno4cpp::getURI() {
+      mico::persistence::model::URI ResourceAnno4cpp::getURI() {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
 
-        jnipp::LocalRef<URI> jResourceURI =
+        jnipp::LocalRef<jnipp::org::openrdf::model::URI> jResourceURI =
             ((jnipp::Ref<RDFObject>)m_resourceMMM)->getResource();
 
         m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject)jResourceURI);
 
-        return mico::rdf::model::URI(jResourceURI->toString()->std_str());
+        return mico::persistence::model::URI(jResourceURI->toString()->std_str());
       }
 
       jnipp::Ref<ResourceMMM> ResourceAnno4cpp::getRDFObject() {

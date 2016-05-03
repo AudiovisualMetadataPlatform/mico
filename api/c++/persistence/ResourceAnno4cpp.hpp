@@ -2,6 +2,7 @@
 #define RESOURCEANNO4CPP_HPP 1
 
 #include "Resource.hpp"
+#include "Uri.hpp"
 #include "PersistenceService.hpp"
 #include "Logging.hpp"
 #include <jnipp.h>
@@ -24,7 +25,7 @@ namespace mico {
                            PersistenceService& persistenceService);
 
       public:
-          virtual mico::rdf::model::URI getURI();
+          virtual mico::persistence::model::URI getURI();
 
           virtual jnipp::Ref<jnipp::eu::mico::platform::anno4j::model::ResourceMMM> getRDFObject();
 

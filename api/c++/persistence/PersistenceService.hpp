@@ -9,11 +9,12 @@
 
 
 #include "Metadata.hpp"
-#include "ContentItem.hpp"
+//#include "ContentItem.hpp"
 #include "anno4cpp.h"
+#include "Uri.hpp"
 
-#include "rdf_model.hpp"
-#include "rdf_query.hpp"
+//#include "rdf_model.hpp"
+//#include "rdf_query.hpp"
 
 
 
@@ -120,12 +121,12 @@ namespace mico {
             *
             * @return A handle to the Item with the given URI, or null if it does not exist
             */
-            std::shared_ptr<model::Item> getItem(const mico::rdf::model::URI& id);
+            std::shared_ptr<model::Item> getItem(const mico::persistence::model::URI& id);
 
             /**
             * Delete the content item with the given URI. If the content item does not exist, do nothing.
             */
-            void deleteItem(const mico::rdf::model::URI& id);
+            void deleteItem(const mico::persistence::model::URI& id);
 
 
             /**

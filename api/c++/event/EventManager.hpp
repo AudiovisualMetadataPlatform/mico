@@ -13,6 +13,7 @@
 #include <amqpcpp.h>
 #include "rdf_model.hpp"
 #include "Item.hpp"
+#include "Uri.hpp"
 #include "PersistenceService.hpp"
 #include "AnalysisService.hpp"
 #include "Event.pb.h"
@@ -71,14 +72,15 @@ namespace mico {
           AnalysisService& m_service;
           const AMQP::Message &m_message;
           AMQP::Channel* m_channel;
+
         public:
           AnalysisResponse(AnalysisService& service, const AMQP::Message &message, AMQP::Channel* channel):
             m_service(service), m_message(message), m_channel(channel) {}
 
           void sendFinish(      std::shared_ptr< mico::persistence::model::Item > i);
           void sendErrorMessage(std::shared_ptr< mico::persistence::model::Item > i, const mico::event::model::ErrorCodes& errcode, const std::string& msg, const std::string& desc);
-          void sendProgress(    std::shared_ptr< mico::persistence::model::Item > i, const mico::rdf::model::URI& part, const float& progress);
-          void sendNew(         std::shared_ptr< mico::persistence::model::Item > i, const mico::rdf::model::URI& part);
+          void sendProgress(    std::shared_ptr< mico::persistence::model::Item > i, const mico::persistence::model::URI& part, const float& progress);
+          void sendNew(         std::shared_ptr< mico::persistence::model::Item > i, const mico::persistence::model::URI& part);
         };
 
         /**
