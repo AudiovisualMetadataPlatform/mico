@@ -2,6 +2,7 @@
 #define ITEM_HPP 1
 
 #include "Part.hpp"
+#include "anno4cpp.h"
 
 namespace mico {
   namespace persistence {
@@ -40,6 +41,17 @@ namespace mico {
            * @return a list that holds the content parts
            */
           virtual std::list< std::shared_ptr<Part> > getParts() = 0;
+
+          /**
+           * Create a new jnipp Object of the desired class.
+           */
+          virtual jnipp::Ref<JavaLangObject>& createObject(const jnipp::Ref<jnipp::Class>& clazz) = 0;
+
+          /**
+           * Retrieve an existing jnipp Object of the desired class.
+           */
+          virtual jnipp::Ref<JavaLangObject>& findObject(const  mico::persistence::model::URI& uri, const jnipp::Ref<jnipp::Class>& clazz) = 0;
+
 
           virtual std::string getSerializedAt() = 0;
 

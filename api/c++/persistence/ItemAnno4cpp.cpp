@@ -136,6 +136,60 @@ namespace mico {
         m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         return nativePartSet;
       }
+
+      jnipp::Ref<JavaLangObject>& ItemAnno4cpp::createObject(const jnipp::Ref<jnipp::Class>& clazz) {
+
+    	static jnipp::GlobalRef<JavaLangObject> out;
+    	jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+    	bool error = false;
+
+    	LOG_DEBUG("ItemAnno4cpp::createObject - Creating instance of %s", clazz->getName()->std_str().c_str());
+
+    	jnipp::LocalRef<Transaction> jTransaction = m_persistenceService.getAnno4j()->createTransaction();
+
+    	error = error || m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
+    	assert((jobject) jTransaction);
+
+    	jTransaction->begin();
+    	jTransaction->setAllContexts(((jnipp::Ref<RDFObject>)m_itemMMM)->getResource());
+    	out = jTransaction->createObject(clazz);
+
+    	error = error || m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
+    	assert((jobject) out);
+
+    	if (error) {
+    		jTransaction->rollback(); //rollback any triples created during this method
+    		jTransaction->close(); //in case we have not succeeded we can close the connection
+    		out=jnipp::GlobalRef<JavaLangObject>();
+    		LOG_DEBUG("ItemAnno4cpp::createObject - Rolling back creation of an instance of %s", clazz->getName()->std_str().c_str());
+    	} else {
+    		jTransaction->commit(); //commit the item before returning
+    	}
+      	return out;
+      }
+
+      jnipp::Ref<JavaLangObject>& ItemAnno4cpp::findObject(const  model::URI& uri, const jnipp::Ref<jnipp::Class>& clazz) {
+
+      	static jnipp::GlobalRef<JavaLangObject> out;
+      	LOG_DEBUG("ItemAnno4cpp::findObject - Retrieving an of %s from %s", clazz->getName()->std_str().c_str(),uri.stringValue().c_str());
+
+      	bool error = false;
+      	jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+        jnipp::LocalRef<Transaction> jTransaction = m_persistenceService.getAnno4j()->createTransaction();
+        error = error || m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
+        assert((jobject) jTransaction);
+
+        out = jTransaction->findByID(clazz, (jnipp::Ref<String>) jnipp::String::create(uri.stringValue()));
+
+        bool isInstance = out->isInstanceOf(clazz);
+        error = error || m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
+
+        if (!isInstance || error) {
+            LOG_DEBUG("ItemAnno4cpp::findObject - Returned RDF object is NOT an instance of %s or null", clazz->getName()->std_str().c_str());
+            out=jnipp::GlobalRef<JavaLangObject>();
+        }
+        return out;
+      }
     }
   }
 }

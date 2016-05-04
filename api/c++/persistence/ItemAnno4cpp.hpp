@@ -5,6 +5,7 @@
 #include "Item.hpp"
 #include "PartAnno4cpp.hpp"
 #include "ResourceAnno4cpp.hpp"
+#include "anno4cpp.h"
 
 namespace mico {
   namespace persistence {
@@ -38,6 +39,17 @@ namespace mico {
           m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
           return timestamp;
         }
+
+        /**
+         * Create a new jnipp Object of the desired class.
+         */
+        jnipp::Ref<JavaLangObject>& createObject(const jnipp::Ref<jnipp::Class>& clazz);
+
+        /**
+         * Retrieve an existing jnipp Object of the desired class.
+         */
+        jnipp::Ref<JavaLangObject>& findObject(const  mico::persistence::model::URI& uri, const jnipp::Ref<jnipp::Class>& clazz);
+
 
 
 
