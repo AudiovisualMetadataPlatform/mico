@@ -171,10 +171,12 @@ namespace mico {
       jnipp::Ref<JavaLangObject>& ItemAnno4cpp::findObject(const  model::URI& uri, const jnipp::Ref<jnipp::Class>& clazz) {
 
       	static jnipp::GlobalRef<JavaLangObject> out;
+      	jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+      	bool error = false;
+
       	LOG_DEBUG("ItemAnno4cpp::findObject - Retrieving an of %s from %s", clazz->getName()->std_str().c_str(),uri.stringValue().c_str());
 
-      	bool error = false;
-      	jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+
         jnipp::LocalRef<Transaction> jTransaction = m_persistenceService.getAnno4j()->createTransaction();
         error = error || m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
         assert((jobject) jTransaction);
