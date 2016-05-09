@@ -17,6 +17,7 @@ import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.model.ItemState;
 import eu.mico.platform.broker.model.ServiceDescriptor;
 import eu.mico.platform.broker.model.Transition;
+import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Resource;
@@ -165,6 +166,15 @@ public class StatusWebService {
             Item item = broker.getPersistenceService().getItem(new URIImpl(uri));
             log.trace("collect {} collect parts of item: {}",uri);
             if (item != null) {
+                sprops.put("semanticType"   , item.getSemanticType());
+                sprops.put("syntacticalType", item.getSyntacticalType());
+                sprops.put("serializedAt"   , item.getSerializedAt());
+                sprops.put("hasAsset", item.hasAsset());
+                if(item.hasAsset()){
+                    Asset asset = item.getAsset();
+                    sprops.put("assetFormat", asset.getFormat());
+                    sprops.put("assetLocation", asset.getLocation());
+                }
                 for (Part part : item.getParts()) {
                     log.trace("    - part: {} - {} ({})",part.getURI(),part.getSerializedBy(), part.getSerializedAt());
                     parts.add(wrapContentStatus(state, part));
@@ -184,6 +194,12 @@ public class StatusWebService {
         sprops.put("creator",  part.getSerializedBy().getResourceAsString());
         sprops.put("created",  part.getSerializedAt());
         sprops.put("source",  stringValue(part.getInputs().toArray(new Resource[0])[0].getURI()));
+        sprops.put("hasAsset", part.hasAsset());
+        if(part.hasAsset()){
+            Asset asset = part.getAsset();
+            sprops.put("assetFormat", asset.getFormat());
+            sprops.put("assetLocation", asset.getLocation());
+        }
 
         if(state != null) {
             if(state.getStates().get(part.getURI()) != null) {

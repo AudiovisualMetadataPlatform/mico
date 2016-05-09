@@ -85,6 +85,25 @@
                 <div style="background-color: darkred; color: lightcoral; text-align: center;" ng-show="itemData.finished == 'false'">In Progress</div>
             </td>
         </tr>
+        <tr><th>Created</th><td>{{itemData.serializedAt}}</td></tr>
+        <tr><th>Creator</th><td>{{itemData.serializedBy}}</td></tr>
+        <tr><th>Semantic-Type</th><td>{{itemData.semanticType}}</td></tr>
+        <tr><th>Syntactical-Type</th><td>{{itemData.syntacticalType}}</td></tr>
+        <tr ng-show="itemData.hasAsset">
+        <th>Asset</th>
+            <td>
+                <table>
+                    <tr>
+                        <td>mime-Type</td>
+                        <td>{{itemData.assetFormat}}</td>
+                    </tr>
+                    <tr>
+                        <td>location</td>
+                        <td>{{itemData.assetLocation}}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
     </table>
 </div>
 
@@ -94,10 +113,11 @@
 
     <table>
         <tr><th>URI</th><td><a href="/marmotta/resource?uri={{part.uri}}">{{part.uri}}</a></td></tr>
-        <tr><th>Source</th><td>{{part.source}}</td></tr>
+        <tr><th>Source</th><td><a href="/marmotta/resource?uri={{part.source}}">{{part.source}}</a></td></tr>
         <tr><th>Type</th><td>{{part.type}}</td></tr>
         <tr><th>Created</th><td>{{part.created}}</td></tr>
         <tr><th>Creator</th><td>{{part.creator}}</td></tr>
+        <tr ng-show="part.hasAsset"><th>Asset</th><td>{{part.assetFormat}} at: {{part.assetLocation}}</td></tr>
         <tr ng-show="part.transitions.length > 0">
             <th>Transitions</th>
             <td>
