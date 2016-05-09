@@ -263,6 +263,8 @@ namespace mico {
             checkJavaExceptionNoThrow(m_jniErrorMessage);
             assert((jobject) jTransaction);
 
+            LOG_DEBUG("PersistenceService::getItem. Setting context [%s] to transaction.",  jItemURI->toString()->std_str().c_str());
+
             jTransaction->setAllContexts((jnipp::Ref<URI>) jItemURI);
 
             jnipp::GlobalRef<ItemMMM> jItemMMM=
