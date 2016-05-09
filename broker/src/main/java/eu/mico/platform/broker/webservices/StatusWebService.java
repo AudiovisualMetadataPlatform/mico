@@ -79,9 +79,11 @@ public class StatusWebService {
             mf.read(resourceAsStream);
             Attributes atts = mf.getMainAttributes();
             info = atts.getValue("Implementation-Title") + " ("+ atts.getValue("Implementation-Version")+")"
+                    + "\nGit-Revision: " + atts.getValue("Git-Revision")
+                    + "\nGit-Branch: " + atts.getValue("Git-Branch")
                     + "\nbuild on: " + atts.getValue("Build-Time");
         }catch(IOException e ){
-            info = "Version 2.x";
+            info = "Version 2.x-???";
         }
         return Response.ok(info).build();
     }

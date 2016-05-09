@@ -47,6 +47,8 @@
                             </manifest>
                             <manifestEntries>
                                 <Build-Time>${maven.build.timestamp}</Build-Time>
+                                <Git-Revision>${buildNumber}</Git-Revision>
+                                <Git-Branch>${scmBranch}</Git-Branch>
                             </manifestEntries>
                         </archive>
                         <archiveClasses>false</archiveClasses>
@@ -76,6 +78,24 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                    <shortRevisionLength>8</shortRevisionLength>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>
                 <artifactId>tomcat7-maven-plugin</artifactId>
@@ -410,5 +430,7 @@
             </build>
         </profile>
     </profiles>
-
+    <scm>
+        <connection>scm:git:ssh://git@bitbucket.org:mico-project/platform.git</connection>
+    </scm>
 </project>
