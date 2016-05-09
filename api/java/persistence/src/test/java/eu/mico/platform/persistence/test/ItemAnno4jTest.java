@@ -2,6 +2,7 @@ package eu.mico.platform.persistence.test;
 
 import com.github.anno4j.querying.QueryService;
 import com.google.common.collect.Iterables;
+
 import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.anno4j.model.PartMMM;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
@@ -26,6 +27,8 @@ import org.openrdf.result.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 
 import static org.junit.Assert.*;
@@ -138,14 +141,23 @@ public class ItemAnno4jTest {
     public void getAssetFromPartTest() throws RepositoryException {
         String format = "image/png";
 
-        Asset asset = itemAnno4j.createPart(extractorID).getAsset();
+        Part part = itemAnno4j.createPart(extractorID);
+        try {
+            part.getAsset().getOutputStream();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            fail(e1.getMessage());
+        }
+
+        Asset asset = part.getAsset();
         assertNotNull(asset);
         assertNotNull(asset.getLocation());
 
         assertNull(asset.getFormat());
         asset.setFormat(format);
+        assertEquals(format, asset.getFormat());
 
-        assertEquals(format, persistenceService.getItem(itemAnno4j.getURI()).getAsset().getFormat());
+        assertEquals(format, persistenceService.getItem(itemAnno4j.getURI()).getPart(part.getURI()).getAsset().getFormat());
     }
 
 
