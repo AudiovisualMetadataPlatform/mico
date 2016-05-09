@@ -135,6 +135,21 @@ public class ItemAnno4jTest {
     }
 
     @Test
+    public void getAssetFromPartTest() throws RepositoryException {
+        String format = "image/png";
+
+        Asset asset = itemAnno4j.createPart(extractorID).getAsset();
+        assertNotNull(asset);
+        assertNotNull(asset.getLocation());
+
+        assertNull(asset.getFormat());
+        asset.setFormat(format);
+
+        assertEquals(format, persistenceService.getItem(itemAnno4j.getURI()).getAsset().getFormat());
+    }
+
+
+    @Test
     public void hasAssetTest() throws RepositoryException {
         final Item tmpItem = persistenceService.createItem();
         assertFalse(tmpItem.hasAsset());
