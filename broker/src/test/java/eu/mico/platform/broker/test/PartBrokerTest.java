@@ -42,7 +42,7 @@ import static org.hamcrest.Matchers.hasProperty;
  */
 public class PartBrokerTest extends BaseBrokerTest {
 
-    @Test
+    @Test(timeout=10000)
     public void testSimpleAnalyse() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
 
         setupMockAnalyser("A","B");
