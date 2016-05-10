@@ -24,6 +24,7 @@ import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
+import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.storage.util.VFSUtils;
@@ -149,17 +150,27 @@ public abstract class BaseBrokerTest {
 
     protected void setupMockAnalyser(String source, String target)
             throws IOException {
-        eventManager.registerService(new MockService(source, target));
+        setupMockAnalyser(source, target,false);
+    }
+    
+    protected void setupMockAnalyser(String source, String target, boolean createPart)
+            throws IOException {
+        eventManager.registerService(new MockService(source, target, createPart));
     }
 
     protected static class MockService implements AnalysisService {
 
-        private boolean called = false;
+        private boolean createAsset = false;
         private String source, target;
 
         public MockService(String source, String target) {
+            this(source,target,false);
+        }
+
+        public MockService(String source, String target, boolean createAsset) {
             this.source = source;
             this.target = target;
+            this.createAsset = createAsset;
         }
 
         @Override
@@ -198,9 +209,13 @@ public abstract class BaseBrokerTest {
                 c = item.createPart(item.getURI());
                 c.setSemanticType(getProvides());
                 c.setSyntacticalType(getProvides());
+                if (createAsset){
+                    Asset asset = c.getAsset();
+                    asset.setFormat("text/plain");
+                    asset.getOutputStream().write(getServiceID().stringValue().getBytes("UTF-8"));
+                }
 
                 resp.sendNew(item, c.getURI());
-                called = true;
             } catch (RepositoryException e) {
                 throw new AnalysisException("could not access triple store");
             }

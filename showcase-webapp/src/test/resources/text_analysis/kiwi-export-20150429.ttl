@@ -1,0 +1,1290 @@
+@prefix fam: <http://vocab.fusepool.info/fam#> .
+@prefix mmm: <http://www.mico-project.eu/ns/mmm/2.0/schema#> .
+@prefix oa: <http://www.w3.org/ns/oa#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix services: <http://www.mico-project.eu/services/> .
+@prefix test: <http://localhost/mem/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+test:03b1f09d-593b-4edf-bd5c-4f36ecf226f4 a oa:TextPositionSelector ;
+	oa:end "1681"^^xsd:long ;
+	oa:exact "beach combing" ;
+	oa:prefix "ways like " ;
+	oa:start "1668"^^xsd:long ;
+	oa:suffix " you know " .
+
+test:0490c525-c6d9-46c2-8441-4b150f5a2df5 mmm:hasBody test:a82ce9a6-c73a-47a8-ba8a-1e1e9716c57e ;
+	a mmm:Part ;
+	oa:hasBody test:a82ce9a6-c73a-47a8-ba8a-1e1e9716c57e ;
+	oa:serializedAt "2016-04-29 15:42:47.600" ;
+	oa:serializedBy services:ner-text .
+
+test:04ed01a2-f1cb-4de8-86b0-667e5a38e52d a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:0717c70b-5c24-499d-8b94-f9aebbe22901 a oa:TextPositionSelector ;
+	oa:end "507"^^xsd:long ;
+	oa:exact "context" ;
+	oa:prefix "“media in " ;
+	oa:start "500"^^xsd:long ;
+	oa:suffix "” by orche" .
+
+test:078f7eee-7841-4224-b19b-29d139b750a2 a oa:TextPositionSelector ;
+	oa:end "139"^^xsd:long ;
+	oa:exact "will" ;
+	oa:prefix """rs.
+
+MICO """ ;
+	oa:start "135"^^xsd:long ;
+	oa:suffix " develop m" .
+
+test:07941987-72f8-4c9d-838d-59920689e544 a oa:TextPositionSelector ;
+	oa:end "1042"^^xsd:long ;
+	oa:exact "entities" ;
+	oa:prefix " concrete " ;
+	oa:start "1034"^^xsd:long ;
+	oa:suffix ") or a “di" .
+
+test:0aead340-e056-4fb4-b74c-085f2794ec8b fam:confidence 1.0E0 ;
+	fam:entity-label "states"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Sovereign_state> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:0b1dece2-6104-45d5-b6ba-efce454853c1 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:0eda36d4-c25b-47d7-908a-54d1c677eb6d mmm:hasBody test:3685b276-0041-4ef9-affb-851b9e924f93 ;
+	a mmm:Part ;
+	oa:hasBody test:3685b276-0041-4ef9-affb-851b9e924f93 ;
+	oa:serializedAt "2016-04-29 15:42:47.624" ;
+	oa:serializedBy services:ner-text .
+
+test:0f56aa0b-c414-4e4f-a032-c89cc8d2dcef mmm:hasBody test:b9e4b19d-f108-4844-883b-4e5a61a5c811 ;
+	a mmm:Part ;
+	oa:hasBody test:b9e4b19d-f108-4844-883b-4e5a61a5c811 ;
+	oa:serializedAt "2016-04-29 15:42:47.404" ;
+	oa:serializedBy services:ner-text .
+
+test:110872c3-51df-452a-b697-97e0f89b4ad6 a oa:TextPositionSelector ;
+	oa:end "1847"^^xsd:long ;
+	oa:exact "for" ;
+	oa:prefix "s is just " ;
+	oa:start "1844"^^xsd:long ;
+	oa:suffix " the unite" .
+
+test:12f398ff-891b-4729-b1af-939e38c03dcf a oa:TextPositionSelector ;
+	oa:end "894"^^xsd:long ;
+	oa:exact "identifying" ;
+	oa:prefix "etector” (" ;
+	oa:start "883"^^xsd:long ;
+	oa:suffix " objects t" .
+
+test:14f94c75-6f31-4f8c-9467-1dc967d32394 a oa:TextPositionSelector ;
+	oa:end "278"^^xsd:long ;
+	oa:exact "objects" ;
+	oa:prefix "ted media " ;
+	oa:start "271"^^xsd:long ;
+	oa:suffix " (text, im" .
+
+test:15ec7f35-1b39-4e07-a49b-62ab1f248a75 fam:confidence 1.0E0 ;
+	fam:entity-label "beach combing"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Beachcombing> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:16aeb896-4293-434b-8946-6770a4ef3427 a oa:TextPositionSelector ;
+	oa:end "1422"^^xsd:long ;
+	oa:exact "available" ;
+	oa:prefix "nents are " ;
+	oa:start "1413"^^xsd:long ;
+	oa:suffix " as Maven " .
+
+test:170e63bd-16f3-4097-8c1f-1b4025bf9b08 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:170eca93-346a-4693-b3ad-4a5481817a9d fam:confidence 2.164948433637619E-1 ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:topic-label "Science"@en-us ;
+	fam:topic-reference <http://dbpedia.org/resource/Science> ;
+	a fam:TopicAnnotation .
+
+test:17141f98-187f-494a-b97d-276af99e13bf a oa:TextPositionSelector ;
+	oa:end "1467"^^xsd:long ;
+	oa:exact "repository" ;
+	oa:prefix "e project " ;
+	oa:start "1457"^^xsd:long ;
+	oa:suffix "; but the " .
+
+test:1858c27c-8767-4cb1-89a2-b96c92dcfe7d a oa:TextPositionSelector ;
+	oa:end "1365"^^xsd:long ;
+	oa:exact "Platform" ;
+	oa:prefix " the MICO " ;
+	oa:start "1357"^^xsd:long ;
+	oa:suffix " is availa" .
+
+test:18f51dc7-ef0e-4359-85d7-4c715d50255c a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:1b9819a6-be9b-45f6-b3d1-4ba6a3a6403b a oa:TextPositionSelector ;
+	oa:end "270"^^xsd:long ;
+	oa:exact "media" ;
+	oa:prefix "d related " ;
+	oa:start "265"^^xsd:long ;
+	oa:suffix " objects (" .
+
+test:1c090aea-2d0a-4f29-ac71-ad2c465df5b9 a oa:TextPositionSelector ;
+	oa:end "444"^^xsd:long ;
+	oa:exact "Platform" ;
+	oa:prefix """
+The MICO """ ;
+	oa:start "436"^^xsd:long ;
+	oa:suffix " is an env" .
+
+test:1e778530-a56d-4cec-99a9-3f5fbe4c9351 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:1f0fdc8b-676d-480f-8852-64658701cc87 a oa:TextPositionSelector ;
+	oa:end "1634"^^xsd:long ;
+	oa:exact "it" ;
+	oa:prefix "ore about " ;
+	oa:start "1632"^^xsd:long ;
+	oa:suffix " every tim" .
+
+test:1f39e5de-d1db-473c-9eec-fdcfde147304 a oa:TextPositionSelector ;
+	oa:end "154"^^xsd:long ;
+	oa:exact "models" ;
+	oa:prefix "l develop " ;
+	oa:start "148"^^xsd:long ;
+	oa:suffix ", standard" .
+
+test:2088eeca-fe56-4b91-a33e-504049bd7796 fam:confidence 1.0E0 ;
+	fam:entity-label "available"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Availability> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:213adcc7-2d43-44d4-8b21-4f7edff4d969 a oa:TextPositionSelector ;
+	oa:end "708"^^xsd:long ;
+	oa:exact "components" ;
+	oa:prefix " Analysis " ;
+	oa:start "698"^^xsd:long ;
+	oa:suffix " can e.g. " .
+
+test:214579bc-0914-4813-a3b1-edc21cf332cc a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:226b38bb-1b77-4e7a-bb0d-7aa9834aed9c mmm:hasBody test:9a12e8f2-eefe-4b8f-9765-44bbdc573193 ;
+	a mmm:Part ;
+	oa:hasBody test:9a12e8f2-eefe-4b8f-9765-44bbdc573193 ;
+	oa:serializedAt "2016-04-29 15:42:47.514" ;
+	oa:serializedBy services:ner-text .
+
+test:2310ac43-7208-4300-8396-fc571b1f1e15 mmm:hasBody test:f96d6c13-b279-4b55-be96-3f5688f758e6 ;
+	a mmm:Part ;
+	oa:hasBody test:f96d6c13-b279-4b55-be96-3f5688f758e6 ;
+	oa:serializedAt "2016-04-29 15:42:47.562" ;
+	oa:serializedBy services:ner-text .
+
+test:23eb6f44-5af5-459b-aed0-ab64191b6832 fam:confidence 1.0E0 ;
+	fam:entity-label "environment"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Environment_(biophysical)> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:243c943e-f544-49d4-be1e-2dc78649dc57 mmm:hasBody test:f7d4e034-d3aa-4a6a-abb3-43bea10f11bc ;
+	a mmm:Part ;
+	oa:hasBody test:f7d4e034-d3aa-4a6a-abb3-43bea10f11bc ;
+	oa:serializedAt "2016-04-29 15:42:47.662" ;
+	oa:serializedBy services:ner-text .
+
+test:244fc9ef-14d3-46ca-93fd-c45c162fb193 mmm:hasBody test:dabc1634-f997-4206-be8e-bb08d429b44d ;
+	a mmm:Part ;
+	oa:hasBody test:dabc1634-f997-4206-be8e-bb08d429b44d ;
+	oa:serializedAt "2016-04-29 15:42:47.649" ;
+	oa:serializedBy services:ner-text .
+
+test:249460ba-ed70-4eff-9a11-0531b64ae680 mmm:hasBody test:939ff493-c2c5-4ec6-9219-ad98a28ce65b ;
+	a mmm:Part ;
+	oa:hasBody test:939ff493-c2c5-4ec6-9219-ad98a28ce65b ;
+	oa:serializedAt "2016-04-29 15:42:47.616" ;
+	oa:serializedBy services:ner-text .
+
+test:268c20c5-3776-4f4f-8d01-477ecb5adc5a a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:2839b8b5-4ac4-4f95-8bfa-fb3dd285009d mmm:hasBody test:429b96ae-a16b-4c1f-87c6-2f89d698fdff ;
+	a mmm:Part ;
+	oa:hasBody test:429b96ae-a16b-4c1f-87c6-2f89d698fdff ;
+	oa:serializedAt "2016-04-29 15:42:47.568" ;
+	oa:serializedBy services:ner-text .
+
+test:2850cf29-2df6-4be1-8581-b387709f35da a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:29a4e1fc-20d0-4ca1-b015-1d3d4ea8af9f a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:29d39fc4-14ab-486a-9210-b367e0325ef0 mmm:hasBody test:77a6b46f-5ef5-4d66-9da9-d54874f54973 ;
+	a mmm:Part ;
+	oa:hasBody test:77a6b46f-5ef5-4d66-9da9-d54874f54973 ;
+	oa:serializedAt "2016-04-29 15:42:47.587" ;
+	oa:serializedBy services:ner-text .
+
+test:2acdf0f3-3c1d-4eca-9c54-3e870c30f174 fam:confidence 1.0E0 ;
+	fam:entity-label "will"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Will_and_testament> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:2ad38a74-e957-44f8-8372-163bb570347d mmm:hasBody test:6bbaa9d6-d4b8-492d-9c4a-f65ca446e1b7 ;
+	a mmm:Part ;
+	oa:hasBody test:6bbaa9d6-d4b8-492d-9c4a-f65ca446e1b7 ;
+	oa:serializedAt "2016-04-29 15:42:47.780" ;
+	oa:serializedBy services:ner-text .
+
+test:2c236336-ec79-49e3-939a-efce2ecea832 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:2c25a0f7-1464-4222-912e-6cb8b09ae77c a oa:TextPositionSelector ;
+	oa:end "1602"^^xsd:long ;
+	oa:exact "images" ;
+	oa:prefix "had a new " ;
+	oa:start "1596"^^xsd:long ;
+	oa:suffix " because i" .
+
+test:2c5ffa03-719c-4b9b-aede-676ee363000b a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:2ca3963d-4430-475e-8eda-ae516ca15c00 mmm:hasBody test:be0a87c0-743c-44b7-88be-2a7b3a6bf482 ;
+	a mmm:Part ;
+	oa:hasBody test:be0a87c0-743c-44b7-88be-2a7b3a6bf482 ;
+	oa:serializedAt "2016-04-29 15:42:47.604" ;
+	oa:serializedBy services:ner-text .
+
+test:2cf6e51a-46cc-47dc-833e-6ce1fac0da76 fam:confidence 1.0E0 ;
+	fam:entity-label "images"@en ;
+	fam:entity-reference <http://www.mico-project.eu/ns/cv/serengeti#image> ;
+	fam:entity-type <http://www.w3.org/2004/02/skos/core#Concept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:2da7a120-b949-45aa-b372-311151fe9f4c mmm:hasBody test:15ec7f35-1b39-4e07-a49b-62ab1f248a75 ;
+	a mmm:Part ;
+	oa:hasBody test:15ec7f35-1b39-4e07-a49b-62ab1f248a75 ;
+	oa:serializedAt "2016-04-29 15:42:47.574" ;
+	oa:serializedBy services:ner-text .
+
+test:2e5db80b-d2d7-4c20-8359-1b1c56de4f3f fam:confidence 1.0E0 ;
+	fam:entity-label "Bitbucket"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Bitbucket> ;
+	fam:entity-type <http://dbpedia.org/ontology/Website> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:308eeaad-2b4f-4477-80ac-115d42ebe699 fam:confidence 1.0E0 ;
+	fam:entity-label "records"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Record_(computer_science)> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:30ac908e-4dc4-4ae7-b3e1-987089ac3aac a oa:TextPositionSelector ;
+	oa:end "53"^^xsd:long ;
+	oa:exact "research project" ;
+	oa:prefix "rt-funded " ;
+	oa:start "37"^^xsd:long ;
+	oa:suffix " to provid" .
+
+test:30ad8ce3-b484-457b-ac1a-a7e539e30396 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:34551f6b-d474-458c-8353-e524e136173c a oa:TextPositionSelector ;
+	oa:end "1378"^^xsd:long ;
+	oa:exact "available" ;
+	oa:prefix "atform is " ;
+	oa:start "1369"^^xsd:long ;
+	oa:suffix " at Bitbuc" .
+
+test:3479dcd9-2fad-4439-9863-e715718e99b4 fam:confidence 1.0E0 ;
+	fam:entity-label "it"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Information_technology> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:348fe82b-64f5-46c7-bbee-68ca6001260a fam:confidence 1.0E0 ;
+	fam:entity-label "for"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Infinite_loop> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:35d66ceb-fd81-4af9-80b3-bdbed5001e64 mmm:hasBody test:980e533a-4176-4e7a-8b8c-c40a31390ed2 ;
+	a mmm:Part ;
+	oa:hasBody test:980e533a-4176-4e7a-8b8c-c40a31390ed2 ;
+	oa:serializedAt "2016-04-29 15:42:47.525" ;
+	oa:serializedBy services:ner-text .
+
+test:3685b276-0041-4ef9-affb-851b9e924f93 fam:confidence 1.0E0 ;
+	fam:entity-label "faces"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Face_(geometry)> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:396441c5-9e7f-4f23-8936-cc13f74e33a7 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:3a4cc3d8-1d8b-4c20-ac49-40b1670808e9 mmm:hasBody test:b1892ed8-e3e7-47de-ba3d-6365491211f9 ;
+	a mmm:Part ;
+	oa:hasBody test:b1892ed8-e3e7-47de-ba3d-6365491211f9 ;
+	oa:serializedAt "2016-04-29 15:42:47.611" ;
+	oa:serializedBy services:ner-text .
+
+test:3e74338f-8c16-4e9c-80e8-56c0eda79c35 a oa:TextPositionSelector ;
+	oa:end "902"^^xsd:long ;
+	oa:exact "objects" ;
+	oa:prefix "entifying " ;
+	oa:start "895"^^xsd:long ;
+	oa:suffix " that coul" .
+
+test:3ec0a731-bfcb-4049-bf97-9dc0628b8b83 fam:confidence 1.0E0 ;
+	fam:entity-label "extractor"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Extractor_(firearms)> ;
+	fam:entity-type <http://dbpedia.org/ontology/Device> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:3f7b8687-1668-40e1-802c-0815616ee4c1 fam:confidence 2.4742268025875092E-1 ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:topic-label "Technology"@en-us ;
+	fam:topic-reference <http://dbpedia.org/resource/Technology> ;
+	a fam:TopicAnnotation .
+
+test:40ccfa67-c659-4b51-ba4d-09376442c45d a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:429b96ae-a16b-4c1f-87c6-2f89d698fdff fam:confidence 1.0E0 ;
+	fam:entity-label "Platform"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Computing_platform> ;
+	fam:entity-type <http://dbpedia.org/ontology/Book> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:431543a7-0ca9-4a30-b5ae-c080e5a16830 a oa:TextPositionSelector ;
+	oa:end "1021"^^xsd:long ;
+	oa:exact "objects" ;
+	oa:prefix "assigning " ;
+	oa:start "1014"^^xsd:long ;
+	oa:suffix " to concre" .
+
+test:436a50b4-17af-47d7-832e-97c10292bc58 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:455bc6ec-4a74-43e3-9663-68581e11be4b a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:4588625c-fdd2-4096-8532-db10e204a344 mmm:hasBody test:3f7b8687-1668-40e1-802c-0815616ee4c1 ;
+	a mmm:Part ;
+	oa:hasBody test:3f7b8687-1668-40e1-802c-0815616ee4c1 ;
+	oa:serializedAt "2016-04-29 15:42:47.782" ;
+	oa:serializedBy services:ner-text .
+
+test:45fc8668-837e-4e77-8de4-b0da9d770f12 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:46067b9c-274f-4f15-bad6-a358ec44cee8 a oa:TextPositionSelector ;
+	oa:end "117"^^xsd:long ;
+	oa:exact "multimedia" ;
+	oa:prefix "or online " ;
+	oa:start "107"^^xsd:long ;
+	oa:suffix " producers" .
+
+test:462de112-2a76-427d-9b42-323b3b0fe897 a oa:TextPositionSelector ;
+	oa:end "165"^^xsd:long ;
+	oa:exact "standards" ;
+	oa:prefix "p models, " ;
+	oa:start "156"^^xsd:long ;
+	oa:suffix " and softw" .
+
+test:46437ff9-c016-4e01-9086-7a6b161cfb2d a oa:TextPositionSelector ;
+	oa:end "994"^^xsd:long ;
+	oa:exact "entity" ;
+	oa:prefix "ons), an “" ;
+	oa:start "988"^^xsd:long ;
+	oa:suffix " linker” (" .
+
+test:4a3815c5-633a-42bb-b4b2-7d98999758cf a oa:TextPositionSelector ;
+	oa:end "1074"^^xsd:long ;
+	oa:exact "component" ;
+	oa:prefix "biguation " ;
+	oa:start "1065"^^xsd:long ;
+	oa:suffix "” (resolvi" .
+
+test:4c034d2b-9492-4c83-ba27-e933d28324b4 fam:confidence 1.0E0 ;
+	fam:entity-label "research project"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Research> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:4cf5acb8-7452-4e16-960e-44c1c4466068 fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:sentiment -1.9203712637924847E-1 ;
+	a fam:SentimentAnnotation .
+
+test:4d766956-b5f7-49d2-b243-93a5bbb99810 a oa:TextPositionSelector ;
+	oa:end "1289"^^xsd:long ;
+	oa:exact "API" ;
+	oa:prefix "about the " ;
+	oa:start "1286"^^xsd:long ;
+	oa:suffix " and vocab" .
+
+test:4fbb1019-c47f-4dd5-9880-7cc269717d2a a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:509a65c4-f38c-47d3-ab90-e4904d58afaf a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:50b960b5-8d5b-4853-96be-f42f9977b39a a oa:TextPositionSelector ;
+	oa:end "365"^^xsd:long ;
+	oa:exact "information extraction" ;
+	oa:prefix "de better " ;
+	oa:start "343"^^xsd:long ;
+	oa:suffix " results f" .
+
+test:52623911-cb84-43b4-923a-2f2e01d528fd a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:5401bc67-ca0b-410e-b81d-ed45e82b8574 a oa:TextPositionSelector ;
+	oa:end "1583"^^xsd:long ;
+	oa:exact "it" ;
+	oa:prefix "me i give " ;
+	oa:start "1581"^^xsd:long ;
+	oa:suffix " i had a n" .
+
+test:54063c7c-167c-413e-b0e1-d13ffd4aa30c a oa:TextPositionSelector ;
+	oa:end "127"^^xsd:long ;
+	oa:exact "producers" ;
+	oa:prefix "ultimedia " ;
+	oa:start "118"^^xsd:long ;
+	oa:suffix """.
+
+MICO wi""" .
+
+test:564c63f3-4319-45d3-84d8-944f727f60e4 mmm:hasBody test:4c034d2b-9492-4c83-ba27-e933d28324b4 ;
+	a mmm:Part ;
+	oa:hasBody test:4c034d2b-9492-4c83-ba27-e933d28324b4 ;
+	oa:serializedAt "2016-04-29 15:42:47.509" ;
+	oa:serializedBy services:ner-text .
+
+test:56b90661-14b5-4fe6-b2c8-af5357f729a9 mmm:hasPart test:0490c525-c6d9-46c2-8441-4b150f5a2df5 , test:0eda36d4-c25b-47d7-908a-54d1c677eb6d , test:0f56aa0b-c414-4e4f-a032-c89cc8d2dcef , test:226b38bb-1b77-4e7a-bb0d-7aa9834aed9c , test:2310ac43-7208-4300-8396-fc571b1f1e15 , test:243c943e-f544-49d4-be1e-2dc78649dc57 , test:244fc9ef-14d3-46ca-93fd-c45c162fb193 , test:249460ba-ed70-4eff-9a11-0531b64ae680 , test:2839b8b5-4ac4-4f95-8bfa-fb3dd285009d , test:29d39fc4-14ab-486a-9210-b367e0325ef0 , test:2ad38a74-e957-44f8-8372-163bb570347d , test:2ca3963d-4430-475e-8eda-ae516ca15c00 , test:2da7a120-b949-45aa-b372-311151fe9f4c , test:35d66ceb-fd81-4af9-80b3-bdbed5001e64 , test:3a4cc3d8-1d8b-4c20-ac49-40b1670808e9 , test:4588625c-fdd2-4096-8532-db10e204a344 , test:564c63f3-4319-45d3-84d8-944f727f60e4 , test:58d0ad7e-fe8f-4d78-ac12-585391647c0f , test:6fb1fb4e-6c0a-4aa3-8564-cefae8499b9f , test:70c1c2a1-4671-4c53-beda-74e502c65d6e , test:7744c614-06ea-46cc-93f2-aa84433e4e8d , test:79385896-f259-46e8-94f7-e76b7fdc1789 , test:7aa5defe-e550-4424-bedd-1c901d9a2ab9 , test:7c8da9ef-8946-4674-825e-84e2bb3a193e , test:7d5891c9-feea-43e8-b023-c8a9bd3c319a , test:826d3f4d-44bd-402d-88b8-27fbba712bd0 , test:88b41bc6-a766-4d29-9965-4518a83d0997 , test:8bc710dc-d518-4046-a68f-c4b0636ac702 , test:9c3e31cb-9481-4f62-8b93-288c252594db , test:9cd5db47-b679-4bf0-a476-698ac677e59a , test:9ebc36bb-683e-4d05-be0e-245c9d718b2e , test:a18dbf2a-f453-4785-9ca5-3542b7880be7 , test:a985b9ff-ea70-45cf-8d40-c703a35991f7 , test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 , test:aaa207ae-ac8e-4645-b108-e81303735a19 , test:b8fddfc0-10f5-42a4-9705-a7a7ebb9278e , test:c4fa1128-07a0-423b-a521-146c703fb95a , test:d16f1060-02ab-4342-8f57-2ef4c2d75a55 , test:d289f495-d9cb-41dd-913d-371d63e68f37 , test:d500c6ec-2b06-41bd-82c5-0c0e32c1a6f9 , test:de5b2a4b-9689-497d-8317-b814cf6e368b , test:df5aec3e-f95e-47e7-8d90-1f1e2b28d8d8 , test:e0c1b2f2-1d2c-4eab-8bee-b24d2480df31 , test:f19a40d2-82cc-4988-9aff-00c224a50a54 , test:fa896bc7-505b-415a-868a-201f4725433e ;
+	a mmm:Item ;
+	oa:serializedAt "2016-04-29 15:42:45.413" .
+
+test:57e4b6a9-0d11-43a8-a4ec-72ff1c78c230 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:58d0ad7e-fe8f-4d78-ac12-585391647c0f mmm:hasBody test:d49a6947-5ac1-4605-aedb-9515093e4a48 ;
+	a mmm:Part ;
+	oa:hasBody test:d49a6947-5ac1-4605-aedb-9515093e4a48 ;
+	oa:serializedAt "2016-04-29 15:42:47.582" ;
+	oa:serializedBy services:ner-text .
+
+test:59a8b091-e6e3-469e-bea6-31d3ce436d38 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:5bdae5f3-a8d9-41e5-aa9a-17a76dfbd13c a oa:TextPositionSelector ;
+	oa:end "1154"^^xsd:long ;
+	oa:exact "context" ;
+	oa:prefix "given the " ;
+	oa:start "1147"^^xsd:long ;
+	oa:suffix "). Further" .
+
+test:6401f36c-d25c-46f5-bbbf-702277f2846d a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:65c9f001-b1a7-45b5-9d3f-c3c08ec4ff1f a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:6605bbce-df5e-49ed-9244-2d0f1917c14a a oa:TextPositionSelector ;
+	oa:end "1560"^^xsd:long ;
+	oa:exact "repository" ;
+	oa:prefix "oject APT " ;
+	oa:start "1550"^^xsd:long ;
+	oa:suffix """.
+
+every t""" .
+
+test:664cc189-093a-4e10-8900-f5079076d1e7 fam:confidence 1.0E0 ;
+	fam:entity-label "deliverables"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Deliverable> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:66fffbdf-5e7a-4c4a-bef4-31f0d7f24e13 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:67bb0533-8e82-4fe0-8baf-e9e8c85e1db5 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:67d7b02a-68e3-4e8d-b4df-90271e666dd3 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:6bbaa9d6-d4b8-492d-9c4a-f65ca446e1b7 fam:confidence 5.360824465751648E-1 ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:topic-label "Computer"@en-us ;
+	fam:topic-reference <http://dbpedia.org/resource/Computer> ;
+	a fam:TopicAnnotation .
+
+test:6ccfcaf1-f50e-4e89-9c76-395fc36d50c2 a oa:TextPositionSelector ;
+	oa:end "496"^^xsd:long ;
+	oa:exact "media" ;
+	oa:prefix " analyse “" ;
+	oa:start "491"^^xsd:long ;
+	oa:suffix " in contex" .
+
+test:6d7f3a46-088f-4557-ab4a-6844a83fd4ec a oa:TextPositionSelector ;
+	oa:end "641"^^xsd:long ;
+	oa:exact "bit" ;
+	oa:prefix "ing their " ;
+	oa:start "638"^^xsd:long ;
+	oa:suffix " of additi" .
+
+test:6ef13811-640b-43a7-b5f7-23daa796dd12 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:6fb1fb4e-6c0a-4aa3-8564-cefae8499b9f mmm:hasBody test:23eb6f44-5af5-459b-aed0-ab64191b6832 ;
+	a mmm:Part ;
+	oa:hasBody test:23eb6f44-5af5-459b-aed0-ab64191b6832 ;
+	oa:serializedAt "2016-04-29 15:42:47.596" ;
+	oa:serializedBy services:ner-text .
+
+test:70c1c2a1-4671-4c53-beda-74e502c65d6e mmm:hasBody test:c722ea68-a4a1-414a-a0a0-868c8acb5b82 ;
+	a mmm:Part ;
+	oa:hasBody test:c722ea68-a4a1-414a-a0a0-868c8acb5b82 ;
+	oa:serializedAt "2016-04-29 15:42:47.730" ;
+	oa:serializedBy services:ner-text .
+
+test:71ca7a28-bb36-4c8e-833f-8112c21b30e5 <http://purl.org/dc/elements/1.1/format> "text/plain" ;
+	mmm:hasLocation "file:/Volumes/development/workspace/mico/extractors/java/TE-220-named-entity-recognizer/target/test-classes/aaa0b5ab-fcc9-47eb-8610-eedadda304e4/71ca7a28-bb36-4c8e-833f-8112c21b30e5" ;
+	a mmm:Asset .
+
+test:7744c614-06ea-46cc-93f2-aa84433e4e8d mmm:hasBody test:b5df59e4-82cd-454f-86a4-bd9e51e5fb80 ;
+	a mmm:Part ;
+	oa:hasBody test:b5df59e4-82cd-454f-86a4-bd9e51e5fb80 ;
+	oa:serializedAt "2016-04-29 15:42:47.520" ;
+	oa:serializedBy services:ner-text .
+
+test:77a6b46f-5ef5-4d66-9da9-d54874f54973 fam:confidence 1.0E0 ;
+	fam:entity-label "identifying"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Station_identification> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:787f12ca-fe34-4fd7-b355-9310e1925d78 a oa:TextPositionSelector ;
+	oa:end "284"^^xsd:long ;
+	oa:exact "text" ;
+	oa:prefix " objects (" ;
+	oa:start "280"^^xsd:long ;
+	oa:suffix ", image, a" .
+
+test:78f6bc49-49e2-44ec-8da8-8e71a9cf4357 a oa:TextPositionSelector ;
+	oa:end "755"^^xsd:long ;
+	oa:exact "identifying" ;
+	oa:prefix "etector” (" ;
+	oa:start "744"^^xsd:long ;
+	oa:suffix " the langu" .
+
+test:79385896-f259-46e8-94f7-e76b7fdc1789 mmm:hasBody test:932a1b70-9fc6-4e00-a6c7-70bd2b3f6a1a ;
+	a mmm:Part ;
+	oa:hasBody test:932a1b70-9fc6-4e00-a6c7-70bd2b3f6a1a ;
+	oa:serializedAt "2016-04-29 15:42:47.530" ;
+	oa:serializedBy services:ner-text .
+
+test:7aa5defe-e550-4424-bedd-1c901d9a2ab9 mmm:hasBody test:cb3218dd-908b-4d49-a60b-18da5e396710 ;
+	a mmm:Part ;
+	oa:hasBody test:cb3218dd-908b-4d49-a60b-18da5e396710 ;
+	oa:serializedAt "2016-04-29 15:42:47.535" ;
+	oa:serializedBy services:ner-text .
+
+test:7b067032-0291-41c7-ace9-d7f03a8e858c a oa:TextPositionSelector ;
+	oa:end "377"^^xsd:long ;
+	oa:exact "for" ;
+	oa:prefix "n results " ;
+	oa:start "374"^^xsd:long ;
+	oa:suffix " more rele" .
+
+test:7b8c8a36-0f28-46d1-bb43-3fec5669f36e a oa:TextPositionSelector ;
+	oa:end "291"^^xsd:long ;
+	oa:exact "image" ;
+	oa:prefix "ts (text, " ;
+	oa:start "286"^^xsd:long ;
+	oa:suffix ", audio, v" .
+
+test:7c8da9ef-8946-4674-825e-84e2bb3a193e mmm:hasBody test:c551b747-64d9-4081-9b32-8dd87ae92707 ;
+	a mmm:Part ;
+	oa:hasBody test:c551b747-64d9-4081-9b32-8dd87ae92707 ;
+	oa:serializedAt "2016-04-29 15:42:47.620" ;
+	oa:serializedBy services:ner-text .
+
+test:7d0d999a-f1ee-4a79-8734-1487133ba588 fam:confidence 1.0E0 ;
+	fam:entity-label "information discovery"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Information_discovery> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:7d5891c9-feea-43e8-b023-c8a9bd3c319a mmm:hasBody test:2acdf0f3-3c1d-4eca-9c54-3e870c30f174 ;
+	a mmm:Part ;
+	oa:hasBody test:2acdf0f3-3c1d-4eca-9c54-3e870c30f174 ;
+	oa:serializedAt "2016-04-29 15:42:47.556" ;
+	oa:serializedBy services:ner-text .
+
+test:7d6e4d14-d19a-4790-8178-1da865af5ed2 a oa:TextPositionSelector ;
+	oa:end "472"^^xsd:long ;
+	oa:exact "will" ;
+	oa:prefix "ment that " ;
+	oa:start "468"^^xsd:long ;
+	oa:suffix " allow to " .
+
+test:7e0a7f61-09ed-42ff-b49a-fa599871b939 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:7e600f20-94e2-4dbb-98db-f9329736efb5 a oa:TextPositionSelector ;
+	oa:end "581"^^xsd:long ;
+	oa:exact "components" ;
+	oa:prefix "eanalysis " ;
+	oa:start "571"^^xsd:long ;
+	oa:suffix " that can " .
+
+test:7f730f24-b300-4036-8b25-cd1cb361653c a oa:TextPositionSelector ;
+	oa:end "1344"^^xsd:long ;
+	oa:exact "source code" ;
+	oa:prefix """ect.
+
+The """ ;
+	oa:start "1333"^^xsd:long ;
+	oa:suffix " of the MI" .
+
+test:80c1f4cf-b7c1-40bc-8eb7-9b8a8d6bcf5e a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:8133626e-560e-42fa-82b9-798c7b857512 a oa:TextPositionSelector ;
+	oa:end "1505"^^xsd:long ;
+	oa:exact "packaged" ;
+	oa:prefix "atform is " ;
+	oa:start "1497"^^xsd:long ;
+	oa:suffix " for Debia" .
+
+test:826d3f4d-44bd-402d-88b8-27fbba712bd0 mmm:hasBody test:664cc189-093a-4e10-8900-f5079076d1e7 ;
+	a mmm:Part ;
+	oa:hasBody test:664cc189-093a-4e10-8900-f5079076d1e7 ;
+	oa:serializedAt "2016-04-29 15:42:47.578" ;
+	oa:serializedBy services:ner-text .
+
+test:88b41bc6-a766-4d29-9965-4518a83d0997 mmm:hasBody test:2e5db80b-d2d7-4c20-8359-1b1c56de4f3f ;
+	a mmm:Part ;
+	oa:hasBody test:2e5db80b-d2d7-4c20-8359-1b1c56de4f3f ;
+	oa:serializedAt "2016-04-29 15:42:47.592" ;
+	oa:serializedBy services:ner-text .
+
+test:89c7f57b-bc8b-445a-a041-7434d4bf86a3 a oa:TextPositionSelector ;
+	oa:end "848"^^xsd:long ;
+	oa:exact "images" ;
+	oa:prefix " relevant " ;
+	oa:start "842"^^xsd:long ;
+	oa:suffix " from a vi" .
+
+test:8b8d267a-1047-40be-87c7-ab5795f31642 a oa:TextPositionSelector ;
+	oa:end "462"^^xsd:long ;
+	oa:exact "environment" ;
+	oa:prefix "orm is an " ;
+	oa:start "451"^^xsd:long ;
+	oa:suffix " that will" .
+
+test:8bc710dc-d518-4046-a68f-c4b0636ac702 mmm:hasBody test:308eeaad-2b4f-4477-80ac-115d42ebe699 ;
+	a mmm:Part ;
+	oa:hasBody test:308eeaad-2b4f-4477-80ac-115d42ebe699 ;
+	oa:serializedAt "2016-04-29 15:42:47.637" ;
+	oa:serializedBy services:ner-text .
+
+test:8c5093d7-26af-4803-9094-820847011671 a oa:TextPositionSelector ;
+	oa:end "1391"^^xsd:long ;
+	oa:exact "Bitbucket" ;
+	oa:prefix "ilable at " ;
+	oa:start "1382"^^xsd:long ;
+	oa:suffix ". Some com" .
+
+test:8c9b56f5-e380-4e8c-a9ad-44a061670fd9 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:8cf126ff-fd9c-4b8b-9058-23f969ee88b9 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:8ef8f251-f620-44cc-a098-f8e56f7c04cb a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:909a0a16-085b-4c56-b6a8-a8b5f2720661 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:912e1d07-057a-4d95-9536-a5e683858ba2 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:932a1b70-9fc6-4e00-a6c7-70bd2b3f6a1a fam:confidence 1.0E0 ;
+	fam:entity-label "models"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Scientific_modelling> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:938ebec9-164c-43ad-a6ce-e96495394fcc a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:939ff493-c2c5-4ec6-9219-ad98a28ce65b fam:confidence 1.0E0 ;
+	fam:entity-label "standards"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Technical_standard> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:93e2d959-bfde-43a4-8e6e-a1e9e9f9d164 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:95584218-f98f-4164-a073-289ee7bb5e99 fam:confidence 1.0E0 ;
+	fam:entity-label "source code"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Source_code> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:96d5fb11-f499-4366-b727-cde47fb04a57 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:980e533a-4176-4e7a-8b8c-c40a31390ed2 fam:confidence 1.0E0 ;
+	fam:entity-label "technical documentation"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Technical_documentation> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:9855ea1a-d06c-448c-925f-b44dd10bdbc2 fam:confidence 1.0E0 ;
+	fam:entity-label "sequence"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Sequence> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:99e157ba-06f4-4f32-87af-6ed7a2476923 a oa:TextPositionSelector ;
+	oa:end "1655"^^xsd:long ;
+	oa:exact "it" ;
+	oa:prefix "me i give " ;
+	oa:start "1653"^^xsd:long ;
+	oa:suffix " always li" .
+
+test:9a12e8f2-eefe-4b8f-9765-44bbdc573193 fam:confidence 1.0E0 ;
+	fam:entity-label "software tools"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Programming_tool> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:9c3e31cb-9481-4f62-8b93-288c252594db mmm:hasBody test:4cf5acb8-7452-4e16-960e-44c1c4466068 ;
+	a mmm:Part ;
+	oa:hasBody test:4cf5acb8-7452-4e16-960e-44c1c4466068 ;
+	oa:serializedAt "2016-04-29 15:42:47.695" ;
+	oa:serializedBy services:ner-text .
+
+test:9c9423e8-9243-4031-922c-30347066ae7d a oa:TextPositionSelector ;
+	oa:end "1408"^^xsd:long ;
+	oa:exact "components" ;
+	oa:prefix "ket. Some " ;
+	oa:start "1398"^^xsd:long ;
+	oa:suffix " are avail" .
+
+test:9cd5db47-b679-4bf0-a476-698ac677e59a mmm:hasBody test:3ec0a731-bfcb-4049-bf97-9dc0628b8b83 ;
+	a mmm:Part ;
+	oa:hasBody test:3ec0a731-bfcb-4049-bf97-9dc0628b8b83 ;
+	oa:serializedAt "2016-04-29 15:42:47.653" ;
+	oa:serializedBy services:ner-text .
+
+test:9d0ac35b-5d66-4c8b-917d-f70329efe093 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:9d31c4eb-d7ad-44f4-b282-6b85e29cbcbd a oa:TextPositionSelector ;
+	oa:end "607"^^xsd:long ;
+	oa:exact "sequence" ;
+	oa:prefix "n work in " ;
+	oa:start "599"^^xsd:long ;
+	oa:suffix " on conten" .
+
+test:9de6758a-b946-4d0b-bbe7-ea76a99d5d07 a oa:TextPositionSelector ;
+	oa:end "1509"^^xsd:long ;
+	oa:exact "for" ;
+	oa:prefix " packaged " ;
+	oa:start "1506"^^xsd:long ;
+	oa:suffix " Debian-ba" .
+
+test:9ebc36bb-683e-4d05-be0e-245c9d718b2e mmm:hasBody test:b7f47393-ea75-49a4-976f-7f9bab392a81 ;
+	a mmm:Part ;
+	oa:hasBody test:b7f47393-ea75-49a4-976f-7f9bab392a81 ;
+	oa:serializedAt "2016-04-29 15:42:47.541" ;
+	oa:serializedBy services:ner-text .
+
+test:a18dbf2a-f453-4785-9ca5-3542b7880be7 mmm:hasBody test:7d0d999a-f1ee-4a79-8734-1487133ba588 ;
+	a mmm:Part ;
+	oa:hasBody test:7d0d999a-f1ee-4a79-8734-1487133ba588 ;
+	oa:serializedAt "2016-04-29 15:42:47.646" ;
+	oa:serializedBy services:ner-text .
+
+test:a4f14693-927b-431c-ba98-b9cb777579d0 a oa:TextPositionSelector ;
+	oa:end "961"^^xsd:long ;
+	oa:exact "faces" ;
+	oa:prefix "assigning " ;
+	oa:start "956"^^xsd:long ;
+	oa:suffix " to concre" .
+
+test:a82ce9a6-c73a-47a8-ba8a-1e1e9716c57e fam:confidence 1.0E0 ;
+	fam:entity-label "text"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Plain_text> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:a985b9ff-ea70-45cf-8d40-c703a35991f7 mmm:hasBody test:3479dcd9-2fad-4439-9863-e715718e99b4 ;
+	a mmm:Part ;
+	oa:hasBody test:3479dcd9-2fad-4439-9863-e715718e99b4 ;
+	oa:serializedAt "2016-04-29 15:42:47.641" ;
+	oa:serializedBy services:ner-text .
+
+test:aa6afc99-32b8-454a-89d6-d4b29fdff33e a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 mmm:hasAsset test:71ca7a28-bb36-4c8e-833f-8112c21b30e5 ;
+	mmm:hasSyntacticalType "text/plain" ;
+	a mmm:Part ;
+	oa:serializedAt "2016-04-29 15:42:45.564" ;
+	oa:serializedBy <urn:test:dummyUri> .
+
+test:aaa207ae-ac8e-4645-b108-e81303735a19 mmm:hasBody test:2088eeca-fe56-4b91-a33e-504049bd7796 ;
+	a mmm:Part ;
+	oa:hasBody test:2088eeca-fe56-4b91-a33e-504049bd7796 ;
+	oa:serializedAt "2016-04-29 15:42:47.546" ;
+	oa:serializedBy services:ner-text .
+
+test:ab40ceeb-f4e3-440e-af63-c3e7f9a344c4 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:aea66c05-5d8a-4ca6-bbc7-ca3757bc792b a oa:TextPositionSelector ;
+	oa:end "1865"^^xsd:long ;
+	oa:exact "states" ;
+	oa:prefix "he united " ;
+	oa:start "1859"^^xsd:long ;
+	oa:suffix " of americ" .
+
+test:af9433ba-28f9-4c94-95ca-01d55cfbd2cd a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:afc7b7aa-c728-4227-830b-4d56a27d15c2 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:b1892ed8-e3e7-47de-ba3d-6365491211f9 fam:confidence 1.0E0 ;
+	fam:entity-label "media"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Media_(communication)> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:b593ba19-9a1a-4caf-8533-4476725b8e68 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:b5df59e4-82cd-454f-86a4-bd9e51e5fb80 fam:confidence 1.0E0 ;
+	fam:entity-label "producers"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Film_producer> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:b6bb2f00-7cfe-4d10-9053-0f36fb7ee5dd a oa:TextPositionSelector ;
+	oa:end "1819"^^xsd:long ;
+	oa:exact "records" ;
+	oa:prefix "mperature " ;
+	oa:start "1812"^^xsd:long ;
+	oa:suffix " in januar" .
+
+test:b7f47393-ea75-49a4-976f-7f9bab392a81 fam:confidence 1.0E0 ;
+	fam:entity-label "API"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Application_programming_interface> ;
+	fam:entity-type <http://dbpedia.org/ontology/NameEntity> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:b8d64452-d82f-4479-9920-6c69180dc9a0 a oa:TextPositionSelector ;
+	oa:end "1602"^^xsd:long ;
+	oa:exact "images" ;
+	oa:prefix "had a new " ;
+	oa:start "1596"^^xsd:long ;
+	oa:suffix " because i" .
+
+test:b8fddfc0-10f5-42a4-9705-a7a7ebb9278e mmm:hasBody test:0aead340-e056-4fb4-b74c-085f2794ec8b ;
+	a mmm:Part ;
+	oa:hasBody test:0aead340-e056-4fb4-b74c-085f2794ec8b ;
+	oa:serializedAt "2016-04-29 15:42:47.656" ;
+	oa:serializedBy services:ner-text .
+
+test:b9e4b19d-f108-4844-883b-4e5a61a5c811 fam:confidence 1.0E0 ;
+	fam:entity-label "repository"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Software_repository> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:bb77c5d2-2268-4ad6-b522-88443ede02b1 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:be0a87c0-743c-44b7-88be-2a7b3a6bf482 fam:confidence 1.0E0 ;
+	fam:entity-label "information extraction"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Information_extraction> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:be8a9407-508b-4a53-97eb-22916d7494dd a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:c1bea6d2-6fe9-4707-a85a-4ac0bc9dad50 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:c39462db-4263-41a9-95d8-e8637fb6c335 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:c3a79eac-cc4d-46fe-9be3-c8cb3036d8e2 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:c4eff32b-a2dd-4777-bbca-bc4a95870f61 a oa:TextPositionSelector ;
+	oa:end "848"^^xsd:long ;
+	oa:exact "images" ;
+	oa:prefix " relevant " ;
+	oa:start "842"^^xsd:long ;
+	oa:suffix " from a vi" .
+
+test:c4fa1128-07a0-423b-a521-146c703fb95a mmm:hasBody test:170eca93-346a-4693-b3ad-4a5481817a9d ;
+	a mmm:Part ;
+	oa:hasBody test:170eca93-346a-4693-b3ad-4a5481817a9d ;
+	oa:serializedAt "2016-04-29 15:42:47.784" ;
+	oa:serializedBy services:ner-text .
+
+test:c551b747-64d9-4081-9b32-8dd87ae92707 fam:confidence 1.0E0 ;
+	fam:entity-label "entity"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Entity> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:c660a9ba-12fc-47c1-849a-fc7f405bc427 a oa:TextPositionSelector ;
+	oa:end "1001"^^xsd:long ;
+	oa:exact "linker" ;
+	oa:prefix "n “entity " ;
+	oa:start "995"^^xsd:long ;
+	oa:suffix "” (assigni" .
+
+test:c722ea68-a4a1-414a-a0a0-868c8acb5b82 <http://purl.org/dc/terms/language> "en" ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	a fam:LanguageAnnotation .
+
+test:c96d07cd-905a-494a-81b7-d745bc3d651b a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:cb3218dd-908b-4d49-a60b-18da5e396710 fam:confidence 8.571428571428572E-1 ;
+	fam:entity-label "object"@en ;
+	fam:entity-reference <http://www.mico-project.eu/ns/cv/serengeti#object> ;
+	fam:entity-type <http://www.w3.org/2004/02/skos/core#Concept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:cbc3dbd7-5224-416e-8d27-1dc56a5118da a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:cd9c275c-8813-4cdf-955e-61f0a4ea0419 fam:confidence 1.0E0 ;
+	fam:entity-label "context"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Context_(language_use)> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:cdd65cc5-e4aa-4faa-b42f-a84ccb64d1b6 a oa:TextPositionSelector ;
+	oa:end "424"^^xsd:long ;
+	oa:exact "information discovery" ;
+	oa:prefix "earch and " ;
+	oa:start "403"^^xsd:long ;
+	oa:suffix """.
+
+The MIC""" .
+
+test:cefb0557-1718-4fac-ba9b-ad6000b680df a oa:TextPositionSelector ;
+	oa:end "818"^^xsd:long ;
+	oa:exact "extractor" ;
+	oa:prefix "“keyframe " ;
+	oa:start "809"^^xsd:long ;
+	oa:suffix "” (identif" .
+
+test:cf03187a-a5d7-407e-b572-cdddc31a5ba8 a oa:TextPositionSelector ;
+	oa:end "922"^^xsd:long ;
+	oa:exact "faces" ;
+	oa:prefix " could be " ;
+	oa:start "917"^^xsd:long ;
+	oa:suffix "), a “face" .
+
+test:d16f1060-02ab-4342-8f57-2ef4c2d75a55 mmm:hasBody test:95584218-f98f-4164-a073-289ee7bb5e99 ;
+	a mmm:Part ;
+	oa:hasBody test:95584218-f98f-4164-a073-289ee7bb5e99 ;
+	oa:serializedAt "2016-04-29 15:42:47.490" ;
+	oa:serializedBy services:ner-text .
+
+test:d1f2a5dd-de16-474d-a00f-f846383ed69c a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:d24c5d89-34db-4633-b9a3-c05d07690f20 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:d289f495-d9cb-41dd-913d-371d63e68f37 mmm:hasBody test:cd9c275c-8813-4cdf-955e-61f0a4ea0419 ;
+	a mmm:Part ;
+	oa:hasBody test:cd9c275c-8813-4cdf-955e-61f0a4ea0419 ;
+	oa:serializedAt "2016-04-29 15:42:47.634" ;
+	oa:serializedBy services:ner-text .
+
+test:d449ff73-298a-4327-b3e3-45ba6a02c8fc a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:d49a6947-5ac1-4605-aedb-9515093e4a48 fam:confidence 1.0E0 ;
+	fam:entity-label "bit"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Bit> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:d500c6ec-2b06-41bd-82c5-0c0e32c1a6f9 mmm:hasBody test:e38d7b81-3a12-407e-9182-5efa36e53585 ;
+	a mmm:Part ;
+	oa:hasBody test:e38d7b81-3a12-407e-9182-5efa36e53585 ;
+	oa:serializedAt "2016-04-29 15:42:47.550" ;
+	oa:serializedBy services:ner-text .
+
+test:d7e13e8b-2115-4de6-8a1a-622c7e33b1bb a oa:TextPositionSelector ;
+	oa:end "99"^^xsd:long ;
+	oa:exact "for" ;
+	oa:prefix "solutions " ;
+	oa:start "96"^^xsd:long ;
+	oa:suffix " online mu" .
+
+test:da453b76-ca90-47a1-a699-b58f29bebe84 a oa:TextPositionSelector ;
+	oa:end "1896"^^xsd:long ;
+	oa:exact "for" ;
+	oa:prefix "l average " ;
+	oa:start "1893"^^xsd:long ;
+	oa:suffix " january's" .
+
+test:dabc1634-f997-4206-be8e-bb08d429b44d fam:confidence 1.0E0 ;
+	fam:entity-label "images"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Digital_image> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:dba2c92f-ea5a-4dba-9a34-a7cc436ef5dd a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:dccd65e7-7ff0-47ae-9710-f23661642154 a oa:TextPositionSelector ;
+	oa:end "76"^^xsd:long ;
+	oa:exact "media" ;
+	oa:prefix "ide cross-" ;
+	oa:start "71"^^xsd:long ;
+	oa:suffix " analysis " .
+
+test:ddac0f71-a8c1-4680-a6a2-0872a6a94ba0 a oa:TextPositionSelector ;
+	oa:end "1206"^^xsd:long ;
+	oa:exact "deliverables" ;
+	oa:prefix "ed in the " ;
+	oa:start "1194"^^xsd:long ;
+	oa:suffix " D6.1.1 an" .
+
+test:ddb350c9-6980-4db4-b46e-c64141782efc a oa:TextPositionSelector ;
+	oa:end "776"^^xsd:long ;
+	oa:exact "text" ;
+	oa:prefix "nguage of " ;
+	oa:start "772"^^xsd:long ;
+	oa:suffix " or an aud" .
+
+test:de275cd2-f06b-4cce-abff-20c105bc7136 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:de5b2a4b-9689-497d-8317-b814cf6e368b mmm:hasBody test:2cf6e51a-46cc-47dc-833e-6ce1fac0da76 ;
+	a mmm:Part ;
+	oa:hasBody test:2cf6e51a-46cc-47dc-833e-6ce1fac0da76 ;
+	oa:serializedAt "2016-04-29 15:42:47.629" ;
+	oa:serializedBy services:ner-text .
+
+test:df5aec3e-f95e-47e7-8d90-1f1e2b28d8d8 mmm:hasBody test:e93db018-778c-408a-97fa-a3c8aea1da9e ;
+	a mmm:Part ;
+	oa:hasBody test:e93db018-778c-408a-97fa-a3c8aea1da9e ;
+	oa:serializedAt "2016-04-29 15:42:47.565" ;
+	oa:serializedBy services:ner-text .
+
+test:e0c1b2f2-1d2c-4eab-8bee-b24d2480df31 mmm:hasBody test:9855ea1a-d06c-448c-925f-b44dd10bdbc2 ;
+	a mmm:Part ;
+	oa:hasBody test:9855ea1a-d06c-448c-925f-b44dd10bdbc2 ;
+	oa:serializedAt "2016-04-29 15:42:47.658" ;
+	oa:serializedBy services:ner-text .
+
+test:e20c71c8-b000-4cb0-8b3a-e1917ba389d0 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:e21c7f40-befa-4bbb-a3d5-9a45b6e4ce03 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:e38d7b81-3a12-407e-9182-5efa36e53585 fam:confidence 1.0E0 ;
+	fam:entity-label "component"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Component-based_software_engineering> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:e62df075-4839-4f8e-9411-736424f673be a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:e93db018-778c-408a-97fa-a3c8aea1da9e fam:confidence 1.0E0 ;
+	fam:entity-label "packaged"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Packaging_and_labeling> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:e97b3db7-c96f-4cb6-a9f7-865f09b5f31c a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:e9eb1915-65e7-4a17-9aad-482a9dc9e4c4 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:e9f4598a-1632-4f54-93fc-f42b6c10582a a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:ef45b70e-66a0-4d19-9d0d-6ba1accde88c a oa:TextPositionSelector ;
+	oa:end "291"^^xsd:long ;
+	oa:exact "image" ;
+	oa:prefix "ts (text, " ;
+	oa:start "286"^^xsd:long ;
+	oa:suffix ", audio, v" .
+
+test:f0d27396-8141-4237-a67c-268b76ebb2d4 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:f19a40d2-82cc-4988-9aff-00c224a50a54 mmm:hasBody test:f42b9c6d-13ef-44b7-918d-5a87d6f28836 ;
+	a mmm:Part ;
+	oa:hasBody test:f42b9c6d-13ef-44b7-918d-5a87d6f28836 ;
+	oa:serializedAt "2016-04-29 15:42:47.607" ;
+	oa:serializedBy services:ner-text .
+
+test:f42b9c6d-13ef-44b7-918d-5a87d6f28836 fam:confidence 1.0E0 ;
+	fam:entity-label "image"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Image> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:f5555809-0955-44a0-b44f-283427e95d1e a oa:TextPositionSelector ;
+	oa:end "184"^^xsd:long ;
+	oa:exact "software tools" ;
+	oa:prefix "dards and " ;
+	oa:start "170"^^xsd:long ;
+	oa:suffix " to jointl" .
+
+test:f6b70f1b-0b4a-44d2-98e8-257be9bcf36a a oa:TextPositionSelector ;
+	oa:end "832"^^xsd:long ;
+	oa:exact "identifying" ;
+	oa:prefix "tractor” (" ;
+	oa:start "821"^^xsd:long ;
+	oa:suffix " relevant " .
+
+test:f71f075a-a9cb-4cdf-9447-86f568818e55 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+test:f7d4e034-d3aa-4a6a-abb3-43bea10f11bc fam:confidence 1.0E0 ;
+	fam:entity-label "multimedia"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Multimedia> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:f96d6c13-b279-4b55-be96-3f5688f758e6 fam:confidence 1.0E0 ;
+	fam:entity-label "linker"@en ;
+	fam:entity-reference <http://dbpedia.org/resource/Linker_(computing)> ;
+	fam:entity-type <http://dbpedia.org/ontology/TopicalConcept> ;
+	fam:extracted-from test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 ;
+	fam:selector "ACED0005737200116A6176612E7574696C2E48617368536574BA44859596B8B7340300007870770C000000103F4000000000000078"^^<java:java.util.HashSet> ;
+	a fam:LinkedEntity .
+
+test:fa896bc7-505b-415a-868a-201f4725433e mmm:hasBody test:348fe82b-64f5-46c7-bbee-68ca6001260a ;
+	a mmm:Part ;
+	oa:hasBody test:348fe82b-64f5-46c7-bbee-68ca6001260a ;
+	oa:serializedAt "2016-04-29 15:42:47.496" ;
+	oa:serializedBy services:ner-text .
+
+test:fc11d4d6-9c05-40d3-9cb7-34670f483a32 a oa:TextPositionSelector ;
+	oa:end "1254"^^xsd:long ;
+	oa:exact "technical documentation" ;
+	oa:prefix """2.1.
+
+The """ ;
+	oa:start "1231"^^xsd:long ;
+	oa:suffix " includes " .
+
+test:ff3ca7e3-5e45-47b9-8166-01213546ee66 a oa:SpecificResource ;
+	oa:hasSource test:aaa0b5ab-fcc9-47eb-8610-eedadda304e4 .
+
+services:ner-text a <https://github.com/anno4j/ns#Agent> .
+
+<urn:test:dummyUri> a <https://github.com/anno4j/ns#Agent> .

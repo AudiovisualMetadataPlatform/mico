@@ -1,6 +1,7 @@
 package eu.mico.platform.anno4j.model.fam;
 
 import java.util.Collection;
+import java.util.Set;
 
 import org.openrdf.annotations.Iri;
 import org.openrdf.model.Resource;
@@ -33,14 +34,14 @@ public interface FAMBody extends BodyMMM {
     public void addSelector(Selector selector);
     
     @Iri(FAM.SELECTOR)
-    public void setSelectors(Collection<Selector> selectors);
+    public void setSelectors(Set<Selector> selectors);
     
     /**
      * Unmodifiable collection of the selectors for this Body
      * @return
      */
     @Iri(FAM.SELECTOR)
-    public Collection<Selector> getSelectors();
+    public Set<Selector> getSelectors();
 
 
 }

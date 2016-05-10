@@ -24,13 +24,25 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
+import org.openrdf.model.Model;
+import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
+import org.openrdf.model.impl.TreeModel;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.UnknownTransactionStateException;
 import org.openrdf.repository.object.ObjectConnection;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.rio.Rio;
+import org.openrdf.rio.helpers.RDFHandlerBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.anno4j.model.namespaces.OADM;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
@@ -40,6 +52,7 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.RpcClient;
 
+import eu.mico.platform.anno4j.model.namespaces.MMM;
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
@@ -58,6 +71,7 @@ import eu.mico.platform.persistence.model.Resource;
  * Add file description here!
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
+ * @author Rupert Westenthaler (rwesten@apache.org)
  */
 public class EventManagerImpl implements EventManager {
 
@@ -264,11 +278,69 @@ public class EventManagerImpl implements EventManager {
      */
     @Override
     public void injectItem(Item item) throws IOException {
+        ObjectConnection con = item.getObjectConnection();
+        try {
+            if(con.isActive()){
+                con.commit(); //commit the current state of the item before notifying the broker
+                con.begin();
+            }
+        } catch (RepositoryException e) {
+            throw new IOException("Unable to commit Item data before inject",e);
+        } //else  auto commit ... nothing to do 
+        traceRDF(item, "injected");
         Channel chan = connection.createChannel();
         chan.basicPublish("", EventManager.QUEUE_CONTENT_INPUT, null, Event.ItemEvent.newBuilder().setItemUri(item.getURI().stringValue()).build().toByteArray());
         chan.close();
     }
-
+    
+    private void traceRDF(Item item, String taskName) {
+        if(!log.isTraceEnabled()){
+            return;
+        }
+        //we copy all statements to a TreeModel as this one sorts them by SPO
+        //what results in a much nicer TURTLE serialization
+        final Model model = new TreeModel();
+        //we also set commonly used namespaces
+        model.setNamespace(OADM.PREFIX, OADM.NS);
+        model.setNamespace(RDF.PREFIX, RDF.NAMESPACE);
+        model.setNamespace(RDFS.PREFIX, RDF.NAMESPACE);
+        model.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#");
+        model.setNamespace(MMM.PREFIX, MMM.NS);
+        model.setNamespace("test", "http://localhost/mem/");
+        model.setNamespace("services", "http://www.mico-project.eu/services/");
+        model.setNamespace("fam", "http://vocab.fusepool.info/fam#");
+        RepositoryConnection con = item.getObjectConnection();
+        boolean startedTransaction = false;
+        try {
+            if(!con.isActive()){
+                con.begin();
+                startedTransaction = true;
+            }
+            con.exportStatements(null, null, null, true, new RDFHandlerBase(){
+                @Override
+                public void handleStatement(Statement st) {
+                    model.add(st);
+                }
+            });
+        } catch (RDFHandlerException | RepositoryException e) {
+            log.trace("Unable to LOG RDF for task "+taskName+" because "+ e.getMessage(), e);
+        } finally {
+            if(startedTransaction){
+                try {
+                    con.rollback();
+                } catch (RepositoryException e) {/* ignore */}
+            }
+        }
+        try (StringWriter rdfOut = new StringWriter()){
+            Rio.write(model, rdfOut, RDFFormat.TURTLE);
+            log.debug("--- START {} RDF item: {} ---\n{}\n--- END {} RDF ---", 
+                    taskName,item.getURI(),rdfOut.toString(),taskName);
+        } catch (RDFHandlerException e) {
+            log.trace("Unable to serialize RDF for task "+taskName+" because "+ e.getMessage(), e);
+        } catch (IOException e) {
+            log.trace("Unable to print serialized RDF for task "+taskName+" because "+ e.getMessage(), e);
+        }
+    }
     /**
      * A consumer reacting to service discovery requests. Upon initialisation, it creates its own queue and binds it to
      * the service discovery exchange. Upon a discovery event, it simply sends back its list of services to the replyTo
@@ -609,6 +681,7 @@ public class EventManagerImpl implements EventManager {
                 } //else everything we need was correctly initialized
             }
             log.debug("> process Item {} (message: {})", item.getURI(), envelope.getDeliveryTag());
+            traceRDF(item, "before call to "+service.getServiceID());
             boolean reEnqueue = false; //if the message should be re-enqueued
             try {
                 final List<Resource> resourceList = parseResourceList(analysisRequest.getPartUriList(), item);
@@ -683,6 +756,7 @@ public class EventManagerImpl implements EventManager {
                                     + " has not finished for an unknown reason", "");
                         }
                     } finally {
+                        traceRDF(item, "after call to "+service.getServiceID());
                         getChannel().basicAck(envelope.getDeliveryTag(), false);
                         log.trace("ack message: {}[item: {}]", envelope.getDeliveryTag(),
                                 analysisRequest.getItemUri());

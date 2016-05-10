@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
         std::vector<std::string> itemURIS;
         itemURIS.reserve(numTestItems);
 
-
+        std::cout << "++++++++++++++++++++++++++++++++++++ TESTING ITEM CREATION ++++++++++++++++++++++++++++++" << std::endl;
         for (size_t i=0; i < numTestItems; ++i) {
 
             // create check
@@ -195,12 +195,13 @@ int main(int argc, char **argv) {
             auto semanticType = currItemResource->getSemanticType();
             assert( semanticType.compare(ss_sem_type.str().c_str()) == 0 );
 
-            currItemResource->setSyntacticalType(ss_sem_type.str().c_str());
+            currItemResource->setSyntacticalType(ss_syn_type.str().c_str());
             auto synType = currItemResource->getSyntacticalType();
-            assert( synType.compare(ss_sem_type.str().c_str()) == 0 );
+            assert( synType.compare(ss_syn_type.str().c_str()) == 0 );
         }
 
 
+        std::cout << "++++++++++++++++++++++++++++++++++++ TESTING ITEM RETRIEVAL ++++++++++++++++++++++++++++++" << std::endl;
         // check item retrieval
         for (auto itemURI : itemURIS) {
             mico::persistence::model::URI asURI(itemURI);
@@ -250,16 +251,20 @@ int main(int argc, char **argv) {
         assert(newAsset->getURI().stringValue().length() > 0);
         assert(existingAsset->getURI().stringValue().length() > 0);
 
+        persistenceServiceTest.svc->deleteItem(itemWithAssetResource->getURI());
+
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+        std::cout << "+++++++++++++++++++++++++++++ TESTING NON EXISTING ITEM RETRIEVAL +++++++++++++++++++++++" << std::endl;
         // check non existing item retrieval
         std::shared_ptr<mico::persistence::model::Item> notExistingItem  =
             persistenceServiceTest.svc->getItem(mico::persistence::model::URI("http://does_not_exist_at_all"));
 
         assert(!notExistingItem);
 
+        std::cout << "+++++++++++++++++++++++++++++ TESTING PART CREATION +++++++++++++++++++++++" << std::endl;
         //part creation
         for (auto itemURI : itemURIS) {
             mico::persistence::model::URI asURI(itemURI);
@@ -285,6 +290,7 @@ int main(int argc, char **argv) {
 
         }
 
+        std::cout << "+++++++++++++++++++++++++++++ TESTING PART RETRIEVAL +++++++++++++++++++++++" << std::endl;
         //part retrieval and body creation - BIG ITEM LOOP!!
         for (auto itemURI : itemURIS) {
             mico::persistence::model::URI asURI(itemURI);
@@ -319,11 +325,13 @@ int main(int argc, char **argv) {
 
               assert(partInputResources.size() == 1);
 
-              std::cout.flush();
+
 
               // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-              // ++++++++++++++ create a MICO Body and Target and add to part ++++++++++++++
+              // ++++++++++++++ create a MICO Body and Target aved input http://micobox154:8080/marmotta/d83a4436-4831-469a-ba75-5c5b873a494d of type ItemMMM for part htnd add to part ++++++++++++++
               // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+              std::cout << "+++++++++++++++++++++++++++++ TESTING BODY AND TARGET CREATION +++++++++++++++++++++++" << std::endl;
 
               // !!!! always set the current scope to the JVM !!!
 
@@ -338,13 +346,13 @@ int main(int argc, char **argv) {
 
 
               jnipp::LocalRef<ns_anno4jmodel::Body> fd_body=
-                persistenceServiceTest.svc->getAnno4j()->createObject(ns_bodymmm::FaceDetectionBodyMMM::clazz());
+                part->getItem()->createObject(ns_bodymmm::FaceDetectionBodyMMM::clazz());
 
               jnipp::LocalRef<ns_targetmmm::SpecificResourceMMM> fd_target=
-                persistenceServiceTest.svc->getAnno4j()->createObject(ns_targetmmm::SpecificResourceMMM::clazz());
+                part->getItem()->createObject(ns_targetmmm::SpecificResourceMMM::clazz());
 
               jnipp::LocalRef<ns_anno4jselector::FragmentSelector> spatialFragmentSelector=
-                persistenceServiceTest.svc->getAnno4j()->createObject(ns_anno4jselector::FragmentSelector::clazz());
+                part->getItem()->createObject(ns_anno4jselector::FragmentSelector::clazz());
 
               // !!!! always check Java exceptions through persistence service and returned Java objects for null!!!
               persistenceServiceTest.svc->checkJavaExceptionThrow();
@@ -365,6 +373,8 @@ int main(int argc, char **argv) {
               // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
               // +++++++++++++++++++++ Asset creation for part++++++++++++++++++++
               // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+              std::cout << "+++++++++++++++++++++++++++++ TESTING ASSET CREATION FOR PART +++++++++++++++++++++++" << std::endl;
 
               assert(!partResource->hasAsset());
 
@@ -394,6 +404,8 @@ int main(int argc, char **argv) {
 
             }
 
+            std::cout << "+++++++++++++++++++++++++++++ TESTING INPUT ASSIGNMENT +++++++++++++++++++++++" << std::endl;
+
             //try circular part inputs -> should that be possible at all?
             auto listIt1 = itemParts.begin();
             auto listIt2 = listIt1++;
@@ -415,7 +427,7 @@ int main(int argc, char **argv) {
 
         }
 
-        // check item deletion
+        //check item deletion
         for (auto itemURI : itemURIS) {
            persistenceServiceTest.svc->deleteItem(itemURI);
         }

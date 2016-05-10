@@ -116,6 +116,8 @@ namespace mico {
                 JavaClassPath +=  jar_file[".*anno4jdependencies.*"];
                 //JavaClassPath +=  "/home/christian/mico/anno4cpp/java/anno4jdependencies/target/anno4jdependencies-2.0.0-SNAPSHOT.jar";
 
+                LOG_INFO("Loading Java dependency JAR: %s", jar_file[".*anno4jdependencies.*"].c_str());
+
                 JavaVMOption options[1];    // JVM invocation options
                 options[0].optionString = (char *) JavaClassPath.c_str();
 //                options[1].optionString = "-Xdebug";
@@ -130,6 +132,11 @@ namespace mico {
                 vm_args.ignoreUnrecognized = false;
 
                 jint rc = JNI_CreateJavaVM(&PersistenceService::m_sJvm, (void**)&PersistenceService::m_sEnv, &vm_args);
+
+                if (rc != JNI_OK) {
+                    LOG_ERROR("Could not launch Java virtual machine.");
+                    throw std::runtime_error("Could not launch Java virtual machine.");
+                }
 
 
             }
@@ -255,6 +262,8 @@ namespace mico {
 
             checkJavaExceptionNoThrow(m_jniErrorMessage);
             assert((jobject) jTransaction);
+
+            LOG_DEBUG("PersistenceService::getItem. Setting context [%s] to transaction.",  jItemURI->toString()->std_str().c_str());
 
             jTransaction->setAllContexts((jnipp::Ref<URI>) jItemURI);
 

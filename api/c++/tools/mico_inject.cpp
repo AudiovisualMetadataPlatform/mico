@@ -76,10 +76,10 @@ int main(int argc, char **argv) {
   try {
     EventManager eventManager(argv[1], mico_user, mico_pass);
 
-    std::shared_ptr<Item> item = eventManager.getPersistenceService()->createItem();
-
     for(int i=4; i<argc; i++) {
       int fd = open(argv[i], O_RDONLY);
+
+
 
       if(fd >= 0) {
         struct stat st;
@@ -88,28 +88,35 @@ int main(int argc, char **argv) {
         size_t len = st.st_size;
         char* buffer = (char*)mmap(NULL, len, PROT_READ, MAP_SHARED, fd, 0);
 
-        std::cout << "creating new content part for file " << argv[i] << " of size " << len << " with type " << getMimeType(buffer,len) << std::endl;
+        std::string mimeType = getMimeType(buffer,len);
 
-        std::shared_ptr<Part> c = item->createPart(mico::persistence::model::URI("http://www.mico-project.eu/tools/mico_inject"));
-        std::shared_ptr<Resource> res = std::dynamic_pointer_cast<Resource>(c);
-        res->setSyntacticalType( getMimeType(buffer,len) );
-        std::shared_ptr<Asset> asset = res->getAsset();
+        std::cout << "creating new Item for file " << argv[i] << " of size " << len << " with type " << mimeType << std::endl;
+        std::shared_ptr<Item> item = eventManager.getPersistenceService()->createItem();
+        std::shared_ptr<Resource> itemResource =  std::dynamic_pointer_cast<Resource>(item);
+
+        std::dynamic_pointer_cast<Resource>(item)->setSemanticType("application/cpp_mico_inject");
+        std::dynamic_pointer_cast<Resource>(item)->setSyntacticalType( getMimeType(buffer,len) );
+        std::shared_ptr<Asset> asset = std::dynamic_pointer_cast<Resource>(item)->getAsset();
+
+        asset->setFormat(mimeType);
+
         std::ostream* os = asset->getOutputStream();
+
         os->write(buffer, len);
+        os->flush();
         delete os;
 
-        std::cout << "content part URI: " << res->getURI().stringValue() << std::endl;
-				
+        std::cout << "Item successfully created." << std::endl;
+
+        eventManager.injectItem(item);
+
+        std::cout << "Item with URI [ " << itemResource->getURI().stringValue() <<" ] has been send to broker" << std::endl;
+
         munmap(buffer, len);
       } else {
-        std::cerr << "could not open file " << argv[i] << std::endl;
+        std::cerr << "Could not open file " << argv[i] << std::endl;
       }
     }
-
-    eventManager.injectItem(item);
-
-    std::shared_ptr<Resource> itemres = std::dynamic_pointer_cast<Resource>(item);
-    std::cout << "created content item with URI " << itemres->getURI().stringValue() << std::endl;
 
   } catch(EventManagerException ex) {
     std::cerr << "could not initialise event manager: " << ex.getMessage() << std::endl;

@@ -33,8 +33,8 @@ public class PartAnno4j extends ResourceAnno4j implements Part {
     private final Item item;
     private final PartMMM partMMM;
 
-    public PartAnno4j(PartMMM partMMM, Item item, PersistenceService persistenceService, Anno4j anno4j) {
-        super(partMMM, persistenceService, anno4j);
+    public PartAnno4j(PartMMM partMMM, Item item, PersistenceService persistenceService) {
+        super(partMMM, persistenceService);
         this.partMMM = partMMM;
         this.item = item;
     }
@@ -69,9 +69,9 @@ public class PartAnno4j extends ResourceAnno4j implements Part {
         Set<Resource> resourceSet = new HashSet<>();
         for(ResourceMMM resourceMMM : this.partMMM.getInputs()) {
             if(resourceMMM instanceof ItemMMM) {
-                resourceSet.add(new ItemAnno4j((ItemMMM) resourceMMM, this.persistenceService, anno4j));
+                resourceSet.add(new ItemAnno4j((ItemMMM) resourceMMM, this.persistenceService));
             } else {
-                resourceSet.add(new PartAnno4j((PartMMM) resourceMMM, this.item, this.persistenceService, anno4j));
+                resourceSet.add(new PartAnno4j((PartMMM) resourceMMM, this.item, this.persistenceService));
             }
         }
         return resourceSet;
@@ -106,8 +106,4 @@ public class PartAnno4j extends ResourceAnno4j implements Part {
         return item;
     }
 
-    @Override
-    public PartMMM getRDFObject() {
-        return partMMM;
-    }
 }

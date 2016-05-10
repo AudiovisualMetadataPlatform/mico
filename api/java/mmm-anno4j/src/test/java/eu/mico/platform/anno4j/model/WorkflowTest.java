@@ -95,6 +95,9 @@ public class WorkflowTest {
 
         itemMMM.addPart(part3);
 
+        // Persist
+        anno4j.persist(itemMMM);
+
         List<ItemMMM> result = queryService.execute(ItemMMM.class);
 
         ItemMMM resultItemMMM = result.get(0);
