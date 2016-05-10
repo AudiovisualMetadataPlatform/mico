@@ -78,7 +78,7 @@ public class InjectionWebService {
 
         log.info("item created {}: uploaded {} bytes", item.getURI(), bytes);
 
-        return Response.ok(ImmutableMap.of("itemUri", item.getURI().stringValue(), "assetLocation", item.getAsset().getLocation().stringValue(), "created", item.getSerializedAt())).build();
+        return Response.ok(ImmutableMap.of("itemUri", item.getURI().stringValue(), "assetLocation", item.getAsset().getLocation(), "created", item.getSerializedAt())).build();
     }
 
     @GET
@@ -150,7 +150,7 @@ public class InjectionWebService {
 
         log.info("item {}, part created {} : uploaded {} bytes", item.getURI(), part.getURI(), bytes);
 
-        return Response.ok(ImmutableMap.of("itemURI", item.getURI().stringValue(),"partURI", part.getURI().stringValue(), "assetLocation", partAsset.getLocation().stringValue(), "created", part.getSerializedAt())).build();
+        return Response.ok(ImmutableMap.of("itemURI", item.getURI().stringValue(),"partURI", part.getURI().stringValue(), "assetLocation", partAsset.getLocation(), "created", part.getSerializedAt())).build();
     }
 
 

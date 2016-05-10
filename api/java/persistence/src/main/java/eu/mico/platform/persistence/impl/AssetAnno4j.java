@@ -1,7 +1,6 @@
 package eu.mico.platform.persistence.impl;
 
 import eu.mico.platform.anno4j.model.AssetMMM;
-import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.storage.api.StorageService;
 
@@ -44,23 +43,28 @@ public class AssetAnno4j implements Asset {
 
     @Override
     public OutputStream getOutputStream() throws IOException {
-        log.trace("Open Outputstream for Asset with id {} and location {}", assetMMM.getResourceAsString(), getLocation());
+        log.trace("Open Outputstream for Asset with id {} and location {}", this.assetMMM.getResourceAsString(), this.assetMMM.getLocation());
         return storageService.getOutputStream(getAssetPath());
     }
 
     @Override
     public InputStream getInputStream() throws IOException {
-        log.trace("Open Inputstream for Asset with id {} and location {}", assetMMM.getResourceAsString(), getLocation());
+        log.trace("Open Inputstream for Asset with id {} and location {}", this.assetMMM.getResourceAsString(), this.assetMMM.getLocation());
         return storageService.getInputStream(getAssetPath());
     }
 
     private java.net.URI getAssetPath() {
         try {
-            String path = new java.net.URI(this.assetMMM.getLocation()).getPath();
-            String []pathParts = path.replaceAll("^/+", "").replaceAll("/+$", "").split("/");
-            if (pathParts.length >= 2) {
-                String assetPath = "/" + pathParts[pathParts.length-2] + "/" + pathParts[pathParts.length-1];
-                return new java.net.URI(assetPath);
+            String path = this.assetMMM.getLocation();
+            if (path == null) {
+                throw new NullPointerException("asset does not have a location.");
+            }
+            if (path.startsWith(STORAGE_SERVICE_URN_PREFIX)) {
+                String[] pathParts = path.substring(path.lastIndexOf(':') + 1).split("/");
+                if (pathParts.length >= 2) {
+                    String assetPath = "/" + pathParts[pathParts.length - 2] + "/" + pathParts[pathParts.length - 1];
+                    return new java.net.URI(assetPath);
+                }
             }
             throw new IllegalStateException("Invalid asset path " + path);
         } catch (URISyntaxException e) {
