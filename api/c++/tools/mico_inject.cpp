@@ -88,13 +88,17 @@ int main(int argc, char **argv) {
         size_t len = st.st_size;
         char* buffer = (char*)mmap(NULL, len, PROT_READ, MAP_SHARED, fd, 0);
 
-        std::cout << "creating new Item for file " << argv[i] << " of size " << len << " with type " << getMimeType(buffer,len) << std::endl;
+        std::string mimeType = getMimeType(buffer,len);
+
+        std::cout << "creating new Item for file " << argv[i] << " of size " << len << " with type " << mimeType << std::endl;
         std::shared_ptr<Item> item = eventManager.getPersistenceService()->createItem();
         std::shared_ptr<Resource> itemResource =  std::dynamic_pointer_cast<Resource>(item);
 
         std::dynamic_pointer_cast<Resource>(item)->setSemanticType("application/cpp_mico_inject");
         std::dynamic_pointer_cast<Resource>(item)->setSyntacticalType( getMimeType(buffer,len) );
         std::shared_ptr<Asset> asset = std::dynamic_pointer_cast<Resource>(item)->getAsset();
+
+        asset->setFormat(mimeType);
 
         std::ostream* os = asset->getOutputStream();
 
