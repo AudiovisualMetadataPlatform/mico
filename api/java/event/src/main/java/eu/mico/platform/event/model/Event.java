@@ -181,6 +181,343 @@ public final class Event {
     // @@protoc_insertion_point(enum_scope:mico.event.model.RegistrationType)
   }
 
+  /**
+   * Protobuf enum {@code mico.event.model.MessageType}
+   */
+  public enum MessageType
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>PROGRESS = 1;</code>
+     *
+     * <pre>
+     *!&lt; indicates, that the message is an value between 0..100
+     * </pre>
+     */
+    PROGRESS(0, 1),
+    /**
+     * <code>FINISH = 2;</code>
+     *
+     * <pre>
+     *!&lt; indicates, that the processing is done
+     * </pre>
+     */
+    FINISH(1, 2),
+    /**
+     * <code>NEW_PART = 3;</code>
+     *
+     * <pre>
+     *!&lt; used to inform the broker that a new part was added to the item
+     * </pre>
+     */
+    NEW_PART(2, 3),
+    /**
+     * <code>ERROR = 4;</code>
+     *
+     * <pre>
+     *!&lt; indicates, that the processing failed and the message contains an error and further description
+     * </pre>
+     */
+    ERROR(3, 4),
+    ;
+
+    /**
+     * <code>PROGRESS = 1;</code>
+     *
+     * <pre>
+     *!&lt; indicates, that the message is an value between 0..100
+     * </pre>
+     */
+    public static final int PROGRESS_VALUE = 1;
+    /**
+     * <code>FINISH = 2;</code>
+     *
+     * <pre>
+     *!&lt; indicates, that the processing is done
+     * </pre>
+     */
+    public static final int FINISH_VALUE = 2;
+    /**
+     * <code>NEW_PART = 3;</code>
+     *
+     * <pre>
+     *!&lt; used to inform the broker that a new part was added to the item
+     * </pre>
+     */
+    public static final int NEW_PART_VALUE = 3;
+    /**
+     * <code>ERROR = 4;</code>
+     *
+     * <pre>
+     *!&lt; indicates, that the processing failed and the message contains an error and further description
+     * </pre>
+     */
+    public static final int ERROR_VALUE = 4;
+
+
+    public final int getNumber() { return value; }
+
+    public static MessageType valueOf(int value) {
+      switch (value) {
+        case 1: return PROGRESS;
+        case 2: return FINISH;
+        case 3: return NEW_PART;
+        case 4: return ERROR;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<MessageType>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static com.google.protobuf.Internal.EnumLiteMap<MessageType>
+        internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<MessageType>() {
+            public MessageType findValueByNumber(int number) {
+              return MessageType.valueOf(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(index);
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return eu.mico.platform.event.model.Event.getDescriptor().getEnumTypes().get(2);
+    }
+
+    private static final MessageType[] VALUES = values();
+
+    public static MessageType valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int index;
+    private final int value;
+
+    private MessageType(int index, int value) {
+      this.index = index;
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:mico.event.model.MessageType)
+  }
+
+  /**
+   * Protobuf enum {@code mico.event.model.ErrorCodes}
+   *
+   * <pre>
+   **
+   * A list of errors, that can occur during extraction, where the broker should react on
+   * </pre>
+   */
+  public enum ErrorCodes
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>UNSUPPORTED_CONTENT_TYPE = 30;</code>
+     *
+     * <pre>
+     * asset content has different type then stated in annotation (could be a bug in broker or in an extractor which provided that content )
+     * </pre>
+     */
+    UNSUPPORTED_CONTENT_TYPE(0, 30),
+    /**
+     * <code>UNSUPPORTED_CONTENT_VARIANT = 31;</code>
+     *
+     * <pre>
+     * e.g. an animated 32bit HDR TIFF that cannot be read by an extractor using libtiff, while a 8bit RGB TIFF can be read without problem
+     * </pre>
+     */
+    UNSUPPORTED_CONTENT_VARIANT(1, 31),
+    /**
+     * <code>DECODING_ERROR = 32;</code>
+     *
+     * <pre>
+     * error in binary data / stream
+     * </pre>
+     */
+    DECODING_ERROR(2, 32),
+    /**
+     * <code>MISSING_ASSET = 33;</code>
+     *
+     * <pre>
+     * a required asset is not available during extraction
+     * </pre>
+     */
+    MISSING_ASSET(3, 33),
+    /**
+     * <code>MISSING_ANNOTATION = 35;</code>
+     *
+     * <pre>
+     * extractor depends on non-existing annotation from other extractor
+     * </pre>
+     */
+    MISSING_ANNOTATION(4, 35),
+    /**
+     * <code>INSUFFICIENT_RESOURCE = 40;</code>
+     *
+     * <pre>
+     * extractor is not able to process this part
+     * </pre>
+     */
+    INSUFFICIENT_RESOURCE(5, 40),
+    /**
+     * <code>INSUFFICIENT_STORAGE = 41;</code>
+     *
+     * <pre>
+     * more detailed info then INSUFFICIENT_RESOURCE
+     * </pre>
+     */
+    INSUFFICIENT_STORAGE(6, 41),
+    /**
+     * <code>UNEXPECTED_ERROR = 50;</code>
+     *
+     * <pre>
+     * unknown / non-resolvable error
+     * </pre>
+     */
+    UNEXPECTED_ERROR(7, 50),
+    ;
+
+    /**
+     * <code>UNSUPPORTED_CONTENT_TYPE = 30;</code>
+     *
+     * <pre>
+     * asset content has different type then stated in annotation (could be a bug in broker or in an extractor which provided that content )
+     * </pre>
+     */
+    public static final int UNSUPPORTED_CONTENT_TYPE_VALUE = 30;
+    /**
+     * <code>UNSUPPORTED_CONTENT_VARIANT = 31;</code>
+     *
+     * <pre>
+     * e.g. an animated 32bit HDR TIFF that cannot be read by an extractor using libtiff, while a 8bit RGB TIFF can be read without problem
+     * </pre>
+     */
+    public static final int UNSUPPORTED_CONTENT_VARIANT_VALUE = 31;
+    /**
+     * <code>DECODING_ERROR = 32;</code>
+     *
+     * <pre>
+     * error in binary data / stream
+     * </pre>
+     */
+    public static final int DECODING_ERROR_VALUE = 32;
+    /**
+     * <code>MISSING_ASSET = 33;</code>
+     *
+     * <pre>
+     * a required asset is not available during extraction
+     * </pre>
+     */
+    public static final int MISSING_ASSET_VALUE = 33;
+    /**
+     * <code>MISSING_ANNOTATION = 35;</code>
+     *
+     * <pre>
+     * extractor depends on non-existing annotation from other extractor
+     * </pre>
+     */
+    public static final int MISSING_ANNOTATION_VALUE = 35;
+    /**
+     * <code>INSUFFICIENT_RESOURCE = 40;</code>
+     *
+     * <pre>
+     * extractor is not able to process this part
+     * </pre>
+     */
+    public static final int INSUFFICIENT_RESOURCE_VALUE = 40;
+    /**
+     * <code>INSUFFICIENT_STORAGE = 41;</code>
+     *
+     * <pre>
+     * more detailed info then INSUFFICIENT_RESOURCE
+     * </pre>
+     */
+    public static final int INSUFFICIENT_STORAGE_VALUE = 41;
+    /**
+     * <code>UNEXPECTED_ERROR = 50;</code>
+     *
+     * <pre>
+     * unknown / non-resolvable error
+     * </pre>
+     */
+    public static final int UNEXPECTED_ERROR_VALUE = 50;
+
+
+    public final int getNumber() { return value; }
+
+    public static ErrorCodes valueOf(int value) {
+      switch (value) {
+        case 30: return UNSUPPORTED_CONTENT_TYPE;
+        case 31: return UNSUPPORTED_CONTENT_VARIANT;
+        case 32: return DECODING_ERROR;
+        case 33: return MISSING_ASSET;
+        case 35: return MISSING_ANNOTATION;
+        case 40: return INSUFFICIENT_RESOURCE;
+        case 41: return INSUFFICIENT_STORAGE;
+        case 50: return UNEXPECTED_ERROR;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<ErrorCodes>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static com.google.protobuf.Internal.EnumLiteMap<ErrorCodes>
+        internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<ErrorCodes>() {
+            public ErrorCodes findValueByNumber(int number) {
+              return ErrorCodes.valueOf(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(index);
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return eu.mico.platform.event.model.Event.getDescriptor().getEnumTypes().get(3);
+    }
+
+    private static final ErrorCodes[] VALUES = values();
+
+    public static ErrorCodes valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int index;
+    private final int value;
+
+    private ErrorCodes(int index, int value) {
+      this.index = index;
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:mico.event.model.ErrorCodes)
+  }
+
   public interface RegistrationEventOrBuilder extends
       // @@protoc_insertion_point(interface_extends:mico.event.model.RegistrationEvent)
       com.google.protobuf.MessageOrBuilder {
@@ -1536,15 +1873,15 @@ public final class Event {
     // @@protoc_insertion_point(class_scope:mico.event.model.RegistrationEvent)
   }
 
-  public interface AnalysisEventOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:mico.event.model.AnalysisEvent)
+  public interface AnalysisRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:mico.event.model.AnalysisRequest)
       com.google.protobuf.MessageOrBuilder {
 
     /**
      * <code>required string serviceId = 1;</code>
      *
      * <pre>
-     *!&lt; service identifier of the service generating the event
+     * service identifier of the service generating the event
      * </pre>
      */
     boolean hasServiceId();
@@ -1552,7 +1889,7 @@ public final class Event {
      * <code>required string serviceId = 1;</code>
      *
      * <pre>
-     *!&lt; service identifier of the service generating the event
+     * service identifier of the service generating the event
      * </pre>
      */
     java.lang.String getServiceId();
@@ -1560,66 +1897,119 @@ public final class Event {
      * <code>required string serviceId = 1;</code>
      *
      * <pre>
-     *!&lt; service identifier of the service generating the event
+     * service identifier of the service generating the event
      * </pre>
      */
     com.google.protobuf.ByteString
         getServiceIdBytes();
 
     /**
-     * <code>required string contentItemUri = 2;</code>
+     * <code>required string ItemUri = 2;</code>
      *
      * <pre>
-     *!&lt; URI of the content item being processed
+     * URI of the item being processed
      * </pre>
      */
-    boolean hasContentItemUri();
+    boolean hasItemUri();
     /**
-     * <code>required string contentItemUri = 2;</code>
+     * <code>required string ItemUri = 2;</code>
      *
      * <pre>
-     *!&lt; URI of the content item being processed
+     * URI of the item being processed
      * </pre>
      */
-    java.lang.String getContentItemUri();
+    java.lang.String getItemUri();
     /**
-     * <code>required string contentItemUri = 2;</code>
+     * <code>required string ItemUri = 2;</code>
      *
      * <pre>
-     *!&lt; URI of the content item being processed
+     * URI of the item being processed
      * </pre>
      */
     com.google.protobuf.ByteString
-        getContentItemUriBytes();
+        getItemUriBytes();
 
     /**
-     * <code>optional string objectUri = 3;</code>
+     * <code>repeated string partUri = 3;</code>
      *
      * <pre>
-     *!&lt; URI of the object of that content item being processed
+     * URI of the part of that item being processed
      * </pre>
      */
-    boolean hasObjectUri();
+    com.google.protobuf.ProtocolStringList
+        getPartUriList();
     /**
-     * <code>optional string objectUri = 3;</code>
+     * <code>repeated string partUri = 3;</code>
      *
      * <pre>
-     *!&lt; URI of the object of that content item being processed
+     * URI of the part of that item being processed
      * </pre>
      */
-    java.lang.String getObjectUri();
+    int getPartUriCount();
     /**
-     * <code>optional string objectUri = 3;</code>
+     * <code>repeated string partUri = 3;</code>
      *
      * <pre>
-     *!&lt; URI of the object of that content item being processed
+     * URI of the part of that item being processed
+     * </pre>
+     */
+    java.lang.String getPartUri(int index);
+    /**
+     * <code>repeated string partUri = 3;</code>
+     *
+     * <pre>
+     * URI of the part of that item being processed
      * </pre>
      */
     com.google.protobuf.ByteString
-        getObjectUriBytes();
+        getPartUriBytes(int index);
+
+    /**
+     * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+     *
+     * <pre>
+     * a map with runtime parameters for the extractor
+     * </pre>
+     */
+    java.util.List<eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry> 
+        getParamsList();
+    /**
+     * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+     *
+     * <pre>
+     * a map with runtime parameters for the extractor
+     * </pre>
+     */
+    eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry getParams(int index);
+    /**
+     * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+     *
+     * <pre>
+     * a map with runtime parameters for the extractor
+     * </pre>
+     */
+    int getParamsCount();
+    /**
+     * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+     *
+     * <pre>
+     * a map with runtime parameters for the extractor
+     * </pre>
+     */
+    java.util.List<? extends eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntryOrBuilder> 
+        getParamsOrBuilderList();
+    /**
+     * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+     *
+     * <pre>
+     * a map with runtime parameters for the extractor
+     * </pre>
+     */
+    eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntryOrBuilder getParamsOrBuilder(
+        int index);
   }
   /**
-   * Protobuf type {@code mico.event.model.AnalysisEvent}
+   * Protobuf type {@code mico.event.model.AnalysisRequest}
    *
    * <pre>
    **
@@ -1628,6 +2018,2078 @@ public final class Event {
    * object URI is the URI of an object that should be taken into account by the receiving service;
    * this can be a content part (identified by its URI), a fragment identified and stored in the
    * metadata, etc.
+   * </pre>
+   */
+  public static final class AnalysisRequest extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:mico.event.model.AnalysisRequest)
+      AnalysisRequestOrBuilder {
+    // Use AnalysisRequest.newBuilder() to construct.
+    private AnalysisRequest(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private AnalysisRequest(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final AnalysisRequest defaultInstance;
+    public static AnalysisRequest getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public AnalysisRequest getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AnalysisRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000001;
+              serviceId_ = bs;
+              break;
+            }
+            case 18: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000002;
+              itemUri_ = bs;
+              break;
+            }
+            case 26: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                partUri_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              partUri_.add(bs);
+              break;
+            }
+            case 82: {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+                params_ = new java.util.ArrayList<eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry>();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              params_.add(input.readMessage(eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+          partUri_ = partUri_.getUnmodifiableView();
+        }
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+          params_ = java.util.Collections.unmodifiableList(params_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisRequest_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              eu.mico.platform.event.model.Event.AnalysisRequest.class, eu.mico.platform.event.model.Event.AnalysisRequest.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<AnalysisRequest> PARSER =
+        new com.google.protobuf.AbstractParser<AnalysisRequest>() {
+      public AnalysisRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AnalysisRequest(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AnalysisRequest> getParserForType() {
+      return PARSER;
+    }
+
+    public interface ParamEntryOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:mico.event.model.AnalysisRequest.ParamEntry)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required string key = 1;</code>
+       */
+      boolean hasKey();
+      /**
+       * <code>required string key = 1;</code>
+       */
+      java.lang.String getKey();
+      /**
+       * <code>required string key = 1;</code>
+       */
+      com.google.protobuf.ByteString
+          getKeyBytes();
+
+      /**
+       * <code>required string value = 2;</code>
+       */
+      boolean hasValue();
+      /**
+       * <code>required string value = 2;</code>
+       */
+      java.lang.String getValue();
+      /**
+       * <code>required string value = 2;</code>
+       */
+      com.google.protobuf.ByteString
+          getValueBytes();
+    }
+    /**
+     * Protobuf type {@code mico.event.model.AnalysisRequest.ParamEntry}
+     */
+    public static final class ParamEntry extends
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:mico.event.model.AnalysisRequest.ParamEntry)
+        ParamEntryOrBuilder {
+      // Use ParamEntry.newBuilder() to construct.
+      private ParamEntry(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+        super(builder);
+        this.unknownFields = builder.getUnknownFields();
+      }
+      private ParamEntry(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+      private static final ParamEntry defaultInstance;
+      public static ParamEntry getDefaultInstance() {
+        return defaultInstance;
+      }
+
+      public ParamEntry getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private ParamEntry(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000001;
+                key_ = bs;
+                break;
+              }
+              case 18: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000002;
+                value_ = bs;
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisRequest_ParamEntry_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisRequest_ParamEntry_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.class, eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.Builder.class);
+      }
+
+      public static com.google.protobuf.Parser<ParamEntry> PARSER =
+          new com.google.protobuf.AbstractParser<ParamEntry>() {
+        public ParamEntry parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new ParamEntry(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<ParamEntry> getParserForType() {
+        return PARSER;
+      }
+
+      private int bitField0_;
+      public static final int KEY_FIELD_NUMBER = 1;
+      private java.lang.Object key_;
+      /**
+       * <code>required string key = 1;</code>
+       */
+      public boolean hasKey() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string key = 1;</code>
+       */
+      public java.lang.String getKey() {
+        java.lang.Object ref = key_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            key_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string key = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getKeyBytes() {
+        java.lang.Object ref = key_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          key_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int VALUE_FIELD_NUMBER = 2;
+      private java.lang.Object value_;
+      /**
+       * <code>required string value = 2;</code>
+       */
+      public boolean hasValue() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required string value = 2;</code>
+       */
+      public java.lang.String getValue() {
+        java.lang.Object ref = value_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            value_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string value = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getValueBytes() {
+        java.lang.Object ref = value_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          value_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      private void initFields() {
+        key_ = "";
+        value_ = "";
+      }
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasKey()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasValue()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeBytes(1, getKeyBytes());
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeBytes(2, getValueBytes());
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(1, getKeyBytes());
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(2, getValueBytes());
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code mico.event.model.AnalysisRequest.ParamEntry}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:mico.event.model.AnalysisRequest.ParamEntry)
+          eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntryOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisRequest_ParamEntry_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisRequest_ParamEntry_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.class, eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.Builder.class);
+        }
+
+        // Construct using eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          }
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          key_ = "";
+          bitField0_ = (bitField0_ & ~0x00000001);
+          value_ = "";
+          bitField0_ = (bitField0_ & ~0x00000002);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisRequest_ParamEntry_descriptor;
+        }
+
+        public eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry getDefaultInstanceForType() {
+          return eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.getDefaultInstance();
+        }
+
+        public eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry build() {
+          eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry buildPartial() {
+          eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry result = new eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.key_ = key_;
+          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.value_ = value_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry) {
+            return mergeFrom((eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry other) {
+          if (other == eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.getDefaultInstance()) return this;
+          if (other.hasKey()) {
+            bitField0_ |= 0x00000001;
+            key_ = other.key_;
+            onChanged();
+          }
+          if (other.hasValue()) {
+            bitField0_ |= 0x00000002;
+            value_ = other.value_;
+            onChanged();
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          if (!hasKey()) {
+            
+            return false;
+          }
+          if (!hasValue()) {
+            
+            return false;
+          }
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private java.lang.Object key_ = "";
+        /**
+         * <code>required string key = 1;</code>
+         */
+        public boolean hasKey() {
+          return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        /**
+         * <code>required string key = 1;</code>
+         */
+        public java.lang.String getKey() {
+          java.lang.Object ref = key_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              key_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string key = 1;</code>
+         */
+        public com.google.protobuf.ByteString
+            getKeyBytes() {
+          java.lang.Object ref = key_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            key_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string key = 1;</code>
+         */
+        public Builder setKey(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          key_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string key = 1;</code>
+         */
+        public Builder clearKey() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          key_ = getDefaultInstance().getKey();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string key = 1;</code>
+         */
+        public Builder setKeyBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          key_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object value_ = "";
+        /**
+         * <code>required string value = 2;</code>
+         */
+        public boolean hasValue() {
+          return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        /**
+         * <code>required string value = 2;</code>
+         */
+        public java.lang.String getValue() {
+          java.lang.Object ref = value_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              value_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string value = 2;</code>
+         */
+        public com.google.protobuf.ByteString
+            getValueBytes() {
+          java.lang.Object ref = value_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            value_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string value = 2;</code>
+         */
+        public Builder setValue(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          value_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string value = 2;</code>
+         */
+        public Builder clearValue() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          value_ = getDefaultInstance().getValue();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string value = 2;</code>
+         */
+        public Builder setValueBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          value_ = value;
+          onChanged();
+          return this;
+        }
+
+        // @@protoc_insertion_point(builder_scope:mico.event.model.AnalysisRequest.ParamEntry)
+      }
+
+      static {
+        defaultInstance = new ParamEntry(true);
+        defaultInstance.initFields();
+      }
+
+      // @@protoc_insertion_point(class_scope:mico.event.model.AnalysisRequest.ParamEntry)
+    }
+
+    private int bitField0_;
+    public static final int SERVICEID_FIELD_NUMBER = 1;
+    private java.lang.Object serviceId_;
+    /**
+     * <code>required string serviceId = 1;</code>
+     *
+     * <pre>
+     * service identifier of the service generating the event
+     * </pre>
+     */
+    public boolean hasServiceId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string serviceId = 1;</code>
+     *
+     * <pre>
+     * service identifier of the service generating the event
+     * </pre>
+     */
+    public java.lang.String getServiceId() {
+      java.lang.Object ref = serviceId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          serviceId_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string serviceId = 1;</code>
+     *
+     * <pre>
+     * service identifier of the service generating the event
+     * </pre>
+     */
+    public com.google.protobuf.ByteString
+        getServiceIdBytes() {
+      java.lang.Object ref = serviceId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        serviceId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ITEMURI_FIELD_NUMBER = 2;
+    private java.lang.Object itemUri_;
+    /**
+     * <code>required string ItemUri = 2;</code>
+     *
+     * <pre>
+     * URI of the item being processed
+     * </pre>
+     */
+    public boolean hasItemUri() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required string ItemUri = 2;</code>
+     *
+     * <pre>
+     * URI of the item being processed
+     * </pre>
+     */
+    public java.lang.String getItemUri() {
+      java.lang.Object ref = itemUri_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          itemUri_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string ItemUri = 2;</code>
+     *
+     * <pre>
+     * URI of the item being processed
+     * </pre>
+     */
+    public com.google.protobuf.ByteString
+        getItemUriBytes() {
+      java.lang.Object ref = itemUri_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        itemUri_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PARTURI_FIELD_NUMBER = 3;
+    private com.google.protobuf.LazyStringList partUri_;
+    /**
+     * <code>repeated string partUri = 3;</code>
+     *
+     * <pre>
+     * URI of the part of that item being processed
+     * </pre>
+     */
+    public com.google.protobuf.ProtocolStringList
+        getPartUriList() {
+      return partUri_;
+    }
+    /**
+     * <code>repeated string partUri = 3;</code>
+     *
+     * <pre>
+     * URI of the part of that item being processed
+     * </pre>
+     */
+    public int getPartUriCount() {
+      return partUri_.size();
+    }
+    /**
+     * <code>repeated string partUri = 3;</code>
+     *
+     * <pre>
+     * URI of the part of that item being processed
+     * </pre>
+     */
+    public java.lang.String getPartUri(int index) {
+      return partUri_.get(index);
+    }
+    /**
+     * <code>repeated string partUri = 3;</code>
+     *
+     * <pre>
+     * URI of the part of that item being processed
+     * </pre>
+     */
+    public com.google.protobuf.ByteString
+        getPartUriBytes(int index) {
+      return partUri_.getByteString(index);
+    }
+
+    public static final int PARAMS_FIELD_NUMBER = 10;
+    private java.util.List<eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry> params_;
+    /**
+     * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+     *
+     * <pre>
+     * a map with runtime parameters for the extractor
+     * </pre>
+     */
+    public java.util.List<eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry> getParamsList() {
+      return params_;
+    }
+    /**
+     * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+     *
+     * <pre>
+     * a map with runtime parameters for the extractor
+     * </pre>
+     */
+    public java.util.List<? extends eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntryOrBuilder> 
+        getParamsOrBuilderList() {
+      return params_;
+    }
+    /**
+     * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+     *
+     * <pre>
+     * a map with runtime parameters for the extractor
+     * </pre>
+     */
+    public int getParamsCount() {
+      return params_.size();
+    }
+    /**
+     * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+     *
+     * <pre>
+     * a map with runtime parameters for the extractor
+     * </pre>
+     */
+    public eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry getParams(int index) {
+      return params_.get(index);
+    }
+    /**
+     * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+     *
+     * <pre>
+     * a map with runtime parameters for the extractor
+     * </pre>
+     */
+    public eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntryOrBuilder getParamsOrBuilder(
+        int index) {
+      return params_.get(index);
+    }
+
+    private void initFields() {
+      serviceId_ = "";
+      itemUri_ = "";
+      partUri_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      params_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      if (!hasServiceId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasItemUri()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      for (int i = 0; i < getParamsCount(); i++) {
+        if (!getParams(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getServiceIdBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, getItemUriBytes());
+      }
+      for (int i = 0; i < partUri_.size(); i++) {
+        output.writeBytes(3, partUri_.getByteString(i));
+      }
+      for (int i = 0; i < params_.size(); i++) {
+        output.writeMessage(10, params_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getServiceIdBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, getItemUriBytes());
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < partUri_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeBytesSizeNoTag(partUri_.getByteString(i));
+        }
+        size += dataSize;
+        size += 1 * getPartUriList().size();
+      }
+      for (int i = 0; i < params_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(10, params_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static eu.mico.platform.event.model.Event.AnalysisRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.mico.platform.event.model.Event.AnalysisRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.mico.platform.event.model.Event.AnalysisRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static eu.mico.platform.event.model.Event.AnalysisRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static eu.mico.platform.event.model.Event.AnalysisRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static eu.mico.platform.event.model.Event.AnalysisRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static eu.mico.platform.event.model.Event.AnalysisRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static eu.mico.platform.event.model.Event.AnalysisRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static eu.mico.platform.event.model.Event.AnalysisRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static eu.mico.platform.event.model.Event.AnalysisRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(eu.mico.platform.event.model.Event.AnalysisRequest prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code mico.event.model.AnalysisRequest}
+     *
+     * <pre>
+     **
+     * Notify a service that a analysis should continue using the given content item and object in that
+     * content item. The content item URI is the unique identifier of the content item (a URI). The
+     * object URI is the URI of an object that should be taken into account by the receiving service;
+     * this can be a content part (identified by its URI), a fragment identified and stored in the
+     * metadata, etc.
+     * </pre>
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:mico.event.model.AnalysisRequest)
+        eu.mico.platform.event.model.Event.AnalysisRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisRequest_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                eu.mico.platform.event.model.Event.AnalysisRequest.class, eu.mico.platform.event.model.Event.AnalysisRequest.Builder.class);
+      }
+
+      // Construct using eu.mico.platform.event.model.Event.AnalysisRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getParamsFieldBuilder();
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        serviceId_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        itemUri_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
+        partUri_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        if (paramsBuilder_ == null) {
+          params_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+        } else {
+          paramsBuilder_.clear();
+        }
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisRequest_descriptor;
+      }
+
+      public eu.mico.platform.event.model.Event.AnalysisRequest getDefaultInstanceForType() {
+        return eu.mico.platform.event.model.Event.AnalysisRequest.getDefaultInstance();
+      }
+
+      public eu.mico.platform.event.model.Event.AnalysisRequest build() {
+        eu.mico.platform.event.model.Event.AnalysisRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public eu.mico.platform.event.model.Event.AnalysisRequest buildPartial() {
+        eu.mico.platform.event.model.Event.AnalysisRequest result = new eu.mico.platform.event.model.Event.AnalysisRequest(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.serviceId_ = serviceId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.itemUri_ = itemUri_;
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          partUri_ = partUri_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000004);
+        }
+        result.partUri_ = partUri_;
+        if (paramsBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) == 0x00000008)) {
+            params_ = java.util.Collections.unmodifiableList(params_);
+            bitField0_ = (bitField0_ & ~0x00000008);
+          }
+          result.params_ = params_;
+        } else {
+          result.params_ = paramsBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof eu.mico.platform.event.model.Event.AnalysisRequest) {
+          return mergeFrom((eu.mico.platform.event.model.Event.AnalysisRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(eu.mico.platform.event.model.Event.AnalysisRequest other) {
+        if (other == eu.mico.platform.event.model.Event.AnalysisRequest.getDefaultInstance()) return this;
+        if (other.hasServiceId()) {
+          bitField0_ |= 0x00000001;
+          serviceId_ = other.serviceId_;
+          onChanged();
+        }
+        if (other.hasItemUri()) {
+          bitField0_ |= 0x00000002;
+          itemUri_ = other.itemUri_;
+          onChanged();
+        }
+        if (!other.partUri_.isEmpty()) {
+          if (partUri_.isEmpty()) {
+            partUri_ = other.partUri_;
+            bitField0_ = (bitField0_ & ~0x00000004);
+          } else {
+            ensurePartUriIsMutable();
+            partUri_.addAll(other.partUri_);
+          }
+          onChanged();
+        }
+        if (paramsBuilder_ == null) {
+          if (!other.params_.isEmpty()) {
+            if (params_.isEmpty()) {
+              params_ = other.params_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+            } else {
+              ensureParamsIsMutable();
+              params_.addAll(other.params_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.params_.isEmpty()) {
+            if (paramsBuilder_.isEmpty()) {
+              paramsBuilder_.dispose();
+              paramsBuilder_ = null;
+              params_ = other.params_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+              paramsBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getParamsFieldBuilder() : null;
+            } else {
+              paramsBuilder_.addAllMessages(other.params_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasServiceId()) {
+          
+          return false;
+        }
+        if (!hasItemUri()) {
+          
+          return false;
+        }
+        for (int i = 0; i < getParamsCount(); i++) {
+          if (!getParams(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        eu.mico.platform.event.model.Event.AnalysisRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (eu.mico.platform.event.model.Event.AnalysisRequest) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object serviceId_ = "";
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       * service identifier of the service generating the event
+       * </pre>
+       */
+      public boolean hasServiceId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       * service identifier of the service generating the event
+       * </pre>
+       */
+      public java.lang.String getServiceId() {
+        java.lang.Object ref = serviceId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            serviceId_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       * service identifier of the service generating the event
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getServiceIdBytes() {
+        java.lang.Object ref = serviceId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          serviceId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       * service identifier of the service generating the event
+       * </pre>
+       */
+      public Builder setServiceId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        serviceId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       * service identifier of the service generating the event
+       * </pre>
+       */
+      public Builder clearServiceId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        serviceId_ = getDefaultInstance().getServiceId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       * service identifier of the service generating the event
+       * </pre>
+       */
+      public Builder setServiceIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        serviceId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object itemUri_ = "";
+      /**
+       * <code>required string ItemUri = 2;</code>
+       *
+       * <pre>
+       * URI of the item being processed
+       * </pre>
+       */
+      public boolean hasItemUri() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required string ItemUri = 2;</code>
+       *
+       * <pre>
+       * URI of the item being processed
+       * </pre>
+       */
+      public java.lang.String getItemUri() {
+        java.lang.Object ref = itemUri_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            itemUri_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string ItemUri = 2;</code>
+       *
+       * <pre>
+       * URI of the item being processed
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getItemUriBytes() {
+        java.lang.Object ref = itemUri_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          itemUri_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string ItemUri = 2;</code>
+       *
+       * <pre>
+       * URI of the item being processed
+       * </pre>
+       */
+      public Builder setItemUri(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        itemUri_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string ItemUri = 2;</code>
+       *
+       * <pre>
+       * URI of the item being processed
+       * </pre>
+       */
+      public Builder clearItemUri() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        itemUri_ = getDefaultInstance().getItemUri();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string ItemUri = 2;</code>
+       *
+       * <pre>
+       * URI of the item being processed
+       * </pre>
+       */
+      public Builder setItemUriBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        itemUri_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.LazyStringList partUri_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensurePartUriIsMutable() {
+        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+          partUri_ = new com.google.protobuf.LazyStringArrayList(partUri_);
+          bitField0_ |= 0x00000004;
+         }
+      }
+      /**
+       * <code>repeated string partUri = 3;</code>
+       *
+       * <pre>
+       * URI of the part of that item being processed
+       * </pre>
+       */
+      public com.google.protobuf.ProtocolStringList
+          getPartUriList() {
+        return partUri_.getUnmodifiableView();
+      }
+      /**
+       * <code>repeated string partUri = 3;</code>
+       *
+       * <pre>
+       * URI of the part of that item being processed
+       * </pre>
+       */
+      public int getPartUriCount() {
+        return partUri_.size();
+      }
+      /**
+       * <code>repeated string partUri = 3;</code>
+       *
+       * <pre>
+       * URI of the part of that item being processed
+       * </pre>
+       */
+      public java.lang.String getPartUri(int index) {
+        return partUri_.get(index);
+      }
+      /**
+       * <code>repeated string partUri = 3;</code>
+       *
+       * <pre>
+       * URI of the part of that item being processed
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getPartUriBytes(int index) {
+        return partUri_.getByteString(index);
+      }
+      /**
+       * <code>repeated string partUri = 3;</code>
+       *
+       * <pre>
+       * URI of the part of that item being processed
+       * </pre>
+       */
+      public Builder setPartUri(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensurePartUriIsMutable();
+        partUri_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string partUri = 3;</code>
+       *
+       * <pre>
+       * URI of the part of that item being processed
+       * </pre>
+       */
+      public Builder addPartUri(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensurePartUriIsMutable();
+        partUri_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string partUri = 3;</code>
+       *
+       * <pre>
+       * URI of the part of that item being processed
+       * </pre>
+       */
+      public Builder addAllPartUri(
+          java.lang.Iterable<java.lang.String> values) {
+        ensurePartUriIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, partUri_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string partUri = 3;</code>
+       *
+       * <pre>
+       * URI of the part of that item being processed
+       * </pre>
+       */
+      public Builder clearPartUri() {
+        partUri_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string partUri = 3;</code>
+       *
+       * <pre>
+       * URI of the part of that item being processed
+       * </pre>
+       */
+      public Builder addPartUriBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensurePartUriIsMutable();
+        partUri_.add(value);
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry> params_ =
+        java.util.Collections.emptyList();
+      private void ensureParamsIsMutable() {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+          params_ = new java.util.ArrayList<eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry>(params_);
+          bitField0_ |= 0x00000008;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry, eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.Builder, eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntryOrBuilder> paramsBuilder_;
+
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public java.util.List<eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry> getParamsList() {
+        if (paramsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(params_);
+        } else {
+          return paramsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public int getParamsCount() {
+        if (paramsBuilder_ == null) {
+          return params_.size();
+        } else {
+          return paramsBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry getParams(int index) {
+        if (paramsBuilder_ == null) {
+          return params_.get(index);
+        } else {
+          return paramsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public Builder setParams(
+          int index, eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry value) {
+        if (paramsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureParamsIsMutable();
+          params_.set(index, value);
+          onChanged();
+        } else {
+          paramsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public Builder setParams(
+          int index, eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.Builder builderForValue) {
+        if (paramsBuilder_ == null) {
+          ensureParamsIsMutable();
+          params_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          paramsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public Builder addParams(eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry value) {
+        if (paramsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureParamsIsMutable();
+          params_.add(value);
+          onChanged();
+        } else {
+          paramsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public Builder addParams(
+          int index, eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry value) {
+        if (paramsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureParamsIsMutable();
+          params_.add(index, value);
+          onChanged();
+        } else {
+          paramsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public Builder addParams(
+          eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.Builder builderForValue) {
+        if (paramsBuilder_ == null) {
+          ensureParamsIsMutable();
+          params_.add(builderForValue.build());
+          onChanged();
+        } else {
+          paramsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public Builder addParams(
+          int index, eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.Builder builderForValue) {
+        if (paramsBuilder_ == null) {
+          ensureParamsIsMutable();
+          params_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          paramsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public Builder addAllParams(
+          java.lang.Iterable<? extends eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry> values) {
+        if (paramsBuilder_ == null) {
+          ensureParamsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, params_);
+          onChanged();
+        } else {
+          paramsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public Builder clearParams() {
+        if (paramsBuilder_ == null) {
+          params_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+          onChanged();
+        } else {
+          paramsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public Builder removeParams(int index) {
+        if (paramsBuilder_ == null) {
+          ensureParamsIsMutable();
+          params_.remove(index);
+          onChanged();
+        } else {
+          paramsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.Builder getParamsBuilder(
+          int index) {
+        return getParamsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntryOrBuilder getParamsOrBuilder(
+          int index) {
+        if (paramsBuilder_ == null) {
+          return params_.get(index);  } else {
+          return paramsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public java.util.List<? extends eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntryOrBuilder> 
+           getParamsOrBuilderList() {
+        if (paramsBuilder_ != null) {
+          return paramsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(params_);
+        }
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.Builder addParamsBuilder() {
+        return getParamsFieldBuilder().addBuilder(
+            eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.Builder addParamsBuilder(
+          int index) {
+        return getParamsFieldBuilder().addBuilder(
+            index, eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .mico.event.model.AnalysisRequest.ParamEntry params = 10;</code>
+       *
+       * <pre>
+       * a map with runtime parameters for the extractor
+       * </pre>
+       */
+      public java.util.List<eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.Builder> 
+           getParamsBuilderList() {
+        return getParamsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry, eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.Builder, eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntryOrBuilder> 
+          getParamsFieldBuilder() {
+        if (paramsBuilder_ == null) {
+          paramsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry, eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry.Builder, eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntryOrBuilder>(
+                  params_,
+                  ((bitField0_ & 0x00000008) == 0x00000008),
+                  getParentForChildren(),
+                  isClean());
+          params_ = null;
+        }
+        return paramsBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:mico.event.model.AnalysisRequest)
+    }
+
+    static {
+      defaultInstance = new AnalysisRequest(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:mico.event.model.AnalysisRequest)
+  }
+
+  public interface AnalysisEventOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:mico.event.model.AnalysisEvent)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>required .mico.event.model.MessageType type = 1;</code>
+     */
+    boolean hasType();
+    /**
+     * <code>required .mico.event.model.MessageType type = 1;</code>
+     */
+    eu.mico.platform.event.model.Event.MessageType getType();
+
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.Progress progress = 2;</code>
+     */
+    boolean hasProgress();
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.Progress progress = 2;</code>
+     */
+    eu.mico.platform.event.model.Event.AnalysisEvent.Progress getProgress();
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.Progress progress = 2;</code>
+     */
+    eu.mico.platform.event.model.Event.AnalysisEvent.ProgressOrBuilder getProgressOrBuilder();
+
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.NewPart new = 3;</code>
+     */
+    boolean hasNew();
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.NewPart new = 3;</code>
+     */
+    eu.mico.platform.event.model.Event.AnalysisEvent.NewPart getNew();
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.NewPart new = 3;</code>
+     */
+    eu.mico.platform.event.model.Event.AnalysisEvent.NewPartOrBuilder getNewOrBuilder();
+
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.Finish finish = 8;</code>
+     */
+    boolean hasFinish();
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.Finish finish = 8;</code>
+     */
+    eu.mico.platform.event.model.Event.AnalysisEvent.Finish getFinish();
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.Finish finish = 8;</code>
+     */
+    eu.mico.platform.event.model.Event.AnalysisEvent.FinishOrBuilder getFinishOrBuilder();
+
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.Error error = 9;</code>
+     */
+    boolean hasError();
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.Error error = 9;</code>
+     */
+    eu.mico.platform.event.model.Event.AnalysisEvent.Error getError();
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.Error error = 9;</code>
+     */
+    eu.mico.platform.event.model.Event.AnalysisEvent.ErrorOrBuilder getErrorOrBuilder();
+  }
+  /**
+   * Protobuf type {@code mico.event.model.AnalysisEvent}
+   *
+   * <pre>
+   *
    * AnalysisEvents are sent both, by the message broker to notify services that they should start
    * analysing an object, and by services to notify the message broker that they added a new object.
    * </pre>
@@ -1681,22 +4143,67 @@ public final class Event {
               }
               break;
             }
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000001;
-              serviceId_ = bs;
+            case 8: {
+              int rawValue = input.readEnum();
+              eu.mico.platform.event.model.Event.MessageType value = eu.mico.platform.event.model.Event.MessageType.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(1, rawValue);
+              } else {
+                bitField0_ |= 0x00000001;
+                type_ = value;
+              }
               break;
             }
             case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000002;
-              contentItemUri_ = bs;
+              eu.mico.platform.event.model.Event.AnalysisEvent.Progress.Builder subBuilder = null;
+              if (testOneofCase_ == 2) {
+                subBuilder = ((eu.mico.platform.event.model.Event.AnalysisEvent.Progress) testOneof_).toBuilder();
+              }
+              testOneof_ = input.readMessage(eu.mico.platform.event.model.Event.AnalysisEvent.Progress.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((eu.mico.platform.event.model.Event.AnalysisEvent.Progress) testOneof_);
+                testOneof_ = subBuilder.buildPartial();
+              }
+              testOneofCase_ = 2;
               break;
             }
             case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000004;
-              objectUri_ = bs;
+              eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.Builder subBuilder = null;
+              if (testOneofCase_ == 3) {
+                subBuilder = ((eu.mico.platform.event.model.Event.AnalysisEvent.NewPart) testOneof_).toBuilder();
+              }
+              testOneof_ = input.readMessage(eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((eu.mico.platform.event.model.Event.AnalysisEvent.NewPart) testOneof_);
+                testOneof_ = subBuilder.buildPartial();
+              }
+              testOneofCase_ = 3;
+              break;
+            }
+            case 66: {
+              eu.mico.platform.event.model.Event.AnalysisEvent.Finish.Builder subBuilder = null;
+              if (testOneofCase_ == 8) {
+                subBuilder = ((eu.mico.platform.event.model.Event.AnalysisEvent.Finish) testOneof_).toBuilder();
+              }
+              testOneof_ = input.readMessage(eu.mico.platform.event.model.Event.AnalysisEvent.Finish.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((eu.mico.platform.event.model.Event.AnalysisEvent.Finish) testOneof_);
+                testOneof_ = subBuilder.buildPartial();
+              }
+              testOneofCase_ = 8;
+              break;
+            }
+            case 74: {
+              eu.mico.platform.event.model.Event.AnalysisEvent.Error.Builder subBuilder = null;
+              if (testOneofCase_ == 9) {
+                subBuilder = ((eu.mico.platform.event.model.Event.AnalysisEvent.Error) testOneof_).toBuilder();
+              }
+              testOneof_ = input.readMessage(eu.mico.platform.event.model.Event.AnalysisEvent.Error.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((eu.mico.platform.event.model.Event.AnalysisEvent.Error) testOneof_);
+                testOneof_ = subBuilder.buildPartial();
+              }
+              testOneofCase_ = 9;
               break;
             }
           }
@@ -1738,173 +4245,4216 @@ public final class Event {
       return PARSER;
     }
 
-    private int bitField0_;
-    public static final int SERVICEID_FIELD_NUMBER = 1;
-    private java.lang.Object serviceId_;
+    public interface ProgressOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:mico.event.model.AnalysisEvent.Progress)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event
+       * </pre>
+       */
+      boolean hasServiceId();
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event
+       * </pre>
+       */
+      java.lang.String getServiceId();
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event
+       * </pre>
+       */
+      com.google.protobuf.ByteString
+          getServiceIdBytes();
+
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      boolean hasItemUri();
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      java.lang.String getItemUri();
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      com.google.protobuf.ByteString
+          getItemUriBytes();
+
+      /**
+       * <code>required string partUri = 3;</code>
+       *
+       * <pre>
+       *!&lt; URI of the part of that item being processed
+       * </pre>
+       */
+      boolean hasPartUri();
+      /**
+       * <code>required string partUri = 3;</code>
+       *
+       * <pre>
+       *!&lt; URI of the part of that item being processed
+       * </pre>
+       */
+      java.lang.String getPartUri();
+      /**
+       * <code>required string partUri = 3;</code>
+       *
+       * <pre>
+       *!&lt; URI of the part of that item being processed
+       * </pre>
+       */
+      com.google.protobuf.ByteString
+          getPartUriBytes();
+
+      /**
+       * <code>required float progress = 5;</code>
+       *
+       * <pre>
+       *!&lt; normalized progress of extractor (0.0 .. 1.0)
+       * </pre>
+       */
+      boolean hasProgress();
+      /**
+       * <code>required float progress = 5;</code>
+       *
+       * <pre>
+       *!&lt; normalized progress of extractor (0.0 .. 1.0)
+       * </pre>
+       */
+      float getProgress();
+    }
     /**
-     * <code>required string serviceId = 1;</code>
-     *
-     * <pre>
-     *!&lt; service identifier of the service generating the event
-     * </pre>
+     * Protobuf type {@code mico.event.model.AnalysisEvent.Progress}
      */
-    public boolean hasServiceId() {
+    public static final class Progress extends
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:mico.event.model.AnalysisEvent.Progress)
+        ProgressOrBuilder {
+      // Use Progress.newBuilder() to construct.
+      private Progress(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+        super(builder);
+        this.unknownFields = builder.getUnknownFields();
+      }
+      private Progress(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+      private static final Progress defaultInstance;
+      public static Progress getDefaultInstance() {
+        return defaultInstance;
+      }
+
+      public Progress getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private Progress(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000001;
+                serviceId_ = bs;
+                break;
+              }
+              case 18: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000002;
+                itemUri_ = bs;
+                break;
+              }
+              case 26: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000004;
+                partUri_ = bs;
+                break;
+              }
+              case 45: {
+                bitField0_ |= 0x00000008;
+                progress_ = input.readFloat();
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_Progress_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_Progress_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                eu.mico.platform.event.model.Event.AnalysisEvent.Progress.class, eu.mico.platform.event.model.Event.AnalysisEvent.Progress.Builder.class);
+      }
+
+      public static com.google.protobuf.Parser<Progress> PARSER =
+          new com.google.protobuf.AbstractParser<Progress>() {
+        public Progress parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new Progress(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<Progress> getParserForType() {
+        return PARSER;
+      }
+
+      private int bitField0_;
+      public static final int SERVICEID_FIELD_NUMBER = 1;
+      private java.lang.Object serviceId_;
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event
+       * </pre>
+       */
+      public boolean hasServiceId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event
+       * </pre>
+       */
+      public java.lang.String getServiceId() {
+        java.lang.Object ref = serviceId_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            serviceId_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getServiceIdBytes() {
+        java.lang.Object ref = serviceId_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          serviceId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int ITEMURI_FIELD_NUMBER = 2;
+      private java.lang.Object itemUri_;
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      public boolean hasItemUri() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      public java.lang.String getItemUri() {
+        java.lang.Object ref = itemUri_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            itemUri_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getItemUriBytes() {
+        java.lang.Object ref = itemUri_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          itemUri_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int PARTURI_FIELD_NUMBER = 3;
+      private java.lang.Object partUri_;
+      /**
+       * <code>required string partUri = 3;</code>
+       *
+       * <pre>
+       *!&lt; URI of the part of that item being processed
+       * </pre>
+       */
+      public boolean hasPartUri() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required string partUri = 3;</code>
+       *
+       * <pre>
+       *!&lt; URI of the part of that item being processed
+       * </pre>
+       */
+      public java.lang.String getPartUri() {
+        java.lang.Object ref = partUri_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            partUri_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string partUri = 3;</code>
+       *
+       * <pre>
+       *!&lt; URI of the part of that item being processed
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getPartUriBytes() {
+        java.lang.Object ref = partUri_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          partUri_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int PROGRESS_FIELD_NUMBER = 5;
+      private float progress_;
+      /**
+       * <code>required float progress = 5;</code>
+       *
+       * <pre>
+       *!&lt; normalized progress of extractor (0.0 .. 1.0)
+       * </pre>
+       */
+      public boolean hasProgress() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required float progress = 5;</code>
+       *
+       * <pre>
+       *!&lt; normalized progress of extractor (0.0 .. 1.0)
+       * </pre>
+       */
+      public float getProgress() {
+        return progress_;
+      }
+
+      private void initFields() {
+        serviceId_ = "";
+        itemUri_ = "";
+        partUri_ = "";
+        progress_ = 0F;
+      }
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasServiceId()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasItemUri()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasPartUri()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasProgress()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeBytes(1, getServiceIdBytes());
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeBytes(2, getItemUriBytes());
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          output.writeBytes(3, getPartUriBytes());
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          output.writeFloat(5, progress_);
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(1, getServiceIdBytes());
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(2, getItemUriBytes());
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(3, getPartUriBytes());
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeFloatSize(5, progress_);
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Progress parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Progress parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Progress parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Progress parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Progress parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Progress parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Progress parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Progress parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Progress parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Progress parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(eu.mico.platform.event.model.Event.AnalysisEvent.Progress prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code mico.event.model.AnalysisEvent.Progress}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:mico.event.model.AnalysisEvent.Progress)
+          eu.mico.platform.event.model.Event.AnalysisEvent.ProgressOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_Progress_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_Progress_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  eu.mico.platform.event.model.Event.AnalysisEvent.Progress.class, eu.mico.platform.event.model.Event.AnalysisEvent.Progress.Builder.class);
+        }
+
+        // Construct using eu.mico.platform.event.model.Event.AnalysisEvent.Progress.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          }
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          serviceId_ = "";
+          bitField0_ = (bitField0_ & ~0x00000001);
+          itemUri_ = "";
+          bitField0_ = (bitField0_ & ~0x00000002);
+          partUri_ = "";
+          bitField0_ = (bitField0_ & ~0x00000004);
+          progress_ = 0F;
+          bitField0_ = (bitField0_ & ~0x00000008);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_Progress_descriptor;
+        }
+
+        public eu.mico.platform.event.model.Event.AnalysisEvent.Progress getDefaultInstanceForType() {
+          return eu.mico.platform.event.model.Event.AnalysisEvent.Progress.getDefaultInstance();
+        }
+
+        public eu.mico.platform.event.model.Event.AnalysisEvent.Progress build() {
+          eu.mico.platform.event.model.Event.AnalysisEvent.Progress result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public eu.mico.platform.event.model.Event.AnalysisEvent.Progress buildPartial() {
+          eu.mico.platform.event.model.Event.AnalysisEvent.Progress result = new eu.mico.platform.event.model.Event.AnalysisEvent.Progress(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.serviceId_ = serviceId_;
+          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.itemUri_ = itemUri_;
+          if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+            to_bitField0_ |= 0x00000004;
+          }
+          result.partUri_ = partUri_;
+          if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+            to_bitField0_ |= 0x00000008;
+          }
+          result.progress_ = progress_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof eu.mico.platform.event.model.Event.AnalysisEvent.Progress) {
+            return mergeFrom((eu.mico.platform.event.model.Event.AnalysisEvent.Progress)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(eu.mico.platform.event.model.Event.AnalysisEvent.Progress other) {
+          if (other == eu.mico.platform.event.model.Event.AnalysisEvent.Progress.getDefaultInstance()) return this;
+          if (other.hasServiceId()) {
+            bitField0_ |= 0x00000001;
+            serviceId_ = other.serviceId_;
+            onChanged();
+          }
+          if (other.hasItemUri()) {
+            bitField0_ |= 0x00000002;
+            itemUri_ = other.itemUri_;
+            onChanged();
+          }
+          if (other.hasPartUri()) {
+            bitField0_ |= 0x00000004;
+            partUri_ = other.partUri_;
+            onChanged();
+          }
+          if (other.hasProgress()) {
+            setProgress(other.getProgress());
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          if (!hasServiceId()) {
+            
+            return false;
+          }
+          if (!hasItemUri()) {
+            
+            return false;
+          }
+          if (!hasPartUri()) {
+            
+            return false;
+          }
+          if (!hasProgress()) {
+            
+            return false;
+          }
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          eu.mico.platform.event.model.Event.AnalysisEvent.Progress parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (eu.mico.platform.event.model.Event.AnalysisEvent.Progress) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private java.lang.Object serviceId_ = "";
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event
+         * </pre>
+         */
+        public boolean hasServiceId() {
+          return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event
+         * </pre>
+         */
+        public java.lang.String getServiceId() {
+          java.lang.Object ref = serviceId_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              serviceId_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event
+         * </pre>
+         */
+        public com.google.protobuf.ByteString
+            getServiceIdBytes() {
+          java.lang.Object ref = serviceId_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            serviceId_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event
+         * </pre>
+         */
+        public Builder setServiceId(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          serviceId_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event
+         * </pre>
+         */
+        public Builder clearServiceId() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          serviceId_ = getDefaultInstance().getServiceId();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event
+         * </pre>
+         */
+        public Builder setServiceIdBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          serviceId_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object itemUri_ = "";
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public boolean hasItemUri() {
+          return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public java.lang.String getItemUri() {
+          java.lang.Object ref = itemUri_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              itemUri_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public com.google.protobuf.ByteString
+            getItemUriBytes() {
+          java.lang.Object ref = itemUri_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            itemUri_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public Builder setItemUri(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          itemUri_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public Builder clearItemUri() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          itemUri_ = getDefaultInstance().getItemUri();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public Builder setItemUriBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          itemUri_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object partUri_ = "";
+        /**
+         * <code>required string partUri = 3;</code>
+         *
+         * <pre>
+         *!&lt; URI of the part of that item being processed
+         * </pre>
+         */
+        public boolean hasPartUri() {
+          return ((bitField0_ & 0x00000004) == 0x00000004);
+        }
+        /**
+         * <code>required string partUri = 3;</code>
+         *
+         * <pre>
+         *!&lt; URI of the part of that item being processed
+         * </pre>
+         */
+        public java.lang.String getPartUri() {
+          java.lang.Object ref = partUri_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              partUri_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string partUri = 3;</code>
+         *
+         * <pre>
+         *!&lt; URI of the part of that item being processed
+         * </pre>
+         */
+        public com.google.protobuf.ByteString
+            getPartUriBytes() {
+          java.lang.Object ref = partUri_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            partUri_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string partUri = 3;</code>
+         *
+         * <pre>
+         *!&lt; URI of the part of that item being processed
+         * </pre>
+         */
+        public Builder setPartUri(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+          partUri_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string partUri = 3;</code>
+         *
+         * <pre>
+         *!&lt; URI of the part of that item being processed
+         * </pre>
+         */
+        public Builder clearPartUri() {
+          bitField0_ = (bitField0_ & ~0x00000004);
+          partUri_ = getDefaultInstance().getPartUri();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string partUri = 3;</code>
+         *
+         * <pre>
+         *!&lt; URI of the part of that item being processed
+         * </pre>
+         */
+        public Builder setPartUriBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+          partUri_ = value;
+          onChanged();
+          return this;
+        }
+
+        private float progress_ ;
+        /**
+         * <code>required float progress = 5;</code>
+         *
+         * <pre>
+         *!&lt; normalized progress of extractor (0.0 .. 1.0)
+         * </pre>
+         */
+        public boolean hasProgress() {
+          return ((bitField0_ & 0x00000008) == 0x00000008);
+        }
+        /**
+         * <code>required float progress = 5;</code>
+         *
+         * <pre>
+         *!&lt; normalized progress of extractor (0.0 .. 1.0)
+         * </pre>
+         */
+        public float getProgress() {
+          return progress_;
+        }
+        /**
+         * <code>required float progress = 5;</code>
+         *
+         * <pre>
+         *!&lt; normalized progress of extractor (0.0 .. 1.0)
+         * </pre>
+         */
+        public Builder setProgress(float value) {
+          bitField0_ |= 0x00000008;
+          progress_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required float progress = 5;</code>
+         *
+         * <pre>
+         *!&lt; normalized progress of extractor (0.0 .. 1.0)
+         * </pre>
+         */
+        public Builder clearProgress() {
+          bitField0_ = (bitField0_ & ~0x00000008);
+          progress_ = 0F;
+          onChanged();
+          return this;
+        }
+
+        // @@protoc_insertion_point(builder_scope:mico.event.model.AnalysisEvent.Progress)
+      }
+
+      static {
+        defaultInstance = new Progress(true);
+        defaultInstance.initFields();
+      }
+
+      // @@protoc_insertion_point(class_scope:mico.event.model.AnalysisEvent.Progress)
+    }
+
+    public interface NewPartOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:mico.event.model.AnalysisEvent.NewPart)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      boolean hasServiceId();
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      java.lang.String getServiceId();
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      com.google.protobuf.ByteString
+          getServiceIdBytes();
+
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      boolean hasItemUri();
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      java.lang.String getItemUri();
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      com.google.protobuf.ByteString
+          getItemUriBytes();
+
+      /**
+       * <code>required string partUri = 3;</code>
+       *
+       * <pre>
+       *!&lt; URI of the part of that item being processed
+       * </pre>
+       */
+      boolean hasPartUri();
+      /**
+       * <code>required string partUri = 3;</code>
+       *
+       * <pre>
+       *!&lt; URI of the part of that item being processed
+       * </pre>
+       */
+      java.lang.String getPartUri();
+      /**
+       * <code>required string partUri = 3;</code>
+       *
+       * <pre>
+       *!&lt; URI of the part of that item being processed
+       * </pre>
+       */
+      com.google.protobuf.ByteString
+          getPartUriBytes();
+    }
+    /**
+     * Protobuf type {@code mico.event.model.AnalysisEvent.NewPart}
+     */
+    public static final class NewPart extends
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:mico.event.model.AnalysisEvent.NewPart)
+        NewPartOrBuilder {
+      // Use NewPart.newBuilder() to construct.
+      private NewPart(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+        super(builder);
+        this.unknownFields = builder.getUnknownFields();
+      }
+      private NewPart(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+      private static final NewPart defaultInstance;
+      public static NewPart getDefaultInstance() {
+        return defaultInstance;
+      }
+
+      public NewPart getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private NewPart(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000001;
+                serviceId_ = bs;
+                break;
+              }
+              case 18: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000002;
+                itemUri_ = bs;
+                break;
+              }
+              case 26: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000004;
+                partUri_ = bs;
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_NewPart_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_NewPart_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.class, eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.Builder.class);
+      }
+
+      public static com.google.protobuf.Parser<NewPart> PARSER =
+          new com.google.protobuf.AbstractParser<NewPart>() {
+        public NewPart parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new NewPart(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<NewPart> getParserForType() {
+        return PARSER;
+      }
+
+      private int bitField0_;
+      public static final int SERVICEID_FIELD_NUMBER = 1;
+      private java.lang.Object serviceId_;
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      public boolean hasServiceId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      public java.lang.String getServiceId() {
+        java.lang.Object ref = serviceId_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            serviceId_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getServiceIdBytes() {
+        java.lang.Object ref = serviceId_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          serviceId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int ITEMURI_FIELD_NUMBER = 2;
+      private java.lang.Object itemUri_;
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      public boolean hasItemUri() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      public java.lang.String getItemUri() {
+        java.lang.Object ref = itemUri_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            itemUri_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getItemUriBytes() {
+        java.lang.Object ref = itemUri_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          itemUri_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int PARTURI_FIELD_NUMBER = 3;
+      private java.lang.Object partUri_;
+      /**
+       * <code>required string partUri = 3;</code>
+       *
+       * <pre>
+       *!&lt; URI of the part of that item being processed
+       * </pre>
+       */
+      public boolean hasPartUri() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>required string partUri = 3;</code>
+       *
+       * <pre>
+       *!&lt; URI of the part of that item being processed
+       * </pre>
+       */
+      public java.lang.String getPartUri() {
+        java.lang.Object ref = partUri_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            partUri_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string partUri = 3;</code>
+       *
+       * <pre>
+       *!&lt; URI of the part of that item being processed
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getPartUriBytes() {
+        java.lang.Object ref = partUri_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          partUri_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      private void initFields() {
+        serviceId_ = "";
+        itemUri_ = "";
+        partUri_ = "";
+      }
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasServiceId()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasItemUri()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasPartUri()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeBytes(1, getServiceIdBytes());
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeBytes(2, getItemUriBytes());
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          output.writeBytes(3, getPartUriBytes());
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(1, getServiceIdBytes());
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(2, getItemUriBytes());
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(3, getPartUriBytes());
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.NewPart parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.NewPart parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.NewPart parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.NewPart parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.NewPart parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.NewPart parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.NewPart parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.NewPart parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.NewPart parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.NewPart parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(eu.mico.platform.event.model.Event.AnalysisEvent.NewPart prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code mico.event.model.AnalysisEvent.NewPart}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:mico.event.model.AnalysisEvent.NewPart)
+          eu.mico.platform.event.model.Event.AnalysisEvent.NewPartOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_NewPart_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_NewPart_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.class, eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.Builder.class);
+        }
+
+        // Construct using eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          }
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          serviceId_ = "";
+          bitField0_ = (bitField0_ & ~0x00000001);
+          itemUri_ = "";
+          bitField0_ = (bitField0_ & ~0x00000002);
+          partUri_ = "";
+          bitField0_ = (bitField0_ & ~0x00000004);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_NewPart_descriptor;
+        }
+
+        public eu.mico.platform.event.model.Event.AnalysisEvent.NewPart getDefaultInstanceForType() {
+          return eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.getDefaultInstance();
+        }
+
+        public eu.mico.platform.event.model.Event.AnalysisEvent.NewPart build() {
+          eu.mico.platform.event.model.Event.AnalysisEvent.NewPart result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public eu.mico.platform.event.model.Event.AnalysisEvent.NewPart buildPartial() {
+          eu.mico.platform.event.model.Event.AnalysisEvent.NewPart result = new eu.mico.platform.event.model.Event.AnalysisEvent.NewPart(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.serviceId_ = serviceId_;
+          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.itemUri_ = itemUri_;
+          if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+            to_bitField0_ |= 0x00000004;
+          }
+          result.partUri_ = partUri_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof eu.mico.platform.event.model.Event.AnalysisEvent.NewPart) {
+            return mergeFrom((eu.mico.platform.event.model.Event.AnalysisEvent.NewPart)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(eu.mico.platform.event.model.Event.AnalysisEvent.NewPart other) {
+          if (other == eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.getDefaultInstance()) return this;
+          if (other.hasServiceId()) {
+            bitField0_ |= 0x00000001;
+            serviceId_ = other.serviceId_;
+            onChanged();
+          }
+          if (other.hasItemUri()) {
+            bitField0_ |= 0x00000002;
+            itemUri_ = other.itemUri_;
+            onChanged();
+          }
+          if (other.hasPartUri()) {
+            bitField0_ |= 0x00000004;
+            partUri_ = other.partUri_;
+            onChanged();
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          if (!hasServiceId()) {
+            
+            return false;
+          }
+          if (!hasItemUri()) {
+            
+            return false;
+          }
+          if (!hasPartUri()) {
+            
+            return false;
+          }
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          eu.mico.platform.event.model.Event.AnalysisEvent.NewPart parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (eu.mico.platform.event.model.Event.AnalysisEvent.NewPart) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private java.lang.Object serviceId_ = "";
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public boolean hasServiceId() {
+          return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public java.lang.String getServiceId() {
+          java.lang.Object ref = serviceId_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              serviceId_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public com.google.protobuf.ByteString
+            getServiceIdBytes() {
+          java.lang.Object ref = serviceId_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            serviceId_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public Builder setServiceId(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          serviceId_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public Builder clearServiceId() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          serviceId_ = getDefaultInstance().getServiceId();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public Builder setServiceIdBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          serviceId_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object itemUri_ = "";
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public boolean hasItemUri() {
+          return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public java.lang.String getItemUri() {
+          java.lang.Object ref = itemUri_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              itemUri_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public com.google.protobuf.ByteString
+            getItemUriBytes() {
+          java.lang.Object ref = itemUri_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            itemUri_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public Builder setItemUri(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          itemUri_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public Builder clearItemUri() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          itemUri_ = getDefaultInstance().getItemUri();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public Builder setItemUriBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          itemUri_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object partUri_ = "";
+        /**
+         * <code>required string partUri = 3;</code>
+         *
+         * <pre>
+         *!&lt; URI of the part of that item being processed
+         * </pre>
+         */
+        public boolean hasPartUri() {
+          return ((bitField0_ & 0x00000004) == 0x00000004);
+        }
+        /**
+         * <code>required string partUri = 3;</code>
+         *
+         * <pre>
+         *!&lt; URI of the part of that item being processed
+         * </pre>
+         */
+        public java.lang.String getPartUri() {
+          java.lang.Object ref = partUri_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              partUri_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string partUri = 3;</code>
+         *
+         * <pre>
+         *!&lt; URI of the part of that item being processed
+         * </pre>
+         */
+        public com.google.protobuf.ByteString
+            getPartUriBytes() {
+          java.lang.Object ref = partUri_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            partUri_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string partUri = 3;</code>
+         *
+         * <pre>
+         *!&lt; URI of the part of that item being processed
+         * </pre>
+         */
+        public Builder setPartUri(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+          partUri_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string partUri = 3;</code>
+         *
+         * <pre>
+         *!&lt; URI of the part of that item being processed
+         * </pre>
+         */
+        public Builder clearPartUri() {
+          bitField0_ = (bitField0_ & ~0x00000004);
+          partUri_ = getDefaultInstance().getPartUri();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string partUri = 3;</code>
+         *
+         * <pre>
+         *!&lt; URI of the part of that item being processed
+         * </pre>
+         */
+        public Builder setPartUriBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+          partUri_ = value;
+          onChanged();
+          return this;
+        }
+
+        // @@protoc_insertion_point(builder_scope:mico.event.model.AnalysisEvent.NewPart)
+      }
+
+      static {
+        defaultInstance = new NewPart(true);
+        defaultInstance.initFields();
+      }
+
+      // @@protoc_insertion_point(class_scope:mico.event.model.AnalysisEvent.NewPart)
+    }
+
+    public interface FinishOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:mico.event.model.AnalysisEvent.Finish)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      boolean hasServiceId();
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      java.lang.String getServiceId();
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      com.google.protobuf.ByteString
+          getServiceIdBytes();
+
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      boolean hasItemUri();
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      java.lang.String getItemUri();
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      com.google.protobuf.ByteString
+          getItemUriBytes();
+    }
+    /**
+     * Protobuf type {@code mico.event.model.AnalysisEvent.Finish}
+     */
+    public static final class Finish extends
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:mico.event.model.AnalysisEvent.Finish)
+        FinishOrBuilder {
+      // Use Finish.newBuilder() to construct.
+      private Finish(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+        super(builder);
+        this.unknownFields = builder.getUnknownFields();
+      }
+      private Finish(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+      private static final Finish defaultInstance;
+      public static Finish getDefaultInstance() {
+        return defaultInstance;
+      }
+
+      public Finish getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private Finish(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000001;
+                serviceId_ = bs;
+                break;
+              }
+              case 18: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000002;
+                itemUri_ = bs;
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_Finish_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_Finish_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                eu.mico.platform.event.model.Event.AnalysisEvent.Finish.class, eu.mico.platform.event.model.Event.AnalysisEvent.Finish.Builder.class);
+      }
+
+      public static com.google.protobuf.Parser<Finish> PARSER =
+          new com.google.protobuf.AbstractParser<Finish>() {
+        public Finish parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new Finish(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<Finish> getParserForType() {
+        return PARSER;
+      }
+
+      private int bitField0_;
+      public static final int SERVICEID_FIELD_NUMBER = 1;
+      private java.lang.Object serviceId_;
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      public boolean hasServiceId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      public java.lang.String getServiceId() {
+        java.lang.Object ref = serviceId_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            serviceId_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getServiceIdBytes() {
+        java.lang.Object ref = serviceId_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          serviceId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int ITEMURI_FIELD_NUMBER = 2;
+      private java.lang.Object itemUri_;
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      public boolean hasItemUri() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      public java.lang.String getItemUri() {
+        java.lang.Object ref = itemUri_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            itemUri_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getItemUriBytes() {
+        java.lang.Object ref = itemUri_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          itemUri_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      private void initFields() {
+        serviceId_ = "";
+        itemUri_ = "";
+      }
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasServiceId()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasItemUri()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeBytes(1, getServiceIdBytes());
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeBytes(2, getItemUriBytes());
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(1, getServiceIdBytes());
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(2, getItemUriBytes());
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Finish parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Finish parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Finish parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Finish parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Finish parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Finish parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Finish parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Finish parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Finish parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Finish parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(eu.mico.platform.event.model.Event.AnalysisEvent.Finish prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code mico.event.model.AnalysisEvent.Finish}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:mico.event.model.AnalysisEvent.Finish)
+          eu.mico.platform.event.model.Event.AnalysisEvent.FinishOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_Finish_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_Finish_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  eu.mico.platform.event.model.Event.AnalysisEvent.Finish.class, eu.mico.platform.event.model.Event.AnalysisEvent.Finish.Builder.class);
+        }
+
+        // Construct using eu.mico.platform.event.model.Event.AnalysisEvent.Finish.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          }
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          serviceId_ = "";
+          bitField0_ = (bitField0_ & ~0x00000001);
+          itemUri_ = "";
+          bitField0_ = (bitField0_ & ~0x00000002);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_Finish_descriptor;
+        }
+
+        public eu.mico.platform.event.model.Event.AnalysisEvent.Finish getDefaultInstanceForType() {
+          return eu.mico.platform.event.model.Event.AnalysisEvent.Finish.getDefaultInstance();
+        }
+
+        public eu.mico.platform.event.model.Event.AnalysisEvent.Finish build() {
+          eu.mico.platform.event.model.Event.AnalysisEvent.Finish result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public eu.mico.platform.event.model.Event.AnalysisEvent.Finish buildPartial() {
+          eu.mico.platform.event.model.Event.AnalysisEvent.Finish result = new eu.mico.platform.event.model.Event.AnalysisEvent.Finish(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.serviceId_ = serviceId_;
+          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.itemUri_ = itemUri_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof eu.mico.platform.event.model.Event.AnalysisEvent.Finish) {
+            return mergeFrom((eu.mico.platform.event.model.Event.AnalysisEvent.Finish)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(eu.mico.platform.event.model.Event.AnalysisEvent.Finish other) {
+          if (other == eu.mico.platform.event.model.Event.AnalysisEvent.Finish.getDefaultInstance()) return this;
+          if (other.hasServiceId()) {
+            bitField0_ |= 0x00000001;
+            serviceId_ = other.serviceId_;
+            onChanged();
+          }
+          if (other.hasItemUri()) {
+            bitField0_ |= 0x00000002;
+            itemUri_ = other.itemUri_;
+            onChanged();
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          if (!hasServiceId()) {
+            
+            return false;
+          }
+          if (!hasItemUri()) {
+            
+            return false;
+          }
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          eu.mico.platform.event.model.Event.AnalysisEvent.Finish parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (eu.mico.platform.event.model.Event.AnalysisEvent.Finish) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private java.lang.Object serviceId_ = "";
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public boolean hasServiceId() {
+          return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public java.lang.String getServiceId() {
+          java.lang.Object ref = serviceId_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              serviceId_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public com.google.protobuf.ByteString
+            getServiceIdBytes() {
+          java.lang.Object ref = serviceId_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            serviceId_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public Builder setServiceId(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          serviceId_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public Builder clearServiceId() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          serviceId_ = getDefaultInstance().getServiceId();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public Builder setServiceIdBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          serviceId_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object itemUri_ = "";
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public boolean hasItemUri() {
+          return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public java.lang.String getItemUri() {
+          java.lang.Object ref = itemUri_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              itemUri_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public com.google.protobuf.ByteString
+            getItemUriBytes() {
+          java.lang.Object ref = itemUri_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            itemUri_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public Builder setItemUri(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          itemUri_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public Builder clearItemUri() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          itemUri_ = getDefaultInstance().getItemUri();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public Builder setItemUriBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          itemUri_ = value;
+          onChanged();
+          return this;
+        }
+
+        // @@protoc_insertion_point(builder_scope:mico.event.model.AnalysisEvent.Finish)
+      }
+
+      static {
+        defaultInstance = new Finish(true);
+        defaultInstance.initFields();
+      }
+
+      // @@protoc_insertion_point(class_scope:mico.event.model.AnalysisEvent.Finish)
+    }
+
+    public interface ErrorOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:mico.event.model.AnalysisEvent.Error)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      boolean hasServiceId();
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      java.lang.String getServiceId();
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      com.google.protobuf.ByteString
+          getServiceIdBytes();
+
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      boolean hasItemUri();
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      java.lang.String getItemUri();
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      com.google.protobuf.ByteString
+          getItemUriBytes();
+
+      /**
+       * <code>optional string message = 5;</code>
+       *
+       * <pre>
+       *!&lt; a short info
+       * </pre>
+       */
+      boolean hasMessage();
+      /**
+       * <code>optional string message = 5;</code>
+       *
+       * <pre>
+       *!&lt; a short info
+       * </pre>
+       */
+      java.lang.String getMessage();
+      /**
+       * <code>optional string message = 5;</code>
+       *
+       * <pre>
+       *!&lt; a short info
+       * </pre>
+       */
+      com.google.protobuf.ByteString
+          getMessageBytes();
+
+      /**
+       * <code>optional string description = 6;</code>
+       *
+       * <pre>
+       *!&lt; further description of message
+       * </pre>
+       */
+      boolean hasDescription();
+      /**
+       * <code>optional string description = 6;</code>
+       *
+       * <pre>
+       *!&lt; further description of message
+       * </pre>
+       */
+      java.lang.String getDescription();
+      /**
+       * <code>optional string description = 6;</code>
+       *
+       * <pre>
+       *!&lt; further description of message
+       * </pre>
+       */
+      com.google.protobuf.ByteString
+          getDescriptionBytes();
+
+      /**
+       * <code>optional .mico.event.model.ErrorCodes errorCode = 7;</code>
+       *
+       * <pre>
+       *!&lt; one of the predefined error codes, used by broker to handle error
+       * </pre>
+       */
+      boolean hasErrorCode();
+      /**
+       * <code>optional .mico.event.model.ErrorCodes errorCode = 7;</code>
+       *
+       * <pre>
+       *!&lt; one of the predefined error codes, used by broker to handle error
+       * </pre>
+       */
+      eu.mico.platform.event.model.Event.ErrorCodes getErrorCode();
+    }
+    /**
+     * Protobuf type {@code mico.event.model.AnalysisEvent.Error}
+     */
+    public static final class Error extends
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:mico.event.model.AnalysisEvent.Error)
+        ErrorOrBuilder {
+      // Use Error.newBuilder() to construct.
+      private Error(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+        super(builder);
+        this.unknownFields = builder.getUnknownFields();
+      }
+      private Error(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+      private static final Error defaultInstance;
+      public static Error getDefaultInstance() {
+        return defaultInstance;
+      }
+
+      public Error getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private Error(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000001;
+                serviceId_ = bs;
+                break;
+              }
+              case 18: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000002;
+                itemUri_ = bs;
+                break;
+              }
+              case 42: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000004;
+                message_ = bs;
+                break;
+              }
+              case 50: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000008;
+                description_ = bs;
+                break;
+              }
+              case 56: {
+                int rawValue = input.readEnum();
+                eu.mico.platform.event.model.Event.ErrorCodes value = eu.mico.platform.event.model.Event.ErrorCodes.valueOf(rawValue);
+                if (value == null) {
+                  unknownFields.mergeVarintField(7, rawValue);
+                } else {
+                  bitField0_ |= 0x00000010;
+                  errorCode_ = value;
+                }
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_Error_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_Error_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                eu.mico.platform.event.model.Event.AnalysisEvent.Error.class, eu.mico.platform.event.model.Event.AnalysisEvent.Error.Builder.class);
+      }
+
+      public static com.google.protobuf.Parser<Error> PARSER =
+          new com.google.protobuf.AbstractParser<Error>() {
+        public Error parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new Error(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<Error> getParserForType() {
+        return PARSER;
+      }
+
+      private int bitField0_;
+      public static final int SERVICEID_FIELD_NUMBER = 1;
+      private java.lang.Object serviceId_;
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      public boolean hasServiceId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      public java.lang.String getServiceId() {
+        java.lang.Object ref = serviceId_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            serviceId_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string serviceId = 1;</code>
+       *
+       * <pre>
+       *!&lt; service identifier of the service generating the event    
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getServiceIdBytes() {
+        java.lang.Object ref = serviceId_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          serviceId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int ITEMURI_FIELD_NUMBER = 2;
+      private java.lang.Object itemUri_;
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      public boolean hasItemUri() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      public java.lang.String getItemUri() {
+        java.lang.Object ref = itemUri_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            itemUri_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>required string itemUri = 2;</code>
+       *
+       * <pre>
+       *!&lt; URI of the item being processed
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getItemUriBytes() {
+        java.lang.Object ref = itemUri_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          itemUri_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int MESSAGE_FIELD_NUMBER = 5;
+      private java.lang.Object message_;
+      /**
+       * <code>optional string message = 5;</code>
+       *
+       * <pre>
+       *!&lt; a short info
+       * </pre>
+       */
+      public boolean hasMessage() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional string message = 5;</code>
+       *
+       * <pre>
+       *!&lt; a short info
+       * </pre>
+       */
+      public java.lang.String getMessage() {
+        java.lang.Object ref = message_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            message_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string message = 5;</code>
+       *
+       * <pre>
+       *!&lt; a short info
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getMessageBytes() {
+        java.lang.Object ref = message_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          message_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int DESCRIPTION_FIELD_NUMBER = 6;
+      private java.lang.Object description_;
+      /**
+       * <code>optional string description = 6;</code>
+       *
+       * <pre>
+       *!&lt; further description of message
+       * </pre>
+       */
+      public boolean hasDescription() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional string description = 6;</code>
+       *
+       * <pre>
+       *!&lt; further description of message
+       * </pre>
+       */
+      public java.lang.String getDescription() {
+        java.lang.Object ref = description_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            description_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string description = 6;</code>
+       *
+       * <pre>
+       *!&lt; further description of message
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getDescriptionBytes() {
+        java.lang.Object ref = description_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          description_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int ERRORCODE_FIELD_NUMBER = 7;
+      private eu.mico.platform.event.model.Event.ErrorCodes errorCode_;
+      /**
+       * <code>optional .mico.event.model.ErrorCodes errorCode = 7;</code>
+       *
+       * <pre>
+       *!&lt; one of the predefined error codes, used by broker to handle error
+       * </pre>
+       */
+      public boolean hasErrorCode() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional .mico.event.model.ErrorCodes errorCode = 7;</code>
+       *
+       * <pre>
+       *!&lt; one of the predefined error codes, used by broker to handle error
+       * </pre>
+       */
+      public eu.mico.platform.event.model.Event.ErrorCodes getErrorCode() {
+        return errorCode_;
+      }
+
+      private void initFields() {
+        serviceId_ = "";
+        itemUri_ = "";
+        message_ = "";
+        description_ = "";
+        errorCode_ = eu.mico.platform.event.model.Event.ErrorCodes.UNSUPPORTED_CONTENT_TYPE;
+      }
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        if (!hasServiceId()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (!hasItemUri()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeBytes(1, getServiceIdBytes());
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeBytes(2, getItemUriBytes());
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          output.writeBytes(5, getMessageBytes());
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          output.writeBytes(6, getDescriptionBytes());
+        }
+        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          output.writeEnum(7, errorCode_.getNumber());
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(1, getServiceIdBytes());
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(2, getItemUriBytes());
+        }
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(5, getMessageBytes());
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(6, getDescriptionBytes());
+        }
+        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeEnumSize(7, errorCode_.getNumber());
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Error parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Error parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Error parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Error parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Error parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Error parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Error parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Error parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Error parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static eu.mico.platform.event.model.Event.AnalysisEvent.Error parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(eu.mico.platform.event.model.Event.AnalysisEvent.Error prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code mico.event.model.AnalysisEvent.Error}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:mico.event.model.AnalysisEvent.Error)
+          eu.mico.platform.event.model.Event.AnalysisEvent.ErrorOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_Error_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_Error_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  eu.mico.platform.event.model.Event.AnalysisEvent.Error.class, eu.mico.platform.event.model.Event.AnalysisEvent.Error.Builder.class);
+        }
+
+        // Construct using eu.mico.platform.event.model.Event.AnalysisEvent.Error.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          }
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          serviceId_ = "";
+          bitField0_ = (bitField0_ & ~0x00000001);
+          itemUri_ = "";
+          bitField0_ = (bitField0_ & ~0x00000002);
+          message_ = "";
+          bitField0_ = (bitField0_ & ~0x00000004);
+          description_ = "";
+          bitField0_ = (bitField0_ & ~0x00000008);
+          errorCode_ = eu.mico.platform.event.model.Event.ErrorCodes.UNSUPPORTED_CONTENT_TYPE;
+          bitField0_ = (bitField0_ & ~0x00000010);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return eu.mico.platform.event.model.Event.internal_static_mico_event_model_AnalysisEvent_Error_descriptor;
+        }
+
+        public eu.mico.platform.event.model.Event.AnalysisEvent.Error getDefaultInstanceForType() {
+          return eu.mico.platform.event.model.Event.AnalysisEvent.Error.getDefaultInstance();
+        }
+
+        public eu.mico.platform.event.model.Event.AnalysisEvent.Error build() {
+          eu.mico.platform.event.model.Event.AnalysisEvent.Error result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public eu.mico.platform.event.model.Event.AnalysisEvent.Error buildPartial() {
+          eu.mico.platform.event.model.Event.AnalysisEvent.Error result = new eu.mico.platform.event.model.Event.AnalysisEvent.Error(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.serviceId_ = serviceId_;
+          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.itemUri_ = itemUri_;
+          if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+            to_bitField0_ |= 0x00000004;
+          }
+          result.message_ = message_;
+          if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+            to_bitField0_ |= 0x00000008;
+          }
+          result.description_ = description_;
+          if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+            to_bitField0_ |= 0x00000010;
+          }
+          result.errorCode_ = errorCode_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof eu.mico.platform.event.model.Event.AnalysisEvent.Error) {
+            return mergeFrom((eu.mico.platform.event.model.Event.AnalysisEvent.Error)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(eu.mico.platform.event.model.Event.AnalysisEvent.Error other) {
+          if (other == eu.mico.platform.event.model.Event.AnalysisEvent.Error.getDefaultInstance()) return this;
+          if (other.hasServiceId()) {
+            bitField0_ |= 0x00000001;
+            serviceId_ = other.serviceId_;
+            onChanged();
+          }
+          if (other.hasItemUri()) {
+            bitField0_ |= 0x00000002;
+            itemUri_ = other.itemUri_;
+            onChanged();
+          }
+          if (other.hasMessage()) {
+            bitField0_ |= 0x00000004;
+            message_ = other.message_;
+            onChanged();
+          }
+          if (other.hasDescription()) {
+            bitField0_ |= 0x00000008;
+            description_ = other.description_;
+            onChanged();
+          }
+          if (other.hasErrorCode()) {
+            setErrorCode(other.getErrorCode());
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          if (!hasServiceId()) {
+            
+            return false;
+          }
+          if (!hasItemUri()) {
+            
+            return false;
+          }
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          eu.mico.platform.event.model.Event.AnalysisEvent.Error parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (eu.mico.platform.event.model.Event.AnalysisEvent.Error) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private java.lang.Object serviceId_ = "";
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public boolean hasServiceId() {
+          return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public java.lang.String getServiceId() {
+          java.lang.Object ref = serviceId_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              serviceId_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public com.google.protobuf.ByteString
+            getServiceIdBytes() {
+          java.lang.Object ref = serviceId_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            serviceId_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public Builder setServiceId(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          serviceId_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public Builder clearServiceId() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          serviceId_ = getDefaultInstance().getServiceId();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string serviceId = 1;</code>
+         *
+         * <pre>
+         *!&lt; service identifier of the service generating the event    
+         * </pre>
+         */
+        public Builder setServiceIdBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          serviceId_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object itemUri_ = "";
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public boolean hasItemUri() {
+          return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public java.lang.String getItemUri() {
+          java.lang.Object ref = itemUri_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              itemUri_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public com.google.protobuf.ByteString
+            getItemUriBytes() {
+          java.lang.Object ref = itemUri_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            itemUri_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public Builder setItemUri(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          itemUri_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public Builder clearItemUri() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          itemUri_ = getDefaultInstance().getItemUri();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>required string itemUri = 2;</code>
+         *
+         * <pre>
+         *!&lt; URI of the item being processed
+         * </pre>
+         */
+        public Builder setItemUriBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+          itemUri_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object message_ = "";
+        /**
+         * <code>optional string message = 5;</code>
+         *
+         * <pre>
+         *!&lt; a short info
+         * </pre>
+         */
+        public boolean hasMessage() {
+          return ((bitField0_ & 0x00000004) == 0x00000004);
+        }
+        /**
+         * <code>optional string message = 5;</code>
+         *
+         * <pre>
+         *!&lt; a short info
+         * </pre>
+         */
+        public java.lang.String getMessage() {
+          java.lang.Object ref = message_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              message_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string message = 5;</code>
+         *
+         * <pre>
+         *!&lt; a short info
+         * </pre>
+         */
+        public com.google.protobuf.ByteString
+            getMessageBytes() {
+          java.lang.Object ref = message_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            message_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string message = 5;</code>
+         *
+         * <pre>
+         *!&lt; a short info
+         * </pre>
+         */
+        public Builder setMessage(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+          message_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string message = 5;</code>
+         *
+         * <pre>
+         *!&lt; a short info
+         * </pre>
+         */
+        public Builder clearMessage() {
+          bitField0_ = (bitField0_ & ~0x00000004);
+          message_ = getDefaultInstance().getMessage();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string message = 5;</code>
+         *
+         * <pre>
+         *!&lt; a short info
+         * </pre>
+         */
+        public Builder setMessageBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+          message_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object description_ = "";
+        /**
+         * <code>optional string description = 6;</code>
+         *
+         * <pre>
+         *!&lt; further description of message
+         * </pre>
+         */
+        public boolean hasDescription() {
+          return ((bitField0_ & 0x00000008) == 0x00000008);
+        }
+        /**
+         * <code>optional string description = 6;</code>
+         *
+         * <pre>
+         *!&lt; further description of message
+         * </pre>
+         */
+        public java.lang.String getDescription() {
+          java.lang.Object ref = description_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              description_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string description = 6;</code>
+         *
+         * <pre>
+         *!&lt; further description of message
+         * </pre>
+         */
+        public com.google.protobuf.ByteString
+            getDescriptionBytes() {
+          java.lang.Object ref = description_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            description_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string description = 6;</code>
+         *
+         * <pre>
+         *!&lt; further description of message
+         * </pre>
+         */
+        public Builder setDescription(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+          description_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string description = 6;</code>
+         *
+         * <pre>
+         *!&lt; further description of message
+         * </pre>
+         */
+        public Builder clearDescription() {
+          bitField0_ = (bitField0_ & ~0x00000008);
+          description_ = getDefaultInstance().getDescription();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string description = 6;</code>
+         *
+         * <pre>
+         *!&lt; further description of message
+         * </pre>
+         */
+        public Builder setDescriptionBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+          description_ = value;
+          onChanged();
+          return this;
+        }
+
+        private eu.mico.platform.event.model.Event.ErrorCodes errorCode_ = eu.mico.platform.event.model.Event.ErrorCodes.UNSUPPORTED_CONTENT_TYPE;
+        /**
+         * <code>optional .mico.event.model.ErrorCodes errorCode = 7;</code>
+         *
+         * <pre>
+         *!&lt; one of the predefined error codes, used by broker to handle error
+         * </pre>
+         */
+        public boolean hasErrorCode() {
+          return ((bitField0_ & 0x00000010) == 0x00000010);
+        }
+        /**
+         * <code>optional .mico.event.model.ErrorCodes errorCode = 7;</code>
+         *
+         * <pre>
+         *!&lt; one of the predefined error codes, used by broker to handle error
+         * </pre>
+         */
+        public eu.mico.platform.event.model.Event.ErrorCodes getErrorCode() {
+          return errorCode_;
+        }
+        /**
+         * <code>optional .mico.event.model.ErrorCodes errorCode = 7;</code>
+         *
+         * <pre>
+         *!&lt; one of the predefined error codes, used by broker to handle error
+         * </pre>
+         */
+        public Builder setErrorCode(eu.mico.platform.event.model.Event.ErrorCodes value) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          bitField0_ |= 0x00000010;
+          errorCode_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional .mico.event.model.ErrorCodes errorCode = 7;</code>
+         *
+         * <pre>
+         *!&lt; one of the predefined error codes, used by broker to handle error
+         * </pre>
+         */
+        public Builder clearErrorCode() {
+          bitField0_ = (bitField0_ & ~0x00000010);
+          errorCode_ = eu.mico.platform.event.model.Event.ErrorCodes.UNSUPPORTED_CONTENT_TYPE;
+          onChanged();
+          return this;
+        }
+
+        // @@protoc_insertion_point(builder_scope:mico.event.model.AnalysisEvent.Error)
+      }
+
+      static {
+        defaultInstance = new Error(true);
+        defaultInstance.initFields();
+      }
+
+      // @@protoc_insertion_point(class_scope:mico.event.model.AnalysisEvent.Error)
+    }
+
+    private int bitField0_;
+    private int testOneofCase_ = 0;
+    private java.lang.Object testOneof_;
+    public enum TestOneofCase
+        implements com.google.protobuf.Internal.EnumLite {
+      PROGRESS(2),
+      NEW(3),
+      FINISH(8),
+      ERROR(9),
+      TESTONEOF_NOT_SET(0);
+      private int value = 0;
+      private TestOneofCase(int value) {
+        this.value = value;
+      }
+      public static TestOneofCase valueOf(int value) {
+        switch (value) {
+          case 2: return PROGRESS;
+          case 3: return NEW;
+          case 8: return FINISH;
+          case 9: return ERROR;
+          case 0: return TESTONEOF_NOT_SET;
+          default: throw new java.lang.IllegalArgumentException(
+            "Value is undefined for this oneof enum.");
+        }
+      }
+      public int getNumber() {
+        return this.value;
+      }
+    };
+
+    public TestOneofCase
+    getTestOneofCase() {
+      return TestOneofCase.valueOf(
+          testOneofCase_);
+    }
+
+    public static final int TYPE_FIELD_NUMBER = 1;
+    private eu.mico.platform.event.model.Event.MessageType type_;
+    /**
+     * <code>required .mico.event.model.MessageType type = 1;</code>
+     */
+    public boolean hasType() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required string serviceId = 1;</code>
-     *
-     * <pre>
-     *!&lt; service identifier of the service generating the event
-     * </pre>
+     * <code>required .mico.event.model.MessageType type = 1;</code>
      */
-    public java.lang.String getServiceId() {
-      java.lang.Object ref = serviceId_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          serviceId_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>required string serviceId = 1;</code>
-     *
-     * <pre>
-     *!&lt; service identifier of the service generating the event
-     * </pre>
-     */
-    public com.google.protobuf.ByteString
-        getServiceIdBytes() {
-      java.lang.Object ref = serviceId_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        serviceId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public eu.mico.platform.event.model.Event.MessageType getType() {
+      return type_;
     }
 
-    public static final int CONTENTITEMURI_FIELD_NUMBER = 2;
-    private java.lang.Object contentItemUri_;
+    public static final int PROGRESS_FIELD_NUMBER = 2;
     /**
-     * <code>required string contentItemUri = 2;</code>
-     *
-     * <pre>
-     *!&lt; URI of the content item being processed
-     * </pre>
+     * <code>optional .mico.event.model.AnalysisEvent.Progress progress = 2;</code>
      */
-    public boolean hasContentItemUri() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
+    public boolean hasProgress() {
+      return testOneofCase_ == 2;
     }
     /**
-     * <code>required string contentItemUri = 2;</code>
-     *
-     * <pre>
-     *!&lt; URI of the content item being processed
-     * </pre>
+     * <code>optional .mico.event.model.AnalysisEvent.Progress progress = 2;</code>
      */
-    public java.lang.String getContentItemUri() {
-      java.lang.Object ref = contentItemUri_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          contentItemUri_ = s;
-        }
-        return s;
+    public eu.mico.platform.event.model.Event.AnalysisEvent.Progress getProgress() {
+      if (testOneofCase_ == 2) {
+         return (eu.mico.platform.event.model.Event.AnalysisEvent.Progress) testOneof_;
       }
+      return eu.mico.platform.event.model.Event.AnalysisEvent.Progress.getDefaultInstance();
     }
     /**
-     * <code>required string contentItemUri = 2;</code>
-     *
-     * <pre>
-     *!&lt; URI of the content item being processed
-     * </pre>
+     * <code>optional .mico.event.model.AnalysisEvent.Progress progress = 2;</code>
      */
-    public com.google.protobuf.ByteString
-        getContentItemUriBytes() {
-      java.lang.Object ref = contentItemUri_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        contentItemUri_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
+    public eu.mico.platform.event.model.Event.AnalysisEvent.ProgressOrBuilder getProgressOrBuilder() {
+      if (testOneofCase_ == 2) {
+         return (eu.mico.platform.event.model.Event.AnalysisEvent.Progress) testOneof_;
       }
+      return eu.mico.platform.event.model.Event.AnalysisEvent.Progress.getDefaultInstance();
     }
 
-    public static final int OBJECTURI_FIELD_NUMBER = 3;
-    private java.lang.Object objectUri_;
+    public static final int NEW_FIELD_NUMBER = 3;
     /**
-     * <code>optional string objectUri = 3;</code>
-     *
-     * <pre>
-     *!&lt; URI of the object of that content item being processed
-     * </pre>
+     * <code>optional .mico.event.model.AnalysisEvent.NewPart new = 3;</code>
      */
-    public boolean hasObjectUri() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
+    public boolean hasNew() {
+      return testOneofCase_ == 3;
     }
     /**
-     * <code>optional string objectUri = 3;</code>
-     *
-     * <pre>
-     *!&lt; URI of the object of that content item being processed
-     * </pre>
+     * <code>optional .mico.event.model.AnalysisEvent.NewPart new = 3;</code>
      */
-    public java.lang.String getObjectUri() {
-      java.lang.Object ref = objectUri_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          objectUri_ = s;
-        }
-        return s;
+    public eu.mico.platform.event.model.Event.AnalysisEvent.NewPart getNew() {
+      if (testOneofCase_ == 3) {
+         return (eu.mico.platform.event.model.Event.AnalysisEvent.NewPart) testOneof_;
       }
+      return eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.getDefaultInstance();
     }
     /**
-     * <code>optional string objectUri = 3;</code>
-     *
-     * <pre>
-     *!&lt; URI of the object of that content item being processed
-     * </pre>
+     * <code>optional .mico.event.model.AnalysisEvent.NewPart new = 3;</code>
      */
-    public com.google.protobuf.ByteString
-        getObjectUriBytes() {
-      java.lang.Object ref = objectUri_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        objectUri_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
+    public eu.mico.platform.event.model.Event.AnalysisEvent.NewPartOrBuilder getNewOrBuilder() {
+      if (testOneofCase_ == 3) {
+         return (eu.mico.platform.event.model.Event.AnalysisEvent.NewPart) testOneof_;
       }
+      return eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.getDefaultInstance();
+    }
+
+    public static final int FINISH_FIELD_NUMBER = 8;
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.Finish finish = 8;</code>
+     */
+    public boolean hasFinish() {
+      return testOneofCase_ == 8;
+    }
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.Finish finish = 8;</code>
+     */
+    public eu.mico.platform.event.model.Event.AnalysisEvent.Finish getFinish() {
+      if (testOneofCase_ == 8) {
+         return (eu.mico.platform.event.model.Event.AnalysisEvent.Finish) testOneof_;
+      }
+      return eu.mico.platform.event.model.Event.AnalysisEvent.Finish.getDefaultInstance();
+    }
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.Finish finish = 8;</code>
+     */
+    public eu.mico.platform.event.model.Event.AnalysisEvent.FinishOrBuilder getFinishOrBuilder() {
+      if (testOneofCase_ == 8) {
+         return (eu.mico.platform.event.model.Event.AnalysisEvent.Finish) testOneof_;
+      }
+      return eu.mico.platform.event.model.Event.AnalysisEvent.Finish.getDefaultInstance();
+    }
+
+    public static final int ERROR_FIELD_NUMBER = 9;
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.Error error = 9;</code>
+     */
+    public boolean hasError() {
+      return testOneofCase_ == 9;
+    }
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.Error error = 9;</code>
+     */
+    public eu.mico.platform.event.model.Event.AnalysisEvent.Error getError() {
+      if (testOneofCase_ == 9) {
+         return (eu.mico.platform.event.model.Event.AnalysisEvent.Error) testOneof_;
+      }
+      return eu.mico.platform.event.model.Event.AnalysisEvent.Error.getDefaultInstance();
+    }
+    /**
+     * <code>optional .mico.event.model.AnalysisEvent.Error error = 9;</code>
+     */
+    public eu.mico.platform.event.model.Event.AnalysisEvent.ErrorOrBuilder getErrorOrBuilder() {
+      if (testOneofCase_ == 9) {
+         return (eu.mico.platform.event.model.Event.AnalysisEvent.Error) testOneof_;
+      }
+      return eu.mico.platform.event.model.Event.AnalysisEvent.Error.getDefaultInstance();
     }
 
     private void initFields() {
-      serviceId_ = "";
-      contentItemUri_ = "";
-      objectUri_ = "";
+      type_ = eu.mico.platform.event.model.Event.MessageType.PROGRESS;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1912,13 +8462,33 @@ public final class Event {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      if (!hasServiceId()) {
+      if (!hasType()) {
         memoizedIsInitialized = 0;
         return false;
       }
-      if (!hasContentItemUri()) {
-        memoizedIsInitialized = 0;
-        return false;
+      if (hasProgress()) {
+        if (!getProgress().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasNew()) {
+        if (!getNew().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasFinish()) {
+        if (!getFinish().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasError()) {
+        if (!getError().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
       }
       memoizedIsInitialized = 1;
       return true;
@@ -1928,13 +8498,19 @@ public final class Event {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getServiceIdBytes());
+        output.writeEnum(1, type_.getNumber());
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getContentItemUriBytes());
+      if (testOneofCase_ == 2) {
+        output.writeMessage(2, (eu.mico.platform.event.model.Event.AnalysisEvent.Progress) testOneof_);
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, getObjectUriBytes());
+      if (testOneofCase_ == 3) {
+        output.writeMessage(3, (eu.mico.platform.event.model.Event.AnalysisEvent.NewPart) testOneof_);
+      }
+      if (testOneofCase_ == 8) {
+        output.writeMessage(8, (eu.mico.platform.event.model.Event.AnalysisEvent.Finish) testOneof_);
+      }
+      if (testOneofCase_ == 9) {
+        output.writeMessage(9, (eu.mico.platform.event.model.Event.AnalysisEvent.Error) testOneof_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1947,15 +8523,23 @@ public final class Event {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getServiceIdBytes());
+          .computeEnumSize(1, type_.getNumber());
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+      if (testOneofCase_ == 2) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getContentItemUriBytes());
+          .computeMessageSize(2, (eu.mico.platform.event.model.Event.AnalysisEvent.Progress) testOneof_);
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+      if (testOneofCase_ == 3) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, getObjectUriBytes());
+          .computeMessageSize(3, (eu.mico.platform.event.model.Event.AnalysisEvent.NewPart) testOneof_);
+      }
+      if (testOneofCase_ == 8) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(8, (eu.mico.platform.event.model.Event.AnalysisEvent.Finish) testOneof_);
+      }
+      if (testOneofCase_ == 9) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(9, (eu.mico.platform.event.model.Event.AnalysisEvent.Error) testOneof_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -2039,12 +8623,7 @@ public final class Event {
      * Protobuf type {@code mico.event.model.AnalysisEvent}
      *
      * <pre>
-     **
-     * Notify a service that a analysis should continue using the given content item and object in that
-     * content item. The content item URI is the unique identifier of the content item (a URI). The
-     * object URI is the URI of an object that should be taken into account by the receiving service;
-     * this can be a content part (identified by its URI), a fragment identified and stored in the
-     * metadata, etc.
+     *
      * AnalysisEvents are sent both, by the message broker to notify services that they should start
      * analysing an object, and by services to notify the message broker that they added a new object.
      * </pre>
@@ -2085,12 +8664,10 @@ public final class Event {
 
       public Builder clear() {
         super.clear();
-        serviceId_ = "";
+        type_ = eu.mico.platform.event.model.Event.MessageType.PROGRESS;
         bitField0_ = (bitField0_ & ~0x00000001);
-        contentItemUri_ = "";
-        bitField0_ = (bitField0_ & ~0x00000002);
-        objectUri_ = "";
-        bitField0_ = (bitField0_ & ~0x00000004);
+        testOneofCase_ = 0;
+        testOneof_ = null;
         return this;
       }
 
@@ -2122,16 +8699,37 @@ public final class Event {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.serviceId_ = serviceId_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
+        result.type_ = type_;
+        if (testOneofCase_ == 2) {
+          if (progressBuilder_ == null) {
+            result.testOneof_ = testOneof_;
+          } else {
+            result.testOneof_ = progressBuilder_.build();
+          }
         }
-        result.contentItemUri_ = contentItemUri_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
+        if (testOneofCase_ == 3) {
+          if (newBuilder_ == null) {
+            result.testOneof_ = testOneof_;
+          } else {
+            result.testOneof_ = newBuilder_.build();
+          }
         }
-        result.objectUri_ = objectUri_;
+        if (testOneofCase_ == 8) {
+          if (finishBuilder_ == null) {
+            result.testOneof_ = testOneof_;
+          } else {
+            result.testOneof_ = finishBuilder_.build();
+          }
+        }
+        if (testOneofCase_ == 9) {
+          if (errorBuilder_ == null) {
+            result.testOneof_ = testOneof_;
+          } else {
+            result.testOneof_ = errorBuilder_.build();
+          }
+        }
         result.bitField0_ = to_bitField0_;
+        result.testOneofCase_ = testOneofCase_;
         onBuilt();
         return result;
       }
@@ -2147,33 +8745,62 @@ public final class Event {
 
       public Builder mergeFrom(eu.mico.platform.event.model.Event.AnalysisEvent other) {
         if (other == eu.mico.platform.event.model.Event.AnalysisEvent.getDefaultInstance()) return this;
-        if (other.hasServiceId()) {
-          bitField0_ |= 0x00000001;
-          serviceId_ = other.serviceId_;
-          onChanged();
+        if (other.hasType()) {
+          setType(other.getType());
         }
-        if (other.hasContentItemUri()) {
-          bitField0_ |= 0x00000002;
-          contentItemUri_ = other.contentItemUri_;
-          onChanged();
-        }
-        if (other.hasObjectUri()) {
-          bitField0_ |= 0x00000004;
-          objectUri_ = other.objectUri_;
-          onChanged();
+        switch (other.getTestOneofCase()) {
+          case PROGRESS: {
+            mergeProgress(other.getProgress());
+            break;
+          }
+          case NEW: {
+            mergeNew(other.getNew());
+            break;
+          }
+          case FINISH: {
+            mergeFinish(other.getFinish());
+            break;
+          }
+          case ERROR: {
+            mergeError(other.getError());
+            break;
+          }
+          case TESTONEOF_NOT_SET: {
+            break;
+          }
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
 
       public final boolean isInitialized() {
-        if (!hasServiceId()) {
+        if (!hasType()) {
           
           return false;
         }
-        if (!hasContentItemUri()) {
-          
-          return false;
+        if (hasProgress()) {
+          if (!getProgress().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasNew()) {
+          if (!getNew().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasFinish()) {
+          if (!getFinish().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasError()) {
+          if (!getError().isInitialized()) {
+            
+            return false;
+          }
         }
         return true;
       }
@@ -2195,306 +8822,596 @@ public final class Event {
         }
         return this;
       }
+      private int testOneofCase_ = 0;
+      private java.lang.Object testOneof_;
+      public TestOneofCase
+          getTestOneofCase() {
+        return TestOneofCase.valueOf(
+            testOneofCase_);
+      }
+
+      public Builder clearTestOneof() {
+        testOneofCase_ = 0;
+        testOneof_ = null;
+        onChanged();
+        return this;
+      }
+
       private int bitField0_;
 
-      private java.lang.Object serviceId_ = "";
+      private eu.mico.platform.event.model.Event.MessageType type_ = eu.mico.platform.event.model.Event.MessageType.PROGRESS;
       /**
-       * <code>required string serviceId = 1;</code>
-       *
-       * <pre>
-       *!&lt; service identifier of the service generating the event
-       * </pre>
+       * <code>required .mico.event.model.MessageType type = 1;</code>
        */
-      public boolean hasServiceId() {
+      public boolean hasType() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required string serviceId = 1;</code>
-       *
-       * <pre>
-       *!&lt; service identifier of the service generating the event
-       * </pre>
+       * <code>required .mico.event.model.MessageType type = 1;</code>
        */
-      public java.lang.String getServiceId() {
-        java.lang.Object ref = serviceId_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            serviceId_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      public eu.mico.platform.event.model.Event.MessageType getType() {
+        return type_;
       }
       /**
-       * <code>required string serviceId = 1;</code>
-       *
-       * <pre>
-       *!&lt; service identifier of the service generating the event
-       * </pre>
+       * <code>required .mico.event.model.MessageType type = 1;</code>
        */
-      public com.google.protobuf.ByteString
-          getServiceIdBytes() {
-        java.lang.Object ref = serviceId_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          serviceId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>required string serviceId = 1;</code>
-       *
-       * <pre>
-       *!&lt; service identifier of the service generating the event
-       * </pre>
-       */
-      public Builder setServiceId(
-          java.lang.String value) {
+      public Builder setType(eu.mico.platform.event.model.Event.MessageType value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        serviceId_ = value;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000001;
+        type_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string serviceId = 1;</code>
-       *
-       * <pre>
-       *!&lt; service identifier of the service generating the event
-       * </pre>
+       * <code>required .mico.event.model.MessageType type = 1;</code>
        */
-      public Builder clearServiceId() {
+      public Builder clearType() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        serviceId_ = getDefaultInstance().getServiceId();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string serviceId = 1;</code>
-       *
-       * <pre>
-       *!&lt; service identifier of the service generating the event
-       * </pre>
-       */
-      public Builder setServiceIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        serviceId_ = value;
+        type_ = eu.mico.platform.event.model.Event.MessageType.PROGRESS;
         onChanged();
         return this;
       }
 
-      private java.lang.Object contentItemUri_ = "";
+      private com.google.protobuf.SingleFieldBuilder<
+          eu.mico.platform.event.model.Event.AnalysisEvent.Progress, eu.mico.platform.event.model.Event.AnalysisEvent.Progress.Builder, eu.mico.platform.event.model.Event.AnalysisEvent.ProgressOrBuilder> progressBuilder_;
       /**
-       * <code>required string contentItemUri = 2;</code>
-       *
-       * <pre>
-       *!&lt; URI of the content item being processed
-       * </pre>
+       * <code>optional .mico.event.model.AnalysisEvent.Progress progress = 2;</code>
        */
-      public boolean hasContentItemUri() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
+      public boolean hasProgress() {
+        return testOneofCase_ == 2;
       }
       /**
-       * <code>required string contentItemUri = 2;</code>
-       *
-       * <pre>
-       *!&lt; URI of the content item being processed
-       * </pre>
+       * <code>optional .mico.event.model.AnalysisEvent.Progress progress = 2;</code>
        */
-      public java.lang.String getContentItemUri() {
-        java.lang.Object ref = contentItemUri_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            contentItemUri_ = s;
+      public eu.mico.platform.event.model.Event.AnalysisEvent.Progress getProgress() {
+        if (progressBuilder_ == null) {
+          if (testOneofCase_ == 2) {
+            return (eu.mico.platform.event.model.Event.AnalysisEvent.Progress) testOneof_;
           }
-          return s;
+          return eu.mico.platform.event.model.Event.AnalysisEvent.Progress.getDefaultInstance();
         } else {
-          return (java.lang.String) ref;
+          if (testOneofCase_ == 2) {
+            return progressBuilder_.getMessage();
+          }
+          return eu.mico.platform.event.model.Event.AnalysisEvent.Progress.getDefaultInstance();
         }
       }
       /**
-       * <code>required string contentItemUri = 2;</code>
-       *
-       * <pre>
-       *!&lt; URI of the content item being processed
-       * </pre>
+       * <code>optional .mico.event.model.AnalysisEvent.Progress progress = 2;</code>
        */
-      public com.google.protobuf.ByteString
-          getContentItemUriBytes() {
-        java.lang.Object ref = contentItemUri_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          contentItemUri_ = b;
-          return b;
+      public Builder setProgress(eu.mico.platform.event.model.Event.AnalysisEvent.Progress value) {
+        if (progressBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          testOneof_ = value;
+          onChanged();
         } else {
-          return (com.google.protobuf.ByteString) ref;
+          progressBuilder_.setMessage(value);
+        }
+        testOneofCase_ = 2;
+        return this;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Progress progress = 2;</code>
+       */
+      public Builder setProgress(
+          eu.mico.platform.event.model.Event.AnalysisEvent.Progress.Builder builderForValue) {
+        if (progressBuilder_ == null) {
+          testOneof_ = builderForValue.build();
+          onChanged();
+        } else {
+          progressBuilder_.setMessage(builderForValue.build());
+        }
+        testOneofCase_ = 2;
+        return this;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Progress progress = 2;</code>
+       */
+      public Builder mergeProgress(eu.mico.platform.event.model.Event.AnalysisEvent.Progress value) {
+        if (progressBuilder_ == null) {
+          if (testOneofCase_ == 2 &&
+              testOneof_ != eu.mico.platform.event.model.Event.AnalysisEvent.Progress.getDefaultInstance()) {
+            testOneof_ = eu.mico.platform.event.model.Event.AnalysisEvent.Progress.newBuilder((eu.mico.platform.event.model.Event.AnalysisEvent.Progress) testOneof_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            testOneof_ = value;
+          }
+          onChanged();
+        } else {
+          if (testOneofCase_ == 2) {
+            progressBuilder_.mergeFrom(value);
+          }
+          progressBuilder_.setMessage(value);
+        }
+        testOneofCase_ = 2;
+        return this;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Progress progress = 2;</code>
+       */
+      public Builder clearProgress() {
+        if (progressBuilder_ == null) {
+          if (testOneofCase_ == 2) {
+            testOneofCase_ = 0;
+            testOneof_ = null;
+            onChanged();
+          }
+        } else {
+          if (testOneofCase_ == 2) {
+            testOneofCase_ = 0;
+            testOneof_ = null;
+          }
+          progressBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Progress progress = 2;</code>
+       */
+      public eu.mico.platform.event.model.Event.AnalysisEvent.Progress.Builder getProgressBuilder() {
+        return getProgressFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Progress progress = 2;</code>
+       */
+      public eu.mico.platform.event.model.Event.AnalysisEvent.ProgressOrBuilder getProgressOrBuilder() {
+        if ((testOneofCase_ == 2) && (progressBuilder_ != null)) {
+          return progressBuilder_.getMessageOrBuilder();
+        } else {
+          if (testOneofCase_ == 2) {
+            return (eu.mico.platform.event.model.Event.AnalysisEvent.Progress) testOneof_;
+          }
+          return eu.mico.platform.event.model.Event.AnalysisEvent.Progress.getDefaultInstance();
         }
       }
       /**
-       * <code>required string contentItemUri = 2;</code>
-       *
-       * <pre>
-       *!&lt; URI of the content item being processed
-       * </pre>
+       * <code>optional .mico.event.model.AnalysisEvent.Progress progress = 2;</code>
        */
-      public Builder setContentItemUri(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-        contentItemUri_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string contentItemUri = 2;</code>
-       *
-       * <pre>
-       *!&lt; URI of the content item being processed
-       * </pre>
-       */
-      public Builder clearContentItemUri() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        contentItemUri_ = getDefaultInstance().getContentItemUri();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>required string contentItemUri = 2;</code>
-       *
-       * <pre>
-       *!&lt; URI of the content item being processed
-       * </pre>
-       */
-      public Builder setContentItemUriBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-        contentItemUri_ = value;
-        onChanged();
-        return this;
+      private com.google.protobuf.SingleFieldBuilder<
+          eu.mico.platform.event.model.Event.AnalysisEvent.Progress, eu.mico.platform.event.model.Event.AnalysisEvent.Progress.Builder, eu.mico.platform.event.model.Event.AnalysisEvent.ProgressOrBuilder> 
+          getProgressFieldBuilder() {
+        if (progressBuilder_ == null) {
+          if (!(testOneofCase_ == 2)) {
+            testOneof_ = eu.mico.platform.event.model.Event.AnalysisEvent.Progress.getDefaultInstance();
+          }
+          progressBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              eu.mico.platform.event.model.Event.AnalysisEvent.Progress, eu.mico.platform.event.model.Event.AnalysisEvent.Progress.Builder, eu.mico.platform.event.model.Event.AnalysisEvent.ProgressOrBuilder>(
+                  (eu.mico.platform.event.model.Event.AnalysisEvent.Progress) testOneof_,
+                  getParentForChildren(),
+                  isClean());
+          testOneof_ = null;
+        }
+        testOneofCase_ = 2;
+        return progressBuilder_;
       }
 
-      private java.lang.Object objectUri_ = "";
+      private com.google.protobuf.SingleFieldBuilder<
+          eu.mico.platform.event.model.Event.AnalysisEvent.NewPart, eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.Builder, eu.mico.platform.event.model.Event.AnalysisEvent.NewPartOrBuilder> newBuilder_;
       /**
-       * <code>optional string objectUri = 3;</code>
-       *
-       * <pre>
-       *!&lt; URI of the object of that content item being processed
-       * </pre>
+       * <code>optional .mico.event.model.AnalysisEvent.NewPart new = 3;</code>
        */
-      public boolean hasObjectUri() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+      public boolean hasNew() {
+        return testOneofCase_ == 3;
       }
       /**
-       * <code>optional string objectUri = 3;</code>
-       *
-       * <pre>
-       *!&lt; URI of the object of that content item being processed
-       * </pre>
+       * <code>optional .mico.event.model.AnalysisEvent.NewPart new = 3;</code>
        */
-      public java.lang.String getObjectUri() {
-        java.lang.Object ref = objectUri_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            objectUri_ = s;
+      public eu.mico.platform.event.model.Event.AnalysisEvent.NewPart getNew() {
+        if (newBuilder_ == null) {
+          if (testOneofCase_ == 3) {
+            return (eu.mico.platform.event.model.Event.AnalysisEvent.NewPart) testOneof_;
           }
-          return s;
+          return eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.getDefaultInstance();
         } else {
-          return (java.lang.String) ref;
+          if (testOneofCase_ == 3) {
+            return newBuilder_.getMessage();
+          }
+          return eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.getDefaultInstance();
         }
       }
       /**
-       * <code>optional string objectUri = 3;</code>
-       *
-       * <pre>
-       *!&lt; URI of the object of that content item being processed
-       * </pre>
+       * <code>optional .mico.event.model.AnalysisEvent.NewPart new = 3;</code>
        */
-      public com.google.protobuf.ByteString
-          getObjectUriBytes() {
-        java.lang.Object ref = objectUri_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          objectUri_ = b;
-          return b;
+      public Builder setNew(eu.mico.platform.event.model.Event.AnalysisEvent.NewPart value) {
+        if (newBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          testOneof_ = value;
+          onChanged();
         } else {
-          return (com.google.protobuf.ByteString) ref;
+          newBuilder_.setMessage(value);
+        }
+        testOneofCase_ = 3;
+        return this;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.NewPart new = 3;</code>
+       */
+      public Builder setNew(
+          eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.Builder builderForValue) {
+        if (newBuilder_ == null) {
+          testOneof_ = builderForValue.build();
+          onChanged();
+        } else {
+          newBuilder_.setMessage(builderForValue.build());
+        }
+        testOneofCase_ = 3;
+        return this;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.NewPart new = 3;</code>
+       */
+      public Builder mergeNew(eu.mico.platform.event.model.Event.AnalysisEvent.NewPart value) {
+        if (newBuilder_ == null) {
+          if (testOneofCase_ == 3 &&
+              testOneof_ != eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.getDefaultInstance()) {
+            testOneof_ = eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.newBuilder((eu.mico.platform.event.model.Event.AnalysisEvent.NewPart) testOneof_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            testOneof_ = value;
+          }
+          onChanged();
+        } else {
+          if (testOneofCase_ == 3) {
+            newBuilder_.mergeFrom(value);
+          }
+          newBuilder_.setMessage(value);
+        }
+        testOneofCase_ = 3;
+        return this;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.NewPart new = 3;</code>
+       */
+      public Builder clearNew() {
+        if (newBuilder_ == null) {
+          if (testOneofCase_ == 3) {
+            testOneofCase_ = 0;
+            testOneof_ = null;
+            onChanged();
+          }
+        } else {
+          if (testOneofCase_ == 3) {
+            testOneofCase_ = 0;
+            testOneof_ = null;
+          }
+          newBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.NewPart new = 3;</code>
+       */
+      public eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.Builder getNewBuilder() {
+        return getNewFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.NewPart new = 3;</code>
+       */
+      public eu.mico.platform.event.model.Event.AnalysisEvent.NewPartOrBuilder getNewOrBuilder() {
+        if ((testOneofCase_ == 3) && (newBuilder_ != null)) {
+          return newBuilder_.getMessageOrBuilder();
+        } else {
+          if (testOneofCase_ == 3) {
+            return (eu.mico.platform.event.model.Event.AnalysisEvent.NewPart) testOneof_;
+          }
+          return eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.getDefaultInstance();
         }
       }
       /**
-       * <code>optional string objectUri = 3;</code>
-       *
-       * <pre>
-       *!&lt; URI of the object of that content item being processed
-       * </pre>
+       * <code>optional .mico.event.model.AnalysisEvent.NewPart new = 3;</code>
        */
-      public Builder setObjectUri(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-        objectUri_ = value;
-        onChanged();
+      private com.google.protobuf.SingleFieldBuilder<
+          eu.mico.platform.event.model.Event.AnalysisEvent.NewPart, eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.Builder, eu.mico.platform.event.model.Event.AnalysisEvent.NewPartOrBuilder> 
+          getNewFieldBuilder() {
+        if (newBuilder_ == null) {
+          if (!(testOneofCase_ == 3)) {
+            testOneof_ = eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.getDefaultInstance();
+          }
+          newBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              eu.mico.platform.event.model.Event.AnalysisEvent.NewPart, eu.mico.platform.event.model.Event.AnalysisEvent.NewPart.Builder, eu.mico.platform.event.model.Event.AnalysisEvent.NewPartOrBuilder>(
+                  (eu.mico.platform.event.model.Event.AnalysisEvent.NewPart) testOneof_,
+                  getParentForChildren(),
+                  isClean());
+          testOneof_ = null;
+        }
+        testOneofCase_ = 3;
+        return newBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilder<
+          eu.mico.platform.event.model.Event.AnalysisEvent.Finish, eu.mico.platform.event.model.Event.AnalysisEvent.Finish.Builder, eu.mico.platform.event.model.Event.AnalysisEvent.FinishOrBuilder> finishBuilder_;
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Finish finish = 8;</code>
+       */
+      public boolean hasFinish() {
+        return testOneofCase_ == 8;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Finish finish = 8;</code>
+       */
+      public eu.mico.platform.event.model.Event.AnalysisEvent.Finish getFinish() {
+        if (finishBuilder_ == null) {
+          if (testOneofCase_ == 8) {
+            return (eu.mico.platform.event.model.Event.AnalysisEvent.Finish) testOneof_;
+          }
+          return eu.mico.platform.event.model.Event.AnalysisEvent.Finish.getDefaultInstance();
+        } else {
+          if (testOneofCase_ == 8) {
+            return finishBuilder_.getMessage();
+          }
+          return eu.mico.platform.event.model.Event.AnalysisEvent.Finish.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Finish finish = 8;</code>
+       */
+      public Builder setFinish(eu.mico.platform.event.model.Event.AnalysisEvent.Finish value) {
+        if (finishBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          testOneof_ = value;
+          onChanged();
+        } else {
+          finishBuilder_.setMessage(value);
+        }
+        testOneofCase_ = 8;
         return this;
       }
       /**
-       * <code>optional string objectUri = 3;</code>
-       *
-       * <pre>
-       *!&lt; URI of the object of that content item being processed
-       * </pre>
+       * <code>optional .mico.event.model.AnalysisEvent.Finish finish = 8;</code>
        */
-      public Builder clearObjectUri() {
-        bitField0_ = (bitField0_ & ~0x00000004);
-        objectUri_ = getDefaultInstance().getObjectUri();
-        onChanged();
+      public Builder setFinish(
+          eu.mico.platform.event.model.Event.AnalysisEvent.Finish.Builder builderForValue) {
+        if (finishBuilder_ == null) {
+          testOneof_ = builderForValue.build();
+          onChanged();
+        } else {
+          finishBuilder_.setMessage(builderForValue.build());
+        }
+        testOneofCase_ = 8;
         return this;
       }
       /**
-       * <code>optional string objectUri = 3;</code>
-       *
-       * <pre>
-       *!&lt; URI of the object of that content item being processed
-       * </pre>
+       * <code>optional .mico.event.model.AnalysisEvent.Finish finish = 8;</code>
        */
-      public Builder setObjectUriBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-        objectUri_ = value;
-        onChanged();
+      public Builder mergeFinish(eu.mico.platform.event.model.Event.AnalysisEvent.Finish value) {
+        if (finishBuilder_ == null) {
+          if (testOneofCase_ == 8 &&
+              testOneof_ != eu.mico.platform.event.model.Event.AnalysisEvent.Finish.getDefaultInstance()) {
+            testOneof_ = eu.mico.platform.event.model.Event.AnalysisEvent.Finish.newBuilder((eu.mico.platform.event.model.Event.AnalysisEvent.Finish) testOneof_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            testOneof_ = value;
+          }
+          onChanged();
+        } else {
+          if (testOneofCase_ == 8) {
+            finishBuilder_.mergeFrom(value);
+          }
+          finishBuilder_.setMessage(value);
+        }
+        testOneofCase_ = 8;
         return this;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Finish finish = 8;</code>
+       */
+      public Builder clearFinish() {
+        if (finishBuilder_ == null) {
+          if (testOneofCase_ == 8) {
+            testOneofCase_ = 0;
+            testOneof_ = null;
+            onChanged();
+          }
+        } else {
+          if (testOneofCase_ == 8) {
+            testOneofCase_ = 0;
+            testOneof_ = null;
+          }
+          finishBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Finish finish = 8;</code>
+       */
+      public eu.mico.platform.event.model.Event.AnalysisEvent.Finish.Builder getFinishBuilder() {
+        return getFinishFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Finish finish = 8;</code>
+       */
+      public eu.mico.platform.event.model.Event.AnalysisEvent.FinishOrBuilder getFinishOrBuilder() {
+        if ((testOneofCase_ == 8) && (finishBuilder_ != null)) {
+          return finishBuilder_.getMessageOrBuilder();
+        } else {
+          if (testOneofCase_ == 8) {
+            return (eu.mico.platform.event.model.Event.AnalysisEvent.Finish) testOneof_;
+          }
+          return eu.mico.platform.event.model.Event.AnalysisEvent.Finish.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Finish finish = 8;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          eu.mico.platform.event.model.Event.AnalysisEvent.Finish, eu.mico.platform.event.model.Event.AnalysisEvent.Finish.Builder, eu.mico.platform.event.model.Event.AnalysisEvent.FinishOrBuilder> 
+          getFinishFieldBuilder() {
+        if (finishBuilder_ == null) {
+          if (!(testOneofCase_ == 8)) {
+            testOneof_ = eu.mico.platform.event.model.Event.AnalysisEvent.Finish.getDefaultInstance();
+          }
+          finishBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              eu.mico.platform.event.model.Event.AnalysisEvent.Finish, eu.mico.platform.event.model.Event.AnalysisEvent.Finish.Builder, eu.mico.platform.event.model.Event.AnalysisEvent.FinishOrBuilder>(
+                  (eu.mico.platform.event.model.Event.AnalysisEvent.Finish) testOneof_,
+                  getParentForChildren(),
+                  isClean());
+          testOneof_ = null;
+        }
+        testOneofCase_ = 8;
+        return finishBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilder<
+          eu.mico.platform.event.model.Event.AnalysisEvent.Error, eu.mico.platform.event.model.Event.AnalysisEvent.Error.Builder, eu.mico.platform.event.model.Event.AnalysisEvent.ErrorOrBuilder> errorBuilder_;
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Error error = 9;</code>
+       */
+      public boolean hasError() {
+        return testOneofCase_ == 9;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Error error = 9;</code>
+       */
+      public eu.mico.platform.event.model.Event.AnalysisEvent.Error getError() {
+        if (errorBuilder_ == null) {
+          if (testOneofCase_ == 9) {
+            return (eu.mico.platform.event.model.Event.AnalysisEvent.Error) testOneof_;
+          }
+          return eu.mico.platform.event.model.Event.AnalysisEvent.Error.getDefaultInstance();
+        } else {
+          if (testOneofCase_ == 9) {
+            return errorBuilder_.getMessage();
+          }
+          return eu.mico.platform.event.model.Event.AnalysisEvent.Error.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Error error = 9;</code>
+       */
+      public Builder setError(eu.mico.platform.event.model.Event.AnalysisEvent.Error value) {
+        if (errorBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          testOneof_ = value;
+          onChanged();
+        } else {
+          errorBuilder_.setMessage(value);
+        }
+        testOneofCase_ = 9;
+        return this;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Error error = 9;</code>
+       */
+      public Builder setError(
+          eu.mico.platform.event.model.Event.AnalysisEvent.Error.Builder builderForValue) {
+        if (errorBuilder_ == null) {
+          testOneof_ = builderForValue.build();
+          onChanged();
+        } else {
+          errorBuilder_.setMessage(builderForValue.build());
+        }
+        testOneofCase_ = 9;
+        return this;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Error error = 9;</code>
+       */
+      public Builder mergeError(eu.mico.platform.event.model.Event.AnalysisEvent.Error value) {
+        if (errorBuilder_ == null) {
+          if (testOneofCase_ == 9 &&
+              testOneof_ != eu.mico.platform.event.model.Event.AnalysisEvent.Error.getDefaultInstance()) {
+            testOneof_ = eu.mico.platform.event.model.Event.AnalysisEvent.Error.newBuilder((eu.mico.platform.event.model.Event.AnalysisEvent.Error) testOneof_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            testOneof_ = value;
+          }
+          onChanged();
+        } else {
+          if (testOneofCase_ == 9) {
+            errorBuilder_.mergeFrom(value);
+          }
+          errorBuilder_.setMessage(value);
+        }
+        testOneofCase_ = 9;
+        return this;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Error error = 9;</code>
+       */
+      public Builder clearError() {
+        if (errorBuilder_ == null) {
+          if (testOneofCase_ == 9) {
+            testOneofCase_ = 0;
+            testOneof_ = null;
+            onChanged();
+          }
+        } else {
+          if (testOneofCase_ == 9) {
+            testOneofCase_ = 0;
+            testOneof_ = null;
+          }
+          errorBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Error error = 9;</code>
+       */
+      public eu.mico.platform.event.model.Event.AnalysisEvent.Error.Builder getErrorBuilder() {
+        return getErrorFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Error error = 9;</code>
+       */
+      public eu.mico.platform.event.model.Event.AnalysisEvent.ErrorOrBuilder getErrorOrBuilder() {
+        if ((testOneofCase_ == 9) && (errorBuilder_ != null)) {
+          return errorBuilder_.getMessageOrBuilder();
+        } else {
+          if (testOneofCase_ == 9) {
+            return (eu.mico.platform.event.model.Event.AnalysisEvent.Error) testOneof_;
+          }
+          return eu.mico.platform.event.model.Event.AnalysisEvent.Error.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>optional .mico.event.model.AnalysisEvent.Error error = 9;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          eu.mico.platform.event.model.Event.AnalysisEvent.Error, eu.mico.platform.event.model.Event.AnalysisEvent.Error.Builder, eu.mico.platform.event.model.Event.AnalysisEvent.ErrorOrBuilder> 
+          getErrorFieldBuilder() {
+        if (errorBuilder_ == null) {
+          if (!(testOneofCase_ == 9)) {
+            testOneof_ = eu.mico.platform.event.model.Event.AnalysisEvent.Error.getDefaultInstance();
+          }
+          errorBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              eu.mico.platform.event.model.Event.AnalysisEvent.Error, eu.mico.platform.event.model.Event.AnalysisEvent.Error.Builder, eu.mico.platform.event.model.Event.AnalysisEvent.ErrorOrBuilder>(
+                  (eu.mico.platform.event.model.Event.AnalysisEvent.Error) testOneof_,
+                  getParentForChildren(),
+                  isClean());
+          testOneof_ = null;
+        }
+        testOneofCase_ = 9;
+        return errorBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:mico.event.model.AnalysisEvent)
@@ -2508,49 +9425,49 @@ public final class Event {
     // @@protoc_insertion_point(class_scope:mico.event.model.AnalysisEvent)
   }
 
-  public interface ContentEventOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:mico.event.model.ContentEvent)
+  public interface ItemEventOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:mico.event.model.ItemEvent)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required string contentItemUri = 1;</code>
+     * <code>required string itemUri = 1;</code>
      */
-    boolean hasContentItemUri();
+    boolean hasItemUri();
     /**
-     * <code>required string contentItemUri = 1;</code>
+     * <code>required string itemUri = 1;</code>
      */
-    java.lang.String getContentItemUri();
+    java.lang.String getItemUri();
     /**
-     * <code>required string contentItemUri = 1;</code>
+     * <code>required string itemUri = 1;</code>
      */
     com.google.protobuf.ByteString
-        getContentItemUriBytes();
+        getItemUriBytes();
   }
   /**
-   * Protobuf type {@code mico.event.model.ContentEvent}
+   * Protobuf type {@code mico.event.model.ItemEvent}
    *
    * <pre>
    **
-   * Notify the broker that a new content item is available in the system using the given URI.
+   * Notify the broker that a new item is available in the system using the given URI.
    * </pre>
    */
-  public static final class ContentEvent extends
+  public static final class ItemEvent extends
       com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:mico.event.model.ContentEvent)
-      ContentEventOrBuilder {
-    // Use ContentEvent.newBuilder() to construct.
-    private ContentEvent(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      // @@protoc_insertion_point(message_implements:mico.event.model.ItemEvent)
+      ItemEventOrBuilder {
+    // Use ItemEvent.newBuilder() to construct.
+    private ItemEvent(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private ContentEvent(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+    private ItemEvent(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
 
-    private static final ContentEvent defaultInstance;
-    public static ContentEvent getDefaultInstance() {
+    private static final ItemEvent defaultInstance;
+    public static ItemEvent getDefaultInstance() {
       return defaultInstance;
     }
 
-    public ContentEvent getDefaultInstanceForType() {
+    public ItemEvent getDefaultInstanceForType() {
       return defaultInstance;
     }
 
@@ -2560,7 +9477,7 @@ public final class Event {
         getUnknownFields() {
       return this.unknownFields;
     }
-    private ContentEvent(
+    private ItemEvent(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -2586,7 +9503,7 @@ public final class Event {
             case 10: {
               com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000001;
-              contentItemUri_ = bs;
+              itemUri_ = bs;
               break;
             }
           }
@@ -2603,45 +9520,45 @@ public final class Event {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ContentEvent_descriptor;
+      return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ItemEvent_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ContentEvent_fieldAccessorTable
+      return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ItemEvent_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              eu.mico.platform.event.model.Event.ContentEvent.class, eu.mico.platform.event.model.Event.ContentEvent.Builder.class);
+              eu.mico.platform.event.model.Event.ItemEvent.class, eu.mico.platform.event.model.Event.ItemEvent.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<ContentEvent> PARSER =
-        new com.google.protobuf.AbstractParser<ContentEvent>() {
-      public ContentEvent parsePartialFrom(
+    public static com.google.protobuf.Parser<ItemEvent> PARSER =
+        new com.google.protobuf.AbstractParser<ItemEvent>() {
+      public ItemEvent parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ContentEvent(input, extensionRegistry);
+        return new ItemEvent(input, extensionRegistry);
       }
     };
 
     @java.lang.Override
-    public com.google.protobuf.Parser<ContentEvent> getParserForType() {
+    public com.google.protobuf.Parser<ItemEvent> getParserForType() {
       return PARSER;
     }
 
     private int bitField0_;
-    public static final int CONTENTITEMURI_FIELD_NUMBER = 1;
-    private java.lang.Object contentItemUri_;
+    public static final int ITEMURI_FIELD_NUMBER = 1;
+    private java.lang.Object itemUri_;
     /**
-     * <code>required string contentItemUri = 1;</code>
+     * <code>required string itemUri = 1;</code>
      */
-    public boolean hasContentItemUri() {
+    public boolean hasItemUri() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required string contentItemUri = 1;</code>
+     * <code>required string itemUri = 1;</code>
      */
-    public java.lang.String getContentItemUri() {
-      java.lang.Object ref = contentItemUri_;
+    public java.lang.String getItemUri() {
+      java.lang.Object ref = itemUri_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
@@ -2649,22 +9566,22 @@ public final class Event {
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
-          contentItemUri_ = s;
+          itemUri_ = s;
         }
         return s;
       }
     }
     /**
-     * <code>required string contentItemUri = 1;</code>
+     * <code>required string itemUri = 1;</code>
      */
     public com.google.protobuf.ByteString
-        getContentItemUriBytes() {
-      java.lang.Object ref = contentItemUri_;
+        getItemUriBytes() {
+      java.lang.Object ref = itemUri_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        contentItemUri_ = b;
+        itemUri_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -2672,7 +9589,7 @@ public final class Event {
     }
 
     private void initFields() {
-      contentItemUri_ = "";
+      itemUri_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -2680,7 +9597,7 @@ public final class Event {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      if (!hasContentItemUri()) {
+      if (!hasItemUri()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -2692,7 +9609,7 @@ public final class Event {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getContentItemUriBytes());
+        output.writeBytes(1, getItemUriBytes());
       }
       getUnknownFields().writeTo(output);
     }
@@ -2705,7 +9622,7 @@ public final class Event {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getContentItemUriBytes());
+          .computeBytesSize(1, getItemUriBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -2719,53 +9636,53 @@ public final class Event {
       return super.writeReplace();
     }
 
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+    public static eu.mico.platform.event.model.Event.ItemEvent parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+    public static eu.mico.platform.event.model.Event.ItemEvent parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(byte[] data)
+    public static eu.mico.platform.event.model.Event.ItemEvent parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+    public static eu.mico.platform.event.model.Event.ItemEvent parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(java.io.InputStream input)
+    public static eu.mico.platform.event.model.Event.ItemEvent parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+    public static eu.mico.platform.event.model.Event.ItemEvent parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseDelimitedFrom(java.io.InputStream input)
+    public static eu.mico.platform.event.model.Event.ItemEvent parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseDelimitedFrom(
+    public static eu.mico.platform.event.model.Event.ItemEvent parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+    public static eu.mico.platform.event.model.Event.ItemEvent parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static eu.mico.platform.event.model.Event.ContentEvent parseFrom(
+    public static eu.mico.platform.event.model.Event.ItemEvent parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -2774,7 +9691,7 @@ public final class Event {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(eu.mico.platform.event.model.Event.ContentEvent prototype) {
+    public static Builder newBuilder(eu.mico.platform.event.model.Event.ItemEvent prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
@@ -2786,30 +9703,30 @@ public final class Event {
       return builder;
     }
     /**
-     * Protobuf type {@code mico.event.model.ContentEvent}
+     * Protobuf type {@code mico.event.model.ItemEvent}
      *
      * <pre>
      **
-     * Notify the broker that a new content item is available in the system using the given URI.
+     * Notify the broker that a new item is available in the system using the given URI.
      * </pre>
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:mico.event.model.ContentEvent)
-        eu.mico.platform.event.model.Event.ContentEventOrBuilder {
+        // @@protoc_insertion_point(builder_implements:mico.event.model.ItemEvent)
+        eu.mico.platform.event.model.Event.ItemEventOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ContentEvent_descriptor;
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ItemEvent_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ContentEvent_fieldAccessorTable
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ItemEvent_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                eu.mico.platform.event.model.Event.ContentEvent.class, eu.mico.platform.event.model.Event.ContentEvent.Builder.class);
+                eu.mico.platform.event.model.Event.ItemEvent.class, eu.mico.platform.event.model.Event.ItemEvent.Builder.class);
       }
 
-      // Construct using eu.mico.platform.event.model.Event.ContentEvent.newBuilder()
+      // Construct using eu.mico.platform.event.model.Event.ItemEvent.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -2829,7 +9746,7 @@ public final class Event {
 
       public Builder clear() {
         super.clear();
-        contentItemUri_ = "";
+        itemUri_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
@@ -2840,48 +9757,48 @@ public final class Event {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ContentEvent_descriptor;
+        return eu.mico.platform.event.model.Event.internal_static_mico_event_model_ItemEvent_descriptor;
       }
 
-      public eu.mico.platform.event.model.Event.ContentEvent getDefaultInstanceForType() {
-        return eu.mico.platform.event.model.Event.ContentEvent.getDefaultInstance();
+      public eu.mico.platform.event.model.Event.ItemEvent getDefaultInstanceForType() {
+        return eu.mico.platform.event.model.Event.ItemEvent.getDefaultInstance();
       }
 
-      public eu.mico.platform.event.model.Event.ContentEvent build() {
-        eu.mico.platform.event.model.Event.ContentEvent result = buildPartial();
+      public eu.mico.platform.event.model.Event.ItemEvent build() {
+        eu.mico.platform.event.model.Event.ItemEvent result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public eu.mico.platform.event.model.Event.ContentEvent buildPartial() {
-        eu.mico.platform.event.model.Event.ContentEvent result = new eu.mico.platform.event.model.Event.ContentEvent(this);
+      public eu.mico.platform.event.model.Event.ItemEvent buildPartial() {
+        eu.mico.platform.event.model.Event.ItemEvent result = new eu.mico.platform.event.model.Event.ItemEvent(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.contentItemUri_ = contentItemUri_;
+        result.itemUri_ = itemUri_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof eu.mico.platform.event.model.Event.ContentEvent) {
-          return mergeFrom((eu.mico.platform.event.model.Event.ContentEvent)other);
+        if (other instanceof eu.mico.platform.event.model.Event.ItemEvent) {
+          return mergeFrom((eu.mico.platform.event.model.Event.ItemEvent)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(eu.mico.platform.event.model.Event.ContentEvent other) {
-        if (other == eu.mico.platform.event.model.Event.ContentEvent.getDefaultInstance()) return this;
-        if (other.hasContentItemUri()) {
+      public Builder mergeFrom(eu.mico.platform.event.model.Event.ItemEvent other) {
+        if (other == eu.mico.platform.event.model.Event.ItemEvent.getDefaultInstance()) return this;
+        if (other.hasItemUri()) {
           bitField0_ |= 0x00000001;
-          contentItemUri_ = other.contentItemUri_;
+          itemUri_ = other.itemUri_;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -2889,7 +9806,7 @@ public final class Event {
       }
 
       public final boolean isInitialized() {
-        if (!hasContentItemUri()) {
+        if (!hasItemUri()) {
           
           return false;
         }
@@ -2900,11 +9817,11 @@ public final class Event {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        eu.mico.platform.event.model.Event.ContentEvent parsedMessage = null;
+        eu.mico.platform.event.model.Event.ItemEvent parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (eu.mico.platform.event.model.Event.ContentEvent) e.getUnfinishedMessage();
+          parsedMessage = (eu.mico.platform.event.model.Event.ItemEvent) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -2915,24 +9832,24 @@ public final class Event {
       }
       private int bitField0_;
 
-      private java.lang.Object contentItemUri_ = "";
+      private java.lang.Object itemUri_ = "";
       /**
-       * <code>required string contentItemUri = 1;</code>
+       * <code>required string itemUri = 1;</code>
        */
-      public boolean hasContentItemUri() {
+      public boolean hasItemUri() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required string contentItemUri = 1;</code>
+       * <code>required string itemUri = 1;</code>
        */
-      public java.lang.String getContentItemUri() {
-        java.lang.Object ref = contentItemUri_;
+      public java.lang.String getItemUri() {
+        java.lang.Object ref = itemUri_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
-            contentItemUri_ = s;
+            itemUri_ = s;
           }
           return s;
         } else {
@@ -2940,66 +9857,66 @@ public final class Event {
         }
       }
       /**
-       * <code>required string contentItemUri = 1;</code>
+       * <code>required string itemUri = 1;</code>
        */
       public com.google.protobuf.ByteString
-          getContentItemUriBytes() {
-        java.lang.Object ref = contentItemUri_;
+          getItemUriBytes() {
+        java.lang.Object ref = itemUri_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          contentItemUri_ = b;
+          itemUri_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
       }
       /**
-       * <code>required string contentItemUri = 1;</code>
+       * <code>required string itemUri = 1;</code>
        */
-      public Builder setContentItemUri(
+      public Builder setItemUri(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000001;
-        contentItemUri_ = value;
+        itemUri_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required string contentItemUri = 1;</code>
+       * <code>required string itemUri = 1;</code>
        */
-      public Builder clearContentItemUri() {
+      public Builder clearItemUri() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        contentItemUri_ = getDefaultInstance().getContentItemUri();
+        itemUri_ = getDefaultInstance().getItemUri();
         onChanged();
         return this;
       }
       /**
-       * <code>required string contentItemUri = 1;</code>
+       * <code>required string itemUri = 1;</code>
        */
-      public Builder setContentItemUriBytes(
+      public Builder setItemUriBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000001;
-        contentItemUri_ = value;
+        itemUri_ = value;
         onChanged();
         return this;
       }
 
-      // @@protoc_insertion_point(builder_scope:mico.event.model.ContentEvent)
+      // @@protoc_insertion_point(builder_scope:mico.event.model.ItemEvent)
     }
 
     static {
-      defaultInstance = new ContentEvent(true);
+      defaultInstance = new ItemEvent(true);
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:mico.event.model.ContentEvent)
+    // @@protoc_insertion_point(class_scope:mico.event.model.ItemEvent)
   }
 
   public interface DiscoveryEventOrBuilder extends
@@ -4389,15 +11306,45 @@ public final class Event {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_mico_event_model_RegistrationEvent_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_mico_event_model_AnalysisRequest_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_mico_event_model_AnalysisRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_mico_event_model_AnalysisRequest_ParamEntry_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_mico_event_model_AnalysisRequest_ParamEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_mico_event_model_AnalysisEvent_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_mico_event_model_AnalysisEvent_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_mico_event_model_ContentEvent_descriptor;
+    internal_static_mico_event_model_AnalysisEvent_Progress_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_mico_event_model_ContentEvent_fieldAccessorTable;
+      internal_static_mico_event_model_AnalysisEvent_Progress_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_mico_event_model_AnalysisEvent_NewPart_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_mico_event_model_AnalysisEvent_NewPart_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_mico_event_model_AnalysisEvent_Finish_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_mico_event_model_AnalysisEvent_Finish_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_mico_event_model_AnalysisEvent_Error_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_mico_event_model_AnalysisEvent_Error_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_mico_event_model_ItemEvent_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_mico_event_model_ItemEvent_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_mico_event_model_DiscoveryEvent_descriptor;
   private static
@@ -4428,16 +11375,41 @@ public final class Event {
       "s\030\004 \002(\t\0228\n\010language\030\005 \001(\0162 .mico.event.m" +
       "odel.Implementation:\004JAVA\022:\n\004type\030\006 \001(\0162" +
       "\".mico.event.model.RegistrationType:\010REG" +
-      "ISTER\"M\n\rAnalysisEvent\022\021\n\tserviceId\030\001 \002(" +
-      "\t\022\026\n\016contentItemUri\030\002 \002(\t\022\021\n\tobjectUri\030\003" +
-      " \001(\t\"&\n\014ContentEvent\022\026\n\016contentItemUri\030\001" +
-      " \002(\t\"\020\n\016DiscoveryEvent\"E\n\022ConfigurationE",
-      "vent\022\027\n\017marmottaBaseUri\030\001 \002(\t\022\026\n\016storage" +
-      "BaseUri\030\002 \002(\t\"\034\n\032ConfigurationDiscoverEv" +
-      "ent*/\n\016Implementation\022\010\n\004JAVA\020\001\022\007\n\003CPP\020\002" +
-      "\022\n\n\006PYTHON\020\003*0\n\020RegistrationType\022\014\n\010REGI" +
-      "STER\020\001\022\016\n\nUNREGISTER\020\002B\036\n\034eu.mico.platfo" +
-      "rm.event.model"
+      "ISTER\"\256\001\n\017AnalysisRequest\022\021\n\tserviceId\030\001" +
+      " \002(\t\022\017\n\007ItemUri\030\002 \002(\t\022\017\n\007partUri\030\003 \003(\t\022<" +
+      "\n\006params\030\n \003(\0132,.mico.event.model.Analys" +
+      "isRequest.ParamEntry\032(\n\nParamEntry\022\013\n\003ke",
+      "y\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\370\004\n\rAnalysisEvent" +
+      "\022+\n\004type\030\001 \002(\0162\035.mico.event.model.Messag" +
+      "eType\022<\n\010progress\030\002 \001(\0132(.mico.event.mod" +
+      "el.AnalysisEvent.ProgressH\000\0226\n\003new\030\003 \001(\013" +
+      "2\'.mico.event.model.AnalysisEvent.NewPar" +
+      "tH\000\0228\n\006finish\030\010 \001(\0132&.mico.event.model.A" +
+      "nalysisEvent.FinishH\000\0226\n\005error\030\t \001(\0132%.m" +
+      "ico.event.model.AnalysisEvent.ErrorH\000\032Q\n" +
+      "\010Progress\022\021\n\tserviceId\030\001 \002(\t\022\017\n\007itemUri\030" +
+      "\002 \002(\t\022\017\n\007partUri\030\003 \002(\t\022\020\n\010progress\030\005 \002(\002",
+      "\032>\n\007NewPart\022\021\n\tserviceId\030\001 \002(\t\022\017\n\007itemUr" +
+      "i\030\002 \002(\t\022\017\n\007partUri\030\003 \002(\t\032,\n\006Finish\022\021\n\tse" +
+      "rviceId\030\001 \002(\t\022\017\n\007itemUri\030\002 \002(\t\032\202\001\n\005Error" +
+      "\022\021\n\tserviceId\030\001 \002(\t\022\017\n\007itemUri\030\002 \002(\t\022\017\n\007" +
+      "message\030\005 \001(\t\022\023\n\013description\030\006 \001(\t\022/\n\ter" +
+      "rorCode\030\007 \001(\0162\034.mico.event.model.ErrorCo" +
+      "desB\014\n\ntest_oneof\"\034\n\tItemEvent\022\017\n\007itemUr" +
+      "i\030\001 \002(\t\"\020\n\016DiscoveryEvent\"E\n\022Configurati" +
+      "onEvent\022\027\n\017marmottaBaseUri\030\001 \002(\t\022\026\n\016stor" +
+      "ageBaseUri\030\002 \002(\t\"\034\n\032ConfigurationDiscove",
+      "rEvent*/\n\016Implementation\022\010\n\004JAVA\020\001\022\007\n\003CP" +
+      "P\020\002\022\n\n\006PYTHON\020\003*0\n\020RegistrationType\022\014\n\010R" +
+      "EGISTER\020\001\022\016\n\nUNREGISTER\020\002*@\n\013MessageType" +
+      "\022\014\n\010PROGRESS\020\001\022\n\n\006FINISH\020\002\022\014\n\010NEW_PART\020\003" +
+      "\022\t\n\005ERROR\020\004*\325\001\n\nErrorCodes\022\034\n\030UNSUPPORTE" +
+      "D_CONTENT_TYPE\020\036\022\037\n\033UNSUPPORTED_CONTENT_" +
+      "VARIANT\020\037\022\022\n\016DECODING_ERROR\020 \022\021\n\rMISSING" +
+      "_ASSET\020!\022\026\n\022MISSING_ANNOTATION\020#\022\031\n\025INSU" +
+      "FFICIENT_RESOURCE\020(\022\030\n\024INSUFFICIENT_STOR" +
+      "AGE\020)\022\024\n\020UNEXPECTED_ERROR\0202B\036\n\034eu.mico.p",
+      "latform.event.model"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -4457,32 +11429,68 @@ public final class Event {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_mico_event_model_RegistrationEvent_descriptor,
         new java.lang.String[] { "ServiceId", "QueueName", "Provides", "Requires", "Language", "Type", });
-    internal_static_mico_event_model_AnalysisEvent_descriptor =
+    internal_static_mico_event_model_AnalysisRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
+    internal_static_mico_event_model_AnalysisRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_mico_event_model_AnalysisRequest_descriptor,
+        new java.lang.String[] { "ServiceId", "ItemUri", "PartUri", "Params", });
+    internal_static_mico_event_model_AnalysisRequest_ParamEntry_descriptor =
+      internal_static_mico_event_model_AnalysisRequest_descriptor.getNestedTypes().get(0);
+    internal_static_mico_event_model_AnalysisRequest_ParamEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_mico_event_model_AnalysisRequest_ParamEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_mico_event_model_AnalysisEvent_descriptor =
+      getDescriptor().getMessageTypes().get(2);
     internal_static_mico_event_model_AnalysisEvent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_mico_event_model_AnalysisEvent_descriptor,
-        new java.lang.String[] { "ServiceId", "ContentItemUri", "ObjectUri", });
-    internal_static_mico_event_model_ContentEvent_descriptor =
-      getDescriptor().getMessageTypes().get(2);
-    internal_static_mico_event_model_ContentEvent_fieldAccessorTable = new
+        new java.lang.String[] { "Type", "Progress", "New", "Finish", "Error", "TestOneof", });
+    internal_static_mico_event_model_AnalysisEvent_Progress_descriptor =
+      internal_static_mico_event_model_AnalysisEvent_descriptor.getNestedTypes().get(0);
+    internal_static_mico_event_model_AnalysisEvent_Progress_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_mico_event_model_ContentEvent_descriptor,
-        new java.lang.String[] { "ContentItemUri", });
-    internal_static_mico_event_model_DiscoveryEvent_descriptor =
+        internal_static_mico_event_model_AnalysisEvent_Progress_descriptor,
+        new java.lang.String[] { "ServiceId", "ItemUri", "PartUri", "Progress", });
+    internal_static_mico_event_model_AnalysisEvent_NewPart_descriptor =
+      internal_static_mico_event_model_AnalysisEvent_descriptor.getNestedTypes().get(1);
+    internal_static_mico_event_model_AnalysisEvent_NewPart_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_mico_event_model_AnalysisEvent_NewPart_descriptor,
+        new java.lang.String[] { "ServiceId", "ItemUri", "PartUri", });
+    internal_static_mico_event_model_AnalysisEvent_Finish_descriptor =
+      internal_static_mico_event_model_AnalysisEvent_descriptor.getNestedTypes().get(2);
+    internal_static_mico_event_model_AnalysisEvent_Finish_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_mico_event_model_AnalysisEvent_Finish_descriptor,
+        new java.lang.String[] { "ServiceId", "ItemUri", });
+    internal_static_mico_event_model_AnalysisEvent_Error_descriptor =
+      internal_static_mico_event_model_AnalysisEvent_descriptor.getNestedTypes().get(3);
+    internal_static_mico_event_model_AnalysisEvent_Error_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_mico_event_model_AnalysisEvent_Error_descriptor,
+        new java.lang.String[] { "ServiceId", "ItemUri", "Message", "Description", "ErrorCode", });
+    internal_static_mico_event_model_ItemEvent_descriptor =
       getDescriptor().getMessageTypes().get(3);
+    internal_static_mico_event_model_ItemEvent_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_mico_event_model_ItemEvent_descriptor,
+        new java.lang.String[] { "ItemUri", });
+    internal_static_mico_event_model_DiscoveryEvent_descriptor =
+      getDescriptor().getMessageTypes().get(4);
     internal_static_mico_event_model_DiscoveryEvent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_mico_event_model_DiscoveryEvent_descriptor,
         new java.lang.String[] { });
     internal_static_mico_event_model_ConfigurationEvent_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(5);
     internal_static_mico_event_model_ConfigurationEvent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_mico_event_model_ConfigurationEvent_descriptor,
         new java.lang.String[] { "MarmottaBaseUri", "StorageBaseUri", });
     internal_static_mico_event_model_ConfigurationDiscoverEvent_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_mico_event_model_ConfigurationDiscoverEvent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_mico_event_model_ConfigurationDiscoverEvent_descriptor,

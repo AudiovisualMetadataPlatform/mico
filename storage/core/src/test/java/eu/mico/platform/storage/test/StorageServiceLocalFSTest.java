@@ -3,6 +3,7 @@ package eu.mico.platform.storage.test;
 import eu.mico.platform.storage.impl.StorageServiceLocalFS;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;

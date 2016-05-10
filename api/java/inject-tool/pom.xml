@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>eu.mico-project.platform</groupId>
+        <artifactId>parent</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+        <relativePath>../../../parent</relativePath>
+    </parent>
+
+    <artifactId>inject-tool</artifactId>
+    <name>MICO Platform: cli inject tool</name>
+
+    <developers>
+        <developer>
+            <name>Kai Schlegel</name>
+            <email>kai.schlegel@googlemail.com</email>
+            <organization>University of Passau</organization>
+        </developer>
+        <developer>
+            <name>Emanuel Berndl</name>
+            <email>berndl.emanuel@googlemail.com</email>
+            <organization>University of Passau</organization>
+        </developer>
+        <developer>
+            <name>Andreas Eisenkolb</name>
+            <email>berndl.emanuel@googlemail.com</email>
+            <organization>University of Passau</organization>
+        </developer>
+    </developers>
+    <inceptionYear>2016</inceptionYear>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>eu.mico.platform.api.inject.Main</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!--MICO Platform-->
+        <dependency>
+            <groupId>eu.mico-project.platform</groupId>
+            <artifactId>persistence</artifactId>
+            <version>2.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.mico-project.platform</groupId>
+            <artifactId>event</artifactId>
+            <version>2.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+            <version>1.48</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.20</version>
+        </dependency>
+    </dependencies>
+
+
+    <profiles>
+        <profile>
+            <id>debian</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>build-doc</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>javadoc</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

@@ -1,0 +1,37 @@
+{
+	"name": "LIUM-Speaker-Diarization",
+	"version": "1.0.0",
+	"id": "speaker_diarization",
+	"mode": [{
+		"id": "speaker-diarization",
+		"description": "Speaker diarization for wav files with 8kHz sampling frequency",
+		"input": [{
+			"semanticType": {
+				"name": "Audio",
+				"description": "Audio wav file"
+			},
+			"dataType": {
+				"mimeType": ["audio/wav"],
+				"syntacticType": "mico:Audio",
+				"cmdLineSwitch": null
+			},
+			"constraint": []
+		}],
+		"output": [{
+			"semanticType": {
+				"name": "Diarization",
+				"description": "Diarization of the input wav file with rdf annotations"
+			},
+			"dataType": {
+				"mimeType": ["application/rdf+xml"],
+				"syntacticType": "mmmterms:DiarizationBody",
+				"cmdLineSwitch": null
+			},
+			"location": "Dummy Location",
+			"annotatedProperty": []
+		}],
+		"param": []
+	}],
+	"deployedAt": [],
+	"isSingleton": false
+}

@@ -15,3 +15,6 @@ RUN apt-get download mico-broker && \
 
 #Cleanup
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+
+

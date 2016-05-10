@@ -1,6 +1,6 @@
 Source: libmico-api-java
 Priority: optional
-Maintainer: Sebastian Schaffert <sebastian.schaffert@gmail.com>
+Maintainer: Horst Stadler <horst.stadler@salzburgresearch.at>
 Section: java
 Homepage: https://bitbucket.org/mico-project/platform/overview
 Vcs-Git: https://bitbucket.org/mico-project/platform.git

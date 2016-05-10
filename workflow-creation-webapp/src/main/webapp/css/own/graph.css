@@ -1,0 +1,69 @@
+
+.node {
+    fill: #0000cc; /* blue */
+    stroke: #fff;
+    stroke-width: 2px;
+/*     fill: #ffa500; orange */
+}
+
+.node text{
+	fill:   #000000; /* black */
+	stroke: #000000; /* black */
+	stroke-width: 0;   
+}
+.node.disabled text{
+	fill:   #000000; /* black */
+	stroke: #000000; /* black */
+	stroke-width: 0;
+	opacity: 0.3;
+}
+
+
+.node.binary-file circle{
+	fill: #00cc00; /* green */
+}
+.node.binary-file.disabled circle{
+	fill: #b3f0b3; /* green */
+}
+
+.node.extractor circle{
+	fill: #cccc00; /* yellow */
+}
+.node.extractor.disabled circle{
+	fill: #f0f0b3
+}
+
+
+
+.link {
+	fill: #777;
+    stroke: #777;
+    stroke-width: 2px;
+}
+
+.link.disabled{
+	opacity: 0.3;
+}
+
+
+.link text{
+	fill:   #000000; /* black */
+	stroke: #000000; /* black */
+	stroke-width: 0;
+}
+
+.link rect{
+	fill:   #00cc00; /* green */
+	stroke-width: 0;
+	opacity: 0.6;
+}
+
+.link.warning rect{
+	fill: yellow;
+}
+
+.link.broken rect{
+	fill: red;
+}
+
+

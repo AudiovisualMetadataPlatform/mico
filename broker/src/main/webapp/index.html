@@ -37,7 +37,7 @@
 
         .page-header {
             padding-right: 300px;
-            background-image: url('http://www.mico-project.eu/wp-content/uploads/2014/04/mico_logo.png');
+            background-image: url('img/mico_logo.png');
             background-repeat: no-repeat;
             background-position: right top;
             border-bottom: 2px solid #ACCD6C;
@@ -67,7 +67,7 @@
 <body ng-controller="StatusCtrl">
 
 <div class="container-fluid page-header">
-    <h1>MICO <small>Broker Status</small></h1>
+    <h1>MICO <small title="{{version}}">Broker Status</small></h1>
 </div>
 
 <div class="container-fluid">
@@ -99,7 +99,7 @@
 </div>
 
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
-    <h2>Content Items</h2>
+    <h2>Items</h2>
 
     <table ng-show="filteredItems.length>0" class="table table-striped" style="width: 100%">
         <tr>

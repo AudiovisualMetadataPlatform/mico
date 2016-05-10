@@ -27,6 +27,11 @@ brokerApp.controller("StatusCtrl", function($scope,$http) {
       $scope.filteredItems = $scope.items.slice(begin, end);
     };
 
+    $scope.version = "Broker Version 2.x";
+    $http.get("status/info").success(function(data) {
+        $scope.version = data;
+    });
+
     $scope.services = [];
     $http.get("status/services").success(function(data) {
         $scope.services = data;
@@ -51,80 +56,45 @@ brokerApp.controller("ShowItemCtrl", function($scope,$http) {
 
     $scope.itemData;
 
-
-    $scope.$watch('itemUri', function(newValue, oldValue) {
-
+    $scope.$watch('itemUri', function() {
         $http.get("status/items?parts=true&uri=" + $scope.itemUri).success(function (data) {
             $scope.itemData = data[0];
         });
     });
-
 });
 
 
 brokerApp.controller("InjectItemCtrl", function($scope,$http,$upload) {
 
     $scope.itemUri;
-
-    $scope.itemData;
-
+    $scope.itemAssetfiles;
+    $scope.itemAssetType;
+    $scope.itemAssetName;
     $scope.state = "Created";
+    $scope.itemAssetLocation
+    $scope.itemCreated
 
-    $scope.files;
+    $scope.createItem = function() {
 
-    $scope.type="";
-
-    $scope.updateItem = function() {
-        if($scope.itemUri) {
-            $http.get("inject/items?parts=true&uri=" + $scope.itemUri).success(function (data) {
-                $scope.itemData = data[0];
+        var file = $scope.itemAssetfiles[0];
+        var fileReader = new FileReader();
+        fileReader.readAsArrayBuffer(file);
+        fileReader.onload = function(e) {
+            $upload.http({
+                url: "inject/create" + "?type=" + $scope.itemAssetType + "&name=" + file.name,
+                method: 'POST',
+                data: e.target.result
+            }).success(function (data) {
+                $scope.itemUri = data["itemUri"];
+                $scope.assetLocation = data["assetLocation"];
+                $scope.itemCreated = data["created"];
             });
         }
-
-        $scope.type="";
-        $scope.files=[];
-        document.getElementById("file").value = '';
     };
 
-    $scope.createContentItem = function() {
-        $http.post("inject/create").success(function(data) {
-            $scope.itemUri = data["uri"];
-        });
-    };
-
-    $scope.onFileSelect = function($files) {
-        $scope.files = $files;
-        if($files.length > 0) {
-            $scope.type = $files[0].type;
-        }
-    };
-
-    $scope.addContentPart = function(){
-        for (var i = 0; i < $scope.files.length; i++) {
-            var file = $scope.files[i];
-            var fileReader = new FileReader();
-            fileReader.readAsArrayBuffer(file);
-            fileReader.onload = function(e) {
-                $upload.http({
-                    url: "inject/add?ci=" + $scope.itemUri + "&type=" + $scope.type + "&name=" + file.name,
-                    method: 'POST',
-                    data: e.target.result
-                }).success(function (data) {
-                    $scope.updateItem();
-                });
-            }
-        }
-
-    };
-
-    $scope.submitContentItem = function() {
-        $http.post("inject/submit?ci=" + $scope.itemUri).success(function() {
+    $scope.submitItem = function() {
+        $http.post("inject/submit?item=" + $scope.itemUri).success(function() {
             $scope.state = "Submitted";
         });
     };
-
-    $scope.$watch('itemUri', function(newValue, oldValue) {
-        $scope.updateItem();
-    });
-
 });

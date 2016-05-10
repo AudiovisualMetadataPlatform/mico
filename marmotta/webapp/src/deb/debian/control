@@ -1,12 +1,12 @@
 Section: mico
 Priority: optional
-Maintainer: Sebastian Schaffert <sschaffert@apache.org>
+Maintainer: Horst Stadler <horst.stadler@salzburgresearch.at>
 Homepage: https://bitbucket.org/mico-project/platform
 Package: [[name]]
 Architecture: all
 Version: [[version]]
 Pre-Depends: debconf, iproute2, sudo
-Depends: tomcat7 (>= 7.0.52), openjdk-7-jre | openjdk-7-jre-headless, postgresql-9.4, mico-base
+Depends: tomcat7 (>= 7.0.52), java8-runtime-headless, postgresql-9.4, mico-base
 Description: Apache Marmotta
  This package contains the distribution of Apache Marmotta used by the
  MICO Platform.

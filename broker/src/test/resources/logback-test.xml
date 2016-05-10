@@ -1,0 +1,20 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+
+    <logger name="org.openrdf" level="INFO" />
+    <logger name="org.reflections" level="ERROR"/>
+    <logger name="httpclient.wire.header" level="INFO"/>
+    <logger name="org.xml" level="WARN" />
+    <logger name="eu.mico" level="DEBUG" />
+    <logger name="eu.mico.platform" level="TRACE" />
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

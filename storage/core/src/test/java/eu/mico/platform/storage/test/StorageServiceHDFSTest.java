@@ -2,7 +2,6 @@ package eu.mico.platform.storage.test;
 
 
 import eu.mico.platform.storage.impl.StorageServiceHDFS;
-import eu.mico.platform.storage.model.Content;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -28,14 +27,19 @@ public class StorageServiceHDFSTest {
     static URI contentId = null;
     final static String testString = "This is a Test.";
 
+    static boolean hdfsServerRunning;
+
     @BeforeClass
-    public static void init() throws URISyntaxException{
+    public static void init() throws URISyntaxException
+    {
+        hdfsServerRunning = isHDFSServerRunning();
         contentId = new URI("junittest");
     }
 
     @Test
     public void test1ConnectHDFS() throws IOException
     {
+        Assume.assumeTrue(isHDFSServerRunning());
         final FileSystem fs = connect();
         fs.getStatus();
         fs.close();
@@ -44,6 +48,7 @@ public class StorageServiceHDFSTest {
     @Test
     public void test2StoreContent() throws IOException
     {
+        Assume.assumeTrue(hdfsServerRunning);
         StorageServiceHDFS s = new StorageServiceHDFS(host, -1, "/");
         PrintStream out = new PrintStream(s.getOutputStream(contentId));
         out.print(testString);
@@ -53,6 +58,7 @@ public class StorageServiceHDFSTest {
     @Test
     public void test3ContentNaming() throws IOException
     {
+        Assume.assumeTrue(hdfsServerRunning);
         final FileSystem fs = connect();
         final Path file =  getContentPartPath(contentId);
         Assert.assertTrue(fs.exists(file));
@@ -63,6 +69,7 @@ public class StorageServiceHDFSTest {
     @Test
     public void test4RetrieveContent() throws IOException
     {
+        Assume.assumeTrue(hdfsServerRunning);
         StorageServiceHDFS s = new StorageServiceHDFS(host, -1, "/");
         StringWriter writer = new StringWriter();
         InputStream is = s.getInputStream(contentId);
@@ -74,6 +81,7 @@ public class StorageServiceHDFSTest {
     @AfterClass
     public static void removeTestFile() throws IOException
     {
+        Assume.assumeTrue(hdfsServerRunning);
         final FileSystem fs = connect();
         final Path file =  getContentPartPath(contentId);
         if (fs.exists(file) && fs.isFile(file)) {
@@ -86,6 +94,17 @@ public class StorageServiceHDFSTest {
         Configuration hdfsConfig = new Configuration();
         hdfsConfig.set("fs.defaultFS", "hdfs://" + host);
         return FileSystem.get(hdfsConfig);
+    }
+
+    private static boolean isHDFSServerRunning() {
+        try {
+            final FileSystem fs = connect();
+            fs.getStatus();
+            fs.close();
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
     private static Path getContentPartPath(URI part) {

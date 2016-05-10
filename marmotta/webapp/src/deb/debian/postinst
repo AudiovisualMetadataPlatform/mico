@@ -68,7 +68,7 @@ EOF
         SHARED_BUFFERS=$(pg_conftool -s get shared_buffers |numfmt --from=iec --suffix=B)
         if [ -z "$SHARED_BUFFERS" ] || [ "${SHARED_BUFFERS::-1}" -lt "$MIN_SHARED_BUFFERS" ]; then
             echo "Changing PostgreSQL shared_buffers to $(numfmt --to=iec --suffix=B $MIN_SHARED_BUFFERS)"
-            pg_conftool set shared_buffers $(numfmt --to=iec --suffix=B $MIN_SHARED_BUFFERS)
+            pg_conftool set shared_buffers $(numfmt --to=iec --suffix=B $MIN_SHARED_BUFFERS |sed -r 's/\.[0-9]+//g')
             service postgresql status 1>/dev/null && service postgresql reload
         fi
 
@@ -76,7 +76,7 @@ EOF
         WORK_MEM=$(pg_conftool -s get work_mem |numfmt --from=iec --suffix=B)
         if [ -z "$WORK_MEM" ] || [ "${WORK_MEM::-1}" -lt "$MIN_WORK_MEM" ]; then
             echo "Changing PostgreSQL work_mem to $(numfmt --to=iec --suffix=B $MIN_WORK_MEM)"
-            pg_conftool set work_mem $(numfmt --to=iec --suffix=B $MIN_WORK_MEM)
+            pg_conftool set work_mem $(numfmt --to=iec --suffix=B $MIN_WORK_MEM |sed -r 's/\.[0-9]+//g')
             service postgresql status 1>/dev/null && service postgresql reload
         fi
 

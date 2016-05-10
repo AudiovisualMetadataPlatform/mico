@@ -14,7 +14,12 @@
 package eu.mico.platform.event.api.spring;
 
 import eu.mico.platform.event.api.AnalysisResponse;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Resource;
+
+import java.util.List;
+import java.util.Map;
+
 import org.openrdf.model.URI;
 
 /**
@@ -27,8 +32,8 @@ public interface Analyser {
     /**
      * The callback which is called whenever a new event for this service has been received.
      * @param analysisResponse  a response object that can be used to send back notifications about new objects to the broker
-     * @param contentItem the content item to analyse
+     * @param item the content item to analyse
      * @param uri the URI of the object to analyse in the content item (a content part or a metadata URI)
      */
-    public void call(AnalysisResponse analysisResponse, ContentItem contentItem, URI uri);
+	public void call(AnalysisResponse resp, Item item, List<Resource> resourceList, Map<String, String> params);
 }

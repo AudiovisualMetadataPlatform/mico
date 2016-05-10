@@ -35,7 +35,8 @@
 
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
-
+#include <boost/program_options.hpp>
+#include <Logging.hpp>
 #include "AnalysisService.hpp"
 #include "Daemon.hpp"
 
@@ -59,6 +60,7 @@ using namespace mico::rdf::model;
 // define dublin core vocabulary shortcut
 namespace DC = mico::rdf::vocabularies::DC;
 
+namespace po  = boost::program_options;
 
 // helper function to get time stamp
 std::string getTimestamp() {
@@ -87,7 +89,7 @@ public:
     OCRAnalysisService(string id, string requires, string language)
             : AnalysisService("http://www.mico-project.org/services/OCR-"+id, requires, "text/plain", "ocr-queue-"+id) {
         if(api.Init(NULL, language.c_str())) {
-            std::cerr << "could not initialise tesseract instance" << std::endl;
+            LOG_ERROR( "could not initialise tesseract instance" );
             throw string("could not initialise tesseract instance");
         }
     };
@@ -105,8 +107,9 @@ public:
     * @param ci     the content item to analyse
     * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
     */
-    void call(std::function<void(const ContentItem& ci, const URI& object)> resp, ContentItem& ci, URI& object) {
+    void call(AnalysisResponse& resp, ContentItem& ci, std::list<mico::rdf::model::URI>& objects, std::map<std::string,std::string>& params) {
         // retrieve the content part identified by the object URI
+        mico::rdf::model::URI object = objects.front();
         Content* imgPart = ci.getContentPart(object);
 
         if(imgPart != NULL) {
@@ -135,8 +138,10 @@ public:
             *out << plainText;
             delete out;
 
-            // notify broker that we created a new content part by calling the callback function passed as argument
-            resp(ci, txtPart->getURI());
+            LOG_INFO("Sending OCR results");
+            // notify broker that we created a new content part by calling functions from AnalysisResponse passed as argument
+            resp.sendNew(ci, txtPart->getURI());
+            resp.sendFinish(ci);
 
             // clean up
             delete imgPart;
@@ -150,35 +155,120 @@ public:
 
 };
 
+/****** globals ******/
+EventManager* mgr = 0;
+OCRAnalysisService* ocrService = 0;
+bool loop = true;
 
-void usage() {
-    std::cerr << "Usage: mico_ocr_service SERVER_IP [USER PASSWORD]" << std::endl;
-    std::cerr << "Usage: mico_ocr_service -k" << std::endl;
+void signal_handler(int signum) {
+  std::cout << "shutting down ocr service ... " << std::endl;
+
+  if (mgr) {
+    mgr->unregisterService(ocrService);
+  }
+
+  if (ocrService)
+    delete ocrService;
+
+  if (mgr)
+    delete mgr;
+
+  loop = false;
 }
 
+static  std::string ip;
+static  std::string user;
+static  std::string passw;
+
+static bool setCommandLineParams(int argc, char** argv, po::variables_map& vm)
+{
+  po::options_description desc("Allowed options");
+  desc.add_options()
+    ("serverIP,i",  po::value<std::string>(&ip)->required(), "IP of the MICO system server.")
+    ("userName,u",  po::value<std::string>(&user)->required(), "MICO system user name")
+    ("userPassword,p", po::value<std::string>(&passw)->required(), "MICO system user password")
+    ("kill,k","Shuts down the service.")
+    ("foreground,f","Runs the png extractor as foreground process (by default it runs as daemon)")
+    ("help,h","Prints this help message.");
+
+  po::positional_options_description p;
+  p.add("serverIP",1);
+  p.add("userName",1);
+  p.add("userPassword",1);
+
+  bool printHelp = false;
+  std::string ex("") ;
+  try {
+    po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run() , vm);
+    po::notify(vm);
+  } catch (std::exception& e) {
+    ex = e.what();
+    printHelp = true;
+  }
+  if (vm.count("help")) {
+    printHelp = true;
+  }
+
+  if (printHelp) {
+    if (ex.size() > 0)
+      std::cout << std::endl << ex << "\n";
+    std::cout << "\nUsage:   " << argv[0];
+    for (unsigned int i=0; i < p.max_total_count(); ++i)
+      std::cout << " " << p.name_for_position(i);
+    std::cout << " [options]" << "\n";
+    std::cout << "\n" << desc << "\n";
+    return false;
+  }
+  return true;
+}
 
 int main(int argc, char **argv) {
-    if(argc != 2 && argc != 4) {
-        usage();
-        exit(1);
+  po::variables_map vm;
+  if (!setCommandLineParams(argc, argv, vm)) {
+   exit(EXIT_FAILURE);
+  }
+
+  bool   doKill    = false;
+  bool   asDaemon  = true;
+
+  if (vm.count("kill")) {
+    doKill = true;
+  }
+
+  if (vm.count("foreground")) {
+    doKill   = false;
+    asDaemon = false;
+  }
+  std::string s_daemon_id(argv[0]);
+
+  if (!doKill && asDaemon)
+     std::cout << "Setting up ocr extractor as deamon" << std::endl;
+  else if (doKill && asDaemon)
+     std::cout << "Shutting down ocr extractor deamon " << std::endl;
+  else
+     std::cout << "Starting ocr extractor " << std::endl;
+
+  if(doKill) {
+    return mico::daemon::stop(s_daemon_id.c_str());
+  }
+  if (asDaemon) {
+    mico::log::set_log_backend (mico::daemon::createDaemonLogBackend());
+    // create a new instance of a MICO daemon, auto-registering two instances of the OCR analysis service
+    return mico::daemon::start(s_daemon_id.c_str(), ip.c_str(), user.c_str(), passw.c_str(),
+    {new OCRAnalysisService("png", "image/png", "eng"), new OCRAnalysisService("jpeg", "image/jpeg", "eng")});
+  } else {
+    mico::log::set_log_backend (new mico::log::StdOutBackend());
+    mgr = new EventManager(ip.c_str(), user.c_str(), passw.c_str());
+    ocrService = new OCRAnalysisService("png", "image/png", "eng");
+
+    mgr->registerService(ocrService);
+
+    signal(SIGINT,  &signal_handler);
+    signal(SIGTERM, &signal_handler);
+    signal(SIGHUP,  &signal_handler);
+
+    while(loop) {
+      sleep(1);
     }
-
-    const char *mico_user;
-    const char *mico_pass;
-
-    if(argc == 4) {
-        mico_user = argv[2];
-        mico_pass = argv[3];
-    } else {
-        mico_user = "mico";
-        mico_pass = "mico";
-    }
-
-    if(!strcmp(argv[1], "-k")) {
-        return mico::daemon::stop(argv[0]);
-    } else {
-        // create a new instance of a MICO daemon, auto-registering two instances of the OCR analysis service
-        return mico::daemon::start(argv[0], argv[1], mico_user, mico_pass, {new OCRAnalysisService("png", "image/png", "eng"), new OCRAnalysisService("jpeg", "image/jpeg", "eng")});
-
-    }
+  }
 }

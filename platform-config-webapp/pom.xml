@@ -4,11 +4,12 @@
   <parent>
     <groupId>eu.mico-project.platform</groupId>
     <artifactId>parent</artifactId>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
 
   <groupId>de.fraunhofer.idmt.mico</groupId>
+  <name>MICO Platform: mico-platform-config</name>
   <artifactId>mico-platform-config</artifactId>
 
     <packaging>war</packaging>

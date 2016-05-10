@@ -1,0 +1,75 @@
+package com.github.anno4j.extension.sparqlmm;
+
+$import_classes
+import com.github.anno4j.model.namespaces.OADM;
+import com.github.anno4j.model.namespaces.RDF;
+import com.github.anno4j.querying.evaluation.LDPathEvaluatorConfiguration;
+import com.github.anno4j.querying.evaluation.VarIDGenerator;
+import com.github.anno4j.querying.evaluation.ldpath.LDPathEvaluator;
+import com.github.anno4j.querying.extension.QueryEvaluator;
+import com.github.anno4j.annotations.Evaluator;
+import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.expr.Expr;
+import com.hp.hpl.jena.sparql.expr.ExprVar;
+import com.hp.hpl.jena.sparql.syntax.ElementFilter;
+import com.hp.hpl.jena.sparql.syntax.ElementGroup;
+import org.apache.marmotta.ldpath.api.selectors.NodeSelector;
+import org.apache.marmotta.ldpath.model.selectors.PathSelector;
+import org.apache.marmotta.ldpath.model.selectors.PropertySelector;
+import org.apache.marmotta.ldpath.model.selectors.TestingSelector;
+import org.apache.marmotta.ldpath.model.tests.FunctionTest;
+
+/**
+ * @author Thomas Kurz (tkurz@apache.org)
+ * @since 06.10.15.
+ */
+@Evaluator(value={
+$function_classes
+})
+public class SparqlMMFunctionTest implements QueryEvaluator {
+
+    @Override
+    public Var evaluate(NodeSelector nodeSelector, ElementGroup elementGroup, Var var, LDPathEvaluatorConfiguration evaluatorConfiguration) {
+        //get left side of the function
+        Var leftSide = LDPathEvaluator.evaluate(
+                createFragmentValueSelector(),
+                elementGroup,
+                var,
+                evaluatorConfiguration
+        );
+
+        //get right side of the function
+        TestingSelector testingSelector = (TestingSelector) nodeSelector;
+        FunctionTest functionTest = (FunctionTest) testingSelector.getTest();
+        com.github.anno4j.extension.sparqlmm.SparqlMMTestFunction sparqlMMTestFunction = (SparqlMMTestFunction) functionTest.getTest();
+
+        Var annotation2 = Var.alloc(VarIDGenerator.createID());
+
+        if(functionTest.getArgSelectors().size() != 0) {
+            throw new RuntimeException("Function " + functionTest.getSignature() + " does currently not support a paremeter");
+            //NodeSelector arg1 = (NodeSelector) functionTest.getArgSelectors().get(0);
+            //annotation2 = LDPathEvaluator.evaluate(arg1, elementGroup, annotation2, evaluatorConfiguration);
+            //TODO: this should evaluate the internal stuff, but it returns root. Maybe an issue in anno4j?
+        }
+
+        Var rightSide = LDPathEvaluator.evaluate(
+                createFragmentValueSelector(),
+                elementGroup,
+                annotation2,
+                evaluatorConfiguration
+        );
+
+        try {
+            Expr expr = sparqlMMTestFunction.getExpression().getConstructor(Expr.class,Expr.class).newInstance(new ExprVar(leftSide), new ExprVar(rightSide));
+            elementGroup.addElementFilter(new ElementFilter(expr));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return var;
+    }
+
+    private NodeSelector createFragmentValueSelector() {
+        return new PathSelector(new PathSelector(new PropertySelector(OADM.HAS_TARGET), new PropertySelector(OADM.HAS_SELECTOR)), new PropertySelector(RDF.VALUE));
+    }
+}

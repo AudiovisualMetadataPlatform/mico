@@ -40,4 +40,4 @@ target_link_libraries(mico_event mico_logging mico_rdf mico_persistence ${PROTOB
 set_target_properties(mico_event PROPERTIES VERSION "${MICO_PLATFORM_VERSION}" SOVERSION "${MICO_PLATFORM_SOVERSION}")
 
 install (TARGETS mico_event DESTINATION lib)
-install (FILES AnalysisService.hpp EventManager.hpp DESTINATION include)
+install (FILES AnalysisService.hpp EventManager.hpp ${MICO_EVENT_PB_OUT_DIR}/Event.pb.h DESTINATION include)

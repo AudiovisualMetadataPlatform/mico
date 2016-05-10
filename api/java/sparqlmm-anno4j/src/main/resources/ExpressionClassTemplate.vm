@@ -1,0 +1,28 @@
+package com.github.anno4j.extension.sparqlmm.expression;
+
+import com.hp.hpl.jena.sparql.expr.Expr;
+import com.hp.hpl.jena.sparql.expr.ExprFunction2;
+import com.hp.hpl.jena.sparql.expr.NodeValue;
+
+/**
+* @author Thomas Kurz (tkurz@apache.org)
+* Rendered by velocity based in SPARQL-MM
+*/
+public class $expression_name extends ExprFunction2
+{
+private static final String symbol = "<$uri>" ;
+
+public $expression_name(Expr expr1, Expr expr2)
+{
+super(expr1, expr2, symbol) ;
+}
+
+@Override
+public NodeValue eval(NodeValue n1, NodeValue n2)
+{
+throw new RuntimeException("Method is not implemented");
+}
+
+@Override
+public Expr copy(Expr e1, Expr e2) {  return new $expression_name(e1 , e2 ) ; }
+}

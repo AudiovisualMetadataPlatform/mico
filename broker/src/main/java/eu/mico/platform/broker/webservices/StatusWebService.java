@@ -14,25 +14,28 @@
 package eu.mico.platform.broker.webservices;
 
 import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.model.ContentItemState;
+import eu.mico.platform.broker.model.ItemState;
 import eu.mico.platform.broker.model.ServiceDescriptor;
 import eu.mico.platform.broker.model.Transition;
-import eu.mico.platform.broker.model.TypeDescriptor;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Asset;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Resource;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileSystemException;
-import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletContext;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+
 import java.awt.Dimension;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +43,8 @@ import java.io.OutputStream;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 /**
  * Add file description here!
@@ -53,13 +58,35 @@ public class StatusWebService {
 
     public static final SimpleDateFormat ISO8601FORMAT = createDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "UTC");
 
-
+    @Context
+    private ServletContext servletContext;
+    
     private MICOBroker broker;
 
     public StatusWebService(MICOBroker broker) {
         this.broker = broker;
     }
 
+    @GET
+    @Path("/info")
+    @Produces("text/plain")
+    public Response getInfo(){
+        String info = null;
+        try{
+            InputStream resourceAsStream = servletContext
+                    .getResourceAsStream("/META-INF/MANIFEST.MF");
+            Manifest mf = new Manifest();
+            mf.read(resourceAsStream);
+            Attributes atts = mf.getMainAttributes();
+            info = atts.getValue("Implementation-Title") + " ("+ atts.getValue("Implementation-Version")+")"
+                    + "\nGit-Revision: " + atts.getValue("Git-Revision")
+                    + "\nGit-Branch: " + atts.getValue("Git-Branch")
+                    + "\nbuild on: " + atts.getValue("Build-Time");
+        }catch(IOException e ){
+            info = "Version 2.x-???";
+        }
+        return Response.ok(info).build();
+    }
 
     @GET
     @Path("/dependencies")
@@ -102,7 +129,7 @@ public class StatusWebService {
         List<Map<String,Object>> result = new ArrayList<>();
         if(itemUri == null) {
             // retrieve a list of all items
-            for(Map.Entry<String, ContentItemState> state : broker.getStates().entrySet()) {
+            for(Map.Entry<String, ItemState> state : broker.getStates().entrySet()) {
                 result.add(wrapContentItemStatus(state.getKey(),state.getValue(),showParts));
             }
             Collections.sort(result, new Comparator<Map<String,Object>>() {
@@ -130,7 +157,7 @@ public class StatusWebService {
         return result;
     }
 
-    private Map<String,Object> wrapContentItemStatus(String uri, ContentItemState state, boolean showParts) throws RepositoryException {
+    private Map<String,Object> wrapContentItemStatus(String uri, ItemState state, boolean showParts) throws RepositoryException {
         Map<String,Object> sprops = new HashMap<>();
         sprops.put("uri", uri);
         sprops.put("finished", state.isFinalState() ? "true" : "false");
@@ -138,9 +165,20 @@ public class StatusWebService {
 
         if(showParts) {
             List<Map<String, Object>> parts = new ArrayList<>();
-            ContentItem item = broker.getPersistenceService().getContentItem(new URIImpl(uri));
+            Item item = broker.getPersistenceService().getItem(new URIImpl(uri));
+            log.trace("collect {} collect parts of item: {}",uri);
             if (item != null) {
-                for (Content part : item.listContentParts()) {
+                sprops.put("semanticType"   , item.getSemanticType());
+                sprops.put("syntacticalType", item.getSyntacticalType());
+                sprops.put("serializedAt"   , item.getSerializedAt());
+                sprops.put("hasAsset", item.hasAsset());
+                if(item.hasAsset()){
+                    Asset asset = item.getAsset();
+                    sprops.put("assetFormat", asset.getFormat());
+                    sprops.put("assetLocation", asset.getLocation());
+                }
+                for (Part part : item.getParts()) {
+                    log.trace("    - part: {} - {} ({})",part.getURI(),part.getSerializedBy(), part.getSerializedAt());
                     parts.add(wrapContentStatus(state, part));
                 }
             }
@@ -150,14 +188,20 @@ public class StatusWebService {
         return sprops;
     }
 
-    private Map<String,Object> wrapContentStatus(ContentItemState state, Content part) throws RepositoryException {
+    private Map<String,Object> wrapContentStatus(ItemState state, Part part) throws RepositoryException {
         Map<String,Object> sprops = new HashMap<>();
         sprops.put("uri", part.getURI().stringValue());
-        sprops.put("title", part.getProperty(DCTERMS.TITLE));
-        sprops.put("type",  part.getType());
-        sprops.put("creator",  stringValue(part.getRelation(DCTERMS.CREATOR)));
-        sprops.put("created",  part.getProperty(DCTERMS.CREATED));
-        sprops.put("source",  stringValue(part.getRelation(DCTERMS.SOURCE)));
+        sprops.put("title", part.getRDFObject().getResourceAsString());
+        sprops.put("type",  part.getSyntacticalType());
+        sprops.put("creator",  part.getSerializedBy().getResourceAsString());
+        sprops.put("created",  part.getSerializedAt());
+        sprops.put("source",  stringValue(part.getInputs().toArray(new Resource[0])[0].getURI()));
+        sprops.put("hasAsset", part.hasAsset());
+        if(part.hasAsset()){
+            Asset asset = part.getAsset();
+            sprops.put("assetFormat", asset.getFormat());
+            sprops.put("assetLocation", asset.getLocation());
+        }
 
         if(state != null) {
             if(state.getStates().get(part.getURI()) != null) {
@@ -171,6 +215,7 @@ public class StatusWebService {
                     tprops.put("correlation", t.getKey());
                     tprops.put("start_state", t.getValue().getStateStart().getSymbol());
                     tprops.put("end_state", t.getValue().getStateEnd().getSymbol());
+                    tprops.put("progress", Float.toString(t.getValue().getProgress()));
                     tprops.put("service", t.getValue().getService().getUri().stringValue());
                     transitions.add(tprops);
                 }
@@ -189,16 +234,16 @@ public class StatusWebService {
     @GET
     @Path("/download")
     public Response downloadPart(@QueryParam("itemUri") String itemUri, @QueryParam("partUri") String partUri) throws RepositoryException {
-        final ContentItem item = broker.getPersistenceService().getContentItem(new URIImpl(itemUri));
+        final Item item = broker.getPersistenceService().getItem(new URIImpl(itemUri));
         if(item == null) {
-            throw new NotFoundException("Content Item with URI " + itemUri + " not found in system");
+            throw new NotFoundException("Part Item with URI " + itemUri + " not found in system");
         }
-        final Content     part = item.getContentPart(new URIImpl(partUri));
+        final Part part = item.getPart(new URIImpl(partUri));
         if(part == null) {
-            throw new NotFoundException("Content Part with URI " + partUri + " not found in system");
+            throw new NotFoundException("Part Part with URI " + partUri + " not found in system");
         }
         try {
-            final InputStream is = part.getInputStream();
+            final InputStream is = part.getAsset().getInputStream();
             if(is != null) {
                 StreamingOutput entity = new StreamingOutput() {
                     @Override
@@ -207,9 +252,9 @@ public class StatusWebService {
                     }
                 };
 
-                return Response.ok(entity, part.getType()).build();
+                return Response.ok(entity, part.getAsset().getFormat()).build();
             } else {
-                throw new NotFoundException("Content Part with URI " + partUri + " has no binary content");
+                throw new NotFoundException("Part Part with URI " + partUri + " has no binary content");
             }
         } catch (FileSystemException e) {
             return Response.serverError().entity(e.getMessage()).build();
@@ -224,7 +269,18 @@ public class StatusWebService {
 
     @GET
     public Response getStatus() {
-        return Response.status(Response.Status.OK).build();
+        String mVersionString = "n.n";
+        try {
+            InputStream manifestStream = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF");
+            Manifest manifest = new Manifest(manifestStream);
+            Attributes attributes = manifest.getMainAttributes();
+            String impVersion = attributes.getValue("Implementation-Version");
+            mVersionString = impVersion;
+        }
+        catch(IOException ex) {
+            log.warn("Error while reading version: " + ex.getMessage());
+        }
+        return Response.status(Response.Status.OK).entity("Version: " + mVersionString).build();
     }
 
 

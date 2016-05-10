@@ -13,11 +13,16 @@
  */
 package eu.mico.platform.event.api;
 
-import eu.mico.platform.event.model.AnalysisException;
-import eu.mico.platform.persistence.model.ContentItem;
-import org.openrdf.model.URI;
-
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import org.openrdf.model.URI;
+import org.openrdf.repository.RepositoryException;
+
+import eu.mico.platform.event.model.AnalysisException;
+import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Resource;
 
 /**
  * Interface to be implemented by services. Consists of some informational methods as well as a callback which is called
@@ -32,7 +37,7 @@ public interface AnalysisService {
      *
      * @return a unique ID identifying this service globally
      */
-    public URI getServiceID();
+    URI getServiceID();
 
 
     /**
@@ -41,7 +46,7 @@ public interface AnalysisService {
      *
      * @return a symbolic identifier representing the output type of this service
      */
-    public String getProvides();
+    String getProvides();
 
 
     /**
@@ -50,7 +55,7 @@ public interface AnalysisService {
      *
      * @return  a symbolic identifier representing the input type of this service
      */
-    public String getRequires();
+    String getRequires();
 
 
     /**
@@ -62,7 +67,7 @@ public interface AnalysisService {
      *
      * @return a string identifying the queue name this service wants to use
      */
-    public String getQueueName();
+    String getQueueName();
 
 
     /**
@@ -71,8 +76,13 @@ public interface AnalysisService {
      * resolving the content item in the persistence service.
      *
      * @param resp   a response object that can be used to send back notifications about new objects to the broker
-     * @param ci     the content item to analyse
-     * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
+     * @throws AnalysisException if the AnalysisService fails for some reason (e.g. the media file was corrupted;
+     * processed annotations in the Item where incomplete; ...). Also IO exceptions while accessing
+     * external resource should be wrapped as {@link AnalysisException}s.
+     * @throws RepositoryException if writing RDF data to the Repository failed for some reason
+     * @throws IOException if sending events via the AnalysisResponse failed for some reason
+     * @throws RuntimeException the caller takes also care of runtime exceptions 
      */
-    public void call(AnalysisResponse resp, ContentItem ci, URI object) throws AnalysisException, IOException;
+    void call(AnalysisResponse resp, Item item,  List<Resource> resourceList,  Map<String, String> params) throws AnalysisException, IOException, RepositoryException;
+
 }

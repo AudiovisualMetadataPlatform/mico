@@ -13,18 +13,28 @@
  */
 package eu.mico.platform.samples.wordcount;
 
+import com.github.anno4j.Anno4j;
+import com.github.anno4j.model.Body;
+import com.github.anno4j.model.Target;
+import com.github.anno4j.model.impl.targets.SpecificResource;
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
-import eu.mico.platform.persistence.model.Content;
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Resource;
 import org.apache.commons.io.IOUtils;
+
+
+import org.openrdf.annotations.Iri;
+import org.openrdf.idGenerator.IDGenerator;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.object.ObjectConnection;
+import org.openrdf.repository.object.ObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +44,9 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
@@ -48,6 +59,8 @@ import java.util.regex.Pattern;
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
 public class WordCountAnalyzer implements AnalysisService {
+    
+    private static Boolean simulateSlow = true;
 
     private static Logger log = LoggerFactory.getLogger(WordCountAnalyzer.class);
 
@@ -77,43 +90,86 @@ public class WordCountAnalyzer implements AnalysisService {
     }
 
     @Override
-    public void call(AnalysisResponse analysisResponse, ContentItem contentItem, URI uri) throws AnalysisException, IOException {
+    public void call(AnalysisResponse analysisResponse, Item item, List<Resource> resourceList, Map<String, String> params) throws RepositoryException, AnalysisException, IOException {
+        ObjectConnection con = item.getObjectConnection();
+        ObjectFactory factory = con.getObjectFactory();
+        if(resourceList.size() > 1) {
+            throw new IllegalArgumentException("Resource list only allows one item to be processed.");
+        }
+
+        Resource resource = resourceList.get(0);
+
+        log.info("Retrieved analysis call for {}", resource.getURI());
+
+        // get the input stream and read it into a string
+        String text = IOUtils.toString(item.getAsset().getInputStream(), "utf-8");
+        log.debug("Loaded text of {} to count words", resource.getURI());
+
+        // count the words using a regular expression pattern
+        Pattern p_wordcount = Pattern.compile("\\w+");
+        Matcher m = p_wordcount.matcher(text);
+
+        // we are progressing ... inform broker
+        analysisResponse.sendProgress(item, resource.getURI(), 0.25f);
+        if (simulateSlow == true) {
+            simulateLongTask(analysisResponse, item, resource.getURI());
+        }
+
+        int count;
+        for(count = 0; m.find(); count++);
+
+        log.debug("Counted {} words in {}", count, resource.getURI());
+
+        // create a new part for assigning the metadata
+        Part part = item.createPart(getServiceID());
+        part.setSyntacticalType(getProvides());
+
+        // create example wordcount body and setting the result of the analyzer
+        WordCountBody wordCountBody = con.addDesignation(
+                factory.createObject(IDGenerator.BLANK_RESOURCE, WordCountBody.class),
+                WordCountBody.class);
+        wordCountBody.setCount(count);
+        part.setBody(wordCountBody);
+
+        // create the target and set a reference to the part/item on which the body refers to
+        SpecificResource specificResource = con.addDesignation(
+                factory.createObject(IDGenerator.BLANK_RESOURCE, SpecificResource.class),
+                SpecificResource.class);
+        specificResource.setSource(resource.getRDFObject());
+
+        // adding the target to the part
+        part.addTarget(specificResource);
+
+        // adding the input
+        part.addInput(resource);
+        analysisResponse.sendNew(item, part.getURI());
+
+        analysisResponse.sendFinish(item);
+        log.debug("Done for {}", resource.getURI());
+    }
+
+    /**
+     * This function uses Thread.sleep() to simulate long running analyze
+     * process
+     * 
+     * @param analysisResponse
+     * @param item
+     * @param uri
+     */
+    private void simulateLongTask(AnalysisResponse analysisResponse, Item item, URI uri) {
         try {
-            log.info("Retrieved analysis call for {}", uri);
-            // get the content part with the given URI
-            Content content = contentItem.getContentPart(uri);
-
-            // get the input stream and read it into a string
-            String text = IOUtils.toString(content.getInputStream(), "utf-8");
-            log.debug("Loaded text of {} to count words", uri);
-
-            // count the words using a regular expression pattern
-            Pattern p_wordcount = Pattern.compile("\\w+");
-            Matcher m = p_wordcount.matcher(text);
-
-            int count;
-            for(count = 0; m.find(); count++);
-
-            log.debug("Countend {} words in {}", count, uri);
-
-            // create a new content part for assigning the metadata
-            Content result = contentItem.createContentPart();
-            result.setType(getProvides());
-            result.setRelation(DCTERMS.CREATOR, getServiceID());  // set the service ID as provenance information for the new content part
-            result.setRelation(DCTERMS.SOURCE, uri);              // set the analyzed content part as source for the new content part
-            result.setProperty(DCTERMS.CREATED, isodate.format(new Date())); // set the created date for the new content part
-
-            // add the wordcount as property
-            result.setProperty(new URIImpl("http://www.mico-project.org/properties/wordcount"), Integer.toString(count));
-
-            // report newly available results to broker
-            analysisResponse.sendMessage(contentItem, result.getURI());
-
-            log.debug("Done for {}", uri);
-        } catch (RepositoryException e) {
-            log.error("error accessing metadata repository",e);
-
-            throw new AnalysisException("error accessing metadata repository",e);
+            log.debug("debug is enabled, sleep 5 seconds and send next progress info");
+            Thread.sleep(5000);
+            analysisResponse.sendProgress(item, uri, 0.50f);
+            Thread.sleep(5000);
+            analysisResponse.sendProgress(item, uri, 0.75f);
+            analysisResponse.sendProgress(item, uri, 0.76f);
+            analysisResponse.sendProgress(item, uri, 0.77f);
+            analysisResponse.sendProgress(item, uri, 0.78f);
+            log.debug("... progress updated, sleep 5 seconds again");
+            Thread.sleep(5000);
+        } catch (Exception e) {
+            log.warn(e.getMessage());
         }
     }
 
@@ -166,6 +222,20 @@ public class WordCountAnalyzer implements AnalysisService {
         } catch (TimeoutException e) {
             log.error("fetching configuration timed out:", e);
         }
+
+    }
+
+    @Iri("http://www.mico-project.eu/wordcount-body")
+    public interface WordCountBody extends Body {
+        @Iri("http://www.mico-project.eu/wordcount-body#count")
+        void setCount(int count);
+
+        @Iri("http://www.mico-project.eu/wordcount-body#count")
+        int getCount();
+    }
+
+    @Iri("http://www.mico-project.eu/wordcount-target")
+    public interface WordCountTarget extends Target {
 
     }
 }

@@ -13,7 +13,7 @@
  */
 package eu.mico.platform.broker.model;
 
-import eu.mico.platform.persistence.model.ContentItem;
+import eu.mico.platform.persistence.model.Item;
 import org.openrdf.model.URI;
 
 /**
@@ -23,14 +23,15 @@ import org.openrdf.model.URI;
  */
 public class Transition {
 
-    private ContentItem item;
+    private Item item;
     private URI object;
 
     private TypeDescriptor stateStart;
     private TypeDescriptor stateEnd;
     private ServiceDescriptor service;
+    private float progress = -1.0f;
 
-    public Transition(ContentItem item, URI object, TypeDescriptor stateStart, TypeDescriptor stateEnd, ServiceDescriptor service) {
+    public Transition(Item item, URI object, TypeDescriptor stateStart, TypeDescriptor stateEnd, ServiceDescriptor service) {
         this.item = item;
         this.object = object;
         this.stateStart = stateStart;
@@ -39,7 +40,7 @@ public class Transition {
     }
 
 
-    public ContentItem getItem() {
+    public Item getItem() {
         return item;
     }
 
@@ -68,5 +69,15 @@ public class Transition {
                 ", stateEnd=" + stateEnd +
                 ", service=" + service.getUri() +
                 '}';
+    }
+
+
+    public float getProgress() {
+        return progress;
+    }
+
+
+    public void setProgress(float progress) {
+        this.progress = progress;
     }
 }
