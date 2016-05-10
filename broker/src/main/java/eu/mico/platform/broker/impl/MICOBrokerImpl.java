@@ -21,10 +21,13 @@ import eu.mico.platform.broker.exception.StateNotFoundException;
 import eu.mico.platform.broker.model.*;
 import eu.mico.platform.broker.util.RabbitMQUtils;
 import eu.mico.platform.event.api.EventManager;
+import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
+import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
+
 import org.apache.commons.lang3.StringUtils;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -400,8 +403,9 @@ public class MICOBrokerImpl implements MICOBroker {
                     log.info("persistenceService available: {}", persistenceService.getStoragePrefix());
                 }
 
-                Item item = persistenceService.getItem(new URIImpl(partEvent.getItemUri()));
+                Item item = getItem(new URIImpl(partEvent.getItemUri()));
                 traceItem(item);
+                checkItem(item);
 
                 log.info("- adding initial content item state ...");
                 ItemState state = new ItemState(dependencies, item);
@@ -427,9 +431,6 @@ public class MICOBrokerImpl implements MICOBroker {
             }
         }
 
-        private void traceItem(Item item) {
-            log.trace("Item: {} semantic: {}  syntactic: {}",item.getURI(),item.getSemanticType(), item.getSyntacticalType());
-        }
     }
 
 
@@ -541,8 +542,7 @@ public class MICOBrokerImpl implements MICOBroker {
             URIImpl partUri = new URIImpl(analysisResponse.getPartUri());
             String serviceId = analysisResponse.getServiceId();
             try {
-                String mimetype = persistenceService
-                        .getItem(itemUri)
+                String mimetype = getItem(itemUri)
                         .getPart(partUri).getSyntacticalType();
 
                 if (mimetype != null) {
@@ -550,7 +550,7 @@ public class MICOBrokerImpl implements MICOBroker {
                     state.addState(partUri, newState);
                 } else {
                     log.warn(
-                            "Type for not set for part {}, assume its type fits to produce value from service: {}.",
+                            "Type not set for part {}, assume its type fits to produce value from service: {}.",
                             partUri, serviceId);
                     state.addState(partUri, dependencies.getTargetState(new URIImpl(serviceId)));
                 }
@@ -588,4 +588,66 @@ public class MICOBrokerImpl implements MICOBroker {
             }
         }
     }
+
+    /**
+     * retrieve an item object with given uri
+     * @param itemUri uri of the item
+     * @return an item object
+     * @throws RepositoryException if the returned item is null
+     */
+    private Item getItem(URIImpl itemUri) throws RepositoryException {
+        Item item = persistenceService.getItem(itemUri);
+        if (item == null) {
+            throw new RepositoryException(
+                    "persistenceService returned null for item with url: "
+                            + itemUri);
+        }
+        return item;
+    }
+
+    private boolean checkItem(Item item) throws RepositoryException{
+        boolean ret = true;
+        if (item == null) {
+            throw new RepositoryException("Unable to check an item which is null.");
+        }
+        String test = item.getSemanticType();
+        if (test == null || test.isEmpty()) {
+            log.warn("Semantic type of item {} must be set", item.getURI());
+            ret= false;
+        }
+        test = item.getSyntacticalType();
+        if (test == null || test.isEmpty()) {
+            log.warn("Syntactical type of item {} must be set", item.getURI());
+            ret= false;
+        }
+        if (item.hasAsset()){
+            Asset asset = item.getAsset();
+            if (asset == null ) {
+                log.warn("Asset of item {} must not be null", item.getURI());
+                ret= false;
+            }
+            test = asset.getFormat();
+            if (test == null || test.isEmpty()) {
+                log.warn("The Format of asset from item {} must be set", item.getURI());
+                ret= false;
+            }
+            test = asset.getFormat();
+            if (test == null || test.isEmpty()) {
+                log.warn("The location of asset from item {} must be set", item.getURI());
+                ret= false;
+            }
+        }
+        if(ret == false){
+            throw new RepositoryException("Item check failed, see previous warnings");
+        }
+        return ret;
+    }
+    private void traceItem(Item item) {
+        if(item == null){
+            log.debug("Unable to log an item which is null.");
+        }else{
+            log.debug("Item: {} semantic: {}  syntactic: {}",item.getURI(),item.getSemanticType(), item.getSyntacticalType());
+        }
+    }
+
 }
