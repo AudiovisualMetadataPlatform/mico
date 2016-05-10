@@ -57,6 +57,8 @@ public class ExtractorMMMSupportTest {
         ex.setStringId(EXTRACTOR_ID);
         ex.setVersion(EXTRACTOR_VERSION);
 
+        anno4j.persist(ex);
+
         List<ExtractorMMM> result = queryService.execute(ExtractorMMM.class);
 
         assertEquals(1, result.size());
@@ -76,6 +78,8 @@ public class ExtractorMMMSupportTest {
         mode.setConfigSchemaUri(MODE_CONFIG_SCHEMA_URI);
         mode.setOutputSchemaUri(MODE_OUTPUT_SCHEMA_URI);
         mode.setDescription(MODE_DESCRIPTION);
+
+        anno4j.persist(mode);
 
         List<ModeMMM> result = queryService.execute(ModeMMM.class);
 

@@ -235,14 +235,21 @@ var Form=function(extractorNodeId){
 			  }
 			  else if(allowedRange.length>0)
 			  {
-				  //if input list of ranges
+				  //if input list of ranges				  		  
 
+				  
 				  var range2String=function(range){
+					  
+					  //create an easy access for the values of minIncl and maxIncl
+					  for (var contentIdx in range.content ){
+						  range[range.content[contentIdx].name]=range.content[contentIdx].value;
+					  }
+					  
 					  var out = 'x';
-					  if(range.maxIncl != null) 
+					  if(range.maxIncl != undefined) 
 					  {
 						  out=out+' ≤ '+range.maxIncl;
-						  if(range.minIncl != null){
+						  if(range.minIncl != undefined){
 							  out= range.minIncl + ' ≤ ' + out;
 						  }
 					  }
@@ -256,6 +263,8 @@ var Form=function(extractorNodeId){
 				  for(var r=1; r < allowedRange.length ; r++){
 					  validRangeDescription=validRangeDescription+' OR ( '+range2String(allowedRange[r])+' )';
 				  }
+				  
+				  
 
 					
 				  
@@ -339,8 +348,7 @@ var Form=function(extractorNodeId){
 					    errors: {
 					    	range: 'parameter out of defined range'
 					    }
-					}
-					);
+					});
 					
 				}
 				else{
@@ -476,7 +484,7 @@ var Form=function(extractorNodeId){
 		var out={};		
 		var inputs=this.thumbnail.getElementsByClassName('extractor-output-data');
 		
-		//for every input of the current extractor
+		//for every output of the current extractor
 		for (var i=0; i<inputs.length; i++){
 			
 			out[inputs[i].getAttribute('name')]=[];
@@ -490,6 +498,28 @@ var Form=function(extractorNodeId){
 			}
 			
 		}		
+		
+		return out;
+	};
+	
+	this.getSelectedParameters = function(){
+		var out={};
+		var parameters=this.thumbnail.getElementsByClassName('extractor-param-data');
+		
+		//for every parameter of the current extractor
+		for (var i=0; i<parameters.length; i++){
+			var inputs = parameters[i].getElementsByTagName('input');
+			var inputField = inputs[inputs.length-1];
+			
+			//non range-based parameters are defined by the placeholder text
+			if(inputField.getAttribute('data-range') == null ){
+				out[parameters[i].getAttribute('name')] = inputField.placeholder;
+			}
+			//ranged based parameters are defined by their value
+			else{
+				out[parameters[i].getAttribute('name')] = inputField.value;
+			}
+		}
 		
 		return out;
 	};

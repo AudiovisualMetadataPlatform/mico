@@ -81,21 +81,20 @@ public class TextAnalysisWebService {
 
         try {
             final Item item = persistenceService.createItem();
+            item.setSyntacticalType("text/plain");
 
-            final Part part = item.createPart(ExtractorURI);
-            part.setSyntacticalType("text/plain");
-            try (OutputStream outputStream = part.getAsset().getOutputStream()) {
+            try (OutputStream outputStream = item.getAsset().getOutputStream()) {
                 IOUtils.copy(IOUtils.toInputStream(input.comment), outputStream);
                 outputStream.close();
             } catch (IOException e) {
-                log.error("Could not persist text data for ContentPart {}: {}", part.getURI(), e.getMessage());
+                log.error("Could not persist text data for ContentItem {}: {}", item.getURI(), e.getMessage());
                 throw e;
             }
 
             eventManager.injectItem(item);
 
             return Response.status(Response.Status.CREATED)
-                    .entity(ImmutableMap.of("id",item.getURI(),"status","submitted"))
+                    .entity(ImmutableMap.of("id",item.getURI().stringValue(),"status","submitted"))
                     .link(java.net.URI.create(item.getURI().stringValue()), "contentItem")
                     .build();
         } catch (RepositoryException | IOException e) {
@@ -106,7 +105,7 @@ public class TextAnalysisWebService {
 
     @GET
     @Produces("application/json")
-    @Path("{id:[^/]+}")
+    @Path("{id:.+}")
     public Response getResult(@PathParam("id") final String itemURI) {
 
         final Item item;
@@ -130,6 +129,7 @@ public class TextAnalysisWebService {
         final TextAnalysisOutput out;
         try {
             out = getTextResult(item);
+            item.getObjectConnection().close();
 
             if(out == null) {
                 throw new Exception("Analysis result is empty");
@@ -147,28 +147,28 @@ public class TextAnalysisWebService {
     }
     private static String queryEntities = "PREFIX fam: <http://vocab.fusepool.info/fam#>\n" +
             "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
-            "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
-            "SELECT DISTINCT ?uri ?label WHERE {\n" +
+            "PREFIX mmm: <http://www.mico-project.eu/ns/mmm/2.0/schema#>\n" +
+            "SELECT DISTINCT ?uri ?label ?confidence WHERE {\n" +
             "  <%s>\n" +
-            "  mico:hasContentPart/mico:hasContent/oa:hasBody ?body.\n" +
-            "  ?body a fam:LinkedEntity; fam:entity-label ?label; fam:entity-reference ?uri.\n" +
+            "  mmm:hasPart/oa:hasBody ?body.\n" +
+            "  ?body a fam:LinkedEntity; fam:entity-label ?label; fam:entity-reference ?uri; fam:confidence ?confidence.\n" +
             "}";
 
     private static String queryTopics = "PREFIX fam: <http://vocab.fusepool.info/fam#>\n" +
             "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
-            "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
+            "PREFIX mmm: <http://www.mico-project.eu/ns/mmm/2.0/schema#>\n" +
             "SELECT DISTINCT ?uri ?label ?confidence WHERE {\n" +
             "  <%s>\n" +
-            "  mico:hasContentPart/mico:hasContent/oa:hasBody ?body.\n" +
+            "  mmm:hasPart/oa:hasBody ?body.\n" +
             "  ?body a fam:TopicAnnotation; fam:topic-label ?label; fam:topic-reference ?uri; fam:confidence ?confidence.\n" +
             "}";
 
     private static String querySentiment = "PREFIX fam: <http://vocab.fusepool.info/fam#>\n" +
             "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
-            "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
+            "PREFIX mmm: <http://www.mico-project.eu/ns/mmm/2.0/schema#>\n" +
             "SELECT ?sentiment WHERE {\n" +
             "  <%s>\n" +
-            "  mico:hasContentPart/mico:hasContent/oa:hasBody ?body.\n" +
+            "  mmm:hasPart/oa:hasBody ?body.\n" +
             "  ?body a fam:SentimentAnnotation; fam:sentiment ?sentiment.\n" +
             "}";
 
@@ -178,8 +178,8 @@ public class TextAnalysisWebService {
             TextAnalysisOutput out = new TextAnalysisOutput(item);
 
             out.sentiment = querySentiment(item);
-            out.entities = queryList(item);
-            out.topics = queryList(item);
+            out.entities = queryList(item, queryEntities);
+            out.topics = queryList(item, queryTopics);
 
             return out;
         } catch (MalformedQueryException | QueryEvaluationException e) {
@@ -188,58 +188,53 @@ public class TextAnalysisWebService {
         }
     }
 
-    private List queryList(Item ci) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
+    private List queryList(Item ci, String query) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
+
+        query = String.format(query, ci.getURI().stringValue());
 
         List res = new ArrayList<>();
-//        final TupleQueryResult result = metadata.query(query);
-//
-//        try {
-//            while (result.hasNext()) {
-//                HashMap map = new HashMap<>();
-//                BindingSet bindings = result.next();
-//                for(String name : result.getBindingNames()) {
-//                    Value v = bindings.getBinding(name).getValue();
-//                    if(v instanceof Literal) {
-//                        Literal l = (Literal) v;
-//                        try {
-//                            map.put(name,l.doubleValue());//workaround !
-//                        } catch (IllegalArgumentException e) {
-//                            map.put(name,l.stringValue());
-//                        }
-//                    } else {
-//                        map.put(name, v.stringValue());
-//                    }
-//                }
-//                res.add(map);
-//            }
-//        } finally {
-//            result.close();
-//        }
+        final TupleQueryResult result = ci.getObjectConnection().prepareTupleQuery(query).evaluate();
+
+        try {
+            while (result.hasNext()) {
+                HashMap map = new HashMap<>();
+                BindingSet bindings = result.next();
+                for(String name : result.getBindingNames()) {
+                    Value v = bindings.getBinding(name).getValue();
+                    if(v instanceof Literal) {
+                        Literal l = (Literal) v;
+                        try {
+                            map.put(name,l.doubleValue());//workaround !
+                        } catch (IllegalArgumentException e) {
+                            map.put(name,l.stringValue());
+                        }
+                    } else {
+                        map.put(name, v.stringValue());
+                    }
+                }
+                res.add(map);
+            }
+        } finally {
+            result.close();
+        }
         return res;
     }
 
     private Object querySentiment(Item item) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
 
-//        String query = String.format(querySentiment, ci.getURI().stringValue());
-//
-//        final TupleQueryResult result = metadata.query(query);
-//
-//        try {
-//            if (result.hasNext()) {
-//                return ((Literal)result.next().getBinding(result.getBindingNames().get(0)).getValue()).doubleValue();
-//            }
-//        } finally {
-//            result.close();
-//        }
+        String query = String.format(querySentiment, item.getURI().stringValue());
+
+        final TupleQueryResult result = item.getObjectConnection().prepareTupleQuery(query).evaluate();
+
+        try {
+            if (result.hasNext()) {
+                return ((Literal)result.next().getBinding(result.getBindingNames().get(0)).getValue()).doubleValue();
+            }
+        } finally {
+            result.close();
+        }
 
         return null;
-    }
-
-    private URI concatUrlWithPath(String baseURL, String extraPath) throws URISyntaxException{
-        java.net.URI baseURI = new java.net.URI(baseURL).normalize();
-        String newPath = baseURI.getPath() + "/" + extraPath;
-        java.net.URI newURI = baseURI.resolve(newPath);
-        return new URIImpl(newURI.normalize().toString());
     }
 
 }

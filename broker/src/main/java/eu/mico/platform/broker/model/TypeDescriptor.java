@@ -24,6 +24,9 @@ public class TypeDescriptor {
     private String symbol;
 
     public TypeDescriptor(String symbol) {
+        if (symbol == null){
+            throw new IllegalArgumentException("The symbol must not be null");
+        }
         this.symbol = symbol;
     }
 
