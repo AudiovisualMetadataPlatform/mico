@@ -138,6 +138,7 @@ namespace mico {
             jnipp::LocalRef<URIImpl> jResourceUriImpl =
                 URIImpl::construct( ((jnipp::Ref<ResourceObject>)m_resourceMMM)->getResourceAsString() );
 
+            //TODO: link to Asset.STORAGE_SERVICE_URN_PREFIX
             ss << m_persistenceService.getContentDirectory()
                << "/" << jResourceUriImpl->getLocalName()->std_str()
                << "/" << jUriImpl->getLocalName()->std_str();
