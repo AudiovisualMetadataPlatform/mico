@@ -161,6 +161,8 @@ public class StatusWebService {
         Map<String,Object> sprops = new HashMap<>();
         sprops.put("uri", uri);
         sprops.put("finished", state.isFinalState() ? "true" : "false");
+        sprops.put("hasError", state.hasError() ? "true" : "false");
+        sprops.put("error", state.getError());
         sprops.put("time", ISO8601FORMAT.format(state.getCreated()));
 
         if(showParts) {

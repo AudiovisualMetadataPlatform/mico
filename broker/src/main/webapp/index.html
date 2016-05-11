@@ -115,8 +115,9 @@
                 {{item.time}}
             </td>
             <td>
-                <div style="background-color: #006318; color: lightgreen; text-align: center;" ng-show="item.finished == 'true'">Finished</div>
-                <div style="background-color: darkred; color: lightcoral; text-align: center;" ng-show="item.finished == 'false'">In Progress</div>
+                <div style="background-color: #006318; color: lightgreen; text-align: center;" ng-show="item.finished == 'true' && item.hasError == 'false'">Finished</div>
+                <div style="background-color: yellow; color: lightcoral; text-align: center;" ng-show="item.finished == 'false'">In Progress</div>
+                <div style="background-color: darkred; color: lightcoral; text-align: center;" ng-show="item.finished == 'true' && item.hasError == 'true'" title="{{item.error}}">Failed</div>
             </td>
         </tr>
     </table>
