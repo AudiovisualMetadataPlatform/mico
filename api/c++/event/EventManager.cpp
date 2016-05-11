@@ -100,6 +100,7 @@ namespace mico {
                       LOG_DEBUG("prevent double execution of ConfigurationClient callback.");
                       return;
                     }
+                    LOG_DEBUG("Declaring configuration queue for event manager");
                     //declare config reply queue
                     this->channel->declareQueue(AMQP::autodelete + AMQP::exclusive)
                             .onSuccess([this](const std::string &name, uint32_t messageCount, uint32_t consumerCount) {
@@ -322,12 +323,14 @@ namespace mico {
 
         public:
             AnalysisConsumer(mico::persistence::PersistenceService* persistence, AnalysisService& service, std::string queue, AMQP::Channel* channel)
-                    : Consumer(channel), persistence(persistence), service(service), queue(queue) {
+                    : Consumer(channel), persistence(persistence), service(service), queue(queue)
+            {
                 channel->onReady([this, channel, queue]() {
                     if (!amqpWorkaround.isFirstCall()) {
 
                         return;
                     }
+                    LOG_DEBUG("Declaring consumption queue for analysis service %s", this->service.getServiceID().stringValue().c_str());
                     channel->declareQueue(queue, AMQP::durable + AMQP::autodelete)
                             .onSuccess([this,channel, queue]() {
                                 LOG_INFO("starting to consume data for analysis service %s on queue %s", this->service.getServiceID().stringValue().c_str(), this->queue.c_str());
