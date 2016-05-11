@@ -423,7 +423,7 @@ namespace mico {
         		return getContentDirectory() + std::string("/") + maskedURL.substr(urn_prefix.length());
         	}
 
-        	throw std::logic_error("PersistenceService::getContentLocation(std::string maskedURL) is not implemented");
+        	return maskedURL;
 
         }
 
