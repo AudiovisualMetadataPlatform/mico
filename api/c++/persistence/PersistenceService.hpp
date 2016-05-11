@@ -158,6 +158,8 @@ namespace mico {
 
             std::string getContentDirectory();
 
+            std::string getContentLocation(std::string maskedURL );
+
             void checkJavaExceptionThrow();
 
             void checkJavaExceptionThrow(std::vector<std::string> exceptionNames);

@@ -413,6 +413,11 @@ namespace mico {
             con->setRemoveContexts(context);
         }
 
+        std::string PersistenceService::getContentLocation(std::string maskedURL) {
+        	throw std::logic_error("PersistenceService::getContentLocation(std::string maskedURL) is not implemented");
+        }
+
 
     }
 }
+
