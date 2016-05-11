@@ -413,8 +413,18 @@ namespace mico {
             con->setRemoveContexts(context);
         }
 
-        std::string PersistenceService::getContentLocation(std::string maskedURL) {
+        std::string PersistenceService::unmaskContentLocation(const std::string &maskedURL){
+        	jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+        	checkJavaExceptionNoThrow(m_jniErrorMessage);
+
+        	std::string urn_prefix=jnipp::eu::mico::platform::persistence::model::Asset::STORAGE_SERVICE_URN_PREFIX->std_str();
+        	if (maskedURL.compare(0, urn_prefix.length(), urn_prefix) == 0)
+        	{
+        		return getContentDirectory() + std::string("/") + maskedURL.substr(urn_prefix.length());
+        	}
+
         	throw std::logic_error("PersistenceService::getContentLocation(std::string maskedURL) is not implemented");
+
         }
 
 
