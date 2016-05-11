@@ -59,13 +59,13 @@ namespace mico {
           std::ostream* getOutputStream() {
             jnipp::Env::Scope scope(PersistenceService::m_sJvm);
             LOG_DEBUG("new output stream connection to %s.bin", this->getLocation().stringValue().c_str());
-            return new mico::io::url_ostream( this->getLocation().stringValue() + ".bin");
+            return new mico::io::url_ostream( m_persistenceService.unmaskContentLocation(this->getLocation().stringValue()) + ".bin");
           }
 
           std::istream* getInputStream() {
             jnipp::Env::Scope scope(PersistenceService::m_sJvm);
             LOG_DEBUG("new input stream connection to %s.bin", this->getLocation().stringValue().c_str());
-            return new mico::io::url_istream( this->getLocation().stringValue() + ".bin");
+            return new mico::io::url_istream( m_persistenceService.unmaskContentLocation(this->getLocation().stringValue()) + ".bin");
           }
         };
     }
