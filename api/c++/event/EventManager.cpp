@@ -15,9 +15,11 @@
 
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <thread>
 #include <google/protobuf/stubs/common.h>
 #include "Logging.hpp"
 #include "Uri.hpp"
+
 
 using std::string;
 using boost::asio::ip::tcp;
@@ -352,9 +354,11 @@ namespace mico {
             void handleDelivery(const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
                 mico::event::model::AnalysisRequest event;
                 if (event.ParseFromArray(message.body(), message.bodySize())){
+                    std::stringstream ss;
+                    ss << std::this_thread::get_id();
 
-                    LOG_DEBUG("Received analysis event (content item %s, object %s, replyTo %s)",
-                              event.itemuri().c_str(), event.parturi(0).c_str(), message.replyTo().c_str());
+                    LOG_DEBUG("Received analysis event (content item %s, object %s, replyTo %s) in thread %s",
+                              event.itemuri().c_str(), event.parturi(0).c_str(), message.replyTo().c_str(), ss.str().c_str());
 
                     std::vector<mico::persistence::model::URI> resourceURIList;
 
@@ -646,8 +650,10 @@ namespace mico {
             if(unavailable) {
                 throw EventManagerException("event manager unavailable");
             }
+            std::stringstream ss;
+            ss << std::this_thread::get_id();
 
-            LOG_INFO ("registering analysis service %s...", service->getServiceID().stringValue().c_str());
+            LOG_INFO ("registering analysis service %s in thread %s...", service->getServiceID().stringValue().c_str(), ss.str().c_str());
 
             boost::uuids::uuid UUID = rnd_gen();
             std::string queue = service->getQueueName() != "" ? service->getQueueName() : boost::uuids::to_string(UUID);
