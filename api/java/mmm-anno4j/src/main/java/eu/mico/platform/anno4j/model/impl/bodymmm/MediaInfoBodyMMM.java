@@ -1,7 +1,7 @@
 package eu.mico.platform.anno4j.model.impl.bodymmm;
 
 import eu.mico.platform.anno4j.model.BodyMMM;
-import eu.mico.platform.anno4j.model.namespaces.MMM;
+import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
 import org.openrdf.annotations.Iri;
 
 /**
@@ -10,7 +10,7 @@ import org.openrdf.annotations.Iri;
  *
  * XML file associated (via Asset) which contains all extracted information.
  */
-@Iri(MMM.MEDIA_INFO_BODY)
+@Iri(MMMTERMS.MEDIA_INFO_BODY)
 public interface MediaInfoBodyMMM extends BodyMMM {
 
 }

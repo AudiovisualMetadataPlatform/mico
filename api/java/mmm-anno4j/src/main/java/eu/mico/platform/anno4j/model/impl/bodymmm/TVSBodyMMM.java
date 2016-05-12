@@ -2,9 +2,10 @@ package eu.mico.platform.anno4j.model.impl.bodymmm;
 
 import eu.mico.platform.anno4j.model.BodyMMM;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
+import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
 import org.openrdf.annotations.Iri;
 
-@Iri(MMM.TVS_BODY)
+@Iri(MMMTERMS.TVS_BODY)
 public interface TVSBodyMMM extends BodyMMM {
 
 

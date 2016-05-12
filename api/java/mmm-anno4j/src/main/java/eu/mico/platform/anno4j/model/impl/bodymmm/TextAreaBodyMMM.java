@@ -1,6 +1,8 @@
 package eu.mico.platform.anno4j.model.impl.bodymmm;
 
-import com.github.anno4j.model.namespaces.*;
+import com.github.anno4j.model.namespaces.DC;
+import com.github.anno4j.model.namespaces.DCTYPES;
+import com.github.anno4j.model.namespaces.RDF;
 import eu.mico.platform.anno4j.model.BodyMMM;
 import org.openrdf.annotations.Iri;
 

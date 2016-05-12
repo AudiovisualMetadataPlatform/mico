@@ -1,7 +1,7 @@
 package eu.mico.platform.anno4j.model.impl.bodymmm;
 
 import eu.mico.platform.anno4j.model.BodyMMM;
-import eu.mico.platform.anno4j.model.namespaces.MMM;
+import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
 import org.openrdf.annotations.Iri;
 
 /**
@@ -11,6 +11,6 @@ import org.openrdf.annotations.Iri;
  * The relevant time information is stored in the associated specific resource of the given part, or rather in the
  * associated temporal FragmentSelector.
  */
-@Iri(MMM.SPEECH_MUSIC_BODY)
+@Iri(MMMTERMS.SPEECH_MUSIC_BODY)
 public interface SpeechMusicBodyMMM extends BodyMMM {
 }

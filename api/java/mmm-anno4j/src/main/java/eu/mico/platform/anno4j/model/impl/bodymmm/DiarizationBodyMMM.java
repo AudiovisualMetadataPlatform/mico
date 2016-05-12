@@ -2,7 +2,7 @@ package eu.mico.platform.anno4j.model.impl.bodymmm;
 
 import com.github.anno4j.model.namespaces.RDF;
 import eu.mico.platform.anno4j.model.BodyMMM;
-import eu.mico.platform.anno4j.model.namespaces.MMM;
+import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
 import org.openrdf.annotations.Iri;
 
 /**
@@ -11,7 +11,7 @@ import org.openrdf.annotations.Iri;
  *
  * The timestamp is to be set via a temporal FragmentSelector assigned to the respective specific resource of the given Part.
  */
-@Iri(MMM.DIARIZATION_BODY)
+@Iri(MMMTERMS.DIARIZATION_BODY)
 public interface DiarizationBodyMMM extends BodyMMM{
 
     @Iri(RDF.VALUE)
