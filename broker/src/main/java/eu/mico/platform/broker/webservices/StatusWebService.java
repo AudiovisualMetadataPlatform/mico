@@ -17,13 +17,13 @@ import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.model.ItemState;
 import eu.mico.platform.broker.model.ServiceDescriptor;
 import eu.mico.platform.broker.model.Transition;
+import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Resource;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.vfs2.FileSystemException;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -236,36 +236,51 @@ public class StatusWebService {
     @GET
     @Path("/download")
     public Response downloadPart(@QueryParam("itemUri") String itemUri, @QueryParam("partUri") String partUri) throws RepositoryException {
-        final Item item = broker.getPersistenceService().getItem(new URIImpl(itemUri));
-        if(item == null) {
-            throw new NotFoundException("Part Item with URI " + itemUri + " not found in system");
+        PersistenceService ps = broker.getPersistenceService();
+
+        final Item item = ps.getItem(new URIImpl(itemUri));
+
+        if (item == null) {
+            throw new NotFoundException("Item with URI " + itemUri + " not found in system");
         }
-        final Part part = item.getPart(new URIImpl(partUri));
-        if(part == null) {
-            throw new NotFoundException("Part Part with URI " + partUri + " not found in system");
-        }
-        try {
-            final InputStream is = part.getAsset().getInputStream();
-            if(is != null) {
-                StreamingOutput entity = new StreamingOutput() {
-                    @Override
-                    public void write(OutputStream output) throws IOException, WebApplicationException {
-                        IOUtils.copy(is, output);
+
+        StreamingOutput entity;
+        String type;
+        if (partUri == null || itemUri.equals(partUri)) {
+            entity = new StreamingOutput() {
+                @Override
+                public void write(OutputStream output) throws IOException, WebApplicationException {
+                    try {
+                        IOUtils.copy(item.getAsset().getInputStream(), output);
+                    } catch (RepositoryException e) {
+                        throw new IllegalStateException(e);
                     }
-                };
+                }
+            };
 
-                return Response.ok(entity, part.getAsset().getFormat()).build();
-            } else {
-                throw new NotFoundException("Part Part with URI " + partUri + " has no binary content");
+            type = item.getAsset().getFormat();
+        } else {
+            final Part part = item.getPart(new URIImpl(partUri));
+            if (part == null) {
+                throw new NotFoundException("Part with URI " + partUri + " not found in system");
             }
-        } catch (FileSystemException e) {
-            return Response.serverError().entity(e.getMessage()).build();
-        } catch (IOException e) {
-            return Response.serverError().entity(e.getMessage()).build();
+
+            entity = new StreamingOutput() {
+                @Override
+                public void write(OutputStream output) throws IOException, WebApplicationException {
+                    try {
+                        IOUtils.copy(part.getAsset().getInputStream(), output);
+                    } catch (RepositoryException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
+            };
+
+            type = part.getAsset().getFormat();
         }
 
 
-
+        return Response.ok(entity, type).build();
     }
 
 

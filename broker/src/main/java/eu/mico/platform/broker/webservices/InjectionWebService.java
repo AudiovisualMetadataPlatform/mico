@@ -33,8 +33,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.DateFormatSymbols;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -236,16 +234,6 @@ public class InjectionWebService {
 
 
         return Response.ok(entity, type).build();
-    }
-
-
-    private static SimpleDateFormat createDateFormat(String format, String timezone) {
-        SimpleDateFormat sdf =
-                new SimpleDateFormat(format, DateFormatSymbols.getInstance(Locale.US));
-        if (timezone != null) {
-            sdf.setTimeZone(TimeZone.getTimeZone(timezone));
-        }
-        return sdf;
     }
 
 }
