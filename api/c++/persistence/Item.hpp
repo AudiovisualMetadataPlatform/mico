@@ -45,12 +45,23 @@ namespace mico {
           /**
            * Create a new jnipp Object of the desired class.
            */
-          virtual jnipp::Ref<JavaLangObject>& createObject(const jnipp::Ref<jnipp::Class>& clazz) = 0;
+          virtual jnipp::Ref<jnipp::java::lang::Object>& createObject(const jnipp::Ref<jnipp::Class>& clazz) = 0;
+
+          /**
+           * Create a new jnipp Object of the desired class using the connection.
+           *
+           * Notice that this method does not commit the transaction.
+           *
+           */
+          virtual jnipp::Ref<jnipp::java::lang::Object>& createObjectNoCommit(
+            jnipp::Ref<jnipp::org::openrdf::repository::object::ObjectConnection> con,
+            const jnipp::Ref<jnipp::Class>& clazz) = 0;
 
           /**
            * Retrieve an existing jnipp Object of the desired class.
            */
-          virtual jnipp::Ref<JavaLangObject>& findObject(const  mico::persistence::model::URI& uri, const jnipp::Ref<jnipp::Class>& clazz) = 0;
+          virtual jnipp::Ref<jnipp::java::lang::Object>& findObject(const  mico::persistence::model::URI& uri,
+                                                                    const jnipp::Ref<jnipp::Class>& clazz) = 0;
 
 
           virtual std::string getSerializedAt() = 0;

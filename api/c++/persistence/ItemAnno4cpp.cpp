@@ -168,13 +168,29 @@ namespace mico {
       	return out;
       }
 
+      jnipp::Ref<JavaLangObject>& ItemAnno4cpp::createObjectNoCommit(
+          jnipp::Ref<ObjectConnection> con, const jnipp::Ref<jnipp::Class>& clazz) {
+
+        static jnipp::GlobalRef<JavaLangObject> out;
+        jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+
+        jnipp::LocalRef<jnipp::org::openrdf::model::Resource>
+            blankResource = IDGenerator::BLANK_RESOURCE;
+
+        out = con->addDesignation(
+              con->getObjectFactory()->createObject(blankResource, (jnipp::Ref<Class>) clazz),
+              (jnipp::Ref<Class>) clazz);
+
+        return out;
+      }
+
       jnipp::Ref<JavaLangObject>& ItemAnno4cpp::findObject(const  model::URI& uri, const jnipp::Ref<jnipp::Class>& clazz) {
 
-      	static jnipp::GlobalRef<JavaLangObject> out;
-      	jnipp::Env::Scope scope(PersistenceService::m_sJvm);
-      	bool error = false;
+        static jnipp::GlobalRef<JavaLangObject> out;
+        jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+        bool error = false;
 
-      	LOG_DEBUG("ItemAnno4cpp::findObject - Retrieving an of %s from %s", clazz->getName()->std_str().c_str(),uri.stringValue().c_str());
+        LOG_DEBUG("ItemAnno4cpp::findObject - Retrieving an of %s from %s", clazz->getName()->std_str().c_str(),uri.stringValue().c_str());
 
 
         jnipp::LocalRef<Transaction> jTransaction = m_persistenceService.getAnno4j()->createTransaction();

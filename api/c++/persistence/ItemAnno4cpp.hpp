@@ -43,12 +43,23 @@ namespace mico {
         /**
          * Create a new jnipp Object of the desired class.
          */
-        jnipp::Ref<JavaLangObject>& createObject(const jnipp::Ref<jnipp::Class>& clazz);
+        jnipp::Ref<jnipp::java::lang::Object>& createObject(const jnipp::Ref<jnipp::Class>& clazz);
+
+        /**
+         * Create a new jnipp Object of the desired class using the connection.
+         *
+         * Notice that this method does not commit the transaction.
+         *
+         */
+        jnipp::Ref<jnipp::java::lang::Object>& createObjectNoCommit(
+            jnipp::Ref<jnipp::org::openrdf::repository::object::ObjectConnection> con,
+            const jnipp::Ref<jnipp::Class>& clazz);
 
         /**
          * Retrieve an existing jnipp Object of the desired class.
          */
-        jnipp::Ref<JavaLangObject>& findObject(const  mico::persistence::model::URI& uri, const jnipp::Ref<jnipp::Class>& clazz);
+        jnipp::Ref<jnipp::java::lang::Object>& findObject(const  mico::persistence::model::URI& uri,
+                                                          const jnipp::Ref<jnipp::Class>& clazz);
 
 
 
