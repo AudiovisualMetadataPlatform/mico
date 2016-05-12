@@ -332,17 +332,21 @@ namespace mico {
 
                         return;
                     }
-                    LOG_DEBUG("Declaring consumption queue for analysis service %s", this->service.getServiceID().stringValue().c_str());
+                    LOG_DEBUG("Declaring consumption queue [%s] for analysis service %s",queue.c_str(),
+                              this->service.getServiceID().stringValue().c_str());
                     channel->declareQueue(queue, AMQP::durable + AMQP::autodelete)
-                            .onSuccess([this,channel, queue]() {
-                                LOG_INFO("starting to consume data for analysis service %s on queue %s", this->service.getServiceID().stringValue().c_str(), this->queue.c_str());
-                                channel->consume(queue).onReceived([this](const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
-                                    this->handleDelivery(message,deliveryTag,redelivered);
-                                });
-                            })
-                            .onError([this](const char* message) {
-                                LOG_ERROR ("Cannot consume data on queue %s: %s", this->queue.c_str(), message);
-                          });;
+                      .onSuccess([this,channel, queue]() {
+                          LOG_INFO("starting to consume data for analysis service %s on queue %s", this->service.getServiceID().stringValue().c_str(), this->queue.c_str());
+                          channel->consume(queue).onReceived([this](const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
+                              this->handleDelivery(message,deliveryTag,redelivered);
+                          });
+                      })
+                      .onError([this](const char* message) {
+                          LOG_ERROR ("Cannot consume data on queue %s: %s", this->queue.c_str(), message);
+                      })
+                      .onFinalize([this]() {
+                          LOG_DEBUG ("Finalize called on queue %s", this->queue.c_str());
+                    });
                 });
             }
 
