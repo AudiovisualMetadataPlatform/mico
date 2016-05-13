@@ -15,7 +15,7 @@ if (NOT DEFINED MICO_PLATFORM_VERSION)
     set(MICO_PLATFORM_VERSION ${CPP_PLATFORM_VERSION})
 else()
     if (NOT ${MICO_PLATFORM_VERSION} MATCHES ${CPP_PLATFORM_VERSION})
-        # message(FATAL_ERROR "Platform version set in Debian config does not match POM version - Please update Debian config")
+        message(FATAL_ERROR "Platform version set in Debian config does not match POM version - Please update Debian config")
     endif()
 endif()
 
