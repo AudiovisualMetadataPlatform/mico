@@ -1,3 +1,12 @@
+libmico-api (2.0.0) unstable; urgency=medium
+
+  * major update using Java persistence services through ano4cpp
+  * complete API change for mico- extractors no backwards compatibility given
+  * better Event handling and implementation of new broker protocol
+  * some bugfixes
+
+ -- Christian Weigel <christian@micobox154>  Fri, 13 May 2016 20:50:37 +0200
+
 libmico-api (1.2.11) unstable; urgency=medium
 
   * Fixed umask (set to 0) for file and directory permissions for file:// handler
