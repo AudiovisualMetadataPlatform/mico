@@ -35,6 +35,11 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.vocabulary.DCTERMS;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +57,8 @@ import java.net.URISyntaxException;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  */
@@ -234,7 +241,7 @@ public class AnimalDetectionWebService {
         }
 
         try {
-            List<Object> objects = getObjects(itemURI);
+            List<Object> objects = getObjects(item);
             if (objects == null) {
                 log.error("Empty objects list of content item: %s", itemURI.toString());
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -242,8 +249,8 @@ public class AnimalDetectionWebService {
             rspEntity.put("objects", objects);
             rspEntity.put("objectsFound", objects.size());
 
-            rspEntity.put("processingBegin", getProcessingBegin(partURI));
-            rspEntity.put("processingEnd", getProcessingEnd(itemURI));
+            rspEntity.put("processingBegin", getProcessingBegin(item));
+            rspEntity.put("processingEnd", getProcessingEnd(item));
         } catch (RepositoryException e) {
             log.error("Error processing queries: {}", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
@@ -258,152 +265,144 @@ public class AnimalDetectionWebService {
 
     }
 
-    // TODO: adjust to changed model
-    private String getProcessingEnd(URI contentItemUri) throws  RepositoryException {
-//        final Metadata metadata = persistenceService.getMetadata();
-//
-//        try {
-//
-//            final String query = String.format(
-//                    "SELECT ?value WHERE {\n" +
-//                            " <%s>  <http://www.mico-project.eu/ns/platform/1.0/schema#hasContentPart> ?cp .\n" +
-//                            " ?cp <%s> \"text/vnd.fhg-hog-detector+xml\" .\n" +
-//                            " ?cp <%s> ?value .\n" +
-//                            "}",
-//                    contentItemUri,
-//                    DCTERMS.TYPE,
-//                    DCTERMS.CREATED
-//            );
-//
-//            final TupleQueryResult result = metadata.query(query);
-//
-//            try {
-//                if (result.hasNext()) {
-//                    return result.next().getBinding("value").getValue().stringValue();
-//                }
-//            } finally {
-//                result.close();
-//            }
-//        } catch (MalformedQueryException | QueryEvaluationException e) {
-//            log.error("Error querying objects; {}", e);
-//        } finally {
-//            metadata.close();
-//        }
+    /***************
+     * TODO adapt queries to new model
+     ****************/
+    private String getProcessingEnd(Item item) throws  RepositoryException {
+        try {
+
+            final String query = String.format(
+                    "PREFIX mmm: <http://www.mico-project.eu/ns/mmm/2.0/schema#>\n" +
+                    "SELECT ?value WHERE {\n" +
+                            " <%s>  mmm:hasPart> ?cp .\n" +
+                            " ?cp <%s> \"text/vnd.fhg-hog-detector+xml\" .\n" + //TODO still correct?
+                            " ?cp <%s> ?value .\n" +
+                            "}",
+                    item.getURI().stringValue(),
+                    DCTERMS.TYPE,
+                    DCTERMS.CREATED
+            );
+
+            final TupleQueryResult result = item.getObjectConnection().prepareTupleQuery(query).evaluate();
+
+            try {
+                if (result.hasNext()) {
+                    return result.next().getBinding("value").getValue().stringValue();
+                }
+            } finally {
+                result.close();
+            }
+        } catch (MalformedQueryException | QueryEvaluationException e) {
+            log.error("Error querying objects; {}", e);
+        }
         return null;
     }
 
-    private String getProcessingBegin(URI contentPartUri) throws  RepositoryException {
-//        final Metadata metadata = persistenceService.getMetadata();
-//
-//        try {
-//
-//            final String query = String.format(
-//                    "SELECT ?value WHERE {\n" +
-//                            " <%s>   <http://www.w3.org/ns/oa#serializedAt> ?value .\n" +
-//                            "}",
-//                    contentPartUri
-//            );
-//
-//            final TupleQueryResult result = metadata.query(query);
-//
-//            try {
-//                if (result.hasNext()) {
-//                    return result.next().getBinding("value").getValue().stringValue();
-//                }
-//            } finally {
-//                result.close();
-//            }
-//        } catch (MalformedQueryException | QueryEvaluationException e) {
-//            log.error("Error querying objects; {}", e);
-//        } finally {
-//            metadata.close();
-//        }
+    private String getProcessingBegin(Item item) throws  RepositoryException {
+
+        try {
+
+            final String query = String.format(
+                    "SELECT ?value WHERE {\n" +
+                            " <%s>   <http://www.w3.org/ns/oa#serializedAt> ?value .\n" + //TODO still correct?
+                            "}",
+                    item.getURI().stringValue()
+            );
+
+            final TupleQueryResult result = item.getObjectConnection().prepareTupleQuery(query).evaluate();
+
+            try {
+                if (result.hasNext()) {
+                    return result.next().getBinding("value").getValue().stringValue();
+                }
+            } finally {
+                result.close();
+            }
+        } catch (MalformedQueryException | QueryEvaluationException e) {
+            log.error("Error querying objects; {}", e);
+        }
         return null;
     }
 
-    private List<Object> getObjects(URI contentItemUri) throws RepositoryException{
+    private List<Object> getObjects(Item item) throws RepositoryException{
         List<Object> rspObjects = new ArrayList<>();
-//        final Metadata metadata = persistenceService.getMetadata();
-//
-//        try {
-//
-//            final String query = String.format(
-//                "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
-//                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-//                "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
-//                "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
-//                "SELECT ?animal ?region ?confidence ?version WHERE {\n" +
-//                    "<%s> mico:hasContentPart ?cp .\n" +
-//                    "?cp mico:hasContent ?annot .\n" +
-//                    "?annot oa:hasBody ?body .\n" +
-//                    "?annot oa:hasTarget ?tgt .\n" +
-//                    "?tgt  oa:hasSelector ?fs .\n" +
-//                    "?body rdf:value ?animal .\n" +
-//                    "?body mico:hasConfidence ?confidence .\n" +
-//                    "?body mico:hasExtractionVersion ?version .\n" +
-//                    "?fs rdf:value ?region\n" +
-//                "FILTER EXISTS {?body rdf:type mico:AnimalDetectionBody}\n" +
-//                "}",
-//                contentItemUri
-//            );
-//
-//            final TupleQueryResult result = metadata.query(query);
-//
-//            try {
-//                while (result.hasNext()) {
-//                    Map<String, Object> rspObject = new HashMap<>();
-//                    BindingSet bindingSet = result.next();
-//                    rspObject.put("animal", bindingSet.getBinding("animal").getValue().stringValue());
-//                    rspObject.put("confidence", bindingSet.getBinding("confidence").getValue().stringValue());
-//                    rspObject.put("algorithmVersion", bindingSet.getBinding("version").getValue().stringValue());
-//                    String value = bindingSet.getBinding("region").getValue().stringValue();
-//                    final Pattern fragmentPattern = Pattern.compile("#xywh=(-?\\d+),(-?\\d+),(-?\\d+),(-?\\d+)");
-//                    Matcher matcher = fragmentPattern.matcher(value);
-//                    if (!matcher.matches()) {
-//                        log.error("Error parsing value {}", value);
-//                        return null;
-//                    }
-//                    rspObject.put("x", Integer.parseInt(matcher.group(1)));
-//                    rspObject.put("y", Integer.parseInt(matcher.group(2)));
-//                    rspObject.put("w", Integer.parseInt(matcher.group(3)));
-//                    rspObject.put("h", Integer.parseInt(matcher.group(4)));
-//                    rspObjects.add(rspObject);
-//                }
-//            } finally {
-//                result.close();
-//            }
-//        } catch (MalformedQueryException | QueryEvaluationException e) {
-//            log.error("Error querying objects; {}", e);
-//            return null;
-//        } finally {
-//            metadata.close();
-//        }
+
+        try {
+
+            final String query = String.format(
+                "PREFIX mmm: <http://www.mico-project.eu/ns/mmm/2.0/schema#>\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
+                "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
+                "SELECT ?animal ?region ?confidence ?version WHERE {\n" +
+                    "<%s> mico:hasPart ?annot .\n" +
+                    "?annot oa:hasBody ?body .\n" +
+                    "?annot oa:hasTarget ?tgt .\n" +
+                    "?tgt  oa:hasSelector ?fs .\n" +
+                    "?body rdf:value ?animal .\n" +
+                    "?body mmm:hasConfidence ?confidence .\n" + //TODO still correct
+                    "?body mmm:hasExtractionVersion ?version .\n" + //TODO still correct
+                    "?fs rdf:value ?region\n" +
+                "FILTER EXISTS {?body rdf:type mmm:AnimalDetectionBody}\n" + //TODO still correct
+                "}",
+                item.getURI().stringValue()
+            );
+
+            final TupleQueryResult result = item.getObjectConnection().prepareTupleQuery(query).evaluate();
+
+            try {
+                while (result.hasNext()) {
+                    Map<String, Object> rspObject = new HashMap<>();
+                    BindingSet bindingSet = result.next();
+                    rspObject.put("animal", bindingSet.getBinding("animal").getValue().stringValue());
+                    rspObject.put("confidence", bindingSet.getBinding("confidence").getValue().stringValue());
+                    rspObject.put("algorithmVersion", bindingSet.getBinding("version").getValue().stringValue());
+                    String value = bindingSet.getBinding("region").getValue().stringValue();
+                    final Pattern fragmentPattern = Pattern.compile("#xywh=(-?\\d+),(-?\\d+),(-?\\d+),(-?\\d+)");
+                    Matcher matcher = fragmentPattern.matcher(value);
+                    if (!matcher.matches()) {
+                        log.error("Error parsing value {}", value);
+                        return null;
+                    }
+                    rspObject.put("x", Integer.parseInt(matcher.group(1)));
+                    rspObject.put("y", Integer.parseInt(matcher.group(2)));
+                    rspObject.put("w", Integer.parseInt(matcher.group(3)));
+                    rspObject.put("h", Integer.parseInt(matcher.group(4)));
+                    rspObjects.add(rspObject);
+                }
+            } finally {
+                result.close();
+            }
+        } catch (MalformedQueryException | QueryEvaluationException e) {
+            log.error("Error querying objects; {}", e);
+            return null;
+        }
         return rspObjects;
     }
 
     @DELETE
     @Path("{contentItemID:[^/]+}/{contentPartID:[^/]+}")
     public Response deleteSubject(@PathParam("contentItemID") final String contentItemId, @PathParam("contentPartID") final String contentPartId) {
-//        final URI contentItemUri;
-//        try {
-//            contentItemUri = concatUrlWithPath(marmottaBaseUri, contentItemId);
-//        }
-//        catch (URISyntaxException e) {
-//            log.error("Unable to create URI with marmotta base '{}', content item id '{}' and content part id '{}'", marmottaBaseUri, contentItemId, contentPartId);
-//            return Response.status(Response.Status.NOT_FOUND).entity(String.format("Unable to create URI with marmotta base '%s', content item id '%s' and content part id '%s'", marmottaBaseUri, contentItemId, contentPartId)).build();
-//        }
-//
-//        final ContentItem contentItem;
-//        try {
-//            contentItem = persistenceService.getContentItem(contentItemUri);
-//            if (contentItem == null)
-//                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'%n", contentItemUri.stringValue())).build();
-//
-//            persistenceService.deleteContentItem(contentItemUri);
-//        } catch (RepositoryException e) {
-//            log.error("Error removing content item {}: {}", contentItemUri, e);
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
-//        }
+        final URI contentItemUri;
+        try {
+            contentItemUri = concatUrlWithPath(marmottaBaseUri, contentItemId);
+        }
+        catch (URISyntaxException e) {
+            log.error("Unable to create URI with marmotta base '{}', content item id '{}' and content part id '{}'", marmottaBaseUri, contentItemId, contentPartId);
+            return Response.status(Response.Status.NOT_FOUND).entity(String.format("Unable to create URI with marmotta base '%s', content item id '%s' and content part id '%s'", marmottaBaseUri, contentItemId, contentPartId)).build();
+        }
+
+        final Item item;
+        try {
+            item = persistenceService.getItem(contentItemUri);
+            if (item == null)
+                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'%n", contentItemUri.stringValue())).build();
+
+            persistenceService.deleteItem(contentItemUri);
+        } catch (RepositoryException e) {
+            log.error("Error removing content item {}: {}", contentItemUri, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
+        }
 
 
 

@@ -2,44 +2,45 @@ package eu.mico.platform.anno4j.model.impl.bodymmm;
 
 import eu.mico.platform.anno4j.model.BodyMMM;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
+import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
 import org.openrdf.annotations.Iri;
 
-@Iri(MMM.COLORLAYOUT_BODY)
+@Iri(MMMTERMS.COLORLAYOUT_BODY)
 public interface ColorLayoutBodyMMM extends BodyMMM {
 
-    @Iri(MMM.YDCCOEFF)
+    @Iri(MMMTERMS.YDCCOEFF)
     String getYDC();
 
-    @Iri(MMM.YDCCOEFF)
+    @Iri(MMMTERMS.YDCCOEFF)
     void setYDC(String YDC);
 
-    @Iri(MMM.CBDCCOEFF)
+    @Iri(MMMTERMS.CBDCCOEFF)
     String getCbDC();
 
-    @Iri(MMM.CBDCCOEFF)
+    @Iri(MMMTERMS.CBDCCOEFF)
     void setCbDC(String cbDC);
 
-    @Iri(MMM.CRDCCOEFF)
+    @Iri(MMMTERMS.CRDCCOEFF)
     String getCrDC();
 
-    @Iri(MMM.CRDCCOEFF)
+    @Iri(MMMTERMS.CRDCCOEFF)
     void setCrDC(String crDC);
 
-    @Iri(MMM.CBACCOEFF)
+    @Iri(MMMTERMS.CBACCOEFF)
     String getCbAC();
 
-    @Iri(MMM.CBACCOEFF)
+    @Iri(MMMTERMS.CBACCOEFF)
     void setCbAC(String cbAC);
 
-    @Iri(MMM.CRACCOEFF)
+    @Iri(MMMTERMS.CRACCOEFF)
     String getCrAC();
 
-    @Iri(MMM.CRACCOEFF)
+    @Iri(MMMTERMS.CRACCOEFF)
     void setCrAC(String crAC);
 
-    @Iri(MMM.YACCOEFF)
+    @Iri(MMMTERMS.YACCOEFF)
     String getYAC();
 
-    @Iri(MMM.YACCOEFF)
+    @Iri(MMMTERMS.YACCOEFF)
     void setYAC(String YAC);
 }

@@ -58,8 +58,6 @@ public class TextAnalysisWebServiceTest {
 
     private static RepositoryConnection connection;
 
-    private static Part part;
-
     @BeforeClass
     public static void init() throws Exception {
 
@@ -99,9 +97,6 @@ public class TextAnalysisWebServiceTest {
                 .body("id", Matchers.equalTo(itemUrlString))
                 .body("status", Matchers.equalTo("submitted"));
 
-        //test content parts
-        Assert.assertNotNull(part);
-        Assert.assertEquals("This is a text", new String(((ByteArrayOutputStream) part.getAsset().getOutputStream()).toByteArray()));
     }
 
     @Test
@@ -154,12 +149,19 @@ public class TextAnalysisWebServiceTest {
 
     private static Item mockCreateItem() throws RepositoryException, IOException {
         URI uri = Mockito.mock(URI.class);
+        Asset a = createAsset();
         Mockito.when(uri.stringValue()).thenReturn(itemUrlString);
         Item item = Mockito.mock(Item.class);
-        Part part = mockContent();
-        Mockito.when(item.createPart(anyObject())).thenReturn(part);
         Mockito.when(item.getURI()).thenReturn(uri);
+        Mockito.when(item.getAsset()).thenReturn(a);
         return item;
+    }
+
+    public static Asset createAsset() throws IOException {
+        OutputStream os = new ByteArrayOutputStream();
+        Asset a = Mockito.mock(Asset.class);
+        Mockito.when(a.getOutputStream()).thenReturn(os);
+        return a;
     }
 
     private static Item mockItem(URI uri) throws RepositoryException, IOException, MalformedQueryException, QueryEvaluationException {
@@ -168,15 +170,6 @@ public class TextAnalysisWebServiceTest {
         ObjectConnection connection = mockObjectConnection();
         Mockito.when(item.getObjectConnection()).thenReturn(connection);
         return item;
-    }
-
-    private static Part mockContent() throws IOException, RepositoryException {
-        part = Mockito.mock(Part.class);
-        OutputStream os = new ByteArrayOutputStream();
-        Asset a = Mockito.mock(Asset.class);
-        Mockito.when(a.getOutputStream()).thenReturn(os);
-        Mockito.when(part.getAsset()).thenReturn(a);
-        return part;
     }
 
     private static ObjectConnection mockObjectConnection() throws RepositoryException, MalformedQueryException, QueryEvaluationException {

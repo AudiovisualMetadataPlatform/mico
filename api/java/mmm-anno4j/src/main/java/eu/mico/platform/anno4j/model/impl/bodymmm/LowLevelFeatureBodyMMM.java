@@ -3,9 +3,10 @@ package eu.mico.platform.anno4j.model.impl.bodymmm;
 import com.github.anno4j.model.namespaces.DCTERMS;
 import eu.mico.platform.anno4j.model.BodyMMM;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
+import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
 import org.openrdf.annotations.Iri;
 
-@Iri(MMM.LOW_LEVEL_FEATURE_BODY)
+@Iri(MMMTERMS.LOW_LEVEL_FEATURE_BODY)
 public interface LowLevelFeatureBodyMMM extends BodyMMM
 {
     

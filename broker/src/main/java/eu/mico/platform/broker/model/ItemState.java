@@ -16,6 +16,7 @@ package eu.mico.platform.broker.model;
 import eu.mico.platform.broker.exception.StateNotFoundException;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
+
 import org.openrdf.model.URI;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
@@ -32,8 +33,9 @@ public class ItemState {
 
     private static Logger log = LoggerFactory.getLogger(ItemState.class);
 
-    private Item item;
-    private Date        created;
+    private Item    item;
+    private Date    created;
+    private StringBuilder error;
 
     private Map<URI, TypeDescriptor> states;   // contains the currently non-processed states
     private Map<String,Transition>   progress; // contains the correlation IDs currently in progress, used to indicate when we are finished
@@ -41,10 +43,11 @@ public class ItemState {
     private ServiceGraph             graph;
 
     public ItemState(ServiceGraph graph, Item item) {
-        this.graph       = graph;
-        this.item = item;
+        this.graph    = graph;
+        this.item     = item;
+        this.error    = null;
 
-        this.states = new HashMap<>();
+        this.states   = new HashMap<>();
         this.progress = new HashMap<>();
         this.created  = new Date();
 
@@ -59,16 +62,25 @@ public class ItemState {
     private void initState() {
         try {
             if (item.hasAsset()){
+                // if we have an asset, it needs a format
+                String format = item.getAsset().getFormat();
+                if (format == null){
+                    setError("asset Format not set");
+                    format="";
+                }
+ 
                 try {
-                    states.put(item.getURI(), graph.getState(item.getAsset().getFormat()));
+                    states.put(item.getURI(), graph.getState(format));
                 } catch (StateNotFoundException e) {
-                    log.warn("no starting state found for item with asset type {}", item.getAsset().getFormat());
+                    setError("no starting state found for item with asset type: " +format);
+                    log.warn("no starting state found for item with asset type {}", format);
                 }
             }
             for(Part part : item.getParts()) {
                 try {
                     states.put(part.getURI(), graph.getState(part.getSyntacticalType()));
                 } catch (StateNotFoundException e) {
+                    setError("no starting state found for part with asset type: " +part.getSyntacticalType());
                     log.warn("no starting state found for part with asset type {}", part.getSyntacticalType());
                 }
             }
@@ -165,4 +177,27 @@ public class ItemState {
     public Date getCreated() {
         return created;
     }
+
+
+    public boolean hasError() {
+        return error != null;
+    }
+
+
+    public void setError(String msg) {
+        if (error == null ){
+            error = new StringBuilder(msg.length());
+        }else{
+            error.append("\n");
+        }
+        error.append(msg);
+    }
+    
+    public String getError() {
+        if (error != null){
+            return error.toString();
+        }
+        return "";
+    }
+
 }

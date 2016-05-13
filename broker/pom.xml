@@ -47,6 +47,8 @@
                             </manifest>
                             <manifestEntries>
                                 <Build-Time>${maven.build.timestamp}</Build-Time>
+                                <Git-Revision>${buildNumber}</Git-Revision>
+                                <Git-Branch>${scmBranch}</Git-Branch>
                             </manifestEntries>
                         </archive>
                         <archiveClasses>false</archiveClasses>
@@ -76,6 +78,24 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                    <shortRevisionLength>8</shortRevisionLength>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>
                 <artifactId>tomcat7-maven-plugin</artifactId>
@@ -327,21 +347,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.marmotta</groupId>
-            <artifactId>marmotta-sparql</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.weld.se</groupId>
             <artifactId>weld-se-core</artifactId>
             <scope>test</scope>
@@ -425,5 +430,8 @@
             </build>
         </profile>
     </profiles>
-
+    <scm>
+        <connection>scm:git:ssh://git@bitbucket.org:mico-project/platform.git</connection>
+      <tag>HEAD</tag>
+  </scm>
 </project>

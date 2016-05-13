@@ -22,9 +22,12 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.TupleQueryResult;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +145,7 @@ public class DemoWebService {
                 state = broker.getStates().get(ci.getURI().stringValue());
             }
 
-            Object result = createImageResult(ci.getURI().stringValue());
+            Object result = createImageResult(ci);
 
             return Response.status(Response.Status.CREATED)
                     .entity(ImmutableMap.of("id", ci.getURI(), "uri", ci.getURI().stringValue(), "result", result, "status", "done"))
@@ -348,7 +351,7 @@ public class DemoWebService {
         }
 
         try {
-            Object result = createImageResult(uriString);
+            Object result = createImageResult(item);
             return Response.status(Response.Status.CREATED)
                     .entity(ImmutableMap.of("id", item.getURI(), "uri", item.getURI().stringValue(), "result", result, "status", "done"))
                     .build();
@@ -385,7 +388,7 @@ public class DemoWebService {
         }
 
         try {
-            Object result = createVideoResult(uriString);
+            Object result = createVideoResult(item);
             return Response.status(Response.Status.CREATED)
                     .entity(ImmutableMap.of("id", item.getURI(), "uri", item.getURI().stringValue(), "result", result, "status", "done"))
                     .build();
@@ -397,57 +400,57 @@ public class DemoWebService {
     }
 
     // TODO: refactor to model v2 impl
-    private Object createImageResult(String uri) throws Exception {
+    private Object createImageResult(Item item) throws Exception {
 
 //        final Metadata metadata;
         Map<String,Object> result = new HashMap<>();
-//        try {
-//            metadata = persistenceService.getMetadata();
-//
-//            try {
-//                result.put("type", "image");
-//                result.put("part_uri", queryString(queryMediaPartURI, metadata, uri));
-//                result.put("faces", queryList(queryFaces, metadata, uri));
-//                result.put("animals", queryMapList(animals, metadata, uri));
-//
-//            } catch (MalformedQueryException | QueryEvaluationException e) {
-//                log.error("Error querying objects; {}", e);
-//                throw new Exception(e);
-//            }
-//
-//        } catch (RepositoryException e) {
-//            e.printStackTrace();
-//        }
+        try {
+
+            try {
+                result.put("type", "image");
+                result.put("part_uri", queryString(queryMediaPartURI, item));
+                result.put("faces", queryList(queryFaces, item));
+                result.put("animals", queryMapList(animals, item));
+
+            } catch (MalformedQueryException | QueryEvaluationException e) {
+                log.error("Error querying objects; {}", e);
+                throw new Exception(e);
+            }
+
+        } catch (RepositoryException e) {
+            e.printStackTrace();
+        }
 
         return result;
     }
 
-    private Object createVideoResult(String uri) throws Exception {
+    private Object createVideoResult(Item item) throws Exception {
 
-//        final Metadata metadata;
         Map<String,Object> result = new HashMap<>();
-//        try {
-//            metadata = persistenceService.getMetadata();
-//
-//            try {
-//                result.put("type", "video");
-//                result.put("part_uri", queryString(queryMediaPartURI, metadata, uri));
-//                result.put("faces", queryMapList(timedFaces, metadata, uri));
-//                result.put("shotImages", queryMapList(shotImages, metadata, uri));
-//                //result.put("shots", queryMapList(shots, metadata, uri));
-//                result.put("timedText", queryMapList(timedText, metadata, uri));
-//            } catch (MalformedQueryException | QueryEvaluationException e) {
-//                log.error("Error querying objects; {}", e);
-//                throw new Exception(e);
-//            }
-//
-//        } catch (RepositoryException e) {
-//            e.printStackTrace();
-//        }
+        try {
+
+            try {
+                result.put("type", "video");
+                result.put("part_uri", queryString(queryMediaPartURI, item));
+                result.put("faces", queryMapList(timedFaces, item));
+                result.put("shotImages", queryMapList(shotImages, item));
+                //result.put("shots", queryMapList(shots, item));
+                result.put("timedText", queryMapList(timedText, item));
+            } catch (MalformedQueryException | QueryEvaluationException e) {
+                log.error("Error querying objects; {}", e);
+                throw new Exception(e);
+            }
+
+        } catch (RepositoryException e) {
+            e.printStackTrace();
+        }
 
         return result;
     }
 
+    /***************
+     * TODO adapt queries to new model
+     ****************/
     private static String queryMediaPartURI = "PREFIX dct: <http://purl.org/dc/terms/>\n" +
             "PREFIX mico: <http://www.mico-project.eu/ns/platform/1.0/schema#>\n" +
             "SELECT ?p WHERE {<%s> mico:hasContentPart ?p. ?p dct:creator \""+INJECTOR+"\" }";
@@ -479,8 +482,7 @@ public class DemoWebService {
             "\n" +
             "SELECT (group_concat(?stt_value;separator=\" \") AS ?text) ((?group)*3 AS ?start) ((?group+1)*3 AS ?end) WHERE {\n" +
             "  <%s>\n" +
-            "  mico:hasContentPart ?cp .\n" +
-            "  ?cp mico:hasContent ?stt_annot .\n" +
+            "  mico:hasPart/mico:hasPart ?stt_annot .\n" +
             "  ?stt_annot oa:hasBody ?stt_body .\n" +
             "  ?stt_body rdf:type  ?stt_body_type .\n" +
             "  ?stt_body rdf:value ?stt_value .\n" +
@@ -500,7 +502,7 @@ public class DemoWebService {
             "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "SELECT ?faces WHERE {\n" +
-            "   <%s> mico:hasContentPart/mico:hasContent ?c." +
+            "   <%s> mico:hasPart ?c." +
             "   ?c oa:hasTarget/oa:hasSelector/rdf:value ?faces." +
             "   ?c oa:hasBody/rdf:type <http://www.mico-project.eu/ns/platform/1.0/schema#FaceDetectionBody>\n" +
             "}";
@@ -564,59 +566,59 @@ public class DemoWebService {
             "                ?pcp dct:type \"text/vnd.fhg-ccv-facedetection+xml\"}\n" +
             "} ORDER BY mm:getStart(?timestamp)";
 
-    private String queryString(String uri) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
-//        query = String.format(query, uri);
-//
-//        final TupleQueryResult result = metadata.query(query);
-//
-//        try {
-//            if (result.hasNext()) {
-//                BindingSet bindings = result.next();
-//                return bindings.getBinding(result.getBindingNames().get(0)).getValue().stringValue();
-//            }
-//        } finally {
-//            result.close();
-//        }
+    private String queryString(String query, Item item) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
+        query = String.format(query, item.getURI().stringValue());
+
+        final TupleQueryResult result = item.getObjectConnection().prepareTupleQuery(query).evaluate();
+
+        try {
+            if (result.hasNext()) {
+                BindingSet bindings = result.next();
+                return bindings.getBinding(result.getBindingNames().get(0)).getValue().stringValue();
+            }
+        } finally {
+            result.close();
+        }
         return null;
     }
 
-    private List queryMapList(String uri) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
-//        query = String.format(query, uri);
-//
+    private List queryMapList(String query, Item item) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
+        query = String.format(query, item.getURI().stringValue());
+
         List res = new ArrayList<>();
-//        final TupleQueryResult result = metadata.query(query);
-//
-//        try {
-//            while (result.hasNext()) {
-//                HashMap map = new HashMap<>();
-//                BindingSet bindings = result.next();
-//                for (String name : result.getBindingNames()) {
-//                    Value v = bindings.getBinding(name).getValue();
-//                    map.put(name, v.stringValue());
-//                }
-//                res.add(map);
-//            }
-//        } finally {
-//            result.close();
-//        }
+        final TupleQueryResult result = item.getObjectConnection().prepareTupleQuery(query).evaluate();
+
+        try {
+            while (result.hasNext()) {
+                HashMap map = new HashMap<>();
+                BindingSet bindings = result.next();
+                for (String name : result.getBindingNames()) {
+                    Value v = bindings.getBinding(name).getValue();
+                    map.put(name, v.stringValue());
+                }
+                res.add(map);
+            }
+        } finally {
+            result.close();
+        }
         return res;
     }
 
-    private List queryList(String uri) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
-//        query = String.format(query, uri);
+    private List queryList(String query, Item item) throws QueryEvaluationException, MalformedQueryException, RepositoryException {
+        query = String.format(query, item.getURI().stringValue());
 
         List res = new ArrayList<>();
-//        final TupleQueryResult result = metadata.query(query);
-//
-//        try {
-//            while (result.hasNext()) {
-//                BindingSet bindings = result.next();
-//                Value v = bindings.getBinding(result.getBindingNames().get(0)).getValue();
-//                res.add(v.stringValue());
-//            }
-//        } finally {
-//            result.close();
-//        }
+        final TupleQueryResult result = item.getObjectConnection().prepareTupleQuery(query).evaluate();
+
+        try {
+            while (result.hasNext()) {
+                BindingSet bindings = result.next();
+                Value v = bindings.getBinding(result.getBindingNames().get(0)).getValue();
+                res.add(v.stringValue());
+            }
+        } finally {
+            result.close();
+        }
         return res;
     }
 }

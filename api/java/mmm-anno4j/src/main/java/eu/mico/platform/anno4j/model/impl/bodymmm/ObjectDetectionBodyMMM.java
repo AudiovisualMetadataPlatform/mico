@@ -3,12 +3,13 @@ package eu.mico.platform.anno4j.model.impl.bodymmm;
 import com.github.anno4j.model.namespaces.RDF;
 import eu.mico.platform.anno4j.model.BodyMMM;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
+import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
 import org.openrdf.annotations.Iri;
 
 /**
  * Body class for a generic object detection algorithm.
  */
-@Iri(MMM.OBJECT_DETECTION_BODY)
+@Iri(MMMTERMS.OBJECT_DETECTION_BODY)
 public interface ObjectDetectionBodyMMM extends BodyMMM {
 
     @Iri(MMM.HAS_CONFIDENCE)

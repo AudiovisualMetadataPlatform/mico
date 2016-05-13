@@ -36,7 +36,7 @@
 
         .page-header {
         padding-right: 300px;
-        background-image: url('http://www.mico-project.eu/wp-content/uploads/2014/04/mico_logo.png');
+        background-image: url('img/mico_logo.png');
         background-repeat: no-repeat;
         background-position: right top;
         border-bottom: 2px solid #ACCD6C;
@@ -85,6 +85,29 @@
                 <div style="background-color: darkred; color: lightcoral; text-align: center;" ng-show="itemData.finished == 'false'">In Progress</div>
             </td>
         </tr>
+        <tr><th>Created</th><td>{{itemData.serializedAt}}</td></tr>
+        <tr><th>Creator</th><td>{{itemData.serializedBy}}</td></tr>
+        <tr><th>Semantic-Type</th><td>{{itemData.semanticType}}</td></tr>
+        <tr><th>Syntactical-Type</th><td>{{itemData.syntacticalType}}</td></tr>
+        <tr ng-show="itemData.hasAsset">
+        <th>Asset</th>
+            <td>
+                <table>
+                    <tr>
+                        <td>mime-Type</td>
+                        <td>{{itemData.assetFormat}}</td>
+                    </tr>
+                    <tr>
+                        <td>location</td>
+                        <td>{{itemData.assetLocation}}</td>
+                    </tr>
+                    <tr>
+                        <td>Actions</td>
+                        <td><a href="status/download?itemUri={{itemUri}}">Download</a></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
     </table>
 </div>
 
@@ -94,17 +117,18 @@
 
     <table>
         <tr><th>URI</th><td><a href="/marmotta/resource?uri={{part.uri}}">{{part.uri}}</a></td></tr>
-        <tr><th>Source</th><td>{{part.source}}</td></tr>
+        <tr><th>Source</th><td><a href="/marmotta/resource?uri={{part.source}}">{{part.source}}</a></td></tr>
         <tr><th>Type</th><td>{{part.type}}</td></tr>
         <tr><th>Created</th><td>{{part.created}}</td></tr>
         <tr><th>Creator</th><td>{{part.creator}}</td></tr>
+        <tr ng-show="part.hasAsset"><th>Asset</th><td>{{part.assetFormat}} at: {{part.assetLocation}}</td></tr>
         <tr ng-show="part.transitions.length > 0">
             <th>Transitions</th>
             <td>
                 <span ng-repeat="t in part.transitions">{{t.start_state}} -> {{t.end_state}} ({{t.service}}) ,({{t.progress}}%)</span>
             </td>
         </tr>
-        <tr><th>Actions</th><td><a href="/marmotta/resource?uri={{part.uri}}">Metadata</a> - <a href="status/download?partUri={{part.uri}}&itemUri={{itemUri}}">Download</a></td></tr>
+        <tr><th>Actions</th><td><a href="/marmotta/resource?uri={{part.uri}}">Metadata</a> <span ng-show="part.hasAsset"> - <a href="status/download?partUri={{part.uri}}&itemUri={{itemUri}}">Download</a> </span></td></tr>
     </table>
 </div>
 

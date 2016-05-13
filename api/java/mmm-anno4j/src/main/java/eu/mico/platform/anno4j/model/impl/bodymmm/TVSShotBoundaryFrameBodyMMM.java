@@ -1,13 +1,13 @@
 package eu.mico.platform.anno4j.model.impl.bodymmm;
 
 import com.github.anno4j.model.namespaces.DC;
-import eu.mico.platform.anno4j.model.namespaces.MMM;
+import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
 import org.openrdf.annotations.Iri;
 
 /**
  * Class represents a Shot Boundary Frame of a given TVS analysis.
  */
-@Iri(MMM.TVS_SHOT_BOUNDARY_FRAME_BODY)
+@Iri(MMMTERMS.TVS_SHOT_BOUNDARY_FRAME_BODY)
 public interface TVSShotBoundaryFrameBodyMMM extends TVSBodyMMM {
 
     @Iri(DC.FORMAT)

@@ -2,7 +2,8 @@ package eu.mico.platform.anno4j.model.impl.bodymmm;
 
 import eu.mico.platform.anno4j.model.BodyMMM;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
-import org.openrdf.annotations.Iri;import java.lang.Double;import java.lang.Long;
+import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
+import org.openrdf.annotations.Iri;
 
 /**
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +18,7 @@ import org.openrdf.annotations.Iri;import java.lang.Double;import java.lang.Long
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Iri(MMM.IMAGE_DIMENSION_BODY)
+@Iri(MMMTERMS.IMAGE_DIMENSION_BODY)
 public interface ImageDimensionBodyMMM extends BodyMMM {
 
     @Iri(MMM.HAS_HEIGHT)

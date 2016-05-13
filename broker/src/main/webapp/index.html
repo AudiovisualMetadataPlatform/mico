@@ -37,7 +37,7 @@
 
         .page-header {
             padding-right: 300px;
-            background-image: url('http://www.mico-project.eu/wp-content/uploads/2014/04/mico_logo.png');
+            background-image: url('img/mico_logo.png');
             background-repeat: no-repeat;
             background-position: right top;
             border-bottom: 2px solid #ACCD6C;
@@ -115,8 +115,9 @@
                 {{item.time}}
             </td>
             <td>
-                <div style="background-color: #006318; color: lightgreen; text-align: center;" ng-show="item.finished == 'true'">Finished</div>
-                <div style="background-color: darkred; color: lightcoral; text-align: center;" ng-show="item.finished == 'false'">In Progress</div>
+                <div style="background-color: #006318; color: lightgreen; text-align: center;" ng-show="item.finished == 'true' && item.hasError == 'false'">Finished</div>
+                <div style="background-color: yellow; color: lightcoral; text-align: center;" ng-show="item.finished == 'false'">In Progress</div>
+                <div style="background-color: darkred; color: lightcoral; text-align: center;" ng-show="item.finished == 'true' && item.hasError == 'true'" title="{{item.error}}">Failed</div>
             </td>
         </tr>
     </table>

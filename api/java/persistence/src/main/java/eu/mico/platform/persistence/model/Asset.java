@@ -11,6 +11,8 @@ import java.io.OutputStream;
  */
 public interface Asset {
 
+    String STORAGE_SERVICE_URN_PREFIX="urn:eu.mico-project:storage.location:";
+
     URI getLocation();
 
     String getFormat();
