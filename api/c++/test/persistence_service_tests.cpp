@@ -221,7 +221,7 @@ int main(int argc, char **argv) {
         }
 
         // check item retrieval
-        std::vector< std::shared_ptr<model::Item> > resultItems = persistenceServiceTest.svc->getItems();
+        //std::vector< std::shared_ptr<model::Item> > resultItems = persistenceServiceTest.svc->getItems();
         // @TODO comment back in when done
 //        assert(resultItems.size() == itemURIS.size());
 
