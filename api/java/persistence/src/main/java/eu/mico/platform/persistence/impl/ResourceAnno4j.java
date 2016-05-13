@@ -60,22 +60,53 @@ public abstract class ResourceAnno4j implements Resource {
 
     @Override
     public final Asset getAsset() throws RepositoryException {
-        if (resourceMMM.getAsset() == null) {
-            AssetMMM assetMMM = createObject(AssetMMM.class);
+        AssetMMM assetMMM = resourceMMM.getAsset();
+        if (assetMMM == null) {
+            assetMMM = createAndCommitAsset();
+            resourceMMM.setAsset(assetMMM);
+        }
+        return new AssetAnno4j(assetMMM, this.persistenceService.getStorage());
+    }
+
+    private AssetMMM createAndCommitAsset() throws RepositoryException{
+        AssetMMM assetMMM = null;
+
+        //NOTE: Workaround for assetMMM.getLocation returning null (TODO: add Issue reference here)
+        ObjectConnection itemCon = resourceMMM.getObjectConnection();
+        ObjectConnection assetCon = null;
+        org.openrdf.model.Resource assetResource = null;
+        try {
+            assetCon = itemCon.getRepository().getConnection();
+            assetCon.begin();
+            assetCon.setInsertContext(itemCon.getInsertContext());
+            assetCon.setReadContexts(itemCon.getReadContexts());
+            assetCon.setRemoveContexts(itemCon.getRemoveContexts());
+
+            assetMMM = createObject(assetCon, null, AssetMMM.class);
             StringBuilder location = new StringBuilder()
-                    .append(persistenceService.getStoragePrefix()) //FIXME: Should not be part of location, especially for local file storage
-                    .append("/")
+                    .append(Asset.STORAGE_SERVICE_URN_PREFIX)
                     .append(this.getURI().getLocalName())
                     .append("/")
-                    .append(new URIImpl(assetMMM.getResourceAsString()).getLocalName());
+                    .append(((URI) assetMMM.getResource()).getLocalName());
             assetMMM.setLocation(location.toString());
-
-            resourceMMM.setAsset(assetMMM);
-
-            log.trace("No Asset available for Resource {} - Created new Asset with id {} and location {}", 
+            assetCon.commit();
+            log.trace("No Asset available for Resource {} - Created new Asset with id {} and location {}",
                     this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());
+            assetResource = assetMMM.getResource();
+        } finally {
+            if(assetCon!= null){
+                try {
+                    assetCon.close();
+                } catch (RepositoryException e){
+                        /*ignore*/
+                    e.printStackTrace();
+                }
+            }
         }
-        return new AssetAnno4j(this.resourceMMM.getAsset(), this.persistenceService.getStorage());
+        assetMMM = AssetMMM.class.cast(itemCon.getObject(assetResource));
+        assert assetMMM != null;
+
+        return assetMMM;
     }
 
     @Override
@@ -87,7 +118,9 @@ public abstract class ResourceAnno4j implements Resource {
         return createObject(null,clazz);
     }
     protected <T extends RDFObject> T createObject(URI resource, Class<T> clazz) throws RepositoryException{
-        ObjectConnection con = resourceMMM.getObjectConnection();
+        return createObject(resourceMMM.getObjectConnection(), resource, clazz);
+    }
+    protected <T extends RDFObject> T createObject(ObjectConnection con, URI resource, Class<T> clazz) throws RepositoryException{
         return con.addDesignation(con.getObjectFactory().createObject(
                 resource == null ? IDGenerator.BLANK_RESOURCE : resource , clazz), clazz);
     }

@@ -33,8 +33,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.DateFormatSymbols;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -78,7 +76,7 @@ public class InjectionWebService {
 
         log.info("item created {}: uploaded {} bytes", item.getURI(), bytes);
 
-        return Response.ok(ImmutableMap.of("itemUri", item.getURI().stringValue(), "assetLocation", item.getAsset().getLocation().stringValue(), "created", item.getSerializedAt())).build();
+        return Response.ok(ImmutableMap.of("itemUri", item.getURI().stringValue(), "assetLocation", item.getAsset().getLocation(), "created", item.getSerializedAt())).build();
     }
 
     @GET
@@ -150,7 +148,7 @@ public class InjectionWebService {
 
         log.info("item {}, part created {} : uploaded {} bytes", item.getURI(), part.getURI(), bytes);
 
-        return Response.ok(ImmutableMap.of("itemURI", item.getURI().stringValue(),"partURI", part.getURI().stringValue(), "assetLocation", partAsset.getLocation().stringValue(), "created", part.getSerializedAt())).build();
+        return Response.ok(ImmutableMap.of("itemURI", item.getURI().stringValue(),"partURI", part.getURI().stringValue(), "assetLocation", partAsset.getLocation(), "created", part.getSerializedAt())).build();
     }
 
 
@@ -236,16 +234,6 @@ public class InjectionWebService {
 
 
         return Response.ok(entity, type).build();
-    }
-
-
-    private static SimpleDateFormat createDateFormat(String format, String timezone) {
-        SimpleDateFormat sdf =
-                new SimpleDateFormat(format, DateFormatSymbols.getInstance(Locale.US));
-        if (timezone != null) {
-            sdf.setTimeZone(TimeZone.getTimeZone(timezone));
-        }
-        return sdf;
     }
 
 }

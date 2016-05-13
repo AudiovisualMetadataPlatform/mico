@@ -405,29 +405,36 @@ public class MICOBrokerImpl implements MICOBroker {
 
                 Item item = getItem(new URIImpl(partEvent.getItemUri()));
                 traceItem(item);
-                checkItem(item);
+                if (checkItem(item))
+                {
 
-                log.info("- adding initial content item state ...");
-                ItemState state = new ItemState(dependencies, item);
-                states.put(partEvent.getItemUri(), state);
+                    log.info("- adding initial content item state ...");
+                    ItemState state = new ItemState(dependencies, item);
+                    states.put(partEvent.getItemUri(), state);
+    
+                    log.info("- setting up messaging for content item analysis ...");
+    
+                    // create a new channel for the content item so it runs isolated from the other items
+                    Channel channel = connection.createChannel();
+    
+                    log.info("- triggering analysis process for initial states ...");
+                    ItemManager mgr = new ItemManager(item, state, channel);
+                    Thread t = new Thread(mgr, "ItemManager_" + item.getURI().toString());
+                    t.start();
 
-                log.info("- setting up messaging for content item analysis ...");
+                }else{ // something is wrong with the item, tell broker that we can not process it
+                    ItemState state = new ItemState(dependencies, item);
+                    states.put(partEvent.getItemUri(), state);
 
-                // create a new channel for the content item so it runs isolated from the other items
-                Channel channel = connection.createChannel();
-
-                log.info("- triggering analysis process for initial states ...");
-                ItemManager mgr = new ItemManager(item, state, channel);
-                Thread t = new Thread(mgr, "ItemManager_" + item.getURI().toString());
-                t.start();
-
-                getChannel().basicAck(envelope.getDeliveryTag(), false);
-
+                }
             } catch (RepositoryException e) {
                 log.error("could not load item from persistence layer (message: {})", e.getMessage());
                 log.debug("Exception:", e);
             } catch (ClassCastException e) {
                 log.error("could not cast item ({}) from persistence layer (message: {})",partEvent.getItemUri(), e.getMessage());
+            } finally {
+                // even when there was an error, we got it and tried to handle 
+                getChannel().basicAck(envelope.getDeliveryTag(), false);
             }
         }
 
@@ -503,8 +510,11 @@ public class MICOBrokerImpl implements MICOBroker {
 
                     switch (analysisResponse.getType()) {
                         case ERROR:
-                            log.warn(analysisResponse.getError().getMessage(),
+                        String errMsg = analysisResponse.getError().getMessage();
+                        log.warn(errMsg,
                                     analysisResponse.getError().getDescription());
+                            state.setError(errMsg);
+                            state.removeProgress(properties.getCorrelationId());
                             break;
                         case NEW_PART:
                             setStateForContent(analysisResponse.getNew());
@@ -631,22 +641,25 @@ public class MICOBrokerImpl implements MICOBroker {
                 log.warn("The Format of asset from item {} must be set", item.getURI());
                 ret= false;
             }
-            test = asset.getFormat();
+            test = asset.getLocation().stringValue();
             if (test == null || test.isEmpty()) {
                 log.warn("The location of asset from item {} must be set", item.getURI());
                 ret= false;
             }
+        }else{
+            if(! item.getParts().iterator().hasNext()){
+                log.warn("The item {} without an asset must have at least one part", item.getURI());
+                ret= false;
+            }
         }
-        if(ret == false){
-            throw new RepositoryException("Item check failed, see previous warnings");
-        }
+
         return ret;
     }
     private void traceItem(Item item) {
         if(item == null){
             log.debug("Unable to log an item which is null.");
         }else{
-            log.debug("Item: {} semantic: {}  syntactic: {}",item.getURI(),item.getSemanticType(), item.getSyntacticalType());
+            log.trace("Item: {} semantic: {}  syntactic: {}",item.getURI(),item.getSemanticType(), item.getSyntacticalType());
         }
     }
 

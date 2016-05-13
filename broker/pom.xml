@@ -432,5 +432,6 @@
     </profiles>
     <scm>
         <connection>scm:git:ssh://git@bitbucket.org:mico-project/platform.git</connection>
-    </scm>
+      <tag>HEAD</tag>
+  </scm>
 </project>

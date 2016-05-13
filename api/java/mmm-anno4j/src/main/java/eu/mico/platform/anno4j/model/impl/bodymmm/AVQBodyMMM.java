@@ -2,13 +2,14 @@ package eu.mico.platform.anno4j.model.impl.bodymmm;
 
 import eu.mico.platform.anno4j.model.BodyMMM;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
+import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
 import org.openrdf.annotations.Iri;
 
 /**
  * Body-implementation for the Audio-Video-Quality extractor.
  * Has two subclasses {@link AVQShotBodyMMM} and {@link AVQKeyFrameBodyMMM}.
  */
-@Iri(MMM.AVQ_BODY)
+@Iri(MMMTERMS.AVQ_BODY)
 public interface AVQBodyMMM extends BodyMMM {
 
     /**
