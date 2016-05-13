@@ -18,8 +18,8 @@ target_link_libraries(query_tests gtest mico_rdf)
 add_executable(client_tests rdf_tests.cpp http_request_tests.cpp http_client_tests.cpp )
 target_link_libraries(client_tests gtest mico_rdf mico_marmotta curl boost_system boost_log boost_log_setup)
 
-add_executable(sparql_tests rdf_tests.cpp sparql_client_tests.cpp )
-target_link_libraries(sparql_tests gtest mico_rdf mico_marmotta curl boost_system boost_log boost_log_setup)
+#add_executable(sparql_tests rdf_tests.cpp sparql_client_tests.cpp )
+#target_link_libraries(sparql_tests gtest mico_rdf mico_marmotta curl boost_system boost_log boost_log_setup)
 
 add_executable(persistence_service_tests
     # persistence_tests.cpp
@@ -34,8 +34,8 @@ target_link_libraries(persistence_service_tests gtest mico_rdf mico_marmotta mic
 add_executable(metadata_tests  persistence_tests.cpp metadata_tests.cpp )
 target_link_libraries(metadata_tests gtest mico_rdf mico_marmotta mico_persistence curl boost_system boost_log boost_log_setup)
 
-add_executable(content_item_tests  persistence_tests.cpp content_item_tests.cpp )
-target_link_libraries(content_item_tests gtest mico_rdf mico_marmotta mico_persistence curl boost_system boost_log boost_log_setup)
+#add_executable(content_item_tests  persistence_tests.cpp content_item_tests.cpp )
+#target_link_libraries(content_item_tests gtest mico_rdf mico_marmotta mico_persistence curl boost_system boost_log boost_log_setup)
 
 add_executable(urlstream_tests  persistence_tests.cpp urlstream_tests.cpp )
 target_link_libraries(urlstream_tests gtest mico_rdf mico_marmotta mico_persistence curl boost_system boost_log boost_log_setup)
