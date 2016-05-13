@@ -1,25 +1,38 @@
 cmake_minimum_required(VERSION 2.8.4)
 project(mico-platform)
+get_filename_component(PLATFORM_ROOT "${CMAKE_SOURCE_DIR}/../../" ABSOLUTE)
 
+execute_process(
+    COMMAND bash get_mvn_platform_version.txt
+    OUTPUT_VARIABLE POM_PLATFORM_VERSION
+    ERROR_VARIABLE POM_PLATFORM_VERSION_ERROR
+    WORKING_DIRECTORY ${PLATFORM_ROOT}
+)
+message(STATUS "POM_PLATFORM_VERSION =" ${POM_PLATFORM_VERSION})
+string(REGEX MATCH "([0-9]+)(\\.[0-9]+)?(\\.[0-9]+)?" CPP_PLATFORM_VERSION ${POM_PLATFORM_VERSION})
+message(STATUS "CPP_PLATFORM_VERSION =" ${CPP_PLATFORM_VERSION})
 if (NOT DEFINED MICO_PLATFORM_VERSION)
-    set(MICO_PLATFORM_VERSION "2.0.0")
+    set(MICO_PLATFORM_VERSION ${CPP_PLATFORM_VERSION})
+else()
+    if (NOT ${MICO_PLATFORM_VERSION} MATCHES ${CPP_PLATFORM_VERSION})
+        # message(FATAL_ERROR "Platform version set in Debian config does not match POM version - Please update Debian config")
+    endif()
 endif()
+
+message(STATUS "MICO_PLATFORM_VERSION=" ${MICO_PLATFORM_VERSION})
 
 include(ExternalProject)
 
 set(ANNO4CPPDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/install_anno4cpp)
-#if (DEFINED CMAKE_INSTALL_PREFIX)
-#    set(ANNO4CPPDEPS_ROOT ${CMAKE_INSTALL_PREFIX})
-#endif()
 
 ExternalProject_Add(anno4cpp_ext
     PREFIX externals
     GIT_REPOSITORY git@bitbucket.org:mico-project/anno4cpp.git
-    GIT_TAG update_cpp_api_anno4cpp_ns_2.0.0_SNAPSHOT
+    GIT_TAG develop
     CMAKE_ARGS
+      -DMICO_PLATFORM_PARENT_VERSION=${POM_PLATFORM_VERSION}
       -DCMAKE_BUILD_TYPE=Debug
-      -DCMAKE_INSTALL_PREFIX:PATH=${ANNO4CPPDEPS_ROOT}
-)
+      -DCMAKE_INSTALL_PREFIX:PATH=${ANNO4CPPDEPS_ROOT})
 
 
 string(REPLACE "." ";" VERSION_LIST ${MICO_PLATFORM_VERSION})
