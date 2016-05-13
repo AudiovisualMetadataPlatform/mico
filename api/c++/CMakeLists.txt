@@ -15,7 +15,7 @@ set(ANNO4CPPDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/install_anno4cpp)
 ExternalProject_Add(anno4cpp_ext
     PREFIX externals
     GIT_REPOSITORY git@bitbucket.org:mico-project/anno4cpp.git
-    GIT_TAG update_cpp_api_anno4cpp_ns_rc3
+    GIT_TAG update_cpp_api_anno4cpp_ns_2.0.0_SNAPSHOT
     CMAKE_ARGS
       -DCMAKE_BUILD_TYPE=Debug
       -DCMAKE_INSTALL_PREFIX:PATH=${ANNO4CPPDEPS_ROOT}
