@@ -1,4 +1,4 @@
-libmico-api (2.0.0) unstable; urgency=medium
+libmico-api (2.0.0~RC4) unstable; urgency=medium
 
   * major update using Java persistence services through ano4cpp
   * complete API change for mico- extractors no backwards compatibility given
