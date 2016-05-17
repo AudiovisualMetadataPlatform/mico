@@ -70,7 +70,7 @@ public class StatusWebService {
     @GET
     @Path("/info")
     @Produces("text/plain")
-    public Response getInfo(){
+    public Response getInfoText(){
         String info = null;
         try{
             InputStream resourceAsStream = servletContext
@@ -82,10 +82,26 @@ public class StatusWebService {
                     + "\nGit-Revision: " + atts.getValue("Git-Revision")
                     + "\nGit-Branch: " + atts.getValue("Git-Branch")
                     + "\nbuild on: " + atts.getValue("Build-Time");
-        }catch(IOException e ){
-            info = "Version 2.x-???";
+        }catch(IOException e){
+            info = "<unknown>";
         }
         return Response.ok(info).build();
+    }
+
+    @GET
+    @Path("/info")
+    @Produces("application/json")
+    public Response getInfoJson(){
+        try{
+            InputStream resourceAsStream = servletContext
+                    .getResourceAsStream("/META-INF/MANIFEST.MF");
+            Manifest mf = new Manifest();
+            mf.read(resourceAsStream);
+            Attributes atts = mf.getMainAttributes();
+            return Response.ok(atts).build();
+        }catch(IOException e ){
+            return Response.noContent().build();
+        }
     }
 
     @GET
