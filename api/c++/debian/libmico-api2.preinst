@@ -4,19 +4,15 @@
 set -e
 
 # summary of how this script can be called:
-#        * <postinst> `configure' <most-recently-configured-version>
-#        * <old-postinst> `abort-upgrade' <new version>
-#        * <conflictor's-postinst> `abort-remove' `in-favour' <package>
-#          <new-version>
-#        * <postinst> `abort-remove'
-#        * <deconfigured's-postinst> `abort-deconfigure' `in-favour'
-#          <failed-install-package> <version> `removing'
-#          <conflicting-package> <version>
+#        * <new preinst> `install'
+#        * <new preinst> `install' <old version>
+#        * <new-preinst> `upgrade' <old version>
+#        * <old-preinst> `abort-upgrade' <new-version>
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
 case "$1" in
-    configure)
+    install|abort-upgrade)
 
     if [ ! -f "/etc/ld.so.conf.d/mico-java.conf" ]; then
         if /usr/bin/dpkg -s openjdk-8-jre-headless 1>/dev/null; then
@@ -26,6 +22,9 @@ case "$1" in
             if /usr/bin/dpkg -s oracle-java8-jdk 1>/dev/null; then
                 echo $(dirname $(dpkg-query -L oracle-java8-jdk |grep "/libjawt.so$" |tail -n 1)) >> /etc/ld.so.conf.d/mico-java.conf
                 echo $(dirname $(dpkg-query -L oracle-java8-jdk |grep "/libjvm.so$" |tail -n 1)) >> /etc/ld.so.conf.d/mico-java.conf  
+            else 
+                echo "Java 8 could not be found!!" >&2
+                exit 1
             fi
         fi
 	/sbin/ldconfig
@@ -34,7 +33,7 @@ case "$1" in
 
     ;;
 
-    abort-upgrade|abort-remove|abort-deconfigure)
+     upgrade)
     ;;
 
     *)
