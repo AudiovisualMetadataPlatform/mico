@@ -69,7 +69,7 @@ message(STATUS "Using JNI_INCLUDE_DIRS = " ${JNI_INCLUDE_DIRS})
 message(STATUS "Using JNI_LIBRARIES = " ${JNI_LIBRARIES})
 
 #this line creates the links file info with the current version for the debian packaging
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/debian/libmico-api1.links.in ${CMAKE_CURRENT_SOURCE_DIR}/debian/libmico-api1.links @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/debian/libmico-api2.links.in ${CMAKE_CURRENT_SOURCE_DIR}/debian/libmico-api2.links @ONLY)
 
 option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" )
 

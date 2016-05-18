@@ -1,0 +1,46 @@
+#!/bin/sh
+# postinst script for mico-extractor-named-entity-recognizer
+
+set -e
+
+# summary of how this script can be called:
+#        * <postinst> `configure' <most-recently-configured-version>
+#        * <old-postinst> `abort-upgrade' <new version>
+#        * <conflictor's-postinst> `abort-remove' `in-favour' <package>
+#          <new-version>
+#        * <postinst> `abort-remove'
+#        * <deconfigured's-postinst> `abort-deconfigure' `in-favour'
+#          <failed-install-package> <version> `removing'
+#          <conflicting-package> <version>
+# for details, see http://www.debian.org/doc/debian-policy/ or
+# the debian-policy package
+
+case "$1" in
+    configure)
+
+    if [ ! -f "/etc/ld.so.conf.d/mico-java.conf" ]; then
+        if /usr/bin/dpkg -s openjdk-8-jre-headless 1>/dev/null; then
+            echo $(dirname $(dpkg-query -L openjdk-8-jre-headless |grep "/libjawt.so$" |tail -n 1)) >> /etc/ld.so.conf.d/mico-java.conf
+            echo $(dirname $(dpkg-query -L openjdk-8-jre-headless |grep "/libjvm.so$" |tail -n 1)) >> /etc/ld.so.conf.d/mico-java.conf  
+        else
+            if /usr/bin/dpkg -s oracle-java8-jdk 1>/dev/null; then
+                echo $(dirname $(dpkg-query -L oracle-java8-jdk |grep "/libjawt.so$" |tail -n 1)) >> /etc/ld.so.conf.d/mico-java.conf
+                echo $(dirname $(dpkg-query -L oracle-java8-jdk |grep "/libjvm.so$" |tail -n 1)) >> /etc/ld.so.conf.d/mico-java.conf  
+            fi
+        fi
+	/sbin/ldconfig
+    fi
+
+
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+exit 0

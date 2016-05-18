@@ -24,7 +24,7 @@ Description: MICO client library - development headers and documentation
  This package contains the MICO C++ API header files and documentation. These are needed for implementing
  custom MICO services in C++.
 
-Package: libmico-api1
+Package: libmico-api2
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 X-Foo: libexpat1, libcurl3, libcurl3-gnutls, libprotobuf9, libstdc++6, libhdfs3-1, libamqpcpp2, libdaemon0
