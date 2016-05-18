@@ -28,7 +28,7 @@ set(ANNO4CPPDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/install_anno4cpp)
 ExternalProject_Add(anno4cpp_ext
     PREFIX externals
     GIT_REPOSITORY git@bitbucket.org:mico-project/anno4cpp.git
-    GIT_TAG 1.0.0
+    GIT_TAG 1.0.1
     CMAKE_ARGS
       -DMICO_PLATFORM_PARENT_VERSION=${POM_PLATFORM_VERSION}
       -DCMAKE_BUILD_TYPE=Debug
@@ -89,7 +89,7 @@ if(MICO_PLATFORM_BUILD_DOCUMENTATION AND DOXYGEN_FOUND)
         COMMENT "Generating API documentation with Doxygen"
         VERBATIM)
 
-    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc/libmico-api1)
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc/libmico-api2)
 endif()
 
 include_directories(
