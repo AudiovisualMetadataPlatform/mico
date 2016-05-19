@@ -1,6 +1,5 @@
 package eu.mico.platform.demo;
 
-import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 
@@ -25,13 +24,11 @@ public class ContentWebService {
     }
 
     private final EventManager eventManager;
-    private final MICOBroker broker;
     private final String marmottaBaseUri;
     private final PersistenceService persistenceService;
 
-    public ContentWebService(EventManager eventManager, MICOBroker broker, String marmottaBaseUri) {
+    public ContentWebService(EventManager eventManager, String marmottaBaseUri) {
         this.eventManager = eventManager;
-        this.broker = broker;
         this.marmottaBaseUri = marmottaBaseUri;
         this.persistenceService = eventManager.getPersistenceService();
     }
