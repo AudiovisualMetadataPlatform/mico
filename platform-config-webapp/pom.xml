@@ -1,60 +1,68 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>eu.mico-project.platform</groupId>
-    <artifactId>parent</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
-    <relativePath>../parent</relativePath>
-  </parent>
+    <parent>
+        <groupId>eu.mico-project.platform</groupId>
+        <artifactId>parent</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+        <relativePath>../parent</relativePath>
+    </parent>
 
-  <groupId>de.fraunhofer.idmt.mico</groupId>
-  <name>MICO Platform: mico-platform-config</name>
-  <artifactId>mico-platform-config</artifactId>
+    <groupId>de.fraunhofer.idmt.mico</groupId>
+    <name>MICO Platform: mico-platform-config</name>
+    <artifactId>mico-platform-config</artifactId>
 
     <packaging>war</packaging>
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-aop</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-		</dependency>
- 
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>jstl</artifactId>
-		</dependency>
- 
-		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
-		</dependency>
-		<dependency>
-		    <groupId>javax.servlet</groupId>
-		    <artifactId>javax.servlet-api</artifactId>
-		    <scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-		</dependency>
-	    <dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-	    </dependency>
-	</dependencies>
-	<build>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- User Interface -->
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>bootstrap</artifactId>
+        </dependency>
+
+    </dependencies>
+    <build>
         <finalName>${project.artifactId}</finalName>
         <resources>
             <resource>
@@ -67,36 +75,36 @@
                 <targetPath>${project.build.directory}/deb-resources</targetPath>
             </resource>
         </resources>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-war-plugin</artifactId>
-				<configuration>
-                        <archive>
-                            <manifest>
-                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                            </manifest>
-                        </archive>
-                        <archiveClasses>false</archiveClasses>
-					<failOnMissingWebXml>false</failOnMissingWebXml>
-				</configuration>
-			</plugin>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
+                    <archiveClasses>false</archiveClasses>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
             </plugin>
-		</plugins>
-	</build>
-	    <profiles>
+        </plugins>
+    </build>
+    <profiles>
         <profile>
             <id>debian</id>
             <build>
@@ -129,29 +137,29 @@
                                                 <group>tomcat7</group>
                                             </mapper>
                                         </data>
-										<data>
-											<src>src/deb/resources/mico-configuration.xml.tmpl</src>
-											<type>file</type>
-											<mapper>
-												<type>perm</type>
-												<prefix>/etc/tomcat7/Catalina/localhost</prefix>
-												<user>root</user>
-												<group>root</group>
-											</mapper>
-											<conffile>false</conffile>
-										</data>
-										<data>
-											<src>src/deb/resources/mico-configuration.sudoers.tmpl</src>
-											<type>file</type>
-											<mapper>
-												<type>perm</type>
-												<prefix>/etc/sudoers.d</prefix>
-												<user>root</user>
-												<group>root</group>
-												<filemode>440</filemode>
-											</mapper>
-											<conffile>false</conffile>
-										</data>
+                                        <data>
+                                            <src>src/deb/resources/mico-configuration.xml.tmpl</src>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/etc/tomcat7/Catalina/localhost</prefix>
+                                                <user>root</user>
+                                                <group>root</group>
+                                            </mapper>
+                                            <conffile>false</conffile>
+                                        </data>
+                                        <data>
+                                            <src>src/deb/resources/mico-configuration.sudoers.tmpl</src>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/etc/sudoers.d</prefix>
+                                                <user>root</user>
+                                                <group>root</group>
+                                                <filemode>440</filemode>
+                                            </mapper>
+                                            <conffile>false</conffile>
+                                        </data>
                                     </dataSet>
                                 </configuration>
                             </execution>

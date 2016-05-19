@@ -6,11 +6,46 @@
 <head>
 <meta charset="utf-8" />
 <title>Mico Platform - configurations</title>
-<style type="text/css">
-body {
-	background-image: url('img/bg.png');
-	background: grey;
-}
+    <link rel="stylesheet" href="webjars/bootstrap/3.1.1/css/bootstrap.css"/>
+
+    <!-- fix Bootstrap CSS for AngularJS -->
+    <style type="text/css">
+        .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+        body {
+            margin-left: 10%;
+            margin-right: 10%;
+            font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+        }
+
+        .page-header {
+            padding-right: 300px;
+            background-image: url('../broker/img/mico_logo.png');
+            background-repeat: no-repeat;
+            background-position: right top;
+            border-bottom: 2px solid #ACCD6C;
+        }
+
+        .page-header h1 {
+            font-size: 3.2em;
+            color: #3a6548;
+        }
+
+        .page-header h1 small {
+            color: #ACCD6C
+        }
+
+        .colorpick, .colorpick:hover {
+            border: 1px solid #000000;
+            color: #000000;
+        }
+
+        .infobox {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+    <style type="text/css">
 
 .container {
     min-width: 500px;
@@ -27,7 +62,7 @@ body {
 	-webkit-border-radius: 10px;
 }
 
-.mainbody, .header, .footer {
+.mainbody, .header {
 	padding: 5px;
 }
 
@@ -41,13 +76,8 @@ body {
 .header {
 	height: 25px;
 	border-bottom: 1px solid #EEE;
-	background-color: lightgrey;
 	font-size: 1.3em;
 	text-align: center;
-	-webkit-border-top-left-radius: 5px;
-	-webkit-border-top-right-radius: 5px;
-	-moz-border-radius-topleft: 5px;
-	-moz-border-radius-topright: 5px;
 	border-top-left-radius: 5px;
 	border-top-right-radius: 5px;
 }
@@ -56,10 +86,6 @@ body {
 	height: 30px;
 	background-color: whiteSmoke;
 	border-top: 1px solid #DDD;
-	-webkit-border-bottom-left-radius: 5px;
-	-webkit-border-bottom-right-radius: 5px;
-	-moz-border-radius-bottomleft: 5px;
-	-moz-border-radius-bottomright: 5px;
 	border-bottom-left-radius: 5px;
 	border-bottom-right-radius: 5px;
 }
@@ -69,20 +95,24 @@ select, input {
 	margin: 10px;
 }
 
-footer{
-	text-align: center;
-}
-footer a {
-	margin: 5px;
-}
 </style>
 </head>
 <body>
 
+<div class="container-fluid page-header">
+    <h1>MICO <small>Platform Configuration</small></h1>
+</div>
+
+<div class="container-fluid">
+    <ul class="nav nav-tabs">
+        <li role="presentation"><a href="/broker/">Broker</a></li>
+        <li role="presentation" class="active"><a href="/mico-configuration/">Platform Configuration</a></li>
+        <li role="presentation"><a href="/marmotta/">Marmotta</a></li>
+    </ul>
+</div>
+
+<div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;">
 	<main class="inline-block-center">
-	<div class="container">
-		<div class="header">Mico Platform Configurations</div>
-	</div>
 
 	<c:if test="${error != null}">
 		<div class="container">
@@ -122,10 +152,6 @@ footer a {
 		</div>
 	</div>
 	</main>
-	<footer>
-		<a href="stopAll.html">stop all extractors</a>  
-		<a href="/broker">show broker page</a>
-		<a href="/marmotta">show marmotta</a>
-	</footer>
+</div>
 </body>
 </html>
