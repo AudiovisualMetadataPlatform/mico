@@ -214,7 +214,7 @@ public class StatusWebService {
         sprops.put("creator",  part.getSerializedBy().getResourceAsString());
         sprops.put("created",  part.getSerializedAt());
         Resource[] inputs = part.getInputs().toArray(new Resource[0]);
-        if(inputs.length<0){
+        if(inputs.length > 0){
             sprops.put("source", stringValue(inputs[0].getURI()));
         }
         sprops.put("hasAsset", part.hasAsset());
