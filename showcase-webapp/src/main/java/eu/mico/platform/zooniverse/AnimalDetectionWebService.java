@@ -17,12 +17,12 @@
  */
 package eu.mico.platform.zooniverse;
 
-import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.model.ItemState;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.zooniverse.util.BrokerServices;
+import eu.mico.platform.zooniverse.util.ItemData;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -62,7 +62,7 @@ import java.util.regex.Pattern;
 
 /**
  */
-@Path("zooniverse/animaldetection")
+@Path("/zooniverse/animaldetection")
 public class AnimalDetectionWebService {
 
     private static final Logger log = LoggerFactory.getLogger(AnimalDetectionWebService.class);
@@ -75,18 +75,18 @@ public class AnimalDetectionWebService {
     private static final MimetypesFileTypeMap mimetypesMap = new MimetypesFileTypeMap();
 
     private final EventManager eventManager;
-    private final MICOBroker broker;
     private final String marmottaBaseUri;
     private final PersistenceService persistenceService;
+    private final BrokerServices brokerSvc;
     private final CloseableHttpClient httpClient;
 
-    private static final URI ExtractorURI = new URIImpl("http://www.mico-project.eu/services/animal-detection");
+    private static final String ExtractorURI = "http://www.mico-project.eu/services/animal-detection";
 
 
-    public AnimalDetectionWebService(EventManager eventManager, MICOBroker broker, String marmottaBaseUri) {
+    public AnimalDetectionWebService(EventManager eventManager, String marmottaBaseUri, BrokerServices brokerSvc) {
         this.eventManager = eventManager;
-        this.broker = broker;
         this.marmottaBaseUri = marmottaBaseUri;
+        this.brokerSvc = brokerSvc;
 
         mimetypesMap.addMimeTypes("image/jpeg jpeg jpg");
 
@@ -159,7 +159,7 @@ public class AnimalDetectionWebService {
         try {
             final Item item = persistenceService.createItem();
 
-            final Part part = item.createPart(ExtractorURI);
+            final Part part = item.createPart(new URIImpl(ExtractorURI));
             part.setSyntacticalType(String.format("%s/%s", type.getType(), type.getSubtype()));
 
             try (OutputStream outputStream = part.getAsset().getOutputStream()) {
@@ -232,12 +232,17 @@ public class AnimalDetectionWebService {
 
         Map<String, Object> rspEntity = new HashMap<>();
 
-        final ItemState state = broker.getStates().get(itemURI.stringValue());
-        if (state != null && !state.isFinalState()) {
-            rspEntity.put("status", "inProgress");
-            return Response.status(Response.Status.ACCEPTED)
-                    .entity(rspEntity)
-                    .build();
+        try {
+            final ItemData itemData = brokerSvc.getItemData(itemURI.stringValue());
+            if (itemData != null && !itemData.hasFinished()) {
+                rspEntity.put("status", "inProgress");
+                return Response.status(Response.Status.ACCEPTED)
+                        .entity(rspEntity)
+                        .build();
+            }
+        } catch (IOException e) {
+            log.error("Error getting status of item {} from broker: {}", itemURI.stringValue(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
 
         try {
