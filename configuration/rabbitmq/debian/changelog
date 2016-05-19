@@ -1,4 +1,11 @@
-mico-rabbitmq (1.0.1) UNRELEASED; urgency=medium
+mico-rabbitmq (2.0.0) unstable; urgency=medium
+
+  * Platform version bump
+  * postinst script fix
+
+ -- Horst Stadler <horst.stadler@salzburgresearch.at>  Thu, 19 May 2016 18:25:12 +0200
+
+mico-rabbitmq (1.0.1) unstable; urgency=medium
 
   * restart RabbitMQ server after applying changes
 

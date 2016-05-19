@@ -29,17 +29,22 @@ case "$1" in
         db_get mico-base/password
         MICO_PASS="$RET"
 
-	echo "creating MICO user in RabbitMQ ..."
-	rabbitmqctl add_user $MICO_USER $MICO_PASS
-	rabbitmqctl set_user_tags $MICO_USER administrator
-	rabbitmqctl set_permissions  $MICO_USER ".*" ".*" ".*"
-
-	echo "enabling RabbitMQ management plugins ..."
-	rabbitmq-plugins enable rabbitmq_management rabbitmq_management_visualiser
-
 	db_stop
 
-	service rabbitmq-server restart
+	if ! rabbitmqctl list_users | grep -P "^${MICO_USER}\s" 1>/dev/null; then
+		echo "creating MICO user in RabbitMQ ..."
+		rabbitmqctl add_user $MICO_USER $MICO_PASS
+		rabbitmqctl set_user_tags $MICO_USER administrator
+		rabbitmqctl set_permissions  $MICO_USER ".*" ".*" ".*"
+
+		echo "enabling RabbitMQ management plugins ..."
+		rabbitmq-plugins enable rabbitmq_management rabbitmq_management_visualiser
+
+		service rabbitmq-server reload
+	else
+		echo "MICO user exists."
+	fi
+
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

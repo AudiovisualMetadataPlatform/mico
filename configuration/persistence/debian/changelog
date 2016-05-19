@@ -1,3 +1,9 @@
+mico-persistence (2.0.0) unstable; urgency=low
+
+  * Platform version bump
+
+ -- Horst Stadler <horst.stadler@salzburgresearch.at>  Thu, 19 May 2016 18:32:48 +0200
+
 mico-persistence (1.0.2) unstable; urgency=medium
 
   * Minor postinst script fix to work with Docker
