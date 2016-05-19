@@ -213,7 +213,10 @@ public class StatusWebService {
         sprops.put("type",  part.getSyntacticalType());
         sprops.put("creator",  part.getSerializedBy().getResourceAsString());
         sprops.put("created",  part.getSerializedAt());
-        sprops.put("source",  stringValue(part.getInputs().toArray(new Resource[0])[0].getURI()));
+        Resource[] inputs = part.getInputs().toArray(new Resource[0]);
+        if(inputs.length<0){
+            sprops.put("source", stringValue(inputs[0].getURI()));
+        }
         sprops.put("hasAsset", part.hasAsset());
         if(part.hasAsset()){
             Asset asset = part.getAsset();
