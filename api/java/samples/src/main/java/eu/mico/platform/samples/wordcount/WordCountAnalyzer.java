@@ -13,18 +13,20 @@
  */
 package eu.mico.platform.samples.wordcount;
 
-import com.github.anno4j.Anno4j;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Target;
 import com.github.anno4j.model.impl.targets.SpecificResource;
+
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
+import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Resource;
+
 import org.apache.commons.io.IOUtils;
 
 
@@ -93,16 +95,24 @@ public class WordCountAnalyzer implements AnalysisService {
     public void call(AnalysisResponse analysisResponse, Item item, List<Resource> resourceList, Map<String, String> params) throws RepositoryException, AnalysisException, IOException {
         ObjectConnection con = item.getObjectConnection();
         ObjectFactory factory = con.getObjectFactory();
-        if(resourceList.size() > 1) {
-            throw new IllegalArgumentException("Resource list only allows one item to be processed.");
+        if(resourceList == null || resourceList.size() != 1) {
+            throw new IllegalArgumentException("A call should contain one item.");
         }
 
         Resource resource = resourceList.get(0);
+        if( resource == null || !resource.hasAsset()) {
+            throw new IllegalArgumentException("Resource to analyze MUST HAVE an asset.");
+        }
 
         log.info("Retrieved analysis call for {}", resource.getURI());
 
+        Asset asset = item.getAsset();
+        if(!getRequires().equals(asset.getFormat())){
+            log.warn("The asset format should be: {} but is {}", getRequires(), asset.getFormat());
+        }
+
         // get the input stream and read it into a string
-        String text = IOUtils.toString(item.getAsset().getInputStream(), "utf-8");
+        String text = IOUtils.toString(asset.getInputStream(), "utf-8");
         log.debug("Loaded text of {} to count words", resource.getURI());
 
         // count the words using a regular expression pattern
@@ -149,7 +159,7 @@ public class WordCountAnalyzer implements AnalysisService {
     }
 
     /**
-     * This function uses Thread.sleep() to simulate long running analyze
+     * This function uses Thread.sleep() and sendProgress() to simulate long running analyze
      * process
      * 
      * @param analysisResponse
@@ -187,7 +197,7 @@ public class WordCountAnalyzer implements AnalysisService {
 
         try {
             // create event manager instance, providing the correct host, user and password, and initialise it
-            EventManager eventManager = new EventManagerImpl(mico_host,mico_user,mico_pass);
+            EventManager eventManager = new EventManagerImpl(mico_host, mico_user, mico_pass);
             eventManager.init();
 
             // create analyzer service instance and register it with event manager
