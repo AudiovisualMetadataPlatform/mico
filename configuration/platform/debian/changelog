@@ -1,3 +1,9 @@
+mico-platform (2.0.0) unstable; urgency=medium
+
+  * Updated dependecy to libmico-api2
+
+ -- Horst Stadler <horst.stadler@salzburgresearch.at>  Thu, 19 May 2016 16:45:33 +0200
+
 mico-platform (1.0.5) unstable; urgency=medium
 
   * Added dependencies: mico-conf, libmico-api1
