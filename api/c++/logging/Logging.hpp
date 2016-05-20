@@ -4,6 +4,13 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+
+#ifdef DEBUG_BUILD
+   #define DEFAULT_LOG_LEVEL DEBUG
+#else
+   #define DEFAULT_LOG_LEVEL INFO
+#endif
+
 /*
  * Simple logging implementation that allows defining different backends
  */
@@ -28,7 +35,7 @@ namespace mico {
         public:
 
 
-            LoggingBackend() : level(INFO) {
+            LoggingBackend() : level(DEFAULT_LOG_LEVEL) {
             }
 
             virtual ~LoggingBackend() {};
@@ -59,7 +66,7 @@ namespace mico {
                 if(level <= INFO) {
                     va_list args;
                     va_start(args,message);
-                    log(DEBUG, message, args);
+                    log(INFO, message, args);
                     va_end(args);
                 }
             };
@@ -71,7 +78,7 @@ namespace mico {
                 if(level <= WARN) {
                     va_list args;
                     va_start(args,message);
-                    log(DEBUG, message, args);
+                    log(WARN, message, args);
                     va_end(args);
                 }
             };
@@ -83,7 +90,7 @@ namespace mico {
                 if(level <= ERROR) {
                     va_list args;
                     va_start(args,message);
-                    log(DEBUG, message, args);
+                    log(ERROR, message, args);
                     va_end(args);
                 }
             };

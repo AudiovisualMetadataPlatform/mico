@@ -2,15 +2,14 @@ package eu.mico.platform.zooniverse;
 
 import com.google.common.io.Resources;
 import com.jayway.restassured.RestAssured;
-import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.model.ItemState;
-import eu.mico.platform.broker.model.ServiceGraph;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.zooniverse.testutils.TestServer;
+import eu.mico.platform.zooniverse.util.BrokerServices;
+import eu.mico.platform.zooniverse.util.ItemData;
 import org.hamcrest.Matchers;
 import org.junit.*;
 import org.mockito.Mockito;
@@ -112,17 +111,11 @@ public class TextAnalysisWebServiceTest {
                 .body("status", Matchers.equalTo("finished"));
     }
 
-    private static MICOBroker mockBroker() {
-        MICOBroker broker = Mockito.mock(MICOBroker.class);
-        Map states = Mockito.mock(Map.class);
-        ItemState state = Mockito.mock(ItemState.class);
-        ServiceGraph serviceGraph = Mockito.mock(ServiceGraph.class);
-        Mockito.when(serviceGraph.getDescriptorURIs()).thenReturn(Collections.<URI>singleton(new URIImpl("http://www.mico-project.eu/services/ner-text")));
-        Mockito.when(state.isFinalState()).thenReturn(true);
-        Mockito.when(states.get(org.mockito.Matchers.any())).thenReturn(state);
-        Mockito.when(broker.getStates()).thenReturn(states);
-        Mockito.when(broker.getDependencies()).thenReturn(serviceGraph);
-        return broker;
+    private static BrokerServices mockBroker() throws IOException {
+        BrokerServices brokerSvc = Mockito.mock(BrokerServices.class);
+        Mockito.when(brokerSvc.getItemData(org.mockito.Matchers.<String>any())).thenReturn(new ItemData(Collections.singletonMap("finished", (Object)"true")));
+        Mockito.when(brokerSvc.getServices()).thenReturn(Collections.singletonList(Collections.singletonMap("uri", "http://www.mico-project.eu/services/ner-text")));
+        return brokerSvc;
     }
 
     private static EventManager mockEvenmanager() throws RepositoryException, IOException, QueryEvaluationException, MalformedQueryException {

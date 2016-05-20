@@ -2,7 +2,6 @@ package eu.mico.platform.reco;
 
 
 import com.google.common.collect.ImmutableMap;
-import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.zooniverse.model.TextAnalysisInput;
@@ -28,14 +27,12 @@ public class RecoWebService {
     private static final Logger log = LoggerFactory.getLogger(RecoWebService.class);
 
     private final EventManager eventManager;
-    private final MICOBroker broker;
     private final String marmottaBaseUri;
     private final PersistenceService persistenceService;
 
 
-    public RecoWebService(EventManager eventManager, MICOBroker broker, String marmottaBaseUri) {
+    public RecoWebService(EventManager eventManager, String marmottaBaseUri) {
         this.eventManager = eventManager;
-        this.broker = broker;
         this.marmottaBaseUri = marmottaBaseUri;
         this.persistenceService = eventManager.getPersistenceService();
     }

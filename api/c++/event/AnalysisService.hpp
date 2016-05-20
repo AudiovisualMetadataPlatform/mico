@@ -3,9 +3,12 @@
 
 #include <string>
 #include <list>
+#include <map>
 
 #include "rdf_model.hpp"
-#include "ContentItem.hpp"
+#include "Item.hpp"
+#include "Uri.hpp"
+
 
 namespace mico {
     namespace event {
@@ -20,24 +23,24 @@ namespace mico {
         class AnalysisService {
 
         protected:
-            mico::rdf::model::URI serviceID;
+            mico::persistence::model::URI serviceID;
             std::string provides;
             std::string requires;
             std::string queue;
 
         public:
             AnalysisService(const std::string serviceID, const std::string requires, const std::string provides, const std::string queue)
-                    : serviceID(serviceID), provides(provides), requires(requires), queue(queue) {};
+                    : serviceID(serviceID), provides(provides), requires(requires), queue(queue) {}
 
 
-            virtual ~AnalysisService() {};
+            virtual ~AnalysisService() {}
 
             /**
             * Return a unique ID (URI) that identifies this service and its functionality.
             *
             * @return a unique ID identifying this service globally
             */
-            virtual const mico::rdf::model::URI& getServiceID() const { return serviceID; };
+            virtual const mico::persistence::model::URI& getServiceID() const { return serviceID; }
 
 
             /**
@@ -46,7 +49,7 @@ namespace mico {
             *
             * @return a symbolic identifier representing the output type of this service
             */
-            virtual const std::string& getProvides() const { return provides; };
+            virtual const std::string& getProvides() const { return provides; }
 
 
             /**
@@ -55,7 +58,7 @@ namespace mico {
             *
             * @return  a symbolic identifier representing the input type of this service
             */
-            virtual const std::string& getRequires() const { return requires; };
+            virtual const std::string& getRequires() const { return requires; }
 
 
             /**
@@ -67,7 +70,7 @@ namespace mico {
             *
             * @return a string identifying the queue name this service wants to use
             */
-            virtual const std::string& getQueueName() const { return queue; };
+            virtual const std::string& getQueueName() const { return queue; }
 
 
             /**
@@ -79,7 +82,10 @@ namespace mico {
             * @param ci     the content item to analyse
             * @param object the URI of the object to analyse in the content item (a content part or a metadata URI)
             */
-            virtual void call(mico::event::AnalysisResponse& response, mico::persistence::ContentItem& ci, std::list<mico::rdf::model::URI>& object, std::map<std::string,std::string>& params) = 0;
+            virtual void call(mico::event::AnalysisResponse& response,
+                              std::shared_ptr< mico::persistence::model::Item > item,
+                              std::vector<std::shared_ptr<mico::persistence::model::Resource>> resources,
+                              std::map<std::string,std::string>& params) = 0;
         };
 
     }

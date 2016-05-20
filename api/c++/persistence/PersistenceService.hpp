@@ -3,22 +3,32 @@
 
 #include <string>
 #include <iterator>
+#include <memory>
 
 #include <boost/iterator/iterator_facade.hpp>
 
 
 #include "Metadata.hpp"
-#include "ContentItem.hpp"
+//#include "ContentItem.hpp"
+#include "anno4cpp.h"
+#include "Uri.hpp"
 
-#include "rdf_model.hpp"
-#include "rdf_query.hpp"
+//#include "rdf_model.hpp"
+//#include "rdf_query.hpp"
+
+
 
 namespace mico {
     namespace persistence {
 
         using namespace mico::rdf::query;
 
-        class content_item_iterator;
+        class item_iterator;
+
+        namespace model {
+          class Item;
+        }
+
 
         /**
         * Specialised support for persistence service metadata. Might in the future be extended with
@@ -45,18 +55,31 @@ namespace mico {
             std::string marmottaServerUrl;
             std::string contentDirectory;
             PersistenceMetadata metadata;
+            std::string m_jniErrorMessage;
+
+            static JNIEnv* m_sEnv;
+
+            jnipp::GlobalRef<ComGithubAnno4jAnno4j> m_anno4j;
+
+
+            /** Inits Java VM and connects to Marmotta via JNI->anno4j */
+            void initService();
+
+            void setContext(jnipp::Ref<OrgOpenrdfRepositoryObjectObjectConnection> con, jnipp::Ref<OrgOpenrdfModelURI> context);
+
 
         public:
+            static JavaVM* m_sJvm;
+
+
+            static JavaVM* getJVM() { return m_sJvm; }
 
             /**
             * Initialise persistence service with the address of a server running the standard installation of
             * the MICO platform with Marmotta at port 8080 under context /marmotta, RabbitMQ at port 5672, and
             * an HDFS server, all with login/password mico/mico.
             */
-            PersistenceService(std::string serverAddress)
-                    : marmottaServerUrl("http://" + serverAddress + ":8080/marmotta")
-                    , contentDirectory("hdfs://" + serverAddress)
-                    , metadata("http://" + serverAddress + ":8080/marmotta") {};
+            PersistenceService(std::string serverAddress);
 
 
             /**
@@ -64,10 +87,7 @@ namespace mico {
             * the MICO platform with Marmotta at port 8080 under context /marmotta, RabbitMQ at port 5672, and
             * an HDFS server, all with login/password mico/mico.
             */
-            PersistenceService(std::string serverAddress, int marmottaPort, std::string user, std::string password)
-                    : marmottaServerUrl("http://" + serverAddress + ":" + std::to_string(marmottaPort) + "/marmotta")
-                    , contentDirectory("hdfs://" + serverAddress)
-                    , metadata("http://" + serverAddress + ":" + std::to_string(marmottaPort) + "/marmotta") {};
+            PersistenceService(std::string serverAddress, int marmottaPort, std::string user, std::string password);
 
 
             /**
@@ -76,8 +96,7 @@ namespace mico {
             *
             * @param marmottaServerUrl the URL of the Apache Marmotta server, e.g. http://localhost:8080/marmotta
             */
-            PersistenceService(std::string marmottaServerUrl, std::string contentDirectory)
-                    : marmottaServerUrl(marmottaServerUrl), contentDirectory(contentDirectory), metadata(marmottaServerUrl) {};
+            PersistenceService(std::string marmottaServerUrl, std::string contentDirectory);
 
 
             /**
@@ -94,78 +113,93 @@ namespace mico {
             *
             * @return a handle to the newly created ContentItem
             */
-            ContentItem* createContentItem();
+            std::shared_ptr<model::Item> createItem();
 
             /**
-            * Create a new content item with the given URI and return it. The content item should be suitable for reading and
+            * Return the item with the given URI if it exists. The item should be suitable for reading and
             * updating and write all updates to the underlying low-level persistence layer.
             *
-            * @return a handle to the newly created ContentItem
+            * @return A handle to the Item with the given URI, or null if it does not exist
             */
-            ContentItem* createContentItem(const mico::rdf::model::URI& id);
-
-
-            /**
-            * Return the content item with the given URI if it exists. The content item should be suitable for reading and
-            * updating and write all updates to the underlying low-level persistence layer.
-            *
-            * @return a handle to the ContentItem with the given URI, or null if it does not exist
-            */
-            ContentItem* getContentItem(const mico::rdf::model::URI& id);
+            std::shared_ptr<model::Item> getItem(const mico::persistence::model::URI& id);
 
             /**
             * Delete the content item with the given URI. If the content item does not exist, do nothing.
             */
-            void deleteContentItem(const mico::rdf::model::URI& id);
+            void deleteItem(const mico::persistence::model::URI& id);
+
 
             /**
-            * Return an iterator over all currently available content items.
+            * Get all items of the persistence service connection
+            * Notice that this implementation might be rather slow since it fetches all items first
+            * and then creates new ItemMMM object out of it.
             *
-            * @return iterable
+            * @returns A std::vector<Item>
             */
-            content_item_iterator begin();
+            std::vector<std::shared_ptr<model::Item> > getItems();
+
+//            /**
+//            * Return an iterator over all currently available content items.
+//            *
+//            * @return iterable
+//            */
+//            item_iterator begin();
 
 
-            /**
-            * Return the end iterator for checking when iteration has completed.
-            */
-            content_item_iterator end();
+//            /**
+//            * Return the end iterator for checking when iteration has completed.
+//            */
+//            item_iterator end();
 
 
+            jnipp::LocalRef<jnipp::com::github::anno4j::Anno4j> getAnno4j();
 
+            std::string getStoragePrefix();
+
+            std::string getContentDirectory();
+
+            std::string unmaskContentLocation(const std::string &maskedURL );
+
+            void checkJavaExceptionThrow();
+
+            void checkJavaExceptionThrow(std::vector<std::string> exceptionNames);
+
+            bool checkJavaExceptionNoThrow(std::string& msg);
+
+            bool checkJavaExceptionNoThrow(std::vector<std::string> exceptionNames, std::string& msg);
         };
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
         /**
-        * 	Internal implementation of iterators over the content items managed by a PersistenceService
+        * 	Internal implementation of iterators over the items managed by a PersistenceService
         */
-        class content_item_iterator  : public boost::iterator_facade<content_item_iterator, ContentItem*, boost::forward_traversal_tag, ContentItem*> {
-        private:
-            int pos;
-            const std::string& baseUrl;
-            const std::string& contentDirectory;
-            const mico::rdf::query::TupleResult* result;
+//        class item_iterator  : public boost::iterator_facade<item_iterator, Item*, boost::forward_traversal_tag, Item*> {
+//        private:
+//            int pos;
+//            const std::string& baseUrl;
+//            const std::string& contentDirectory;
+//            const mico::rdf::query::TupleResult* result;
 
-        public:
-            content_item_iterator(const std::string& baseUrl, const std::string& contentDirectory)
-                    : pos(-1), baseUrl(baseUrl), contentDirectory(contentDirectory), result(NULL) {};
+//        public:
+//            item_iterator(const std::string& baseUrl, const std::string& contentDirectory)
+//                    : pos(-1), baseUrl(baseUrl), contentDirectory(contentDirectory), result(NULL) {};
 
-            content_item_iterator(const std::string& baseUrl, const std::string& contentDirectory, const mico::rdf::query::TupleResult* r)
-                    : pos(0), baseUrl(baseUrl), contentDirectory(contentDirectory), result(r) {};
+//            item_iterator(const std::string& baseUrl, const std::string& contentDirectory, const mico::rdf::query::TupleResult* r)
+//                    : pos(0), baseUrl(baseUrl), contentDirectory(contentDirectory), result(r) {};
 
-            ~content_item_iterator() { if(result) { delete result; } };
+//            ~item_iterator() { if(result) { delete result; } };
 
 
-        private:
+//        private:
 
-            friend class boost::iterator_core_access;
+//            friend class boost::iterator_core_access;
 
-            void increment();
-            bool equal(content_item_iterator const& other) const;
-            ContentItem* dereference() const;
+//            void increment();
+//            bool equal(item_iterator const& other) const;
+//            Item* dereference() const;
 
-        };
+//        };
 #endif
     }
 }

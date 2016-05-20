@@ -31,10 +31,10 @@ endforeach()
 include_directories(
   ${MICO_EVENT_PB_OUT_DIR}
 )
-
 add_library(mico_event SHARED 
   ${MICO_EVENT_PB_OUTPUT_SRC_FILES}
-  EventManager.cpp
+  AnalysisService
+  EventManager
 )
 target_link_libraries(mico_event mico_logging mico_rdf mico_persistence ${PROTOBUF_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${AMQPCPP_LIBRARIES})
 set_target_properties(mico_event PROPERTIES VERSION "${MICO_PLATFORM_VERSION}" SOVERSION "${MICO_PLATFORM_SOVERSION}")
