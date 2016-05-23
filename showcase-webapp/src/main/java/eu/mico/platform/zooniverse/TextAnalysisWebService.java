@@ -46,11 +46,13 @@ public class TextAnalysisWebService {
 
     private final EventManager eventManager;
     private final PersistenceService persistenceService;
+    private final String marmottaBaseUri;
     private final BrokerServices brokerSvc;
 
-    public TextAnalysisWebService(EventManager eventManager, BrokerServices broker) {
+    public TextAnalysisWebService(EventManager eventManager, String marmottaBaseUri, BrokerServices broker) {
         this.eventManager = eventManager;
         this.persistenceService = eventManager.getPersistenceService();
+        this.marmottaBaseUri = marmottaBaseUri;
         this.brokerSvc = broker;
     }
 
@@ -89,7 +91,7 @@ public class TextAnalysisWebService {
             eventManager.injectItem(item);
 
             return Response.status(Response.Status.CREATED)
-                    .entity(ImmutableMap.of("id",item.getURI().stringValue(),"status","submitted"))
+                    .entity(ImmutableMap.of("id",item.getURI().getLocalName(),"status","submitted"))
                     .link(java.net.URI.create(item.getURI().stringValue()), "contentItem")
                     .build();
         } catch (RepositoryException | IOException e) {
@@ -105,7 +107,7 @@ public class TextAnalysisWebService {
 
         final Item item;
         try {
-            item = persistenceService.getItem(new URIImpl(itemURI));
+            item = persistenceService.getItem(new URIImpl(this.marmottaBaseUri + "/" + itemURI));
             if (item == null)
                 return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'", itemURI)).build();
         } catch (RepositoryException e) {
