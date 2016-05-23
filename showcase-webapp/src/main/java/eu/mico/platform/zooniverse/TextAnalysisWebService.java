@@ -3,6 +3,7 @@ package eu.mico.platform.zooniverse;
 import com.google.common.collect.ImmutableMap;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.zooniverse.model.TextAnalysisInput;
 import eu.mico.platform.zooniverse.model.TextAnalysisOutput;
@@ -78,11 +79,14 @@ public class TextAnalysisWebService {
 
         try {
             final Item item = persistenceService.createItem();
+            item.setSemanticType("application/textanalysis-endpoint");
             item.setSyntacticalType("text/plain");
 
-            try (OutputStream outputStream = item.getAsset().getOutputStream()) {
+            Asset asset = item.getAsset();
+            try (OutputStream outputStream = asset.getOutputStream()) {
                 IOUtils.copy(IOUtils.toInputStream(input.comment), outputStream);
                 outputStream.close();
+                asset.setFormat("text/plain");
             } catch (IOException e) {
                 log.error("Could not persist text data for ContentItem {}: {}", item.getURI(), e.getMessage());
                 throw e;
