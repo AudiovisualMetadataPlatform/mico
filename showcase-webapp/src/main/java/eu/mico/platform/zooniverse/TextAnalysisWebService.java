@@ -130,7 +130,7 @@ public class TextAnalysisWebService {
 
         final TextAnalysisOutput out;
         try {
-            out = getTextResult(item);
+            out = getTextResult(itemURI, item);
             item.getObjectConnection().close();
 
             if(out == null) {
@@ -175,9 +175,9 @@ public class TextAnalysisWebService {
             "}";
 
     // TODO: refactor, because model changed: Metadata object does not exist anymore. Dont use sparql queries, use anno4j
-    private TextAnalysisOutput getTextResult(Item item) throws Exception {
+    private TextAnalysisOutput getTextResult(String id, Item item) throws Exception {
         try {
-            TextAnalysisOutput out = new TextAnalysisOutput(item);
+            TextAnalysisOutput out = new TextAnalysisOutput(id);
 
             out.sentiment = querySentiment(item);
             out.entities = queryList(item, queryEntities);

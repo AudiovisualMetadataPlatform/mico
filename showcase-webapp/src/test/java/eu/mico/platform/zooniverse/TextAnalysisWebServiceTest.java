@@ -49,7 +49,8 @@ import static org.mockito.Matchers.anyString;
  */
 public class TextAnalysisWebServiceTest {
 
-    private static String itemUrlString = "http://localhost/mem/56b90661-14b5-4fe6-b2c8-af5357f729a9";
+    private static String localName = "c3cf9a33-88ae-428f-8eb1-985dca5c3b97";
+    private static String itemUrlString = "http://mico-platform.salzburgresearch.at:8080/marmotta/" + localName;
 
     private static TestServer server;
 
@@ -63,6 +64,7 @@ public class TextAnalysisWebServiceTest {
         //init webservice with mocked environment
         TextAnalysisWebService textAnalysisWebService = new TextAnalysisWebService(
                 mockEvenmanager(),
+                "http://mico-platform.salzburgresearch.at:8080/marmotta",
                 mockBroker());
 
         //init in memory repository
@@ -93,7 +95,7 @@ public class TextAnalysisWebServiceTest {
                 post(server.getUrl() + "zooniverse/textanalysis").
                 then().
                 assertThat()
-                .body("id", Matchers.equalTo(itemUrlString))
+                .body("id", Matchers.equalTo(localName))
                 .body("status", Matchers.equalTo("submitted"));
 
     }
@@ -101,13 +103,13 @@ public class TextAnalysisWebServiceTest {
     @Test
     public void testGetResult() {
         com.jayway.restassured.RestAssured.when().
-                get(server.getUrl() + "zooniverse/textanalysis/" + itemUrlString).
+                get(server.getUrl() + "zooniverse/textanalysis/" + localName).
                 then().
                 assertThat()
-                .body("id", Matchers.equalTo(itemUrlString))
-                .body("sentiment", Matchers.equalTo(-0.19203712F))
-                .body("topics.size()", Matchers.equalTo(3))
-                .body("entities.size()", Matchers.equalTo(39))
+                .body("id", Matchers.equalTo(localName))
+                .body("sentiment", Matchers.equalTo(0.18698756F))
+                .body("topics.size()", Matchers.equalTo(0))
+                .body("entities.size()", Matchers.equalTo(5))
                 .body("status", Matchers.equalTo("finished"));
     }
 
@@ -144,6 +146,7 @@ public class TextAnalysisWebServiceTest {
         URI uri = Mockito.mock(URI.class);
         Asset a = createAsset();
         Mockito.when(uri.stringValue()).thenReturn(itemUrlString);
+        Mockito.when(uri.getLocalName()).thenReturn(localName);
         Item item = Mockito.mock(Item.class);
         Mockito.when(item.getURI()).thenReturn(uri);
         Mockito.when(item.getAsset()).thenReturn(a);
@@ -183,7 +186,7 @@ public class TextAnalysisWebServiceTest {
         repository.initialize();
 
         //import file
-        URL file = Resources.getResource("text_analysis/kiwi-export-20150429.ttl");
+        URL file = Resources.getResource("text_analysis/mico-export-20160523.ttl");
 
         RepositoryConnection c = repository.getConnection();
 
