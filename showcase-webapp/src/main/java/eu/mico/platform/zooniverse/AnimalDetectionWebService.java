@@ -19,6 +19,7 @@ package eu.mico.platform.zooniverse;
 
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.zooniverse.util.BrokerServices;
@@ -160,11 +161,15 @@ public class AnimalDetectionWebService {
             final Item item = persistenceService.createItem();
 
             final Part part = item.createPart(new URIImpl(ExtractorURI));
-            part.setSyntacticalType(String.format("%s/%s", type.getType(), type.getSubtype()));
+            part.setSemanticType("application/animaldetection-endpoint");
+            String assetType = String.format("%s/%s", type.getType(), type.getSubtype());
+            part.setSyntacticalType(assetType);
 
-            try (OutputStream outputStream = part.getAsset().getOutputStream()) {
+            Asset asset = part.getAsset();
+            try (OutputStream outputStream = asset.getOutputStream()) {
                 IOUtils.copy(postBody, outputStream);
                 outputStream.close();
+                asset.setFormat(assetType);
             } catch (IOException e) {
                 log.error("Could not persist binary data for ContentPart {}: {}", part.getURI(), e.getMessage());
                 throw e;
