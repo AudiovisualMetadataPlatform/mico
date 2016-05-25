@@ -137,14 +137,25 @@ public class WorkflowManagementService {
     }
     
     @GET
-    @Path("ui-params/{id}")
+    @Path("/ui-params/{id}")
     @Produces("application/json")
-    public Response get(@PathParam("id") Integer workflowId ) throws RepositoryException,
+    public Response getUIParams(@PathParam("id") Integer workflowId ) throws RepositoryException,
             IOException {
     	log.info("Retrieving UI Parameters for workflow with ID {}",workflowId);
         Workflow w=getWorkflow(workflowId);
         
         return Response.ok(ImmutableMap.of("workflowName",w.getName(), "nodes",w.getNodes(), "links",w.getLinks())).build();
+    }
+    
+    @GET
+    @Path("/camel-route/{id}")
+    @Produces("text/plain")
+    public Response getCamelRoute(@PathParam("id") Integer workflowId ) throws RepositoryException,
+            IOException {
+    	log.info("Retrieving CamelRoute for workflow with ID {}",workflowId);
+        Workflow w=getWorkflow(workflowId);
+        
+        return Response.ok(w.getRoute()).build();
     }
     
     
