@@ -30,8 +30,6 @@
     <name>MICO Platform: Broker</name>
     <packaging>war</packaging>
 
-
-
     <build>
         <finalName>${project.artifactId}</finalName>
         <pluginManagement>
@@ -340,6 +338,28 @@
             <artifactId>weld-se-core</artifactId>
             <scope>test</scope>
         </dependency>
+        
+        <!-- for in-memory persistence -->
+        <dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>5.1.0.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>5.1.0.Final</version>
+		</dependency>
+		<dependency>
+		    <groupId>javax.persistence</groupId>
+		    <artifactId>persistence-api</artifactId>
+		    <version>1.0.2</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.hsqldb</groupId>
+		    <artifactId>hsqldb</artifactId>
+		    <version>2.3.4</version>
+		</dependency>
     </dependencies>
 
     <profiles>

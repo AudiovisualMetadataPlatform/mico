@@ -23,8 +23,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import javax.persistence.Query;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -32,6 +35,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,9 +51,11 @@ public class WorkflowManagementService {
 
     private static Logger log = LoggerFactory.getLogger(WorkflowManagementService.class);
 
-//    @PersistenceContext(unitName = "MeineJpaPU", type = PersistenceContextType.TRANSACTION)
-//    EntityManager entityManager;
-    private Map<String,Workflow> workflows = new HashMap<String,Workflow>();
+//    @PersistenceContext(unitName = "inMemoryPersistenceUnit", type = PersistenceContextType.TRANSACTION)
+    private EntityManagerFactory emf;
+    private EntityManager em;
+
+    
     private int nextID = 1;
 
     @Context
@@ -59,7 +65,11 @@ public class WorkflowManagementService {
 
     public WorkflowManagementService(MICOBroker broker) {
         this.broker = broker;
+    	this.emf = Persistence.createEntityManagerFactory("inMemoryPersistenceUnit");
+    	this.em = emf.createEntityManager();
     }
+    
+    //------------------- public REST API
 
     /**
      * add a new workflow.
@@ -69,15 +79,18 @@ public class WorkflowManagementService {
     @POST
     @Path("/add")
     @Produces("application/json")
-    public Response createItem(@QueryParam("user") String user,
-            @QueryParam("workflowName") String workflowName,
-            @QueryParam("route") String route,
-            @QueryParam("links") String links, 
-            @QueryParam("nodes") String nodes)
+    public Response createItem(@FormParam("user") String user,
+    		@FormParam("workflowName") String workflowName,
+    		@FormParam("route") String route,
+    		@FormParam("links") String links, 
+    		@FormParam("nodes") String nodes)
             throws RepositoryException, IOException {
         
+    	log.info("Persisting new workflow with name {} for user {}",workflowName,user);
+    	
         Workflow workflow = new Workflow(user, workflowName, route, links, nodes);
         persistWorkflow(workflow);
+        log.info("Persisted new workflow {} belonging to user {}",workflow.toString(),user);
 
         return Response.ok(ImmutableMap.of()).build();
     }
@@ -92,31 +105,11 @@ public class WorkflowManagementService {
     @Produces("application/json")
     public Response listWorkflows(@QueryParam("user") String user) 
             throws RepositoryException, IOException {
-        
-        Workflow workflow = getWorkflowNames(user);
-
-        return Response.ok(ImmutableMap.of()).build();
+    	log.info("Retrieving list of workflows ids for user {}",user);
+    	List<String> WorkflowIds = getUserWorkflowIds(user);        
+    	return Response.ok(WorkflowIds).build();
     }
     
-    /**
-     * return information about workflow
-     *
-     * @return
-     */
-    @GET
-    @Path("/get/{id}")
-    @Produces("application/json")
-    public Response getWorkflow(@QueryParam("user") String user,
-            @PathParam("id") String workflowId,
-            @Context HttpServletRequest request) throws RepositoryException,
-            IOException {
-        
-        Workflow workflow = loadWorkflow(workflowId);
-
-        return Response.ok(ImmutableMap.of()).build();
-    }
-    
-
     /**
      * return status of specific workflow The returned status can be one of the
      * following:
@@ -134,28 +127,36 @@ public class WorkflowManagementService {
      */
     @GET
     @Path("/status/{id}")
-    @Produces("application/json")
+    @Produces("text/plain")
     public Response createItem(@QueryParam("user") String user,
             @QueryParam("id") String workflowId ) throws RepositoryException,
             IOException {
         log.warn("status check is not implemented yet, simply returning 'ONLINE'");
-        return Response.ok(ImmutableMap.of("status", "ONLINE")).build();
+        String status="ONLINE";
+        return Response.ok(status).build();
     }
     
+    
+    //------------------- private methods handling the persistence backend
     
     private void persistWorkflow(Workflow workflow){
-//        entityManager.persist(workflow);
-        workflows.put(String.valueOf(nextID++),workflow);
+    	em.getTransaction().begin();
+        em.persist(workflow);
+        em.flush();
+        em.getTransaction().commit();
     }
 
-    private Workflow loadWorkflow(String id){
-//        return entityManager.find(Workflow.class, id);
-        return workflows.get(id);
-    }
-
-    private Workflow getWorkflowNames(String user) {
-        // TODO Auto-generated method stub
-        return null;
+    @SuppressWarnings("unchecked")
+    private List<String> getUserWorkflowIds(String user) {
+    	Query queryAllIDs = em.createNamedQuery(Workflow.QUERY_WORKFLOW_IDS_BY_USER);
+    	queryAllIDs.setParameter("user", user);
+    	List<Integer> res = queryAllIDs.getResultList();
+    	log.info("Retrieved {} workflow IDs for user {}",res.size(),user);
+    	List<String> out=new ArrayList<String>();
+    	for(Integer id : res){
+    		out.add(id.toString());
+    	}
+    	return out;
     }
 
 

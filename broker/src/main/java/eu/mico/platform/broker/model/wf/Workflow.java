@@ -10,17 +10,17 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Type;
+
 @Entity
-@NamedQueries(value = { 
-        @NamedQuery(name=Workflow.QUERY_BY_NAME, query="Select w from Workflow w where w.workflowName = :wname" ),
-        @NamedQuery(name=Workflow.QUERY_ALL_NAMES, query="Select w.name from Workflow w" )
+@NamedQueries(value = {
+        @NamedQuery(name=Workflow.QUERY_WORKFLOW_IDS_BY_USER, query="Select w.id from Workflow w where w.user = :user" )
 })
-@Table( uniqueConstraints=@UniqueConstraint(columnNames={"workflowName"}) )
-public class Workflow {
+@Table( /*uniqueConstraints=@UniqueConstraint(columnNames={"workflowName"})*/ )
+public class Workflow{
 
     private static final long   serialVersionUID = 1L;
-    public  static final String QUERY_BY_NAME = "Workflow.queryName";
-    public  static final String QUERY_ALL_NAMES = "Workflow.queryAllNames";
+    public  static final String QUERY_WORKFLOW_IDS_BY_USER = "Workflow.queryIdByUser";
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,8 +28,11 @@ public class Workflow {
     private String user;
     @Column(name="workflowName", nullable=false)
     private String name;
+    @Type(type="text")
     private String route;
+    @Type(type="text")
     private String links;
+    @Type(type="text")
     private String nodes;
     
     public Workflow() {
