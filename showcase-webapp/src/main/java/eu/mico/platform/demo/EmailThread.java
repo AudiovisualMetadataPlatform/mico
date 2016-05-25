@@ -1,7 +1,5 @@
-package eu.mico.platform.broker.model;
+package eu.mico.platform.demo;
 
-import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.service.EmailService;
 import eu.mico.platform.persistence.model.Item;
 import org.apache.commons.mail.EmailException;
 
@@ -15,15 +13,13 @@ public class EmailThread extends Thread {
     public static final long timestep = 30000;
 
     private String email;
-    private MICOBroker broker;
     private Item item;
     private long start;
     private String ciName;
 
-    public EmailThread(String email, String ciName, MICOBroker broker, Item item) {
+    public EmailThread(String email, String ciName, Item item) {
         super();
         this.email = email;
-        this.broker = broker;
         this.item = item;
         this.ciName = ciName;
         this.start = System.currentTimeMillis();
@@ -35,11 +31,12 @@ public class EmailThread extends Thread {
 
             while(start + timeout > System.currentTimeMillis()) {
 
-                ItemState state = broker.getStates().get(item.getURI().stringValue());
+                // FIXME: Update this to use the broker REST interface to get the processing state
+/*                ItemState state = broker.getStates().get(item.getURI().stringValue());
                 if(state != null && state.isFinalState()) {
                     EmailService.sendEmail(email, "Analysis finished", "Hi!\n\nThe analysis for '%s' has been finished. You can get your results here:\n\nhttp://demo3.mico-project.eu/#/video?uri=%s\n\nYour MICO team", ciName, item.getURI().stringValue());
                     return;
-                }
+                }*/
                 sleep(timestep);
             }
 

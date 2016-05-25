@@ -1,4 +1,4 @@
-package eu.mico.platform.broker.service;
+package eu.mico.platform.demo;
 
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;

@@ -13,8 +13,6 @@
  */
 package eu.mico.platform;
 
-import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.impl.MICOBrokerImpl;
 import eu.mico.platform.demo.ContentWebService;
 import eu.mico.platform.demo.DemoWebService;
 import eu.mico.platform.demo.DownloadWebService;
@@ -23,6 +21,7 @@ import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.reco.RecoWebService;
 import eu.mico.platform.zooniverse.AnimalDetectionWebService;
 import eu.mico.platform.zooniverse.TextAnalysisWebService;
+import eu.mico.platform.zooniverse.util.BrokerServices;
 import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +31,7 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeoutException;
 
 public class ShowcaseApplication extends Application {
@@ -42,7 +40,6 @@ public class ShowcaseApplication extends Application {
 
     Set<Object> services;
 
-    private MICOBroker broker;
     private EventManager manager;
 
     public ShowcaseApplication(@Context ServletContext context) {
@@ -51,13 +48,13 @@ public class ShowcaseApplication extends Application {
         String host = context.getInitParameter("mico.host") != null ? context.getInitParameter("mico.host") : "mico-platform";
         String user = context.getInitParameter("mico.user") != null ? context.getInitParameter("mico.user") : "mico";
         String pass = context.getInitParameter("mico.pass") != null ? context.getInitParameter("mico.pass") : "mico";
-        String marmottaBaseUri = context.getInitParameter("mico.marmottaBaseUri") != null ? context.getInitParameter("mico.marmottaBaseUri") : "http://mico-platform:8080/marmotta";
+        String brokerBaseUri = context.getInitParameter("mico.brokerBaseUri") != null ? context.getInitParameter("mico.brokerBaseUri") : "http://" + host + ":8080/broker";
+        while (brokerBaseUri.endsWith("/")) {
+            brokerBaseUri = brokerBaseUri.substring(0, brokerBaseUri.length() - 1);
+        }
+        String marmottaBaseUri = context.getInitParameter("mico.marmottaBaseUri") != null ? context.getInitParameter("mico.marmottaBaseUri") : "http://" + host + ":8080/marmotta";
         while (marmottaBaseUri.endsWith("/")) {
             marmottaBaseUri = marmottaBaseUri.substring(0, marmottaBaseUri.length() - 1);
-        }
-        String storageBaseUri = context.getInitParameter("mico.storageBaseUri") != null ? context.getInitParameter("mico.storageBaseUri") : "file:///data";
-        while (storageBaseUri.endsWith("/")) {
-            storageBaseUri = storageBaseUri.substring(0, storageBaseUri.length() - 1);
         }
 
         if ("localhost".equals(host)) {
@@ -71,23 +68,24 @@ public class ShowcaseApplication extends Application {
         log.info("initialising new MICO broker for host {}", host);
 
         try {
-            broker = new MICOBrokerImpl(host, user, pass, 5672, marmottaBaseUri, storageBaseUri);
             manager = new EventManagerImpl(host, user, pass);
             manager.init();
+
+            BrokerServices brokerServices = new BrokerServices(brokerBaseUri, marmottaBaseUri);
 
             services = new HashSet<>();
 
             //WP5
-            services.add(new RecoWebService(manager, broker, marmottaBaseUri));
+            services.add(new RecoWebService(manager, marmottaBaseUri));
 
             // Zooniverse
-            services.add(new AnimalDetectionWebService(manager, broker, marmottaBaseUri));
-            services.add(new TextAnalysisWebService(manager, broker));
+            services.add(new AnimalDetectionWebService(manager, marmottaBaseUri, brokerServices));
+            services.add(new TextAnalysisWebService(manager, marmottaBaseUri, brokerServices));
 
             //Demo
             services.add(new DownloadWebService(manager));
-            services.add(new ContentWebService(manager, broker, marmottaBaseUri));
-            services.add(new DemoWebService(manager, broker, marmottaBaseUri));
+            services.add(new ContentWebService(manager, marmottaBaseUri));
+            services.add(new DemoWebService(manager, marmottaBaseUri, brokerServices));
 
         } catch (IOException ex) {
             log.error("could not initialise MICO broker, services not available (message: {})", ex.getMessage());

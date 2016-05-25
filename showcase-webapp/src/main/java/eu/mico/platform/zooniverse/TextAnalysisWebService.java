@@ -1,15 +1,14 @@
 package eu.mico.platform.zooniverse;
 
 import com.google.common.collect.ImmutableMap;
-import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.model.ItemState;
-import eu.mico.platform.broker.model.ServiceGraph;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
-import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.zooniverse.model.TextAnalysisInput;
 import eu.mico.platform.zooniverse.model.TextAnalysisOutput;
+import eu.mico.platform.zooniverse.util.BrokerServices;
+import eu.mico.platform.zooniverse.util.ItemData;
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
@@ -27,7 +26,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -37,7 +35,7 @@ import java.util.*;
  * <p/>
  * Author: Thomas Kurz (tkurz@apache.org)
  */
-@Path("zooniverse/textanalysis")
+@Path("/zooniverse/textanalysis")
 public class TextAnalysisWebService {
 
     private static final Logger log = LoggerFactory.getLogger(TextAnalysisWebService.class);
@@ -48,44 +46,47 @@ public class TextAnalysisWebService {
     }
 
     private final EventManager eventManager;
-    private final MICOBroker broker;
     private final PersistenceService persistenceService;
+    private final String marmottaBaseUri;
+    private final BrokerServices brokerSvc;
 
-    public TextAnalysisWebService(EventManager eventManager, MICOBroker broker) {
+    public TextAnalysisWebService(EventManager eventManager, String marmottaBaseUri, BrokerServices broker) {
         this.eventManager = eventManager;
-        this.broker = broker;
         this.persistenceService = eventManager.getPersistenceService();
+        this.marmottaBaseUri = marmottaBaseUri;
+        this.brokerSvc = broker;
     }
 
-    private static final URI ExtractorURI = new URIImpl("http://www.mico-project.eu/services/ner-text");
+    private static final String ExtractorURI = "http://www.mico-project.eu/services/ner-text";
 
     @POST
     @Consumes("application/json")
     @Produces("application/json")
-    public Response uploadImage(TextAnalysisInput input) {
-
-        ServiceGraph dependencies = broker.getDependencies();
+    public Response uploadImage(TextAnalysisInput input) throws  IOException{
 
         boolean extractorRunning = false;
 
-        for(URI descriptorURI : dependencies.getDescriptorURIs()) {
-            if(descriptorURI.equals(ExtractorURI)) {
+        for(Map<String, String>service : this.brokerSvc.getServices()) {
+            if(service.containsKey("uri") && service.get("uri").equals(ExtractorURI)) {
                 extractorRunning = true;
                 break;
             }
         }
 
         if(!extractorRunning) return Response.status(Response.Status.SERVICE_UNAVAILABLE)
-                .entity(String.format("Extractor '%s' currently not active",ExtractorURI.stringValue()))
+                .entity(String.format("Extractor '%s' currently not active",ExtractorURI))
                 .build();
 
         try {
             final Item item = persistenceService.createItem();
+            item.setSemanticType("application/textanalysis-endpoint");
             item.setSyntacticalType("text/plain");
 
-            try (OutputStream outputStream = item.getAsset().getOutputStream()) {
+            Asset asset = item.getAsset();
+            try (OutputStream outputStream = asset.getOutputStream()) {
                 IOUtils.copy(IOUtils.toInputStream(input.comment), outputStream);
                 outputStream.close();
+                asset.setFormat("text/plain");
             } catch (IOException e) {
                 log.error("Could not persist text data for ContentItem {}: {}", item.getURI(), e.getMessage());
                 throw e;
@@ -94,7 +95,7 @@ public class TextAnalysisWebService {
             eventManager.injectItem(item);
 
             return Response.status(Response.Status.CREATED)
-                    .entity(ImmutableMap.of("id",item.getURI().stringValue(),"status","submitted"))
+                    .entity(ImmutableMap.of("id",item.getURI().getLocalName(),"status","submitted"))
                     .link(java.net.URI.create(item.getURI().stringValue()), "contentItem")
                     .build();
         } catch (RepositoryException | IOException e) {
@@ -106,11 +107,11 @@ public class TextAnalysisWebService {
     @GET
     @Produces("application/json")
     @Path("{id:.+}")
-    public Response getResult(@PathParam("id") final String itemURI) {
+    public Response getResult(@PathParam("id") final String itemURI) throws IOException {
 
         final Item item;
         try {
-            item = persistenceService.getItem(new URIImpl(itemURI));
+            item = persistenceService.getItem(new URIImpl(this.marmottaBaseUri + "/" + itemURI));
             if (item == null)
                 return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'", itemURI)).build();
         } catch (RepositoryException e) {
@@ -118,9 +119,10 @@ public class TextAnalysisWebService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
 
+
         //test if it is still in progress
-        final ItemState state = broker.getStates().get(itemURI);
-        if (state != null && !state.isFinalState()) {
+        final ItemData itemData = brokerSvc.getItemData(itemURI);
+        if (itemData != null && !itemData.hasFinished()) {
             return Response.status(Response.Status.ACCEPTED)
                     .entity(ImmutableMap.of("id",itemURI,"status","inProgress"))
                     .build();
@@ -128,7 +130,7 @@ public class TextAnalysisWebService {
 
         final TextAnalysisOutput out;
         try {
-            out = getTextResult(item);
+            out = getTextResult(itemURI, item);
             item.getObjectConnection().close();
 
             if(out == null) {
@@ -173,9 +175,9 @@ public class TextAnalysisWebService {
             "}";
 
     // TODO: refactor, because model changed: Metadata object does not exist anymore. Dont use sparql queries, use anno4j
-    private TextAnalysisOutput getTextResult(Item item) throws Exception {
+    private TextAnalysisOutput getTextResult(String id, Item item) throws Exception {
         try {
-            TextAnalysisOutput out = new TextAnalysisOutput(item);
+            TextAnalysisOutput out = new TextAnalysisOutput(id);
 
             out.sentiment = querySentiment(item);
             out.entities = queryList(item, queryEntities);

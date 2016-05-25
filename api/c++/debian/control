@@ -12,19 +12,19 @@ Package: mico-service-ocr
 Section: misc
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}, tesseract-ocr-eng
-X-Foo: libmico-api1, liblept4, libmagic1, libtesseract3, libboost-thread1.55.0, libdaemon0
+X-Foo: libmico-api2, liblept4, libmagic1, libtesseract3, libboost-thread1.55.0, libdaemon0
 Description: OCR service for the MICO platform
  This package contains a binary version of the sample OCR service implemented in C++ to use with the MICO platform.
 
 Package: libmico-api-dev
 Section: libdevel
 Architecture: any
-Depends: libmico-api1 (= ${binary:Version}), ${misc:Depends}, libstdc++-4.9-dev, libboost1.55-dev, libboost-system1.55-dev, libboost-log1.55-dev, libexpat1-dev, libprotobuf-dev, libamqpcpp-dev, libhdfs3-dev, libdaemon-dev, libcurl4-gnutls-dev | libcurl-dev
+Depends: libmico-api2 (= ${binary:Version}), ${misc:Depends}, libstdc++-4.9-dev, libboost1.55-dev, libboost-system1.55-dev, libboost-log1.55-dev, libexpat1-dev, libprotobuf-dev, libamqpcpp-dev, libhdfs3-dev, libdaemon-dev, libcurl4-gnutls-dev | libcurl-dev
 Description: MICO client library - development headers and documentation
  This package contains the MICO C++ API header files and documentation. These are needed for implementing
  custom MICO services in C++.
 
-Package: libmico-api1
+Package: libmico-api2
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 X-Foo: libexpat1, libcurl3, libcurl3-gnutls, libprotobuf9, libstdc++6, libhdfs3-1, libamqpcpp2, libdaemon0

@@ -2,13 +2,12 @@ package eu.mico.platform.demo;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.model.EmailThread;
-import eu.mico.platform.broker.model.ItemState;
+import eu.mico.platform.zooniverse.util.BrokerServices;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.zooniverse.util.ItemData;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.http.Header;
@@ -69,16 +68,16 @@ public class DemoWebService {
     private static final MimetypesFileTypeMap mimetypesMap = new MimetypesFileTypeMap();
 
     private final EventManager eventManager;
-    private final MICOBroker broker;
     private final String marmottaBaseUri;
     private final PersistenceService persistenceService;
+    private final BrokerServices brokerSvc;
     private final CloseableHttpClient httpClient;
 
-    public DemoWebService(EventManager eventManager, MICOBroker broker, String marmottaBaseUri) {
+    public DemoWebService(EventManager eventManager, String marmottaBaseUri, BrokerServices brokerSvc) {
         this.eventManager = eventManager;
-        this.broker = broker;
         this.marmottaBaseUri = marmottaBaseUri;
         this.persistenceService = eventManager.getPersistenceService();
+        this.brokerSvc = brokerSvc;
         this.httpClient = HttpClientBuilder.create()
                 .setUserAgent("MicoPlatform (ZooniverseWebService)")
                 .build();
@@ -131,19 +130,16 @@ public class DemoWebService {
 
             //test if it is still in progress
             long start = System.currentTimeMillis();
-
-            ItemState state = broker.getStates().get(ci.getURI().stringValue());
-
-            while (state == null || !state.isFinalState()) {
+            ItemData itemData;
+            do {
+                Thread.sleep(timestep);
 
                 if(System.currentTimeMillis() > start+timeout) {
                     return Response.status(408).entity("Image took to long to compute").build();
                 }
 
-                Thread.sleep(timestep);
-
-                state = broker.getStates().get(ci.getURI().stringValue());
-            }
+                itemData = brokerSvc.getItemData(ci.getURI().stringValue());
+            } while(itemData == null || !itemData.hasFinished());
 
             Object result = createImageResult(ci);
 
@@ -307,7 +303,7 @@ public class DemoWebService {
                 log.info("Send email: {}", email != null);
                 if(email != null) {
                     log.info("Start email thread for {}", email);
-                    EmailThread emailThread = new EmailThread(email,filename,broker,ci);
+                    EmailThread emailThread = new EmailThread(email,filename, ci);
                     emailThread.start();
                 }
 
@@ -342,12 +338,17 @@ public class DemoWebService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
 
-        //test if it is still in progress
-        final ItemState state = broker.getStates().get(contentItemUri.stringValue());
-        if (state != null && !state.isFinalState()) {
-            return Response.status(Response.Status.ACCEPTED)
-                    .entity(ImmutableMap.of("uri", uriString, "status", "inProgress"))
-                    .build();
+        try {
+            //test if it is still in progress
+            ItemData itemData = brokerSvc.getItemData(contentItemUri.stringValue());
+            if (itemData != null && !itemData.hasFinished()) {
+                return Response.status(Response.Status.ACCEPTED)
+                        .entity(ImmutableMap.of("uri", uriString, "status", "inProgress"))
+                        .build();
+            }
+        } catch (IOException e) {
+            log.error("Error getting status of item {} from broker: {}", contentItemUri.stringValue(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
 
         try {
@@ -379,12 +380,17 @@ public class DemoWebService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
 
-        //test if it is still in progress
-        final ItemState state = broker.getStates().get(contentItemUri.stringValue());
-        if (state != null && !state.isFinalState()) {
-            return Response.status(Response.Status.ACCEPTED)
-                    .entity(ImmutableMap.of("uri", uriString, "status", "inProgress"))
-                    .build();
+        try {
+            //test if it is still in progress
+            ItemData itemData = brokerSvc.getItemData(contentItemUri.stringValue());
+            if (itemData != null && !itemData.hasFinished()) {
+                return Response.status(Response.Status.ACCEPTED)
+                        .entity(ImmutableMap.of("uri", uriString, "status", "inProgress"))
+                        .build();
+            }
+        } catch (IOException e) {
+            log.error("Error getting status of item {} from broker: {}", contentItemUri.stringValue(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
 
         try {

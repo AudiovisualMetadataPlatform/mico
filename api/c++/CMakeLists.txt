@@ -25,10 +25,13 @@ include(ExternalProject)
 
 set(ANNO4CPPDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/install_anno4cpp)
 
+#Stop SSH from asking for key acceptance on Git clone
+set(ENV{GIT_SSH_COMMAND} "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no")
+
 ExternalProject_Add(anno4cpp_ext
     PREFIX externals
     GIT_REPOSITORY git@bitbucket.org:mico-project/anno4cpp.git
-    GIT_TAG develop
+    GIT_TAG 1.0.1
     CMAKE_ARGS
       -DMICO_PLATFORM_PARENT_VERSION=${POM_PLATFORM_VERSION}
       -DCMAKE_BUILD_TYPE=Debug
@@ -69,7 +72,7 @@ message(STATUS "Using JNI_INCLUDE_DIRS = " ${JNI_INCLUDE_DIRS})
 message(STATUS "Using JNI_LIBRARIES = " ${JNI_LIBRARIES})
 
 #this line creates the links file info with the current version for the debian packaging
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/debian/libmico-api1.links.in ${CMAKE_CURRENT_SOURCE_DIR}/debian/libmico-api1.links @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/debian/libmico-api2.links.in ${CMAKE_CURRENT_SOURCE_DIR}/debian/libmico-api2.links @ONLY)
 
 option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" )
 
@@ -89,7 +92,7 @@ if(MICO_PLATFORM_BUILD_DOCUMENTATION AND DOXYGEN_FOUND)
         COMMENT "Generating API documentation with Doxygen"
         VERBATIM)
 
-    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc/libmico-api1)
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc/libmico-api2)
 endif()
 
 include_directories(

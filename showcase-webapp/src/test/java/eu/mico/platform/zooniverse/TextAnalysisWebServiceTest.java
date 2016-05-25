@@ -2,15 +2,14 @@ package eu.mico.platform.zooniverse;
 
 import com.google.common.io.Resources;
 import com.jayway.restassured.RestAssured;
-import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.model.ItemState;
-import eu.mico.platform.broker.model.ServiceGraph;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.zooniverse.testutils.TestServer;
+import eu.mico.platform.zooniverse.util.BrokerServices;
+import eu.mico.platform.zooniverse.util.ItemData;
 import org.hamcrest.Matchers;
 import org.junit.*;
 import org.mockito.Mockito;
@@ -50,7 +49,8 @@ import static org.mockito.Matchers.anyString;
  */
 public class TextAnalysisWebServiceTest {
 
-    private static String itemUrlString = "http://localhost/mem/56b90661-14b5-4fe6-b2c8-af5357f729a9";
+    private static String localName = "c3cf9a33-88ae-428f-8eb1-985dca5c3b97";
+    private static String itemUrlString = "http://mico-platform.salzburgresearch.at:8080/marmotta/" + localName;
 
     private static TestServer server;
 
@@ -64,6 +64,7 @@ public class TextAnalysisWebServiceTest {
         //init webservice with mocked environment
         TextAnalysisWebService textAnalysisWebService = new TextAnalysisWebService(
                 mockEvenmanager(),
+                "http://mico-platform.salzburgresearch.at:8080/marmotta",
                 mockBroker());
 
         //init in memory repository
@@ -94,7 +95,7 @@ public class TextAnalysisWebServiceTest {
                 post(server.getUrl() + "zooniverse/textanalysis").
                 then().
                 assertThat()
-                .body("id", Matchers.equalTo(itemUrlString))
+                .body("id", Matchers.equalTo(localName))
                 .body("status", Matchers.equalTo("submitted"));
 
     }
@@ -102,27 +103,21 @@ public class TextAnalysisWebServiceTest {
     @Test
     public void testGetResult() {
         com.jayway.restassured.RestAssured.when().
-                get(server.getUrl() + "zooniverse/textanalysis/" + itemUrlString).
+                get(server.getUrl() + "zooniverse/textanalysis/" + localName).
                 then().
                 assertThat()
-                .body("id", Matchers.equalTo(itemUrlString))
-                .body("sentiment", Matchers.equalTo(-0.19203712F))
-                .body("topics.size()", Matchers.equalTo(3))
-                .body("entities.size()", Matchers.equalTo(39))
+                .body("id", Matchers.equalTo(localName))
+                .body("sentiment", Matchers.equalTo(0.18698756F))
+                .body("topics.size()", Matchers.equalTo(0))
+                .body("entities.size()", Matchers.equalTo(5))
                 .body("status", Matchers.equalTo("finished"));
     }
 
-    private static MICOBroker mockBroker() {
-        MICOBroker broker = Mockito.mock(MICOBroker.class);
-        Map states = Mockito.mock(Map.class);
-        ItemState state = Mockito.mock(ItemState.class);
-        ServiceGraph serviceGraph = Mockito.mock(ServiceGraph.class);
-        Mockito.when(serviceGraph.getDescriptorURIs()).thenReturn(Collections.<URI>singleton(new URIImpl("http://www.mico-project.eu/services/ner-text")));
-        Mockito.when(state.isFinalState()).thenReturn(true);
-        Mockito.when(states.get(org.mockito.Matchers.any())).thenReturn(state);
-        Mockito.when(broker.getStates()).thenReturn(states);
-        Mockito.when(broker.getDependencies()).thenReturn(serviceGraph);
-        return broker;
+    private static BrokerServices mockBroker() throws IOException {
+        BrokerServices brokerSvc = Mockito.mock(BrokerServices.class);
+        Mockito.when(brokerSvc.getItemData(org.mockito.Matchers.<String>any())).thenReturn(new ItemData(Collections.singletonMap("finished", (Object)"true")));
+        Mockito.when(brokerSvc.getServices()).thenReturn(Collections.singletonList(Collections.singletonMap("uri", "http://www.mico-project.eu/services/ner-text")));
+        return brokerSvc;
     }
 
     private static EventManager mockEvenmanager() throws RepositoryException, IOException, QueryEvaluationException, MalformedQueryException {
@@ -151,6 +146,7 @@ public class TextAnalysisWebServiceTest {
         URI uri = Mockito.mock(URI.class);
         Asset a = createAsset();
         Mockito.when(uri.stringValue()).thenReturn(itemUrlString);
+        Mockito.when(uri.getLocalName()).thenReturn(localName);
         Item item = Mockito.mock(Item.class);
         Mockito.when(item.getURI()).thenReturn(uri);
         Mockito.when(item.getAsset()).thenReturn(a);
@@ -190,7 +186,7 @@ public class TextAnalysisWebServiceTest {
         repository.initialize();
 
         //import file
-        URL file = Resources.getResource("text_analysis/kiwi-export-20150429.ttl");
+        URL file = Resources.getResource("text_analysis/mico-export-20160523.ttl");
 
         RepositoryConnection c = repository.getConnection();
 
