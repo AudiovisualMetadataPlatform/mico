@@ -16,7 +16,7 @@ public interface ObjectDetectionBodyMMM extends BodyMMM {
     void setConfidence(Double confidence);
 
     @Iri(MMM.HAS_CONFIDENCE)
-    double getConfidence();
+    Double getConfidence();
 
     @Iri(RDF.VALUE)
     void setValue(String value);
