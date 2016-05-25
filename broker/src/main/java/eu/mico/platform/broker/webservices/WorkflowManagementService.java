@@ -106,7 +106,7 @@ public class WorkflowManagementService {
     public Response listWorkflows(@QueryParam("user") String user) 
             throws RepositoryException, IOException {
     	log.info("Retrieving list of workflows ids for user {}",user);
-    	List<String> WorkflowIds = getUserWorkflowIds(user);        
+    	List<String> WorkflowIds = getWorkflowIdsForUser(user);        
     	return Response.ok(WorkflowIds).build();
     }
     
@@ -129,11 +129,22 @@ public class WorkflowManagementService {
     @Path("/status/{id}")
     @Produces("text/plain")
     public Response createItem(@QueryParam("user") String user,
-            @QueryParam("id") String workflowId ) throws RepositoryException,
+            @PathParam("id") String workflowId ) throws RepositoryException,
             IOException {
         log.warn("status check is not implemented yet, simply returning 'ONLINE'");
         String status="ONLINE";
         return Response.ok(status).build();
+    }
+    
+    @GET
+    @Path("ui-params/{id}")
+    @Produces("application/json")
+    public Response get(@PathParam("id") Integer workflowId ) throws RepositoryException,
+            IOException {
+    	log.info("Retrieving UI Parameters for workflow with ID {}",workflowId);
+        Workflow w=getWorkflow(workflowId);
+        
+        return Response.ok(ImmutableMap.of("workflowName",w.getName(), "nodes",w.getNodes(), "links",w.getLinks())).build();
     }
     
     
@@ -147,7 +158,7 @@ public class WorkflowManagementService {
     }
 
     @SuppressWarnings("unchecked")
-    private List<String> getUserWorkflowIds(String user) {
+    private List<String> getWorkflowIdsForUser(String user) {
     	Query queryAllIDs = em.createNamedQuery(Workflow.QUERY_WORKFLOW_IDS_BY_USER);
     	queryAllIDs.setParameter("user", user);
     	List<Integer> res = queryAllIDs.getResultList();
@@ -157,6 +168,13 @@ public class WorkflowManagementService {
     		out.add(id.toString());
     	}
     	return out;
+    }
+    
+    private Workflow getWorkflow(Integer wId) {
+    	
+    	Query querySingleWorkflow = em.createNamedQuery(Workflow.QUERY_SINGLE_WORKFLOW_BY_ID);
+    	querySingleWorkflow.setParameter("id", wId);
+    	return (Workflow) querySingleWorkflow.getSingleResult();
     }
 
 

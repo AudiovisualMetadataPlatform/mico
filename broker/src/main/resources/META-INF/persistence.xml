@@ -10,8 +10,8 @@
     <properties>
         <property name="javax.persistence.jdbc.driver" value="org.hsqldb.jdbcDriver"/>
         <property name="javax.persistence.jdbc.url" value="jdbc:hsqldb:mem:wmdb"/>
-        <property name="javax.persistence.jdbc.username" value="mico"/>
-        <property name="javax.persistence.jdbc.password" value="mico"/>
+        <property name="javax.persistence.jdbc.username" value="mico-wf"/>
+        <property name="javax.persistence.jdbc.password" value=""/>
         <property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect"/>
         <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
     </properties>

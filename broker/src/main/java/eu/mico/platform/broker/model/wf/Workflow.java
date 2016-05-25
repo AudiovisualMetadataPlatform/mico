@@ -14,13 +14,15 @@ import org.hibernate.annotations.Type;
 
 @Entity
 @NamedQueries(value = {
-        @NamedQuery(name=Workflow.QUERY_WORKFLOW_IDS_BY_USER, query="Select w.id from Workflow w where w.user = :user" )
+        @NamedQuery(name=Workflow.QUERY_WORKFLOW_IDS_BY_USER, query="Select w.id from Workflow w where w.user = :user" ),
+        @NamedQuery(name=Workflow.QUERY_SINGLE_WORKFLOW_BY_ID, query="Select w from Workflow w where w.id = :id" )
 })
 @Table( /*uniqueConstraints=@UniqueConstraint(columnNames={"workflowName"})*/ )
 public class Workflow{
 
     private static final long   serialVersionUID = 1L;
     public  static final String QUERY_WORKFLOW_IDS_BY_USER = "Workflow.queryIdByUser";
+    public  static final String QUERY_SINGLE_WORKFLOW_BY_ID = "Workflow.queryWorkflowById";
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
