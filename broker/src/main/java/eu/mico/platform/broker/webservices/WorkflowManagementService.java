@@ -94,6 +94,18 @@ public class WorkflowManagementService {
 
         return Response.ok(ImmutableMap.of()).build();
     }
+
+    //TODO: with @delete the ui gets a 403 forbidden error, and this method is not triggered. check why
+    @POST
+    @Path("/del/{id}")
+    @Produces("application/json")
+    public Response removeItem(@PathParam("id") Integer workflowId ) throws RepositoryException,
+            IOException {
+    	log.info("Removing workflow with ID {}",workflowId);
+        deleteWorkflow(getWorkflow(workflowId));
+        
+        return Response.ok(ImmutableMap.of()).build();
+    }
     
     /**
      * Get all workflows for a user
@@ -186,6 +198,14 @@ public class WorkflowManagementService {
     	Query querySingleWorkflow = em.createNamedQuery(Workflow.QUERY_SINGLE_WORKFLOW_BY_ID);
     	querySingleWorkflow.setParameter("id", wId);
     	return (Workflow) querySingleWorkflow.getSingleResult();
+    }
+    
+    private void deleteWorkflow(Workflow workflow) {
+    	
+    	em.getTransaction().begin();
+    	em.remove(workflow);
+    	em.flush();
+    	em.getTransaction().commit();
     }
 
 
