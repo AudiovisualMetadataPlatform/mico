@@ -627,6 +627,84 @@ public final class Event {
         getRequiresBytes();
 
     /**
+     * <code>required string extractorId = 11;</code>
+     *
+     * <pre>
+     *!&lt; id of the extractor, e.g. eu.mico.example.Extractor
+     * </pre>
+     */
+    boolean hasExtractorId();
+    /**
+     * <code>required string extractorId = 11;</code>
+     *
+     * <pre>
+     *!&lt; id of the extractor, e.g. eu.mico.example.Extractor
+     * </pre>
+     */
+    java.lang.String getExtractorId();
+    /**
+     * <code>required string extractorId = 11;</code>
+     *
+     * <pre>
+     *!&lt; id of the extractor, e.g. eu.mico.example.Extractor
+     * </pre>
+     */
+    com.google.protobuf.ByteString
+        getExtractorIdBytes();
+
+    /**
+     * <code>required string extractorModeId = 12;</code>
+     *
+     * <pre>
+     *!&lt; id of the extractor mode, e.g. testMode
+     * </pre>
+     */
+    boolean hasExtractorModeId();
+    /**
+     * <code>required string extractorModeId = 12;</code>
+     *
+     * <pre>
+     *!&lt; id of the extractor mode, e.g. testMode
+     * </pre>
+     */
+    java.lang.String getExtractorModeId();
+    /**
+     * <code>required string extractorModeId = 12;</code>
+     *
+     * <pre>
+     *!&lt; id of the extractor mode, e.g. testMode
+     * </pre>
+     */
+    com.google.protobuf.ByteString
+        getExtractorModeIdBytes();
+
+    /**
+     * <code>required string extractorVersion = 13;</code>
+     *
+     * <pre>
+     *!&lt; version of the extractor, e.g., 0.0.0
+     * </pre>
+     */
+    boolean hasExtractorVersion();
+    /**
+     * <code>required string extractorVersion = 13;</code>
+     *
+     * <pre>
+     *!&lt; version of the extractor, e.g., 0.0.0
+     * </pre>
+     */
+    java.lang.String getExtractorVersion();
+    /**
+     * <code>required string extractorVersion = 13;</code>
+     *
+     * <pre>
+     *!&lt; version of the extractor, e.g., 0.0.0
+     * </pre>
+     */
+    com.google.protobuf.ByteString
+        getExtractorVersionBytes();
+
+    /**
      * <code>optional .mico.event.model.Implementation language = 5 [default = JAVA];</code>
      */
     boolean hasLanguage();
@@ -731,7 +809,7 @@ public final class Event {
               if (value == null) {
                 unknownFields.mergeVarintField(5, rawValue);
               } else {
-                bitField0_ |= 0x00000010;
+                bitField0_ |= 0x00000080;
                 language_ = value;
               }
               break;
@@ -742,9 +820,27 @@ public final class Event {
               if (value == null) {
                 unknownFields.mergeVarintField(6, rawValue);
               } else {
-                bitField0_ |= 0x00000020;
+                bitField0_ |= 0x00000100;
                 type_ = value;
               }
+              break;
+            }
+            case 90: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000010;
+              extractorId_ = bs;
+              break;
+            }
+            case 98: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000020;
+              extractorModeId_ = bs;
+              break;
+            }
+            case 106: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000040;
+              extractorVersion_ = bs;
               break;
             }
           }
@@ -1003,13 +1099,175 @@ public final class Event {
       }
     }
 
+    public static final int EXTRACTORID_FIELD_NUMBER = 11;
+    private java.lang.Object extractorId_;
+    /**
+     * <code>required string extractorId = 11;</code>
+     *
+     * <pre>
+     *!&lt; id of the extractor, e.g. eu.mico.example.Extractor
+     * </pre>
+     */
+    public boolean hasExtractorId() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>required string extractorId = 11;</code>
+     *
+     * <pre>
+     *!&lt; id of the extractor, e.g. eu.mico.example.Extractor
+     * </pre>
+     */
+    public java.lang.String getExtractorId() {
+      java.lang.Object ref = extractorId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          extractorId_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string extractorId = 11;</code>
+     *
+     * <pre>
+     *!&lt; id of the extractor, e.g. eu.mico.example.Extractor
+     * </pre>
+     */
+    public com.google.protobuf.ByteString
+        getExtractorIdBytes() {
+      java.lang.Object ref = extractorId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        extractorId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int EXTRACTORMODEID_FIELD_NUMBER = 12;
+    private java.lang.Object extractorModeId_;
+    /**
+     * <code>required string extractorModeId = 12;</code>
+     *
+     * <pre>
+     *!&lt; id of the extractor mode, e.g. testMode
+     * </pre>
+     */
+    public boolean hasExtractorModeId() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>required string extractorModeId = 12;</code>
+     *
+     * <pre>
+     *!&lt; id of the extractor mode, e.g. testMode
+     * </pre>
+     */
+    public java.lang.String getExtractorModeId() {
+      java.lang.Object ref = extractorModeId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          extractorModeId_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string extractorModeId = 12;</code>
+     *
+     * <pre>
+     *!&lt; id of the extractor mode, e.g. testMode
+     * </pre>
+     */
+    public com.google.protobuf.ByteString
+        getExtractorModeIdBytes() {
+      java.lang.Object ref = extractorModeId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        extractorModeId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int EXTRACTORVERSION_FIELD_NUMBER = 13;
+    private java.lang.Object extractorVersion_;
+    /**
+     * <code>required string extractorVersion = 13;</code>
+     *
+     * <pre>
+     *!&lt; version of the extractor, e.g., 0.0.0
+     * </pre>
+     */
+    public boolean hasExtractorVersion() {
+      return ((bitField0_ & 0x00000040) == 0x00000040);
+    }
+    /**
+     * <code>required string extractorVersion = 13;</code>
+     *
+     * <pre>
+     *!&lt; version of the extractor, e.g., 0.0.0
+     * </pre>
+     */
+    public java.lang.String getExtractorVersion() {
+      java.lang.Object ref = extractorVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          extractorVersion_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string extractorVersion = 13;</code>
+     *
+     * <pre>
+     *!&lt; version of the extractor, e.g., 0.0.0
+     * </pre>
+     */
+    public com.google.protobuf.ByteString
+        getExtractorVersionBytes() {
+      java.lang.Object ref = extractorVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        extractorVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     public static final int LANGUAGE_FIELD_NUMBER = 5;
     private eu.mico.platform.event.model.Event.Implementation language_;
     /**
      * <code>optional .mico.event.model.Implementation language = 5 [default = JAVA];</code>
      */
     public boolean hasLanguage() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
+      return ((bitField0_ & 0x00000080) == 0x00000080);
     }
     /**
      * <code>optional .mico.event.model.Implementation language = 5 [default = JAVA];</code>
@@ -1024,7 +1282,7 @@ public final class Event {
      * <code>optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];</code>
      */
     public boolean hasType() {
-      return ((bitField0_ & 0x00000020) == 0x00000020);
+      return ((bitField0_ & 0x00000100) == 0x00000100);
     }
     /**
      * <code>optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];</code>
@@ -1038,6 +1296,9 @@ public final class Event {
       queueName_ = "";
       provides_ = "";
       requires_ = "";
+      extractorId_ = "";
+      extractorModeId_ = "";
+      extractorVersion_ = "";
       language_ = eu.mico.platform.event.model.Event.Implementation.JAVA;
       type_ = eu.mico.platform.event.model.Event.RegistrationType.REGISTER;
     }
@@ -1063,6 +1324,18 @@ public final class Event {
         memoizedIsInitialized = 0;
         return false;
       }
+      if (!hasExtractorId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasExtractorModeId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasExtractorVersion()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -1082,11 +1355,20 @@ public final class Event {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeBytes(4, getRequiresBytes());
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
         output.writeEnum(5, language_.getNumber());
       }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
         output.writeEnum(6, type_.getNumber());
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeBytes(11, getExtractorIdBytes());
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeBytes(12, getExtractorModeIdBytes());
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        output.writeBytes(13, getExtractorVersionBytes());
       }
       getUnknownFields().writeTo(output);
     }
@@ -1113,13 +1395,25 @@ public final class Event {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(4, getRequiresBytes());
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(5, language_.getNumber());
       }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(6, type_.getNumber());
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(11, getExtractorIdBytes());
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(12, getExtractorModeIdBytes());
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(13, getExtractorVersionBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1251,10 +1545,16 @@ public final class Event {
         bitField0_ = (bitField0_ & ~0x00000004);
         requires_ = "";
         bitField0_ = (bitField0_ & ~0x00000008);
-        language_ = eu.mico.platform.event.model.Event.Implementation.JAVA;
+        extractorId_ = "";
         bitField0_ = (bitField0_ & ~0x00000010);
-        type_ = eu.mico.platform.event.model.Event.RegistrationType.REGISTER;
+        extractorModeId_ = "";
         bitField0_ = (bitField0_ & ~0x00000020);
+        extractorVersion_ = "";
+        bitField0_ = (bitField0_ & ~0x00000040);
+        language_ = eu.mico.platform.event.model.Event.Implementation.JAVA;
+        bitField0_ = (bitField0_ & ~0x00000080);
+        type_ = eu.mico.platform.event.model.Event.RegistrationType.REGISTER;
+        bitField0_ = (bitField0_ & ~0x00000100);
         return this;
       }
 
@@ -1302,9 +1602,21 @@ public final class Event {
         if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
           to_bitField0_ |= 0x00000010;
         }
-        result.language_ = language_;
+        result.extractorId_ = extractorId_;
         if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
           to_bitField0_ |= 0x00000020;
+        }
+        result.extractorModeId_ = extractorModeId_;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000040;
+        }
+        result.extractorVersion_ = extractorVersion_;
+        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+          to_bitField0_ |= 0x00000080;
+        }
+        result.language_ = language_;
+        if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
+          to_bitField0_ |= 0x00000100;
         }
         result.type_ = type_;
         result.bitField0_ = to_bitField0_;
@@ -1343,6 +1655,21 @@ public final class Event {
           requires_ = other.requires_;
           onChanged();
         }
+        if (other.hasExtractorId()) {
+          bitField0_ |= 0x00000010;
+          extractorId_ = other.extractorId_;
+          onChanged();
+        }
+        if (other.hasExtractorModeId()) {
+          bitField0_ |= 0x00000020;
+          extractorModeId_ = other.extractorModeId_;
+          onChanged();
+        }
+        if (other.hasExtractorVersion()) {
+          bitField0_ |= 0x00000040;
+          extractorVersion_ = other.extractorVersion_;
+          onChanged();
+        }
         if (other.hasLanguage()) {
           setLanguage(other.getLanguage());
         }
@@ -1367,6 +1694,18 @@ public final class Event {
           return false;
         }
         if (!hasRequires()) {
+          
+          return false;
+        }
+        if (!hasExtractorId()) {
+          
+          return false;
+        }
+        if (!hasExtractorModeId()) {
+          
+          return false;
+        }
+        if (!hasExtractorVersion()) {
           
           return false;
         }
@@ -1792,12 +2131,312 @@ public final class Event {
         return this;
       }
 
+      private java.lang.Object extractorId_ = "";
+      /**
+       * <code>required string extractorId = 11;</code>
+       *
+       * <pre>
+       *!&lt; id of the extractor, e.g. eu.mico.example.Extractor
+       * </pre>
+       */
+      public boolean hasExtractorId() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>required string extractorId = 11;</code>
+       *
+       * <pre>
+       *!&lt; id of the extractor, e.g. eu.mico.example.Extractor
+       * </pre>
+       */
+      public java.lang.String getExtractorId() {
+        java.lang.Object ref = extractorId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            extractorId_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string extractorId = 11;</code>
+       *
+       * <pre>
+       *!&lt; id of the extractor, e.g. eu.mico.example.Extractor
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getExtractorIdBytes() {
+        java.lang.Object ref = extractorId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          extractorId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string extractorId = 11;</code>
+       *
+       * <pre>
+       *!&lt; id of the extractor, e.g. eu.mico.example.Extractor
+       * </pre>
+       */
+      public Builder setExtractorId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000010;
+        extractorId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string extractorId = 11;</code>
+       *
+       * <pre>
+       *!&lt; id of the extractor, e.g. eu.mico.example.Extractor
+       * </pre>
+       */
+      public Builder clearExtractorId() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        extractorId_ = getDefaultInstance().getExtractorId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string extractorId = 11;</code>
+       *
+       * <pre>
+       *!&lt; id of the extractor, e.g. eu.mico.example.Extractor
+       * </pre>
+       */
+      public Builder setExtractorIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000010;
+        extractorId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object extractorModeId_ = "";
+      /**
+       * <code>required string extractorModeId = 12;</code>
+       *
+       * <pre>
+       *!&lt; id of the extractor mode, e.g. testMode
+       * </pre>
+       */
+      public boolean hasExtractorModeId() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>required string extractorModeId = 12;</code>
+       *
+       * <pre>
+       *!&lt; id of the extractor mode, e.g. testMode
+       * </pre>
+       */
+      public java.lang.String getExtractorModeId() {
+        java.lang.Object ref = extractorModeId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            extractorModeId_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string extractorModeId = 12;</code>
+       *
+       * <pre>
+       *!&lt; id of the extractor mode, e.g. testMode
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getExtractorModeIdBytes() {
+        java.lang.Object ref = extractorModeId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          extractorModeId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string extractorModeId = 12;</code>
+       *
+       * <pre>
+       *!&lt; id of the extractor mode, e.g. testMode
+       * </pre>
+       */
+      public Builder setExtractorModeId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000020;
+        extractorModeId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string extractorModeId = 12;</code>
+       *
+       * <pre>
+       *!&lt; id of the extractor mode, e.g. testMode
+       * </pre>
+       */
+      public Builder clearExtractorModeId() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        extractorModeId_ = getDefaultInstance().getExtractorModeId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string extractorModeId = 12;</code>
+       *
+       * <pre>
+       *!&lt; id of the extractor mode, e.g. testMode
+       * </pre>
+       */
+      public Builder setExtractorModeIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000020;
+        extractorModeId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object extractorVersion_ = "";
+      /**
+       * <code>required string extractorVersion = 13;</code>
+       *
+       * <pre>
+       *!&lt; version of the extractor, e.g., 0.0.0
+       * </pre>
+       */
+      public boolean hasExtractorVersion() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>required string extractorVersion = 13;</code>
+       *
+       * <pre>
+       *!&lt; version of the extractor, e.g., 0.0.0
+       * </pre>
+       */
+      public java.lang.String getExtractorVersion() {
+        java.lang.Object ref = extractorVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            extractorVersion_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string extractorVersion = 13;</code>
+       *
+       * <pre>
+       *!&lt; version of the extractor, e.g., 0.0.0
+       * </pre>
+       */
+      public com.google.protobuf.ByteString
+          getExtractorVersionBytes() {
+        java.lang.Object ref = extractorVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          extractorVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string extractorVersion = 13;</code>
+       *
+       * <pre>
+       *!&lt; version of the extractor, e.g., 0.0.0
+       * </pre>
+       */
+      public Builder setExtractorVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000040;
+        extractorVersion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string extractorVersion = 13;</code>
+       *
+       * <pre>
+       *!&lt; version of the extractor, e.g., 0.0.0
+       * </pre>
+       */
+      public Builder clearExtractorVersion() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        extractorVersion_ = getDefaultInstance().getExtractorVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string extractorVersion = 13;</code>
+       *
+       * <pre>
+       *!&lt; version of the extractor, e.g., 0.0.0
+       * </pre>
+       */
+      public Builder setExtractorVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000040;
+        extractorVersion_ = value;
+        onChanged();
+        return this;
+      }
+
       private eu.mico.platform.event.model.Event.Implementation language_ = eu.mico.platform.event.model.Event.Implementation.JAVA;
       /**
        * <code>optional .mico.event.model.Implementation language = 5 [default = JAVA];</code>
        */
       public boolean hasLanguage() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
+        return ((bitField0_ & 0x00000080) == 0x00000080);
       }
       /**
        * <code>optional .mico.event.model.Implementation language = 5 [default = JAVA];</code>
@@ -1812,7 +2451,7 @@ public final class Event {
         if (value == null) {
           throw new NullPointerException();
         }
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000080;
         language_ = value;
         onChanged();
         return this;
@@ -1821,7 +2460,7 @@ public final class Event {
        * <code>optional .mico.event.model.Implementation language = 5 [default = JAVA];</code>
        */
       public Builder clearLanguage() {
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000080);
         language_ = eu.mico.platform.event.model.Event.Implementation.JAVA;
         onChanged();
         return this;
@@ -1832,7 +2471,7 @@ public final class Event {
        * <code>optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];</code>
        */
       public boolean hasType() {
-        return ((bitField0_ & 0x00000020) == 0x00000020);
+        return ((bitField0_ & 0x00000100) == 0x00000100);
       }
       /**
        * <code>optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];</code>
@@ -1847,7 +2486,7 @@ public final class Event {
         if (value == null) {
           throw new NullPointerException();
         }
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000100;
         type_ = value;
         onChanged();
         return this;
@@ -1856,7 +2495,7 @@ public final class Event {
        * <code>optional .mico.event.model.RegistrationType type = 6 [default = REGISTER];</code>
        */
       public Builder clearType() {
-        bitField0_ = (bitField0_ & ~0x00000020);
+        bitField0_ = (bitField0_ & ~0x00000100);
         type_ = eu.mico.platform.event.model.Event.RegistrationType.REGISTER;
         onChanged();
         return this;
@@ -11369,47 +12008,49 @@ public final class Event {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\013Event.proto\022\020mico.event.model\"\323\001\n\021Regi" +
+      "\n\013Event.proto\022\020mico.event.model\"\233\002\n\021Regi" +
       "strationEvent\022\021\n\tserviceId\030\001 \002(\t\022\021\n\tqueu" +
       "eName\030\002 \002(\t\022\020\n\010provides\030\003 \002(\t\022\020\n\010require" +
-      "s\030\004 \002(\t\0228\n\010language\030\005 \001(\0162 .mico.event.m" +
-      "odel.Implementation:\004JAVA\022:\n\004type\030\006 \001(\0162" +
-      "\".mico.event.model.RegistrationType:\010REG" +
-      "ISTER\"\256\001\n\017AnalysisRequest\022\021\n\tserviceId\030\001" +
-      " \002(\t\022\017\n\007ItemUri\030\002 \002(\t\022\017\n\007partUri\030\003 \003(\t\022<" +
-      "\n\006params\030\n \003(\0132,.mico.event.model.Analys" +
-      "isRequest.ParamEntry\032(\n\nParamEntry\022\013\n\003ke",
-      "y\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\370\004\n\rAnalysisEvent" +
-      "\022+\n\004type\030\001 \002(\0162\035.mico.event.model.Messag" +
-      "eType\022<\n\010progress\030\002 \001(\0132(.mico.event.mod" +
-      "el.AnalysisEvent.ProgressH\000\0226\n\003new\030\003 \001(\013" +
-      "2\'.mico.event.model.AnalysisEvent.NewPar" +
-      "tH\000\0228\n\006finish\030\010 \001(\0132&.mico.event.model.A" +
-      "nalysisEvent.FinishH\000\0226\n\005error\030\t \001(\0132%.m" +
-      "ico.event.model.AnalysisEvent.ErrorH\000\032Q\n" +
-      "\010Progress\022\021\n\tserviceId\030\001 \002(\t\022\017\n\007itemUri\030" +
-      "\002 \002(\t\022\017\n\007partUri\030\003 \002(\t\022\020\n\010progress\030\005 \002(\002",
-      "\032>\n\007NewPart\022\021\n\tserviceId\030\001 \002(\t\022\017\n\007itemUr" +
-      "i\030\002 \002(\t\022\017\n\007partUri\030\003 \002(\t\032,\n\006Finish\022\021\n\tse" +
-      "rviceId\030\001 \002(\t\022\017\n\007itemUri\030\002 \002(\t\032\202\001\n\005Error" +
-      "\022\021\n\tserviceId\030\001 \002(\t\022\017\n\007itemUri\030\002 \002(\t\022\017\n\007" +
-      "message\030\005 \001(\t\022\023\n\013description\030\006 \001(\t\022/\n\ter" +
-      "rorCode\030\007 \001(\0162\034.mico.event.model.ErrorCo" +
-      "desB\014\n\ntest_oneof\"\034\n\tItemEvent\022\017\n\007itemUr" +
-      "i\030\001 \002(\t\"\020\n\016DiscoveryEvent\"E\n\022Configurati" +
-      "onEvent\022\027\n\017marmottaBaseUri\030\001 \002(\t\022\026\n\016stor" +
-      "ageBaseUri\030\002 \002(\t\"\034\n\032ConfigurationDiscove",
-      "rEvent*/\n\016Implementation\022\010\n\004JAVA\020\001\022\007\n\003CP" +
-      "P\020\002\022\n\n\006PYTHON\020\003*0\n\020RegistrationType\022\014\n\010R" +
-      "EGISTER\020\001\022\016\n\nUNREGISTER\020\002*@\n\013MessageType" +
-      "\022\014\n\010PROGRESS\020\001\022\n\n\006FINISH\020\002\022\014\n\010NEW_PART\020\003" +
-      "\022\t\n\005ERROR\020\004*\325\001\n\nErrorCodes\022\034\n\030UNSUPPORTE" +
-      "D_CONTENT_TYPE\020\036\022\037\n\033UNSUPPORTED_CONTENT_" +
-      "VARIANT\020\037\022\022\n\016DECODING_ERROR\020 \022\021\n\rMISSING" +
-      "_ASSET\020!\022\026\n\022MISSING_ANNOTATION\020#\022\031\n\025INSU" +
-      "FFICIENT_RESOURCE\020(\022\030\n\024INSUFFICIENT_STOR" +
-      "AGE\020)\022\024\n\020UNEXPECTED_ERROR\0202B\036\n\034eu.mico.p",
-      "latform.event.model"
+      "s\030\004 \002(\t\022\023\n\013extractorId\030\013 \002(\t\022\027\n\017extracto" +
+      "rModeId\030\014 \002(\t\022\030\n\020extractorVersion\030\r \002(\t\022" +
+      "8\n\010language\030\005 \001(\0162 .mico.event.model.Imp" +
+      "lementation:\004JAVA\022:\n\004type\030\006 \001(\0162\".mico.e" +
+      "vent.model.RegistrationType:\010REGISTER\"\256\001" +
+      "\n\017AnalysisRequest\022\021\n\tserviceId\030\001 \002(\t\022\017\n\007" +
+      "ItemUri\030\002 \002(\t\022\017\n\007partUri\030\003 \003(\t\022<\n\006params",
+      "\030\n \003(\0132,.mico.event.model.AnalysisReques" +
+      "t.ParamEntry\032(\n\nParamEntry\022\013\n\003key\030\001 \002(\t\022" +
+      "\r\n\005value\030\002 \002(\t\"\370\004\n\rAnalysisEvent\022+\n\004type" +
+      "\030\001 \002(\0162\035.mico.event.model.MessageType\022<\n" +
+      "\010progress\030\002 \001(\0132(.mico.event.model.Analy" +
+      "sisEvent.ProgressH\000\0226\n\003new\030\003 \001(\0132\'.mico." +
+      "event.model.AnalysisEvent.NewPartH\000\0228\n\006f" +
+      "inish\030\010 \001(\0132&.mico.event.model.AnalysisE" +
+      "vent.FinishH\000\0226\n\005error\030\t \001(\0132%.mico.even" +
+      "t.model.AnalysisEvent.ErrorH\000\032Q\n\010Progres",
+      "s\022\021\n\tserviceId\030\001 \002(\t\022\017\n\007itemUri\030\002 \002(\t\022\017\n" +
+      "\007partUri\030\003 \002(\t\022\020\n\010progress\030\005 \002(\002\032>\n\007NewP" +
+      "art\022\021\n\tserviceId\030\001 \002(\t\022\017\n\007itemUri\030\002 \002(\t\022" +
+      "\017\n\007partUri\030\003 \002(\t\032,\n\006Finish\022\021\n\tserviceId\030" +
+      "\001 \002(\t\022\017\n\007itemUri\030\002 \002(\t\032\202\001\n\005Error\022\021\n\tserv" +
+      "iceId\030\001 \002(\t\022\017\n\007itemUri\030\002 \002(\t\022\017\n\007message\030" +
+      "\005 \001(\t\022\023\n\013description\030\006 \001(\t\022/\n\terrorCode\030" +
+      "\007 \001(\0162\034.mico.event.model.ErrorCodesB\014\n\nt" +
+      "est_oneof\"\034\n\tItemEvent\022\017\n\007itemUri\030\001 \002(\t\"" +
+      "\020\n\016DiscoveryEvent\"E\n\022ConfigurationEvent\022",
+      "\027\n\017marmottaBaseUri\030\001 \002(\t\022\026\n\016storageBaseU" +
+      "ri\030\002 \002(\t\"\034\n\032ConfigurationDiscoverEvent*/" +
+      "\n\016Implementation\022\010\n\004JAVA\020\001\022\007\n\003CPP\020\002\022\n\n\006P" +
+      "YTHON\020\003*0\n\020RegistrationType\022\014\n\010REGISTER\020" +
+      "\001\022\016\n\nUNREGISTER\020\002*@\n\013MessageType\022\014\n\010PROG" +
+      "RESS\020\001\022\n\n\006FINISH\020\002\022\014\n\010NEW_PART\020\003\022\t\n\005ERRO" +
+      "R\020\004*\325\001\n\nErrorCodes\022\034\n\030UNSUPPORTED_CONTEN" +
+      "T_TYPE\020\036\022\037\n\033UNSUPPORTED_CONTENT_VARIANT\020" +
+      "\037\022\022\n\016DECODING_ERROR\020 \022\021\n\rMISSING_ASSET\020!" +
+      "\022\026\n\022MISSING_ANNOTATION\020#\022\031\n\025INSUFFICIENT",
+      "_RESOURCE\020(\022\030\n\024INSUFFICIENT_STORAGE\020)\022\024\n" +
+      "\020UNEXPECTED_ERROR\0202B\036\n\034eu.mico.platform." +
+      "event.model"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -11428,7 +12069,7 @@ public final class Event {
     internal_static_mico_event_model_RegistrationEvent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_mico_event_model_RegistrationEvent_descriptor,
-        new java.lang.String[] { "ServiceId", "QueueName", "Provides", "Requires", "Language", "Type", });
+        new java.lang.String[] { "ServiceId", "QueueName", "Provides", "Requires", "ExtractorId", "ExtractorModeId", "ExtractorVersion", "Language", "Type", });
     internal_static_mico_event_model_AnalysisRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_mico_event_model_AnalysisRequest_fieldAccessorTable = new

@@ -42,8 +42,14 @@ message RegistrationEvent {
   required string queueName        = 2; //!< input queue name used by service, e.g. exampleServiceQueue
   required string provides         = 3; //!< type of output this service provides (MIME type, e.g. text/plain)
   required string requires         = 4; //!< type of input this service provides (MIME type, e.g. text/html)
+
+  required string extractorId      = 11; //!< id of the extractor, e.g. eu.mico.example.Extractor
+  required string extractorModeId  = 12; //!< id of the extractor mode, e.g. testMode
+  required string extractorVersion = 13; //!< version of the extractor, e.g., 0.0.0
+  
   optional Implementation language = 5 [default = JAVA];
   optional RegistrationType type   = 6 [default = REGISTER];
+  
 }
 
 
