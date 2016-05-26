@@ -89,10 +89,11 @@ public class PlatformConfiguration implements ApplicationContextAware{
             if(Arrays.asList(extractorClass.getInterfaces()).contains(Analyser.class)) {
                 eu.mico.platform.event.api.spring.AnalysisService annotation = extractorClass.getAnnotation(eu.mico.platform.event.api.spring.AnalysisService.class);
 
-                logger.info("Subscribing " + extractorClass + " (" + annotation.id() + "," + annotation.requires() + "," + annotation.provides() + ") to MICO platform");
+                logger.info("Subscribing " + extractorClass + " (" + annotation.serviceId() + "," + annotation.requires() + "," + annotation.provides() + "  OR  "+
+                                                                     annotation.extractorId() + "," + annotation.extractorModeId() + "," + annotation.extractorVersion()+") to MICO platform");
                 String queueName = annotation.queueName().isEmpty() ? null : annotation.queueName();
 
-                AnalysisService analysisService = new AnalyserProxy(new URIImpl(annotation.id()), annotation.provides(), annotation.requires(), queueName, (Analyser) extractor);
+                AnalysisService analysisService = new AnalyserProxy(new URIImpl(annotation.serviceId()),annotation.extractorId(),annotation.extractorModeId(),annotation.extractorVersion(),annotation.provides(), annotation.requires(), queueName, (Analyser) extractor);
 
                 eventManager.registerService(analysisService);
                 analysisServices.add(analysisService);

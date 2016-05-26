@@ -33,7 +33,19 @@ public class AnalyserProxy implements AnalysisService {
     /**
      * A unique ID (URI) that identifies this service and its functionality.
      */
-    private URI id;
+    private URI serviceId;
+    /**
+     * ID that identifies the general functionality of this extractor.
+     */
+    private String extractorId;
+    /**
+     * ID that identifies the specific mode in which the extractor is running.
+     */
+    private String extractorModeId;
+    /**
+     * Extractor version .
+     */
+    private String extractorVersion;
     /**
      * The type of output produced by this service as symbolic identifier (e.g. MIME type).
      */
@@ -55,8 +67,11 @@ public class AnalyserProxy implements AnalysisService {
 
     private Logger logger = LoggerFactory.getLogger(AnalyserProxy.class);
 
-    public AnalyserProxy(URI id, String provides, String requires, String queueName, Analyser analyser) {
-        this.id = id;
+    public AnalyserProxy(URI serviceId, String extractorId, String extractorModeId, String extractorVersion, String provides, String requires, String queueName, Analyser analyser) {
+        this.serviceId = serviceId;
+        this.extractorId = extractorId;
+        this.extractorModeId = extractorModeId;
+        this.extractorVersion = extractorVersion;
         this.provides = provides;
         this.requires = requires;
         this.queueName = queueName;
@@ -65,7 +80,7 @@ public class AnalyserProxy implements AnalysisService {
 
     @Override
     public URI getServiceID() {
-        return id;
+        return serviceId;
     }
 
     @Override
@@ -88,4 +103,19 @@ public class AnalyserProxy implements AnalysisService {
         logger.info("Performing analyser method");
         analyser.call(resp, item, resourceList, params);
     }
+
+	@Override
+	public String getExtractorID() {
+		return extractorId;
+	}
+
+	@Override
+	public String getExtractorModeID() {
+		return extractorModeId;
+	}
+
+	@Override
+	public String getExtractorVersion() {
+		return extractorVersion;
+	}
 }
