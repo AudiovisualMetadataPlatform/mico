@@ -57,7 +57,7 @@ public:
 	bool called;
 
 	MockAnalyser(string requires, string provides) 
-    : AnalysisService("http://example.org/services/cpp/TestService-"+provides+"-"+requires, requires, provides, "queue-"+provides+"-"+requires) {}
+    : AnalysisService("http://example.org/services/cpp/TestService-"+provides+"-"+requires, "TestExtractorId","TestMode" , "TestVersion", requires, provides, "queue-"+provides+"-"+requires) {}
 
 
     /**

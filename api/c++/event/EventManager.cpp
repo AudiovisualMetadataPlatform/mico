@@ -592,6 +592,9 @@ namespace mico {
                                     mico::event::model::RegistrationEvent registrationEvent;
                                     registrationEvent.set_type(mico::event::model::REGISTER);
                                     registrationEvent.set_serviceid(service->getServiceID().stringValue());
+                                    registrationEvent.set_extractorid(service->getExtractorID());
+                                    registrationEvent.set_extractormodeid(service->getExtractorModeID());
+                                    registrationEvent.set_extractorversion(service->getExtractorVersion());
                                     registrationEvent.set_queuename(consumer->queue);
                                     registrationEvent.set_language(mico::event::model::CPP);
                                     registrationEvent.set_requires(service->getRequires());
@@ -667,6 +670,9 @@ namespace mico {
             mico::event::model::RegistrationEvent registrationEvent;
             registrationEvent.set_type(mico::event::model::REGISTER);
             registrationEvent.set_serviceid(service->getServiceID().stringValue());
+            registrationEvent.set_extractorid(service->getExtractorID());
+            registrationEvent.set_extractormodeid(service->getExtractorModeID());
+            registrationEvent.set_extractorversion(service->getExtractorVersion());
             registrationEvent.set_queuename(queue);
             registrationEvent.set_language(mico::event::model::CPP);
             registrationEvent.set_requires(service->getRequires());
@@ -695,6 +701,9 @@ namespace mico {
             mico::event::model::RegistrationEvent registrationEvent;
             registrationEvent.set_type(mico::event::model::UNREGISTER);
             registrationEvent.set_serviceid(service->getServiceID().stringValue());
+            registrationEvent.set_extractorid(service->getExtractorID());
+            registrationEvent.set_extractormodeid(service->getExtractorModeID());
+            registrationEvent.set_extractorversion(service->getExtractorVersion());
             registrationEvent.set_queuename(consumer->queue);
             registrationEvent.set_language(mico::event::model::CPP);
             registrationEvent.set_requires(service->getRequires());

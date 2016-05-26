@@ -226,6 +226,9 @@ public class EventManagerImpl implements EventManager {
                 Event.RegistrationEvent.newBuilder()
                         .setType(Event.RegistrationType.REGISTER)
                         .setServiceId(service.getServiceID().stringValue())
+                        .setExtractorId(service.getExtractorID())
+                        .setExtractorModeId(service.getExtractorModeID())
+                        .setExtractorVersion(service.getExtractorVersion())
                         .setQueueName(queueName)
                         .setProvides(service.getProvides())
                         .setRequires(service.getRequires()).build();
@@ -260,6 +263,9 @@ public class EventManagerImpl implements EventManager {
                 Event.RegistrationEvent.newBuilder()
                         .setType(Event.RegistrationType.UNREGISTER)
                         .setServiceId(service.getServiceID().stringValue())
+                        .setExtractorId(service.getExtractorID())
+                        .setExtractorModeId(service.getExtractorModeID())
+                        .setExtractorVersion(service.getExtractorVersion())
                         .setQueueName(queueName)
                         .setProvides(service.getProvides())
                         .setRequires(service.getRequires()).build();
@@ -382,6 +388,9 @@ public class EventManagerImpl implements EventManager {
                 Event.RegistrationEvent registrationEvent =
                         Event.RegistrationEvent.newBuilder()
                                 .setServiceId(svc.getKey().getServiceID().stringValue())
+                                .setExtractorId(svc.getKey().getExtractorID())
+                                .setExtractorModeId(svc.getKey().getExtractorModeID())
+                                .setExtractorVersion(svc.getKey().getExtractorVersion())
                                 .setQueueName(svc.getValue().getQueueName())
                                 .setProvides(svc.getKey().getProvides())
                                 .setRequires(svc.getKey().getRequires()).build();
