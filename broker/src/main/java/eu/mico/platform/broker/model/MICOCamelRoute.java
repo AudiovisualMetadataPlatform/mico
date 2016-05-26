@@ -84,6 +84,7 @@ public class MICOCamelRoute {
 	
 	private ArrayList<ExtractorConfiguration> eConfig= new ArrayList<ExtractorConfiguration>();
 	private ArrayList<EntryPoint> ePoints= new ArrayList<EntryPoint>();
+	private String workflowId = null;
 	
 	
 	/*
@@ -112,6 +113,13 @@ public class MICOCamelRoute {
 	 */
 	public List<ExtractorConfiguration> getExtractorConfigurations(){
 		return new ArrayList<ExtractorConfiguration>(eConfig);
+	}
+	
+	/*
+	 * Retrieves the workflow id 
+	 */
+	public String getWorkflowId(){
+		return workflowId;
 	}
 	
 	
@@ -218,7 +226,7 @@ public class MICOCamelRoute {
 
 	
 	/*
-	 * Creates one entry point for each line matching this pattern.
+	 * Creates one entry point for each line matching this pattern, and sets the workflow id
 	 * 
 	 *  <route id='workflow-WORKFLOW_ID-starting-point-for-ELEMENT_ID-
 	 *             mimeType=mico/test,
@@ -256,6 +264,7 @@ public class MICOCamelRoute {
     				
     				String workflowId=line.substring(dUriIdx+PIPELINE_ROUTE_STARTING_TOKEN.length(),
     						                         line.indexOf(PIPELINE_STARTING_POINT_PATTERN));
+    				this.workflowId=workflowId;
     				
     				directUri = "direct:workflow-1,mimeType=mico/test,syntacticType=C";
     				directUri = "direct:workflow-"+workflowId+","+
