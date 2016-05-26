@@ -3,6 +3,7 @@ package eu.mico.platform.broker.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -56,11 +57,13 @@ public class MICOCamelRoute {
 
 		private String mimeType;
 		private String syntacticType;
+		private String directUri;
 		
 
-		public EntryPoint(String mimeType,String syntacticType){
+		public EntryPoint(String mimeType,String syntacticType, String directUri){
 			this.mimeType=mimeType;
 			this.syntacticType=syntacticType;
+			this.directUri=directUri;
 		}
 
 		public String getMimeType() {
@@ -71,6 +74,10 @@ public class MICOCamelRoute {
 			return syntacticType;
 		}
 
+		public String getDirectUri() {
+			return directUri;
+		}
+
 	};
 
 	private static Logger log = LoggerFactory.getLogger(MICOCamelRoute.class);
@@ -78,15 +85,7 @@ public class MICOCamelRoute {
 	private ArrayList<ExtractorConfiguration> eConfig= new ArrayList<ExtractorConfiguration>();
 	private ArrayList<EntryPoint> ePoints= new ArrayList<EntryPoint>();
 	
-	private final static String EXTRACTOR_ID_PREFIX="extractorId=";
-	private final static String EXTRACTOR_MODE_ID_PREFIX="modeId=";
-	private final static String EXTRACTOR_VERSION_PREFIX="extractorVersion=";
-	private final static String EXTRACTOR_PARAMETERS_PREFIX="parameters=";
 	
-	private final static String PIPELINE_STARTING_POINT_PATTERN="starting-point-for";
-	private final static String DATA_MIME_TYPE_PREFIX="mimeType=";
-	private final static String DATA_SYNTACTIC_TYPE_PREFIX="syntacticType=";
-
 	/*
 	 * Parse a camel route generated for the MICO system, and tries to identify
 	 *  
@@ -100,6 +99,29 @@ public class MICOCamelRoute {
 		parseEntryPoints(xmlCamelRoute);
 
 	}
+
+	/*
+	 * Retrieves the identified entry points 
+	 */
+	public List<EntryPoint> getEntryPoints(){
+		return new ArrayList<EntryPoint>(ePoints);
+	}
+	
+	/*
+	 * Retrieves the identified extractor configurations 
+	 */
+	public List<ExtractorConfiguration> getExtractorConfigurations(){
+		return new ArrayList<ExtractorConfiguration>(eConfig);
+	}
+	
+	
+	//------------------------- private members below this line  -------------------------
+	
+	private final static String EXTRACTOR_ID_PREFIX="extractorId=";
+	private final static String EXTRACTOR_MODE_ID_PREFIX="modeId=";
+	private final static String EXTRACTOR_VERSION_PREFIX="extractorVersion=";
+	private final static String EXTRACTOR_PARAMETERS_PREFIX="parameters=";
+	
 	
 	/*
 	 * Creates one extractor configuration for each line matching this pattern.
@@ -187,6 +209,14 @@ public class MICOCamelRoute {
     	}
 	}
 	
+	
+	
+	private final static String PIPELINE_STARTING_POINT_PATTERN="-starting-point-for";
+	private final static String PIPELINE_ROUTE_STARTING_TOKEN="<route id='workflow-";
+	private final static String DATA_MIME_TYPE_PREFIX="mimeType=";
+	private final static String DATA_SYNTACTIC_TYPE_PREFIX="syntacticType=";
+
+	
 	/*
 	 * Creates one entry point for each line matching this pattern.
 	 * 
@@ -214,21 +244,32 @@ public class MICOCamelRoute {
     			//retrieve mimeType location    			
     			String mimeType = "";
     			String syntacticType  = "";
+    			String directUri = "";
     			
     			int mTypeIdx=line.indexOf(DATA_MIME_TYPE_PREFIX);
     			int sTypeIdx=line.indexOf(DATA_SYNTACTIC_TYPE_PREFIX);
+    			int dUriIdx =line.indexOf(PIPELINE_ROUTE_STARTING_TOKEN);
     			
-    			if(mTypeIdx!=-1 && sTypeIdx!=-1){
+    			if(mTypeIdx!=-1 && sTypeIdx!=-1 && dUriIdx != -1){
     				mimeType=line.substring(mTypeIdx+DATA_MIME_TYPE_PREFIX.length(), sTypeIdx-1);
-    				syntacticType=line.substring(sTypeIdx+DATA_SYNTACTIC_TYPE_PREFIX.length(),line.length()-2);
+    				syntacticType=line.substring(sTypeIdx+DATA_SYNTACTIC_TYPE_PREFIX.length(),line.length()-3);
+    				
+    				String workflowId=line.substring(dUriIdx+PIPELINE_ROUTE_STARTING_TOKEN.length(),
+    						                         line.indexOf(PIPELINE_STARTING_POINT_PATTERN));
+    				
+    				directUri = "direct:workflow-1,mimeType=mico/test,syntacticType=C";
+    				directUri = "direct:workflow-"+workflowId+","+
+    							DATA_MIME_TYPE_PREFIX+mimeType+","+
+    							DATA_SYNTACTIC_TYPE_PREFIX+syntacticType;
     			}
     			
     			//print some debug info
     			log.debug("mimeType = {}",mimeType);
     			log.debug("syntacticType = {}", syntacticType);
+    			log.debug("directUri = {}", directUri);
     			
     			//add the result of the parsing to the configuration member    			
-    			addEntryPoint(mimeType, syntacticType);
+    			addEntryPoint(mimeType, syntacticType,directUri);
     		     
     		}
     	}
@@ -250,11 +291,12 @@ public class MICOCamelRoute {
 	};
 	
 	//add a new entry point
-	private void addEntryPoint(String mimeType,String syntacticType){
+	private void addEntryPoint(String mimeType,String syntacticType, String directUri){
 
 		checkNonEmptyString("mimeType",mimeType);
 		checkNonEmptyString("syntacticType",syntacticType);
-		ePoints.add( new EntryPoint(mimeType, syntacticType));
+		checkNonEmptyString("directUri",directUri);
+		ePoints.add( new EntryPoint(mimeType, syntacticType,directUri));
 	};
 	
 	private void checkNonEmptyString(String s , String name) throws NullPointerException{
