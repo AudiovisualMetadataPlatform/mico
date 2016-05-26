@@ -222,6 +222,21 @@ public abstract class BaseBrokerTest {
 
         }
 
+		@Override
+		public String getExtractorID() {
+			return "Mock";
+		}
+
+		@Override
+		public String getExtractorModeID() {
+			return "Mode";
+		}
+
+		@Override
+		public String getExtractorVersion() {
+			return "0.0.0";
+		}
+
     }
 
     private static String getConf(String var, String defVal) {
