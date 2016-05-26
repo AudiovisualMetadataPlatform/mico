@@ -214,7 +214,7 @@ public class StatusWebService {
         sprops.put("creator",  part.getSerializedBy().getResourceAsString());
         sprops.put("created",  part.getSerializedAt());
         Resource[] inputs = part.getInputs().toArray(new Resource[0]);
-        if(inputs.length<0){
+        if(inputs.length > 0){
             sprops.put("source", stringValue(inputs[0].getURI()));
         }
         sprops.put("hasAsset", part.hasAsset());
@@ -266,6 +266,12 @@ public class StatusWebService {
         StreamingOutput entity;
         String type;
         if (partUri == null || itemUri.equals(partUri)) {
+            if (!item.hasAsset()){
+                throw new NotFoundException("Item with URI " + partUri + " has no asset");
+            }
+            type = item.getAsset().getFormat();
+
+            log.debug("providing <{}> asset from item {}", type, item.getURI());
             entity = new StreamingOutput() {
                 @Override
                 public void write(OutputStream output) throws IOException, WebApplicationException {
@@ -277,13 +283,17 @@ public class StatusWebService {
                 }
             };
 
-            type = item.getAsset().getFormat();
         } else {
             final Part part = item.getPart(new URIImpl(partUri));
             if (part == null) {
                 throw new NotFoundException("Part with URI " + partUri + " not found in system");
             }
+            if (!part.hasAsset()){
+                throw new NotFoundException("Part with URI " + partUri + " has no asset");
+            }
+            type = part.getAsset().getFormat();
 
+            log.debug("providing <{}> asset from part {}", type, part.getURI());
             entity = new StreamingOutput() {
                 @Override
                 public void write(OutputStream output) throws IOException, WebApplicationException {
@@ -295,7 +305,6 @@ public class StatusWebService {
                 }
             };
 
-            type = part.getAsset().getFormat();
         }
 
 

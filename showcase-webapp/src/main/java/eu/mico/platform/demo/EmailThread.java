@@ -1,7 +1,5 @@
-package eu.mico.platform.zooniverse.util;
+package eu.mico.platform.demo;
 
-import eu.mico.platform.broker.model.ItemState;
-import eu.mico.platform.broker.service.EmailService;
 import eu.mico.platform.persistence.model.Item;
 import org.apache.commons.mail.EmailException;
 
@@ -34,11 +32,11 @@ public class EmailThread extends Thread {
             while(start + timeout > System.currentTimeMillis()) {
 
                 // FIXME: Update this to use the broker REST interface to get the processing state
-                ItemState state = broker.getStates().get(item.getURI().stringValue());
+/*                ItemState state = broker.getStates().get(item.getURI().stringValue());
                 if(state != null && state.isFinalState()) {
                     EmailService.sendEmail(email, "Analysis finished", "Hi!\n\nThe analysis for '%s' has been finished. You can get your results here:\n\nhttp://demo3.mico-project.eu/#/video?uri=%s\n\nYour MICO team", ciName, item.getURI().stringValue());
                     return;
-                }
+                }*/
                 sleep(timestep);
             }
 

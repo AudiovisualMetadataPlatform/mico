@@ -25,6 +25,9 @@ include(ExternalProject)
 
 set(ANNO4CPPDEPS_ROOT ${CMAKE_CURRENT_BINARY_DIR}/install_anno4cpp)
 
+#Stop SSH from asking for key acceptance on Git clone
+set(ENV{GIT_SSH_COMMAND} "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no")
+
 ExternalProject_Add(anno4cpp_ext
     PREFIX externals
     GIT_REPOSITORY git@bitbucket.org:mico-project/anno4cpp.git

@@ -1,3 +1,9 @@
+mico-base (2.0.0) unstable; urgency=low
+
+  * Platform version bump
+
+ -- Horst Stadler <horst.stadler@salzburgresearch.at>  Thu, 19 May 2016 18:31:47 +0200
+
 mico-base (1.2.0) unstable; urgency=medium
 
   * Added config file for rsyslog (C++ daemon extractors)

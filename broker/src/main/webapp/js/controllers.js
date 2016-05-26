@@ -28,7 +28,11 @@ brokerApp.controller("StatusCtrl", function($scope,$http) {
     };
 
     $scope.version = "Broker Version 2.x";
-    $http.get("status/info").success(function(data) {
+    var config = {headers: {
+        'Accept': 'text/plain'
+    }
+};
+    $http.get("status/info",config).success(function(data) {
         $scope.version = data;
     });
 

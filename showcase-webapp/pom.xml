@@ -5,7 +5,7 @@
     <parent>
         <groupId>eu.mico-project.platform</groupId>
         <artifactId>mico-platform</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
+        <version>2.0.1-SNAPSHOT</version>
     </parent>
 
 
@@ -31,12 +31,16 @@
         </dependency>
 
         <dependency>
-            <groupId>eu.mico-project.platform</groupId>
-            <artifactId>broker</artifactId>
-            <version>${project.version}</version>
-            <classifier>classes</classifier>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jackson-provider</artifactId>
+            <version>${resteasy.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -53,6 +57,24 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-email</artifactId>
+            <version>1.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+            <version>1.4.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-multipart-provider</artifactId>
+            <version>3.0.8.Final</version>
         </dependency>
 
         <dependency>
@@ -123,6 +145,7 @@
     </dependencies>
 
     <build>
+        <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
@@ -149,4 +172,57 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>debian</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>jdeb</artifactId>
+                        <groupId>org.vafer</groupId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jdeb</goal>
+                                </goals>
+                                <configuration>
+                                    <name>mico-showcase-webapp</name>
+                                    <deb>${project.build.directory}/[[name]]_[[version]]_all.deb</deb>
+                                    <changesOut>${project.build.directory}/[[name]]_[[version]]_all.changes</changesOut>
+
+                                    <controlDir>${basedir}/src/deb/debian</controlDir>
+                                    <dataSet>
+
+                                        <data>
+                                            <src>${project.build.directory}/${project.build.finalName}.war</src>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/usr/share/mico</prefix>
+                                                <user>tomcat7</user>
+                                                <group>tomcat7</group>
+                                            </mapper>
+                                        </data>
+                                        <data>
+                                            <src>src/deb/resources/showcase-webapp.xml.tmpl</src>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/etc/tomcat7/Catalina/localhost</prefix>
+                                                <user>root</user>
+                                                <group>root</group>
+                                            </mapper>
+                                            <conffile>true</conffile>
+                                        </data>
+                                    </dataSet>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
