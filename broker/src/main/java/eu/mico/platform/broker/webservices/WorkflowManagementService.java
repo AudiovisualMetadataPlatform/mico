@@ -14,6 +14,7 @@
 package eu.mico.platform.broker.webservices;
 
 import eu.mico.platform.broker.api.MICOBroker;
+import eu.mico.platform.broker.impl.MICOBrokerImpl;
 import eu.mico.platform.broker.model.wf.Workflow;
 
 import org.openrdf.repository.RepositoryException;
@@ -140,11 +141,15 @@ public class WorkflowManagementService {
     @GET
     @Path("/status/{id}")
     @Produces("text/plain")
-    public Response createItem(@QueryParam("user") String user,
-            @PathParam("id") String workflowId ) throws RepositoryException,
+    public Response getStatus(@QueryParam("user") String user,
+            @PathParam("id") Integer workflowId ) throws RepositoryException,
             IOException {
-        log.warn("status check is not implemented yet, simply returning 'ONLINE'");
-        String status="ONLINE";
+        
+    	String camelRoute=new String(getWorkflow(workflowId).getRoute());
+    	String status="BROKEN";
+        if (broker instanceof MICOBrokerImpl ){
+        	status = ((MICOBrokerImpl) broker).getRouteStatus(camelRoute.replaceAll("WORKFLOW_ID", workflowId.toString()));
+        }
         return Response.ok(status).build();
     }
     

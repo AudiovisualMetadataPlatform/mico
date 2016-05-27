@@ -662,5 +662,17 @@ public class MICOBrokerImpl implements MICOBroker {
             log.trace("Item: {} semantic: {}  syntactic: {}",item.getURI(),item.getSemanticType(), item.getSyntacticalType());
         }
     }
+    
+    public String getRouteStatus(String camelRoute) {
+    	//TODO implement
+    	
+    	log.warn("status check is not implemented yet, simply returning 'ONLINE'");
+    	
+    	//1. Parse the route
+    	MICOCamelRoute route=new MICOCamelRoute();
+    	route.parseCamelRoute(camelRoute);    	
+
+    	return "ONLINE";
+    }
 
 }
