@@ -32,6 +32,10 @@ public class ServiceDescriptor {
     private Date registrationTime;
     private String provides,requires;
     private String language;
+    
+    private String extractorId;
+    private String extractorModeId;
+    private String extractorVersion;
 
     private int calls = 0;
 
@@ -39,8 +43,13 @@ public class ServiceDescriptor {
         registrationTime = new Date();
     }
 
-    public ServiceDescriptor(URI uri, String queueName, String provides, String requires) {
+    public ServiceDescriptor(URI uri, String extractorId, String extractorModeId, String extractorVersion, String queueName, String provides, String requires) {
         this.uri = uri;
+        
+        this.extractorId=extractorId;
+        this.extractorModeId=extractorModeId;
+        this.extractorVersion=extractorVersion;
+        
         this.queueName = queueName;
         registrationTime = new Date();
         this.provides = provides;
@@ -53,6 +62,10 @@ public class ServiceDescriptor {
         registrationTime = new Date();
         this.provides = e.getProvides();
         this.requires = e.getRequires();
+        
+        this.extractorId=e.getExtractorId();
+        this.extractorModeId=e.getExtractorModeId();
+        this.extractorVersion=e.getExtractorVersion();
 
         switch (e.getLanguage()) {
             case JAVA:
@@ -76,7 +89,35 @@ public class ServiceDescriptor {
         return uri;
     }
 
-    /**
+	/**
+     * Return the extractor ID
+     *
+     * @return
+     */
+    public String getExtractorId() {
+		return extractorId;
+	}
+
+	/**
+     * Return the mode ID
+     *
+     * @return
+     */
+    public String getExtractorModeId() {
+		return extractorModeId;
+	}
+
+	/**
+     * Return the extractor version
+     *
+     * @return
+     */
+    
+	public String getExtractorVersion() {
+		return extractorVersion;
+	}
+
+	/**
      * Return the queue name used by this service
      *
      * @return
