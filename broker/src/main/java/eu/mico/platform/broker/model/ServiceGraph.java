@@ -18,6 +18,7 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DirectedPseudograph;
 import org.openrdf.model.URI;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,10 @@ public class ServiceGraph extends DirectedPseudograph<TypeDescriptor,ServiceDesc
 
     public Set<URI> getDescriptorURIs() {
         return services.keySet();
+    }
+    
+    public List<ServiceDescriptor> getServices() {
+        return new ArrayList<ServiceDescriptor>(services.values());
     }
 
 
