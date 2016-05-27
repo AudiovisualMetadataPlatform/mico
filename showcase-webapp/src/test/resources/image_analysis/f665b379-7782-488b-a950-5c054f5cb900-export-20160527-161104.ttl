@@ -1,0 +1,340 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sesame: <http://www.openrdf.org/schema/sesame#> .
+@prefix fn: <http://www.w3.org/2005/xpath-functions#> .
+@prefix context: <http://10.0.2.15:8080/marmotta/context/> .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Item> ;
+	<http://www.w3.org/ns/oa#serializedAt> "2016-05-27 16:10:19.194" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "image/jpeg" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "application/injection-webservice" .
+
+<http://micobox154:8080/marmotta/c6e9eb26-7b0b-41d7-b69c-84dce9cc3edb> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Asset> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasLocation> "urn:eu.mico-project:storage.location:f665b379-7782-488b-a950-5c054f5cb900/c6e9eb26-7b0b-41d7-b69c-84dce9cc3edb" .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasAsset> <http://micobox154:8080/marmotta/c6e9eb26-7b0b-41d7-b69c-84dce9cc3edb> .
+
+<http://micobox154:8080/marmotta/c6e9eb26-7b0b-41d7-b69c-84dce9cc3edb> <http://purl.org/dc/elements/1.1/format> "image/jpeg" .
+
+<http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	<http://www.w3.org/ns/oa#serializedAt> "2016-05-27T14:10:21Z" .
+
+<http://mico-extractor-animaldetection> a <https://github.com/anno4j/ns#Agent> .
+
+<http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> <http://www.w3.org/ns/oa#serializedBy> <http://mico-extractor-animaldetection> ;
+	a <http://www.mico-project.eu/ns/mmm/2.0/schema#Resource> , <http://www.w3.org/ns/oa#Annotation> .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> .
+
+<http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "text/vnd.fhg-hog-detector+xml" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Animal detection annotation in xml format" .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Resource> .
+
+<http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> .
+
+<http://micobox154:8080/marmotta/76b11ff4-92ea-488e-b911-b3c076ecfaa7> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Asset> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasLocation> "urn:eu.mico-project:storage.location:05bf9e30-0bf1-426d-aea5-9539f3665584/76b11ff4-92ea-488e-b911-b3c076ecfaa7" .
+
+<http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasAsset> <http://micobox154:8080/marmotta/76b11ff4-92ea-488e-b911-b3c076ecfaa7> .
+
+<http://micobox154:8080/marmotta/58ef583f-7445-4c97-bdb2-bd24d36db962> a <http://www.mico-project.eu/ns/mmmterms/2.0/schema#ImageDimensionBody> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasConfidence> "1"^^xsd:double ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasHeight> "478"^^xsd:long ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasWidth> "640"^^xsd:long .
+
+<http://micobox154:8080/marmotta/f6dd5057-63dc-4963-ab3a-e86287b38fc7> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	<http://www.w3.org/ns/oa#serializedAt> "2016-05-27 16:10:22.700" .
+
+<http://www.mico-project.org/services/mico-extractor-object2RDF> a <https://github.com/anno4j/ns#Agent> .
+
+<http://micobox154:8080/marmotta/f6dd5057-63dc-4963-ab3a-e86287b38fc7> <http://www.w3.org/ns/oa#serializedBy> <http://www.mico-project.org/services/mico-extractor-object2RDF> .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://micobox154:8080/marmotta/f6dd5057-63dc-4963-ab3a-e86287b38fc7> .
+
+<http://micobox154:8080/marmotta/f6dd5057-63dc-4963-ab3a-e86287b38fc7> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Conversion of the input part into a http://www.mico-project.eu/ns/mmmterms/2.0/schema#ImageDimensionBody" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#ImageDimensionBody" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> .
+
+<http://micobox154:8080/marmotta/900fab5f-a0f7-4103-a098-6cd38626044f> a <http://www.mico-project.eu/ns/mmm/2.0/schema#SpecificResource> .
+
+<http://micobox154:8080/marmotta/f6dd5057-63dc-4963-ab3a-e86287b38fc7> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasTarget> <http://micobox154:8080/marmotta/900fab5f-a0f7-4103-a098-6cd38626044f> ;
+	<http://www.w3.org/ns/oa#hasBody> <http://micobox154:8080/marmotta/58ef583f-7445-4c97-bdb2-bd24d36db962> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://micobox154:8080/marmotta/58ef583f-7445-4c97-bdb2-bd24d36db962> .
+
+<http://micobox154:8080/marmotta/d534977d-26c6-4aae-a670-eccb53f1513e> a <http://www.w3.org/ns/oa#FragmentSelector> ;
+	rdf:value "#xywh=397,246,78,71" .
+
+<http://micobox154:8080/marmotta/8aa7c58f-dc8b-47fe-a748-9090ac5988b1> a <http://www.mico-project.eu/ns/mmm/2.0/schema#SpecificResource> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSelector> <http://micobox154:8080/marmotta/d534977d-26c6-4aae-a670-eccb53f1513e> ;
+	<http://www.w3.org/ns/oa#hasSelector> <http://micobox154:8080/marmotta/d534977d-26c6-4aae-a670-eccb53f1513e> .
+
+<http://micobox154:8080/marmotta/876e9e30-6e0e-413e-a8f1-1c9366e43ed8> a <http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasExtractionVersion> "01-vsBlank-HOG-CLASS" ;
+	rdf:value "ostrich" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasConfidence> "2.028320074081421"^^xsd:double .
+
+<http://micobox154:8080/marmotta/1217c97d-7297-4033-9bad-8f18a8c6280b> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	<http://www.w3.org/ns/oa#serializedAt> "2016-05-27 16:10:22.715" ;
+	<http://www.w3.org/ns/oa#serializedBy> <http://www.mico-project.org/services/mico-extractor-object2RDF> .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://micobox154:8080/marmotta/1217c97d-7297-4033-9bad-8f18a8c6280b> .
+
+<http://micobox154:8080/marmotta/1217c97d-7297-4033-9bad-8f18a8c6280b> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Conversion of the input part into a http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.w3.org/ns/oa#hasBody> <http://micobox154:8080/marmotta/876e9e30-6e0e-413e-a8f1-1c9366e43ed8> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://micobox154:8080/marmotta/876e9e30-6e0e-413e-a8f1-1c9366e43ed8> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasTarget> <http://micobox154:8080/marmotta/8aa7c58f-dc8b-47fe-a748-9090ac5988b1> .
+
+<http://micobox154:8080/marmotta/513659f1-217d-4e22-966c-2768b45ad57a> a <http://www.w3.org/ns/oa#FragmentSelector> ;
+	rdf:value "#xywh=308,309,62,87" .
+
+<http://micobox154:8080/marmotta/594d9903-3586-4850-9c2c-40fab59a0eda> a <http://www.mico-project.eu/ns/mmm/2.0/schema#SpecificResource> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSelector> <http://micobox154:8080/marmotta/513659f1-217d-4e22-966c-2768b45ad57a> ;
+	<http://www.w3.org/ns/oa#hasSelector> <http://micobox154:8080/marmotta/513659f1-217d-4e22-966c-2768b45ad57a> .
+
+<http://micobox154:8080/marmotta/c78eaef2-98c4-4136-ad0e-f08b6130c457> a <http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasExtractionVersion> "01-vsBlank-HOG-CLASS" ;
+	rdf:value "wildebeest" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasConfidence> "2.6615500450134277"^^xsd:double .
+
+<http://micobox154:8080/marmotta/b9f1e7a4-c80a-445b-b660-059d7a807200> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	<http://www.w3.org/ns/oa#serializedAt> "2016-05-27 16:10:22.848" ;
+	<http://www.w3.org/ns/oa#serializedBy> <http://www.mico-project.org/services/mico-extractor-object2RDF> .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://micobox154:8080/marmotta/b9f1e7a4-c80a-445b-b660-059d7a807200> .
+
+<http://micobox154:8080/marmotta/b9f1e7a4-c80a-445b-b660-059d7a807200> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Conversion of the input part into a http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.w3.org/ns/oa#hasBody> <http://micobox154:8080/marmotta/c78eaef2-98c4-4136-ad0e-f08b6130c457> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://micobox154:8080/marmotta/c78eaef2-98c4-4136-ad0e-f08b6130c457> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasTarget> <http://micobox154:8080/marmotta/594d9903-3586-4850-9c2c-40fab59a0eda> .
+
+<http://micobox154:8080/marmotta/f418c881-8127-46d4-bc13-28866a1de8f6> a <http://www.w3.org/ns/oa#FragmentSelector> ;
+	rdf:value "#xywh=306,305,71,101" .
+
+<http://micobox154:8080/marmotta/125e9844-7ed6-4b3b-9a6a-17af2fc93506> a <http://www.mico-project.eu/ns/mmm/2.0/schema#SpecificResource> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSelector> <http://micobox154:8080/marmotta/f418c881-8127-46d4-bc13-28866a1de8f6> ;
+	<http://www.w3.org/ns/oa#hasSelector> <http://micobox154:8080/marmotta/f418c881-8127-46d4-bc13-28866a1de8f6> .
+
+<http://micobox154:8080/marmotta/f9a650aa-a380-4372-a587-d9c507bd32e6> a <http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasExtractionVersion> "01-vsBlank-HOG-CLASS" ;
+	rdf:value "warthog" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasConfidence> "2.329210042953491"^^xsd:double .
+
+<http://micobox154:8080/marmotta/06a583ef-f5bf-4d74-9542-f7d09a099f70> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	<http://www.w3.org/ns/oa#serializedAt> "2016-05-27 16:10:22.927" ;
+	<http://www.w3.org/ns/oa#serializedBy> <http://www.mico-project.org/services/mico-extractor-object2RDF> .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://micobox154:8080/marmotta/06a583ef-f5bf-4d74-9542-f7d09a099f70> .
+
+<http://micobox154:8080/marmotta/06a583ef-f5bf-4d74-9542-f7d09a099f70> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Conversion of the input part into a http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.w3.org/ns/oa#hasBody> <http://micobox154:8080/marmotta/f9a650aa-a380-4372-a587-d9c507bd32e6> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://micobox154:8080/marmotta/f9a650aa-a380-4372-a587-d9c507bd32e6> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasTarget> <http://micobox154:8080/marmotta/125e9844-7ed6-4b3b-9a6a-17af2fc93506> .
+
+<http://micobox154:8080/marmotta/8a40c8d6-53a7-494d-af5b-91a6dc7fa07b> a <http://www.w3.org/ns/oa#FragmentSelector> ;
+	rdf:value "#xywh=286,299,117,103" .
+
+<http://micobox154:8080/marmotta/2db73838-308c-4544-99ce-438e9f2b749e> a <http://www.mico-project.eu/ns/mmm/2.0/schema#SpecificResource> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSelector> <http://micobox154:8080/marmotta/8a40c8d6-53a7-494d-af5b-91a6dc7fa07b> ;
+	<http://www.w3.org/ns/oa#hasSelector> <http://micobox154:8080/marmotta/8a40c8d6-53a7-494d-af5b-91a6dc7fa07b> .
+
+<http://micobox154:8080/marmotta/f3aa104b-0538-4065-b513-2ab6ae13bf14> a <http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasExtractionVersion> "01-vsBlank-HOG-CLASS" ;
+	rdf:value "warthog" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasConfidence> "1.672320008277893"^^xsd:double .
+
+<http://micobox154:8080/marmotta/3f006fac-e808-4eaf-8a66-b4043b83fe84> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	<http://www.w3.org/ns/oa#serializedAt> "2016-05-27 16:10:23.004" ;
+	<http://www.w3.org/ns/oa#serializedBy> <http://www.mico-project.org/services/mico-extractor-object2RDF> .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://micobox154:8080/marmotta/3f006fac-e808-4eaf-8a66-b4043b83fe84> .
+
+<http://micobox154:8080/marmotta/3f006fac-e808-4eaf-8a66-b4043b83fe84> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Conversion of the input part into a http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.w3.org/ns/oa#hasBody> <http://micobox154:8080/marmotta/f3aa104b-0538-4065-b513-2ab6ae13bf14> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://micobox154:8080/marmotta/f3aa104b-0538-4065-b513-2ab6ae13bf14> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasTarget> <http://micobox154:8080/marmotta/2db73838-308c-4544-99ce-438e9f2b749e> .
+
+<http://micobox154:8080/marmotta/a1a57327-9ce7-4d2f-a84e-a4d4bd1d8e24> a <http://www.w3.org/ns/oa#FragmentSelector> ;
+	rdf:value "#xywh=404,235,117,103" .
+
+<http://micobox154:8080/marmotta/a60cbdde-5482-43b0-871b-15189957d6d1> a <http://www.mico-project.eu/ns/mmm/2.0/schema#SpecificResource> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSelector> <http://micobox154:8080/marmotta/a1a57327-9ce7-4d2f-a84e-a4d4bd1d8e24> ;
+	<http://www.w3.org/ns/oa#hasSelector> <http://micobox154:8080/marmotta/a1a57327-9ce7-4d2f-a84e-a4d4bd1d8e24> .
+
+<http://micobox154:8080/marmotta/a04e19d0-145a-498e-a695-6ada2da7deb8> a <http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasExtractionVersion> "01-vsBlank-HOG-CLASS" ;
+	rdf:value "warthog" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasConfidence> "1.599850058555603"^^xsd:double .
+
+<http://micobox154:8080/marmotta/11e8e373-30a0-451b-89c4-e1734a37da1e> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	<http://www.w3.org/ns/oa#serializedAt> "2016-05-27 16:10:23.074" ;
+	<http://www.w3.org/ns/oa#serializedBy> <http://www.mico-project.org/services/mico-extractor-object2RDF> .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://micobox154:8080/marmotta/11e8e373-30a0-451b-89c4-e1734a37da1e> .
+
+<http://micobox154:8080/marmotta/11e8e373-30a0-451b-89c4-e1734a37da1e> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Conversion of the input part into a http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.w3.org/ns/oa#hasBody> <http://micobox154:8080/marmotta/a04e19d0-145a-498e-a695-6ada2da7deb8> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://micobox154:8080/marmotta/a04e19d0-145a-498e-a695-6ada2da7deb8> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasTarget> <http://micobox154:8080/marmotta/a60cbdde-5482-43b0-871b-15189957d6d1> .
+
+<http://micobox154:8080/marmotta/a6b4ecc0-0948-473b-8bf9-37db88cf3f4e> a <http://www.w3.org/ns/oa#FragmentSelector> ;
+	rdf:value "#xywh=315,305,64,93" .
+
+<http://micobox154:8080/marmotta/452b51de-7ecf-4fd7-9225-bdc53fc9bb74> a <http://www.mico-project.eu/ns/mmm/2.0/schema#SpecificResource> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSelector> <http://micobox154:8080/marmotta/a6b4ecc0-0948-473b-8bf9-37db88cf3f4e> ;
+	<http://www.w3.org/ns/oa#hasSelector> <http://micobox154:8080/marmotta/a6b4ecc0-0948-473b-8bf9-37db88cf3f4e> .
+
+<http://micobox154:8080/marmotta/33a0a8ac-ab51-492e-aa7b-009fe57deed4> a <http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasExtractionVersion> "01-vsBlank-HOG-CLASS" ;
+	rdf:value "elephant" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasConfidence> "1.7632299661636353"^^xsd:double .
+
+<http://micobox154:8080/marmotta/c7e52ae5-23ed-432c-a0bc-33efe9f3c405> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	<http://www.w3.org/ns/oa#serializedAt> "2016-05-27 16:10:23.155" ;
+	<http://www.w3.org/ns/oa#serializedBy> <http://www.mico-project.org/services/mico-extractor-object2RDF> .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://micobox154:8080/marmotta/c7e52ae5-23ed-432c-a0bc-33efe9f3c405> .
+
+<http://micobox154:8080/marmotta/c7e52ae5-23ed-432c-a0bc-33efe9f3c405> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Conversion of the input part into a http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.w3.org/ns/oa#hasBody> <http://micobox154:8080/marmotta/33a0a8ac-ab51-492e-aa7b-009fe57deed4> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://micobox154:8080/marmotta/33a0a8ac-ab51-492e-aa7b-009fe57deed4> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasTarget> <http://micobox154:8080/marmotta/452b51de-7ecf-4fd7-9225-bdc53fc9bb74> .
+
+<http://micobox154:8080/marmotta/691ddceb-3d71-4c04-ac3a-96f45b01f055> a <http://www.w3.org/ns/oa#FragmentSelector> ;
+	rdf:value "#xywh=296,243,122,175" .
+
+<http://micobox154:8080/marmotta/9c46a3b9-3f9f-4536-9670-51a6ff691701> a <http://www.mico-project.eu/ns/mmm/2.0/schema#SpecificResource> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSelector> <http://micobox154:8080/marmotta/691ddceb-3d71-4c04-ac3a-96f45b01f055> ;
+	<http://www.w3.org/ns/oa#hasSelector> <http://micobox154:8080/marmotta/691ddceb-3d71-4c04-ac3a-96f45b01f055> .
+
+<http://micobox154:8080/marmotta/d56e8ba9-c5a6-48e1-a763-8762d08a7ff4> a <http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasExtractionVersion> "01-vsBlank-HOG-CLASS" ;
+	rdf:value "elephant" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasConfidence> "0.998885989189148"^^xsd:double .
+
+<http://micobox154:8080/marmotta/de88c9af-615b-489d-9628-9e6bf006b706> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	<http://www.w3.org/ns/oa#serializedAt> "2016-05-27 16:10:23.241" ;
+	<http://www.w3.org/ns/oa#serializedBy> <http://www.mico-project.org/services/mico-extractor-object2RDF> .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://micobox154:8080/marmotta/de88c9af-615b-489d-9628-9e6bf006b706> .
+
+<http://micobox154:8080/marmotta/de88c9af-615b-489d-9628-9e6bf006b706> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Conversion of the input part into a http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.w3.org/ns/oa#hasBody> <http://micobox154:8080/marmotta/d56e8ba9-c5a6-48e1-a763-8762d08a7ff4> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://micobox154:8080/marmotta/d56e8ba9-c5a6-48e1-a763-8762d08a7ff4> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasTarget> <http://micobox154:8080/marmotta/9c46a3b9-3f9f-4536-9670-51a6ff691701> .
+
+<http://micobox154:8080/marmotta/4a514038-fe7e-4a9b-b691-b88d0c3d7a95> a <http://www.w3.org/ns/oa#FragmentSelector> ;
+	rdf:value "#xywh=308,309,62,87" .
+
+<http://micobox154:8080/marmotta/80396897-8640-4e6d-a568-044611f2cc20> a <http://www.mico-project.eu/ns/mmm/2.0/schema#SpecificResource> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSelector> <http://micobox154:8080/marmotta/4a514038-fe7e-4a9b-b691-b88d0c3d7a95> ;
+	<http://www.w3.org/ns/oa#hasSelector> <http://micobox154:8080/marmotta/4a514038-fe7e-4a9b-b691-b88d0c3d7a95> .
+
+<http://micobox154:8080/marmotta/442da8da-65ca-4d63-9b1e-a82962e6b846> a <http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasExtractionVersion> "01-vsBlank-HOG-CLASS" ;
+	rdf:value "buffalo" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasConfidence> "2.512629985809326"^^xsd:double .
+
+<http://micobox154:8080/marmotta/f8d14623-9b7b-456e-ad0f-7220970ad363> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	<http://www.w3.org/ns/oa#serializedAt> "2016-05-27 16:10:23.299" ;
+	<http://www.w3.org/ns/oa#serializedBy> <http://www.mico-project.org/services/mico-extractor-object2RDF> .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://micobox154:8080/marmotta/f8d14623-9b7b-456e-ad0f-7220970ad363> .
+
+<http://micobox154:8080/marmotta/f8d14623-9b7b-456e-ad0f-7220970ad363> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Conversion of the input part into a http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.w3.org/ns/oa#hasBody> <http://micobox154:8080/marmotta/442da8da-65ca-4d63-9b1e-a82962e6b846> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://micobox154:8080/marmotta/442da8da-65ca-4d63-9b1e-a82962e6b846> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasTarget> <http://micobox154:8080/marmotta/80396897-8640-4e6d-a568-044611f2cc20> .
+
+<http://micobox154:8080/marmotta/9be51ca4-1aa1-415f-a5e3-e9d67c8bcb0c> a <http://www.w3.org/ns/oa#FragmentSelector> ;
+	rdf:value "#xywh=428,159,59,83" .
+
+<http://micobox154:8080/marmotta/5fe5da6d-45a4-4816-9e27-ef4cc830c82a> a <http://www.mico-project.eu/ns/mmm/2.0/schema#SpecificResource> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSelector> <http://micobox154:8080/marmotta/9be51ca4-1aa1-415f-a5e3-e9d67c8bcb0c> ;
+	<http://www.w3.org/ns/oa#hasSelector> <http://micobox154:8080/marmotta/9be51ca4-1aa1-415f-a5e3-e9d67c8bcb0c> .
+
+<http://micobox154:8080/marmotta/9007b77b-c732-4c1c-8ec9-1e69aa01f100> a <http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasExtractionVersion> "01-vsBlank-HOG-CLASS" ;
+	rdf:value "buffalo" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasConfidence> "2.0090699195861816"^^xsd:double .
+
+<http://micobox154:8080/marmotta/c0c4f450-9504-4733-a625-b07b8f2ab222> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	<http://www.w3.org/ns/oa#serializedAt> "2016-05-27 16:10:23.369" ;
+	<http://www.w3.org/ns/oa#serializedBy> <http://www.mico-project.org/services/mico-extractor-object2RDF> .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://micobox154:8080/marmotta/c0c4f450-9504-4733-a625-b07b8f2ab222> .
+
+<http://micobox154:8080/marmotta/c0c4f450-9504-4733-a625-b07b8f2ab222> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Conversion of the input part into a http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.w3.org/ns/oa#hasBody> <http://micobox154:8080/marmotta/9007b77b-c732-4c1c-8ec9-1e69aa01f100> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://micobox154:8080/marmotta/9007b77b-c732-4c1c-8ec9-1e69aa01f100> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasTarget> <http://micobox154:8080/marmotta/5fe5da6d-45a4-4816-9e27-ef4cc830c82a> .
+
+<http://micobox154:8080/marmotta/5bdb1f8a-ff28-4a93-884b-3fbb91bd729e> a <http://www.w3.org/ns/oa#FragmentSelector> ;
+	rdf:value "#xywh=512,216,55,79" .
+
+<http://micobox154:8080/marmotta/fea11779-ad26-4276-91ca-46f5b160966d> a <http://www.mico-project.eu/ns/mmm/2.0/schema#SpecificResource> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSelector> <http://micobox154:8080/marmotta/5bdb1f8a-ff28-4a93-884b-3fbb91bd729e> ;
+	<http://www.w3.org/ns/oa#hasSelector> <http://micobox154:8080/marmotta/5bdb1f8a-ff28-4a93-884b-3fbb91bd729e> .
+
+<http://micobox154:8080/marmotta/bed90c66-53b5-4c8d-93ad-d0d7fb0eaff6> a <http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasExtractionVersion> "01-vsBlank-HOG-CLASS" ;
+	rdf:value "buffalo" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasConfidence> "1.8945499658584595"^^xsd:double .
+
+<http://micobox154:8080/marmotta/de5a605c-11f6-4994-87db-a4e6c71d68a4> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	<http://www.w3.org/ns/oa#serializedAt> "2016-05-27 16:10:23.459" ;
+	<http://www.w3.org/ns/oa#serializedBy> <http://www.mico-project.org/services/mico-extractor-object2RDF> .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://micobox154:8080/marmotta/de5a605c-11f6-4994-87db-a4e6c71d68a4> .
+
+<http://micobox154:8080/marmotta/de5a605c-11f6-4994-87db-a4e6c71d68a4> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Conversion of the input part into a http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.w3.org/ns/oa#hasBody> <http://micobox154:8080/marmotta/bed90c66-53b5-4c8d-93ad-d0d7fb0eaff6> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://micobox154:8080/marmotta/bed90c66-53b5-4c8d-93ad-d0d7fb0eaff6> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasTarget> <http://micobox154:8080/marmotta/fea11779-ad26-4276-91ca-46f5b160966d> .
+
+<http://micobox154:8080/marmotta/e9e49c62-3440-4564-8c4a-75d126540c91> a <http://www.w3.org/ns/oa#FragmentSelector> ;
+	rdf:value "#xywh=322,298,87,123" .
+
+<http://micobox154:8080/marmotta/2672114a-c648-46ba-ab89-8fa611348c3d> a <http://www.mico-project.eu/ns/mmm/2.0/schema#SpecificResource> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSelector> <http://micobox154:8080/marmotta/e9e49c62-3440-4564-8c4a-75d126540c91> ;
+	<http://www.w3.org/ns/oa#hasSelector> <http://micobox154:8080/marmotta/e9e49c62-3440-4564-8c4a-75d126540c91> .
+
+<http://micobox154:8080/marmotta/b1442ed4-9cfe-4336-b1c3-ef9e589ef105> a <http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasExtractionVersion> "01-vsBlank-HOG-CLASS" ;
+	rdf:value "buffalo" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasConfidence> "1.7704999446868896"^^xsd:double .
+
+<http://micobox154:8080/marmotta/96641e44-9dbb-4fab-9d6f-836c10753045> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	<http://www.w3.org/ns/oa#serializedAt> "2016-05-27 16:10:23.529" ;
+	<http://www.w3.org/ns/oa#serializedBy> <http://www.mico-project.org/services/mico-extractor-object2RDF> .
+
+<http://micobox154:8080/marmotta/f665b379-7782-488b-a950-5c054f5cb900> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://micobox154:8080/marmotta/96641e44-9dbb-4fab-9d6f-836c10753045> .
+
+<http://micobox154:8080/marmotta/96641e44-9dbb-4fab-9d6f-836c10753045> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Conversion of the input part into a http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#AnimalDetectionBody" ;
+	<http://www.w3.org/ns/oa#hasBody> <http://micobox154:8080/marmotta/b1442ed4-9cfe-4336-b1c3-ef9e589ef105> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://micobox154:8080/marmotta/b1442ed4-9cfe-4336-b1c3-ef9e589ef105> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://micobox154:8080/marmotta/05bf9e30-0bf1-426d-aea5-9539f3665584> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasTarget> <http://micobox154:8080/marmotta/2672114a-c648-46ba-ab89-8fa611348c3d> .
