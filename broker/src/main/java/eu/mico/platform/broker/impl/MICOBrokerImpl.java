@@ -13,6 +13,9 @@
  */
 package eu.mico.platform.broker.impl;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.rabbitmq.client.*;
 
@@ -29,6 +32,12 @@ import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
@@ -36,11 +45,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
+
 
 /**
  * MICO Message Broker, orchestrating the communication between analysis services and the analysis workflow for content
@@ -80,6 +92,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
     private String marmottaBaseUri;
     private String storageBaseUri;
+    private String registrationBaseUri;
 
     // a graph for representing the currently registered service dependencies
     private ServiceGraph dependencies;
@@ -103,13 +116,13 @@ public class MICOBrokerImpl implements MICOBroker {
     }
 
     public MICOBrokerImpl(String host, String user, String password) throws IOException, URISyntaxException {
-        this(host, user, password, 5672, "http://" + host + ":8080/marmotta", "hdfs://" + host + ("/"));
+        this(host, user, password, 5672, "http://" + host + ":8080/marmotta", "hdfs://" + host + ("/"), "http://" + host + ":8080/marmotta");
     }
-    public MICOBrokerImpl(String host, String user, String password, int rabbitPort, String marmottaBaseUri, String storageBaseUri) throws IOException, URISyntaxException {
-        this(host, "/", user, password, rabbitPort, marmottaBaseUri, storageBaseUri);
+    public MICOBrokerImpl(String host, String user, String password, int rabbitPort, String marmottaBaseUri, String storageBaseUri, String registrationBaseUri) throws IOException, URISyntaxException {
+        this(host, "/", user, password, rabbitPort, marmottaBaseUri, storageBaseUri, registrationBaseUri);
     }
 
-    public MICOBrokerImpl(String host, String vhost, String user, String password, int rabbitPort, String marmottaBaseUri, String storageBaseUri) throws IOException, URISyntaxException {
+    public MICOBrokerImpl(String host, String vhost, String user, String password, int rabbitPort, String marmottaBaseUri, String storageBaseUri, String registrationBaseUri) throws IOException, URISyntaxException {
         this.host = host;
         this.vhost = vhost;
         this.user = user;
@@ -117,6 +130,7 @@ public class MICOBrokerImpl implements MICOBroker {
         this.rabbitPort = rabbitPort;
         this.marmottaBaseUri = marmottaBaseUri;
         this.storageBaseUri = storageBaseUri;
+        this.registrationBaseUri = registrationBaseUri;
 
         dependencies = new ServiceGraph();
         states = new ConcurrentHashMap<>();
@@ -663,16 +677,189 @@ public class MICOBrokerImpl implements MICOBroker {
         }
     }
     
-    public String getRouteStatus(String camelRoute) {
-    	//TODO implement
+    //---- route status retrieval
+    
+    //
+    public enum RouteStatus{
+    	ONLINE, RUNNABLE, UNAVAILABLE, BROKEN;
     	
-    	log.warn("status check is not implemented yet, simply returning 'ONLINE'");
+    	@Override
+    	  public String toString() {
+    	    switch(this) {
+    	      case ONLINE:      return "ONLINE";
+    	      case RUNNABLE:    return "RUNNABLE";
+    	      case UNAVAILABLE: return "UNAVAILABLE";
+    	      case BROKEN:      return "BROKEN";
+    	      default: throw new IllegalArgumentException();
+    	    }
+    	  }
     	
-    	//1. Parse the route
-    	MICOCamelRoute route=new MICOCamelRoute();
-    	route.parseCamelRoute(camelRoute);    	
-
-    	return "ONLINE";
+    };
+    
+    public String getRouteStatus(String xmlCamelRoute) {
+    	try {
+	    	//1. Parse the route
+	    	MICOCamelRoute route = new MICOCamelRoute();
+	    	route.parseCamelRoute(xmlCamelRoute);
+	    	
+	    	//2. Retrieve its status
+	    	RouteStatus status = 	getRouteStatus(route);    	
+	
+	    	//3. Return its string value    	
+	    	return status.toString();
+    	}
+    	catch (Exception e){
+    		//Handle any kind of exception by return BROKEN
+    		log.error("Unable to retrieve route status, returning {}",RouteStatus.BROKEN.toString());
+    		e.printStackTrace();
+    		return RouteStatus.BROKEN.toString();
+    	}
+    	
     }
+    
+    public RouteStatus getRouteStatus(MICOCamelRoute route) throws ClientProtocolException, IOException{
+    	
+    	List<MICOCamelRoute.ExtractorConfiguration> extractors=route.getExtractorConfigurations();
+    	
+    	if(extractors == null || extractors.isEmpty()){
+    		log.error("Critical: no extractors could be parsed from the camel route, returning {}",RouteStatus.BROKEN.toString());
+    		return RouteStatus.BROKEN;
+    	}
+    	
+    	//for every extractor configuration, retrieve its status
+    	
+    	HashMap<MICOCamelRoute.ExtractorConfiguration,ExtractorStatus> eStatus = 
+    			new HashMap<MICOCamelRoute.ExtractorConfiguration,ExtractorStatus> ();
+    	
+    	for( MICOCamelRoute.ExtractorConfiguration extractor : extractors){
+    		eStatus.put(extractor, getStatus(extractor));
+    	}
+    	
+    	//then iterate among the statuses
+    	RouteStatus routeStatus = RouteStatus.ONLINE;
+    	for(ExtractorStatus status : eStatus.values()){
+    		switch(routeStatus){
+	    		case ONLINE: 
+	    			switch(status){
+		    			case DEPLOYED:     routeStatus=RouteStatus.RUNNABLE;    break;
+		    			case NOT_DEPLOYED: routeStatus=RouteStatus.UNAVAILABLE; break;
+		    			case UNREGISTERED: return RouteStatus.BROKEN;
+		    			default: break;
+	    			}break;
+	    			
+	    		case RUNNABLE:
+	    			switch(status){
+		    			case NOT_DEPLOYED: routeStatus=RouteStatus.UNAVAILABLE; break;
+		    			case UNREGISTERED: return RouteStatus.BROKEN;
+		    			default: break;
+	    			}break;
+	    			
+	    		case UNAVAILABLE:
+	    			switch(status){
+	    			case UNREGISTERED: return RouteStatus.BROKEN;
+	    			default: break;
+				}break;
+	    		default:
+	    			log.warn("This code should be unreachable");
+	    			break;
+	    		}
+    	}
+
+    	return routeStatus;
+    }
+    
+    private ExtractorStatus getStatus(MICOCamelRoute.ExtractorConfiguration e) throws ClientProtocolException, IOException{ 
+    	
+    	ExtractorStatus outputStatus = ExtractorStatus.UNREGISTERED;
+    	String eId=e.getExtractorId();
+    	String eMode=e.getModeId();
+    	String eVersion=e.getVersion();
+    	
+    	
+    	HttpGet httpGetExtractor = new HttpGet(registrationBaseUri + "/get/extractor/"+eId+"/json");
+    	HttpGet httpGetExtractorDeployment = new HttpGet(registrationBaseUri + "/get/deployments/extractor/"+eId);
+    	CloseableHttpClient httpclient = HttpClients.createDefault();
+    	
+    	CloseableHttpResponse response = null;  	
+    	
+    		
+    	try{
+    		//first look if the extractor is registered
+    		log.debug("Looking for extractor registration at url {}", httpGetExtractor.toString());
+    		response=httpclient.execute(httpGetExtractor);
+    	    int status = response.getStatusLine().getStatusCode();
+    	    if(status != 200){
+    	    	response.close();
+    	    	log.debug("Extractor {} not found at {}, STATUS code is {}",eId,httpGetExtractor,status);
+    	    	return ExtractorStatus.UNREGISTERED;
+    	    }
+    	    response.close();
+    	    
+    	    //if the extractor is registered, look if it's also deployed
+    	    log.debug("Looking for extractor deployments at url {}", httpGetExtractorDeployment.toString());
+    	    response=httpclient.execute(httpGetExtractorDeployment);
+    	    status = response.getStatusLine().getStatusCode();
+    	    if(status != 200){
+    	    	log.debug("Deployments info for {} not found at {}, STATUS code is {}",eId,httpGetExtractorDeployment,status);
+    	    	response.close();
+    	    	return ExtractorStatus.UNREGISTERED;
+    	    }
+    	    
+    	    /*
+    	     * The response (from registration-service v0.9.0) is this one:
+    	     * {"deployments":["ip1","ip2", ...]} or {"deployments":[]} 
+    	     */
+		    TypeReference<HashMap<String,ArrayList<Object>>> typeRef 
+            = new TypeReference<HashMap<String,ArrayList<Object>>>() {};
+    	    
+            JsonFactory factory = new JsonFactory(); 
+		    ObjectMapper mapper = new ObjectMapper(factory); 
+		    HashMap<String,ArrayList<String>> parsedResponse = 
+           		mapper.readValue(EntityUtils.toString(response.getEntity()), typeRef);
+		    ArrayList<String> deployments=parsedResponse.get("deployments");
+            
+            if(deployments == null || deployments.isEmpty()){
+            	outputStatus=ExtractorStatus.NOT_DEPLOYED;
+            }
+            else{
+            	outputStatus=ExtractorStatus.DEPLOYED;
+            }
+            
+            //finally, check it the extractor is connected
+            List<ServiceDescriptor> svc=dependencies.getServices();
+            for(ServiceDescriptor s : svc){
+            	if(s.getExtractorId()==eId &&s.getExtractorModeId()==eMode && s.getExtractorVersion()==eVersion){
+            		response.close();
+            		return outputStatus=ExtractorStatus.CONNECTED;
+            	}
+            }
+    	}finally{
+    		if(response != null){
+    			response.close();
+    		}
+    	}
+            
+  
+
+    	return outputStatus;
+    };
+
+    
+    public enum ExtractorStatus{
+    	CONNECTED, DEPLOYED, NOT_DEPLOYED, UNREGISTERED;
+    	
+    	@Override
+    	  public String toString() {
+    	    switch(this) {
+    	      case CONNECTED:    return "CONNECTED";
+    	      case DEPLOYED:     return "DEPLOYED";
+    	      case UNREGISTERED: return "UNREGISTERED";
+    	      default: throw new IllegalArgumentException();
+    	    }
+    	  }
+    	
+    };
+    
+    
 
 }
