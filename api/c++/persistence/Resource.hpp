@@ -41,6 +41,8 @@ namespace mico {
 
           virtual std::shared_ptr<mico::persistence::model::Asset> getAsset() = 0;
 
+          virtual std::shared_ptr<mico::persistence::model::Asset> getAssetWithLocation(mico::persistence::model::URI) = 0;
+
           virtual bool hasAsset() = 0;
 
           virtual mico::persistence::PersistenceService& getPersistenceService() = 0;
