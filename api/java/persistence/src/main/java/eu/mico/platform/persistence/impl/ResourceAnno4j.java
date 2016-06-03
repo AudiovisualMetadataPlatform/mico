@@ -79,9 +79,9 @@ public abstract class ResourceAnno4j implements Resource {
             assetMMM = createAndCommitAsset(location.toString());
             resourceMMM.setAsset(assetMMM);
         }
-        if(location.toString() != assetMMM.getLocation()){
-        	throw new IllegalArgumentException("Requested asset with location "+location+
-        			                           ", but the retrieved one has location "+ assetMMM.getLocation());
+        if(! assetMMM.getLocation().contentEquals(location.toString()) ){
+        	throw new IllegalArgumentException("Requested asset with location '"+location+
+        			                           "', but the retrieved one has location '"+ assetMMM.getLocation()+"'");
         }
         return new AssetAnno4j(assetMMM, this.persistenceService.getStorage());
     }
