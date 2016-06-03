@@ -16,6 +16,7 @@ namespace mico {
 
       private:
           jnipp::WeakRef<jnipp::eu::mico::platform::anno4j::model::ResourceMMM> m_resourceMMM;
+          std::shared_ptr<Asset> createAsset(std::string location = "");
 
       protected:
           PersistenceService& m_persistenceService;
@@ -39,6 +40,8 @@ namespace mico {
 
 
           virtual std::shared_ptr<Asset> getAsset();
+
+          virtual std::shared_ptr<Asset> getAssetWithLocation(mico::persistence::model::URI);
 
           virtual bool hasAsset();
 
