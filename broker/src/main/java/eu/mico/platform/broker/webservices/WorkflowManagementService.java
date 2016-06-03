@@ -145,9 +145,10 @@ public class WorkflowManagementService {
             @PathParam("id") Integer workflowId ) throws RepositoryException,
             IOException {
         
-    	String camelRoute=new String(getWorkflow(workflowId).getRoute());
+    	
     	String status="BROKEN";
         if (broker instanceof MICOBrokerImpl ){
+        	String camelRoute=new String(getWorkflow(workflowId).getRoute());
         	status = ((MICOBrokerImpl) broker).getRouteStatus(camelRoute.replaceAll("WORKFLOW_ID", workflowId.toString()));
         }
         return Response.ok(status).build();
@@ -170,9 +171,8 @@ public class WorkflowManagementService {
     public Response getCamelRoute(@PathParam("id") Integer workflowId ) throws RepositoryException,
             IOException {
     	log.info("Retrieving CamelRoute for workflow with ID {}",workflowId);
-        Workflow w=getWorkflow(workflowId);
-        
-        return Response.ok(w.getRoute()).build();
+        String camelRoute=new String(getWorkflow(workflowId).getRoute());        
+        return Response.ok(camelRoute.replaceAll("WORKFLOW_ID", workflowId.toString())).build();
     }
     
     
