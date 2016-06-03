@@ -92,6 +92,9 @@ public class InjectionWebService {
 	    			bytes = IOUtils.copy(in, out);
 	    			out.close();
 	    			asset.setFormat(mimeType);
+	    			if(type == null || type.isEmpty()){
+	    				type=guessSyntacticTypeFromMimeType(mimeType);
+	    			}
 	    			
 	    			item.setSyntacticalType(type);
 	    	    	item.setSemanticType("Item created by application/injection-webservice");
@@ -127,7 +130,10 @@ public class InjectionWebService {
 	        			if(assetIS.available() == 0){
 	        				throw new IllegalArgumentException("No data found at "+existingAssetLocation+" for the asset of the new item");
 	        			}
-	        			asset.setFormat(mimeType);	        			
+	        			asset.setFormat(mimeType);	 
+		    			if(type == null || type.isEmpty()){
+		    				type=guessSyntacticTypeFromMimeType(mimeType);
+		    			}
 	        			
 	        			
 	        			item.setSyntacticalType(type);
@@ -152,8 +158,11 @@ public class InjectionWebService {
 	        		
 	        		//create an item without asset
 	        		Item item = ps.createItem();
+	    			if(type == null || type.isEmpty()){
+	    				type="mico:Item";
+	    			}
         			item.setSyntacticalType(type);
-	    	    	item.setSemanticType("Empty item created by application/injection-webservice");
+	    	    	item.setSemanticType("empty item created by application/injection-webservice");
 	    	    	
 	    	    	log.warn("empty item created {}", item.getURI());
 	    	    	return Response.ok(ImmutableMap.of("itemUri", item.getURI().stringValue(), "created", item.getSerializedAt())).build();
@@ -328,6 +337,17 @@ public class InjectionWebService {
     private String guessMimeType(InputStream in) throws IOException{
     	final Tika tika = new Tika();
         return tika.detect(in);
+    }
+    private String guessSyntacticTypeFromMimeType(String mimeType){
+    	if(mimeType == null || mimeType.isEmpty() || mimeType.length()<2){
+    		return null;
+    	}
+    	String out=null;
+    	String[] tokens = mimeType.split("/");
+    	if(tokens.length == 2){
+    		out="mico:" + tokens[0].substring(0, 1).toUpperCase()+tokens[0].substring(1);
+    	}
+    	return out;
     }
 
 }
