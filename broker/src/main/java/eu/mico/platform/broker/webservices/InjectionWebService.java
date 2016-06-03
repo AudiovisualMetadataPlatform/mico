@@ -31,7 +31,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 
@@ -61,8 +64,10 @@ public class InjectionWebService {
     @POST
     @Path("/create")
     @Produces("application/json")
-    public Response createItem(@QueryParam("type") String type, @QueryParam("name") String fileName, @Context HttpServletRequest request) throws RepositoryException, IOException {
-        PersistenceService ps = eventManager.getPersistenceService();
+    public Response createItem(@QueryParam("type") String type, @QueryParam("assetLocation") String assetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
+
+    	PersistenceService ps = eventManager.getPersistenceService();
+    	InputStream in = new BufferedInputStream(request.getInputStream());
 
         Item item = ps.createItem();
         item.setSyntacticalType(type);
@@ -71,8 +76,10 @@ public class InjectionWebService {
         Asset asset = item.getAsset();
         asset.setFormat(type);
         OutputStream out = asset.getOutputStream();
-        int bytes = IOUtils.copy(request.getInputStream(), out);
+        
+        int bytes = IOUtils.copy(in, out);
         out.close();
+        in.close();
 
         log.info("item created {}: uploaded {} bytes", item.getURI(), bytes);
 
