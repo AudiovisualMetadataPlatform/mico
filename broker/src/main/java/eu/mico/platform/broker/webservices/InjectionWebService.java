@@ -107,7 +107,58 @@ public class InjectionWebService {
 	
 	    	}
 	    	else{
-	    		//TODO: define what happens if no asset was provided
+	    		//if the user provided an existing asset location
+	        	if(existingAssetLocation != null && ! existingAssetLocation.isEmpty()){
+	        		
+	        		InputStream assetIS = null;
+	        		//check if the location exists
+	        		try{
+	        			//if everything is ok, create the item
+	        			Item item = ps.createItem();
+	        			Asset asset = item.getAssetWithLocation(new URIImpl(existingAssetLocation));
+	        			
+	        			assetIS = asset.getInputStream();
+	        			mimeType = guessMimeType(assetIS);	        			
+	        			if(mimeType == null ){
+	                		mimeType=type;
+	                	}
+	        			
+	        			//further check on data having few bytes inside
+	        			if(assetIS.available() == 0){
+	        				throw new IllegalArgumentException("No data found at "+existingAssetLocation+" for the asset of the new item");
+	        			}
+	        			asset.setFormat(mimeType);	        			
+	        			
+	        			
+	        			item.setSyntacticalType(type);
+		    	    	item.setSemanticType("Item created by application/injection-webservice from a pre-existing asset");
+		    	    	
+		    	    	log.info("item created {}", item.getURI());
+		    	    	return Response.ok(ImmutableMap.of("itemUri", item.getURI().stringValue(), "assetLocation", item.getAsset().getLocation(), "created", item.getSerializedAt())).build();
+	        			
+	        		}
+	        		catch( IOException | NullPointerException e) {
+	        			//thrown from the persistence if the data does not exist / the url is malformed 
+	        			throw new IllegalArgumentException("No data found at "+existingAssetLocation+" for the asset of the new item");
+	        		}
+	        		finally{
+	        			if(assetIS!=null){
+	        				assetIS.close();
+	        			}
+	        		}
+	        		
+	        	}
+	        	else{
+	        		
+	        		//create an item without asset
+	        		Item item = ps.createItem();
+        			item.setSyntacticalType(type);
+	    	    	item.setSemanticType("Empty item created by application/injection-webservice");
+	    	    	
+	    	    	log.warn("empty item created {}", item.getURI());
+	    	    	return Response.ok(ImmutableMap.of("itemUri", item.getURI().stringValue(), "created", item.getSerializedAt())).build();
+	    	    	
+	        	}
 	    	}
     	}
     	finally{
@@ -115,9 +166,6 @@ public class InjectionWebService {
     			in.close();
     		}
     	}
-    	
-    	throw new RuntimeException("Unable to create item");
-
     }
 
     @GET
