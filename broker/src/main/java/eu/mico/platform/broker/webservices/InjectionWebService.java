@@ -20,6 +20,7 @@ import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import org.apache.commons.io.IOUtils;
+import org.apache.tika.Tika;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -64,26 +65,59 @@ public class InjectionWebService {
     @POST
     @Path("/create")
     @Produces("application/json")
-    public Response createItem(@QueryParam("type") String type, @QueryParam("assetLocation") String assetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
+    public Response createItem(@QueryParam("type") String type, @QueryParam("existingAssetLocation") String existingAssetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
 
     	PersistenceService ps = eventManager.getPersistenceService();
-    	InputStream in = new BufferedInputStream(request.getInputStream());
+    	InputStream in = null;
+    	
+    	try {
+	    	in = new BufferedInputStream(request.getInputStream());
+			String mimeType=guessMimeType(in);    	
+			if(mimeType == null ){
+				mimeType=type;
+			}
+	    	int bytes = in.available();
+	    	
+	
+	    	if(bytes > 0){
+	    		
+	    		log.info("Creating item with new asset");
+	    		Asset asset = null;
+	    		if(existingAssetLocation == null || existingAssetLocation.isEmpty()){	    			
+	    			
+	    			Item item = ps.createItem();
+	    			asset = item.getAsset();
+	
+	    			OutputStream out = asset.getOutputStream();		        
+	    			bytes = IOUtils.copy(in, out);
+	    			out.close();
+	    			asset.setFormat(mimeType);
+	    			
+	    			item.setSyntacticalType(type);
+	    	    	item.setSemanticType("Item created by application/injection-webservice");
+	
+	    	    	log.info("item created {}: uploaded {} bytes", item.getURI(), bytes);
+	    	    	return Response.ok(ImmutableMap.of("itemUri", item.getURI().stringValue(), "assetLocation", item.getAsset().getLocation(), "created", item.getSerializedAt())).build();
+	    		}
+	    		else {
+	    			log.error("Overriding the content of {} is forbidden", existingAssetLocation);
+	    			throw new IllegalArgumentException("Overriding pre-existing content stored in "+existingAssetLocation+" is forbidden");
+	    		}
+	
+	
+	    	}
+	    	else{
+	    		//TODO: define what happens if no asset was provided
+	    	}
+    	}
+    	finally{
+    		if(in != null){
+    			in.close();
+    		}
+    	}
+    	
+    	throw new RuntimeException("Unable to create item");
 
-        Item item = ps.createItem();
-        item.setSyntacticalType(type);
-        item.setSemanticType("application/injection-webservice");
-
-        Asset asset = item.getAsset();
-        asset.setFormat(type);
-        OutputStream out = asset.getOutputStream();
-        
-        int bytes = IOUtils.copy(in, out);
-        out.close();
-        in.close();
-
-        log.info("item created {}: uploaded {} bytes", item.getURI(), bytes);
-
-        return Response.ok(ImmutableMap.of("itemUri", item.getURI().stringValue(), "assetLocation", item.getAsset().getLocation(), "created", item.getSerializedAt())).build();
     }
 
     @GET
@@ -241,6 +275,11 @@ public class InjectionWebService {
 
 
         return Response.ok(entity, type).build();
+    }
+    
+    private String guessMimeType(InputStream in) throws IOException{
+    	final Tika tika = new Tika();
+        return tika.detect(in);
     }
 
 }
