@@ -114,27 +114,19 @@ public class InjectionWebService {
 	        	if(existingAssetLocation != null && ! existingAssetLocation.isEmpty()){
 	        		
 	        		InputStream assetIS = null;
-	        		//check if the location exists
 	        		try{
-	        			//if everything is ok, create the item
+	        			
+	        			mimeType = guessMimeTypeFromRemoteLocation(ps,existingAssetLocation);
+	        			if(mimeType == null ){
+	        	    		mimeType=type;
+	        	    	}
+	        			
 	        			Item item = ps.createItem();
 	        			Asset asset = item.getAssetWithLocation(new URIImpl(existingAssetLocation));
-	        			
-	        			assetIS = asset.getInputStream();
-	        			mimeType = guessMimeType(assetIS);	        			
-	        			if(mimeType == null ){
-	                		mimeType=type;
-	                	}
-	        			
-	        			//further check on data having few bytes inside
-	        			if(assetIS.available() == 0){
-	        				throw new IllegalArgumentException("No data found at "+existingAssetLocation+" for the asset of the new item");
-	        			}
 	        			asset.setFormat(mimeType);	 
 		    			if(type == null || type.isEmpty()){
 		    				type=guessSyntacticTypeFromMimeType(mimeType);
 		    			}
-	        			
 	        			
 	        			item.setSyntacticalType(type);
 		    	    	item.setSemanticType("Item created by application/injection-webservice from a pre-existing asset");
@@ -229,24 +221,104 @@ public class InjectionWebService {
     @POST
     @Path("/add")
     @Produces("application/json")
-    public Response addPart(@QueryParam("itemUri")String itemURI, @QueryParam("type") String type, @QueryParam("name") String fileName, @Context HttpServletRequest request) throws RepositoryException, IOException {
+    public Response addPart(@QueryParam("itemUri")String itemURI, @QueryParam("type") String type, @QueryParam("existingAssetLocation") String existingAssetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
         PersistenceService ps = eventManager.getPersistenceService();
 
-        Item item = ps.getItem(new URIImpl(itemURI));
+        Item item = ps.getItem(new URIImpl(itemURI));        
+        InputStream in = null;
+    	
+    	try {
+	    	in = new BufferedInputStream(request.getInputStream());
+			String mimeType=guessMimeType(in);    	
+			if(mimeType == null ){
+				mimeType=type;
+			}
+	    	int bytes = in.available();
+	    	
+	
+	    	if(bytes > 0){
+	    		
+	    		log.info("Creating part with new asset");
+	    		Asset asset = null;
+	    		if(existingAssetLocation == null || existingAssetLocation.isEmpty()){	    			
+	    			
+	    			Part part = item.createPart(extratorID);
+	    			asset = part.getAsset();
+	
+	    			OutputStream out = asset.getOutputStream();		        
+	    			bytes = IOUtils.copy(in, out);
+	    			out.close();
+	    			asset.setFormat(mimeType);
+	    			if(type == null || type.isEmpty()){
+	    				type=guessSyntacticTypeFromMimeType(mimeType);
+	    			}
+	    			
+	    			part.setSyntacticalType(type);
+	    	    	part.setSemanticType("Part created by application/injection-webservice");
+	
+	    	    	log.info("item {}, part created {} : uploaded {} bytes", item.getURI(), part.getURI(), bytes);
+	    	        return Response.ok(ImmutableMap.of("itemURI", item.getURI().stringValue(),"partURI", part.getURI().stringValue(), "assetLocation", asset.getLocation(), "created", part.getSerializedAt())).build();
+	    	    	
+	    		}
+	    		else {
+	    			log.error("Overriding the content of {} is forbidden", existingAssetLocation);
+	    			throw new IllegalArgumentException("Overriding pre-existing content stored in "+existingAssetLocation+" is forbidden");
+	    		}
+	
+	
+	    	}
+	    	else{
+	    		//if the user provided an existing asset location
+	        	if(existingAssetLocation != null && ! existingAssetLocation.isEmpty()){
+	        		
+	        		InputStream assetIS = null;
+	        		try{
+	        			
+	        			mimeType = guessMimeTypeFromRemoteLocation(ps,existingAssetLocation);
+	        			if(mimeType == null ){
+	        	    		mimeType=type;
+	        	    	}
+	        			
+	        			Part part = item.createPart(extratorID);
+	        			Asset asset = part.getAssetWithLocation(new URIImpl(existingAssetLocation));
 
-        Part part = item.createPart(extratorID);
-        part.setSyntacticalType(type);
-
-        Asset partAsset = part.getAsset();
-        partAsset.setFormat(type);
-
-        OutputStream out = partAsset.getOutputStream();
-        int bytes = IOUtils.copy(request.getInputStream(), out);
-        out.close();
-
-        log.info("item {}, part created {} : uploaded {} bytes", item.getURI(), part.getURI(), bytes);
-
-        return Response.ok(ImmutableMap.of("itemURI", item.getURI().stringValue(),"partURI", part.getURI().stringValue(), "assetLocation", partAsset.getLocation(), "created", part.getSerializedAt())).build();
+	        			asset.setFormat(mimeType);	 
+		    			if(type == null || type.isEmpty()){
+		    				type=guessSyntacticTypeFromMimeType(mimeType);
+		    			}
+	        			
+	        			
+	        			part.setSyntacticalType(type);
+		    	    	part.setSemanticType("Part created by application/injection-webservice from a pre-existing asset");
+		    	    	
+		    	    	log.info("item {}, part created {}", item.getURI(), part.getURI());
+		    	        return Response.ok(ImmutableMap.of("itemURI", item.getURI().stringValue(),"partURI", part.getURI().stringValue(), "assetLocation", asset.getLocation(), "created", part.getSerializedAt())).build();
+	        			
+	        		}
+	        		catch( IOException | NullPointerException e) {
+	        			//thrown from the persistence if the data does not exist / the url is malformed 
+	        			throw new IllegalArgumentException("No data found at "+existingAssetLocation+" for the asset of the new part");
+	        		}
+	        		finally{
+	        			if(assetIS!=null){
+	        				assetIS.close();
+	        			}
+	        		}
+	        		
+	        	}
+	        	else{
+	        		
+	        		//trying to create a part without an asset ?!
+	        		throw new IllegalArgumentException("Adding a part without an asset with this service is forbidden");
+	    	    	
+	        	}
+	    	}
+    	}
+    	finally{
+    		if(in != null){
+    			in.close();
+    		}
+    	}
     }
 
 
@@ -334,6 +406,27 @@ public class InjectionWebService {
         return Response.ok(entity, type).build();
     }
     
+    private String guessMimeTypeFromRemoteLocation(PersistenceService ps, String existingAssetLocation) throws IOException, RepositoryException{
+		Item tmpItem=ps.createItem();
+		InputStream assetIS = null;
+		String mimeType = null;
+		try{
+			Asset tmpItemAsset=tmpItem.getAssetWithLocation(new URIImpl(existingAssetLocation));	        					
+			
+			assetIS = tmpItemAsset.getInputStream();
+			mimeType = guessMimeType(assetIS);	        			
+					
+			//further check on data having few bytes inside
+			if(assetIS.available() == 0){
+				throw new IllegalArgumentException("No data found at "+existingAssetLocation+" for the asset of the new resource");
+			}
+		}
+		finally{
+			assetIS.close();
+			ps.deleteItem(tmpItem.getURI());
+		}
+		return mimeType;
+    }
     private String guessMimeType(InputStream in) throws IOException{
     	final Tika tika = new Tika();
         return tika.detect(in);
