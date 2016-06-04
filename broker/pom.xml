@@ -170,15 +170,24 @@
         <dependency>
             <groupId>eu.mico-project.platform</groupId>
             <artifactId>persistence</artifactId>
-            <version>2.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.mico-project.platform</groupId>
             <artifactId>event</artifactId>
-            <version>2.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>eu.mico.platform.camel</groupId>
+            <artifactId>mico-rabbitmq-comp</artifactId>
+            <type>jar</type>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-servlet</artifactId>
+            <version>${camel.version}</version>
+        </dependency>
 
         <!-- Dependency Graph Representation -->
         <dependency>
@@ -360,6 +369,7 @@
 		    <artifactId>hsqldb</artifactId>
 		    <version>2.3.4</version>
 		</dependency>
+
     </dependencies>
 
     <profiles>
