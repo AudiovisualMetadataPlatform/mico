@@ -27,6 +27,8 @@ import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Resource;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.marmotta.platform.core.test.base.JettyMarmotta;
 import org.junit.After;
@@ -201,9 +203,12 @@ public abstract class BaseBrokerTest {
                     resourceList.get(0).getURI(), getQueueName());
             Part c = null;
             try {
-                c = item.createPart(item.getURI());
+                c = item.createPart(getServiceID());
                 c.setSemanticType(getProvides());
                 c.setSyntacticalType(getProvides());
+                for (Resource r :resourceList){
+                    c.addInput(r);
+                }
                 if (createAsset){
                     Asset asset = c.getAsset();
                     asset.setFormat("text/plain");

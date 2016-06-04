@@ -14,11 +14,13 @@
 package eu.mico.platform.broker.webservices;
 
 import com.google.common.collect.ImmutableMap;
+
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
+
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
@@ -29,8 +31,10 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
@@ -217,6 +221,9 @@ public class InjectionWebService {
             if (part == null) {
                 throw new NotFoundException("Part with URI " + partUri + " not found in system");
             }
+            if (part.hasAsset() == false) {
+                throw new NotFoundException("Part with URI " + partUri + " has no binary asset");
+            }
 
             entity = new StreamingOutput() {
                 @Override
@@ -232,7 +239,14 @@ public class InjectionWebService {
             type = part.getAsset().getFormat();
         }
 
-
+        try{
+            MediaType.valueOf(type);
+        }catch(IllegalArgumentException e){
+            log.info("deliver unknown mediaType [{}] - set type to {}", type,
+                    MediaType.APPLICATION_OCTET_STREAM);
+            type = MediaType.APPLICATION_OCTET_STREAM;
+        }
+        
         return Response.ok(entity, type).build();
     }
 

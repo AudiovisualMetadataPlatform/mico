@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
@@ -283,6 +284,9 @@ public class StatusWebService {
             if (part == null) {
                 throw new NotFoundException("Part with URI " + partUri + " not found in system");
             }
+            if (part.hasAsset() == false) {
+                throw new NotFoundException("Part with URI " + partUri + " has no binary asset");
+            }
 
             entity = new StreamingOutput() {
                 @Override
@@ -298,6 +302,13 @@ public class StatusWebService {
             type = part.getAsset().getFormat();
         }
 
+        try{
+            MediaType.valueOf(type);
+        }catch(IllegalArgumentException e){
+            log.info("deliver unknown mediaType [{}] - set type to {}", type,
+                    MediaType.APPLICATION_OCTET_STREAM);
+            type = MediaType.APPLICATION_OCTET_STREAM;
+        }
 
         return Response.ok(entity, type).build();
     }
