@@ -27,13 +27,8 @@ import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
-import eu.mico.platform.storage.util.VFSUtils;
-
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.vfs2.FileSystemOptions;
-import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
 import org.apache.marmotta.platform.core.test.base.JettyMarmotta;
-import org.apache.marmotta.platform.sparql.webservices.SparqlWebService;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -175,7 +170,7 @@ public abstract class BaseBrokerTest {
 
         @Override
         public URI getServiceID() {
-            return new URIImpl("http://example.org/services-1.0.0-"
+            return new URIImpl("urn:org.example.services-1.0.0-"
                     + StringUtils.capitalize(source)
                     + StringUtils.capitalize(target) + "Service");
         }
@@ -202,8 +197,8 @@ public abstract class BaseBrokerTest {
                 java.util.List<eu.mico.platform.persistence.model.Resource> resourceList,
                 java.util.Map<String, String> params) throws AnalysisException,
                 IOException {
-            log.info("mock analysis request for content item {}, object {}",
-                    item.getURI(), resourceList.get(0).getURI());
+            log.info("mock analysis request for [{}] on queue {}",
+                    resourceList.get(0).getURI(), getQueueName());
             Part c = null;
             try {
                 c = item.createPart(item.getURI());

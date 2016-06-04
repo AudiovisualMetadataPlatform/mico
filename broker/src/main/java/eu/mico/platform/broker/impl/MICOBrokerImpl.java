@@ -552,11 +552,11 @@ public class MICOBrokerImpl implements MICOBroker {
             URIImpl partUri = new URIImpl(analysisResponse.getPartUri());
             String serviceId = analysisResponse.getServiceId();
             try {
-                String mimetype = getItem(itemUri)
+                String type = getItem(itemUri)
                         .getPart(partUri).getSyntacticalType();
 
-                if (mimetype != null) {
-                    TypeDescriptor newState = dependencies.getState(mimetype);
+                if (type != null) {
+                    TypeDescriptor newState = dependencies.getState(type);
                     state.addState(partUri, newState);
                 } else {
                     log.warn(

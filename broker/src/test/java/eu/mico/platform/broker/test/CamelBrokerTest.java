@@ -49,7 +49,7 @@ public class CamelBrokerTest extends BaseBrokerTest {
     private MicoCamelContext context = new MicoCamelContext();
 
     @Test(timeout=40000)
-    public void testSimpleAnalyse() throws Exception {
+    public void testSimpleWorkflow() throws Exception {
 
         MockEndpoint mock = getMockEndpoint("mock:result_simple1");
         mock.expectedMinimumMessageCount(1);       
