@@ -35,6 +35,11 @@
     </context-param>
     -->
 
+    <!-- location of spring xml files -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:camel-config.xml</param-value>
+    </context-param>
     <!-- RESTeasy Webservices -->
     <listener>
         <listener-class>org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap</listener-class>
@@ -76,5 +81,17 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+    <!-- Camel servlet -->
+    <servlet>
+        <servlet-name>CamelServlet</servlet-name>
+        <servlet-class>org.apache.camel.component.servlet.CamelHttpTransportServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
 
+    <!-- Camel servlet mapping -->
+    <servlet-mapping>
+        <servlet-name>CamelServlet</servlet-name>
+        <url-pattern>/camel/*</url-pattern>
+    </servlet-mapping>
+  
 </web-app>

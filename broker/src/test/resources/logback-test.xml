@@ -11,8 +11,8 @@
     <logger name="org.reflections" level="ERROR"/>
     <logger name="httpclient.wire.header" level="INFO"/>
     <logger name="org.xml" level="WARN" />
-    <logger name="eu.mico" level="DEBUG" />
-    <logger name="eu.mico.platform" level="TRACE" />
+    <logger name="eu.mico" level="INFO" />
+    <logger name="eu.mico.platform.broker" level="TRACE" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />

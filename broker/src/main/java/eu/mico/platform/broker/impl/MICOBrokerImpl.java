@@ -670,7 +670,7 @@ public class MICOBrokerImpl implements MICOBroker {
     	
     	//1. Parse the route
     	MICOCamelRoute route=new MICOCamelRoute();
-    	route.parseCamelRoute(camelRoute);    	
+    	route.parseCamelRoute(camelRoute);
 
     	return "ONLINE";
     }

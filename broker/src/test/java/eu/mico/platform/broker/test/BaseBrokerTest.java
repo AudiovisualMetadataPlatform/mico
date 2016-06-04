@@ -175,7 +175,7 @@ public abstract class BaseBrokerTest {
 
         @Override
         public URI getServiceID() {
-            return new URIImpl("http://example.org/services/"
+            return new URIImpl("http://example.org/services-1.0.0-"
                     + StringUtils.capitalize(source)
                     + StringUtils.capitalize(target) + "Service");
         }
@@ -192,7 +192,7 @@ public abstract class BaseBrokerTest {
 
         @Override
         public String getQueueName() {
-            return source + "-" + target + "-queue";
+            return getServiceID().stringValue();
         }
 
         @Override

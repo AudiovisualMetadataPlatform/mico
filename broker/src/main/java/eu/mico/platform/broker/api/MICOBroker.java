@@ -30,4 +30,6 @@ public interface MICOBroker {
     Map<String, ItemState> getStates();
 
     PersistenceService getPersistenceService();
+
+    String getRouteStatus(String camelRoute);
 }

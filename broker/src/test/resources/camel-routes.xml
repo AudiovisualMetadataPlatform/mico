@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes xmlns="http://camel.apache.org/schema/spring">
+ 
+    <route id="helloRoute">
+      <!-- incoming requests from the servlet is routed -->
+      <from uri="direct:a"/>
+      <to uri='direct:workflow-simple1-pipeline-0'></to>
+    </route>
+ 
+   <route id='workflow-simple1-starting-point-for-pipeline-0-mimeType=mico/test,syntacticType=A'>
+    <from uri='direct:simple1-mimeType=mico/test,syntacticType=A'/>
+    <to uri='direct:workflow-simple1-pipeline-0'/>
+  </route>
+  <route id='workflow-simple1-pipeline-0'>
+    <from uri='direct:workflow-simple1-pipeline-0'/>
+    <pipeline>
+      <to uri='mico-comp:vbox1?host=mico-platform&amp;extractorId=http://example.org/services&amp;extractorVersion=1.0.0&amp;modeId=ABService'/>
+      <to uri='mico-comp:vbox1?host=mico-platform&amp;extractorId=http://example.org/services&amp;extractorVersion=1.0.0&amp;modeId=BCService'/>
+      <to uri="mock:result_simple1"/>
+    </pipeline>
+  </route>
+
+</routes>

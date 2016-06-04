@@ -15,8 +15,16 @@ package eu.mico.platform.broker.webservices;
 
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
+import eu.mico.platform.camel.MicoCamelContext;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
+
+import org.apache.camel.CamelContext;
+import org.apache.camel.CamelContextAware;
+import org.apache.camel.Route;
+import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.model.RouteDefinition;
+import org.apache.camel.model.RoutesDefinition;
 import org.codehaus.plexus.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +32,12 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
@@ -35,6 +46,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
+
 public class MICOBrokerApplication extends Application {
 
     private static Logger log = LoggerFactory.getLogger(MICOBrokerApplication.class);
@@ -43,6 +55,8 @@ public class MICOBrokerApplication extends Application {
 
     private MICOBroker broker;
     private EventManager manager;
+    protected MicoCamelContext camelContext;
+
 
     public MICOBrokerApplication(@Context ServletContext context) {
         super();
@@ -73,12 +87,13 @@ public class MICOBrokerApplication extends Application {
             broker  = new MICOBrokerImpl(host, user, pass, 5672, marmottaBaseUri, storageBaseUri);
             manager = new EventManagerImpl(host, user, pass);
             manager.init();
+            camelContext = new MicoCamelContext();
+            camelContext.init();
 
             services = new HashSet<>();
             services.add(new StatusWebService(broker));
             services.add(new InjectionWebService(manager));
-            services.add(new WorkflowManagementService(broker));
-
+            services.add(new WorkflowManagementService(broker, camelContext));
         } catch (IOException ex) {
             log.error("could not initialise MICO broker, services not available (message: {})", ex.getMessage());
             log.debug("Exception:",ex);

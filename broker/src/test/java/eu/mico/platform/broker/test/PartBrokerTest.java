@@ -80,7 +80,7 @@ public class PartBrokerTest extends BaseBrokerTest {
 
             // each service should have added a part, so there are now four different parts
             Set<Part> parts = ImmutableSet.copyOf(item.getParts());
-            Assert.assertEquals(4, parts.size());
+            Assert.assertEquals(3, parts.size());
             Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("A"))));
             Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("B"))));
             Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("C"))));
@@ -119,10 +119,16 @@ public class PartBrokerTest extends BaseBrokerTest {
         item2.setSyntacticalType("A");
         item2.getAsset().setFormat("A");
         try {
+            Set<Part> parts = ImmutableSet.copyOf(item.getParts());
+            Assert.assertEquals("This item should not have parts",0, parts.size());
+
             Part partA = item.createPart(item.getURI());
             partA.setSemanticType("A");
             partA.setSyntacticalType("A");
-
+            
+            parts = ImmutableSet.copyOf(item.getParts());
+            Assert.assertEquals("There should be one part with type:'A'",1, parts.size());
+            
             eventManager.injectItem(item);
 
             // wait for result notification and verify it contains what we expect
@@ -134,7 +140,7 @@ public class PartBrokerTest extends BaseBrokerTest {
             Assert.assertEquals(item.getURI().stringValue(), event.getItemUri());
 
             // each service should have added a part, so there are now four different parts
-            Set<Part> parts = ImmutableSet.copyOf(item.getParts());
+            parts = ImmutableSet.copyOf(item.getParts());
             Assert.assertEquals(4, parts.size());
             Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("A"))));
             Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("B"))));

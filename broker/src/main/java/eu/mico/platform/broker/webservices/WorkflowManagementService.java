@@ -15,7 +15,10 @@ package eu.mico.platform.broker.webservices;
 
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
+import eu.mico.platform.broker.model.MICOCamelRoute;
+import eu.mico.platform.broker.model.MICOCamelRoute.EntryPoint;
 import eu.mico.platform.broker.model.wf.Workflow;
+import eu.mico.platform.camel.MicoCamelContext;
 
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
@@ -26,21 +29,16 @@ import com.google.common.collect.ImmutableMap;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * broker service for managing camel routes
@@ -57,15 +55,16 @@ public class WorkflowManagementService {
     private EntityManager em;
 
     
-    private int nextID = 1;
-
     @Context
     private ServletContext servletContext;
     
     private MICOBroker broker;
 
-    public WorkflowManagementService(MICOBroker broker) {
+    private MicoCamelContext camelContext;
+
+    public WorkflowManagementService(MICOBroker broker, MicoCamelContext camelContext) {
         this.broker = broker;
+        this.camelContext = camelContext;
     	this.emf = Persistence.createEntityManagerFactory("inMemoryPersistenceUnit");
     	this.em = emf.createEntityManager();
     }
@@ -90,6 +89,7 @@ public class WorkflowManagementService {
     	log.info("Persisting new workflow with name {} for user {}",workflowName,user);
     	
         Workflow workflow = new Workflow(user, workflowName, route, links, nodes);
+        camelContext.addRouteToContext(route);
         persistWorkflow(workflow);
         log.info("Persisted new workflow {} belonging to user {}",workflow.toString(),user);
 
@@ -149,7 +149,7 @@ public class WorkflowManagementService {
     	String status="BROKEN";
         if (broker instanceof MICOBrokerImpl ){
         	String camelRoute=new String(getWorkflow(workflowId).getRoute());
-        	status = ((MICOBrokerImpl) broker).getRouteStatus(camelRoute.replaceAll("WORKFLOW_ID", workflowId.toString()));
+        	status =  broker.getRouteStatus(camelRoute.replaceAll("WORKFLOW_ID", workflowId.toString()));
         }
         return Response.ok(status).build();
     }
@@ -173,6 +173,24 @@ public class WorkflowManagementService {
     	log.info("Retrieving CamelRoute for workflow with ID {}",workflowId);
         String camelRoute=new String(getWorkflow(workflowId).getRoute());        
         return Response.ok(camelRoute.replaceAll("WORKFLOW_ID", workflowId.toString())).build();
+    }
+    
+    @POST
+    @Path("/inject/{route}/{item}")
+    @Produces("text/plain")
+    public Response injectItem(@PathParam("item") String itemUri, @PathParam("route") Integer workflowId ) throws RepositoryException,
+            IOException {
+        log.info("Retrieving CamelRoute for workflow with ID {}",workflowId);
+        Workflow wf = getWorkflow(workflowId);
+        MICOCamelRoute route = new MICOCamelRoute();
+        route.parseCamelRoute(wf.getRoute());
+        
+        for(EntryPoint ep:route.getEntryPoints()){
+            //TODO: add check for syntactic type
+            camelContext.processItem(ep.getDirectUri(),itemUri);
+            break;
+        }
+        return Response.ok().build();
     }
     
     
@@ -200,9 +218,9 @@ public class WorkflowManagementService {
     
     private Workflow getWorkflow(Integer wId) {
     	
-    	Query querySingleWorkflow = em.createNamedQuery(Workflow.QUERY_SINGLE_WORKFLOW_BY_ID);
+    	TypedQuery<Workflow> querySingleWorkflow = em.createNamedQuery(Workflow.QUERY_SINGLE_WORKFLOW_BY_ID, Workflow.class);
     	querySingleWorkflow.setParameter("id", wId);
-    	return (Workflow) querySingleWorkflow.getSingleResult();
+    	return querySingleWorkflow.getSingleResult();
     }
     
     private void deleteWorkflow(Workflow workflow) {
