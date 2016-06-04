@@ -25,7 +25,8 @@ import org.apache.camel.NoSuchEndpointException;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,11 +47,17 @@ import static org.hamcrest.Matchers.hasProperty;
 public class CamelBrokerTest extends BaseBrokerTest {
 
     private static Logger log = LoggerFactory.getLogger(CamelBrokerTest.class);
-    private MicoCamelContext context = new MicoCamelContext();
+    private static MicoCamelContext context = new MicoCamelContext();
 
+    @Ignore
     @Test(timeout=40000)
     public void testSimpleWorkflow() throws Exception {
+        setupMockAnalyser("A","B");
+        setupMockAnalyser("B","C");
+        setupMockAnalyser("A","C");
 
+        Thread.sleep(500);
+        
         MockEndpoint mock = getMockEndpoint("mock:result_simple1");
         mock.expectedMinimumMessageCount(1);       
 
@@ -89,7 +96,59 @@ public class CamelBrokerTest extends BaseBrokerTest {
             }
         }
     }
-    
+
+    @Ignore
+    @Test(timeout=40000)
+    public void testAggregateWorkflow() throws Exception {
+        setupMockAnalyser("A","B1");
+        setupMockAnalyser("A","B2");
+        setupMockAnalyser("B","C");
+
+        Thread.sleep(1000);
+        
+        MockEndpoint mock = getMockEndpoint("mock:result_aggregateSimple_1");
+        mock.expectedMessageCount(2);       
+        MockEndpoint mock2 = getMockEndpoint("mock:result_aggregateSimple_2");
+        mock.expectedMessageCount(2);       
+
+        PersistenceService ps = broker.getPersistenceService();
+        Item item = null;
+        try {
+
+            // create a item with a single part of type "A"; it should walk through the registered mock services and
+            // eventually finish analysis; we simply wait until we receive an event on the output queue.
+            item = ps.createItem();
+            item.setSemanticType("A");
+            item.setSyntacticalType("A");
+            Set<Part> parts = ImmutableSet.copyOf(item.getParts());
+            Assert.assertEquals(0, parts.size());
+
+            context.processItem("direct:b", item.getURI().toString());;
+            
+
+            // wait for result notification and verify it contains what we expect
+            assertMockEndpointsSatisfied(mock, mock2);
+
+
+            // each service should have added a part, so there are now four different parts
+            parts = ImmutableSet.copyOf(item.getParts());
+            Assert.assertEquals(4, parts.size());
+            Assert.assertThat(item.getSyntacticalType(), equalTo("A"));
+            Assert.assertThat(item.getSemanticType(), equalTo("A"));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("B1"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("B2"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("C"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("B1"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("B2"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("semanticType", equalTo("C"))));
+
+        } finally {
+            if(item != null){
+                ps.deleteItem(item.getURI());
+            }
+        }
+    }
+
     /**
      * Resolves the {@link MockEndpoint} using a URI of the form
      * <code>mock:someName</code>, optionally creating it if it does not exist.
@@ -115,28 +174,25 @@ public class CamelBrokerTest extends BaseBrokerTest {
      * Asserts that all the expectations of the Mock endpoints are valid
      * @param mock 
      */
-    protected void assertMockEndpointsSatisfied(MockEndpoint mock) throws InterruptedException {
+    protected void assertMockEndpointsSatisfied(MockEndpoint... mock) throws InterruptedException {
         MockEndpoint.assertIsSatisfied(mock);
     }
 
     /**
      * Asserts that all the expectations of the Mock endpoints are valid
      */
-    protected void assertMockEndpointsSatisfied(MockEndpoint mock, long timeout, TimeUnit unit) throws InterruptedException {
+    protected void assertMockEndpointsSatisfied(long timeout, TimeUnit unit, MockEndpoint... mock) throws InterruptedException {
         MockEndpoint.assertIsSatisfied(timeout, unit,mock);
     }
     
     
-    @Before
-    public void prepareContext() throws Exception {
-        setupMockAnalyser("A","B");
-        setupMockAnalyser("B","C");
-        setupMockAnalyser("A","C");
+    @BeforeClass
+    public static void prepareContext() throws Exception {
 
         // load route from XML and add them to the existing camel context
-        InputStream is = getClass().getClassLoader().getResourceAsStream("camel-routes.xml");
+        InputStream is = CamelBrokerTest.class.getClassLoader().getResourceAsStream("camel-routes.xml");
         if (is == null){
-            Assert.fail("symple routes not found");
+            Assert.fail("sample routes not found");
         }
         context.init();
         context.loadRoutes(is);

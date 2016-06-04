@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <routes xmlns="http://camel.apache.org/schema/spring">
  
-    <route id="helloRoute">
+    <route id="simpleRoute">
       <!-- incoming requests from the servlet is routed -->
       <from uri="direct:a"/>
-      <to uri='direct:workflow-simple1-pipeline-0'></to>
+      <to uri='direct:simple1-mimeType=mico/test,syntacticType=A'></to>
     </route>
  
    <route id='workflow-simple1-starting-point-for-pipeline-0-mimeType=mico/test,syntacticType=A'>
@@ -20,4 +20,50 @@
     </pipeline>
   </route>
 
+<!-- the next set of route definitions is a workflow with aggregate component -->
+    <route id="aggregateRoute">
+      <!-- incoming requests from the servlet is routed -->
+      <from uri="direct:b"/>
+      <to uri='direct:aggregateSimple-mimeType=mico/test,syntacticType=A'></to>
+    </route>
+
+  <route id='workflow-aggregateSimple-starting-point-for-multicast-0-mimeType=mico/test,syntacticType=A'>
+    <from uri='direct:aggregateSimple-mimeType=mico/test,syntacticType=A'/>
+    <multicast>
+      <to uri='direct:workflow-aggregateSimple-pipeline-3'/>
+      <to uri='direct:workflow-aggregateSimple-pipeline-4'/>
+    </multicast>
+  </route>
+  <route id='workflow-aggregateSimple-pipeline-0'>
+    <from uri='direct:workflow-aggregateSimple-pipeline-0'/>
+    <pipeline>
+      <to uri='mico-comp:vbox1?host=mico-platform&amp;extractorId=urn:org.example.services&amp;extractorVersion=1.0.0&amp;modeId=BCService'/>
+    </pipeline>
+  </route>
+  <route id='workflow-aggregateSimple-pipeline-3'>
+    <from uri='direct:workflow-aggregateSimple-pipeline-3'/>
+    <pipeline>
+      <to uri='mico-comp:vbox1?host=mico-platform&amp;extractorId=urn:org.example.services&amp;extractorVersion=1.0.0&amp;modeId=AB1Service'/>
+    </pipeline>
+    <to uri='direct:workflow-aggregateSimple-aggregator-0'/>
+  </route>
+  <route id='workflow-aggregateSimple-pipeline-4'>
+    <from uri='direct:workflow-aggregateSimple-pipeline-4'/>
+    <pipeline>
+      <to uri='mico-comp:vbox1?host=mico-platform&amp;extractorId=urn:org.example.services&amp;extractorVersion=1.0.0&amp;modeId=AB2Service'/>
+    </pipeline>
+    <to uri='direct:workflow-aggregateSimple-aggregator-0'/>
+  </route>
+  <route id='workflow-aggregateSimple-aggregator-0'>
+    <from uri='direct:workflow-aggregateSimple-aggregator-0'/>
+    <aggregate strategyRef='simpleAggregatorStrategy' completionSize='1'>
+      <correlationExpression>
+        <simple>header.mico_item</simple>
+      </correlationExpression>
+      <to uri='direct:workflow-aggregateSimple-pipeline-0'/>
+      <to uri="mock:result_aggregateSimple_1"/>
+    </aggregate>
+    <to uri="mock:result_aggregateSimple_2"/>
+  </route>
+  
 </routes>
