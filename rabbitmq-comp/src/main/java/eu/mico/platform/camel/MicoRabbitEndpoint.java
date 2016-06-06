@@ -35,6 +35,9 @@ public class MicoRabbitEndpoint extends DefaultEndpoint {
 
     @UriParam(name="host", defaultValue = "mico-box")
     private String host = "mico-box";
+    @UriParam(name="vhost", defaultValue = "/")
+    private String virtualHost = "/";
+    
     @UriParam(name="user", defaultValue = "mico")
     private String user = "mico";
     @UriParam(defaultValue = "mico")
@@ -85,6 +88,7 @@ public class MicoRabbitEndpoint extends DefaultEndpoint {
 	    if (connection == null){
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(getHost());
+            factory.setVirtualHost(getVirtualHost());
             factory.setPort(getRabbitPort());
             factory.setUsername(getUser());
             factory.setPassword(getPassword());
@@ -145,6 +149,14 @@ public class MicoRabbitEndpoint extends DefaultEndpoint {
 
 	public void setHost(String host) {
 		this.host = host;
+	}
+	
+	public String getVirtualHost() {
+		return virtualHost;
+	}
+
+	public void setVirtualHost(String vhost) {
+		this.virtualHost = vhost;
 	}
 
     /**
