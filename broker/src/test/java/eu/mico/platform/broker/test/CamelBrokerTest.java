@@ -49,7 +49,6 @@ public class CamelBrokerTest extends BaseBrokerTest {
     private static Logger log = LoggerFactory.getLogger(CamelBrokerTest.class);
     private static MicoCamelContext context = new MicoCamelContext();
 
-    @Ignore
     @Test(timeout=40000)
     public void testSimpleWorkflow() throws Exception {
         setupMockAnalyser("A","B");
@@ -97,7 +96,6 @@ public class CamelBrokerTest extends BaseBrokerTest {
         }
     }
 
-    @Ignore
     @Test(timeout=40000)
     public void testAggregateWorkflow() throws Exception {
         setupMockAnalyser("A","B1");
