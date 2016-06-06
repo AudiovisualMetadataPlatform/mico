@@ -83,8 +83,25 @@ public class ServiceGraph extends DirectedPseudograph<TypeDescriptor,ServiceDesc
 
     @Override
     public boolean removeEdge(ServiceDescriptor serviceDescriptor) {
+    	//get source and target edges
+    	TypeDescriptor sourceVertex = super.getEdgeSource(serviceDescriptor);
+    	TypeDescriptor targetVertex = super.getEdgeTarget(serviceDescriptor);
+    	
         services.remove(serviceDescriptor.getUri());
-
-        return super.removeEdge(serviceDescriptor);
+        boolean result=super.removeEdge(serviceDescriptor);
+        if(result){
+        	//if the edge existed
+        	
+        	//if the source vertex is unnecessary, remove it
+        	if(super.inDegreeOf(sourceVertex)<1 && super.outDegreeOf(sourceVertex)<1){
+        		super.removeVertex(sourceVertex);
+        	}
+        	
+        	//same for the target vertex
+        	if(super.inDegreeOf(targetVertex)<1 && super.outDegreeOf(targetVertex)<1){
+        		super.removeVertex(targetVertex);
+        	}
+        }        
+        return result;
     }
 }
