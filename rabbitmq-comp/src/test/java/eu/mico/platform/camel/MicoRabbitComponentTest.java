@@ -178,8 +178,11 @@ public class MicoRabbitComponentTest extends TestBase {
                 JndiRegistry registry = (JndiRegistry) (
                         (PropertyPlaceholderDelegateRegistry)context.getRegistry()).getRegistry();
 
+                if(registry.lookup("simpleAggregatorStrategy") == null)
                 //and here, it is bound to the registry
                 registry.bind("simpleAggregatorStrategy", aggregatorStrategy);
+                
+                if(registry.lookup("itemAggregatorStrategy") == null)
                 //and here, it is bound to the registry
                 registry.bind("itemAggregatorStrategy", itemAggregatorStrategy);
                         
@@ -237,22 +240,23 @@ public class MicoRabbitComponentTest extends TestBase {
     static public void init() throws Exception {
         resetDataFolder();
 
-        try{
-        micoCamel = new MicoCamel();
-        micoCamel.init();
-        createTextItem();
-        createHtmlItem();
-        createImageItem();
-        createVideoItem();
-        }catch (Exception e){
-            e.printStackTrace();
-            fail("unable to setup test env");
+        if(micoCamel == null){
+	        try{
+		        micoCamel = new MicoCamel();
+		        micoCamel.init();
+		        createTextItem();
+		        createHtmlItem();
+		        createImageItem();
+		        createVideoItem();
+	        }catch (Exception e){
+	            e.printStackTrace();
+	            fail("unable to setup test env");
+	        }
         }
    }
     
     @AfterClass
     static public void cleanup() throws IOException{
-        resetDataFolder();
 
         // remove test items from platform
         micoCamel.deleteContentItem(textItemUri);
@@ -261,6 +265,8 @@ public class MicoRabbitComponentTest extends TestBase {
         micoCamel.deleteContentItem(videoItemUri);
 
         micoCamel.shutdown();
+        micoCamel=null;
+
     }
 
     /**

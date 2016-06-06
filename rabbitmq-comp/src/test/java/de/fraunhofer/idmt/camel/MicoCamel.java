@@ -3,29 +3,42 @@ package de.fraunhofer.idmt.camel;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.marmotta.platform.core.test.base.JettyMarmotta;
+import org.apache.marmotta.platform.sparql.webservices.SparqlWebService;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 
 import de.fraunhofer.idmt.mico.DummyExtractor;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
+import eu.mico.platform.event.model.Event;
+import eu.mico.platform.camel.TestBase;
+import eu.mico.platform.event.test.mock.EventManagerMock;
 import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Resource;
+import eu.mico.platform.storage.api.StorageService;
 
 public class MicoCamel {
     private static Logger log = LoggerFactory.getLogger(MicoCamel.class);
@@ -34,6 +47,21 @@ public class MicoCamel {
 
     protected EventManager eventManager;
     protected Connection connection;
+    
+    private static JettyMarmotta marmotta;
+    
+    private static Path storageDir;
+    protected static String storageBaseUri;
+    private static StorageService storage;
+    
+    protected static String marmottaBaseUrl;
+    
+    protected static PersistenceService persistenceService;
+    
+    private static MockBrokerRegisterEvents brokerRegister;
+    private static MockBrokerConfigEvents brokerConfig;
+    private static Channel registrationChannel;
+    private static Channel configChannel;
 
     protected static AnalysisService extr1 = new DummyExtractor("A","B","mico-extractor-test","1.0.0","A-B-queue");
     protected static AnalysisService extr2 = new DummyExtractor("B","C","mico-extractor-test","1.0.0","B-C-queue");
@@ -56,20 +84,59 @@ public class MicoCamel {
      * @throws URISyntaxException
      */
     public void init() throws IOException, TimeoutException, URISyntaxException {
-        String testHost = System.getProperty("test.host");
+        String testHost = System.getProperty("amqp.host");
         if (testHost == null) {
-            log.warn("'test.host' environment variable not defined, using default of mico-box");
-            testHost = "mico-box";
+        	testHost="127.0.0.1";
+            log.warn("'amqp.host' environment variable not defined, using default of {}",testHost);
         }
+        String virtualHost = System.getProperty("amqp.vhost");
+        if (virtualHost == null) {
+        	virtualHost="/";
+            log.warn("'amqp.vhost' environment variable not defined, using default of {}",virtualHost);
+        }
+        
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost(testHost);
+        factory.setVirtualHost(virtualHost);
+        factory.setUsername("mico");
+        factory.setPassword("mico");
+        
+        //we need a Marmotta instance for the EventManagerImpl
+        if(marmotta == null) marmotta = new JettyMarmotta("/marmotta", 8088, SparqlWebService.class);
+        marmottaBaseUrl = "http://localhost:8088/marmotta";
+        
+        storageDir = Files.createTempDirectory("mico-rabbit-component-test");
+        storageBaseUri = storageDir.toUri().toString();
+        
+        //and a PersistenceService
+        persistenceService = new PersistenceServiceAnno4j(java.net.URI.create(marmottaBaseUrl), 
+                java.net.URI.create(storageBaseUri));
+
+        connection = factory.newConnection();
+
+        Channel initChannel = connection.createChannel();
+        try {
+            // create the exchange in case it does not exist
+            initChannel.exchangeDeclare(EventManager.EXCHANGE_SERVICE_REGISTRY, "fanout", true);
+            // create the exchange in case it does not exist
+            initChannel.exchangeDeclare(EventManager.EXCHANGE_SERVICE_DISCOVERY, "fanout", true);
+            // create the input and output queue with a defined name
+            initChannel.queueDeclare(EventManager.QUEUE_CONTENT_INPUT, true, false, false, null);
+            initChannel.queueDeclare(EventManager.QUEUE_PART_OUTPUT, true, false, false, null);
+            // create the configuration queue with a defined name
+            initChannel.queueDeclare(EventManager.QUEUE_CONFIG_REQUEST, false, true, false, null);
+        } finally {
+            initChannel.close();
+        }
+        
+        registrationChannel = connection.createChannel();
+        brokerRegister = new MockBrokerRegisterEvents(registrationChannel);
+        configChannel = connection.createChannel();
+        brokerConfig = new MockBrokerConfigEvents(configChannel);
+
         log.info("initialize event manager with host: {} ....", testHost);
         eventManager = new EventManagerImpl(testHost);
         eventManager.init();
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(testHost);
-        factory.setUsername("mico");
-        factory.setPassword("mico");
-
-        connection = factory.newConnection();
 
         eventManager.registerService(extr1);
         eventManager.registerService(extr2);
@@ -140,9 +207,25 @@ public class MicoCamel {
      * @throws IOException
      */
     public void shutdown() throws IOException {
-        connection.clearBlockedListeners();
-        connection.close();
+        
         eventManager.shutdown();
+        
+        if(registrationChannel != null){
+            registrationChannel.close();
+            registrationChannel=null;
+        }
+        if(configChannel != null){
+            configChannel.close();
+            configChannel=null;
+        }
+        if(connection != null){
+        	connection.clearBlockedListeners();
+            connection.close();
+            connection=null;
+        }
+        if(storageDir != null){
+            FileUtils.deleteDirectory(storageDir.toFile());
+        }
     }
 
     public void registerService(AnalysisService... extr) throws IOException {
@@ -156,4 +239,63 @@ public class MicoCamel {
             eventManager.unregisterService(ex);
         }
        }
+    
+ // a mock message broker just recording service registry events to test if they worked
+    private static class MockBrokerRegisterEvents extends DefaultConsumer {
+
+        private String lastService;
+
+        public MockBrokerRegisterEvents(Channel channel) throws IOException {
+            super(channel);
+
+            String queueName = channel.queueDeclare().getQueue();
+            channel.queueBind(queueName, EventManager.EXCHANGE_SERVICE_REGISTRY, "");
+            channel.basicConsume(queueName, true, this);
+        }
+
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+            Event.RegistrationEvent registrationEvent = Event.RegistrationEvent.parseFrom(body);
+
+            lastService = registrationEvent.getServiceId();
+
+            synchronized (this) {
+                this.notifyAll();
+            }
+        }
+    }
+
+    // a mock config broker waiting for config requests and sending back fake responses
+    private static class MockBrokerConfigEvents extends DefaultConsumer {
+        public MockBrokerConfigEvents(Channel channel) throws IOException {
+            super(channel);
+
+            channel.queueDeclare(EventManager.QUEUE_CONFIG_REQUEST, false, true, false, null);
+            channel.basicConsume(EventManager.QUEUE_CONFIG_REQUEST, false, this);
+        }
+
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+            log.debug("returning data from MockBrokerConfigEvents");
+        	Event.ConfigurationDiscoverEvent configDiscover = Event.ConfigurationDiscoverEvent.parseFrom(body);
+
+            // construct reply properties, use the same correlation ID as in the request
+            final AMQP.BasicProperties replyProps = new AMQP.BasicProperties
+                    .Builder()
+                    .correlationId(properties.getCorrelationId())
+                    .build();
+
+            // construct configuration event
+            Event.ConfigurationEvent config = Event.ConfigurationEvent.newBuilder()
+                    .setMarmottaBaseUri(marmottaBaseUrl)
+                    .setStorageBaseUri(storageBaseUri)
+                    .build();
+
+            // send configuration
+            getChannel().basicPublish("", properties.getReplyTo(), replyProps, config.toByteArray());
+
+            // ack request
+            getChannel().basicAck(envelope.getDeliveryTag(), false);
+        }
+    }
 }

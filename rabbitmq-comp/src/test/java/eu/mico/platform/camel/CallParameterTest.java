@@ -1,8 +1,12 @@
 package eu.mico.platform.camel;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 
 import org.apache.camel.Exchange;
@@ -15,6 +19,7 @@ import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.RoutesDefinition;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
 
@@ -72,8 +77,12 @@ public class CallParameterTest extends TestBase {
                 JndiRegistry registry = (JndiRegistry) (
                         (PropertyPlaceholderDelegateRegistry)context.getRegistry()).getRegistry();
 
+                
+                if(registry.lookup("simpleAggregatorStrategy") == null)
                 //and here, it is bound to the registry
                 registry.bind("simpleAggregatorStrategy", aggregatorStrategy);
+                
+                if(registry.lookup("itemAggregatorStrategy") == null)
                 //and here, it is bound to the registry
                 registry.bind("itemAggregatorStrategy", itemAggregatorStrategy);
                         
@@ -104,8 +113,9 @@ public class CallParameterTest extends TestBase {
 
     @BeforeClass
     static public void init() throws Exception {
-
-        try{
+    	resetDataFolder();
+    	if(micoCamel == null)
+    	try{
             micoCamel = new MicoCamel();
             micoCamel.init();
             createTextItem();
@@ -121,6 +131,33 @@ public class CallParameterTest extends TestBase {
         micoCamel.deleteContentItem(textItemUri);
 
         micoCamel.shutdown();
+        micoCamel=null;
+    }
+    
+    /**
+     * camel stores all processed files in .camel folder, 
+     * move them back and delete the folder
+     */
+    private static void resetDataFolder() {
+        Path destPath = new File(TEST_DATA_FOLDER).toPath();
+        File processed = new File(TEST_DATA_FOLDER,".camel");
+        if(processed.exists()){
+            for (File f : processed.listFiles()){
+                Path source = f.toPath();
+                try {
+                    System.out.println("move file back to scr folder: " + source.getFileName());
+                    Files.move(source, destPath.resolve(source.getFileName()));
+                } catch (FileAlreadyExistsException e){
+                    // file was not processed correctly and is still in source folder, 
+                    // remove the copy from processed folder
+                    f.delete();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+         processed.delete();
+        }
     }
 
     
