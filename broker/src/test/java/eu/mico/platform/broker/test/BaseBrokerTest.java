@@ -154,6 +154,12 @@ public abstract class BaseBrokerTest {
             throws IOException {
         eventManager.registerService(new MockService(source, target, createPart));
     }
+    
+    protected void teardownMockAnalyser(MockService s)
+            throws IOException {
+        eventManager.unregisterService(s);
+        s=null;
+    }
 
     protected static class MockService implements AnalysisService {
 

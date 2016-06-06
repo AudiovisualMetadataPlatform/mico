@@ -90,4 +90,106 @@ public class SimpleBrokerTest extends BaseBrokerTest {
         Assert.assertEquals(3, broker.getDependencies().edgeSet().size());
         Assert.assertEquals(3, broker.getDependencies().vertexSet().size());
     }
+    
+    @Test
+    public void testServiceGraph() throws IOException, InterruptedException, URISyntaxException {
+
+    	//---- normal graph ---- 
+    	
+    	MockService ad = new MockService("A","D");
+    	MockService ab = new MockService("A","B");
+    	MockService bc = new MockService("B","C");
+    	MockService ac = new MockService("A","C");
+    	
+    	eventManager.registerService(ad);
+    	eventManager.registerService(ab);
+    	eventManager.registerService(bc);
+    	eventManager.registerService(ac);
+    	
+		// wait for broker to finish with discovery ...
+        Thread.sleep(500);
+		// check dependency graph
+        Assert.assertEquals(4, broker.getDependencies().edgeSet().size());
+        Assert.assertEquals(4, broker.getDependencies().vertexSet().size());
+
+	    
+    	teardownMockAnalyser(ab);
+    	teardownMockAnalyser(bc);
+    	teardownMockAnalyser(ac);
+	    //wait for unregistration of (A-B, B-C, A-C)to finish 
+	    Thread.sleep(500);
+	    //check dependency graph
+        Assert.assertEquals(1, broker.getDependencies().edgeSet().size());
+        Assert.assertEquals(2, broker.getDependencies().vertexSet().size());
+
+        bc = new MockService("B","C");
+        eventManager.registerService(bc);
+        // wait for broker to finish with discovery ...
+        Thread.sleep(500);
+        //check dependency graph
+        Assert.assertEquals(2, broker.getDependencies().edgeSet().size());
+        Assert.assertEquals(4, broker.getDependencies().vertexSet().size());
+
+        teardownMockAnalyser(bc);
+    	//wait for unregistration of A-D to finish
+        Thread.sleep(500);
+        // check dependency graph
+        Assert.assertEquals(1, broker.getDependencies().edgeSet().size());
+        Assert.assertEquals(2, broker.getDependencies().vertexSet().size());
+        
+    	
+        teardownMockAnalyser(ad);
+    	//wait for unregistration of A-D to finish
+        Thread.sleep(500);
+        // check dependency graph
+        Assert.assertEquals(0, broker.getDependencies().edgeSet().size());
+        Assert.assertEquals(0, broker.getDependencies().vertexSet().size());
+        
+        
+        
+        
+        
+        //----- graph with loops and repeated edges----
+        ab= new MockService("A","B");
+        MockService ab2 = new MockService("A","B");
+        MockService ba =  new MockService("B","A");
+        
+        eventManager.registerService(ab);
+        eventManager.registerService(ba);
+		// wait for broker to finish with discovery ...
+        Thread.sleep(500);
+		// check dependency graph
+        Assert.assertEquals(2, broker.getDependencies().edgeSet().size());
+        Assert.assertEquals(2, broker.getDependencies().vertexSet().size());
+        
+        eventManager.registerService(ab2); //leaves everything unchanged so far, because the service does already exist
+        //wait for broker to finish with discovery ...
+        Thread.sleep(500);
+		// check dependency graph
+        Assert.assertEquals(2, broker.getDependencies().edgeSet().size());
+        Assert.assertEquals(2, broker.getDependencies().vertexSet().size());
+        
+        teardownMockAnalyser(ab);
+    	//wait for unregistration of A-B to finish
+        Thread.sleep(500);
+        // check dependency graph
+        Assert.assertEquals(1, broker.getDependencies().edgeSet().size());
+        Assert.assertEquals(2, broker.getDependencies().vertexSet().size());
+        
+        teardownMockAnalyser(ab2);
+    	//wait for unregistration of (second) A-B to finish
+        Thread.sleep(500);
+        // check dependency graph
+        Assert.assertEquals(1, broker.getDependencies().edgeSet().size());
+        Assert.assertEquals(2, broker.getDependencies().vertexSet().size());
+        
+        teardownMockAnalyser(ba);
+    	//wait for unregistration of B-A to finish
+        Thread.sleep(500);
+        // check dependency graph
+        Assert.assertEquals(0, broker.getDependencies().edgeSet().size());
+        Assert.assertEquals(0, broker.getDependencies().vertexSet().size());
+        
+    }
+
 }
