@@ -85,6 +85,21 @@ public class DummyExtractor implements AnalysisService {
     public String getQueueName() {
         return extractorId +"-" + version +"-"+ mode;
     }
+    
+	@Override
+	public String getExtractorID() {
+		return "Mock";
+	}
+
+	@Override
+	public String getExtractorModeID() {
+		return "Mode";
+	}
+
+	@Override
+	public String getExtractorVersion() {
+		return "0.0.0";
+	}
 
     @Override
     public void call(AnalysisResponse resp, Item item, java.util.List<Resource> objs, Map<String,String> params) throws AnalysisException ,IOException {
