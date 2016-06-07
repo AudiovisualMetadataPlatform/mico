@@ -92,7 +92,7 @@ public class MICOBrokerApplication extends Application {
 
             services = new HashSet<>();
             services.add(new StatusWebService(broker));
-            services.add(new InjectionWebService(manager));
+            services.add(new InjectionWebService(manager, camelContext));
             services.add(new WorkflowManagementService(broker, camelContext));
         } catch (IOException ex) {
             log.error("could not initialise MICO broker, services not available (message: {})", ex.getMessage());

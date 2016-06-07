@@ -15,6 +15,7 @@ package eu.mico.platform.broker.webservices;
 
 import com.google.common.collect.ImmutableMap;
 
+import eu.mico.platform.camel.MicoCamelContext;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
@@ -53,11 +54,13 @@ public class InjectionWebService {
     private static Logger log = LoggerFactory.getLogger(InjectionWebService.class);
 
     private EventManager eventManager;
+    private MicoCamelContext camelContext;
 
     private final URI extratorID = new URIImpl("http://www.mico-project.eu/injection-webservice/");
 
-    public InjectionWebService(EventManager manager) {
+    public InjectionWebService(EventManager manager, MicoCamelContext camelContext) {
         this.eventManager = manager;
+        this.camelContext = camelContext;
     }
 
     /**
