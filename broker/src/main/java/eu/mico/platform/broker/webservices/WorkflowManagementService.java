@@ -79,7 +79,7 @@ public class WorkflowManagementService {
     @POST
     @Path("/add")
     @Produces("application/json")
-    public Response createItem(@FormParam("user") String user,
+    public Response addWorkflow(@FormParam("user") String user,
     		@FormParam("workflowName") String workflowName,
     		@FormParam("route") String route,
     		@FormParam("links") String links, 
@@ -100,7 +100,7 @@ public class WorkflowManagementService {
     @POST
     @Path("/del/{id}")
     @Produces("application/json")
-    public Response removeItem(@PathParam("id") Integer workflowId ) throws RepositoryException,
+    public Response deleteWorkflow(@PathParam("id") Integer workflowId ) throws RepositoryException,
             IOException {
     	log.info("Removing workflow with ID {}",workflowId);
         deleteWorkflow(getWorkflow(workflowId));
