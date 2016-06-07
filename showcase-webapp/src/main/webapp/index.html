@@ -1,59 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Showcase Webapp</title>
+<head xmlns="http://www.w3.org/1999/html">
+    <title>WP5 Recommendation Demo</title>
+
+    <!--styles-->
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="css/select2.min.css">
+    <link rel="stylesheet" href="css/taggle.css">
+    <link rel="stylesheet" href="css/foldingcube.css">
+    <link rel="stylesheet" href="css/wp5demo.css">
+
+    <!--libs-->
+
+    <script src="script/jquery-1.9.1.min.js"></script>
+    <script src="script/bootstrap.min.js"></script>
+    <script src="script/select2.full.js"></script>
+    <script src="script/taggle.min.js"></script>
+
+
+    <!--custom scripts-->
+    <script src="script/utils.js"></script>
+    <script src="script/wp5demo.js"></script>
+
 </head>
+
+
 <body>
 
-<h2>zooniverse/animaldetection</h2>
+    <nav class="navbar navbar-default">
 
-PUT, POST, GET
-
-
-
-<h2>zooniverse/textanalysis</h2>
-
-POST, GET
-
-
-
-<h2>/content</h2>
-
-GET
-
-
-<h2>/demo</h2>
-
-/image
-/imageurl
-/video
-
-<h2>/resource</h2>
-<h2>reco</h2>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-2"><img src="img/micologo_80t.png"/></div>
+                <div class="col-md-2">
+                    <div class="container" id="loading">
+                        <div class="sk-folding-cube">
+                            <div class="sk-cube1 sk-cube"></div>
+                            <div class="sk-cube2 sk-cube"></div>
+                            <div class="sk-cube4 sk-cube"></div>
+                            <div class="sk-cube3 sk-cube"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8"><a class="navbar-brand" href="#">MICO WP5 Demo</a></div>
+            </div>
+        </div>
+    </nav>
 
 
-<a href="reco/testcall">Testcall</a>
+    <div class="panel">
+        <div class="container panel-body" id="query_frontend">
+            <h3>Please choose user ID:</h3>
+            <select class="user-id-input">
+                <option value="1">Please use drop down menu</option>
+            </select>
+        </div>
+    </div>
 
-<br />
+    <div class="container" id="result"></div>
 
-<a href="reco/dockerstatus">Docker Status</a>
 
-<br />
 
-<a href="reco/piostatus">Prediction IO Event Server Status</a>
+    <div class="panel">
 
-<br />
+        <div class="container panel-body" id="videoanalysis-input">
+            <h3>Please choose analyzed video:</h3>
+            <select class="ner-contentitems">
+                <option value="1">Please use drop down menu</option>
+            </select>
+        </div>
 
-<a href="reco/pioevents">Prediction IO - All Events</a>
+        <div class="container panel-body" id="videoanalysis-results">
+            <div id="tag-display"></div>
+        </div>
 
-<br />
-
-<a href="reco/piosimplereco?userId=300709&length=4">Prediction IO - Simple Recommendation</a>
-
-<br />
-
-<a href="reco/createentity">Prediction IO - Create Entity</a>
+    </div>
 
 </body>
-</html>
