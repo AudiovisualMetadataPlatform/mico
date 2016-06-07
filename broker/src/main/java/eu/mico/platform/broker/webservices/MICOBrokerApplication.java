@@ -54,7 +54,7 @@ public class MICOBrokerApplication extends Application {
     Set<Object> services;
 
     private MICOBroker broker;
-    private EventManager manager;
+    private EventManager eventManager;
     protected MicoCamelContext camelContext;
 
 
@@ -85,14 +85,14 @@ public class MICOBrokerApplication extends Application {
 
         try {
             broker  = new MICOBrokerImpl(host, user, pass, 5672, marmottaBaseUri, storageBaseUri);
-            manager = new EventManagerImpl(host, user, pass);
-            manager.init();
+            eventManager = new EventManagerImpl(host, user, pass);
+            eventManager.init();
             camelContext = new MicoCamelContext();
             camelContext.init();
 
             services = new HashSet<>();
             services.add(new StatusWebService(broker));
-            services.add(new InjectionWebService(manager, camelContext));
+            services.add(new InjectionWebService(eventManager, camelContext));
             services.add(new WorkflowManagementService(broker, camelContext));
         } catch (IOException ex) {
             log.error("could not initialise MICO broker, services not available (message: {})", ex.getMessage());
@@ -115,7 +115,7 @@ public class MICOBrokerApplication extends Application {
 
     @Override
     protected void finalize() throws Throwable {
-        manager.shutdown();
+    	eventManager.shutdown();
 
         super.finalize();
     }
