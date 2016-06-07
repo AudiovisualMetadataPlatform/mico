@@ -107,7 +107,7 @@ public abstract class BaseBrokerTest {
             storageDir = Files.createTempDirectory("mico-event-manager-test");
             storageBaseUri = storageDir.toUri().toString();
             
-            registrationBaseUrl = "http://localhost:8088/registration-service";
+            registrationBaseUrl = getConf("reg-api.base", "http://localhost:8030/");
 
             broker = new MICOBrokerImpl(testHost, amqpVHost, amqpUsr, amqpPwd,
                     rabbitPort, marmottaBaseUrl, storageBaseUri,registrationBaseUrl);
@@ -234,7 +234,7 @@ public abstract class BaseBrokerTest {
 
 		@Override
 		public String getExtractorID() {
-			return "Mock";
+			return getServiceID().stringValue();
 		}
 
 		@Override

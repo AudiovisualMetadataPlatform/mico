@@ -828,12 +828,14 @@ public class MICOBrokerImpl implements MICOBroker {
             //finally, check it the extractor is connected
             List<ServiceDescriptor> svc=dependencies.getServices();
             for(ServiceDescriptor s : svc){
-            	if(s.getExtractorId()==eId &&s.getExtractorModeId()==eMode && s.getExtractorVersion()==eVersion){
+            	if(s.getExtractorId().contentEquals(eId) &&s.getExtractorModeId().contentEquals(eMode) && s.getExtractorVersion().contentEquals(eVersion)){
             		response.close();
             		return outputStatus=ExtractorStatus.CONNECTED;
             	}
             }
-    	}finally{
+    	}
+    	catch(Exception exc){;}
+    	finally{
     		if(response != null){
     			response.close();
     		}
@@ -845,7 +847,11 @@ public class MICOBrokerImpl implements MICOBroker {
     };
 
     
-    public enum ExtractorStatus{
+    public String getRegistrationBaseUri() {
+		return registrationBaseUri;
+	}
+
+	public enum ExtractorStatus{
     	CONNECTED, DEPLOYED, NOT_DEPLOYED, UNREGISTERED;
     	
     	@Override

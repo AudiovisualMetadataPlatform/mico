@@ -260,7 +260,7 @@ public class MICOCamelRoute {
     			
     			if(mTypeIdx!=-1 && sTypeIdx!=-1 && dUriIdx != -1){
     				mimeType=line.substring(mTypeIdx+DATA_MIME_TYPE_PREFIX.length(), sTypeIdx-1);
-    				syntacticType=line.substring(sTypeIdx+DATA_SYNTACTIC_TYPE_PREFIX.length(),line.length()-3);
+    				syntacticType=line.substring(sTypeIdx+DATA_SYNTACTIC_TYPE_PREFIX.length(),line.length()-2);
     				
     				String workflowId=line.substring(dUriIdx+PIPELINE_ROUTE_STARTING_TOKEN.length(),
     						                         line.indexOf(PIPELINE_STARTING_POINT_PATTERN));

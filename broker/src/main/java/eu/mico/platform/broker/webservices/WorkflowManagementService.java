@@ -79,7 +79,7 @@ public class WorkflowManagementService {
     @POST
     @Path("/add")
     @Produces("application/json")
-    public Response addWorkflow(@FormParam("user") String user,
+    public int addWorkflow(@FormParam("user") String user,
     		@FormParam("workflowName") String workflowName,
     		@FormParam("route") String route,
     		@FormParam("links") String links, 
@@ -93,7 +93,7 @@ public class WorkflowManagementService {
         persistWorkflow(workflow);
         log.info("Persisted new workflow {} belonging to user {}",workflow.toString(),user);
 
-        return Response.ok(ImmutableMap.of()).build();
+        return workflow.getId().intValue();
     }
 
     //TODO: with @delete the ui gets a 403 forbidden error, and this method is not triggered. check why
@@ -116,11 +116,11 @@ public class WorkflowManagementService {
     @GET
     @Path("/list")
     @Produces("application/json")
-    public Response listWorkflows(@QueryParam("user") String user) 
+    public List<String> listWorkflows(@QueryParam("user") String user) 
             throws RepositoryException, IOException {
     	log.info("Retrieving list of workflows ids for user {}",user);
     	List<String> WorkflowIds = getWorkflowIdsForUser(user);        
-    	return Response.ok(WorkflowIds).build();
+    	return WorkflowIds;
     }
     
     /**
@@ -141,17 +141,22 @@ public class WorkflowManagementService {
     @GET
     @Path("/status/{id}")
     @Produces("text/plain")
-    public Response getStatus(@QueryParam("user") String user,
+    public String getStatus(@QueryParam("user") String user,
             @PathParam("id") Integer workflowId ) throws RepositoryException,
             IOException {
         
     	
     	String status="BROKEN";
-        if (broker instanceof MICOBrokerImpl ){
-        	String camelRoute=new String(getWorkflow(workflowId).getRoute());
-        	status =  broker.getRouteStatus(camelRoute.replaceAll("WORKFLOW_ID", workflowId.toString()));
+    	try{
+	        if (broker instanceof MICOBrokerImpl ){
+	        	String camelRoute=new String(getWorkflow(workflowId).getRoute());
+	        	status =  broker.getRouteStatus(camelRoute.replaceAll("WORKFLOW_ID", workflowId.toString()));
+	        }
         }
-        return Response.ok(status).build();
+    	catch(Exception e){
+    		log.error("Unable to retrieve status for workflow {}",workflowId);
+    	}
+        return status;
     }
     
     @GET
@@ -168,11 +173,11 @@ public class WorkflowManagementService {
     @GET
     @Path("/camel-route/{id}")
     @Produces("text/plain")
-    public Response getCamelRoute(@PathParam("id") Integer workflowId ) throws RepositoryException,
+    public String getCamelRoute(@PathParam("id") Integer workflowId ) throws RepositoryException,
             IOException {
     	log.info("Retrieving CamelRoute for workflow with ID {}",workflowId);
         String camelRoute=new String(getWorkflow(workflowId).getRoute());        
-        return Response.ok(camelRoute.replaceAll("WORKFLOW_ID", workflowId.toString())).build();
+        return camelRoute.replaceAll("WORKFLOW_ID", workflowId.toString());
     }
     
     @POST
