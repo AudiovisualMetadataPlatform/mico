@@ -149,6 +149,7 @@ select, input {
 				</select>
 				<input type="submit" value="start selected configuration" />
 			</form:form>
+			<a href="stopAll.html"> <button>Stop all extractors</button></a>
 		</div>
 	</div>
 	</main>

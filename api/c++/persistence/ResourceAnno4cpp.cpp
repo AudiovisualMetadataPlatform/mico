@@ -7,6 +7,7 @@
 #include "Uri.hpp"
 
 #include <jnipp.h>
+#include <regex>
 #include <anno4cpp.h>
 #include "Logging.hpp"
 
@@ -94,6 +95,69 @@ namespace mico {
 
       std::shared_ptr<Asset> ResourceAnno4cpp::getAsset()
       {
+    	  return createAsset();
+      }
+
+
+      std::shared_ptr<Asset> ResourceAnno4cpp::getAssetWithLocation(mico::persistence::model::URI uriLocation)
+	  {
+    	  LOG_DEBUG("Trying to retrieve an asset with pre-defined location %s",uriLocation.stringValue().c_str());
+
+    	  //check non-empty input uri
+    	  if(uriLocation.stringValue().empty()){
+    		  LOG_ERROR("Input location is empty.");
+    		  LOG_ERROR("Returning empty asset");
+    		  return std::shared_ptr<Asset>();
+    	  }
+
+
+    	  //check that the uri is correctly formatted as URN_PREFIX + STRING + '/' + STRING
+    	  //where STRING can contains numbers, letters and '-' characters
+    	  //important: to trailing '/' character is allowed
+
+    	  jnipp::Env::Scope scope(PersistenceService::m_sJvm);
+    	  m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);
+
+    	  //retrieve the URN_prefix and escape characters reserved for regular expressions
+    	  std::string URN_PREFIX=jnipp::eu::mico::platform::persistence::model::Asset::STORAGE_SERVICE_URN_PREFIX->std_str();
+
+    	  std::vector<std::string> reserved={ "\\" ,"^","$", ".","|", "?", "*", "+", "(", ")", "[", "{"};
+    	  auto replace_substring = [] (std::string &str, const std::string& from, const std::string& to) {
+    		  size_t start_pos = 0;
+    		  while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+    			  str.replace(start_pos, from.length(), to);
+    			  start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    		  }
+    	  };
+    	  for(std::string s : reserved){
+    		  replace_substring(URN_PREFIX,s,"\\"+s);
+    	  }
+
+          std::string s_uri_pattern("^"+URN_PREFIX+"[0-9a-zA-z\\-]*\\/[0-9a-zA-z\\-]*$");
+          std::regex uri_pattern(s_uri_pattern);
+
+          if( std::regex_search(uriLocation.stringValue(), uri_pattern) == false){
+    		  LOG_ERROR("Input location not validating against the regex %s",s_uri_pattern.c_str());
+    		  LOG_ERROR("Returning empty asset");
+    		  return std::shared_ptr<Asset>();
+          }
+
+          //retrieve the asset
+          std::shared_ptr<Asset> out=createAsset(uriLocation.stringValue());
+
+          //verify that the location requested is matching the retrieved one
+          if( uriLocation.stringValue().compare(out->getLocation().stringValue() ) != 0){
+    		  LOG_ERROR("Requested asset with location %s, but the retrieved one has location %s",
+    				     uriLocation.stringValue().c_str(),
+						 out->getLocation().stringValue().c_str());
+    		  LOG_ERROR("Returning empty asset");
+    		  return std::shared_ptr<Asset>();
+          }
+          return out;
+	  }
+
+      std::shared_ptr<Asset> ResourceAnno4cpp::createAsset(std::string userSelectedLocation)
+      {
         jnipp::Env::Scope scope(PersistenceService::m_sJvm);
         std::string assetType;
 
@@ -139,9 +203,14 @@ namespace mico {
                 URIImpl::construct( ((jnipp::Ref<ResourceObject>)m_resourceMMM)->getResourceAsString() );
 
             std::string urn_prefix=jnipp::eu::mico::platform::persistence::model::Asset::STORAGE_SERVICE_URN_PREFIX->std_str();
-            ss << urn_prefix
-               << jResourceUriImpl->getLocalName()->std_str()
-               << "/" << jUriImpl->getLocalName()->std_str();
+            if(userSelectedLocation.empty()){
+				ss << urn_prefix
+				   << jResourceUriImpl->getLocalName()->std_str()
+				   << "/" << jUriImpl->getLocalName()->std_str();
+            }
+            else{
+            	ss << userSelectedLocation;
+            }
 
             jAssetMMM->setLocation(jnipp::String::create(ss.str()));
             error = error & m_persistenceService.checkJavaExceptionNoThrow(m_jnippErrorMessage);

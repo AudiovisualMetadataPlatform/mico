@@ -118,8 +118,9 @@ namespace mico {
 
                 LOG_INFO("Loading Java dependency JAR: %s", jar_file[".*anno4jdependencies.*"].c_str());
 
-                JavaVMOption options[1];    // JVM invocation options
+                JavaVMOption options[2];    // JVM invocation options
                 options[0].optionString = (char *) JavaClassPath.c_str();
+                options[1].optionString = "-Xrs"; // this is important -> tells the JVM not to steal our system signals
 //                options[1].optionString = "-Xdebug";
 //                options[2].optionString = "-Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n";
                 //options[1].optionString = "-Xint";
@@ -127,7 +128,7 @@ namespace mico {
                 JavaVMInitArgs vm_args;
 
                 vm_args.version = JNI_VERSION_1_6;              // minimum Java version
-                vm_args.nOptions = 1;
+                vm_args.nOptions = 2;
                 vm_args.options = options;
                 vm_args.ignoreUnrecognized = false;
 
@@ -413,11 +414,15 @@ namespace mico {
             con->setRemoveContexts(context);
         }
 
-        std::string PersistenceService::unmaskContentLocation(const std::string &maskedURL){
+        std::string PersistenceService::getStoragePrefix(){
         	jnipp::Env::Scope scope(PersistenceService::m_sJvm);
         	checkJavaExceptionNoThrow(m_jniErrorMessage);
 
-        	std::string urn_prefix=jnipp::eu::mico::platform::persistence::model::Asset::STORAGE_SERVICE_URN_PREFIX->std_str();
+        	return jnipp::eu::mico::platform::persistence::model::Asset::STORAGE_SERVICE_URN_PREFIX->std_str();
+        }
+        std::string PersistenceService::unmaskContentLocation(const std::string &maskedURL){
+
+        	std::string urn_prefix=getStoragePrefix();
         	if (maskedURL.compare(0, urn_prefix.length(), urn_prefix) == 0)
         	{
         		return getContentDirectory() + std::string("/") + maskedURL.substr(urn_prefix.length());

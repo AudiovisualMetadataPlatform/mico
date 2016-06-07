@@ -30,6 +30,7 @@ public interface Resource {
     void setSemanticType(String semanticType) throws RepositoryException;
 
     Asset getAsset() throws RepositoryException;
+    Asset getAssetWithLocation( URI location ) throws RepositoryException;
 
     boolean hasAsset() throws RepositoryException;
 }

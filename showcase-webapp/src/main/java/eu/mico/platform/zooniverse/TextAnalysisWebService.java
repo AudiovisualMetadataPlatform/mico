@@ -3,6 +3,7 @@ package eu.mico.platform.zooniverse;
 import com.google.common.collect.ImmutableMap;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.zooniverse.model.TextAnalysisInput;
 import eu.mico.platform.zooniverse.model.TextAnalysisOutput;
@@ -46,11 +47,13 @@ public class TextAnalysisWebService {
 
     private final EventManager eventManager;
     private final PersistenceService persistenceService;
+    private final String marmottaBaseUri;
     private final BrokerServices brokerSvc;
 
-    public TextAnalysisWebService(EventManager eventManager, BrokerServices broker) {
+    public TextAnalysisWebService(EventManager eventManager, String marmottaBaseUri, BrokerServices broker) {
         this.eventManager = eventManager;
         this.persistenceService = eventManager.getPersistenceService();
+        this.marmottaBaseUri = marmottaBaseUri;
         this.brokerSvc = broker;
     }
 
@@ -76,11 +79,14 @@ public class TextAnalysisWebService {
 
         try {
             final Item item = persistenceService.createItem();
+            item.setSemanticType("application/textanalysis-endpoint");
             item.setSyntacticalType("text/plain");
 
-            try (OutputStream outputStream = item.getAsset().getOutputStream()) {
+            Asset asset = item.getAsset();
+            try (OutputStream outputStream = asset.getOutputStream()) {
                 IOUtils.copy(IOUtils.toInputStream(input.comment), outputStream);
                 outputStream.close();
+                asset.setFormat("text/plain");
             } catch (IOException e) {
                 log.error("Could not persist text data for ContentItem {}: {}", item.getURI(), e.getMessage());
                 throw e;
@@ -89,7 +95,7 @@ public class TextAnalysisWebService {
             eventManager.injectItem(item);
 
             return Response.status(Response.Status.CREATED)
-                    .entity(ImmutableMap.of("id",item.getURI().stringValue(),"status","submitted"))
+                    .entity(ImmutableMap.of("id",item.getURI().getLocalName(),"status","submitted"))
                     .link(java.net.URI.create(item.getURI().stringValue()), "contentItem")
                     .build();
         } catch (RepositoryException | IOException e) {
@@ -105,7 +111,7 @@ public class TextAnalysisWebService {
 
         final Item item;
         try {
-            item = persistenceService.getItem(new URIImpl(itemURI));
+            item = persistenceService.getItem(new URIImpl(this.marmottaBaseUri + "/" + itemURI));
             if (item == null)
                 return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'", itemURI)).build();
         } catch (RepositoryException e) {
@@ -124,7 +130,7 @@ public class TextAnalysisWebService {
 
         final TextAnalysisOutput out;
         try {
-            out = getTextResult(item);
+            out = getTextResult(itemURI, item);
             item.getObjectConnection().close();
 
             if(out == null) {
@@ -169,9 +175,9 @@ public class TextAnalysisWebService {
             "}";
 
     // TODO: refactor, because model changed: Metadata object does not exist anymore. Dont use sparql queries, use anno4j
-    private TextAnalysisOutput getTextResult(Item item) throws Exception {
+    private TextAnalysisOutput getTextResult(String id, Item item) throws Exception {
         try {
-            TextAnalysisOutput out = new TextAnalysisOutput(item);
+            TextAnalysisOutput out = new TextAnalysisOutput(id);
 
             out.sentiment = querySentiment(item);
             out.entities = queryList(item, queryEntities);

@@ -80,7 +80,7 @@ public class ShowcaseApplication extends Application {
 
             // Zooniverse
             services.add(new AnimalDetectionWebService(manager, marmottaBaseUri, brokerServices));
-            services.add(new TextAnalysisWebService(manager, brokerServices));
+            services.add(new TextAnalysisWebService(manager, marmottaBaseUri, brokerServices));
 
             //Demo
             services.add(new DownloadWebService(manager));
