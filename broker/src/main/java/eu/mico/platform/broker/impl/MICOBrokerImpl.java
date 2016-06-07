@@ -511,8 +511,8 @@ public class MICOBrokerImpl implements MICOBroker {
                     switch (analysisResponse.getType()) {
                         case ERROR:
                         String errMsg = analysisResponse.getError().getMessage();
-                        log.warn(errMsg,
-                                    analysisResponse.getError().getDescription());
+                        String description = analysisResponse.getError().getDescription();
+                        log.warn("Analysis Error: {} - ({})",errMsg, description);
                             state.setError(errMsg);
                             state.removeProgress(properties.getCorrelationId());
                             break;

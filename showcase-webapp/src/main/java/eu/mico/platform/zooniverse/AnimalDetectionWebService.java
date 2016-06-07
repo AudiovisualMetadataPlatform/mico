@@ -17,8 +17,10 @@
  */
 package eu.mico.platform.zooniverse;
 
+import com.google.common.collect.ImmutableMap;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.zooniverse.util.BrokerServices;
@@ -159,14 +161,17 @@ public class AnimalDetectionWebService {
         try {
             final Item item = persistenceService.createItem();
 
-            final Part part = item.createPart(new URIImpl(ExtractorURI));
-            part.setSyntacticalType(String.format("%s/%s", type.getType(), type.getSubtype()));
+            item.setSemanticType("application/animaldetection-endpoint");
+            String assetType = String.format("%s/%s", type.getType(), type.getSubtype());
+            item.setSyntacticalType(assetType);
 
-            try (OutputStream outputStream = part.getAsset().getOutputStream()) {
+            Asset asset = item.getAsset();
+            try (OutputStream outputStream = asset.getOutputStream()) {
                 IOUtils.copy(postBody, outputStream);
                 outputStream.close();
+                asset.setFormat(assetType);
             } catch (IOException e) {
-                log.error("Could not persist binary data for ContentPart {}: {}", part.getURI(), e.getMessage());
+                log.error("Could not persist binary data for ContentItem {}: {}", item.getURI(), e.getMessage());
                 throw e;
             } finally {
                 postBody.close();
@@ -174,13 +179,12 @@ public class AnimalDetectionWebService {
 
             eventManager.injectItem(item);
             Map<String, Object> rspEntity = new HashMap<>();
-            rspEntity.put("id", String.format("%s/%s", item.getURI(), part.getURI()));
+            rspEntity.put("id", item.getURI().getLocalName());
             rspEntity.put("status", "submitted");
 
             return Response.status(Response.Status.CREATED)
                     .entity(rspEntity)
                     .link(java.net.URI.create(item.getURI().stringValue()), "contentItem")
-                    .link(java.net.URI.create(part.getURI().stringValue()), "contentPart")
                     .build();
         } catch (RepositoryException | IOException e) {
             log.error("Could not create ContentItem");
@@ -189,79 +193,48 @@ public class AnimalDetectionWebService {
     }
 
     @GET
-    @Path("{contentItemID:[^/]+}/{contentPartID:[^/]+}")
     @Produces("application/json")
-    public Response getResult(@PathParam("contentItemID") final String contentItemId, @PathParam("contentPartID") final String contentPartId) {
-
-        final URI itemURI;
-        final URI partURI;
-        try {
-            itemURI = concatUrlWithPath(marmottaBaseUri, contentItemId);
-            partURI = concatUrlWithPath(marmottaBaseUri, String.format("%s/%s", contentItemId, contentPartId));
-        }
-        catch (URISyntaxException e) {
-            log.error("Unable to create URI with marmotta base '{}', content item id '{}' and content part id '{}'", marmottaBaseUri, contentItemId, contentPartId);
-            return Response.status(Response.Status.NOT_FOUND).entity(String.format("Unable to create URI with marmotta base '%s', content item id '%s' and content part id '%s'", marmottaBaseUri, contentItemId, contentPartId)).build();
-        }
+    @Path("{id:.+}")
+    public Response getResult(@PathParam("id") final String itemId) throws IOException {
 
         final Item item;
         try {
-            item = persistenceService.getItem(itemURI);
+            item = persistenceService.getItem(new URIImpl(this.marmottaBaseUri + "/" + itemId));
             if (item == null)
-                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'%n", itemURI.stringValue())).build();
+                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'", itemId)).build();
         } catch (RepositoryException e) {
-            log.error("Error getting content item {}: {}", itemURI, e);
+            log.error("Error getting content item {}: {}", itemId, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
 
-        final Part part;
-        try {
 
-            part = item.getPart(partURI);
-            if (part == null) {
-                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentPart '%s'%n", partURI.stringValue())).build();
-            }
-            if (part.getSyntacticalType() == null || !part.getSyntacticalType().startsWith("image/")) {
-                log.error("The requested resource is not an image: {}", part.getURI());
-                return Response.status(Response.Status.BAD_REQUEST).entity("The requested resource is not an image").build();
-            }
-        } catch (RepositoryException e) {
-            log.error("Error getting content part{}: {}", partURI, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
+        //test if it is still in progress
+        final ItemData itemData = brokerSvc.getItemData(itemId);
+        if (itemData != null && !itemData.hasFinished()) {
+            return Response.status(Response.Status.ACCEPTED)
+                    .entity(ImmutableMap.of("id", itemId, "status", "inProgress"))
+                    .build();
         }
 
         Map<String, Object> rspEntity = new HashMap<>();
 
         try {
-            final ItemData itemData = brokerSvc.getItemData(itemURI.stringValue());
-            if (itemData != null && !itemData.hasFinished()) {
-                rspEntity.put("status", "inProgress");
-                return Response.status(Response.Status.ACCEPTED)
-                        .entity(rspEntity)
-                        .build();
-            }
-        } catch (IOException e) {
-            log.error("Error getting status of item {} from broker: {}", itemURI.stringValue(), e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
-        }
-
-        try {
             List<Object> objects = getObjects(item);
             if (objects == null) {
-                log.error("Empty objects list of content item: %s", itemURI.toString());
+                log.error("Empty objects list of content item: %s", itemId);
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             }
             rspEntity.put("objects", objects);
             rspEntity.put("objectsFound", objects.size());
 
             rspEntity.put("processingBegin", getProcessingBegin(item));
-            rspEntity.put("processingEnd", getProcessingEnd(item));
+            //rspEntity.put("processingEnd", getProcessingEnd(item));
         } catch (RepositoryException e) {
             log.error("Error processing queries: {}", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
 
-        //rspEntity.put("extractorVersion", null);
+        rspEntity.put("id", itemId);
         rspEntity.put("status", "finished");
 
         return Response.status(Response.Status.OK)
@@ -271,20 +244,20 @@ public class AnimalDetectionWebService {
     }
 
     /***************
-     * TODO adapt queries to new model
+     * not supported by extractor anymore
      ****************/
+    @Deprecated
     private String getProcessingEnd(Item item) throws  RepositoryException {
         try {
 
             final String query = String.format(
                     "PREFIX mmm: <http://www.mico-project.eu/ns/mmm/2.0/schema#>\n" +
                     "SELECT ?value WHERE {\n" +
-                            " <%s>  mmm:hasPart> ?cp .\n" +
-                            " ?cp <%s> \"text/vnd.fhg-hog-detector+xml\" .\n" + //TODO still correct?
+                            " <%s>  mmm:hasPart ?cp .\n" +
+                            " ?cp mmm:hasSyntacticalType \"text/vnd.fhg-hog-detector+xml\" .\n" + //TODO still correct?
                             " ?cp <%s> ?value .\n" +
                             "}",
                     item.getURI().stringValue(),
-                    DCTERMS.TYPE,
                     DCTERMS.CREATED
             );
 
@@ -338,17 +311,17 @@ public class AnimalDetectionWebService {
                 "PREFIX mmm: <http://www.mico-project.eu/ns/mmm/2.0/schema#>\n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
-                "PREFIX dc: <http://purl.org/dc/elements/1.1/>\n" +
+                "PREFIX mmt: <http://www.mico-project.eu/ns/mmmterms/2.0/schema#>\n" +
                 "SELECT ?animal ?region ?confidence ?version WHERE {\n" +
-                    "<%s> mico:hasPart ?annot .\n" +
-                    "?annot oa:hasBody ?body .\n" +
-                    "?annot oa:hasTarget ?tgt .\n" +
+                    "<%s> mmm:hasPart ?annot .\n" +
+                    "?annot mmm:hasBody ?body .\n" +
+                    "?annot mmm:hasTarget ?tgt .\n" +
                     "?tgt  oa:hasSelector ?fs .\n" +
                     "?body rdf:value ?animal .\n" +
-                    "?body mmm:hasConfidence ?confidence .\n" + //TODO still correct
-                    "?body mmm:hasExtractionVersion ?version .\n" + //TODO still correct
+                    "?body a mmt:AnimalDetectionBody.\n" + //why is an annotation a body? and why a string!!
+                    "?body mmm:hasConfidence ?confidence .\n" +
+                    "?body mmm:hasExtractionVersion ?version .\n" +
                     "?fs rdf:value ?region\n" +
-                "FILTER EXISTS {?body rdf:type mmm:AnimalDetectionBody}\n" + //TODO still correct
                 "}",
                 item.getURI().stringValue()
             );
@@ -386,39 +359,20 @@ public class AnimalDetectionWebService {
     }
 
     @DELETE
-    @Path("{contentItemID:[^/]+}/{contentPartID:[^/]+}")
-    public Response deleteSubject(@PathParam("contentItemID") final String contentItemId, @PathParam("contentPartID") final String contentPartId) {
-        final URI contentItemUri;
+    @Path("{id:.+}")
+    public Response deleteSubject(@PathParam("id") final String itemId) {
         try {
-            contentItemUri = concatUrlWithPath(marmottaBaseUri, contentItemId);
-        }
-        catch (URISyntaxException e) {
-            log.error("Unable to create URI with marmotta base '{}', content item id '{}' and content part id '{}'", marmottaBaseUri, contentItemId, contentPartId);
-            return Response.status(Response.Status.NOT_FOUND).entity(String.format("Unable to create URI with marmotta base '%s', content item id '%s' and content part id '%s'", marmottaBaseUri, contentItemId, contentPartId)).build();
-        }
-
-        final Item item;
-        try {
-            item = persistenceService.getItem(contentItemUri);
+            Item item = persistenceService.getItem(new URIImpl(this.marmottaBaseUri + "/" + itemId));
             if (item == null)
-                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'%n", contentItemUri.stringValue())).build();
+                return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'%n", itemId)).build();
 
-            persistenceService.deleteItem(contentItemUri);
+            persistenceService.deleteItem(item.getURI());
         } catch (RepositoryException e) {
-            log.error("Error removing content item {}: {}", contentItemUri, e);
+            log.error("Error removing content item {}: {}", itemId, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
 
-
-
         return Response.noContent().build();
-    }
-
-    private URI concatUrlWithPath(String baseURL, String extraPath) throws URISyntaxException{
-        java.net.URI baseURI = new java.net.URI(baseURL).normalize();
-        String newPath = baseURI.getPath() + "/" + extraPath;
-        java.net.URI newURI = baseURI.resolve(newPath);
-        return new URIImpl(newURI.normalize().toString());
     }
 
 }

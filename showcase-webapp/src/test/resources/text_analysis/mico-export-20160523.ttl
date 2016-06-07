@@ -1,0 +1,226 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix mico: <http://www.mico-project.eu/ns/platform/1.0/schema#> .
+@prefix sesame: <http://www.openrdf.org/schema/sesame#> .
+@prefix fn: <http://www.w3.org/2005/xpath-functions#> .
+@prefix ldp: <http://www.w3.org/ns/ldp#> .
+@prefix oa: <http://www.w3.org/ns/oa#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix context: <http://mico-platform:8080/marmotta/context/> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/5d3d29a3-8ffc-4e75-98d3-7e91a46d488d> a <http://vocab.fusepool.info/fam#LinkedEntity> ;
+	<http://vocab.fusepool.info/fam#entity-label> "ostriches"@en ;
+	<http://vocab.fusepool.info/fam#entity-reference> <http://www.mico-project.eu/ns/cv/serengeti#ostrich> ;
+	<http://vocab.fusepool.info/fam#entity-type> <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://vocab.fusepool.info/fam#confidence> "1"^^xsd:double .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/8225214b-6a8c-4946-8b8a-87f625c02380> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	oa:serializedAt "2016-05-23 13:55:58.572"^^xsd:string ;
+	oa:serializedBy <http://www.mico-project.eu/services/ner-text> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://mico-platform.salzburgresearch.at:8080/marmotta/8225214b-6a8c-4946-8b8a-87f625c02380> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/8225214b-6a8c-4946-8b8a-87f625c02380> oa:hasBody <http://mico-platform.salzburgresearch.at:8080/marmotta/5d3d29a3-8ffc-4e75-98d3-7e91a46d488d> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://mico-platform.salzburgresearch.at:8080/marmotta/5d3d29a3-8ffc-4e75-98d3-7e91a46d488d> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Relevant entity recognized in the txt asset of http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97"^^xsd:string ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#NERBody"^^xsd:string .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/5d3d29a3-8ffc-4e75-98d3-7e91a46d488d> <http://vocab.fusepool.info/fam#extracted-from> <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/1c9a93b2-545a-4559-a4a9-315de0684f5d> a oa:TextPositionSelector ;
+	oa:exact "Ostriches"^^xsd:string ;
+	oa:prefix " animals. "^^xsd:string ;
+	oa:suffix ", zebras, "^^xsd:string ;
+	oa:start "28"^^xsd:long ;
+	oa:end "37"^^xsd:long .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/5fb3ecc1-59d6-4af1-b9f2-87bb8587924b> a oa:SpecificResource .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/5d3d29a3-8ffc-4e75-98d3-7e91a46d488d> <http://vocab.fusepool.info/fam#selector> <http://mico-platform.salzburgresearch.at:8080/marmotta/1c9a93b2-545a-4559-a4a9-315de0684f5d> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/5fb3ecc1-59d6-4af1-b9f2-87bb8587924b> oa:hasSource <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/a317ffec-2ef4-437e-9294-56b53a9f422d> a <http://vocab.fusepool.info/fam#LinkedEntity> ;
+	<http://vocab.fusepool.info/fam#entity-label> "zebras"@en ;
+	<http://vocab.fusepool.info/fam#entity-reference> <http://www.mico-project.eu/ns/cv/serengeti#zebra> ;
+	<http://vocab.fusepool.info/fam#entity-type> <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://vocab.fusepool.info/fam#confidence> "1"^^xsd:double .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/33f2d3fe-180b-4f2c-aba8-d4df39af58a0> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	oa:serializedAt "2016-05-23 13:55:58.960"^^xsd:string ;
+	oa:serializedBy <http://www.mico-project.eu/services/ner-text> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://mico-platform.salzburgresearch.at:8080/marmotta/33f2d3fe-180b-4f2c-aba8-d4df39af58a0> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/33f2d3fe-180b-4f2c-aba8-d4df39af58a0> oa:hasBody <http://mico-platform.salzburgresearch.at:8080/marmotta/a317ffec-2ef4-437e-9294-56b53a9f422d> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://mico-platform.salzburgresearch.at:8080/marmotta/a317ffec-2ef4-437e-9294-56b53a9f422d> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Relevant entity recognized in the txt asset of http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97"^^xsd:string ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#NERBody"^^xsd:string .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/a317ffec-2ef4-437e-9294-56b53a9f422d> <http://vocab.fusepool.info/fam#extracted-from> <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/3b2844d0-c1c7-44bb-b329-09249736bdf0> a oa:TextPositionSelector ;
+	oa:exact "zebras"^^xsd:string ;
+	oa:prefix "striches, "^^xsd:string ;
+	oa:suffix ", elephant"^^xsd:string .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/23d5182d-904f-4e7c-96b3-5afeaf4bbece> a <http://vocab.fusepool.info/fam#LinkedEntity> ;
+	<http://vocab.fusepool.info/fam#entity-label> "animals"@en ;
+	<http://vocab.fusepool.info/fam#entity-reference> <http://www.mico-project.eu/ns/cv/serengeti#animal> ;
+	<http://vocab.fusepool.info/fam#entity-type> <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://vocab.fusepool.info/fam#confidence> "1"^^xsd:double .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/57adf8d7-a7aa-4516-b255-4dfd0dbae609> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	oa:serializedAt "2016-05-23 13:55:58.819"^^xsd:string ;
+	oa:serializedBy <http://www.mico-project.eu/services/ner-text> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://mico-platform.salzburgresearch.at:8080/marmotta/57adf8d7-a7aa-4516-b255-4dfd0dbae609> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/57adf8d7-a7aa-4516-b255-4dfd0dbae609> oa:hasBody <http://mico-platform.salzburgresearch.at:8080/marmotta/23d5182d-904f-4e7c-96b3-5afeaf4bbece> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://mico-platform.salzburgresearch.at:8080/marmotta/23d5182d-904f-4e7c-96b3-5afeaf4bbece> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Relevant entity recognized in the txt asset of http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97"^^xsd:string ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#NERBody"^^xsd:string .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/23d5182d-904f-4e7c-96b3-5afeaf4bbece> <http://vocab.fusepool.info/fam#extracted-from> <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/9672a51c-400a-4f98-b314-a566b41253d1> a oa:TextPositionSelector ;
+	oa:exact "animals"^^xsd:string ;
+	oa:prefix " lot's of "^^xsd:string ;
+	oa:suffix ". Ostriche"^^xsd:string ;
+	oa:start "19"^^xsd:long ;
+	oa:end "26"^^xsd:long .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/a5111005-1ac6-4bcb-ab5b-f3e8388ed08c> a oa:SpecificResource .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/23d5182d-904f-4e7c-96b3-5afeaf4bbece> <http://vocab.fusepool.info/fam#selector> <http://mico-platform.salzburgresearch.at:8080/marmotta/9672a51c-400a-4f98-b314-a566b41253d1> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/a5111005-1ac6-4bcb-ab5b-f3e8388ed08c> oa:hasSource <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/6d6edec5-b23c-4abb-a8e6-19bbc2eb7358> a <http://vocab.fusepool.info/fam#SentimentAnnotation> ;
+	<http://vocab.fusepool.info/fam#sentiment> "0.1869875591882227"^^xsd:double .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/8618390f-71c4-4012-a709-2b187bca2a95> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	oa:serializedAt "2016-05-23 13:55:59.445"^^xsd:string ;
+	oa:serializedBy <http://www.mico-project.eu/services/ner-text> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://mico-platform.salzburgresearch.at:8080/marmotta/8618390f-71c4-4012-a709-2b187bca2a95> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/8618390f-71c4-4012-a709-2b187bca2a95> oa:hasBody <http://mico-platform.salzburgresearch.at:8080/marmotta/6d6edec5-b23c-4abb-a8e6-19bbc2eb7358> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://mico-platform.salzburgresearch.at:8080/marmotta/6d6edec5-b23c-4abb-a8e6-19bbc2eb7358> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Relevant entity recognized in the txt asset of http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97"^^xsd:string ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#NERBody"^^xsd:string .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/6d6edec5-b23c-4abb-a8e6-19bbc2eb7358> <http://vocab.fusepool.info/fam#extracted-from> <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/5cd7991b-4baa-4f09-9201-d732272cc296> a <http://vocab.fusepool.info/fam#LanguageAnnotation> ;
+	dct:language "en"^^xsd:string .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/2aacd13e-fe43-410b-8a53-166820d6b27b> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	oa:serializedAt "2016-05-23 13:55:59.571"^^xsd:string ;
+	oa:serializedBy <http://www.mico-project.eu/services/ner-text> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://mico-platform.salzburgresearch.at:8080/marmotta/2aacd13e-fe43-410b-8a53-166820d6b27b> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/2aacd13e-fe43-410b-8a53-166820d6b27b> oa:hasBody <http://mico-platform.salzburgresearch.at:8080/marmotta/5cd7991b-4baa-4f09-9201-d732272cc296> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://mico-platform.salzburgresearch.at:8080/marmotta/5cd7991b-4baa-4f09-9201-d732272cc296> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Relevant entity recognized in the txt asset of http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97"^^xsd:string ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#NERBody"^^xsd:string .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/5cd7991b-4baa-4f09-9201-d732272cc296> <http://vocab.fusepool.info/fam#extracted-from> <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Item> ;
+	oa:serializedAt "2016-05-23 13:55:57.328" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "application/textanalysis-endpoint" ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "text/plain" .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/e4cae23d-eb07-445b-9611-dc97991fdba1> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Asset> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasLocation> "urn:eu.mico-project:storage.location:c3cf9a33-88ae-428f-8eb1-985dca5c3b97/e4cae23d-eb07-445b-9611-dc97991fdba1" .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasAsset> <http://mico-platform.salzburgresearch.at:8080/marmotta/e4cae23d-eb07-445b-9611-dc97991fdba1> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/e4cae23d-eb07-445b-9611-dc97991fdba1> <http://purl.org/dc/elements/1.1/format> "text/plain" .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/a21f8e5e-088a-4643-a126-491fe5080de2> a <http://vocab.fusepool.info/fam#LinkedEntity> ;
+	<http://vocab.fusepool.info/fam#entity-label> "elephants"@en ;
+	<http://vocab.fusepool.info/fam#entity-reference> <http://www.mico-project.eu/ns/cv/serengeti#elephant> ;
+	<http://vocab.fusepool.info/fam#entity-type> <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://vocab.fusepool.info/fam#confidence> "1"^^xsd:double .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/6ed474dd-3811-46d9-bbef-c6114f1b0f40> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	oa:serializedAt "2016-05-23 13:55:58.352"^^xsd:string .
+
+<http://www.mico-project.eu/services/ner-text> a <https://github.com/anno4j/ns#Agent> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/6ed474dd-3811-46d9-bbef-c6114f1b0f40> oa:serializedBy <http://www.mico-project.eu/services/ner-text> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://mico-platform.salzburgresearch.at:8080/marmotta/6ed474dd-3811-46d9-bbef-c6114f1b0f40> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/6ed474dd-3811-46d9-bbef-c6114f1b0f40> oa:hasBody <http://mico-platform.salzburgresearch.at:8080/marmotta/a21f8e5e-088a-4643-a126-491fe5080de2> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://mico-platform.salzburgresearch.at:8080/marmotta/a21f8e5e-088a-4643-a126-491fe5080de2> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Relevant entity recognized in the txt asset of http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97"^^xsd:string ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#NERBody"^^xsd:string .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/a21f8e5e-088a-4643-a126-491fe5080de2> <http://vocab.fusepool.info/fam#extracted-from> <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/cbbc29db-4426-434e-8ec9-3ca413364abe> a oa:TextPositionSelector ;
+	oa:exact "elephants"^^xsd:string ;
+	oa:prefix ", zebras, "^^xsd:string ;
+	oa:suffix " and wilde"^^xsd:string ;
+	oa:start "47"^^xsd:long ;
+	oa:end "56"^^xsd:long .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/7908a3a1-adeb-4946-9afb-f7adb9510814> a oa:SpecificResource .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/a21f8e5e-088a-4643-a126-491fe5080de2> <http://vocab.fusepool.info/fam#selector> <http://mico-platform.salzburgresearch.at:8080/marmotta/cbbc29db-4426-434e-8ec9-3ca413364abe> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/7908a3a1-adeb-4946-9afb-f7adb9510814> oa:hasSource <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/3b2844d0-c1c7-44bb-b329-09249736bdf0> oa:start "39"^^xsd:long ;
+	oa:end "45"^^xsd:long .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/ada1ba51-07b5-42cb-95c4-2009a4113fc8> a oa:SpecificResource .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/a317ffec-2ef4-437e-9294-56b53a9f422d> <http://vocab.fusepool.info/fam#selector> <http://mico-platform.salzburgresearch.at:8080/marmotta/3b2844d0-c1c7-44bb-b329-09249736bdf0> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/ada1ba51-07b5-42cb-95c4-2009a4113fc8> oa:hasSource <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/ea2f7a80-8e9b-46b9-9fdf-d537b760f1d9> a <http://vocab.fusepool.info/fam#LinkedEntity> ;
+	<http://vocab.fusepool.info/fam#entity-label> "wildebeest"@en ;
+	<http://vocab.fusepool.info/fam#entity-reference> <http://www.mico-project.eu/ns/cv/serengeti#wildebeest> ;
+	<http://vocab.fusepool.info/fam#entity-type> <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://vocab.fusepool.info/fam#confidence> "1"^^xsd:double .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/b8893f23-5315-4afc-867b-fc804fc63980> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
+	oa:serializedAt "2016-05-23 13:55:59.166"^^xsd:string ;
+	oa:serializedBy <http://www.mico-project.eu/services/ner-text> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasPart> <http://mico-platform.salzburgresearch.at:8080/marmotta/b8893f23-5315-4afc-867b-fc804fc63980> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/b8893f23-5315-4afc-867b-fc804fc63980> oa:hasBody <http://mico-platform.salzburgresearch.at:8080/marmotta/ea2f7a80-8e9b-46b9-9fdf-d537b760f1d9> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasBody> <http://mico-platform.salzburgresearch.at:8080/marmotta/ea2f7a80-8e9b-46b9-9fdf-d537b760f1d9> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasInput> <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Relevant entity recognized in the txt asset of http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97"^^xsd:string ;
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "http://www.mico-project.eu/ns/mmmterms/2.0/schema#NERBody"^^xsd:string .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/ea2f7a80-8e9b-46b9-9fdf-d537b760f1d9> <http://vocab.fusepool.info/fam#extracted-from> <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/de5ad989-9d06-43e5-9e96-6e96bbb9254d> a oa:TextPositionSelector ;
+	oa:exact "wildebeest"^^xsd:string ;
+	oa:prefix "hants and "^^xsd:string ;
+	oa:suffix ""^^xsd:string ;
+	oa:start "61"^^xsd:long ;
+	oa:end "71"^^xsd:long .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/e9cca40b-8f33-423d-9c61-07a4a78f34fd> a oa:SpecificResource .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/ea2f7a80-8e9b-46b9-9fdf-d537b760f1d9> <http://vocab.fusepool.info/fam#selector> <http://mico-platform.salzburgresearch.at:8080/marmotta/de5ad989-9d06-43e5-9e96-6e96bbb9254d> .
+
+<http://mico-platform.salzburgresearch.at:8080/marmotta/e9cca40b-8f33-423d-9c61-07a4a78f34fd> oa:hasSource <http://mico-platform.salzburgresearch.at:8080/marmotta/c3cf9a33-88ae-428f-8eb1-985dca5c3b97> .

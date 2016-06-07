@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <iostream>
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -22,16 +23,25 @@ bool FileOperations::findFile( const std::string & dir_path,
                                std::string& path_found )
 {
   boost::regex expression(file_name);
-  boost::cmatch what;
+  boost::system::error_code ec;
 
-  if ( !exists( fs::path(dir_path ) ) ) return false;
+  if ( !exists( fs::path(dir_path) ) ) return false;
   fs::directory_iterator end_itr; // default construction yields past-the-end
-  for ( fs::directory_iterator itr( dir_path );
+  for ( fs::directory_iterator itr( dir_path, ec);
         itr != end_itr;
-        ++itr )
+        itr.increment(ec) )
   {
-    if ( fs::is_directory(itr->status()) )
+    if (ec) {
+      std::cerr << "directory not accessible." << std::endl;
+      continue;
+    }
+
+    if ( fs::is_directory(itr->status(ec)) )
     {
+      if (ec) {
+        std::cerr << "directory not accessible." << std::endl;
+        continue;
+      }
       if ( findFile( itr->path().string(), file_name, path_found ) ) return true;
     }
     //else if ( itr->path().filename() == file_name )

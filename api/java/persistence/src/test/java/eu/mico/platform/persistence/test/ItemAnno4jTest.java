@@ -173,4 +173,76 @@ public class ItemAnno4jTest {
         final Item queriedItem = persistenceService.getItem(new URIImpl(tmpItem.getURI().toString()));
         assertTrue(queriedItem.hasAsset());
     }
+    
+
+    
+    @Test
+    public void getAssetWithLocation() throws RepositoryException, QueryEvaluationException, MalformedQueryException, ParseException {
+    	
+        final Item tmpItem = persistenceService.createItem();
+        assertFalse(tmpItem.hasAsset());
+
+        final URIImpl asset_location=new URIImpl(Asset.STORAGE_SERVICE_URN_PREFIX+"pre-existing/test_location");
+        
+        //verifies that exceptions are raised correctly against wrong input
+        boolean getAssetThrows=false;
+        try{
+        	tmpItem.getAssetWithLocation(null);
+        }
+        catch(IllegalArgumentException e){
+        	getAssetThrows=true;
+        }
+        assertTrue(getAssetThrows);
+        getAssetThrows=false;
+        
+        try{
+        	tmpItem.getAssetWithLocation(new URIImpl(""));
+        }
+        catch(IllegalArgumentException e){
+        	getAssetThrows=true;
+        }
+        assertTrue(getAssetThrows);
+        getAssetThrows=false;
+        
+        //verifies that we created an asset with the required location
+        
+        Asset asset = tmpItem.getAssetWithLocation(asset_location);
+        assertNotNull(asset);
+        assertNotNull(asset.getLocation());
+        assertEquals(asset_location,asset.getLocation());
+        
+        //verifies that we can access the outputStream
+        try {
+            asset.getOutputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+        
+        //verify that we can set and retrieve the format correctly
+        String format = "test/mimeType";
+        assertNull(asset.getFormat());
+        asset.setFormat(format);
+
+        assertEquals(format, persistenceService.getItem(tmpItem.getURI()).getAsset().getFormat());
+
+        //verifies that the normal get returns the asset correctly 
+        assertEquals(asset.getFormat(),tmpItem.getAsset().getFormat());
+        assertEquals(asset.getLocation(),tmpItem.getAsset().getLocation());
+        
+        assertEquals(asset.getFormat(),tmpItem.getAssetWithLocation(asset_location).getFormat());
+        assertEquals(asset.getLocation(),tmpItem.getAssetWithLocation(asset_location).getLocation());
+        
+        
+        //verifies that trying to retrieve the asset with an invalid location fails
+        try{
+        	tmpItem.getAssetWithLocation(new URIImpl(Asset.STORAGE_SERVICE_URN_PREFIX+"pre-existing/invalid_location"));
+        }
+        catch(IllegalArgumentException e){
+        	getAssetThrows=true;
+        }
+        assertTrue(getAssetThrows);
+        getAssetThrows=false;       
+        TestUtils.debugRDF(log, tmpItem.getObjectConnection());
+    }
 }

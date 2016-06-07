@@ -199,7 +199,7 @@ namespace mico {
 
         void AnalysisResponse::sendErrorMessage(std::shared_ptr< mico::persistence::model::Item > i, const mico::event::model::ErrorCodes& errcode, const std::string& msg, const std::string& desc)
         {
-          LOG_INFO("AnalysisResponse:sendErrorMessage: \"%s\" to queue %s",msg.c_str(), m_message.replyTo().c_str());
+          LOG_ERROR("AnalysisResponse:sendErrorMessage: \"%s:%s\" to queue %s",msg.c_str(), desc.c_str(), m_message.replyTo().c_str());
           mico::event::model::AnalysisEvent event;
           mico::event::model::AnalysisEvent::Error *eevent = new mico::event::model::AnalysisEvent::Error();
           std::shared_ptr<mico::persistence::model::Resource> r = std::dynamic_pointer_cast<mico::persistence::model::Resource>(i);

@@ -62,13 +62,31 @@ public abstract class ResourceAnno4j implements Resource {
     public final Asset getAsset() throws RepositoryException {
         AssetMMM assetMMM = resourceMMM.getAsset();
         if (assetMMM == null) {
-            assetMMM = createAndCommitAsset();
+            assetMMM = createAndCommitAsset("");
             resourceMMM.setAsset(assetMMM);
         }
         return new AssetAnno4j(assetMMM, this.persistenceService.getStorage());
     }
+    @Override
+    public final Asset getAssetWithLocation(URI location) throws RepositoryException{
+    	
+    	if(location == null || location.toString().isEmpty()){
+    		throw new IllegalArgumentException("Input location is null or empty");
+    	}
 
-    private AssetMMM createAndCommitAsset() throws RepositoryException{
+        AssetMMM assetMMM = resourceMMM.getAsset();
+        if (assetMMM == null) {
+            assetMMM = createAndCommitAsset(location.toString());
+            resourceMMM.setAsset(assetMMM);
+        }
+        if(! assetMMM.getLocation().contentEquals(location.toString()) ){
+        	throw new IllegalArgumentException("Requested asset with location '"+location+
+        			                           "', but the retrieved one has location '"+ assetMMM.getLocation()+"'");
+        }
+        return new AssetAnno4j(assetMMM, this.persistenceService.getStorage());
+    }
+
+    private AssetMMM createAndCommitAsset(String location) throws RepositoryException{
         AssetMMM assetMMM = null;
 
         //NOTE: Workaround for assetMMM.getLocation returning null (TODO: add Issue reference here)
@@ -83,12 +101,17 @@ public abstract class ResourceAnno4j implements Resource {
             assetCon.setRemoveContexts(itemCon.getRemoveContexts());
 
             assetMMM = createObject(assetCon, null, AssetMMM.class);
-            StringBuilder location = new StringBuilder()
-                    .append(Asset.STORAGE_SERVICE_URN_PREFIX)
-                    .append(this.getURI().getLocalName())
-                    .append("/")
-                    .append(((URI) assetMMM.getResource()).getLocalName());
-            assetMMM.setLocation(location.toString());
+            if(location == null || location.isEmpty()){
+            	
+                StringBuilder assetLocation = new StringBuilder()
+                        .append(Asset.STORAGE_SERVICE_URN_PREFIX)
+                        .append(this.getURI().getLocalName())
+                        .append("/")
+                        .append(((URI) assetMMM.getResource()).getLocalName());
+                location=assetLocation.toString();
+                
+            }
+            assetMMM.setLocation(location);
             assetCon.commit();
             log.trace("No Asset available for Resource {} - Created new Asset with id {} and location {}",
                     this.getURI(), assetMMM.getResourceAsString(), assetMMM.getLocation());

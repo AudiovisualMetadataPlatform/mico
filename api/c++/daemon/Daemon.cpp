@@ -106,11 +106,11 @@ namespace mico {
         int start(const char* _name, const char* _server, const char* _user, const char* _password, std::vector<mico::event::AnalysisService*> svcs) {
 
             pid_t pid;
-
+            daemon_set_verbosity(LOG_DEBUG);
+            log::set_log_backend(new DaemonLogBackend());
+            log::set_log_level(log::LoggingLevel::DEBUG);
             daemon_log(LOG_INFO, "starting daemon and registering services ...");
 
-            log::set_log_backend(new DaemonLogBackend());
-            log::set_log_level(log::LoggingLevel::INFO);
 
             std::string name(_name);
             std::string server(_server);
@@ -131,6 +131,8 @@ namespace mico {
             /* Set identification string for the daemon for both syslog and PID file */
             char* logname = strdup(_name);
             daemon_pid_file_ident = daemon_log_ident = daemon_ident_from_argv0(logname);
+
+            daemon_log(LOG_DEBUG, "daemon_log_ident set to %s", daemon_log_ident);
 
 
             /* Check that the daemon is not rung twice a the same time */
@@ -226,12 +228,14 @@ namespace mico {
                     }
                     /* Check if a signal has been received */
                     if (FD_ISSET(fd, &fds2)) {
+                        daemon_log(LOG_INFO, "checking interupt signal...");
                         int sig;
                         /* Get signal */
                         if ((sig = daemon_signal_next()) <= 0) {
                             daemon_log(LOG_ERR, "daemon_signal_next() failed: %s", strerror(errno));
                             break;
                         }
+                        daemon_log(LOG_INFO, "received signal is %d", sig);
                         /* Dispatch signal */
                         switch (sig) {
                             case SIGINT:
@@ -245,10 +249,9 @@ namespace mico {
                     }
 
                 }
-
+                daemon_log(LOG_INFO, "gracefull shutting down extractor.");
                 d->stop();
                 delete d;
-
                 daemon_log(LOG_INFO, "MICO analysis services unregistered");
 
                 finish:
