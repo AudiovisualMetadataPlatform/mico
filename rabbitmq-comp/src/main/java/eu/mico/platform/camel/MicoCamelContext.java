@@ -72,8 +72,11 @@ public class MicoCamelContext {
             JndiRegistry registry = (JndiRegistry) (
                     (PropertyPlaceholderDelegateRegistry)context.getRegistry()).getRegistry();
 
+            if(registry.lookup("simpleAggregatorStrategy") == null)
             //and here, it is bound to the registry
             registry.bind("simpleAggregatorStrategy", aggregatorStrategy);
+            
+            if(registry.lookup("itemAggregatorStrategy") == null)
             //and here, it is bound to the registry
             registry.bind("itemAggregatorStrategy", itemAggregatorStrategy);
             
