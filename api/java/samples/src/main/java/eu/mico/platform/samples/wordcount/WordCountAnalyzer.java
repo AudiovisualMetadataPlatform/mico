@@ -75,7 +75,24 @@ public class WordCountAnalyzer implements AnalysisService {
     public URI getServiceID() {
         return new URIImpl("http://www.mico-project.org/services/wordcount");
     }
+    
+	@Override
+	public String getExtractorID() {
+		return "wordcount";
+	}
 
+
+	@Override
+	public String getExtractorModeID() {
+		return  "regex";
+	}
+
+
+	@Override
+	public String getExtractorVersion() {
+		return "2.0.0";
+	}
+ 
     @Override
     public String getProvides() {
         return "mico/wordcount";

@@ -38,6 +38,27 @@ public interface AnalysisService {
      * @return a unique ID identifying this service globally
      */
     URI getServiceID();
+    
+    /**
+     * Return an ID (String) that identifies this extractor
+     *
+     * @return an ID that identifies the general functionality of this extractor
+     */
+    String getExtractorID();
+    
+    /**
+     * Return an ID (String) that identifies this extractor
+     *
+     * @return an ID that identifies the specific mode in which the extractor is running
+     */
+    String getExtractorModeID();
+    
+    /**
+     * Returns the version of the extractor
+     *
+     * @return Extractor version (String)
+     */
+    String getExtractorVersion();
 
 
     /**

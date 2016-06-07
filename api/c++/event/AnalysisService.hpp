@@ -24,13 +24,18 @@ namespace mico {
 
         protected:
             mico::persistence::model::URI serviceID;
+            std::string extractorID;
+            std::string extractorModeID;
+            std::string extractorVersion;
             std::string provides;
             std::string requires;
             std::string queue;
 
         public:
-            AnalysisService(const std::string serviceID, const std::string requires, const std::string provides, const std::string queue)
-                    : serviceID(serviceID), provides(provides), requires(requires), queue(queue) {}
+            AnalysisService(const std::string serviceID, const std::string extractorID, const std::string extractorModeID, const std::string extractorVersion,
+            		        const std::string requires, const std::string provides, const std::string queue)
+                    : serviceID(serviceID), extractorID(extractorID), extractorModeID(extractorModeID), extractorVersion(extractorVersion),
+					  provides(provides), requires(requires), queue(queue) {}
 
 
             virtual ~AnalysisService() {}
@@ -40,8 +45,30 @@ namespace mico {
             *
             * @return a unique ID identifying this service globally
             */
-            virtual const mico::persistence::model::URI& getServiceID() const { return serviceID; }
+            virtual const mico::persistence::model::URI& getServiceID() const {
+            	return serviceID;
+            }
 
+            /**
+             * Return an ID (String) that identifies this extractor
+             *
+             * @return an ID that identifies the general functionality of this extractor
+             */
+            virtual const std::string& getExtractorID() { return extractorID; }
+
+            /**
+             * Return an ID (String) that identifies this extractor
+             *
+             * @return an ID that identifies the specific mode in which the extractor is running
+             */
+            virtual const std::string& getExtractorModeID() { return extractorModeID; }
+
+            /**
+             * Returns the version of the extractor
+             *
+             * @return an ID that identifies the specific mode in which the extractor is running
+             */
+            virtual const std::string& getExtractorVersion() { return extractorVersion; }
 
             /**
             * Return the type of output produced by this service as symbolic identifier. In the first version of the API, this

@@ -72,6 +72,10 @@ public class MICOBrokerApplication extends Application {
         while (storageBaseUri.endsWith("/")) {
             storageBaseUri = storageBaseUri.substring(0, storageBaseUri.length()-1);
         }
+        String registrationBaseUri = context.getInitParameter("mico.registrationBaseUri") != null ? context.getInitParameter("mico.registrationBaseUri") : "http://mico-platform:8080/registration";
+        while (registrationBaseUri.endsWith("/")) {
+        	registrationBaseUri = registrationBaseUri.substring(0, registrationBaseUri.length()-1);
+        }
 
         if("localhost".equals(host)) {
             try {
@@ -84,7 +88,7 @@ public class MICOBrokerApplication extends Application {
         log.info("initialising new MICO broker for host {}", host);
 
         try {
-            broker  = new MICOBrokerImpl(host, user, pass, 5672, marmottaBaseUri, storageBaseUri);
+            broker  = new MICOBrokerImpl(host, user, pass, 5672, marmottaBaseUri, storageBaseUri, registrationBaseUri);
             eventManager = new EventManagerImpl(host, user, pass);
             eventManager.init();
             camelContext = new MicoCamelContext();

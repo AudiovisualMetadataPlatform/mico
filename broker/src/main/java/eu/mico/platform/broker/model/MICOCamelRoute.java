@@ -94,11 +94,11 @@ public class MICOCamelRoute {
      * 2. entry points of the pipelines
      *  
 	 */
-	public void parseCamelRoute(String xmlCamelRoute){
+	public MICOCamelRoute parseCamelRoute(String xmlCamelRoute){
 		log.info("Retrieving camel route configuration out of:\n{}",xmlCamelRoute);
 		parseExtractorConfigurations(xmlCamelRoute);
 		parseEntryPoints(xmlCamelRoute);
-
+		return this;
 	}
 
 	/*

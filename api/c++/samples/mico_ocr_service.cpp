@@ -83,7 +83,7 @@ public:
     * requires and provides type, and an (optional) queue name.
     */
     OCRAnalysisService(string id, string requires, string language)
-            : AnalysisService("http://www.mico-project.org/services/OCR-"+id, requires, "text/plain", "ocr-queue-"+id) {
+            : AnalysisService("http://www.mico-project.org/services/OCR-"+id, "OCR", id, "2.0.0",requires, "text/plain", "ocr-queue-"+id) {
         if(api.Init(NULL, language.c_str())) {
             LOG_ERROR( "could not initialise tesseract instance" );
             throw string("could not initialise tesseract instance");

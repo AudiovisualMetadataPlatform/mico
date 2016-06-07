@@ -748,6 +748,9 @@ public class EventManagerTest extends BaseCommunicationTest {
         private final String queueName;
         private final URI serviceId;
         private final String provides;
+        private final String extractorId;
+        private final String extractorModeId;
+        private final String extractorVersion;
         private final String requires;
         private int called = 0;
 
@@ -756,6 +759,9 @@ public class EventManagerTest extends BaseCommunicationTest {
             this.provides = provides;
             this.requires = requires;
             this.serviceId =  new URIImpl("http://example.org/services/"+queueName);
+            this.extractorId = "MockService";
+            this.extractorModeId = "Mode-"+requires+"-"+provides;
+            this.extractorVersion = "Version";
         }
 
         @Override
@@ -817,6 +823,21 @@ public class EventManagerTest extends BaseCommunicationTest {
         public String toString() {
             return "AnalysisService[id="+serviceId+" | queue="+queueName+"]";
         }
+
+		@Override
+		public String getExtractorID() {
+			return extractorId;
+		}
+
+		@Override
+		public String getExtractorModeID() {
+			return extractorModeId;
+		}
+
+		@Override
+		public String getExtractorVersion() {
+			return extractorVersion;
+		}
         
     }
 

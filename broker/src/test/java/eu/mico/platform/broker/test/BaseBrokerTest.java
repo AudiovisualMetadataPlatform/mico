@@ -76,6 +76,8 @@ public abstract class BaseBrokerTest {
     private static String storageBaseUri;
     private static int rabbitPort;
 
+	private static String registrationBaseUrl;
+
     @BeforeClass
     public static void setupBase() throws URISyntaxException, IOException,
             RDFParseException, RepositoryException {
@@ -104,9 +106,11 @@ public abstract class BaseBrokerTest {
 
             storageDir = Files.createTempDirectory("mico-event-manager-test");
             storageBaseUri = storageDir.toUri().toString();
+            
+            registrationBaseUrl = "http://localhost:8088/registration-service";
 
             broker = new MICOBrokerImpl(testHost, amqpVHost, amqpUsr, amqpPwd,
-                    rabbitPort, marmottaBaseUrl, storageBaseUri);
+                    rabbitPort, marmottaBaseUrl, storageBaseUri,registrationBaseUrl);
         }
 
         // Now initialize RabbitMQ
@@ -227,6 +231,21 @@ public abstract class BaseBrokerTest {
             }
 
         }
+
+		@Override
+		public String getExtractorID() {
+			return "Mock";
+		}
+
+		@Override
+		public String getExtractorModeID() {
+			return "Mode";
+		}
+
+		@Override
+		public String getExtractorVersion() {
+			return "0.0.0";
+		}
 
     }
 

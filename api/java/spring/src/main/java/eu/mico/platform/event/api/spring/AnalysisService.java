@@ -32,7 +32,22 @@ public @interface AnalysisService {
     /**
      * A unique ID (URI) that identifies this service and its functionality.
      */
-    String id();
+    String serviceId();
+    
+    /**
+     * An ID that identifies the general functionality of this extractor
+     */
+    String extractorId();
+    
+    /**
+     * An ID that identifies the specific mode in which the extractor is running
+     */
+    String extractorModeId();
+    
+    /**
+     * Extractor version (String)
+     */
+    String extractorVersion();
 
     /**
      * The type of output produced by this service as symbolic identifier (e.g. MIME type).
