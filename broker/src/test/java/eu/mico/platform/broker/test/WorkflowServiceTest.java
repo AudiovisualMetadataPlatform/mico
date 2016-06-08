@@ -64,30 +64,12 @@ import java.util.Random;
     private static MicoCamelContext context = new MicoCamelContext();
     private static Map<Integer,MICOCamelRoute> routes = new HashMap<Integer,MICOCamelRoute>();
     private static WorkflowManagementService service = null;
-    private static boolean isRegistrationServiceAvailable = false;
+    
     
     @BeforeClass
     public static void prepare() throws ClientProtocolException, IOException {
     	
-    	HttpGet httpGetInfo = new HttpGet(((MICOBrokerImpl)broker).getRegistrationBaseUri() + "/info");
-    	
-    	CloseableHttpClient httpclient = HttpClients.createDefault();    	
-    	CloseableHttpResponse response = null;
-    	try{
-    		response = httpclient.execute(httpGetInfo);
-    		int status = response.getStatusLine().getStatusCode();
-        log.info("looking for registration service at {}",httpGetInfo.toString());
-        	if(status == 200){
-        		isRegistrationServiceAvailable = true;
-        	}
-    	}
-    	catch(Exception e){;}
-    	finally{
-    		if(response!= null) response.close();
-    	}
-    	
-    	
-        context.init();
+    	context.init();
         service = new WorkflowManagementService(broker,context,routes);
     }
 
@@ -211,13 +193,13 @@ import java.util.Random;
     
     // ------------------------ HELPER UTILITIES -------------------- //
     
-    private static void assertRouteStatus(RouteStatus expected,  String retrieved){
+    public static void assertRouteStatus(RouteStatus expected,  String retrieved){
     	String errorMessage =  "Expected route status was " + expected.toString() +
                                ", but is "+retrieved;
     	Assert.assertTrue(errorMessage,expected.toString().contentEquals(retrieved));
     }
     
-    private static String createTestRoute( MockService s, String syntacticType, String mimeType){
+    public static String createTestRoute( MockService s, String syntacticType, String mimeType){
 		
 		String startingPoint = "<route id='workflow-WORKFLOW_ID-starting-point-for-pipeline-0-mimeType="+mimeType+",syntacticType="+syntacticType+"'>" + "\n" +
 		                       	 "<from uri='direct:workflow-WORKFLOW_ID,mimeType="+mimeType+",syntacticType="+syntacticType+"'/>" +  "\n" +
@@ -236,74 +218,6 @@ import java.util.Random;
 		
 		  
 		return ROUTE_PREAMBLE+startingPoint+pipeline+ROUTE_END;
-	}
-    
-    private void connectExtractor(MockService s) throws InterruptedException, IOException{
-    	eventManager.registerService(s);
-        // wait for broker to finish
-        synchronized (broker) {
-            broker.wait(500);
-        }
-    }
-    
-    private void disconnectExtractor(MockService s) throws InterruptedException, IOException{
-    	eventManager.unregisterService(s);
-        // wait for broker to finish
-        synchronized (broker) {
-            broker.wait(500);
-        }
-    }
-	
-	private static void unregisterExtractor(MockService s) throws ClientProtocolException, IOException{
-		CloseableHttpClient httpclient = HttpClients.createDefault();
-		HttpDelete httpDelete = new HttpDelete(((MICOBrokerImpl)broker).getRegistrationBaseUri()+"/delete/extractor/"+s.getExtractorID());
-		httpDelete.setHeader("Accept", "application/json");
-		httpDelete.setHeader("Content-type", "application/json");
-	    httpclient.execute(httpDelete);
-	}
-	
-	private static void registerExtractor(MockService s, String mimeType) throws ClientProtocolException, IOException{
-		
-		HttpEntity entity = MultipartEntityBuilder
-			    .create()
-			    .addBinaryBody("file",createTestRegistrationXml(s, mimeType).getBytes() , ContentType.create("application/octet-stream"), "filename")
-			    .build();
-		
-		CloseableHttpClient httpclient = HttpClients.createDefault();
-		HttpPost httppost = new HttpPost(((MICOBrokerImpl)broker).getRegistrationBaseUri()+"/add/extractor");
-		httppost.setEntity(entity);
-
-		//Execute and get the response.
-		CloseableHttpResponse response = httpclient.execute(httppost);
-		int status = response.getStatusLine().getStatusCode();
-		response.close();
-	    Assert.assertEquals(200, status);
-	}
-		
-	
-	private static String createTestRegistrationXml( MockService s, String mimeType){
-		
-		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + 
-	    "<extractorSpecification>"+
-		  "<name>"+s.getServiceID()+"</name>"+
-		  "<version>"+s.getServiceID()+"</version>"+
-		  "<id>"+s.getExtractorID()+"</id>"+
-		    "<mode>"+
-		      "<id>"+s.getExtractorModeID()+"</id>"+
-		      "<description> desc </description>"+
-		      "<input>"+
-		        "<semanticType><name>TestInputName</name><description>TestDescription</description></semanticType>"+
-		        "<dataType><mimeType>"+mimeType+"</mimeType><syntacticType>"+s.getRequires()+"</syntacticType></dataType>"+
-		      "</input>"+
-		      "<output>"+
-		        "<semanticType><name>TestInputName</name><description>TestDescription</description></semanticType>"+
-		        "<dataType><mimeType>"+mimeType+"</mimeType><syntacticType>"+s.getProvides()+"</syntacticType></dataType>"+
-		        "<location>Test Location </location>"+
-		      "</output>"+
-		    "</mode>"+
-		  "<isSingleton>false</isSingleton>"+
-		"</extractorSpecification>";		  
-
 	}
  
 }

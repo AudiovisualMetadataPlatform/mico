@@ -19,6 +19,8 @@ import com.rabbitmq.client.ConnectionFactory;
 
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
+import eu.mico.platform.broker.impl.MICOBrokerImpl.RouteStatus;
+import eu.mico.platform.broker.test.BaseBrokerTest.MockService;
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
@@ -30,9 +32,21 @@ import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Resource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.marmotta.platform.core.test.base.JettyMarmotta;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.openrdf.model.URI;
@@ -41,6 +55,8 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.rio.RDFParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static eu.mico.platform.broker.test.BaseBrokerTest.isRegistrationServiceAvailable;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -77,6 +93,7 @@ public abstract class BaseBrokerTest {
     private static int rabbitPort;
 
 	private static String registrationBaseUrl;
+	protected static boolean isRegistrationServiceAvailable = false;
 
     @BeforeClass
     public static void setupBase() throws URISyntaxException, IOException,
@@ -121,6 +138,24 @@ public abstract class BaseBrokerTest {
         testFactory.setPassword(amqpPwd);
 
         connection = testFactory.newConnection();
+        
+        //retrieve the status of the registration service
+        HttpGet httpGetInfo = new HttpGet(((MICOBrokerImpl)broker).getRegistrationBaseUri() + "/info");
+    	
+    	CloseableHttpClient httpclient = HttpClients.createDefault();    	
+    	CloseableHttpResponse response = null;
+    	try{
+    		response = httpclient.execute(httpGetInfo);
+    		int status = response.getStatusLine().getStatusCode();
+        log.info("looking for registration service at {}",httpGetInfo.toString());
+        	if(status == 200){
+        		isRegistrationServiceAvailable = true;
+        	}
+    	}
+    	catch(Exception e){;}
+    	finally{
+    		if(response!= null) response.close();
+    	}
     }
 
     @AfterClass
@@ -148,20 +183,40 @@ public abstract class BaseBrokerTest {
             channel.close();
         }
     }
-
-    protected void setupMockAnalyser(String source, String target)
-            throws IOException {
+    
+    // ------------------------ HELPER UTILITIES -------------------- //
+    
+    
+    
+    protected void connectExtractor(MockService s) throws InterruptedException, IOException{
+    	eventManager.registerService(s);
+        // wait for broker to finish
+        synchronized (broker) {
+            broker.wait(500);
+        }
+    }
+    
+    protected void disconnectExtractor(MockService s) throws InterruptedException, IOException{
+    	eventManager.unregisterService(s);
+        // wait for broker to finish
+        synchronized (broker) {
+            broker.wait(500);
+        }
+    }
+	
+	protected void setupMockAnalyser(String source, String target)
+            throws IOException, InterruptedException {
         setupMockAnalyser(source, target,false);
     }
     
     protected void setupMockAnalyser(String source, String target, boolean createPart)
-            throws IOException {
-        eventManager.registerService(new MockService(source, target, createPart));
+            throws IOException, InterruptedException {
+        connectExtractor(new MockService(source, target, createPart));
     }
     
     protected void teardownMockAnalyser(MockService s)
-            throws IOException {
-        eventManager.unregisterService(s);
+            throws IOException, InterruptedException {
+        disconnectExtractor(s);
         s=null;
     }
 
@@ -273,4 +328,59 @@ public abstract class BaseBrokerTest {
         return val;
     }
 
+    protected static void unregisterExtractor(MockService s) throws ClientProtocolException, IOException{
+		Assume.assumeTrue(isRegistrationServiceAvailable);
+		CloseableHttpClient httpclient = HttpClients.createDefault();
+		HttpDelete httpDelete = new HttpDelete(((MICOBrokerImpl)broker).getRegistrationBaseUri()+"/delete/extractor/"+s.getExtractorID());
+		httpDelete.setHeader("Accept", "application/json");
+		httpDelete.setHeader("Content-type", "application/json");
+	    httpclient.execute(httpDelete);
+	}
+	
+    // ------------------------ HELPER UTILITIES FOR VERSION 3 -------------------- //
+    
+	protected static void registerExtractor(MockService s, String mimeType) throws ClientProtocolException, IOException{
+		
+		Assume.assumeTrue(isRegistrationServiceAvailable);
+		HttpEntity entity = MultipartEntityBuilder
+			    .create()
+			    .addBinaryBody("file",createTestRegistrationXml(s, mimeType).getBytes() , ContentType.create("application/octet-stream"), "filename")
+			    .build();
+		
+		CloseableHttpClient httpclient = HttpClients.createDefault();
+		HttpPost httppost = new HttpPost(((MICOBrokerImpl)broker).getRegistrationBaseUri()+"/add/extractor");
+		httppost.setEntity(entity);
+
+		//Execute and get the response.
+		CloseableHttpResponse response = httpclient.execute(httppost);
+		int status = response.getStatusLine().getStatusCode();
+		response.close();
+	    Assert.assertEquals(200, status);
+	}
+		
+	
+	private static String createTestRegistrationXml( MockService s, String mimeType){
+		
+		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + 
+	    "<extractorSpecification>"+
+		  "<name>"+s.getServiceID()+"</name>"+
+		  "<version>"+s.getServiceID()+"</version>"+
+		  "<id>"+s.getExtractorID()+"</id>"+
+		    "<mode>"+
+		      "<id>"+s.getExtractorModeID()+"</id>"+
+		      "<description> desc </description>"+
+		      "<input>"+
+		        "<semanticType><name>TestInputName</name><description>TestDescription</description></semanticType>"+
+		        "<dataType><mimeType>"+mimeType+"</mimeType><syntacticType>"+s.getRequires()+"</syntacticType></dataType>"+
+		      "</input>"+
+		      "<output>"+
+		        "<semanticType><name>TestInputName</name><description>TestDescription</description></semanticType>"+
+		        "<dataType><mimeType>"+mimeType+"</mimeType><syntacticType>"+s.getProvides()+"</syntacticType></dataType>"+
+		        "<location>Test Location </location>"+
+		      "</output>"+
+		    "</mode>"+
+		  "<isSingleton>false</isSingleton>"+
+		"</extractorSpecification>";		  
+
+	}
 }
