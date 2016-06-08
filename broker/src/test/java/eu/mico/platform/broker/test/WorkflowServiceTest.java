@@ -13,30 +13,15 @@
  */
 package eu.mico.platform.broker.test;
 
-import com.google.common.collect.ImmutableSet;
-import com.rabbitmq.client.QueueingConsumer;
 
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
-import eu.mico.platform.broker.impl.MICOBrokerImpl.ExtractorStatus;
 import eu.mico.platform.broker.impl.MICOBrokerImpl.RouteStatus;
-import eu.mico.platform.broker.test.BaseBrokerTest.MockService;
+import eu.mico.platform.broker.model.MICOCamelRoute;
 import eu.mico.platform.broker.webservices.WorkflowManagementService;
 import eu.mico.platform.camel.MicoCamelContext;
-import eu.mico.platform.event.api.EventManager;
-import eu.mico.platform.event.model.Event;
-import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.Asset;
-import eu.mico.platform.persistence.model.Part;
-import eu.mico.platform.persistence.model.Item;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.util.HttpURLConnection;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -45,30 +30,23 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
-import javax.ws.rs.core.Response;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.hasProperty;
 
 /**
  * Add file description here!
@@ -84,6 +62,7 @@ import static org.hamcrest.Matchers.hasProperty;
 	
 	private static Logger log = LoggerFactory.getLogger(CamelBrokerTest.class);
     private static MicoCamelContext context = new MicoCamelContext();
+    private static Map<Integer,MICOCamelRoute> routes = new HashMap<Integer,MICOCamelRoute>();
     private static WorkflowManagementService service = null;
     private static boolean isRegistrationServiceAvailable = false;
     
@@ -109,13 +88,14 @@ import static org.hamcrest.Matchers.hasProperty;
     	
     	
         context.init();
-        service = new WorkflowManagementService(broker,context);
+        service = new WorkflowManagementService(broker,context,routes);
     }
 
     
     // ------------------------Tests below this line -------------------- //
     
-    @Test
+    @SuppressWarnings("deprecation")
+	@Test
     public void testGetWorkflowStatus() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
     	
     	Assume.assumeTrue(isRegistrationServiceAvailable);
@@ -154,7 +134,8 @@ import static org.hamcrest.Matchers.hasProperty;
         Assert.assertTrue(service.listWorkflows(USER).isEmpty());
     }
     
-    @Test
+    @SuppressWarnings("deprecation")
+	@Test
     public void testAddRemoveWorkflows() throws RepositoryException, IOException{
     	
     	//assert that no workflows are present
