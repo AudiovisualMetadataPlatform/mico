@@ -85,6 +85,7 @@ public class MICOCamelRoute {
 	private ArrayList<ExtractorConfiguration> eConfig= new ArrayList<ExtractorConfiguration>();
 	private ArrayList<EntryPoint> ePoints= new ArrayList<EntryPoint>();
 	private String workflowId = null;
+	private String xmlCamelRoute = null;
 	
 	
 	/*
@@ -98,6 +99,7 @@ public class MICOCamelRoute {
 		log.info("Retrieving camel route configuration out of:\n{}",xmlCamelRoute);
 		parseExtractorConfigurations(xmlCamelRoute);
 		parseEntryPoints(xmlCamelRoute);
+		this.xmlCamelRoute= xmlCamelRoute;
 		return this;
 	}
 
@@ -120,6 +122,13 @@ public class MICOCamelRoute {
 	 */
 	public String getWorkflowId(){
 		return workflowId;
+	}
+	
+	/*
+	 * Retrieves the xml camel route 
+	 */
+	public String getXmlCamelRoute(){
+		return xmlCamelRoute;
 	}
 	
 	
