@@ -43,7 +43,7 @@ public class MicoCamelContext {
 
     private static Logger log = LoggerFactory.getLogger(MicoCamelContext.class);
     
-    CamelContext context;
+    private static CamelContext context;
     @Bean(ref="simpleAggregatorStrategy")
     public static SimpleAggregationStrategy aggregatorStrategy = new SimpleAggregationStrategy();
     
