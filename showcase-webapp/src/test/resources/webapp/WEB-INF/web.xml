@@ -33,7 +33,7 @@
         </servlet-class>
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
-            <param-value>eu.mico.platform.zooniverse.testutils.TestApplication</param-value>
+            <param-value>eu.mico.platform.testutils.TestApplication</param-value>
         </init-param>
     </servlet>
 

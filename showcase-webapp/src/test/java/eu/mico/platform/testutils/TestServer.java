@@ -1,4 +1,4 @@
-package eu.mico.platform.zooniverse.testutils;
+package eu.mico.platform.testutils;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
