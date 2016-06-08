@@ -194,6 +194,7 @@
 
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>
+                <version>2.2</version>
                 <artifactId>tomcat7-maven-plugin</artifactId>
                 <configuration>
                     <url>http://mico-platform:8080/manager/text</url>
