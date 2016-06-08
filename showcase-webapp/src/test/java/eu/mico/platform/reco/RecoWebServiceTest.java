@@ -29,6 +29,7 @@ public class RecoWebServiceTest {
 
     static private TestServer server;
 
+
     @BeforeClass
     public static void init() throws Exception {
 
@@ -55,6 +56,22 @@ public class RecoWebServiceTest {
                 then().
                 assertThat().
                 body("status", Matchers.equalTo("Trallala"));
+    }
+
+    @Test
+    public void testTalkanalysis() throws Exception {
+
+        RestAssured.
+                when().
+                get(server.getUrl() + "reco/zoo/12345/discussion/relatedsubjects").then()
+                .assertThat()
+                .statusCode(200)
+                .body("reco_id", Matchers.equalTo("12345"))
+                .body("talk_analysis", Matchers.equalTo("Lion"))
+                .body("user_competence", Matchers.equalTo(0.8f))
+                .body("image_analysis", Matchers.equalTo("Ostrich"))
+                .body("related_subject", Matchers.equalTo("DSG0000111"))
+                .body("confidence", Matchers.equalTo(0.3f));
 
     }
 }

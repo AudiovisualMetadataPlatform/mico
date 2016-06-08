@@ -11,10 +11,9 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
@@ -104,7 +103,7 @@ public class RecoWebService {
 
         try {
             URI recopath = new URI(DockerConf.PIO_RECO_API.toString() + "/queries.json");
-            String data = "{ \"user\": \"" + userId + "\", \"num\": "+ length + " }";
+            String data = "{ \"user\": \"" + userId + "\", \"num\": " + length + " }";
             String response = DockerUtils.forwardPOST(recopath, data);
             return Response.ok(response).build();
 
@@ -147,6 +146,25 @@ public class RecoWebService {
                 .entity(ImmutableMap.of("entity_id", eventId, "entity", pioEvent.toString(), "input", input.comment))
                 .build();
 
+    }
+
+
+    @GET
+    @Path("/zoo/{subject_id}/discussion/relatedsubjects")
+    @Produces("application/json")
+    public Response getRelatedSubjects(@PathParam("subject_id") String subject_id) {
+
+        JsonObject returnValue = Json.createObjectBuilder()
+                .add("reco_id", subject_id)
+                .add("talk_analysis", "Lion")
+                .add("user_competence", 0.8)
+                .add("image_analysis", "Ostrich")
+                .add("related_subject", "DSG0000111")
+                .add("confidence", 0.3)
+                .build();
+
+
+        return Response.ok(returnValue.toString()).build();
     }
 
 }
