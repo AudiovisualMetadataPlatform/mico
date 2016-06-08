@@ -14,25 +14,16 @@
 package eu.mico.platform.broker.test;
 
 
-import eu.mico.platform.broker.impl.MICOBrokerImpl;
 import eu.mico.platform.broker.impl.MICOBrokerImpl.RouteStatus;
 import eu.mico.platform.broker.model.MICOCamelRoute;
 import eu.mico.platform.broker.webservices.WorkflowManagementService;
 import eu.mico.platform.camel.MicoCamelContext;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
@@ -60,7 +51,7 @@ import java.util.Random;
 	private static final String ROUTE_END = "</routes>";
 	private static final String USER="mico";
 	
-	private static Logger log = LoggerFactory.getLogger(CamelBrokerTest.class);
+	private static Logger log = LoggerFactory.getLogger(WorkflowServiceTest.class);
     private static MicoCamelContext context = new MicoCamelContext();
     private static Map<Integer,MICOCamelRoute> routes = new HashMap<Integer,MICOCamelRoute>();
     private static WorkflowManagementService service = null;
@@ -213,6 +204,7 @@ import java.util.Random;
 						                               "&amp;extractorId="+s.getExtractorID()+
 						                               "&amp;extractorVersion="+s.getExtractorVersion()+
 						                               "&amp;modeId="+s.getExtractorModeID()+"'/>"+ "\n" +
+						      "<to uri='mock:auto-test-route-"+s.getRequires()+"-"+s.getProvides()+"-"+mimeType+"'/>"+
 						    "</pipeline>"+
 						  "</route>";
 		

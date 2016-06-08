@@ -76,7 +76,7 @@ public abstract class BaseBrokerTest {
 
     protected static String testHost;
 
-    protected EventManager eventManager;
+    protected static EventManager eventManager;
     protected static MICOBroker broker;
     private static Connection connection;
     protected Channel channel;
@@ -289,17 +289,17 @@ public abstract class BaseBrokerTest {
 
 		@Override
 		public String getExtractorID() {
-			return getServiceID().stringValue();
+			return "urn:org.example.services";
 		}
 
 		@Override
 		public String getExtractorModeID() {
-			return "Mode";
+			return source+target+"Service";
 		}
 
 		@Override
 		public String getExtractorVersion() {
-			return "0.0.0";
+			return "1.0.0";
 		}
 
     }
@@ -366,7 +366,7 @@ public abstract class BaseBrokerTest {
 		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + 
 	    "<extractorSpecification>"+
 		  "<name>"+s.getServiceID()+"</name>"+
-		  "<version>"+s.getServiceID()+"</version>"+
+		  "<version>"+s.getExtractorVersion()+"</version>"+
 		  "<id>"+s.getExtractorID()+"</id>"+
 		    "<mode>"+
 		      "<id>"+s.getExtractorModeID()+"</id>"+
