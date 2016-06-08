@@ -15,6 +15,9 @@ package eu.mico.platform.broker.webservices;
 
 import com.google.common.collect.ImmutableMap;
 
+import eu.mico.platform.broker.api.MICOBroker;
+import eu.mico.platform.broker.impl.MICOBrokerImpl;
+import eu.mico.platform.broker.impl.MICOBrokerImpl.RouteStatus;
 import eu.mico.platform.broker.model.MICOCamelRoute;
 import eu.mico.platform.broker.model.MICOCamelRoute.EntryPoint;
 import eu.mico.platform.camel.MicoCamelContext;
@@ -23,6 +26,7 @@ import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Resource;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
@@ -53,16 +57,20 @@ import java.util.*;
 @Path("/inject")
 public class InjectionWebService {
 
+	private static  String MICO_RDF_MIME_TYPE = "application/x-mico-rdf";
+	
     private static Logger log = LoggerFactory.getLogger(InjectionWebService.class);
 
+    private MICOBroker broker;
     private EventManager eventManager;
     private MicoCamelContext camelContext;
     private Map<Integer,MICOCamelRoute> camelRoutes;
 
     private final URI extratorID = new URIImpl("http://www.mico-project.eu/injection-webservice/");
 
-    public InjectionWebService(EventManager manager, MicoCamelContext camelContext, Map<Integer,MICOCamelRoute> camelRoutes) {
-        this.eventManager = manager;
+    public InjectionWebService(MICOBroker broker, EventManager manager, MicoCamelContext camelContext, Map<Integer,MICOCamelRoute> camelRoutes) {
+        this.broker=broker;
+    	this.eventManager = manager;
         this.camelContext = camelContext;
         this.camelRoutes = camelRoutes;
     }
@@ -209,34 +217,93 @@ public class InjectionWebService {
     @Path("/submit")
     public Response submitItem(@QueryParam("item") String itemURI, @QueryParam("route") Integer routeId) throws RepositoryException, IOException {
 
+    	if(itemURI == null || itemURI.isEmpty()){
+    		//wrong item
+    		return Response.status(Response.Status.BAD_REQUEST).build();
+    	}
+    	
     	PersistenceService ps = eventManager.getPersistenceService();
         Item item = ps.getItem(new URIImpl(itemURI));
         
-    	if(routeId == null){
-	
-	        if (item != null) {
-	            eventManager.injectItem(item);
-	            log.info("submitted item {} to every compatible extractor", item.getURI());
-	        }	
-	        
-    	}
-    	else{
+        if(routeId == null){
+
+        	eventManager.injectItem(item);
+        	log.info("submitted item {} to every compatible extractor", item.getURI());
+        	return Response.ok().build();
+
+        }
+        else{
     		
     		log.info("Retrieving CamelRoute with ID {}",routeId);
     		MICOCamelRoute route  = camelRoutes.get(routeId);
     		
-    		if(route != null ){
-                        
-	            for(EntryPoint ep:route.getEntryPoints()){
-	                log.info("submitting item {} to route {} using entry point {}",
-	                		item.getURI() ,route.getWorkflowId(), ep.getDirectUri());
-	                camelContext.processItem(ep.getDirectUri(),itemURI);
-	                log.info("item succesfully submitted");
-	            }
+    		if(route == null ){
+    			//the route does not exist
+    			return Response.status(Response.Status.BAD_REQUEST).build();
     		}
-    	}
+    		
 
-        return Response.ok().build();
+
+    		//check route status
+    		String status = broker.getRouteStatus(camelRoutes.get(routeId).getXmlCamelRoute());
+    		if(status.contentEquals(RouteStatus.UNAVAILABLE.toString()) ||
+    				status.contentEquals(RouteStatus.BROKEN.toString())){
+
+    			//the requested route cannot be started or is broken
+    			log.error("The camel route with ID {} is currently {}",routeId,status);    			   
+    			return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
+
+    		}
+    		else if(status.contentEquals(RouteStatus.RUNNABLE.toString())){
+
+    			//TODO: here we should start the required extractors
+    			log.warn("The camel route with ID {} is currently {}, but the auto-deployment is not implemented",routeId,status);
+    			return Response.status(Response.Status.NOT_IMPLEMENTED).build();
+    		}
+    		else if(status.contentEquals(RouteStatus.ONLINE.toString())){
+
+    			//the route is up and running, proceed with the injection
+    			boolean compatibleEpFound = false;
+    			for(EntryPoint ep:route.getEntryPoints()){
+    				
+    				boolean epCompatible = false;
+    				
+    				//check if the entry point is compatible or not
+    				epCompatible = epCompatible || isCompatible(item, ep);
+    				for(Part p : item.getParts()){
+    					epCompatible = epCompatible || isCompatible(p, ep);
+    				}
+    				
+    				if(epCompatible){
+
+	    				//NOTE: camelContext.processItem() is locking until the pipeline 
+	    				//goes through entirely, hence the thread
+	    				Thread thr = new Thread(new Runnable(){
+	    					public void run(){
+	    						log.info("submitting item {} to route {} using entry point {}",
+	    								item.getURI() ,route.getWorkflowId(), ep.getDirectUri());
+	    						camelContext.processItem(ep.getDirectUri(),itemURI);
+	    					}
+	    				});
+	    				thr.start();
+    				}
+    				
+    				compatibleEpFound = compatibleEpFound || epCompatible;
+
+    			}
+    			if(compatibleEpFound){
+    				return Response.ok().build();
+    			}
+    			return Response.status(Response.Status.BAD_REQUEST).build();
+    		}
+    		else{
+    			//status is not between the known ones
+    			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    		}
+        }
+
+
+        
     }
 
 
@@ -481,4 +548,18 @@ public class InjectionWebService {
     	return out;
     }
 
+    private boolean isCompatible(Resource r, EntryPoint ep) throws RepositoryException{
+    	//becomes false if mimetype or syntactic type doesn't match
+    	boolean isCompatible = true;
+    	
+    	if( ! ep.getMimeType().contentEquals(MICO_RDF_MIME_TYPE) ){
+    		isCompatible = isCompatible &&
+    				       r.hasAsset() &&
+    				       r.getAsset().getFormat().contentEquals(ep.getMimeType());
+    	}
+    	isCompatible = isCompatible &&
+    			       ep.getSyntacticType().contentEquals(r.getSyntacticalType());
+    	
+    	return isCompatible;
+    }
 }
