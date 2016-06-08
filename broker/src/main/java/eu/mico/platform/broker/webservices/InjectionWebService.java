@@ -228,11 +228,10 @@ public class InjectionWebService {
     		if(route != null ){
                         
 	            for(EntryPoint ep:route.getEntryPoints()){
-	                //TODO: add check for syntactic type
-	                camelContext.processItem(ep.getDirectUri(),itemURI);
-	                log.info("submitted item {} to route {} using entry point {}",
+	                log.info("submitting item {} to route {} using entry point {}",
 	                		item.getURI() ,route.getWorkflowId(), ep.getDirectUri());
-	                break;	                
+	                camelContext.processItem(ep.getDirectUri(),itemURI);
+	                log.info("item succesfully submitted");
 	            }
     		}
     	}
