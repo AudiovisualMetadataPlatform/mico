@@ -61,11 +61,6 @@ public class SimpleBrokerTest extends BaseBrokerTest {
         setupMockAnalyser("B","C");
         setupMockAnalyser("A","C");
 
-        // wait for broker to finish
-        synchronized (broker) {
-            broker.wait(500);
-        }
-
         // check dependency graph
         Assert.assertEquals(3, broker.getDependencies().edgeSet().size());
         Assert.assertEquals(3, broker.getDependencies().vertexSet().size());
@@ -81,9 +76,6 @@ public class SimpleBrokerTest extends BaseBrokerTest {
         setupMockAnalyser("A","B");
         setupMockAnalyser("B","C");
         setupMockAnalyser("A","C");
-
-        // wait for broker to finish with discovery ...
-        Thread.sleep(500);
 
 
         // check dependency graph
@@ -101,13 +93,11 @@ public class SimpleBrokerTest extends BaseBrokerTest {
     	MockService bc = new MockService("B","C");
     	MockService ac = new MockService("A","C");
     	
-    	eventManager.registerService(ad);
-    	eventManager.registerService(ab);
-    	eventManager.registerService(bc);
-    	eventManager.registerService(ac);
+    	connectExtractor(ad);
+    	connectExtractor(ab);
+    	connectExtractor(bc);
+    	connectExtractor(ac);
     	
-		// wait for broker to finish with discovery ...
-        Thread.sleep(500);
 		// check dependency graph
         Assert.assertEquals(4, broker.getDependencies().edgeSet().size());
         Assert.assertEquals(4, broker.getDependencies().vertexSet().size());
@@ -116,31 +106,29 @@ public class SimpleBrokerTest extends BaseBrokerTest {
     	teardownMockAnalyser(ab);
     	teardownMockAnalyser(bc);
     	teardownMockAnalyser(ac);
-	    //wait for unregistration of (A-B, B-C, A-C)to finish 
-	    Thread.sleep(500);
+
 	    //check dependency graph
         Assert.assertEquals(1, broker.getDependencies().edgeSet().size());
         Assert.assertEquals(2, broker.getDependencies().vertexSet().size());
 
+        
         bc = new MockService("B","C");
-        eventManager.registerService(bc);
-        // wait for broker to finish with discovery ...
-        Thread.sleep(500);
+        connectExtractor(bc);
+
         //check dependency graph
         Assert.assertEquals(2, broker.getDependencies().edgeSet().size());
         Assert.assertEquals(4, broker.getDependencies().vertexSet().size());
 
+        
         teardownMockAnalyser(bc);
-    	//wait for unregistration of A-D to finish
-        Thread.sleep(500);
+
         // check dependency graph
         Assert.assertEquals(1, broker.getDependencies().edgeSet().size());
         Assert.assertEquals(2, broker.getDependencies().vertexSet().size());
         
     	
         teardownMockAnalyser(ad);
-    	//wait for unregistration of A-D to finish
-        Thread.sleep(500);
+
         // check dependency graph
         Assert.assertEquals(0, broker.getDependencies().edgeSet().size());
         Assert.assertEquals(0, broker.getDependencies().vertexSet().size());
@@ -154,38 +142,37 @@ public class SimpleBrokerTest extends BaseBrokerTest {
         MockService ab2 = new MockService("A","B");
         MockService ba =  new MockService("B","A");
         
-        eventManager.registerService(ab);
-        eventManager.registerService(ba);
-		// wait for broker to finish with discovery ...
-        Thread.sleep(500);
+        connectExtractor(ab);
+        connectExtractor(ba);
+
 		// check dependency graph
         Assert.assertEquals(2, broker.getDependencies().edgeSet().size());
         Assert.assertEquals(2, broker.getDependencies().vertexSet().size());
         
-        eventManager.registerService(ab2); //leaves everything unchanged so far, because the service does already exist
-        //wait for broker to finish with discovery ...
-        Thread.sleep(500);
+        
+        connectExtractor(ab2); //leaves everything unchanged so far, because the service does already exist
+
 		// check dependency graph
         Assert.assertEquals(2, broker.getDependencies().edgeSet().size());
         Assert.assertEquals(2, broker.getDependencies().vertexSet().size());
+
         
         teardownMockAnalyser(ab);
-    	//wait for unregistration of A-B to finish
-        Thread.sleep(500);
+
         // check dependency graph
         Assert.assertEquals(1, broker.getDependencies().edgeSet().size());
         Assert.assertEquals(2, broker.getDependencies().vertexSet().size());
+
         
         teardownMockAnalyser(ab2);
-    	//wait for unregistration of (second) A-B to finish
-        Thread.sleep(500);
+
         // check dependency graph
         Assert.assertEquals(1, broker.getDependencies().edgeSet().size());
         Assert.assertEquals(2, broker.getDependencies().vertexSet().size());
         
+
         teardownMockAnalyser(ba);
-    	//wait for unregistration of B-A to finish
-        Thread.sleep(500);
+
         // check dependency graph
         Assert.assertEquals(0, broker.getDependencies().edgeSet().size());
         Assert.assertEquals(0, broker.getDependencies().vertexSet().size());

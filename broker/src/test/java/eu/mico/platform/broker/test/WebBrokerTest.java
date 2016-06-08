@@ -48,10 +48,7 @@ public class WebBrokerTest extends BaseBrokerTest {
         setupMockAnalyser("A","B");
         setupMockAnalyser("B","C");
         setupMockAnalyser("A","C");
-
-        Thread.sleep(500);
-
-
+        
         QueueingConsumer consumer = new QueueingConsumer(channel);
         channel.basicConsume(EventManager.QUEUE_PART_OUTPUT, true, consumer);
 

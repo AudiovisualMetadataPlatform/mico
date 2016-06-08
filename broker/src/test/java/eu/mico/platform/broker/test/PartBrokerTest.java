@@ -58,11 +58,6 @@ public class PartBrokerTest extends BaseBrokerTest {
         setupMockAnalyser("B","C",true);
         setupMockAnalyser("A","C");
 
-        // wait for broker to finish
-        synchronized (broker) {
-            broker.wait(500);
-        }
-
         QueueingConsumer consumer = new QueueingConsumer(channel);
         channel.basicConsume(EventManager.QUEUE_PART_OUTPUT, true, consumer);
 
@@ -112,11 +107,6 @@ public class PartBrokerTest extends BaseBrokerTest {
         setupMockAnalyser("A","B");
         setupMockAnalyser("B","C");
         setupMockAnalyser("A","C");
-
-        // wait for broker to finish
-        synchronized (broker) {
-            broker.wait(500);
-        }
 
         QueueingConsumer consumer = new QueueingConsumer(channel);
         channel.basicConsume(EventManager.QUEUE_PART_OUTPUT, true, consumer);

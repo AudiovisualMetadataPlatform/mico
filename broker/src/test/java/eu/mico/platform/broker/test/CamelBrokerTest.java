@@ -54,8 +54,6 @@ public class CamelBrokerTest extends BaseBrokerTest {
         setupMockAnalyser("A","B");
         setupMockAnalyser("B","C");
         setupMockAnalyser("A","C");
-
-        Thread.sleep(500);
         
         MockEndpoint mock = getMockEndpoint("mock:result_simple1");
         mock.expectedMinimumMessageCount(1);       
@@ -101,8 +99,6 @@ public class CamelBrokerTest extends BaseBrokerTest {
         setupMockAnalyser("A","B1");
         setupMockAnalyser("A","B2");
         setupMockAnalyser("B","C");
-
-        Thread.sleep(1000);
         
         MockEndpoint mock = getMockEndpoint("mock:result_aggregateSimple_1");
         mock.expectedMessageCount(2);       

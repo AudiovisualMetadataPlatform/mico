@@ -337,6 +337,8 @@ public abstract class BaseBrokerTest {
 	    httpclient.execute(httpDelete);
 	}
 	
+    
+    
     // ------------------------ HELPER UTILITIES FOR VERSION 3 -------------------- //
     
 	protected static void registerExtractor(MockService s, String mimeType) throws ClientProtocolException, IOException{
