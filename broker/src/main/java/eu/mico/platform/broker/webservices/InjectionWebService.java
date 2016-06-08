@@ -15,6 +15,8 @@ package eu.mico.platform.broker.webservices;
 
 import com.google.common.collect.ImmutableMap;
 
+import eu.mico.platform.broker.model.MICOCamelRoute;
+import eu.mico.platform.broker.model.MICOCamelRoute.EntryPoint;
 import eu.mico.platform.camel.MicoCamelContext;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
@@ -55,12 +57,14 @@ public class InjectionWebService {
 
     private EventManager eventManager;
     private MicoCamelContext camelContext;
+    private Map<Integer,MICOCamelRoute> camelRoutes;
 
     private final URI extratorID = new URIImpl("http://www.mico-project.eu/injection-webservice/");
 
-    public InjectionWebService(EventManager manager, MicoCamelContext camelContext) {
+    public InjectionWebService(EventManager manager, MicoCamelContext camelContext, Map<Integer,MICOCamelRoute> camelRoutes) {
         this.eventManager = manager;
         this.camelContext = camelContext;
+        this.camelRoutes = camelRoutes;
     }
 
     /**
@@ -203,16 +207,35 @@ public class InjectionWebService {
      */
     @POST
     @Path("/submit")
-    public Response submitItem(@QueryParam("item") String itemURI) throws RepositoryException, IOException {
+    public Response submitItem(@QueryParam("item") String itemURI, @QueryParam("route") Integer routeId) throws RepositoryException, IOException {
 
-        PersistenceService ps = eventManager.getPersistenceService();
+    	PersistenceService ps = eventManager.getPersistenceService();
         Item item = ps.getItem(new URIImpl(itemURI));
-
-        if (item != null) {
-            eventManager.injectItem(item);
-        }
-
-        log.info("submitted item {}", item.getURI());
+        
+    	if(routeId == null){
+	
+	        if (item != null) {
+	            eventManager.injectItem(item);
+	            log.info("submitted item {} to every compatible extractor", item.getURI());
+	        }	
+	        
+    	}
+    	else{
+    		
+    		log.info("Retrieving CamelRoute with ID {}",routeId);
+    		MICOCamelRoute route  = camelRoutes.get(routeId);
+    		
+    		if(route != null ){
+                        
+	            for(EntryPoint ep:route.getEntryPoints()){
+	                //TODO: add check for syntactic type
+	                camelContext.processItem(ep.getDirectUri(),itemURI);
+	                log.info("submitted item {} to route {} using entry point {}",
+	                		item.getURI() ,route.getWorkflowId(), ep.getDirectUri());
+	                break;	                
+	            }
+    		}
+    	}
 
         return Response.ok().build();
     }
