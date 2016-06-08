@@ -1,7 +1,13 @@
 package eu.mico.platform.reco;
 
+import com.jayway.restassured.RestAssured;
 import eu.mico.platform.testutils.TestServer;
+import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
+import org.junit.Test;
+import org.openrdf.repository.RepositoryException;
+
+import java.io.IOException;
 
 import static eu.mico.platform.testutils.Mockups.mockEvenmanager;
 
@@ -32,11 +38,23 @@ public class RecoWebServiceTest {
                 "http://mico-platform:8080/marmotta"
         );
 
-           //init server
+        //init server
         server = new TestServer();
 
         server.addWebservice(recoWebService);
 
         server.start();
+    }
+
+    @Test
+    public void testTestcall() throws IOException, RepositoryException {
+        RestAssured.
+
+                when().
+                get(server.getUrl() + "reco/testcall").
+                then().
+                assertThat().
+                body("status", Matchers.equalTo("Trallala"));
+
     }
 }

@@ -40,9 +40,9 @@ public class RecoWebService {
 
     @GET
     @Path("/testcall")
-    @Produces("text/plain")
+    @Produces("application/json")
     public Response getTestResponse() {
-        return Response.ok("Trallala").build();
+        return Response.ok("{\"status\":\"Trallala\"}").build();
     }
 
     @GET
