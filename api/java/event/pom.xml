@@ -64,14 +64,14 @@
             <artifactId>hamcrest-library</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>eu.mico-project.platform</groupId>
-            <artifactId>persistence</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        
+        <!--<dependency>-->
+            <!--<groupId>eu.mico-project.platform</groupId>-->
+            <!--<artifactId>persistence</artifactId>-->
+            <!--<version>${project.version}</version>-->
+            <!--<type>test-jar</type>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
+        <!-- -->
         <dependency>
             <groupId>org.apache.marmotta</groupId>
             <artifactId>marmotta-core</artifactId>
