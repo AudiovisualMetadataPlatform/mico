@@ -732,7 +732,7 @@ public class MICOBrokerImpl implements MICOBroker {
     			new HashMap<MICOCamelRoute.ExtractorConfiguration,ExtractorStatus> ();
     	
     	for( MICOCamelRoute.ExtractorConfiguration extractor : extractors){
-    		eStatus.put(extractor, getStatus(extractor));
+    		eStatus.put(extractor, getExtractorStatus(extractor));
     	}
     	
     	//then iterate among the statuses
@@ -768,7 +768,7 @@ public class MICOBrokerImpl implements MICOBroker {
     	return routeStatus;
     }
     
-    private ExtractorStatus getStatus(MICOCamelRoute.ExtractorConfiguration e) throws ClientProtocolException, IOException{ 
+    private ExtractorStatus getExtractorStatus(MICOCamelRoute.ExtractorConfiguration e) throws ClientProtocolException, IOException{ 
     	
     	ExtractorStatus outputStatus = ExtractorStatus.UNREGISTERED;
     	String eId=e.getExtractorId();

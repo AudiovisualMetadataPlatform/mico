@@ -60,7 +60,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import javax.ws.rs.core.Response;
@@ -125,7 +127,7 @@ import static org.hamcrest.Matchers.hasProperty;
     	
     	MockService abService = new MockService("A", "B");
     	String abWorkflow=createTestRoute(abService, "A", "mico/test");    	
-        int newId = service.addWorkflow("mico", "tw-1",abWorkflow , "[]","[]");
+        int newId = service.addWorkflow(USER, "tw-1",abWorkflow , "[]","[]");
         ids = service.listWorkflows(USER);
         
         Assert.assertEquals(ids.size(),1);
@@ -152,10 +154,78 @@ import static org.hamcrest.Matchers.hasProperty;
         Assert.assertTrue(service.listWorkflows(USER).isEmpty());
     }
     
-//    @Test
-//    public void tesAddRemoveWorkflows(){
-//    	
-//    }
+    @Test
+    public void testAddRemoveWorkflows() throws RepositoryException, IOException{
+    	
+    	//assert that no workflows are present
+    	List<String> ids = service.listWorkflows(USER);
+    	Assert.assertTrue(ids.isEmpty());
+    	
+    	final String GUEST = "GUEST";
+    	List<String> ids2 = service.listWorkflows(GUEST);
+    	Assert.assertTrue(ids2.isEmpty());
+    	
+    	MockService abService = new MockService("A", "B");
+    	
+    	//add 100 workflows for user mico
+    	for(int i=0; i<100; i++){
+    		service.addWorkflow(USER, "tw-"+1,createTestRoute(abService,"mico:Test","test/mico") , "[]","[]");
+    	}
+    	
+    	ids = service.listWorkflows(USER);
+    	Assert.assertEquals(100,ids.size());
+    	
+    	
+    	//add 50 workflows for user guest
+    	for(int i=0; i<50; i++){
+    		service.addWorkflow(GUEST, "tw-"+1,createTestRoute(abService,"mico:Test","test/mico") , "[]","[]");
+    	}
+    	
+    	ids2 = service.listWorkflows(GUEST);
+    	Assert.assertEquals(50,ids2.size());
+    	
+    	
+    	Collections.shuffle(ids, new Random(0));
+    	Collections.shuffle(ids2, new Random(0));
+    	
+    	try{
+    	  	for(String id : ids){
+        		service.getCamelRoute(Integer.parseInt(id));
+        	}
+    	}catch(Exception e) {
+    		Assert.fail("Unexpected exception while retrieving an existing workflow for user "+USER);
+    	}
+    	try{
+    	  	for(String id : ids2){
+        		service.getCamelRoute(Integer.parseInt(id));
+        	}
+    	}catch(Exception e) {
+    		Assert.fail("Unexpected exception while retrieving an existing workflow for user "+GUEST);
+    	}
+    	
+    	try{
+    	  	for(String id : ids){
+        		service.deleteWorkflow(Integer.parseInt(id));
+        	}
+    	}catch(Exception e) {
+    		Assert.fail("Unexpected exception while deleting an existing workflow for user "+USER);
+    	}
+    	
+    	Assert.assertTrue(service.listWorkflows(USER).isEmpty());
+    	Assert.assertEquals(ids2.size(),service.listWorkflows(GUEST).size());
+    	
+    	try{
+    	  	for(String id : ids2){
+        		service.deleteWorkflow(Integer.parseInt(id));
+        	}
+    	}catch(Exception e) {
+    		Assert.fail("Unexpected exception while deleting an existing workflow for user "+GUEST);
+    	}
+    	
+    	Assert.assertTrue(service.listWorkflows(GUEST).isEmpty());
+    	
+    		
+    }
     
     
     // ------------------------ HELPER UTILITIES -------------------- //
