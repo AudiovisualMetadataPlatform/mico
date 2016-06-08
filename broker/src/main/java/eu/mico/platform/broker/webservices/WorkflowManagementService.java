@@ -16,7 +16,6 @@ package eu.mico.platform.broker.webservices;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
 import eu.mico.platform.broker.model.MICOCamelRoute;
-import eu.mico.platform.broker.model.MICOCamelRoute.EntryPoint;
 import eu.mico.platform.broker.model.wf.Workflow;
 import eu.mico.platform.camel.MicoCamelContext;
 
@@ -39,6 +38,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * broker service for managing camel routes
@@ -61,10 +61,12 @@ public class WorkflowManagementService {
     private MICOBroker broker;
 
     private MicoCamelContext camelContext;
+    private Map<Integer,MICOCamelRoute> camelRoutes;
 
-    public WorkflowManagementService(MICOBroker broker, MicoCamelContext camelContext) {
+    public WorkflowManagementService(MICOBroker broker, MicoCamelContext camelContext, Map<Integer,MICOCamelRoute> camelRoutes) {
         this.broker = broker;
         this.camelContext = camelContext;
+        this.camelRoutes = camelRoutes;
     	this.emf = Persistence.createEntityManagerFactory("inMemoryPersistenceUnit");
     	this.em = emf.createEntityManager();
     }
@@ -88,9 +90,18 @@ public class WorkflowManagementService {
         
     	log.info("Persisting new workflow with name {} for user {}",workflowName,user);
     	
+    	//add to database
         Workflow workflow = new Workflow(user, workflowName, route, links, nodes);
-        camelContext.addRouteToContext(route);
         persistWorkflow(workflow);
+        
+        
+        //add to memory
+        String xmlCamelRoute = new String(workflow.getRoute());
+        xmlCamelRoute = xmlCamelRoute.replaceAll("WORKFLOW_ID", workflow.getId().toString());
+        
+        camelContext.addRouteToContext(xmlCamelRoute);
+        camelRoutes.put(workflow.getId(),new MICOCamelRoute().parseCamelRoute(xmlCamelRoute));
+        
         log.info("Persisted new workflow {} belonging to user {}",workflow.toString(),user);
 
         return workflow.getId().intValue();
@@ -103,7 +114,14 @@ public class WorkflowManagementService {
     public Response deleteWorkflow(@PathParam("id") Integer workflowId ) throws RepositoryException,
             IOException {
     	log.info("Removing workflow with ID {}",workflowId);
-        deleteWorkflow(getWorkflow(workflowId));
+
+    	//delete from database
+    	deleteWorkflow(getWorkflow(workflowId));
+    	
+    	//delete from memory
+        String xmlRoute=getCamelRoute(workflowId);        
+    	camelContext.removeRouteFromContext(xmlRoute);
+        camelRoutes.remove(workflowId);        
         
         return Response.ok(ImmutableMap.of()).build();
     }
@@ -116,6 +134,7 @@ public class WorkflowManagementService {
     @GET
     @Path("/list")
     @Produces("application/json")
+    @Deprecated
     public List<String> listWorkflows(@QueryParam("user") String user) 
             throws RepositoryException, IOException {
     	log.info("Retrieving list of workflows ids for user {}",user);
@@ -149,8 +168,8 @@ public class WorkflowManagementService {
     	String status="BROKEN";
     	try{
 	        if (broker instanceof MICOBrokerImpl ){
-	        	String camelRoute=new String(getWorkflow(workflowId).getRoute());
-	        	status =  broker.getRouteStatus(camelRoute.replaceAll("WORKFLOW_ID", workflowId.toString()));
+	        	String xmlCamelRoute=new String(getCamelRoute(workflowId));
+	        	status =  broker.getRouteStatus(xmlCamelRoute);
 	        }
         }
     	catch(Exception e){
@@ -162,6 +181,7 @@ public class WorkflowManagementService {
     @GET
     @Path("/ui-params/{id}")
     @Produces("application/json")
+    @Deprecated
     public Response getUIParams(@PathParam("id") Integer workflowId ) throws RepositoryException,
             IOException {
     	log.info("Retrieving UI Parameters for workflow with ID {}",workflowId);
@@ -176,31 +196,15 @@ public class WorkflowManagementService {
     public String getCamelRoute(@PathParam("id") Integer workflowId ) throws RepositoryException,
             IOException {
     	log.info("Retrieving CamelRoute for workflow with ID {}",workflowId);
-        String camelRoute=new String(getWorkflow(workflowId).getRoute());        
-        return camelRoute.replaceAll("WORKFLOW_ID", workflowId.toString());
-    }
-    
-    @POST
-    @Path("/inject/{route}/{item}")
-    @Produces("text/plain")
-    public Response injectItem(@PathParam("item") String itemUri, @PathParam("route") Integer workflowId ) throws RepositoryException,
-            IOException {
-        log.info("Retrieving CamelRoute for workflow with ID {}",workflowId);
-        Workflow wf = getWorkflow(workflowId);
-        MICOCamelRoute route = new MICOCamelRoute();
-        route.parseCamelRoute(wf.getRoute());
-        
-        for(EntryPoint ep:route.getEntryPoints()){
-            //TODO: add check for syntactic type
-            camelContext.processItem(ep.getDirectUri(),itemUri);
-            break;
-        }
-        return Response.ok().build();
+    	
+    	//retrieve from memory
+    	return camelRoutes.get(workflowId).getXmlCamelRoute();
     }
     
     
     //------------------- private methods handling the persistence backend
     
+    @Deprecated
     private void persistWorkflow(Workflow workflow){
     	em.getTransaction().begin();
         em.persist(workflow);
@@ -209,6 +213,7 @@ public class WorkflowManagementService {
     }
 
     @SuppressWarnings("unchecked")
+    @Deprecated
     private List<String> getWorkflowIdsForUser(String user) {
     	Query queryAllIDs = em.createNamedQuery(Workflow.QUERY_WORKFLOW_IDS_BY_USER);
     	queryAllIDs.setParameter("user", user);
@@ -221,6 +226,7 @@ public class WorkflowManagementService {
     	return out;
     }
     
+    @Deprecated
     private Workflow getWorkflow(Integer wId) {
     	
     	TypedQuery<Workflow> querySingleWorkflow = em.createNamedQuery(Workflow.QUERY_SINGLE_WORKFLOW_BY_ID, Workflow.class);
@@ -228,6 +234,7 @@ public class WorkflowManagementService {
     	return querySingleWorkflow.getSingleResult();
     }
     
+    @Deprecated
     private void deleteWorkflow(Workflow workflow) {
     	
     	em.getTransaction().begin();
