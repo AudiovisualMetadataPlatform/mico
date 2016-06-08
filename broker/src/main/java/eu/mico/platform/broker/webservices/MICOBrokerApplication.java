@@ -15,6 +15,7 @@ package eu.mico.platform.broker.webservices;
 
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
+import eu.mico.platform.broker.model.MICOCamelRoute;
 import eu.mico.platform.camel.MicoCamelContext;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
@@ -36,8 +37,11 @@ import javax.ws.rs.core.Context;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
@@ -56,6 +60,7 @@ public class MICOBrokerApplication extends Application {
     private MICOBroker broker;
     private EventManager eventManager;
     protected MicoCamelContext camelContext;
+    protected Map<Integer,MICOCamelRoute> camelRoutes;
 
 
     public MICOBrokerApplication(@Context ServletContext context) {
@@ -91,13 +96,16 @@ public class MICOBrokerApplication extends Application {
             broker  = new MICOBrokerImpl(host, user, pass, 5672, marmottaBaseUri, storageBaseUri, registrationBaseUri);
             eventManager = new EventManagerImpl(host, user, pass);
             eventManager.init();
+            
             camelContext = new MicoCamelContext();
             camelContext.init();
+            
+            camelRoutes = new HashMap<Integer,MICOCamelRoute>();
 
             services = new HashSet<>();
             services.add(new StatusWebService(broker));
-            services.add(new InjectionWebService(eventManager, camelContext));
-            services.add(new WorkflowManagementService(broker, camelContext));
+            services.add(new InjectionWebService(eventManager, camelContext, Collections.unmodifiableMap(camelRoutes)));
+            services.add(new WorkflowManagementService(broker, camelContext, camelRoutes));
         } catch (IOException ex) {
             log.error("could not initialise MICO broker, services not available (message: {})", ex.getMessage());
             log.debug("Exception:",ex);
