@@ -79,9 +79,17 @@ public class ItemState {
             for(Part part : item.getParts()) {
                 try {
                     states.put(part.getURI(), graph.getState(part.getSyntacticalType()));
-                } catch (StateNotFoundException e) {
-                    setError("no starting state found for part with asset type: " +part.getSyntacticalType());
-                    log.warn("no starting state found for part with asset type {}", part.getSyntacticalType());
+                } catch (StateNotFoundException e1) {
+                    setError("no starting state found for part with syntacticType: " + part.getSyntacticalType());
+                    log.warn("no starting state found for part with syntacticType {}, trying with the asset format", part.getSyntacticalType());
+                    try {
+                    	if(part.hasAsset() && part.getAsset().getFormat() != null ){
+                    		states.put(part.getURI(), graph.getState(part.getAsset().getFormat()));
+                    	}
+                    } catch (StateNotFoundException e2) {
+                        setError("no starting state found for part with asset mimeType: " + part.getAsset().getFormat());
+                        log.warn("no starting state found for part with asset mimeType {}", part.getAsset().getFormat());
+                    }
                 }
             }
         } catch (RepositoryException e) {

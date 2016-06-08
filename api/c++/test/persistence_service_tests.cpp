@@ -251,7 +251,52 @@ int main(int argc, char **argv) {
         assert(newAsset->getURI().stringValue().length() > 0);
         assert(existingAsset->getURI().stringValue().length() > 0);
 
+        std::shared_ptr<mico::persistence::model::Asset> existingAsset2 = itemWithAssetResource->getAssetWithLocation(newAsset->getLocation());
+        assert(existingAsset2);
+        assert(existingAsset2->getURI().stringValue().length() > 0);
+        assert(existingAsset2->getFormat().compare("video/mp4") == 0);
+        assert(newAsset->getLocation().stringValue().compare(existingAsset2->getLocation().stringValue()) == 0);
+
         persistenceServiceTest.svc->deleteItem(itemWithAssetResource->getURI());
+
+        //now with custom location
+        itemWithAssetResource =
+        		std::dynamic_pointer_cast<mico::persistence::model::Resource>(persistenceServiceTest.svc->createItem());
+        newAsset = itemWithAssetResource->getAssetWithLocation(mico::persistence::model::URI(""));
+        assert(newAsset == nullptr );
+
+        newAsset = itemWithAssetResource->getAssetWithLocation(
+        		mico::persistence::model::URI(persistenceServiceTest.svc->getStoragePrefix()+"malf/or_med/url"));
+        assert(newAsset == nullptr );
+
+        std::string test_location=persistenceServiceTest.svc->getStoragePrefix()+"new/custom-location";
+        newAsset = itemWithAssetResource->getAssetWithLocation(mico::persistence::model::URI(test_location));
+        existingAsset = itemWithAssetResource->getAsset();
+        existingAsset2 = itemWithAssetResource->getAssetWithLocation(mico::persistence::model::URI(test_location));
+
+        assert(newAsset);
+        assert(existingAsset);
+        assert(existingAsset2);
+
+        assert(newAsset->getURI().stringValue().length() > 0);
+        assert(existingAsset->getURI().stringValue().length() > 0);
+        assert(existingAsset2->getURI().stringValue().length() > 0);
+
+        newAsset->setFormat("video/mp4");
+        assert(existingAsset->getFormat().compare("video/mp4") == 0);
+        assert(existingAsset2->getFormat().compare("video/mp4") == 0);
+
+        assert(newAsset->getLocation().stringValue().compare(test_location) == 0);
+        assert(newAsset->getLocation().stringValue().compare(existingAsset->getLocation().stringValue()) == 0);
+        assert(newAsset->getLocation().stringValue().compare(existingAsset2->getLocation().stringValue()) == 0);
+
+        newAsset = itemWithAssetResource->getAssetWithLocation(
+                		mico::persistence::model::URI(persistenceServiceTest.svc->getStoragePrefix()+"wRong-But-v4lid/cust0m-loc4tion"));
+        assert(newAsset == nullptr );
+
+
+        persistenceServiceTest.svc->deleteItem(itemWithAssetResource->getURI());
+
 
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
