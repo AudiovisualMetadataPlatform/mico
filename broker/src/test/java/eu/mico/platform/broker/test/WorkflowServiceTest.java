@@ -18,6 +18,7 @@ import com.rabbitmq.client.QueueingConsumer;
 
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
 import eu.mico.platform.broker.impl.MICOBrokerImpl.ExtractorStatus;
+import eu.mico.platform.broker.impl.MICOBrokerImpl.RouteStatus;
 import eu.mico.platform.broker.test.BaseBrokerTest.MockService;
 import eu.mico.platform.broker.webservices.WorkflowManagementService;
 import eu.mico.platform.camel.MicoCamelContext;
@@ -79,7 +80,93 @@ import static org.hamcrest.Matchers.hasProperty;
 	private static final String ROUTE_END = "</routes>";
 	private static final String USER="mico";
 	
-	private static String createTestRoute( MockService s, String syntacticType, String mimeType){
+	private static Logger log = LoggerFactory.getLogger(CamelBrokerTest.class);
+    private static MicoCamelContext context = new MicoCamelContext();
+    private static WorkflowManagementService service = null;
+    private static boolean isRegistrationServiceAvailable = false;
+    
+    @BeforeClass
+    public static void prepare() throws ClientProtocolException, IOException {
+    	
+    	HttpGet httpGetInfo = new HttpGet(((MICOBrokerImpl)broker).getRegistrationBaseUri() + "/info");
+    	
+    	CloseableHttpClient httpclient = HttpClients.createDefault();    	
+    	CloseableHttpResponse response = null;
+    	try{
+    		response = httpclient.execute(httpGetInfo);
+    		int status = response.getStatusLine().getStatusCode();
+        log.info("looking for registration service at {}",httpGetInfo.toString());
+        	if(status == 200){
+        		isRegistrationServiceAvailable = true;
+        	}
+    	}
+    	catch(Exception e){;}
+    	finally{
+    		if(response!= null) response.close();
+    	}
+    	
+    	
+        context.init();
+        service = new WorkflowManagementService(broker,context);
+    }
+
+    
+    // ------------------------Tests below this line -------------------- //
+    
+    @Test
+    public void testGetWorkflowStatus() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
+    	
+    	Assume.assumeTrue(isRegistrationServiceAvailable);
+    	
+    	//assert that no workflows are present
+    	List<String> ids = service.listWorkflows(USER);
+    	Assert.assertTrue(ids.isEmpty());
+    	
+    	
+    	MockService abService = new MockService("A", "B");
+    	String abWorkflow=createTestRoute(abService, "A", "mico/test");    	
+        int newId = service.addWorkflow("mico", "tw-1",abWorkflow , "[]","[]");
+        ids = service.listWorkflows(USER);
+        
+        Assert.assertEquals(ids.size(),1);
+        Assert.assertEquals(Integer.parseInt(ids.get(0)),newId);
+        
+        int nonExistingId = -1;
+        Assert.assertTrue(service.listWorkflows("NON_EXISTING_USER").isEmpty());        
+        assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, nonExistingId));
+        assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, newId));
+        
+        registerExtractor(abService,"mico/test");
+        assertRouteStatus(RouteStatus.UNAVAILABLE,service.getStatus(USER, newId));
+        
+        connectExtractor(abService);        
+        assertRouteStatus(RouteStatus.ONLINE,service.getStatus(USER, newId));
+        
+        disconnectExtractor(abService);
+        assertRouteStatus(RouteStatus.UNAVAILABLE,service.getStatus(USER, newId));
+        
+        unregisterExtractor(abService);
+        assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, newId));
+        
+        service.deleteWorkflow(newId);
+        Assert.assertTrue(service.listWorkflows(USER).isEmpty());
+    }
+    
+//    @Test
+//    public void tesAddRemoveWorkflows(){
+//    	
+//    }
+    
+    
+    // ------------------------ HELPER UTILITIES -------------------- //
+    
+    private static void assertRouteStatus(RouteStatus expected,  String retrieved){
+    	String errorMessage =  "Expected route status was " + expected.toString() +
+                               ", but is "+retrieved;
+    	Assert.assertTrue(errorMessage,expected.toString().contentEquals(retrieved));
+    }
+    
+    private static String createTestRoute( MockService s, String syntacticType, String mimeType){
 		
 		String startingPoint = "<route id='workflow-WORKFLOW_ID-starting-point-for-pipeline-0-mimeType="+mimeType+",syntacticType="+syntacticType+"'>" + "\n" +
 		                       	 "<from uri='direct:workflow-WORKFLOW_ID,mimeType="+mimeType+",syntacticType="+syntacticType+"'/>" +  "\n" +
@@ -99,6 +186,22 @@ import static org.hamcrest.Matchers.hasProperty;
 		  
 		return ROUTE_PREAMBLE+startingPoint+pipeline+ROUTE_END;
 	}
+    
+    private void connectExtractor(MockService s) throws InterruptedException, IOException{
+    	eventManager.registerService(s);
+        // wait for broker to finish
+        synchronized (broker) {
+            broker.wait(500);
+        }
+    }
+    
+    private void disconnectExtractor(MockService s) throws InterruptedException, IOException{
+    	eventManager.unregisterService(s);
+        // wait for broker to finish
+        synchronized (broker) {
+            broker.wait(500);
+        }
+    }
 	
 	private static void unregisterExtractor(MockService s) throws ClientProtocolException, IOException{
 		CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -151,99 +254,5 @@ import static org.hamcrest.Matchers.hasProperty;
 		"</extractorSpecification>";		  
 
 	}
-
-	private static Logger log = LoggerFactory.getLogger(CamelBrokerTest.class);
-    private static MicoCamelContext context = new MicoCamelContext();
-    private static WorkflowManagementService service = null;
-    private static boolean isRegistrationServiceAvailable = false;
-    
-    @BeforeClass
-    public static void prepare() throws ClientProtocolException, IOException {
-    	
-    	HttpGet httpGetInfo = new HttpGet(((MICOBrokerImpl)broker).getRegistrationBaseUri() + "/info");
-    	
-    	CloseableHttpClient httpclient = HttpClients.createDefault();    	
-    	CloseableHttpResponse response = null;
-    	try{
-    		response = httpclient.execute(httpGetInfo);
-    		int status = response.getStatusLine().getStatusCode();
-        log.info("looking for registration service at {}",httpGetInfo.toString());
-        	if(status == 200){
-        		isRegistrationServiceAvailable = true;
-        	}
-    	}
-    	catch(Exception e){;}
-    	finally{
-    		if(response!= null) response.close();
-    	}
-    	
-    	
-    	
-    	
-        context.init();
-        service = new WorkflowManagementService(broker,context);
-    }
-
-    @Test
-    public void testGetWorkflowStatus() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
-    	
-    	Assume.assumeTrue(isRegistrationServiceAvailable);
-    	
-    	//assert that no workflows are present
-    	List<String> ids = service.listWorkflows(USER);
-    	Assert.assertTrue(ids.isEmpty());
-    	
-    	
-    	MockService abService = new MockService("A", "B");
-    	String abWorkflow=createTestRoute(abService, "A", "mico/test");
-    	
-        int newId = service.addWorkflow("mico", "tw-1",abWorkflow , "[]","[]");
-        ids = service.listWorkflows(USER);
-        
-        Assert.assertEquals(ids.size(),1);
-        Assert.assertEquals(Integer.parseInt(ids.get(0)),newId);
-        Assert.assertTrue(service.listWorkflows("NON_EXISTING_USER").isEmpty());
-        
-        Assert.assertTrue("Expected route status was BROKEN, but is "+service.getStatus(USER, -1),
-        		MICOBrokerImpl.RouteStatus.BROKEN.toString().contentEquals(service.getStatus(USER, -1)));
-        
-        Assert.assertTrue("Expected route status was BROKEN, but is "+service.getStatus(USER, newId),
-        		MICOBrokerImpl.RouteStatus.BROKEN.toString().contentEquals(service.getStatus(USER, newId)));
-        
-        registerExtractor(abService,"mico/test");
-        Assert.assertTrue("Expected route status was UNAVAILABLE, but is "+service.getStatus(USER, newId),
-        		MICOBrokerImpl.RouteStatus.UNAVAILABLE.toString().contentEquals(service.getStatus(USER, newId)));
-        
-        eventManager.registerService(abService);
-        // wait for broker to finish
-        synchronized (broker) {
-            broker.wait(500);
-        }
-        
-        Assert.assertTrue("Expected route status was ONLINE, but is "+service.getStatus(USER, newId),
-        		MICOBrokerImpl.RouteStatus.ONLINE.toString().contentEquals(service.getStatus(USER, newId)));
-        
-        eventManager.unregisterService(abService);
-        // wait for broker to finish
-        synchronized (broker) {
-            broker.wait(500);
-        }
-        Assert.assertTrue("Expected route status was UNAVAILABLE, but is "+service.getStatus(USER, newId),
-        		MICOBrokerImpl.RouteStatus.UNAVAILABLE.toString().contentEquals(service.getStatus(USER, newId)));
-        
-        unregisterExtractor(abService);
-        Assert.assertTrue("Expected route status was BROKEN, but is "+service.getStatus(USER, newId),
-        		MICOBrokerImpl.RouteStatus.BROKEN.toString().contentEquals(service.getStatus(USER, newId)));
-        
-        eventManager.registerService(abService);
-        // wait for broker to finish
-        synchronized (broker) {
-            broker.wait(500);
-        }
-        Assert.assertTrue("Expected route status was BROKEN, but is "+service.getStatus(USER, newId),
-        		MICOBrokerImpl.RouteStatus.BROKEN.toString().contentEquals(service.getStatus(USER, newId)));
-        
-        
-    }
  
 }
