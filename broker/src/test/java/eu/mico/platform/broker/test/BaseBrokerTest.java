@@ -19,8 +19,6 @@ import com.rabbitmq.client.ConnectionFactory;
 
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
-import eu.mico.platform.broker.impl.MICOBrokerImpl.RouteStatus;
-import eu.mico.platform.broker.test.BaseBrokerTest.MockService;
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
@@ -56,12 +54,11 @@ import org.openrdf.rio.RDFParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static eu.mico.platform.broker.test.BaseBrokerTest.isRegistrationServiceAvailable;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -223,7 +220,7 @@ public abstract class BaseBrokerTest {
     protected static class MockService implements AnalysisService {
 
         private boolean createAsset = false;
-        private String source, target;
+        private String source, target, extractorId;
 
         public MockService(String source, String target) {
             this(source,target,false);
@@ -233,6 +230,7 @@ public abstract class BaseBrokerTest {
             this.source = source;
             this.target = target;
             this.createAsset = createAsset;
+            this.extractorId=UUID.randomUUID().toString();
         }
 
         @Override
@@ -254,7 +252,7 @@ public abstract class BaseBrokerTest {
 
         @Override
         public String getQueueName() {
-            return getServiceID().stringValue();
+            return getExtractorID()+"-"+getExtractorVersion() + "-" + getExtractorModeID();
         }
 
         @Override
@@ -289,7 +287,7 @@ public abstract class BaseBrokerTest {
 
 		@Override
 		public String getExtractorID() {
-			return "urn:org.example.services";
+			return "urn:org.example.services-"+extractorId;
 		}
 
 		@Override

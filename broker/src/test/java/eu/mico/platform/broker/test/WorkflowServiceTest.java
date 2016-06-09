@@ -23,7 +23,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
@@ -109,7 +108,7 @@ import java.util.Random;
     
     @SuppressWarnings("deprecation")
 	@Test
-    public void testAddRemoveWorkflows() throws RepositoryException, IOException{
+	public void testAddRemoveWorkflows() throws RepositoryException, IOException{
     	
     	//assert that no workflows are present
     	List<String> ids = service.listWorkflows(USER);

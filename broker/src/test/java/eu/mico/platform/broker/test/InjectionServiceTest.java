@@ -50,6 +50,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
 
@@ -58,6 +61,7 @@ import static org.hamcrest.Matchers.hasProperty;
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
+
 
 public class InjectionServiceTest extends BaseBrokerTest {
 
@@ -79,13 +83,15 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	injService = new InjectionWebService(broker, eventManager, context, routes);
 	}
 
-    @Test(timeout=40000)
+    @Test
     public void testNewInjection() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
     	
     	Assume.assumeTrue(isRegistrationServiceAvailable);
     	
     	//setup extractors
     	MockService abService = new MockService("A", "B");
+    	MockService abService1 =new MockService("A", "B");
+    	MockService abService2 =new MockService("A", "B");
     	MockService acService = new MockService("A", "C");
     	MockService bcService = new MockService("B", "C");
     	
@@ -93,8 +99,8 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	//setup test routes
     	
     	String A_B_MICO_TEST =WorkflowServiceTest.createTestRoute(abService, "mico:A-B", "mico/test");
-    	String A_B_MICO_TEST1=WorkflowServiceTest.createTestRoute(abService, "mico:A-B", "mico/test1");
-    	String A_B_MICO_TEST2=WorkflowServiceTest.createTestRoute(abService, "mico:A-B", "mico/test2");    	
+    	String A_B_MICO_TEST1=WorkflowServiceTest.createTestRoute(abService1, "mico:A-B", "mico/test1");
+    	String A_B_MICO_TEST2=WorkflowServiceTest.createTestRoute(abService2, "mico:A-B", "mico/test2");    	
     	String A_C_MICO_TEST =WorkflowServiceTest.createTestRoute(acService, "mico:A-C", "mico/test");
     	String B_C_MICO_TEST =WorkflowServiceTest.createTestRoute(bcService, "mico:B-C", "mico/test");
     	
@@ -123,30 +129,81 @@ public class InjectionServiceTest extends BaseBrokerTest {
     		m.setExpectedCount(0);
     	}
     	
-    	triggerRoute("mico:A-B","mico/test", routeIds.get(A_B_MICO_TEST));
-    	triggerRoute("mico:A-B","mico/test1",routeIds.get(A_B_MICO_TEST1));
-    	triggerRoute("mico:A-B","mico/test2",routeIds.get(A_B_MICO_TEST2));
-    	triggerRoute("mico:A-C","mico/test", routeIds.get(A_C_MICO_TEST));
-    	triggerRoute("mico:B-C","mico/test", routeIds.get(B_C_MICO_TEST));
+    	//not-registered = broken = BAD_REQUEST
     	
-    	Thread.sleep(200);
+    	Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(),
+    			            triggerRoute("mico:A-B","mico/test",routeIds.get(A_B_MICO_TEST)).getStatus());
+    	Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(),
+    						triggerRoute("mico:A-B","mico/test1",routeIds.get(A_B_MICO_TEST1)).getStatus());
+    	Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(),
+    						triggerRoute("mico:A-B","mico/test2",routeIds.get(A_B_MICO_TEST2)).getStatus());
+    	Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(),
+    						triggerRoute("mico:A-C","mico/test", routeIds.get(A_C_MICO_TEST)).getStatus());
+    	Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(),
+    						triggerRoute("mico:B-C","mico/test", routeIds.get(B_C_MICO_TEST)).getStatus());
+    	
+    	Thread.sleep(500);
     	
     	for(MockEndpoint m : mocks.values()){
     		m.assertIsSatisfied();
     	}
     	
-    	//connect the extractors, and repeat the same check
+    	//register the extractors, and repeat the same check
+    	registerExtractor(abService, "mico/test");
+    	registerExtractor(abService1, "mico/test1");
+    	registerExtractor(abService2, "mico/test2");
+    	registerExtractor(acService, "mico/test");
+    	registerExtractor(bcService, "mico/test");
+    	
+    	
+    	//registered but not connected = UNAVAILABLE
+    	
+    	Thread.sleep(500);
+    	
+    	Assert.assertEquals(Status.SERVICE_UNAVAILABLE.getStatusCode(),
+	            triggerRoute("mico:A-B","mico/test",routeIds.get(A_B_MICO_TEST)).getStatus());
+    	Assert.assertEquals(Status.SERVICE_UNAVAILABLE.getStatusCode(),
+				triggerRoute("mico:A-B","mico/test1",routeIds.get(A_B_MICO_TEST1)).getStatus());
+    	Assert.assertEquals(Status.SERVICE_UNAVAILABLE.getStatusCode(),
+				triggerRoute("mico:A-B","mico/test2",routeIds.get(A_B_MICO_TEST2)).getStatus());
+    	Assert.assertEquals(Status.SERVICE_UNAVAILABLE.getStatusCode(),
+				triggerRoute("mico:A-C","mico/test", routeIds.get(A_C_MICO_TEST)).getStatus());
+    	Assert.assertEquals(Status.SERVICE_UNAVAILABLE.getStatusCode(),
+				triggerRoute("mico:B-C","mico/test", routeIds.get(B_C_MICO_TEST)).getStatus());
+    	
+    	Thread.sleep(500);
+    	
+    	for(MockEndpoint m : mocks.values()){
+    		m.assertIsSatisfied();
+    	}
+    	
+    	
+    	//connect the extractors, and check that the mocks are activated only ONCE EACH
+
     	connectExtractor(abService);
+    	connectExtractor(abService1);
+    	connectExtractor(abService2);
     	connectExtractor(acService);
     	connectExtractor(bcService);
     	
-    	triggerRoute("mico:A-B","mico/test", routeIds.get(A_B_MICO_TEST));
-    	triggerRoute("mico:A-B","mico/test1",routeIds.get(A_B_MICO_TEST1));
-    	triggerRoute("mico:A-B","mico/test2",routeIds.get(A_B_MICO_TEST2));
-    	triggerRoute("mico:A-C","mico/test", routeIds.get(A_C_MICO_TEST));
-    	triggerRoute("mico:B-C","mico/test", routeIds.get(B_C_MICO_TEST));
+    	Thread.sleep(500);
     	
-    	Thread.sleep(200);
+    	for(MockEndpoint m : mocks.values()){
+    		m.setExpectedCount(1);
+    	}
+    	
+    	Assert.assertEquals(Status.OK.getStatusCode(),
+	            triggerRoute("mico:A-B","mico/test",routeIds.get(A_B_MICO_TEST)).getStatus());
+    	Assert.assertEquals(Status.OK.getStatusCode(),
+				triggerRoute("mico:A-B","mico/test1",routeIds.get(A_B_MICO_TEST1)).getStatus());
+    	Assert.assertEquals(Status.OK.getStatusCode(),
+				triggerRoute("mico:A-B","mico/test2",routeIds.get(A_B_MICO_TEST2)).getStatus());
+    	Assert.assertEquals(Status.OK.getStatusCode(),
+				triggerRoute("mico:A-C","mico/test", routeIds.get(A_C_MICO_TEST)).getStatus());
+    	Assert.assertEquals(Status.OK.getStatusCode(),
+				triggerRoute("mico:B-C","mico/test", routeIds.get(B_C_MICO_TEST)).getStatus());
+    	
+    	Thread.sleep(500);
     	
     	for(MockEndpoint m : mocks.values()){
     		m.assertIsSatisfied();
@@ -154,7 +211,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	
     }
     
-    private void triggerRoute(String syntacticType,String mimeType,Integer routeId) throws RepositoryException, IOException, InterruptedException
+    private Response triggerRoute(String syntacticType,String mimeType,Integer routeId) throws RepositoryException, IOException, InterruptedException
     {
     	 PersistenceService ps = broker.getPersistenceService();
          Item item = null;
@@ -164,15 +221,23 @@ public class InjectionServiceTest extends BaseBrokerTest {
              item.setSyntacticalType(syntacticType);
              item.getAsset().setFormat(mimeType);
 
-             injService.submitItem(item.getURI().stringValue(), routeId);
+             Response r = injService.submitItem(item.getURI().stringValue(), routeId);
              
              Thread.sleep(200);
+             
+             return r;
+         }
+         catch(Exception e){
+        	 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
          }
          finally{
         	 if(item != null){
                  ps.deleteItem(item.getURI());
              }
-         }
+        	 
+        }
+         
+         
     }
 
     /**
