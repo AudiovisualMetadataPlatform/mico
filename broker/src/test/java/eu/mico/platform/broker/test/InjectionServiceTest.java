@@ -65,7 +65,7 @@ import static org.hamcrest.Matchers.hasProperty;
 
 public class InjectionServiceTest extends BaseBrokerTest {
 
-	private static Logger log = LoggerFactory.getLogger(WorkflowServiceTest.class);
+	private static Logger log = LoggerFactory.getLogger(InjectionServiceTest.class);
     private static MicoCamelContext context = new MicoCamelContext();
     private static Map<Integer,MICOCamelRoute> routes = new HashMap<Integer,MICOCamelRoute>();
     
@@ -973,6 +973,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
          catch(Exception e){
         	 log.error("Unexpected exception: ");
         	 e.printStackTrace();
+        	 if(item!=null) ps.deleteItem(item.getURI());
         	 Assert.fail();
         	 return null;
          }
@@ -1004,6 +1005,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
          catch(Exception e){
         	 log.error("Unexpected exception: ");
         	 e.printStackTrace();
+        	 if(item!=null) ps.deleteItem(item.getURI());
         	 Assert.fail();
         	 return null;
          }
@@ -1033,12 +1035,13 @@ public class InjectionServiceTest extends BaseBrokerTest {
 
     		return item;
     	}
-    	catch(Exception e){
-    		log.error("Unexpected exception: ");
-    		e.printStackTrace();
-    		Assert.fail();
-    		return null;
-    	}
+        catch(Exception e){
+       	 log.error("Unexpected exception: ");
+       	 e.printStackTrace();
+       	 if(item!=null) ps.deleteItem(item.getURI());
+       	 Assert.fail();
+       	 return null;
+        }
     }
     
     private Response triggerRouteWithSimpleItem(String syntacticType,String mimeType,Integer routeId) throws RepositoryException, IOException, InterruptedException

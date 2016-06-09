@@ -1,0 +1,387 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package eu.mico.platform.broker.test;
+
+import com.google.common.collect.ImmutableSet;
+import com.rabbitmq.client.QueueingConsumer;
+
+import eu.mico.platform.broker.model.MICOCamelRoute;
+import eu.mico.platform.broker.test.InjectionServiceTest.MockFailingServiceInjTest;
+import eu.mico.platform.broker.test.InjectionServiceTest.MockServiceInjTest;
+import eu.mico.platform.broker.webservices.InjectionWebService;
+import eu.mico.platform.broker.webservices.StatusWebService;
+import eu.mico.platform.broker.webservices.WorkflowManagementService;
+import eu.mico.platform.camel.MicoCamelContext;
+import eu.mico.platform.event.api.AnalysisResponse;
+import eu.mico.platform.event.api.EventManager;
+import eu.mico.platform.event.impl.EventManagerImpl;
+import eu.mico.platform.event.model.AnalysisException;
+import eu.mico.platform.event.model.Event;
+import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.persistence.model.Asset;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Item;
+
+import org.hamcrest.Matchers;
+import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.repository.RepositoryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeoutException;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.hasProperty;
+
+/**
+ * Minimal test. Inject items and see if their statuses are correctly retrieven
+ *
+ * @author Sebastian Schaffert (sschaffert@apache.org)
+ */
+public class StatusServiceTest extends BaseBrokerTest {
+	
+	private static Logger log = LoggerFactory.getLogger(StatusServiceTest.class);
+    private static MicoCamelContext context = new MicoCamelContext();
+    private static Map<Integer,MICOCamelRoute> routes = new HashMap<Integer,MICOCamelRoute>();
+    
+    private static WorkflowManagementService wManager = null;
+    private static InjectionWebService injService = null;
+	private static StatusWebService statusService = null;
+    private static final String USER = "SERVICE-TEST-USER-"+UUID.randomUUID().toString();
+    
+    private MockServiceInjTest        abFastService  = new MockServiceInjTest("A", "B");
+    private MockSlowServiceInjTest    cdSlowService  = new MockSlowServiceInjTest("C", "D");
+    private MockFailingServiceInjTest efWrongService = new MockFailingServiceInjTest("E","F");
+    
+	@BeforeClass 
+	public static void init() throws IOException, TimeoutException, URISyntaxException{
+		
+		eventManager = new EventManagerImpl(amqpHost, amqpUsr, amqpPwd, amqpVHost);
+	    eventManager.init();
+		
+    	context.init();
+    	wManager = new WorkflowManagementService(broker, context, routes);
+    	injService = new InjectionWebService(broker, eventManager, context, routes);
+    	statusService = new StatusWebService(broker);
+    
+	}
+
+    @Test
+    public void testStatusWithNewdInjection() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
+       
+    	Assume.assumeTrue(isRegistrationServiceAvailable);
+    	
+        //1. connect extractors
+    	connectExtractor(abFastService);
+    	connectExtractor(cdSlowService);
+    	connectExtractor(efWrongService);
+    	
+    	//2. register the extractors
+    	registerExtractor(abFastService, "mico/fast");
+    	registerExtractor(cdSlowService, "mico/slow");
+    	registerExtractor(efWrongService,"mico/error");
+    	
+    	//publish the routes
+    	String abFastRoute =WorkflowServiceTest.createTestRoute(abFastService, "mico:A-B", "mico/fast");
+    	String cdSlowRoute =WorkflowServiceTest.createTestRoute(cdSlowService, "mico:C-D", "mico/slow");
+    	String efWrongRoute=WorkflowServiceTest.createTestRoute(efWrongService,"mico:E-F", "mico/error");
+    	
+    	
+    	Map<String,Integer> routeIds = new HashMap<String,Integer>();
+    	routeIds.put(abFastRoute, wManager.addWorkflow(USER,  "abFastRoute" ,abFastRoute , "[]","[]"));
+    	routeIds.put(cdSlowRoute, wManager.addWorkflow(USER,  "cdSlowRoute" ,cdSlowRoute , "[]","[]"));
+    	routeIds.put(efWrongRoute, wManager.addWorkflow(USER, "efWrongRoute" ,cdSlowRoute , "[]","[]"));
+    	
+
+    	List<Item> items = new ArrayList<Item>();
+    	PersistenceService ps = broker.getPersistenceService();
+
+    	//call A-B (the fast one)
+    	items.add(triggerRouteWithSimpleItem("mico:A-B", "mico/fast",  routeIds.get(abFastRoute)));
+    	
+    	//check that its status is available and equal to DONE
+    	try{
+    		Thread.sleep(200);
+    		Map<String,Object> proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
+            
+            boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
+            boolean hasError = Boolean.parseBoolean(((String)proprs.get("hasError")));
+            
+            Assert.assertTrue("The item should have finished",finished);
+            Assert.assertFalse("The item should have no error reported",hasError);
+            
+    	}
+    	catch(Exception e){
+    		e.printStackTrace();
+    		Assert.fail();
+    	}
+    	finally{
+    		ps.deleteItem(items.get(0).getURI());
+    		items.remove(0);
+    	}
+    	
+    	//call E-F (the failing one )
+    	items.add(triggerRouteWithSimpleItem("mico:E-F", "mico/error", routeIds.get(efWrongRoute)));
+    	
+    	
+    	
+    	//check that its status is available and equal to DONE
+    	try{
+    		Thread.sleep(200);
+    		Map<String,Object> proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
+            
+            boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
+            boolean hasError = Boolean.parseBoolean(((String)proprs.get("hasError")));
+            
+            Assert.assertTrue("The item should have finished",finished);
+            Assert.assertTrue("The item should have one error reported",hasError);
+            
+    	}
+    	catch(Exception e){
+    		e.printStackTrace();
+    		Assert.fail();
+    	}
+    	finally{
+    		ps.deleteItem(items.get(0).getURI());
+    		items.remove(0);
+    	}
+    	
+    	//call C-D (the slow one )
+    	items.add(triggerRouteWithSimpleItem("mico:C-D", "mico/slow",  routeIds.get(cdSlowRoute)));
+    	
+    	//check that its status is available and equal to DONE
+    	try{
+    		Thread.sleep(200);
+    		Map<String,Object> proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
+            
+            boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
+            boolean hasError = Boolean.parseBoolean(((String)proprs.get("hasError")));
+            
+            Assert.assertFalse("The item should still be in progress finished",finished);
+            Assert.assertFalse("The item should have no error reported",hasError);
+            
+            Thread.sleep(2000); // same as the mock 
+    		proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
+            
+            finished = Boolean.parseBoolean(((String)proprs.get("finished")));
+            hasError = Boolean.parseBoolean(((String)proprs.get("hasError")));
+            
+            Assert.assertTrue("The item should have finished",finished);
+            Assert.assertFalse("The item should have no error reported",hasError);
+            
+    	}
+    	catch(Exception e){
+    		e.printStackTrace();
+    		Assert.fail();
+    	}
+    	finally{
+    		ps.deleteItem(items.get(0).getURI());
+    		items.remove(0);
+    	}
+    	disconnectExtractor(abFastService);
+    	disconnectExtractor(cdSlowService);
+    	disconnectExtractor(efWrongService);
+        
+
+    }
+    
+    @Test
+    public void testStatusWithOldInjection() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
+       
+    	
+        //1. connect extractors
+    	connectExtractor(abFastService);
+    	connectExtractor(cdSlowService);
+    	connectExtractor(efWrongService);
+    	
+    	//prepare the items w
+    	List<Item> items = new ArrayList<Item>();
+    	
+    	//call A-B (the fast one)
+    	PersistenceService ps = broker.getPersistenceService();
+    	items.add(broadcastSimpleItem("A"));
+    	
+    	//check that its status is available and equal to DONE
+    	try{
+    		Thread.sleep(200);
+    		Map<String,Object> proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
+            
+            boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
+            boolean hasError = Boolean.parseBoolean(((String)proprs.get("hasError")));
+            
+            Assert.assertTrue("The item should have finished",finished);
+            Assert.assertFalse("The item should have no error reported",hasError);
+            
+    	}
+    	catch(Exception e){
+    		e.printStackTrace();
+    		Assert.fail();
+    	}
+    	finally{
+    		ps.deleteItem(items.get(0).getURI());
+    		items.remove(0);
+    	}
+    	
+    	//call E-F (the failing one )
+    	items.add(broadcastSimpleItem("E"));
+    	
+    	//check that its status is available and equal to DONE
+    	try{
+    		Thread.sleep(200);
+    		Map<String,Object> proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
+            
+            boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
+            boolean hasError = Boolean.parseBoolean(((String)proprs.get("hasError")));
+            
+            Assert.assertTrue("The item should have finished",finished);
+            Assert.assertTrue("The item should have one error reported",hasError);
+            
+    	}
+    	catch(Exception e){
+    		e.printStackTrace();
+    		Assert.fail();
+    	}
+    	finally{
+    		ps.deleteItem(items.get(0).getURI());
+    		items.remove(0);
+    	}
+    	
+    	//call C-D (the slow one )
+    	items.add(broadcastSimpleItem("C"));
+    	
+    	//check that its status is available and equal to DONE
+    	try{
+    		Thread.sleep(200);
+    		Map<String,Object> proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
+            
+            boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
+            boolean hasError = Boolean.parseBoolean(((String)proprs.get("hasError")));
+            
+            Assert.assertFalse("The item should still be in progress finished",finished);
+            Assert.assertFalse("The item should have no error reported",hasError);
+            
+            Thread.sleep(2000); // same as the mock 
+    		proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
+            
+            finished = Boolean.parseBoolean(((String)proprs.get("finished")));
+            hasError = Boolean.parseBoolean(((String)proprs.get("hasError")));
+            
+            Assert.assertTrue("The item should have finished",finished);
+            Assert.assertFalse("The item should have no error reported",hasError);
+            
+    	}
+    	catch(Exception e){
+    		e.printStackTrace();
+    		Assert.fail();
+    	}
+    	finally{
+    		ps.deleteItem(items.get(0).getURI());
+    		items.remove(0);
+    	}
+    	 
+        
+
+    }
+    
+    public static class MockSlowServiceInjTest extends MockServiceInjTest{
+
+    	public MockSlowServiceInjTest(String source, String target) {
+			super(source, target);
+		}
+		
+		public MockSlowServiceInjTest(String source, String target, boolean createAsset) {
+			super(source, target,createAsset);
+		}
+		
+		@Override
+		public void call(AnalysisResponse resp,
+                Item item,
+                java.util.List<eu.mico.platform.persistence.model.Resource> resourceList,
+                java.util.Map<String, String> params) throws AnalysisException,
+                IOException {
+            log.info("mock analysis SLOW request for [{}] on queue {}, sleeping for two seconds",
+                    resourceList.get(0).getURI(), getQueueName());
+            try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				throw new AnalysisException();				
+			}
+            super.call(resp,item,resourceList,params);			
+		}
+    	
+    }
+    
+    private Item broadcastSimpleItem(String mimeType) throws RepositoryException, IOException, InterruptedException
+    {
+    	 PersistenceService ps = broker.getPersistenceService();
+         Item item = null;
+         try {
+             item = ps.createItem();
+             item.setSemanticType("Simple type "+mimeType);
+             item.setSyntacticalType(mimeType);
+             item.getAsset().setFormat(mimeType);
+
+             Response r = injService.submitItem(item.getURI().stringValue(), null);             
+             Thread.sleep(200);
+             return item;
+         }
+         catch(Exception e){
+        	 log.error("Unexpected exception: ");
+        	 e.printStackTrace();
+        	 if(item!=null) ps.deleteItem(item.getURI());
+        	 Assert.fail();
+        	 return null;
+         }
+    }
+    
+    private Item triggerRouteWithSimpleItem(String syntacticType,String mimeType,Integer routeId) throws RepositoryException, IOException, InterruptedException
+    {
+    	 PersistenceService ps = broker.getPersistenceService();
+         Item item = null;
+         try {
+             item = ps.createItem();
+             item.setSemanticType(syntacticType+" over "+mimeType);
+             item.setSyntacticalType(syntacticType);
+             item.getAsset().setFormat(mimeType);
+
+             Response r = injService.submitItem(item.getURI().stringValue(), routeId);             
+             Thread.sleep(500);
+             return item;
+         }
+         catch(Exception e){
+        	 log.error("Unexpected exception: ");
+        	 e.printStackTrace();
+        	 if(item!=null) ps.deleteItem(item.getURI());
+        	 Assert.fail();
+        	 return null;
+         }
+    }
+    
+}
