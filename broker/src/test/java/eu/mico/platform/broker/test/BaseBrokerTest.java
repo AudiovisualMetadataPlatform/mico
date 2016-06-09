@@ -220,7 +220,7 @@ public abstract class BaseBrokerTest {
     protected static class MockService implements AnalysisService {
 
         private boolean createAsset = false;
-        private String source, target, extractorId;
+        private String source, target;
 
         public MockService(String source, String target) {
             this(source,target,false);
@@ -230,7 +230,6 @@ public abstract class BaseBrokerTest {
             this.source = source;
             this.target = target;
             this.createAsset = createAsset;
-            this.extractorId=UUID.randomUUID().toString();
         }
 
         @Override
@@ -287,7 +286,7 @@ public abstract class BaseBrokerTest {
 
 		@Override
 		public String getExtractorID() {
-			return "urn:org.example.services-"+extractorId;
+			return "urn:org.example.services";
 		}
 
 		@Override

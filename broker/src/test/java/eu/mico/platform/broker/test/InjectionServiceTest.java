@@ -47,6 +47,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -89,11 +90,11 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	Assume.assumeTrue(isRegistrationServiceAvailable);
     	
     	//setup extractors
-    	MockService abService = new MockService("A", "B");
-    	MockService abService1 =new MockService("A", "B");
-    	MockService abService2 =new MockService("A", "B");
-    	MockService acService = new MockService("A", "C");
-    	MockService bcService = new MockService("B", "C");
+    	MockService abService = new MockServiceInjTest("A", "B");
+    	MockService abService1 =new MockServiceInjTest("A", "B");
+    	MockService abService2 =new MockServiceInjTest("A", "B");
+    	MockService acService = new MockServiceInjTest("A", "C");
+    	MockService bcService = new MockServiceInjTest("B", "C");
     	
     	
     	//setup test routes
@@ -274,5 +275,26 @@ public class InjectionServiceTest extends BaseBrokerTest {
      */
     protected void assertMockEndpointsSatisfied(long timeout, TimeUnit unit, MockEndpoint... mock) throws InterruptedException {
         MockEndpoint.assertIsSatisfied(timeout, unit,mock);
+    }
+    
+    protected static class MockServiceInjTest extends MockService{
+
+    	private String extractorId;
+    	
+		public MockServiceInjTest(String source, String target) {
+			super(source, target);
+			this.extractorId=UUID.randomUUID().toString();
+		}
+		
+		public MockServiceInjTest(String source, String target, boolean createAsset) {
+			super(source, target,createAsset);
+			this.extractorId=UUID.randomUUID().toString();
+		}
+		
+		@Override
+		public String getExtractorID() {
+			return "urn:org.example.services-"+extractorId;
+		}
+    	
     }
 }
