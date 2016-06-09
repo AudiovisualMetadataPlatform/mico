@@ -57,7 +57,7 @@ public class ServiceDescriptor {
     }
 
     public ServiceDescriptor(Event.RegistrationEvent e) {
-        this.uri = new URIImpl(e.getServiceId());
+        this.uri = new URIImpl(e.getExtractorId()+"-"+getExtractorVersion()+"-"+getExtractorModeId());
         this.queueName = e.getQueueName();
         registrationTime = new Date();
         this.provides = e.getProvides();
