@@ -277,12 +277,7 @@ public class InjectionWebService {
     				
     				//check if the entry point is compatible or not
     				epCompatible = epCompatible || isCompatible(item, ep);
-    				for(Part p : item.getParts()){
-    					epCompatible = epCompatible || isCompatible(p, ep);
-    				}
-    				
-    				if(epCompatible){
-
+    				if(isCompatible(item,ep)){
 	    				//NOTE: camelContext.processItem() is locking until the pipeline 
 	    				//goes through entirely, hence the thread
 	    				Thread thr = new Thread(new Runnable(){
@@ -293,7 +288,25 @@ public class InjectionWebService {
 	    					}
 	    				});
 	    				thr.start();
+					}
+    				
+    				for(Part p : item.getParts()){
+    					epCompatible = epCompatible || isCompatible(p, ep);
+    					
+    					if(isCompatible(p,ep)){
+    	    				//NOTE: camelContext.processItem() is locking until the pipeline 
+    	    				//goes through entirely, hence the thread
+    	    				Thread thr = new Thread(new Runnable(){
+    	    					public void run(){
+    	    						log.info("submitting item part {} to route {} using entry point {}",
+    	    								p.getURI() ,route.getWorkflowId(), ep.getDirectUri());
+    	    						camelContext.processPart(ep.getDirectUri(),itemURI,p.getURI().stringValue());
+    	    					}
+    	    				});
+    	    				thr.start();
+    					}
     				}
+    				
     				
     				compatibleEpFound = compatibleEpFound || epCompatible;
 
