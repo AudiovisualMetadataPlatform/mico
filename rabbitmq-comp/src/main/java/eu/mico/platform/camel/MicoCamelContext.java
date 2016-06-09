@@ -132,7 +132,19 @@ public class MicoCamelContext {
      * @param itemUri
      */
     public void processItem(String directUri, String itemUri) {
-        Exchange exc = createExchange(itemUri,directUri);
+        Exchange exc = createExchange(itemUri,null,directUri);
+
+        template.send(directUri,exc);
+        
+    }
+    
+    /**
+     * process single item part with workflow
+     * @param directUri
+     * @param itemUri
+     */
+    public void processPart(String directUri, String itemUri, String partUri) {
+        Exchange exc = createExchange(itemUri,partUri,directUri);
 
         template.send(directUri,exc);
         
@@ -144,7 +156,7 @@ public class MicoCamelContext {
      * @param itemUri
      * @return an exchange containing item in header
      */
-    private Exchange createExchange(String itemUri,String directUri) {
+    private Exchange createExchange(String itemUri, String partUri, String directUri) {
         Endpoint endpoint;
         if ((endpoint = context.hasEndpoint(directUri)) == null){
             throw new IllegalArgumentException("Endpoint with URI [" + directUri +"] is not registered in context");
@@ -153,10 +165,20 @@ public class MicoCamelContext {
         Exchange exchange = endpoint.createExchange();
         Message msg = exchange.getIn();
         msg.setHeader(KEY_MICO_ITEM, itemUri);
+
         AnalysisRequest event = AnalysisRequest.newBuilder()
                 .setItemUri(itemUri)
                 .setServiceId("http://mico-project.eu/services/workflow-injector")
                 .build();
+        
+        if(partUri != null){
+        	event = AnalysisRequest.newBuilder()
+                    .setItemUri(itemUri)
+                    .addPartUri(partUri)
+                    .setServiceId("http://mico-project.eu/services/workflow-injector")
+                    .build();
+        }
+        
         msg.setBody(event.toByteArray());
         return exchange;
     }
