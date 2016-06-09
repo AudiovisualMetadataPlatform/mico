@@ -246,8 +246,14 @@ public class InjectionWebService {
 
     		//check route status
     		String status = broker.getRouteStatus(camelRoutes.get(routeId).getXmlCamelRoute());
-    		if(status.contentEquals(RouteStatus.UNAVAILABLE.toString()) ||
-    				status.contentEquals(RouteStatus.BROKEN.toString())){
+    		if(status.contentEquals(RouteStatus.BROKEN.toString())){
+
+    			//the requested route cannot be started or is broken
+    			log.error("The camel route with ID {} is currently {}",routeId,status);    			   
+    			return Response.status(Response.Status.BAD_REQUEST).build();
+
+    		} 
+    		else if(status.contentEquals(RouteStatus.UNAVAILABLE.toString())){
 
     			//the requested route cannot be started or is broken
     			log.error("The camel route with ID {} is currently {}",routeId,status);    			   
@@ -262,6 +268,7 @@ public class InjectionWebService {
     		}
     		else if(status.contentEquals(RouteStatus.ONLINE.toString())){
 
+    			log.info("The camel route with ID {} is currently {, looking for compatible entry points ...",routeId,status);    	
     			//the route is up and running, proceed with the injection
     			boolean compatibleEpFound = false;
     			for(EntryPoint ep:route.getEntryPoints()){
@@ -294,6 +301,7 @@ public class InjectionWebService {
     			if(compatibleEpFound){
     				return Response.ok().build();
     			}
+    			log.error("Unable to retrieve an entry point compatible with the input item");
     			return Response.status(Response.Status.BAD_REQUEST).build();
     		}
     		else{
