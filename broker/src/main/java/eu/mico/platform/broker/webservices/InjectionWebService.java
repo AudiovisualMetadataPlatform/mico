@@ -268,7 +268,7 @@ public class InjectionWebService {
     		}
     		else if(status.contentEquals(RouteStatus.ONLINE.toString())){
 
-    			log.info("The camel route with ID {} is currently {, looking for compatible entry points ...",routeId,status);    	
+    			log.info("The camel route with ID {} is currently {}, looking for compatible entry points ...",routeId,status);    	
     			//the route is up and running, proceed with the injection
     			boolean compatibleEpFound = false;
     			for(EntryPoint ep:route.getEntryPoints()){

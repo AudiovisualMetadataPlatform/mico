@@ -14,6 +14,9 @@
 package eu.mico.platform.broker.test;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.ByteString;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.QueueingConsumer;
 
 import eu.mico.platform.broker.model.MICOCamelRoute;
@@ -21,9 +24,12 @@ import eu.mico.platform.broker.test.BaseBrokerTest.MockService;
 import eu.mico.platform.broker.webservices.InjectionWebService;
 import eu.mico.platform.broker.webservices.WorkflowManagementService;
 import eu.mico.platform.camel.MicoCamelContext;
+import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
+import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event;
+import eu.mico.platform.event.model.Event.MessageType;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Part;
@@ -72,6 +78,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
     
     private static WorkflowManagementService wManager = null;
     private static InjectionWebService injService = null;
+    private static final String USER = "INJECTION-TEST-USER-"+UUID.randomUUID().toString();
 	
 	@BeforeClass 
 	public static void init() throws IOException, TimeoutException, URISyntaxException{
@@ -100,8 +107,8 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	//setup test routes
     	
     	String A_B_MICO_TEST =WorkflowServiceTest.createTestRoute(abService, "mico:A-B", "mico/test");
-    	String A_B_MICO_TEST1=WorkflowServiceTest.createTestRoute(abService1, "mico:A-B", "mico/test1");
-    	String A_B_MICO_TEST2=WorkflowServiceTest.createTestRoute(abService2, "mico:A-B", "mico/test2");    	
+    	String A_B_MICO_TEST1=WorkflowServiceTest.createTestRoute(abService1,"mico:A-B", "mico/test1");
+    	String A_B_MICO_TEST2=WorkflowServiceTest.createTestRoute(abService2,"mico:A-B", "mico/test2");    	
     	String A_C_MICO_TEST =WorkflowServiceTest.createTestRoute(acService, "mico:A-C", "mico/test");
     	String B_C_MICO_TEST =WorkflowServiceTest.createTestRoute(bcService, "mico:B-C", "mico/test");
     	
@@ -109,11 +116,11 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	
     	Map<String,Integer> routeIds = new HashMap<String,Integer>();
     	
-        routeIds.put(A_B_MICO_TEST, wManager.addWorkflow("MICO", "A_B_MICO_TEST" ,A_B_MICO_TEST , "[]","[]"));
-    	routeIds.put(A_B_MICO_TEST1,wManager.addWorkflow("MICO", "A_B_MICO_TEST1",A_B_MICO_TEST1, "[]","[]"));
-    	routeIds.put(A_B_MICO_TEST2,wManager.addWorkflow("MICO", "A_B_MICO_TEST2",A_B_MICO_TEST2, "[]","[]"));
-    	routeIds.put(A_C_MICO_TEST, wManager.addWorkflow("MICO", "A_C_MICO_TEST" ,A_C_MICO_TEST , "[]","[]"));
-    	routeIds.put(B_C_MICO_TEST, wManager.addWorkflow("MICO", "B_C_MICO_TEST" ,B_C_MICO_TEST , "[]","[]"));
+        routeIds.put(A_B_MICO_TEST, wManager.addWorkflow(USER, "A_B_MICO_TEST" ,A_B_MICO_TEST , "[]","[]"));
+    	routeIds.put(A_B_MICO_TEST1,wManager.addWorkflow(USER, "A_B_MICO_TEST1",A_B_MICO_TEST1, "[]","[]"));
+    	routeIds.put(A_B_MICO_TEST2,wManager.addWorkflow(USER, "A_B_MICO_TEST2",A_B_MICO_TEST2, "[]","[]"));
+    	routeIds.put(A_C_MICO_TEST, wManager.addWorkflow(USER, "A_C_MICO_TEST" ,A_C_MICO_TEST , "[]","[]"));
+    	routeIds.put(B_C_MICO_TEST, wManager.addWorkflow(USER, "B_C_MICO_TEST" ,B_C_MICO_TEST , "[]","[]"));
 
     	Map<String,MockEndpoint> mocks = new HashMap<String,MockEndpoint>();    	
 
@@ -210,6 +217,68 @@ public class InjectionServiceTest extends BaseBrokerTest {
     		m.assertIsSatisfied();
     	}
     	
+    	 //try triggering all routes INCORRECTLY, and verify that no mock is activated
+    	for(MockEndpoint m : mocks.values()){
+    		m.reset();
+    		m.setExpectedCount(0);
+    	}
+    	
+    	//requests with correct syntactic type, but wrong mime type
+    	Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(),
+    			            triggerRoute("mico:A-B","mico/test1",routeIds.get(A_B_MICO_TEST)).getStatus());
+    	Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(),
+    						triggerRoute("mico:A-B","mico/test2",routeIds.get(A_B_MICO_TEST1)).getStatus());
+    	Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(),
+    						triggerRoute("mico:A-B","mico/test",routeIds.get(A_B_MICO_TEST2)).getStatus());
+    	
+    	//request with correct mime type, but wrong syntactic type
+    	Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(),
+    						triggerRoute("mico:A-B","mico/test", routeIds.get(A_C_MICO_TEST)).getStatus());
+    	
+    	//request where both types are wrong
+    	Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(),
+    						triggerRoute("mico:A-C","mico/test2s", routeIds.get(B_C_MICO_TEST)).getStatus());
+    	
+    	Thread.sleep(500);
+    	
+    	for(MockEndpoint m : mocks.values()){
+    		m.assertIsSatisfied();
+    	}
+
+    	
+    	//try triggering one routes correctly, but with a FAILING EXTRACTOR, and verify that the mock is not activated
+
+    	MockService abFailingService = new MockFailingServiceInjTest("ERROR", "B");
+    	registerExtractor(abFailingService, "mico/error");
+    	connectExtractor(abFailingService);
+    	
+    	String ERROR_B_MICO_FAILING_TEST =WorkflowServiceTest.createTestRoute(abFailingService, "mico:ERROR-B", "mico/error");
+    	routeIds.put(ERROR_B_MICO_FAILING_TEST, wManager.addWorkflow(USER, "ERROR_B_MICO_FAILING_TEST" ,ERROR_B_MICO_FAILING_TEST , "[]","[]"));
+    	
+    	mocks.put(ERROR_B_MICO_FAILING_TEST, getMockEndpoint("mock:auto-test-route-ERROR-B-mico/error"));
+    	mocks.get(ERROR_B_MICO_FAILING_TEST).setExpectedCount(1);
+    	
+
+    	Assert.assertEquals(Status.OK.getStatusCode(),
+    			triggerRoute("mico:ERROR-B","mico/error",routeIds.get(ERROR_B_MICO_FAILING_TEST)).getStatus());
+
+    	mocks.get(ERROR_B_MICO_FAILING_TEST).assertIsSatisfied();
+    	//TODO: find a way to assert that the received body holds an error state
+    	
+    	//cleanup
+    	
+    	unregisterExtractor(abService);
+    	unregisterExtractor(abService1);
+    	unregisterExtractor(abService2);
+    	unregisterExtractor(acService);
+    	unregisterExtractor(bcService);
+    	unregisterExtractor(abFailingService);
+    	
+    	for(Integer id : routeIds.values()){
+    		wManager.deleteWorkflow(id);
+    	}
+    	assert(wManager.listWorkflows(USER).isEmpty());
+    	
     }
     
     private Response triggerRoute(String syntacticType,String mimeType,Integer routeId) throws RepositoryException, IOException, InterruptedException
@@ -240,6 +309,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
          
          
     }
+    
 
     /**
      * Resolves the {@link MockEndpoint} using a URI of the form
@@ -294,6 +364,30 @@ public class InjectionServiceTest extends BaseBrokerTest {
 		@Override
 		public String getExtractorID() {
 			return "urn:org.example.services-"+extractorId;
+		}
+    	
+    }
+    
+    protected static class MockFailingServiceInjTest extends MockServiceInjTest{
+
+    	public MockFailingServiceInjTest(String source, String target) {
+			super(source, target);
+		}
+		
+		public MockFailingServiceInjTest(String source, String target, boolean createAsset) {
+			super(source, target,createAsset);
+		}
+		
+		@Override
+		public void call(AnalysisResponse resp,
+                Item item,
+                java.util.List<eu.mico.platform.persistence.model.Resource> resourceList,
+                java.util.Map<String, String> params) throws AnalysisException,
+                IOException {
+            log.info("mock analysis FAILING request for [{}] on queue {}",
+                    resourceList.get(0).getURI(), getQueueName());
+            throw new AnalysisException("exception from mock service");
+			
 		}
     	
     }
