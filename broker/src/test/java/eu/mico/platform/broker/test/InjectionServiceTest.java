@@ -13,6 +13,7 @@
  */
 package eu.mico.platform.broker.test;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.ByteString;
 import com.rabbitmq.client.AMQP;
@@ -92,6 +93,306 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	wManager = new WorkflowManagementService(broker, context, routes);
     	injService = new InjectionWebService(broker, eventManager, context, routes);
 	}
+	
+	@Test
+    public void testOldInjectionWithSimpleItem() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
+    	
+    	//setup extractors
+    	MockService abService = new MockServiceInjTest("A", "B");
+    	MockService abService1= new MockServiceInjTest("A", "B");
+    	MockService abService2= new MockServiceInjTest("A", "B");
+    	MockService acService = new MockServiceInjTest("A", "C");
+    	MockService bcService = new MockServiceInjTest("B", "C");
+    	
+    	
+    	//connect A-B extractors 
+
+    	connectExtractor(abService);	//produces 1 'B' part
+    	connectExtractor(abService1);	//produces 1 'B' part
+    	connectExtractor(abService2);	//produces 1 'B' part
+    	connectExtractor(acService);	//produces 1 'C' part
+    	connectExtractor(bcService);	//produces 1 'B' part
+    	
+    	
+    	//broadcast a simple item with mimeType 'A'
+    	
+    	Item processedItem = broadcastSimpleItem("A");
+    	
+    	//and check that all extractors were triggered
+    	Assert.assertNotNull("Unable to retrieve an item from the persistence service",processedItem); 
+    	
+    	//total parts are 3 'b' (A-B) + 1 'c' (A->C) + 3x1 'c' (B-C)
+    	Assert.assertEquals(7, ImmutableSet.copyOf(processedItem.getParts()).size());
+    	
+    	List<Part> parts = ImmutableList.copyOf(processedItem.getParts());
+    	int numAParts=0;
+    	int numBParts=0;
+    	int numCParts=0;
+    	for(Part p : parts){
+    		if(p.getSyntacticalType().contentEquals("A"))  numAParts++;
+    		if(p.getSyntacticalType().contentEquals("B"))  numBParts++;
+    		if(p.getSyntacticalType().contentEquals("C"))  numCParts++;
+    	}
+    	
+    	Assert.assertEquals(0,numAParts);
+    	Assert.assertEquals(3,numBParts);
+    	Assert.assertEquals(4,numCParts);
+    	broker.getPersistenceService().deleteItem(processedItem.getURI());
+    	
+    	
+    	
+    	//broadcast a simple item with mimeType 'B'
+    	processedItem = broadcastSimpleItem("B");
+    	
+    	//and check that all extractors were triggered
+    	Assert.assertNotNull("Unable to retrieve an item from the persistence service",processedItem); 
+    	
+    	//total parts are 1 'c' (B-C)
+    	Assert.assertEquals(1, ImmutableSet.copyOf(processedItem.getParts()).size());
+    	
+    	parts = ImmutableList.copyOf(processedItem.getParts());
+    	numAParts=0;
+    	numBParts=0;
+    	numCParts=0;
+    	for(Part p : parts){
+    		if(p.getSyntacticalType().contentEquals("A"))  numAParts++;
+    		if(p.getSyntacticalType().contentEquals("B"))  numBParts++;
+    		if(p.getSyntacticalType().contentEquals("C"))  numCParts++;
+    	}
+    	
+    	Assert.assertEquals(0,numAParts);
+    	Assert.assertEquals(0,numBParts);
+    	Assert.assertEquals(1,numCParts);
+    	broker.getPersistenceService().deleteItem(processedItem.getURI());
+    	
+    	
+    	
+    	//broadcast a simple item with mimeType 'C'
+    	processedItem = broadcastSimpleItem("C");
+    	
+    	//and check that all extractors were triggered
+    	Assert.assertNotNull("Unable to retrieve an item from the persistence service",processedItem); 
+    	
+    	//total parts are 0
+    	Assert.assertEquals(0, ImmutableSet.copyOf(processedItem.getParts()).size());
+    	
+    	parts = ImmutableList.copyOf(processedItem.getParts());
+    	numAParts=0;
+    	numBParts=0;
+    	numCParts=0;
+    	for(Part p : parts){
+    		if(p.getSyntacticalType().contentEquals("A"))  numAParts++;
+    		if(p.getSyntacticalType().contentEquals("B"))  numBParts++;
+    		if(p.getSyntacticalType().contentEquals("C"))  numCParts++;
+    	}
+    	
+    	Assert.assertEquals(0,numAParts);
+    	Assert.assertEquals(0,numBParts);
+    	Assert.assertEquals(0,numCParts);
+    	broker.getPersistenceService().deleteItem(processedItem.getURI());
+    	
+    	
+    }
+	
+	@Test
+    public void testOldInjectionWithComplexItem() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
+    	
+    	//setup extractors
+    	MockService abService = new MockServiceInjTest("A", "B");
+    	MockService abService1= new MockServiceInjTest("A", "B");
+    	MockService abService2= new MockServiceInjTest("A", "B");
+    	MockService acService = new MockServiceInjTest("A", "C");
+    	MockService bcService = new MockServiceInjTest("B", "C");
+    	
+    	
+    	//connect A-B extractors 
+
+    	connectExtractor(abService);	//produces 1 'B' part
+    	connectExtractor(abService1);	//produces 1 'B' part
+    	connectExtractor(abService2);	//produces 1 'B' part
+    	connectExtractor(acService);	//produces 1 'C' part
+    	connectExtractor(bcService);	//produces 1 'B' part
+    	
+    	
+    	//broadcast a simple item with mimeType 'A'
+    	
+    	Item processedItem = broker.getPersistenceService().getItem(broadcastComplexItem("A").getURI());
+    	
+    	//and check that all extractors were triggered
+    	Assert.assertNotNull("Unable to retrieve an item from the persistence service",processedItem); 
+    	
+    	//total parts are 1 'a' + 3 'b' (A-B) + 1 'c' (A->C) + 3x1 'c' (B-C)
+    	Assert.assertEquals(8, ImmutableSet.copyOf(processedItem.getParts()).size());
+    	
+    	List<Part> parts = ImmutableList.copyOf(processedItem.getParts());
+    	int numAParts=0;
+    	int numBParts=0;
+    	int numCParts=0;
+    	for(Part p : parts){
+    		if(p.getSyntacticalType().contentEquals("A"))  numAParts++;
+    		if(p.getSyntacticalType().contentEquals("B"))  numBParts++;
+    		if(p.getSyntacticalType().contentEquals("C"))  numCParts++;
+    	}
+    	
+    	Assert.assertEquals(1,numAParts);
+    	Assert.assertEquals(3,numBParts);
+    	Assert.assertEquals(4,numCParts);
+    	broker.getPersistenceService().deleteItem(processedItem.getURI());
+    	
+    	
+    	
+    	//broadcast a simple item with mimeType 'B'
+    	processedItem = broadcastComplexItem("B");
+    	
+    	//and check that all extractors were triggered
+    	Assert.assertNotNull("Unable to retrieve an item from the persistence service",processedItem); 
+    	
+    	//total parts are 1 'b' + 1 'c' (B-C)
+    	Assert.assertEquals(2, ImmutableSet.copyOf(processedItem.getParts()).size());
+    	
+    	parts = ImmutableList.copyOf(processedItem.getParts());
+    	numAParts=0;
+    	numBParts=0;
+    	numCParts=0;
+    	for(Part p : parts){
+    		if(p.getSyntacticalType().contentEquals("A"))  numAParts++;
+    		if(p.getSyntacticalType().contentEquals("B"))  numBParts++;
+    		if(p.getSyntacticalType().contentEquals("C"))  numCParts++;
+    	}
+    	
+    	Assert.assertEquals(0,numAParts);
+    	Assert.assertEquals(1,numBParts);
+    	Assert.assertEquals(1,numCParts);
+    	broker.getPersistenceService().deleteItem(processedItem.getURI());
+    	
+    	
+    	
+    	//broadcast a simple item with mimeType 'C'
+    	processedItem = broadcastComplexItem("C");
+    	
+    	//and check that all extractors were triggered
+    	Assert.assertNotNull("Unable to retrieve an item from the persistence service",processedItem); 
+    	
+    	//total parts are 1 'c'
+    	Assert.assertEquals(1, ImmutableSet.copyOf(processedItem.getParts()).size());
+    	
+    	parts = ImmutableList.copyOf(processedItem.getParts());
+    	numAParts=0;
+    	numBParts=0;
+    	numCParts=0;
+    	for(Part p : parts){
+    		if(p.getSyntacticalType().contentEquals("A"))  numAParts++;
+    		if(p.getSyntacticalType().contentEquals("B"))  numBParts++;
+    		if(p.getSyntacticalType().contentEquals("C"))  numCParts++;
+    	}
+    	
+    	Assert.assertEquals(0,numAParts);
+    	Assert.assertEquals(0,numBParts);
+    	Assert.assertEquals(1,numCParts);
+    	broker.getPersistenceService().deleteItem(processedItem.getURI());
+    	
+    	
+    }
+	
+    public void testOldInjectionWithNastyItem() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
+    	
+    	//setup extractors
+    	MockService abService = new MockServiceInjTest("A", "B");
+    	MockService abService1= new MockServiceInjTest("A", "B");
+    	MockService abService2= new MockServiceInjTest("A", "B");
+    	MockService acService = new MockServiceInjTest("A", "C");
+    	MockService bcService = new MockServiceInjTest("B", "C");
+    	
+    	
+    	//connect A-B extractors 
+
+    	connectExtractor(abService);	//produces 1 'B' part
+    	connectExtractor(abService1);	//produces 1 'B' part
+    	connectExtractor(abService2);	//produces 1 'B' part
+    	connectExtractor(acService);	//produces 1 'C' part
+    	connectExtractor(bcService);	//produces 1 'B' part
+    	
+    	
+    	//broadcast a simple item with mimeType 'A'
+    	
+    	Item processedItem = broadcastNastyItem("A");
+    	
+    	//and check that all extractors were triggered
+    	Assert.assertNotNull("Unable to retrieve an item from the persistence service",processedItem); 
+    	
+    	//total parts are 1 'a' + 3x2 'b' (A-B) + 1x2 'c' (A->C) + 3x1x2 'c' (B-C)
+    	Assert.assertEquals(15, ImmutableSet.copyOf(processedItem.getParts()).size());
+    	
+    	List<Part> parts = ImmutableList.copyOf(processedItem.getParts());
+    	int numAParts=0;
+    	int numBParts=0;
+    	int numCParts=0;
+    	for(Part p : parts){
+    		if(p.getSyntacticalType().contentEquals("A"))  numAParts++;
+    		if(p.getSyntacticalType().contentEquals("B"))  numBParts++;
+    		if(p.getSyntacticalType().contentEquals("C"))  numCParts++;
+    	}
+    	
+    	Assert.assertEquals(1,numAParts);
+    	Assert.assertEquals(6,numBParts);
+    	Assert.assertEquals(8,numCParts);
+    	broker.getPersistenceService().deleteItem(processedItem.getURI());
+    	
+    	
+    	
+    	//broadcast a simple item with mimeType 'B'
+    	processedItem = broadcastNastyItem("B");
+    	
+    	//and check that all extractors were triggered
+    	Assert.assertNotNull("Unable to retrieve an item from the persistence service",processedItem); 
+    	
+    	//total parts are 1'b' + 1x2 'c' (B-C)
+    	Assert.assertEquals(3, ImmutableSet.copyOf(processedItem.getParts()).size());
+    	
+    	parts = ImmutableList.copyOf(processedItem.getParts());
+    	numAParts=0;
+    	numBParts=0;
+    	numCParts=0;
+    	for(Part p : parts){
+    		if(p.getSyntacticalType().contentEquals("A"))  numAParts++;
+    		if(p.getSyntacticalType().contentEquals("B"))  numBParts++;
+    		if(p.getSyntacticalType().contentEquals("C"))  numCParts++;
+    	}
+    	
+    	Assert.assertEquals(0,numAParts);
+    	Assert.assertEquals(1,numBParts);
+    	Assert.assertEquals(2,numCParts);
+    	broker.getPersistenceService().deleteItem(processedItem.getURI());
+    	
+    	
+    	
+    	//broadcast a simple item with mimeType 'C'
+    	processedItem = broadcastNastyItem("C");
+    	
+    	//and check that all extractors were triggered
+    	Assert.assertNotNull("Unable to retrieve an item from the persistence service",processedItem); 
+    	
+    	//total parts are 1'c'
+    	Assert.assertEquals(1, ImmutableSet.copyOf(processedItem.getParts()).size());
+    	
+    	parts = ImmutableList.copyOf(processedItem.getParts());
+    	numAParts=0;
+    	numBParts=0;
+    	numCParts=0;
+    	for(Part p : parts){
+    		if(p.getSyntacticalType().contentEquals("A"))  numAParts++;
+    		if(p.getSyntacticalType().contentEquals("B"))  numBParts++;
+    		if(p.getSyntacticalType().contentEquals("C"))  numCParts++;
+    	}
+    	
+    	Assert.assertEquals(0,numAParts);
+    	Assert.assertEquals(0,numBParts);
+    	Assert.assertEquals(1,numCParts);
+    	broker.getPersistenceService().deleteItem(processedItem.getURI());
+    	
+    	
+    }
+	
 
     @SuppressWarnings("deprecation")
 	@Test
@@ -474,6 +775,96 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	}
     	assert(wManager.listWorkflows(USER).isEmpty());
     	
+    }
+    
+    private Item broadcastSimpleItem(String mimeType) throws RepositoryException, IOException, InterruptedException
+    {
+    	 PersistenceService ps = broker.getPersistenceService();
+         Item item = null;
+         try {
+             item = ps.createItem();
+             item.setSemanticType("Simple type "+mimeType);
+             item.setSyntacticalType(mimeType);
+             item.getAsset().setFormat(mimeType);
+
+             Response r = injService.submitItem(item.getURI().stringValue(), null);
+             
+             Thread.sleep(500);
+             
+             Assert.assertEquals("The response should have been [OK]", 
+            		              Status.OK.getStatusCode(),r.getStatus());
+             
+             return item;
+         }
+         catch(Exception e){
+        	 log.error("Unexpected exception: ");
+        	 e.printStackTrace();
+        	 Assert.fail();
+        	 return null;
+         }
+    }
+    
+    private Item broadcastComplexItem(String mimeType) throws RepositoryException, IOException, InterruptedException
+    {
+    	 PersistenceService ps = broker.getPersistenceService();
+         Item item = null;
+         try {
+             item = ps.createItem();
+             item.setSemanticType("Empty item");
+             item.setSyntacticalType("mico:Item");
+             
+             Part part =item.createPart(new URIImpl("urn:org.example.injection"));
+             part.setSemanticType("Simple type "+mimeType);
+             part.setSyntacticalType(mimeType);
+             part.getAsset().setFormat(mimeType);
+
+             Response r = injService.submitItem(item.getURI().stringValue(), null);
+             
+             Thread.sleep(500);
+             
+             Assert.assertEquals("The response should have been [OK]", 
+            		              Status.OK.getStatusCode(),r.getStatus());
+             
+             return item;
+         }
+         catch(Exception e){
+        	 log.error("Unexpected exception: ");
+        	 e.printStackTrace();
+        	 Assert.fail();
+        	 return null;
+         }
+    }
+    
+    private Item broadcastNastyItem(String mimeType) throws RepositoryException, IOException, InterruptedException
+    {
+    	PersistenceService ps = broker.getPersistenceService();
+    	Item item = null;
+    	try {
+    		item = ps.createItem();
+    		item.setSemanticType("Simple type "+mimeType);
+    		item.setSyntacticalType(mimeType);
+    		item.getAsset().setFormat(mimeType);
+
+    		Part part =item.createPart(new URIImpl("urn:org.example.injection"));
+    		part.setSemanticType("Simple type "+mimeType);
+    		part.setSyntacticalType(mimeType);
+    		part.getAsset().setFormat(mimeType);
+
+    		Response r = injService.submitItem(item.getURI().stringValue(), null);
+
+    		Thread.sleep(500);
+
+    		Assert.assertEquals("The response should have been [OK]", 
+    				Status.OK.getStatusCode(),r.getStatus());
+
+    		return item;
+    	}
+    	catch(Exception e){
+    		log.error("Unexpected exception: ");
+    		e.printStackTrace();
+    		Assert.fail();
+    		return null;
+    	}
     }
     
     private Response triggerRouteWithSimpleItem(String syntacticType,String mimeType,Integer routeId) throws RepositoryException, IOException, InterruptedException
