@@ -15,24 +15,15 @@ package eu.mico.platform.broker.test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.ByteString;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Envelope;
-import com.rabbitmq.client.QueueingConsumer;
 
 import eu.mico.platform.broker.model.MICOCamelRoute;
-import eu.mico.platform.broker.test.BaseBrokerTest.MockService;
 import eu.mico.platform.broker.webservices.InjectionWebService;
 import eu.mico.platform.broker.webservices.WorkflowManagementService;
 import eu.mico.platform.camel.MicoCamelContext;
 import eu.mico.platform.event.api.AnalysisResponse;
-import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
-import eu.mico.platform.event.model.Event;
-import eu.mico.platform.event.model.Event.MessageType;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
 
@@ -43,7 +34,6 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -394,7 +384,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
     }
 	
 
-    @SuppressWarnings("deprecation")
+
 	@Test
     public void testNewInjectionWithSimpleItem() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
     	
@@ -581,12 +571,9 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	for(Integer id : routeIds.values()){
     		wManager.deleteWorkflow(id);
     	}
-    	Thread.sleep(200);
-    	
-    	assert(wManager.listWorkflows(USER).isEmpty());
     }
     
-    @SuppressWarnings("deprecation")
+
 	@Test
     public void testNewInjectionWithComplexItem() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
     	
@@ -772,12 +759,10 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	
     	for(Integer id : routeIds.values()){
     		wManager.deleteWorkflow(id);
-    	}
-    	assert(wManager.listWorkflows(USER).isEmpty());
-    	
+    	}    	
     }
     
-    @SuppressWarnings("deprecation")
+
 	@Test
     public void testNewInjectionWithNastyItem() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
     	
@@ -964,8 +949,6 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	for(Integer id : routeIds.values()){
     		wManager.deleteWorkflow(id);
     	}
-    	assert(wManager.listWorkflows(USER).isEmpty());
-    	
     }
     
     private Item broadcastSimpleItem(String mimeType) throws RepositoryException, IOException, InterruptedException

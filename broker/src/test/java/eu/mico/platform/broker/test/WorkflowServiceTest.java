@@ -25,16 +25,14 @@ import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
+import java.util.Set;
 
 
 
@@ -50,7 +48,6 @@ import java.util.Random;
 	private static final String ROUTE_END = "</routes>";
 	private static final String USER="mico";
 	
-	private static Logger log = LoggerFactory.getLogger(WorkflowServiceTest.class);
     private static MicoCamelContext context = new MicoCamelContext();
     private static Map<Integer,MICOCamelRoute> routes = new HashMap<Integer,MICOCamelRoute>();
     private static WorkflowManagementService service = null;
@@ -66,27 +63,17 @@ import java.util.Random;
     
     // ------------------------Tests below this line -------------------- //
     
-    @SuppressWarnings("deprecation")
+
 	@Test
     public void testGetWorkflowStatus() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
     	
     	Assume.assumeTrue(isRegistrationServiceAvailable);
     	
-    	//assert that no workflows are present
-    	List<String> ids = service.listWorkflows(USER);
-    	Assert.assertTrue(ids.isEmpty());
-    	
-    	
     	MockService abService = new MockService("A", "B");
     	String abWorkflow=createTestRoute(abService, "A", "mico/test");    	
         int newId = service.addWorkflow(USER, "tw-1",abWorkflow , "[]","[]");
-        ids = service.listWorkflows(USER);
-        
-        Assert.assertEquals(ids.size(),1);
-        Assert.assertEquals(Integer.parseInt(ids.get(0)),newId);
-        
         int nonExistingId = -1;
-        Assert.assertTrue(service.listWorkflows("NON_EXISTING_USER").isEmpty());        
+        
         assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, nonExistingId));
         assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, newId));
         
@@ -103,43 +90,35 @@ import java.util.Random;
         assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, newId));
         
         service.deleteWorkflow(newId);
-        Assert.assertTrue(service.listWorkflows(USER).isEmpty());
+        assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, nonExistingId));
     }
     
-    @SuppressWarnings("deprecation")
+
 	@Test
 	public void testAddRemoveWorkflows() throws RepositoryException, IOException{
     	
-    	//assert that no workflows are present
-    	List<String> ids = service.listWorkflows(USER);
-    	Assert.assertTrue(ids.isEmpty());
-    	
+
     	final String GUEST = "GUEST";
-    	List<String> ids2 = service.listWorkflows(GUEST);
+    	Set<String> ids = new HashSet<String>();
+    	Set<String> ids2 = new HashSet<String>();
+    	Assert.assertTrue(ids.isEmpty());
     	Assert.assertTrue(ids2.isEmpty());
     	
     	MockService abService = new MockService("A", "B");
     	
     	//add 100 workflows for user mico
     	for(int i=0; i<100; i++){
-    		service.addWorkflow(USER, "tw-"+1,createTestRoute(abService,"mico:Test","test/mico") , "[]","[]");
+    		ids.add(Integer.toString(service.addWorkflow(USER, "tw-"+1,createTestRoute(abService,"mico:Test","test/mico") , "[]","[]")));
     	}
-    	
-    	ids = service.listWorkflows(USER);
     	Assert.assertEquals(100,ids.size());
     	
     	
     	//add 50 workflows for user guest
     	for(int i=0; i<50; i++){
-    		service.addWorkflow(GUEST, "tw-"+1,createTestRoute(abService,"mico:Test","test/mico") , "[]","[]");
+    		ids2.add(Integer.toString(service.addWorkflow(GUEST, "tw-"+1,createTestRoute(abService,"mico:Test","test/mico") , "[]","[]")));
     	}
-    	
-    	ids2 = service.listWorkflows(GUEST);
     	Assert.assertEquals(50,ids2.size());
     	
-    	
-    	Collections.shuffle(ids, new Random(0));
-    	Collections.shuffle(ids2, new Random(0));
     	
     	try{
     	  	for(String id : ids){
@@ -159,24 +138,20 @@ import java.util.Random;
     	try{
     	  	for(String id : ids){
         		service.deleteWorkflow(Integer.parseInt(id));
+        		assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, Integer.parseInt(id)));
         	}
     	}catch(Exception e) {
     		Assert.fail("Unexpected exception while deleting an existing workflow for user "+USER);
     	}
     	
-    	Assert.assertTrue(service.listWorkflows(USER).isEmpty());
-    	Assert.assertEquals(ids2.size(),service.listWorkflows(GUEST).size());
-    	
     	try{
     	  	for(String id : ids2){
         		service.deleteWorkflow(Integer.parseInt(id));
+        		assertRouteStatus(RouteStatus.BROKEN,service.getStatus(GUEST, Integer.parseInt(id)));
         	}
     	}catch(Exception e) {
     		Assert.fail("Unexpected exception while deleting an existing workflow for user "+GUEST);
-    	}
-    	
-    	Assert.assertTrue(service.listWorkflows(GUEST).isEmpty());
-    	
+    	}    	
     		
     }
     
