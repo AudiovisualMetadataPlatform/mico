@@ -171,8 +171,9 @@ public class MicoRabbitProducer extends DefaultProducer {
             switch (response.getType()) {
             case PROGRESS:
             case ERROR:
-                log.warn(response.getError().getMessage(), response.getError()
+                log.warn("Received an error response {}, generating a new MICOCamelAnalysisException with what message : {}",response.getError().getMessage(), response.getError()
                         .getDescription());
+                throw new MICOCamelAnalysisException(response.getError().getDescription());
             case NEW_PART:
                 newObjectUri = response.getNew().getPartUri();
                 log.debug(
