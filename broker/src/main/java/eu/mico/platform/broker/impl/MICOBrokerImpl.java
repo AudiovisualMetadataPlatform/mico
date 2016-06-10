@@ -106,6 +106,14 @@ public class MICOBrokerImpl implements MICOBroker {
 
     // map from content item URIs to processing states
     private Map<String, ItemState> states;
+    
+    //map from item uri to ...
+    private Map<String, 
+    //map from workflowIDs to job States
+    Map<String, MICOJobStatus>> camelStates;
+    
+//	//map from job to status
+//	private Map<MICOJob,  MICOJobStatus> camelStates;
 
     // map from content item URIs to channels
     private Map<String, Channel> channels;
@@ -134,6 +142,7 @@ public class MICOBrokerImpl implements MICOBroker {
 
         dependencies = new ServiceGraph();
         states = new ConcurrentHashMap<>();
+        camelStates = new ConcurrentHashMap<String,Map<String,MICOJobStatus>>();
         channels = new HashMap<>();
 
         log.info("initialising RabbitMQ connection ...");
@@ -177,6 +186,29 @@ public class MICOBrokerImpl implements MICOBroker {
     public Map<String, ItemState> getStates() {
         return states;
     }
+    
+    @Override
+    public void addCamelRouteStatus(MICOJob job, MICOJobStatus jobState) {
+    	if (camelStates.get(job.getItemURI()) == null){
+    		camelStates.put(job.getItemURI(), new ConcurrentHashMap<String,MICOJobStatus>());
+    	}
+    	
+    	MICOJobStatus oldStatus = camelStates.get(job.getItemURI()).get(job.getWorkflowId().toString());
+		if(oldStatus != null){
+			log.warn("CRITICAL: replacing existing old job status");
+			log.warn("CRITICAL: new status refer to item {} processed with route {}",job.getItemURI(),job.getWorkflowId());
+		}
+		camelStates.get(job.getItemURI()).put(job.getWorkflowId().toString(),jobState);
+    }
+    
+    
+    @Override
+    public MICOJobStatus getCamelRouteStatus(MICOJob job) {
+    	if(camelStates.get(job.getItemURI())==null){
+    		return null;
+    	}
+    	return camelStates.get(job.getItemURI()).get(job.getWorkflowId().toString());
+    };
 
     @Override
     public PersistenceService getPersistenceService() {

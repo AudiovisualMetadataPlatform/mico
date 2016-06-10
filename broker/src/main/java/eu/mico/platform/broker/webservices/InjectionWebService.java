@@ -18,8 +18,12 @@ import com.google.common.collect.ImmutableMap;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
 import eu.mico.platform.broker.impl.MICOBrokerImpl.RouteStatus;
+import eu.mico.platform.broker.model.CamelJob;
 import eu.mico.platform.broker.model.MICOCamelRoute;
 import eu.mico.platform.broker.model.MICOCamelRoute.EntryPoint;
+import eu.mico.platform.broker.model.MICOJob;
+import eu.mico.platform.broker.model.MICOJobStatus;
+import eu.mico.platform.camel.MICOCamelAnalysisException;
 import eu.mico.platform.camel.MicoCamelContext;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
@@ -271,6 +275,8 @@ public class InjectionWebService {
     			log.info("The camel route with ID {} is currently {}, looking for compatible entry points ...",routeId,status);    	
     			//the route is up and running, proceed with the injection
     			boolean compatibleEpFound = false;
+    			MICOJobStatus jobState = new MICOJobStatus();
+    			
     			for(EntryPoint ep:route.getEntryPoints()){
     				
     				boolean epCompatible = false;
@@ -278,40 +284,24 @@ public class InjectionWebService {
     				//check if the entry point is compatible or not
     				epCompatible = epCompatible || isCompatible(item, ep);
     				if(isCompatible(item,ep)){
-	    				//NOTE: camelContext.processItem() is locking until the pipeline 
-	    				//goes through entirely, hence the thread
-	    				Thread thr = new Thread(new Runnable(){
-	    					public void run(){
-	    						log.info("submitting item {} to route {} using entry point {}",
-	    								item.getURI() ,route.getWorkflowId(), ep.getDirectUri());
-	    						camelContext.processItem(ep.getDirectUri(),itemURI);
-	    					}
-	    				});
-	    				thr.start();
+    					jobState.addCamelJob(new CamelJob(itemURI, ep.getDirectUri(), camelContext));
 					}
     				
     				for(Part p : item.getParts()){
     					epCompatible = epCompatible || isCompatible(p, ep);
     					
     					if(isCompatible(p,ep)){
-    	    				//NOTE: camelContext.processItem() is locking until the pipeline 
-    	    				//goes through entirely, hence the thread
-    	    				Thread thr = new Thread(new Runnable(){
-    	    					public void run(){
-    	    						log.info("submitting item part {} to route {} using entry point {}",
-    	    								p.getURI() ,route.getWorkflowId(), ep.getDirectUri());
-    	    						camelContext.processPart(ep.getDirectUri(),itemURI,p.getURI().stringValue());
-    	    					}
-    	    				});
-    	    				thr.start();
+    						jobState.addCamelJob(new CamelJob(itemURI, p.getURI().stringValue(), ep.getDirectUri(), camelContext));
     					}
     				}
-    				
     				
     				compatibleEpFound = compatibleEpFound || epCompatible;
 
     			}
     			if(compatibleEpFound){
+    				Thread thr = new Thread(jobState);
+    				thr.start();
+    				broker.addCamelRouteStatus(new MICOJob(routeId, itemURI), jobState);
     				return Response.ok().build();
     			}
     			log.error("Unable to retrieve an entry point compatible with the input item");

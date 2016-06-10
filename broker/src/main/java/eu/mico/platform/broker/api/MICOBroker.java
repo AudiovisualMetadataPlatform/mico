@@ -13,7 +13,9 @@
  */
 package eu.mico.platform.broker.api;
 
+import eu.mico.platform.broker.model.MICOJobStatus;
 import eu.mico.platform.broker.model.ItemState;
+import eu.mico.platform.broker.model.MICOJob;
 import eu.mico.platform.broker.model.ServiceGraph;
 import eu.mico.platform.persistence.api.PersistenceService;
 
@@ -32,4 +34,7 @@ public interface MICOBroker {
     PersistenceService getPersistenceService();
 
     String getRouteStatus(String camelRoute);
+
+    void addCamelRouteStatus(MICOJob job,MICOJobStatus jobState);
+	MICOJobStatus getCamelRouteStatus(MICOJob job);
 }

@@ -17,6 +17,8 @@ import com.google.common.collect.ImmutableSet;
 import com.rabbitmq.client.QueueingConsumer;
 
 import eu.mico.platform.broker.model.MICOCamelRoute;
+import eu.mico.platform.broker.model.MICOJob;
+import eu.mico.platform.broker.model.MICOJobStatus;
 import eu.mico.platform.broker.test.InjectionServiceTest.MockFailingServiceInjTest;
 import eu.mico.platform.broker.test.InjectionServiceTest.MockServiceInjTest;
 import eu.mico.platform.broker.webservices.InjectionWebService;
@@ -37,6 +39,7 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -53,6 +56,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
+import javax.validation.constraints.AssertFalse;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -93,6 +97,7 @@ public class StatusServiceTest extends BaseBrokerTest {
 	}
 
     @Test
+    @Ignore
     public void testStatusWithNewdInjection() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
        
     	Assume.assumeTrue(isRegistrationServiceAvailable);
@@ -191,6 +196,125 @@ public class StatusServiceTest extends BaseBrokerTest {
             
             finished = Boolean.parseBoolean(((String)proprs.get("finished")));
             hasError = Boolean.parseBoolean(((String)proprs.get("hasError")));
+            
+            Assert.assertTrue("The item should have finished",finished);
+            Assert.assertFalse("The item should have no error reported",hasError);
+            
+    	}
+    	catch(Exception e){
+    		e.printStackTrace();
+    		Assert.fail();
+    	}
+    	finally{
+    		ps.deleteItem(items.get(0).getURI());
+    		items.remove(0);
+    	}
+    	disconnectExtractor(abFastService);
+    	disconnectExtractor(cdSlowService);
+    	disconnectExtractor(efWrongService);
+        
+
+    }
+    
+    @Test
+    public void testStatusBackendWithNewdInjection() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
+       
+    	Assume.assumeTrue(isRegistrationServiceAvailable);
+    	
+        //1. connect extractors
+    	connectExtractor(abFastService);
+    	connectExtractor(cdSlowService);
+    	connectExtractor(efWrongService);
+    	
+    	//2. register the extractors
+    	registerExtractor(abFastService, "mico/fast");
+    	registerExtractor(cdSlowService, "mico/slow");
+    	registerExtractor(efWrongService,"mico/error");
+    	
+    	//publish the routes
+    	String abFastRoute =WorkflowServiceTest.createTestRoute(abFastService, "mico:A-B", "mico/fast");
+    	String cdSlowRoute =WorkflowServiceTest.createTestRoute(cdSlowService, "mico:C-D", "mico/slow");
+    	String efWrongRoute=WorkflowServiceTest.createTestRoute(efWrongService,"mico:E-F", "mico/error");
+    	
+    	
+    	Map<String,Integer> routeIds = new HashMap<String,Integer>();
+    	routeIds.put(abFastRoute, wManager.addWorkflow(USER,  "abFastRoute" ,abFastRoute , "[]","[]"));
+    	routeIds.put(cdSlowRoute, wManager.addWorkflow(USER,  "cdSlowRoute" ,cdSlowRoute , "[]","[]"));
+    	routeIds.put(efWrongRoute, wManager.addWorkflow(USER, "efWrongRoute" ,efWrongRoute , "[]","[]"));
+    	
+
+    	List<Item> items = new ArrayList<Item>();
+    	PersistenceService ps = broker.getPersistenceService();
+
+    	//call A-B (the fast one)
+    	items.add(triggerRouteWithSimpleItem("mico:A-B", "mico/fast",  routeIds.get(abFastRoute)));
+    	
+    	//check that its status is available and equal to DONE
+    	try{
+    		Thread.sleep(200);
+    		MICOJobStatus state = broker.getCamelRouteStatus(new MICOJob(routeIds.get(abFastRoute), items.get(0).getURI().stringValue()));
+            boolean finished = state.isFinished();
+            boolean hasError = state.hasError();
+            
+            Assert.assertTrue("The item should have finished",finished);
+            Assert.assertFalse("The item should have no error reported",hasError);
+            
+    	}
+    	catch(Exception e){
+    		e.printStackTrace();
+    		Assert.fail();
+    	}
+    	finally{
+    		ps.deleteItem(items.get(0).getURI());
+    		items.remove(0);
+    	}
+    	
+    	//call E-F (the failing one )
+    	items.add(triggerRouteWithSimpleItem("mico:E-F", "mico/error", routeIds.get(efWrongRoute)));
+    	
+    	
+    	
+    	//check that its status is available and equal to DONE
+    	try{
+    		Thread.sleep(200);
+    		MICOJobStatus state = broker.getCamelRouteStatus(new MICOJob(routeIds.get(efWrongRoute), items.get(0).getURI().stringValue()));
+            
+            boolean finished = state.isFinished();
+            boolean hasError = state.hasError();
+            
+            Assert.assertTrue("The item should have finished",finished);
+            Assert.assertTrue("The item should have one error reported",hasError);
+            
+    	}
+    	catch(Exception e){
+    		e.printStackTrace();
+    		Assert.fail();
+    	}
+    	finally{
+    		ps.deleteItem(items.get(0).getURI());
+    		items.remove(0);
+    	}
+    	
+    	//call C-D (the slow one )
+    	items.add(triggerRouteWithSimpleItem("mico:C-D", "mico/slow",  routeIds.get(cdSlowRoute)));
+    	
+    	//check that its status is available and equal to DONE
+    	try{
+    		Thread.sleep(200);
+    		MICOJobStatus state = broker.getCamelRouteStatus(new MICOJob(routeIds.get(cdSlowRoute), items.get(0).getURI().stringValue()));
+            
+            boolean finished = state.isFinished();
+            boolean hasError = state.hasError();
+            
+            Assert.assertFalse("The item should still be in progress finished",finished);
+            Assert.assertFalse("The item should have no error reported",hasError);
+            
+            Thread.sleep(2000); // same as the mock 
+            
+            state = broker.getCamelRouteStatus(new MICOJob(routeIds.get(cdSlowRoute), items.get(0).getURI().stringValue()));
+            
+            finished = state.isFinished();
+            hasError = state.hasError();
             
             Assert.assertTrue("The item should have finished",finished);
             Assert.assertFalse("The item should have no error reported",hasError);

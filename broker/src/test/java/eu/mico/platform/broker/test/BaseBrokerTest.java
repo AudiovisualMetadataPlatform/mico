@@ -330,7 +330,8 @@ public abstract class BaseBrokerTest {
 		HttpDelete httpDelete = new HttpDelete(((MICOBrokerImpl)broker).getRegistrationBaseUri()+"/delete/extractor/"+s.getExtractorID());
 		httpDelete.setHeader("Accept", "application/json");
 		httpDelete.setHeader("Content-type", "application/json");
-	    httpclient.execute(httpDelete);
+		CloseableHttpResponse response = httpclient.execute(httpDelete);
+		response.close();
 	}
 	
     
