@@ -18,6 +18,7 @@ import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.RoutesDefinition;
 import org.apache.commons.io.IOUtils;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -48,6 +49,44 @@ public class MicoRabbitComponentTest extends TestBase {
         
         template.send("direct:a",createExchange());
         assertMockEndpointsSatisfied();
+    }
+    
+    @Test(timeout=20000)
+    public void testErrorSignaling() throws Exception {
+    	
+    	Exchange exc = createExchange();
+    	
+        try{
+        	template.send("direct:error",exc);	
+        }
+        catch(MICOCamelAnalysisException e){
+        	Assert.assertTrue(e.getErrorMessage().contentEquals("Mock error message"));
+        	Assert.assertTrue(e.getErrorDescription().contentEquals("Mock error description"));
+        }
+        catch(Exception e){
+        	Assert.fail("Unexpected exception");
+        }
+        
+        Assert.assertTrue(exc.getProperty(Exchange.EXCEPTION_CAUGHT, Boolean.class));
+        Assert.assertTrue(exc.getProperty(Exchange.EXCEPTION_HANDLED, String.class).contentEquals("Mock error message"));
+        Assert.assertTrue(exc.getProperty(Exchange.DUPLICATE_MESSAGE, String.class).contentEquals("Mock error description"));
+    }
+    
+    @Test(timeout=20000)
+    public void testRouteStopsOnAnalysisException() throws Exception {
+        MockEndpoint mock = getMockEndpoint("mock:error");
+        mock.expectedMinimumMessageCount(0);
+    	
+    	try{
+        	template.send("direct:error",createExchange());
+        }
+        catch(MICOCamelAnalysisException e){
+        	log.info("Correctly caught MICOCamelAnalysisException : ",e);
+        }
+        catch(Exception e){
+        	Assert.fail("Unexpected exception");
+        }
+    	assertMockEndpointsSatisfied();
     }
 
     /**
@@ -208,6 +247,11 @@ public class MicoRabbitComponentTest extends TestBase {
                 .pipeline()
                 .to("mico-comp:vbox2?extractorId=microformats")
                 .to("mock:result_text_html");
+                
+                from("direct:error")
+                .pipeline()
+                .to("mico-comp:ebox1?extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=ERROR-ERROR-queue")
+                .to("mock:error");
 
             }
 

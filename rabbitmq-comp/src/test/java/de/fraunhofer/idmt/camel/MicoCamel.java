@@ -26,6 +26,7 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 
 import de.fraunhofer.idmt.mico.DummyExtractor;
+import de.fraunhofer.idmt.mico.DummyFailingExtractor;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
@@ -74,6 +75,7 @@ public class MicoCamel {
     protected static AnalysisService extr_c = new DummyExtractor("C1", "D","mico-extractor-test","1.0.0","C1-D-queue");
     protected static AnalysisService extr_d = new DummyExtractor("D", "E","mico-extractor-test","1.0.0","D-E-queue");
     protected static AnalysisService extr_e = new DummyExtractor("C2", "F","mico-extractor-test","1.0.0","C2-F-queue");
+    protected static AnalysisService extr_error = new DummyFailingExtractor("ERROR", "ERROR","mico-extractor-test","1.0.0","ERROR-ERROR-queue");
 
     /**
      * setup test environment including mico eventManager and some registered
@@ -149,6 +151,7 @@ public class MicoCamel {
         eventManager.registerService(extr_c);
         eventManager.registerService(extr_d);
         eventManager.registerService(extr_e);
+        eventManager.registerService(extr_error);
 
         log.info("event manager initialized: {}", eventManager.getPersistenceService().getStoragePrefix());
     }
