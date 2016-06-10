@@ -35,6 +35,6 @@ public interface MICOBroker {
 
     String getRouteStatus(String camelRoute);
 
-    void addCamelRouteStatus(MICOJob job,MICOJobStatus jobState);
-	MICOJobStatus getCamelRouteStatus(MICOJob job);
+    void addMICOCamelJobStatus(MICOJob job,MICOJobStatus jobState);
+	MICOJobStatus getMICOCamelJobStatus(MICOJob job);
 }

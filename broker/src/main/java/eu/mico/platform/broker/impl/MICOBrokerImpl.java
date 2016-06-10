@@ -24,7 +24,6 @@ import eu.mico.platform.broker.exception.StateNotFoundException;
 import eu.mico.platform.broker.model.*;
 import eu.mico.platform.broker.util.RabbitMQUtils;
 import eu.mico.platform.event.api.EventManager;
-import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
@@ -112,13 +111,6 @@ public class MICOBrokerImpl implements MICOBroker {
     //map from workflowIDs to job States
     Map<String, MICOJobStatus>> camelStates;
     
-//	//map from job to status
-//	private Map<MICOJob,  MICOJobStatus> camelStates;
-
-    // map from content item URIs to channels
-    private Map<String, Channel> channels;
-
-
     public MICOBrokerImpl(String host) throws IOException, URISyntaxException {
         this(host, "mico", "mico");
     }
@@ -143,7 +135,6 @@ public class MICOBrokerImpl implements MICOBroker {
         dependencies = new ServiceGraph();
         states = new ConcurrentHashMap<>();
         camelStates = new ConcurrentHashMap<String,Map<String,MICOJobStatus>>();
-        channels = new HashMap<>();
 
         log.info("initialising RabbitMQ connection ...");
 
@@ -188,7 +179,7 @@ public class MICOBrokerImpl implements MICOBroker {
     }
     
     @Override
-    public void addCamelRouteStatus(MICOJob job, MICOJobStatus jobState) {
+    public void addMICOCamelJobStatus(MICOJob job, MICOJobStatus jobState) {
     	if (camelStates.get(job.getItemURI()) == null){
     		camelStates.put(job.getItemURI(), new ConcurrentHashMap<String,MICOJobStatus>());
     	}
@@ -203,7 +194,7 @@ public class MICOBrokerImpl implements MICOBroker {
     
     
     @Override
-    public MICOJobStatus getCamelRouteStatus(MICOJob job) {
+    public MICOJobStatus getMICOCamelJobStatus(MICOJob job) {
     	if(camelStates.get(job.getItemURI())==null){
     		return null;
     	}
@@ -385,7 +376,7 @@ public class MICOBrokerImpl implements MICOBroker {
             log.info("received config discovery event with reply queue {} ...", properties.getReplyTo());
 
             // parse config discovery request (as it doesn't contain any data for now we won't care about it further)
-            Event.ConfigurationDiscoverEvent configDiscover = Event.ConfigurationDiscoverEvent.parseFrom(body);
+//            Event.ConfigurationDiscoverEvent configDiscover = Event.ConfigurationDiscoverEvent.parseFrom(body);
 
             // construct reply properties, use the same correlation ID as in the request
             final AMQP.BasicProperties replyProps = new AMQP.BasicProperties

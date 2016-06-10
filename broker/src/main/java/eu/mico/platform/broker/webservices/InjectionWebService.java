@@ -16,14 +16,12 @@ package eu.mico.platform.broker.webservices;
 import com.google.common.collect.ImmutableMap;
 
 import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.impl.MICOBrokerImpl;
 import eu.mico.platform.broker.impl.MICOBrokerImpl.RouteStatus;
 import eu.mico.platform.broker.model.CamelJob;
 import eu.mico.platform.broker.model.MICOCamelRoute;
 import eu.mico.platform.broker.model.MICOCamelRoute.EntryPoint;
 import eu.mico.platform.broker.model.MICOJob;
 import eu.mico.platform.broker.model.MICOJobStatus;
-import eu.mico.platform.camel.MICOCamelAnalysisException;
 import eu.mico.platform.camel.MicoCamelContext;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
@@ -301,7 +299,7 @@ public class InjectionWebService {
     			if(compatibleEpFound){
     				Thread thr = new Thread(jobState);
     				thr.start();
-    				broker.addCamelRouteStatus(new MICOJob(routeId, itemURI), jobState);
+    				broker.addMICOCamelJobStatus(new MICOJob(routeId, itemURI), jobState);
     				return Response.ok().build();
     			}
     			log.error("Unable to retrieve an entry point compatible with the input item");

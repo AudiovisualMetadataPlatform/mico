@@ -13,9 +13,6 @@
  */
 package eu.mico.platform.broker.test;
 
-import com.google.common.collect.ImmutableSet;
-import com.rabbitmq.client.QueueingConsumer;
-
 import eu.mico.platform.broker.model.MICOCamelRoute;
 import eu.mico.platform.broker.model.MICOJob;
 import eu.mico.platform.broker.model.MICOJobStatus;
@@ -26,22 +23,16 @@ import eu.mico.platform.broker.webservices.StatusWebService;
 import eu.mico.platform.broker.webservices.WorkflowManagementService;
 import eu.mico.platform.camel.MicoCamelContext;
 import eu.mico.platform.event.api.AnalysisResponse;
-import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
-import eu.mico.platform.event.model.Event;
 import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.model.Asset;
-import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
 
-import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,16 +43,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
-import javax.validation.constraints.AssertFalse;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.hasProperty;
 
 /**
  * Minimal test. Inject items and see if their statuses are correctly retrieven
@@ -252,7 +236,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     	//check that its status is available and equal to DONE
     	try{
     		Thread.sleep(200);
-    		MICOJobStatus state = broker.getCamelRouteStatus(new MICOJob(routeIds.get(abFastRoute), items.get(0).getURI().stringValue()));
+    		MICOJobStatus state = broker.getMICOCamelJobStatus(new MICOJob(routeIds.get(abFastRoute), items.get(0).getURI().stringValue()));
             boolean finished = state.isFinished();
             boolean hasError = state.hasError();
             
@@ -277,7 +261,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     	//check that its status is available and equal to DONE
     	try{
     		Thread.sleep(200);
-    		MICOJobStatus state = broker.getCamelRouteStatus(new MICOJob(routeIds.get(efWrongRoute), items.get(0).getURI().stringValue()));
+    		MICOJobStatus state = broker.getMICOCamelJobStatus(new MICOJob(routeIds.get(efWrongRoute), items.get(0).getURI().stringValue()));
             
             boolean finished = state.isFinished();
             boolean hasError = state.hasError();
@@ -301,7 +285,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     	//check that its status is available and equal to DONE
     	try{
     		Thread.sleep(200);
-    		MICOJobStatus state = broker.getCamelRouteStatus(new MICOJob(routeIds.get(cdSlowRoute), items.get(0).getURI().stringValue()));
+    		MICOJobStatus state = broker.getMICOCamelJobStatus(new MICOJob(routeIds.get(cdSlowRoute), items.get(0).getURI().stringValue()));
             
             boolean finished = state.isFinished();
             boolean hasError = state.hasError();
@@ -311,7 +295,7 @@ public class StatusServiceTest extends BaseBrokerTest {
             
             Thread.sleep(2000); // same as the mock 
             
-            state = broker.getCamelRouteStatus(new MICOJob(routeIds.get(cdSlowRoute), items.get(0).getURI().stringValue()));
+            state = broker.getMICOCamelJobStatus(new MICOJob(routeIds.get(cdSlowRoute), items.get(0).getURI().stringValue()));
             
             finished = state.isFinished();
             hasError = state.hasError();
@@ -472,7 +456,7 @@ public class StatusServiceTest extends BaseBrokerTest {
              item.setSyntacticalType(mimeType);
              item.getAsset().setFormat(mimeType);
 
-             Response r = injService.submitItem(item.getURI().stringValue(), null);             
+             injService.submitItem(item.getURI().stringValue(), null);             
              Thread.sleep(200);
              return item;
          }
@@ -495,7 +479,7 @@ public class StatusServiceTest extends BaseBrokerTest {
              item.setSyntacticalType(syntacticType);
              item.getAsset().setFormat(mimeType);
 
-             Response r = injService.submitItem(item.getURI().stringValue(), routeId);             
+             injService.submitItem(item.getURI().stringValue(), routeId);             
              Thread.sleep(500);
              return item;
          }

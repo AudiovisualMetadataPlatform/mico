@@ -14,12 +14,7 @@
 package eu.mico.platform.broker.webservices;
 
 import com.jgraph.layout.JGraphFacade;
-import com.jgraph.layout.JGraphLayout;
-import com.jgraph.layout.JGraphModelFacade;
-import com.jgraph.layout.hierarchical.JGraphHierarchicalLayout;
 import com.jgraph.layout.organic.JGraphFastOrganicLayout;
-import com.jgraph.layout.organic.JGraphOrganicLayout;
-import com.jgraph.layout.simple.SimpleGridLayout;
 import org.jgraph.JGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphModelAdapter;

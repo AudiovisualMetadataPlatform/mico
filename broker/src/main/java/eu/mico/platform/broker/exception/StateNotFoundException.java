@@ -20,7 +20,12 @@ package eu.mico.platform.broker.exception;
  */
 public class StateNotFoundException extends Exception {
 
-    public StateNotFoundException(String message) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -5784826738520583928L;
+
+	public StateNotFoundException(String message) {
         super(message);
     }
 }
