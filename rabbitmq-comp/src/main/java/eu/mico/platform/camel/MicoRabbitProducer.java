@@ -87,7 +87,7 @@ public class MicoRabbitProducer extends DefaultProducer {
         // so it runs isolated from the other items
         Channel channel = endpoint.getConnection().createChannel();
 
-        AnalyseManager manager = new AnalyseManager(event, channel);
+        AnalyseManager manager = new AnalyseManager(exchange, event, channel);
         manager.sendEvent();
         if(exchange.getPattern().equals(ExchangePattern.InOut)||true){
             while (!manager.hasFinished()) {
@@ -134,9 +134,11 @@ public class MicoRabbitProducer extends DefaultProducer {
         private String           queue;
         private AnalysisRequest    req;
         private boolean finished = false;
+        private boolean hasError = false;
         private String newObjectUri = null;
+        private Exchange exchange = null;
 
-        public AnalyseManager(AnalysisRequest event, Channel channel) throws IOException {
+        public AnalyseManager(Exchange exchange, AnalysisRequest event, Channel channel) throws IOException {
             super(channel);
             this.req = event;
 
@@ -145,6 +147,7 @@ public class MicoRabbitProducer extends DefaultProducer {
             log.debug("listen on queue {} for result. ",queue);
             getChannel().basicConsume(queue, false, this);
             getChannel().confirmSelect();
+            this.exchange = exchange;
         }
 
         public void sendEvent() throws IOException {
@@ -173,7 +176,11 @@ public class MicoRabbitProducer extends DefaultProducer {
             case ERROR:
                 log.warn("Received an error response {}, generating a new MICOCamelAnalysisException with what message : {}",response.getError().getMessage(), response.getError()
                         .getDescription());
-                throw new MICOCamelAnalysisException(response.getError().getDescription());
+                exchange.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE); 
+                exchange.setProperty(Exchange.EXCEPTION_CAUGHT, Boolean.TRUE.toString());
+                exchange.setProperty(Exchange.EXCEPTION_HANDLED, response.getError().getMessage() );
+                exchange.setProperty(Exchange.DUPLICATE_MESSAGE, response.getError().getDescription() );
+                hasError=true;
             case NEW_PART:
                 newObjectUri = response.getNew().getPartUri();
                 log.debug(
@@ -225,6 +232,10 @@ public class MicoRabbitProducer extends DefaultProducer {
 
         public boolean hasFinished() {
             return finished;
+        }
+        
+        public boolean hasError() {
+            return hasError;
         }
 
         public String getNewObjectUri() {

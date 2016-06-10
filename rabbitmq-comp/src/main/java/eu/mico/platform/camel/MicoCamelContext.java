@@ -135,8 +135,11 @@ public class MicoCamelContext {
         Exchange exc = createExchange(itemUri,null,directUri);
 
         template.send(directUri,exc);
-        
-    }
+        Boolean failed  = Boolean.parseBoolean( (String) exc.getProperty(Exchange.EXCEPTION_CAUGHT) );
+        if(failed){
+        	throw new MICOCamelAnalysisException((String) exc.getProperty(Exchange.EXCEPTION_HANDLED) , (String) exc.getProperty(Exchange.DUPLICATE_MESSAGE)  );
+        } 
+     }
     
     /**
      * process single item part with workflow
@@ -147,7 +150,10 @@ public class MicoCamelContext {
         Exchange exc = createExchange(itemUri,partUri,directUri);
 
         template.send(directUri,exc);
-        
+        Boolean failed  = Boolean.parseBoolean( (String) exc.getProperty(Exchange.EXCEPTION_CAUGHT) );
+        if(failed){
+        	throw new MICOCamelAnalysisException((String) exc.getProperty(Exchange.EXCEPTION_HANDLED) , (String) exc.getProperty(Exchange.DUPLICATE_MESSAGE)  );
+        } 
     }
 
     /**
