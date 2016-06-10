@@ -18,6 +18,7 @@ import eu.mico.platform.demo.DemoWebService;
 import eu.mico.platform.demo.DownloadWebService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
+import eu.mico.platform.reco.EchoService;
 import eu.mico.platform.reco.RecoWebService;
 import eu.mico.platform.zooniverse.AnimalDetectionWebService;
 import eu.mico.platform.zooniverse.TextAnalysisWebService;
@@ -77,6 +78,7 @@ public class ShowcaseApplication extends Application {
 
             //WP5
             services.add(new RecoWebService(manager, marmottaBaseUri));
+            services.add(new EchoService());
 
             // Zooniverse
             services.add(new AnimalDetectionWebService(manager, marmottaBaseUri, brokerServices));

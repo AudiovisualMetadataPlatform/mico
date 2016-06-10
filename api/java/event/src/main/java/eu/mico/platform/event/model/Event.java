@@ -4728,7 +4728,6 @@ public final class Event {
    * Protobuf type {@code mico.event.model.AnalysisEvent}
    *
    * <pre>
-   *
    * AnalysisEvents are sent both, by the message broker to notify services that they should start
    * analysing an object, and by services to notify the message broker that they added a new object.
    * </pre>
@@ -9262,7 +9261,6 @@ public final class Event {
      * Protobuf type {@code mico.event.model.AnalysisEvent}
      *
      * <pre>
-     *
      * AnalysisEvents are sent both, by the message broker to notify services that they should start
      * analysing an object, and by services to notify the message broker that they added a new object.
      * </pre>

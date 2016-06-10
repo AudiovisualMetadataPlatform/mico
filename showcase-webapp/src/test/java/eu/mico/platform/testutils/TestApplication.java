@@ -1,4 +1,4 @@
-package eu.mico.platform.zooniverse.testutils;
+package eu.mico.platform.testutils;
 
 import javax.ws.rs.core.Application;
 import java.util.Set;
