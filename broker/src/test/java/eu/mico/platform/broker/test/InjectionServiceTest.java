@@ -550,7 +550,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	routeIds.put(ERROR_B_MICO_FAILING_TEST, wManager.addWorkflow(USER, "ERROR_B_MICO_FAILING_TEST" ,ERROR_B_MICO_FAILING_TEST , "[]","[]"));
     	
     	mocks.put(ERROR_B_MICO_FAILING_TEST, getMockEndpoint("mock:auto-test-route-ERROR-B-mico/error"));
-    	mocks.get(ERROR_B_MICO_FAILING_TEST).setExpectedCount(1);
+    	mocks.get(ERROR_B_MICO_FAILING_TEST).setExpectedCount(0);
     	
 
     	Assert.assertEquals(Status.OK.getStatusCode(),
@@ -739,7 +739,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	routeIds.put(ERROR_B_MICO_FAILING_TEST, wManager.addWorkflow(USER, "ERROR_B_MICO_FAILING_TEST" ,ERROR_B_MICO_FAILING_TEST , "[]","[]"));
     	
     	mocks.put(ERROR_B_MICO_FAILING_TEST, getMockEndpoint("mock:auto-test-route-ERROR-B-mico/error"));
-    	mocks.get(ERROR_B_MICO_FAILING_TEST).setExpectedCount(1);
+    	mocks.get(ERROR_B_MICO_FAILING_TEST).setExpectedCount(0);
     	
 
     	Assert.assertEquals(Status.OK.getStatusCode(),
@@ -928,7 +928,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	routeIds.put(ERROR_B_MICO_FAILING_TEST, wManager.addWorkflow(USER, "ERROR_B_MICO_FAILING_TEST" ,ERROR_B_MICO_FAILING_TEST , "[]","[]"));
     	
     	mocks.put(ERROR_B_MICO_FAILING_TEST, getMockEndpoint("mock:auto-test-route-ERROR-B-mico/error"));
-    	mocks.get(ERROR_B_MICO_FAILING_TEST).setExpectedCount(2);
+    	mocks.get(ERROR_B_MICO_FAILING_TEST).setExpectedCount(0);
     	
 
     	Assert.assertEquals(Status.OK.getStatusCode(),
