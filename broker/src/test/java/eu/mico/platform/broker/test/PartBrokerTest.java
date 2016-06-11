@@ -50,7 +50,8 @@ import static org.hamcrest.Matchers.hasProperty;
 public class PartBrokerTest extends BaseBrokerTest {
 
     private static Logger log = LoggerFactory.getLogger(PartBrokerTest.class);
-            
+
+
     @Test(timeout=10000)
     public void testSimpleAnalyse() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
 
@@ -59,8 +60,8 @@ public class PartBrokerTest extends BaseBrokerTest {
         setupMockAnalyser("A","C");
 
         QueueingConsumer consumer = new QueueingConsumer(channel);
-        channel.basicConsume(EventManager.QUEUE_PART_OUTPUT, true, consumer);
-
+	    channel.basicConsume(EventManager.QUEUE_PART_OUTPUT, true, consumer);
+	
         // create a item with a single part of type "A"; it should walk through the registered mock services and
         // eventually finish analysis; we simply wait until we receive an event on the output queue.
         PersistenceService svc = broker.getPersistenceService();
@@ -109,7 +110,8 @@ public class PartBrokerTest extends BaseBrokerTest {
         setupMockAnalyser("A","C");
 
         QueueingConsumer consumer = new QueueingConsumer(channel);
-        channel.basicConsume(EventManager.QUEUE_PART_OUTPUT, true, consumer);
+	    channel.basicConsume(EventManager.QUEUE_PART_OUTPUT, true, consumer);
+	
 
         // create a item with a single part of type "A"; it should walk through the registered mock services and
         // eventually finish analysis; we simply wait until we receive an event on the output queue.
@@ -130,9 +132,9 @@ public class PartBrokerTest extends BaseBrokerTest {
             partA.setSyntacticalType("A");
             
             
-            // TODO: check why the test fails when executing this 2 lines see PUBLISHING-139
-//            parts = ImmutableSet.copyOf(item.getParts());
-//            Assert.assertEquals("There should be one part with type:'A'",1, parts.size());
+
+            parts = ImmutableSet.copyOf(item.getParts());
+            Assert.assertEquals("There should be one part with type:'A'",1, parts.size());
             
             eventManager.injectItem(item);
 
@@ -143,6 +145,7 @@ public class PartBrokerTest extends BaseBrokerTest {
             ItemEvent event = ItemEvent.parseFrom(delivery.getBody());
 
             Assert.assertEquals(item.getURI().stringValue(), event.getItemUri());
+            item = svc.getItem(item.getURI());
 
             // each service should have added a part, so there are now four different parts
             parts = null;

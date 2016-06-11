@@ -23,19 +23,26 @@ import eu.mico.platform.broker.webservices.StatusWebService;
 import eu.mico.platform.broker.webservices.WorkflowManagementService;
 import eu.mico.platform.camel.MicoCamelContext;
 import eu.mico.platform.event.api.AnalysisResponse;
+import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Item;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Assume;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.rabbitmq.client.ConsumerCancelledException;
+import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.ShutdownSignalException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -78,6 +85,19 @@ public class StatusServiceTest extends BaseBrokerTest {
     	injService = new InjectionWebService(broker, eventManager, context, routes);
     	statusService = new StatusWebService(broker);
     
+	}
+	
+	@After
+	@Before
+	public void cleanupAMQPChannel() throws IOException, ShutdownSignalException, ConsumerCancelledException, InterruptedException{
+	    QueueingConsumer consumer = new QueueingConsumer(channel);
+	    channel.basicConsume(EventManager.QUEUE_PART_OUTPUT, true, consumer);
+	
+	    //consume pending requests, if any are present
+	    QueueingConsumer.Delivery delivery = consumer.nextDelivery(10);
+	    while(delivery != null){
+	     	delivery = consumer.nextDelivery(10);
+	    }
 	}
 
     @Test
