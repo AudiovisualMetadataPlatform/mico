@@ -982,7 +982,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
 
              Response r = injService.submitItem(item.getURI().stringValue(), null);
              
-             Thread.sleep(500);
+             Thread.sleep(1000);
              
              Assert.assertEquals("The response should have been [OK]", 
             		              Status.OK.getStatusCode(),r.getStatus());
@@ -1014,7 +1014,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
 
              Response r = injService.submitItem(item.getURI().stringValue(), null);
              
-             Thread.sleep(500);
+             Thread.sleep(1000);
              
              Assert.assertEquals("The response should have been [OK]", 
             		              Status.OK.getStatusCode(),r.getStatus());
@@ -1047,7 +1047,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
 
     		Response r = injService.submitItem(item.getURI().stringValue(), null);
 
-    		Thread.sleep(500);
+    		Thread.sleep(1000);
 
     		Assert.assertEquals("The response should have been [OK]", 
     				Status.OK.getStatusCode(),r.getStatus());
