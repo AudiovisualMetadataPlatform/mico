@@ -174,7 +174,7 @@ import java.util.Set;
 		String pipeline = "<route id='workflow-WORKFLOW_ID-pipeline-0'>" +
 					        "<from uri='direct:workflow-WORKFLOW_ID-pipeline-0'/>" + 
 					        "<pipeline>" +
-						      "<to uri='mico-comp:vbox1?serviceId="+s.getServiceID().stringValue()+
+						      "<to uri='mico-comp:vbox1?host=localhost&amp;serviceId="+s.getServiceID().stringValue()+
 						                               "&amp;extractorId="+s.getExtractorID()+
 						                               "&amp;extractorVersion="+s.getExtractorVersion()+
 						                               "&amp;modeId="+s.getExtractorModeID()+"'/>"+ "\n" +

@@ -14,8 +14,8 @@
   <route id='workflow-simple1-pipeline-0'>
     <from uri='direct:workflow-simple1-pipeline-0'/>
     <pipeline>
-      <to uri='mico-comp:vbox1?host=mico-platform&amp;extractorId=urn:org.example.services&amp;extractorVersion=1.0.0&amp;modeId=ABService'/>
-      <to uri='mico-comp:vbox1?host=mico-platform&amp;extractorId=urn:org.example.services&amp;extractorVersion=1.0.0&amp;modeId=BCService'/>
+      <to uri='mico-comp:vbox1?host=localhost&amp;extractorId=urn:org.example.services&amp;extractorVersion=1.0.0&amp;modeId=ABService'/>
+      <to uri='mico-comp:vbox1?host=localhost&amp;extractorId=urn:org.example.services&amp;extractorVersion=1.0.0&amp;modeId=BCService'/>
       <to uri="mock:result_simple1"/>
     </pipeline>
   </route>
@@ -37,20 +37,20 @@
   <route id='workflow-aggregateSimple-pipeline-0'>
     <from uri='direct:workflow-aggregateSimple-pipeline-0'/>
     <pipeline>
-      <to uri='mico-comp:vbox1?host=mico-platform&amp;extractorId=urn:org.example.services&amp;extractorVersion=1.0.0&amp;modeId=BCService'/>
+      <to uri='mico-comp:vbox1?host=localhost&amp;extractorId=urn:org.example.services&amp;extractorVersion=1.0.0&amp;modeId=BCService'/>
     </pipeline>
   </route>
   <route id='workflow-aggregateSimple-pipeline-3'>
     <from uri='direct:workflow-aggregateSimple-pipeline-3'/>
     <pipeline>
-      <to uri='mico-comp:vbox1?host=mico-platform&amp;extractorId=urn:org.example.services&amp;extractorVersion=1.0.0&amp;modeId=AB1Service'/>
+      <to uri='mico-comp:vbox1?host=localhost&amp;extractorId=urn:org.example.services&amp;extractorVersion=1.0.0&amp;modeId=AB1Service'/>
     </pipeline>
     <to uri='direct:workflow-aggregateSimple-aggregator-0'/>
   </route>
   <route id='workflow-aggregateSimple-pipeline-4'>
     <from uri='direct:workflow-aggregateSimple-pipeline-4'/>
     <pipeline>
-      <to uri='mico-comp:vbox1?host=mico-platform&amp;extractorId=urn:org.example.services&amp;extractorVersion=1.0.0&amp;modeId=AB2Service'/>
+      <to uri='mico-comp:vbox1?host=localhost&amp;extractorId=urn:org.example.services&amp;extractorVersion=1.0.0&amp;modeId=AB2Service'/>
     </pipeline>
     <to uri='direct:workflow-aggregateSimple-aggregator-0'/>
   </route>
