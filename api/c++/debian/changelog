@@ -1,3 +1,9 @@
+libmico-api (3.0.0) unstable; urgency=medium
+
+  * Switched to new event api
+
+ -- Christian Weigel <christian@micobox154>  Thu, 02 Jun 2016 16:44:02 +0200
+
 libmico-api (2.0.2) unstable; urgency=medium
 
   * fixed file access issue
