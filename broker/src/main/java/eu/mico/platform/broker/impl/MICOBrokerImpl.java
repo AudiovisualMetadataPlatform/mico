@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.rabbitmq.client.*;
 
+import eu.mico.platform.broker.api.ItemState;
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.exception.StateNotFoundException;
 import eu.mico.platform.broker.model.*;
@@ -199,6 +200,25 @@ public class MICOBrokerImpl implements MICOBroker {
     		return null;
     	}
     	return camelStates.get(job.getItemURI()).get(job.getWorkflowId().toString());
+    };
+    
+    @Override
+    //NOTE: this function is here *only* for the old GUI. Its use is discouraged
+    @Deprecated
+    public Map<String, ItemState> getItemStatesFromCamel() {
+    	
+    	// item to state map
+    	Map<String, ItemState> out = new HashMap<String, ItemState>();
+    	
+    	//with camel involved
+    	
+//    	
+//    	if(camelStates.get(job.getItemURI())==null){
+//    		return null;
+//    	}
+//    	return camelStates.get(job.getItemURI()).get(job.getWorkflowId().toString());
+    	
+    	return out;
     };
 
     @Override
@@ -446,7 +466,7 @@ public class MICOBrokerImpl implements MICOBroker {
                 {
 
                     log.info("- adding initial content item state ...");
-                    ItemState state = new ItemState(dependencies, item);
+                    BrokerV2ItemState state = new BrokerV2ItemState(dependencies, item);
                     states.put(partEvent.getItemUri(), state);
     
                     log.info("- setting up messaging for content item analysis ...");
@@ -460,7 +480,7 @@ public class MICOBrokerImpl implements MICOBroker {
                     t.start();
 
                 }else{ // something is wrong with the item, tell broker that we can not process it
-                    ItemState state = new ItemState(dependencies, item);
+                    ItemState state = new BrokerV2ItemState(dependencies, item);
                     states.put(partEvent.getItemUri(), state);
 
                 }
@@ -485,11 +505,11 @@ public class MICOBrokerImpl implements MICOBroker {
      */
     private class ItemManager extends DefaultConsumer implements Runnable {
         private Item item;
-        private ItemState state;
+        private BrokerV2ItemState state;
         private String queue;
         private String queueTag;
 
-        public ItemManager(Item item, ItemState state, Channel channel) throws IOException {
+        public ItemManager(Item item, BrokerV2ItemState state, Channel channel) throws IOException {
             super(channel);
             this.item = item;
             this.state = state;
