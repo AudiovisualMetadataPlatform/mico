@@ -13,6 +13,7 @@
  */
 package eu.mico.platform.broker.model;
 
+import eu.mico.platform.broker.api.ItemState;
 import eu.mico.platform.broker.exception.StateNotFoundException;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
@@ -29,9 +30,9 @@ import java.util.*;
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
-public class ItemState {
+public class BrokerV2ItemState implements ItemState{
 
-    private static Logger log = LoggerFactory.getLogger(ItemState.class);
+    private static Logger log = LoggerFactory.getLogger(BrokerV2ItemState.class);
 
     private Item    item;
     private Date    created;
@@ -42,7 +43,7 @@ public class ItemState {
 
     private ServiceGraph             graph;
 
-    public ItemState(ServiceGraph graph, Item item) {
+    public BrokerV2ItemState(ServiceGraph graph, Item item) {
         this.graph    = graph;
         this.item     = item;
         this.error    = null;
@@ -102,6 +103,7 @@ public class ItemState {
      * Return true in case all parts have reached a final states, i.e. a states with no further outgoing service transitions.
      * @return
      */
+    @Override
     public boolean isFinalState() {
         if(!progress.isEmpty()) {
             return false;
@@ -121,6 +123,7 @@ public class ItemState {
      * an empty set in case all states are final.
      * @return
      */
+    @Override
     public Set<Transition> getPossibleTransitions() {
         Set<Transition> result = new HashSet<>();
         for(Map.Entry<URI,TypeDescriptor> state : states.entrySet()) {
@@ -174,19 +177,23 @@ public class ItemState {
     }
 
 
+    @Override
     public Map<String, Transition> getProgress() {
         return progress;
     }
 
+    @Override
     public Map<URI, TypeDescriptor> getStates() {
         return states;
     }
 
+    @Override
     public Date getCreated() {
         return created;
     }
 
 
+    @Override
     public boolean hasError() {
         return error != null;
     }
@@ -201,6 +208,7 @@ public class ItemState {
         error.append(msg);
     }
     
+    @Override
     public String getError() {
         if (error != null){
             return error.toString();
