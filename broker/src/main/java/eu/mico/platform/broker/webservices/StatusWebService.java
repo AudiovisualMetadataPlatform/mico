@@ -149,6 +149,9 @@ public class StatusWebService {
             for(Map.Entry<String, ItemState> state : broker.getStates().entrySet()) {
                 result.add(wrapContentItemStatus(state.getKey(),state.getValue(),showParts));
             }
+            for(Map.Entry<String, ItemState> state : broker.getItemStatesFromCamel().entrySet()) {
+                result.add(wrapContentItemStatus(state.getKey(),state.getValue(),showParts));
+            }
             Collections.sort(result, new Comparator<Map<String,Object>>() {
                 @Override
                 public int compare(Map<String,Object> ci1, Map<String,Object> ci2) {
@@ -158,6 +161,8 @@ public class StatusWebService {
             });
         } else if(broker.getStates().containsKey(itemUri)) {
             result.add(wrapContentItemStatus(itemUri, broker.getStates().get(itemUri),showParts));
+        } else if(broker.getItemStatesFromCamel().containsKey(itemUri)) {
+            result.add(wrapContentItemStatus(itemUri, broker.getItemStatesFromCamel().get(itemUri),showParts));
         } else {
             throw new NotFoundException("item with uri " + itemUri + " not found in broker");
         }

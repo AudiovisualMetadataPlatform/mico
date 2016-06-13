@@ -37,5 +37,12 @@ public interface MICOBroker {
     
     void addMICOCamelJobStatus(MICOJob job,MICOJobStatus jobState);
 	MICOJobStatus getMICOCamelJobStatus(MICOJob job);
+	
+    /**
+     * This function is here *only* for handling requests by the old GUI. 
+     *
+     * @deprecated use {@link #getMICOCamelJobStatus(MICOJob job)} instead.  
+     */
+    @Deprecated
 	 Map<String, ItemState> getItemStatesFromCamel();
 }

@@ -16,6 +16,7 @@ package eu.mico.platform.broker.impl;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.rabbitmq.client.*;
 
@@ -24,6 +25,7 @@ import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.exception.StateNotFoundException;
 import eu.mico.platform.broker.model.*;
 import eu.mico.platform.broker.model.v2.BrokerV2ItemState;
+import eu.mico.platform.broker.model.v2.BrokerV3ItemState;
 import eu.mico.platform.broker.model.v2.ServiceDescriptor;
 import eu.mico.platform.broker.model.v2.ServiceGraph;
 import eu.mico.platform.broker.model.v2.Transition;
@@ -51,6 +53,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -208,20 +212,23 @@ public class MICOBrokerImpl implements MICOBroker {
     };
     
     @Override
-    //NOTE: this function is here *only* for the old GUI. Its use is discouraged
-    @Deprecated
     public Map<String, ItemState> getItemStatesFromCamel() {
     	
     	// item to state map
     	Map<String, ItemState> out = new HashMap<String, ItemState>();
     	
-    	//with camel involved
-    	
-//    	
-//    	if(camelStates.get(job.getItemURI())==null){
-//    		return null;
-//    	}
-//    	return camelStates.get(job.getItemURI()).get(job.getWorkflowId().toString());
+    	//add one state for the lastest job
+    	for(String itemURI : camelStates.keySet()){
+    		
+    		List <MICOJobStatus> itemStates = new ArrayList<MICOJobStatus>(camelStates.get(itemURI).values());
+    		Collections.sort(itemStates, new Comparator<MICOJobStatus>() {
+                @Override
+                public int compare(MICOJobStatus s1, MICOJobStatus s2) {
+                    return (s1.getCreated()).compareTo(s2.getCreated());
+                }
+            });
+    		out.put(itemURI, new BrokerV3ItemState(itemStates.get(0)));
+    	}
     	
     	return out;
     };

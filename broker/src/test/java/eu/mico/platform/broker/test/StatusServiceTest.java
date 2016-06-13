@@ -101,7 +101,6 @@ public class StatusServiceTest extends BaseBrokerTest {
 	}
 
     @Test
-    @Ignore
     public void testStatusWithNewdInjection() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
        
     	Assume.assumeTrue(isRegistrationServiceAvailable);
@@ -125,7 +124,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     	Map<String,Integer> routeIds = new HashMap<String,Integer>();
     	routeIds.put(abFastRoute, wManager.addWorkflow(USER,  "abFastRoute" ,abFastRoute , "[]","[]"));
     	routeIds.put(cdSlowRoute, wManager.addWorkflow(USER,  "cdSlowRoute" ,cdSlowRoute , "[]","[]"));
-    	routeIds.put(efWrongRoute, wManager.addWorkflow(USER, "efWrongRoute" ,cdSlowRoute , "[]","[]"));
+    	routeIds.put(efWrongRoute, wManager.addWorkflow(USER, "efWrongRoute" ,efWrongRoute , "[]","[]"));
     	
 
     	List<Item> items = new ArrayList<Item>();
