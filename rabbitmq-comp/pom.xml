@@ -98,19 +98,6 @@
 			</exclusion>
 		</exclusions>
 	</dependency>
-	<dependency>
-      <groupId>eu.mico-project.platform</groupId>
-      <artifactId>event</artifactId>
-      <version>${project.version}</version>
-      <type>test-jar</type>
-		<scope>test</scope>
-		<exclusions>
-			<exclusion>
-				<groupId>org.slf4j</groupId>
-				<artifactId>log4j-over-slf4j</artifactId>
-			</exclusion>
-		</exclusions>
-    </dependency>
 	
 	
   </dependencies>
