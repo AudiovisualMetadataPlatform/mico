@@ -15,8 +15,8 @@ package eu.mico.platform.broker.webservices;
 
 import eu.mico.platform.broker.api.ItemState;
 import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.model.ServiceDescriptor;
-import eu.mico.platform.broker.model.Transition;
+import eu.mico.platform.broker.model.v2.ServiceDescriptor;
+import eu.mico.platform.broker.model.v2.Transition;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Part;

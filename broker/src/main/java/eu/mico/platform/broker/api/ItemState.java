@@ -6,8 +6,8 @@ import java.util.Set;
 
 import org.openrdf.model.URI;
 
-import eu.mico.platform.broker.model.Transition;
-import eu.mico.platform.broker.model.TypeDescriptor;
+import eu.mico.platform.broker.model.v2.Transition;
+import eu.mico.platform.broker.model.v2.TypeDescriptor;
 
 public interface ItemState {
 

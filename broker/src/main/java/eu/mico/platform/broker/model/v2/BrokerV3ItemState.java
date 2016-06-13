@@ -1,4 +1,4 @@
-package eu.mico.platform.broker.model;
+package eu.mico.platform.broker.model.v2;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -9,6 +9,7 @@ import java.util.Set;
 import org.openrdf.model.URI;
 
 import eu.mico.platform.broker.api.ItemState;
+import eu.mico.platform.broker.model.MICOJobStatus;
 
 public class BrokerV3ItemState implements ItemState{
 	

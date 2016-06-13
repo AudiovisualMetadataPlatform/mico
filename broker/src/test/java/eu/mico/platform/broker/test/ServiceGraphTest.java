@@ -14,9 +14,10 @@
 package eu.mico.platform.broker.test;
 
 import eu.mico.platform.broker.exception.StateNotFoundException;
-import eu.mico.platform.broker.model.ServiceDescriptor;
-import eu.mico.platform.broker.model.ServiceGraph;
-import eu.mico.platform.broker.model.TypeDescriptor;
+import eu.mico.platform.broker.model.v2.ServiceDescriptor;
+import eu.mico.platform.broker.model.v2.ServiceGraph;
+import eu.mico.platform.broker.model.v2.TypeDescriptor;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.openrdf.model.impl.URIImpl;

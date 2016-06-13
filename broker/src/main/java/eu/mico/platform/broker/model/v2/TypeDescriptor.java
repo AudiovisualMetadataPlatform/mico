@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.mico.platform.broker.model;
+package eu.mico.platform.broker.model.v2;
 
 /**
  * A symbolic representation of the type of input required and output produced by a service. Currently just uses

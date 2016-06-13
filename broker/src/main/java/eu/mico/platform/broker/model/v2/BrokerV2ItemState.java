@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package eu.mico.platform.broker.model;
+package eu.mico.platform.broker.model.v2;
 
 import eu.mico.platform.broker.api.ItemState;
 import eu.mico.platform.broker.exception.StateNotFoundException;
