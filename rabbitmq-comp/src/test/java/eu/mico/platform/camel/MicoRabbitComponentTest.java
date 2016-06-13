@@ -228,29 +228,29 @@ public class MicoRabbitComponentTest extends TestBase {
                 loadXmlSampleRoutes();
                 
                 from("direct:a").pipeline()
-                        .to("mico-comp://foo1?extractorId=A-B-queue")
-                        .to("mico-comp://foo2?extractorId=B-text/plain-queue")
+                        .to("mico-comp://foo1?host=localhost&extractorId=A-B-queue")
+                        .to("mico-comp://foo2?host=localhost&extractorId=B-text/plain-queue")
                         .to("mock:result");
 
                 from("direct:image")
                         .pipeline()
-                        .to("mico-comp:vbox1?extractorId=ocr-queue-png")
-                        .to("mico-comp:vbox2?extractorId=wordcount")
+                        .to("mico-comp:vbox1?host=localhost&extractorId=ocr-queue-png")
+                        .to("mico-comp:vbox2?host=localhost&extractorId=wordcount")
                         .to("mock:result_image");
             
                 from("direct:text")
                 .pipeline()
-                .to("mico-comp:vbox2?extractorId=wordcount")
+                .to("mico-comp:vbox2?host=localhost&extractorId=wordcount")
                 .to("mock:result_text");
 
                 from("direct:text_html")
                 .pipeline()
-                .to("mico-comp:vbox2?extractorId=microformats")
+                .to("mico-comp:vbox2?host=localhost&extractorId=microformats")
                 .to("mock:result_text_html");
                 
                 from("direct:error")
                 .pipeline()
-                .to("mico-comp:ebox1?extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=ERROR-ERROR-queue")
+                .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=ERROR-ERROR-queue")
                 .to("mock:error");
 
             }

@@ -9,20 +9,20 @@
   <route id='workflow-aggregateSimple-pipeline-0'>
     <from uri='direct:workflow-aggregateSimple-pipeline-0'/>
     <pipeline>
-      <to uri='mico-comp:vbox1?serviceId=B-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=B-C-queue'/>
+      <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=B-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=B-C-queue'/>
     </pipeline>
   </route>
   <route id='workflow-aggregateSimple-pipeline-3'>
     <from uri='direct:workflow-aggregateSimple-pipeline-3'/>
     <pipeline>
-      <to uri='mico-comp:vbox1?serviceId=A-B1-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=A-B1'/>
+      <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=A-B1-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=A-B1'/>
     </pipeline>
     <to uri='direct:workflow-aggregateSimple-aggregator-0'/>
   </route>
   <route id='workflow-aggregateSimple-pipeline-4'>
     <from uri='direct:workflow-aggregateSimple-pipeline-4'/>
     <pipeline>
-      <to uri='mico-comp:vbox1?serviceId=A-B2-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=A-B2'/>
+      <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=A-B2-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=A-B2'/>
     </pipeline>
     <to uri='direct:workflow-aggregateSimple-aggregator-0'/>
   </route>

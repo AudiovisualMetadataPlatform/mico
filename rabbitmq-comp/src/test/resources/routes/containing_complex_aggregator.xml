@@ -10,7 +10,7 @@
   <route id='workflow-aggregateComplex-pipeline-0'>
     <from uri='direct:workflow-aggregateComplex-pipeline-0'/>
     <pipeline>
-      <to uri='mico-comp:vbox1?serviceId=AB-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=AB-C-queue'/>
+      <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=AB-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=AB-C-queue'/>
     </pipeline>
   </route>
   <route id='workflow-aggregateComplex-aggregator-0'>

@@ -15,15 +15,15 @@
   <route id='workflow-simpleMulticast-pipeline-2'>
     <from uri='direct:workflow-simpleMulticast-pipeline-2'/>
     <pipeline>
-      <to uri='mico-comp:vbox1?serviceId=C2-F-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=C2-F-queue'/>
+      <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=C2-F-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=C2-F-queue'/>
       <to uri="mock:result_multicast_1"/>
     </pipeline>
   </route>
   <route id='workflow-simpleMulticast-pipeline-3'>
     <from uri='direct:workflow-simpleMulticast-pipeline-3'/>
     <pipeline>
-      <to uri='mico-comp:vbox1?serviceId=C1-D-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=C1-D-queue'/>
-      <to uri='mico-comp:vbox1?serviceId=D-E-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=D-E-queue'/>
+      <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=C1-D-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=C1-D-queue'/>
+      <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=D-E-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=D-E-queue'/>
       <to uri="mock:result_multicast_2"/>
     </pipeline>
   </route>
