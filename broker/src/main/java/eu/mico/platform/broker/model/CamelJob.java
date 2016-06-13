@@ -11,6 +11,8 @@ public class CamelJob extends Thread implements Runnable{
 			       partURI = null,
 			       directURI = null;
 	private MicoCamelContext camelContext;
+	private String errorMessage;
+	
 	
 	public CamelJob(String itemURI, String directURI, MicoCamelContext camelContext){
 		this(itemURI,null,directURI,camelContext);
@@ -36,11 +38,16 @@ public class CamelJob extends Thread implements Runnable{
 		}
 		catch(MICOCamelAnalysisException e){
 			hasError=true;
+			errorMessage = e.getMessage();
 		}		
 	}
 
 	public boolean hasError() {
 		return hasError;
+	}
+	
+	public String getErrorMessage() {
+		return errorMessage;
 	}
 
 }
