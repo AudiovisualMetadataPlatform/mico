@@ -57,7 +57,7 @@ public class ServiceDescriptor {
     }
 
     public ServiceDescriptor(Event.RegistrationEvent e) {
-        this.uri = new URIImpl(e.getExtractorId()+"-"+getExtractorVersion()+"-"+getExtractorModeId());
+        this.uri = new URIImpl("http://www.mico-project.org/services/"+e.getExtractorId()+"-"+e.getExtractorVersion()+"-"+e.getExtractorModeId());
         this.queueName = e.getQueueName();
         registrationTime = new Date();
         this.provides = e.getProvides();
