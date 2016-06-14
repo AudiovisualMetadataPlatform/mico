@@ -199,6 +199,7 @@ public class MICOBrokerImpl implements MICOBroker {
 			log.warn("CRITICAL: replacing existing old job status");
 			log.warn("CRITICAL: new status refer to item {} processed with route {}",job.getItemURI(),job.getWorkflowId());
 		}
+		camelStates.get(job.getItemURI()).remove(job.getWorkflowId().toString());
 		camelStates.get(job.getItemURI()).put(job.getWorkflowId().toString(),jobState);
     }
     
