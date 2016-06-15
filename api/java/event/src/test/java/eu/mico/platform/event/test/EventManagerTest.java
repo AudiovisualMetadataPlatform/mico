@@ -755,13 +755,14 @@ public class EventManagerTest extends BaseCommunicationTest {
         private int called = 0;
 
         public AnalysisServiceMock(String queueName, String requires, String provides) {
-            this.queueName = queueName;
+            
             this.provides = provides;
             this.requires = requires;
             this.serviceId =  new URIImpl("http://example.org/services/"+queueName);
-            this.extractorId = "MockService";
+            this.extractorId = queueName;
             this.extractorModeId = "Mode-"+requires+"-"+provides;
             this.extractorVersion = "Version";
+            this.queueName = this.extractorId+"-"+this.extractorVersion+"-"+this.extractorModeId;
         }
 
         @Override

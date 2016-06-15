@@ -56,7 +56,7 @@ public class DummyExtractor implements AnalysisService {
 	}
 
     public DummyExtractor(String source, String target) {
-        this(source, target, source+"-"+target+"-queue", "0.0.0", "");
+        this(source, target, StringUtils.capitalize(source)+"-"+StringUtils.capitalize(target), "0.0.0", "queue");
     }
 	public DummyExtractor(String source, String target, String extractorID, String version, String mode) {
         this.source = source;
@@ -88,17 +88,17 @@ public class DummyExtractor implements AnalysisService {
     
 	@Override
 	public String getExtractorID() {
-		return "Mock";
+		return extractorId;
 	}
 
 	@Override
 	public String getExtractorModeID() {
-		return "Mode";
+		return mode;
 	}
 
 	@Override
 	public String getExtractorVersion() {
-		return "0.0.0";
+		return version;
 	}
 
     @Override
