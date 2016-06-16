@@ -97,7 +97,7 @@ namespace mico {
             *
             * @return a string identifying the queue name this service wants to use
             */
-            virtual const std::string& getQueueName() const final { return extractorID + "-" + extractorVersion + "-" + extractorModeID; }
+            virtual const std::string getQueueName() const final { return extractorID + "-" + extractorVersion + "-" + extractorModeID; }
 
 
             /**
