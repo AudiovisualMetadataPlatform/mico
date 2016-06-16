@@ -187,9 +187,7 @@ public class MICOCamelRoute {
     				}
     				else if (token.startsWith(EXTRACTOR_MODE_ID_PREFIX)){
     					modeId=token.substring(EXTRACTOR_MODE_ID_PREFIX.length());
-    					if(modeId.contains("'/>")){
-    						modeId=modeId.substring(0,modeId.length()-3);
-    					}
+    					modeId=modeId.split("'")[0];
     				}
     				else if(token.startsWith(EXTRACTOR_VERSION_PREFIX)){
     					version=token.substring(EXTRACTOR_VERSION_PREFIX.length());
