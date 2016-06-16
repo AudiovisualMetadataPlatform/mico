@@ -165,7 +165,7 @@ public class DummyExtractor implements AnalysisService {
             os.close();
             log.info("new contentpart added: {}", part.getURI());
 
-            resp.sendFinish(item);
+            resp.sendNew(item,part.getURI());
             setCalled(true);
         } catch (RepositoryException e) {
             throw new AnalysisException("could not access triple store");

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.directory.api.util.DummySSLSocketFactory;
 import org.apache.marmotta.platform.core.test.base.JettyMarmotta;
 import org.apache.marmotta.platform.sparql.webservices.SparqlWebService;
 import org.openrdf.model.URI;
@@ -27,6 +28,7 @@ import com.rabbitmq.client.Envelope;
 
 import de.fraunhofer.idmt.mico.DummyExtractor;
 import de.fraunhofer.idmt.mico.DummyFailingExtractor;
+import de.fraunhofer.idmt.mico.DummyNoPartExtractor;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
@@ -76,6 +78,12 @@ public class MicoCamel {
     protected static AnalysisService extr_d = new DummyExtractor("D", "E","mico-extractor-test","1.0.0","D-E-queue");
     protected static AnalysisService extr_e = new DummyExtractor("C2", "F","mico-extractor-test","1.0.0","C2-F-queue");
     protected static AnalysisService extr_error = new DummyFailingExtractor("ERROR", "ERROR","mico-extractor-test","1.0.0","ERROR-ERROR-queue");
+    
+    protected static AnalysisService extr_stop = new DummyNoPartExtractor("STOP", "STOP","mico-extractor-test","1.0.0","STOP-STOP-queue");
+    protected static AnalysisService extr_f12 = new DummyExtractor("FINISH1", "FINISH2","mico-extractor-test","1.0.0","FINISH1-FINISH2-queue");
+    protected static AnalysisService extr_f23 = new DummyExtractor("FINISH2", "FINISH3","mico-extractor-test","1.0.0","FINISH2-FINISH3-queue");
+    protected static AnalysisService extr_f34 = new DummyExtractor("FINISH3", "FINISH4","mico-extractor-test","1.0.0","FINISH3-FINISH4-queue");
+    
 
     /**
      * setup test environment including mico eventManager and some registered
@@ -152,6 +160,11 @@ public class MicoCamel {
         eventManager.registerService(extr_d);
         eventManager.registerService(extr_e);
         eventManager.registerService(extr_error);
+        
+        eventManager.registerService(extr_stop);
+        eventManager.registerService(extr_f12);
+        eventManager.registerService(extr_f23);
+        eventManager.registerService(extr_f34); 
 
         log.info("event manager initialized: {}", eventManager.getPersistenceService().getStoragePrefix());
     }

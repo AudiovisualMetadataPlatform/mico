@@ -88,6 +88,28 @@ public class MicoRabbitComponentTest extends TestBase {
         }
     	assertMockEndpointsSatisfied();
     }
+    
+    @Test(timeout=20000)
+    public void testStopMessageFromNoNewPartExtractor() throws Exception {
+            	
+    	MockEndpoint mockStop = getMockEndpoint("mock:stop");
+        mockStop.expectedMinimumMessageCount(0);
+        
+        MockEndpoint mockNoError = getMockEndpoint("mock:no-error");
+        mockNoError.expectedMinimumMessageCount(0);
+        
+        MockEndpoint mockNoStop = getMockEndpoint("mock:no-stop");
+        mockNoStop.expectedMinimumMessageCount(1);
+    	
+    	try{
+        	template.send("direct:stop-propagation",createExchange());
+        }
+        catch(Exception e){
+        	e.printStackTrace();
+        	Assert.fail("Unexpected exception");
+        }
+    	assertMockEndpointsSatisfied();
+    }
 
     /**
      * @throws Exception
@@ -252,6 +274,24 @@ public class MicoRabbitComponentTest extends TestBase {
                 .pipeline()
                 .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=ERROR-ERROR-queue")
                 .to("mock:error");
+                
+                from("direct:stop-propagation")
+                .multicast()
+                  .to("direct:pipeline-to-stop", "direct:pipeline-to-finish");
+                  
+                from("direct:pipeline-to-stop")
+                .pipeline()
+                .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=STOP-STOP-queue")
+                .to("mock:no-error")
+                .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=ERROR-ERROR-queue")
+                .to("mock:no-error");
+                
+                from("direct:pipeline-to-finish")
+                .pipeline()
+                .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=FINISH1-FINISH2-queue")
+                .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=FINISH2-FINISH3-queue")
+                .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=FINISH3-FINISH4-queue")
+                .to("mock:no-stop");
 
             }
 
