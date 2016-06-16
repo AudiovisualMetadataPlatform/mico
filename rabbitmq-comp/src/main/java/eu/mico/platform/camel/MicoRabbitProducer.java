@@ -32,7 +32,6 @@ import eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry;
  */
 public class MicoRabbitProducer extends DefaultProducer {
     public static final String KEY_MICO_ITEM = "mico_item";
-    public static final String KEY_MICO_PART = "mico_part";
 
     private static final Logger LOG = LoggerFactory.getLogger(MicoRabbitProducer.class);
     private MicoRabbitEndpoint endpoint;
@@ -64,30 +63,47 @@ public class MicoRabbitProducer extends DefaultProducer {
 
     @Override
     public void process(Exchange exchange) throws Exception {
+    	
+    	/**
+    	 * NOTE: 
+    	 * - exchange.getIn contains inside its body an AnalysisRequest
+    	 * - The AnalysisRequest is build as such:
+    	 * 
+    	 *  Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.newBuilder()
+         *      .setItemUri(item)    //uri of the item, matches the header KEY_MICO_ITEM
+         *      .addPartUri(part1)   //...
+         *      .addPartUri(part2)	 //i-th part the old service produced (to be analyzed)
+         *      .addPartUri(part3)   //
+         *      .setServiceId(queueId).build();    //queueId of the old service (to be overridden)
+    	 * 
+    	 */
+    	
         LOG.info("P R O D U C E analyze event for {} and put it to msg body", queueId);
-        AnalysisRequest event;
-        Message inItem = exchange.getIn();
-        String item = inItem.getHeader(KEY_MICO_ITEM, String.class);
-        String part = inItem.getHeader(KEY_MICO_PART, String.class);
+        
+        Message inMessage = exchange.getIn();
+        
+        AnalysisRequest inEvent=AnalysisRequest.parseFrom(inMessage.getBody(byte[].class));
+        String headerItemURI = inMessage.getHeader(KEY_MICO_ITEM, String.class);
+        
         try {
-            if (item == null){
+            if (headerItemURI == null){
                 throw new Exception("no item found in header");
             }
-            if (part == null) {
-                log.debug("process item without part");
-                part = item;
+            if ((headerItemURI.contentEquals(inEvent.getItemUri())) == false ){
+                throw new Exception("the input event for the current exchange refers to an item different than the one declared");
             }
-            event = generateRequest(item, part);
+            inEvent = generateInputRequest(inEvent);
         } catch (Exception e) {
-            log.error("unable to extract content item and part uri from message: {}", e.getMessage());
+            log.error("unable to extract content item and part lists from camel exchange: {}", e.getMessage());
             return;
         }
-        inItem.setBody(event);
+        inMessage.setBody(inEvent.toByteArray());
+        
         // create a new channel for the content item
         // so it runs isolated from the other items
         Channel channel = endpoint.getConnection().createChannel();
 
-        AnalyseManager manager = new AnalyseManager(exchange, event, channel);
+        AnalyseManager manager = new AnalyseManager(exchange, inEvent, channel);
         manager.sendEvent();
         if(exchange.getPattern().equals(ExchangePattern.InOut)||true){
             while (!manager.hasFinished()) {
@@ -98,20 +114,48 @@ public class MicoRabbitProducer extends DefaultProducer {
                     queueId.wait();
                 }
             }
-            // save new part in header to tell next extractor to process that part
-            inItem.setHeader(KEY_MICO_PART, manager.getNewObjectUri());
+            
+            //After you're done, produce an outputMessage 
+            Message outMessage = exchange.getOut();
+            
+            //1. containing the correct headers
+            outMessage.getHeaders().putAll(exchange.getIn().getHeaders());
+
+            //2. if any new part was produced, containing a template AnalysisRequest for the next producer
+            String newObjectURI=manager.getNewObjectUri();
+            if(newObjectURI != null){
+            	outMessage.setBody(generateTemplateRequest(inEvent.getItemUri(), newObjectURI).toByteArray());
+            }
+            //3 else, stop the message
+            else{
+            	LOG.warn("No new part produced by service {}, stopping the current message routing.",queueId);
+            	outMessage.setBody(inMessage.getBody());
+            	exchange.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
+            }
+            
         }
-        LOG.info("extraction finished - {}",item);
+        LOG.info("extraction finished - {}",headerItemURI);
     }
 
 
-    private AnalysisRequest generateRequest(String item, String part) {
-        LOG.info("generate event for {} {}", queueId, part);
+    private AnalysisRequest generateTemplateRequest(String item, String part) {
+        LOG.info("generate template of an AnalysisRequest for item {} on part {}", item, part);
         Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.newBuilder()
                 .setItemUri(item)
                 .addPartUri(part)
-                .addAllParams(getParamEntries())
                 .setServiceId(queueId).build();
+    	
+    	return analysisEvent;
+    }
+    
+    private AnalysisRequest generateInputRequest(AnalysisRequest oldRequest) {
+        LOG.info("generate AnalysisRequest for service {} on item {} ( input resource(s): {} )", queueId, oldRequest.getItemUri(), oldRequest.getPartUriList());
+        Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.newBuilder()
+                .setItemUri(oldRequest.getItemUri())
+                .addAllPartUri(oldRequest.getPartUriList())
+                .addAllParams(getParamEntries())
+                .setServiceId(queueId)
+                .build();
     	
     	return analysisEvent;
     }

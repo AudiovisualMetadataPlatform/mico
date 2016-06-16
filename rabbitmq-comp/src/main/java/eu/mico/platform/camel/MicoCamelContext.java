@@ -132,7 +132,7 @@ public class MicoCamelContext {
      * @param itemUri
      */
     public void processItem(String directUri, String itemUri) {
-        Exchange exc = createExchange(itemUri,null,directUri);
+        Exchange exc = createExchange(itemUri,itemUri,directUri);
 
         template.send(directUri,exc);
         Boolean failed  = Boolean.parseBoolean( (String) exc.getProperty(Exchange.EXCEPTION_CAUGHT) );
