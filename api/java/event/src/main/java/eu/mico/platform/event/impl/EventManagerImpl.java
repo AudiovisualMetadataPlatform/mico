@@ -214,6 +214,9 @@ public class EventManagerImpl implements EventManager {
 
         // first declare a new input queue for this service using the service queue name, and register a callback
         String queueName = service.getQueueName() != null ? service.getQueueName() : UUID.randomUUID().toString();
+        
+        // then override its value for compatibility with camel //TODO: remove getQueue() from the api
+        queueName = service.getExtractorID() + "-" + service.getExtractorVersion() + "-" + service.getExtractorModeID();
 
         // then create a new analysis consumer (auto-registered to its queue name)
         services.put(service, new AnalysisConsumer(service, queueName));
@@ -251,6 +254,9 @@ public class EventManagerImpl implements EventManager {
 
         // first declare a new input queue for this service using the service queue name, and register a callback
         String queueName = service.getQueueName() != null ? service.getQueueName() : UUID.randomUUID().toString();
+        
+        // then override its value for compatibility with camel //TODO: remove getQueue() from the api
+        queueName = service.getExtractorID() + "-" + service.getExtractorVersion() + "-" + service.getExtractorModeID();
 
         // then create a new analysis consumer (auto-registered to its queue name)
         services.put(service, new AnalysisConsumer(service, queueName));
@@ -381,17 +387,25 @@ public class EventManagerImpl implements EventManager {
                     .Builder()
                     .correlationId(properties.getCorrelationId())
                     .build();
+            
 
 
             for (Map.Entry<AnalysisService, AnalysisConsumer> svc : services.entrySet()) {
                 log.info("- discover service {} ...", svc.getKey().getServiceID());
+                
+                //Override the queue declared by the service
+                String queueName = svc.getKey().getExtractorID() + "-" +
+                				   svc.getKey().getExtractorVersion() + "-" +
+                		           svc.getKey().getExtractorModeID();
+
+                
                 Event.RegistrationEvent registrationEvent =
                         Event.RegistrationEvent.newBuilder()
                                 .setServiceId(svc.getKey().getServiceID().stringValue())
                                 .setExtractorId(svc.getKey().getExtractorID())
                                 .setExtractorModeId(svc.getKey().getExtractorModeID())
                                 .setExtractorVersion(svc.getKey().getExtractorVersion())
-                                .setQueueName(svc.getValue().getQueueName())
+                                .setQueueName(queueName)
                                 .setProvides(svc.getKey().getProvides())
                                 .setRequires(svc.getKey().getRequires()).build();
 
