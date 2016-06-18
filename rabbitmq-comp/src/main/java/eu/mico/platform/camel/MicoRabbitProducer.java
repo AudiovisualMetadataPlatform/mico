@@ -32,6 +32,7 @@ import eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry;
  */
 public class MicoRabbitProducer extends DefaultProducer {
     public static final String KEY_MICO_ITEM = "mico_item";
+    public static final String KEY_STARTING_DIRECT = "mico_direct";
 
     private static final Logger LOG = LoggerFactory.getLogger(MicoRabbitProducer.class);
     private MicoRabbitEndpoint endpoint;
@@ -106,31 +107,38 @@ public class MicoRabbitProducer extends DefaultProducer {
         AnalyseManager manager = new AnalyseManager(exchange, inEvent, channel);
         manager.sendEvent();
         if(exchange.getPattern().equals(ExchangePattern.InOut)||true){
-            while (!manager.hasFinished()) {
+            while (!manager.hasFinished() && !manager.hasError()) {
                 LOG.debug("..waiting for response..");
 
                 synchronized (queueId){
-                    //Thread.sleep(300);
                     queueId.wait();
                 }
             }
             
-            //After you're done, produce an outputMessage 
-            Message outMessage = exchange.getOut();
-            
-            //1. containing the correct headers
-            outMessage.getHeaders().putAll(exchange.getIn().getHeaders());
-
-            //2. if any new part was produced, containing a template AnalysisRequest for the next producer
-            String newObjectURI=manager.getNewObjectUri();
-            if(newObjectURI != null){
-            	outMessage.setBody(generateTemplateRequest(inEvent.getItemUri(), newObjectURI).toByteArray());
+            if(!manager.hasError()){
+            	//After you're done, produce an outputMessage 
+	            Message outMessage = exchange.getIn();
+	            
+	            //1. containing the correct headers
+	            outMessage.getHeaders().putAll(exchange.getIn().getHeaders());
+	
+	            //2. if any new part was produced, containing a template AnalysisRequest for the next producer
+	            String newObjectURI=manager.getNewObjectUri();
+	            if(newObjectURI != null){
+	            	outMessage.setBody(generateTemplateRequest(inEvent.getItemUri(), newObjectURI).toByteArray());
+	            }
+	            //3 else, stop the message
+	            else{
+	            	LOG.warn("No new part produced by service {}, stopping the current message routing.",queueId);
+	            	outMessage.setBody(inMessage.getBody());
+	            	exchange.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
+	            }
             }
-            //3 else, stop the message
             else{
-            	LOG.warn("No new part produced by service {}, stopping the current message routing.",queueId);
-            	outMessage.setBody(inMessage.getBody());
-            	exchange.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
+            	exchange.getIn().setHeader("error_class",exchange.getException());
+            	exchange.getIn().setBody(exchange.getException());
+//            	exchange.getOut().setBody(exchange.getException());
+            	throw exchange.getException();
             }
             
         }
@@ -220,11 +228,29 @@ public class MicoRabbitProducer extends DefaultProducer {
             case ERROR:
                 log.warn("Received an error response {}, generating a new MICOCamelAnalysisException with what message : {}",response.getError().getMessage(), response.getError()
                         .getDescription());
-                exchange.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE); 
-                exchange.setProperty(Exchange.EXCEPTION_CAUGHT, Boolean.TRUE.toString());
-                exchange.setProperty(Exchange.EXCEPTION_HANDLED, response.getError().getMessage() );
-                exchange.setProperty(Exchange.DUPLICATE_MESSAGE, response.getError().getDescription() );
+
+
                 hasError=true;
+                finished = true;
+                exchange.setProperty(Exchange.DUPLICATE_MESSAGE, new MICOCamelAnalysisException(queueId,
+	                       response.getError().getMessage(), 
+	                       response.getError().getDescription()));
+                exchange.setException( 
+                		new MICOCamelAnalysisException(queueId,
+                				                       response.getError().getMessage(), 
+                				                       response.getError().getDescription()));
+                exchange.getIn().setBody(new MICOCamelAnalysisException(queueId,
+                				                       response.getError().getMessage(), 
+                				                       response.getError().getDescription()));
+                exchange.getOut().setBody(new MICOCamelAnalysisException(queueId,
+	                       response.getError().getMessage(), 
+	                       response.getError().getDescription()));
+                
+                getChannel().basicAck(envelope.getDeliveryTag(), false);
+                synchronized (queueId) {
+                    queueId.notify();
+                }
+                break;
             case NEW_PART:
                 newObjectUri = response.getNew().getPartUri();
                 log.debug(
@@ -232,10 +258,14 @@ public class MicoRabbitProducer extends DefaultProducer {
                         response.getNew().getServiceId(), response.getNew()
                                 .getItemUri(), newObjectUri);
                 getChannel().basicAck(envelope.getDeliveryTag(), false);
-
+                synchronized (queueId) {
+                    queueId.notify();
+                }
+                break;
             case FINISH:
-                // analyze process finished, notify waiting threads to continue
+                // analyze process finished correctly, notify waiting threads to continue
                 // camel route
+            	getChannel().basicAck(envelope.getDeliveryTag(), false);
                 finished = true;
                 synchronized (queueId) {
                     queueId.notify();

@@ -14,23 +14,26 @@
 package eu.mico.platform.camel;
 
 import static eu.mico.platform.camel.MicoRabbitProducer.KEY_MICO_ITEM;
+import static eu.mico.platform.camel.MicoRabbitProducer.KEY_STARTING_DIRECT;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
+import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.Route;
-import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
 import org.apache.camel.language.Bean;
+import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.RoutesDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +54,8 @@ public class MicoCamelContext {
     public static ItemAggregationStrategy itemAggregatorStrategy = new ItemAggregationStrategy();
     
     private ProducerTemplate template;
+    
+    private static ConcurrentHashMap<String, Exception> injExceptions = new ConcurrentHashMap<String, Exception>();
 
     public void init(){
         setupCamelContext();
@@ -68,6 +73,7 @@ public class MicoCamelContext {
 
             context.setAutoStartup(true);
             context.start();
+            
             
             JndiRegistry registry = (JndiRegistry) (
                     (PropertyPlaceholderDelegateRegistry)context.getRegistry()).getRegistry();
@@ -91,7 +97,12 @@ public class MicoCamelContext {
     public void addRouteToContext(String xmlRoute) {
         try {
             RoutesDefinition routeDefs = getRoutesDefinition(xmlRoute);
-            context.addRouteDefinitions(routeDefs.getRoutes());
+            List<RouteDefinition> defs = routeDefs.getRoutes();
+            for(RouteDefinition d : defs){
+            	d.onException(MICOCamelAnalysisException.class).handled(true)
+          	     .process(exceptionProcessor).handled(true).stop();
+            }
+            context.addRouteDefinitions(defs);
         } catch (Exception e) {
             log.warn("Error adding camel route to context",e);
         }
@@ -107,8 +118,14 @@ public class MicoCamelContext {
     }
 
     public void loadRoutes(InputStream is) throws Exception {
-        RoutesDefinition routeDefs = context.loadRoutesDefinition(is);
-        context.addRouteDefinitions(routeDefs.getRoutes());
+    	RoutesDefinition routeDefs = context.loadRoutesDefinition(is);
+        List<RouteDefinition> defs = routeDefs.getRoutes();
+        for(RouteDefinition d : defs){
+        	d.onException(MICOCamelAnalysisException.class).handled(true)
+      	     .process(exceptionProcessor).handled(true).stop();
+        }
+
+        context.addRouteDefinitions(defs);
         context.startAllRoutes();
         context.setupRoutes(true);
         List<Route> routes = context.getRoutes();
@@ -117,13 +134,32 @@ public class MicoCamelContext {
             log.info(" - id: {} descr: {}", r.getId(), r.getDescription());
         }
     }
+    
+    private String getRouteExceptionId(Exchange exchange){
+    	return getRouteExceptionId((String) exchange.getIn().getHeader(KEY_MICO_ITEM), (String) exchange.getIn().getHeader(KEY_STARTING_DIRECT));
+    }
+    private String getRouteExceptionId(String itemUri, String directUri){
+    	return itemUri + "-" + directUri;
+    }
+    
+    private Processor exceptionProcessor = new Processor(){
+		public void process(Exchange exchange) throws Exception {
+			Exception e = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
+			log.error("Notifying exception",e);    			
+			String exc_id = getRouteExceptionId(exchange);
+			log.error("Storing with id {}",exc_id);   
+			injExceptions.put(exc_id, e);
+			log.error("cleaning the current exchange");
+			exchange.setException(null);
+		}
+	};
 
     private RoutesDefinition getRoutesDefinition(String xmlRoute) throws Exception {
-        ByteArrayInputStream stream = new ByteArrayInputStream(
-                xmlRoute.getBytes(StandardCharsets.UTF_8));
-        RoutesDefinition routeDefs = context
-                .loadRoutesDefinition(stream);
-        return routeDefs;
+    	ByteArrayInputStream stream = new ByteArrayInputStream(
+    			xmlRoute.getBytes(StandardCharsets.UTF_8));
+    	RoutesDefinition routeDefs = context
+    			.loadRoutesDefinition(stream);    	
+    	return routeDefs;
     }
         
     /**
@@ -132,13 +168,9 @@ public class MicoCamelContext {
      * @param itemUri
      */
     public void processItem(String directUri, String itemUri) {
-        Exchange exc = createExchange(itemUri,itemUri,directUri);
-
-        template.send(directUri,exc);
-        Boolean failed  = Boolean.parseBoolean( (String) exc.getProperty(Exchange.EXCEPTION_CAUGHT) );
-        if(failed){
-        	throw new MICOCamelAnalysisException((String) exc.getProperty(Exchange.EXCEPTION_HANDLED) , (String) exc.getProperty(Exchange.DUPLICATE_MESSAGE)  );
-        } 
+        Exchange inExc = createExchange(itemUri,itemUri,directUri);
+        Exchange outExc = template.send(directUri,inExc);
+        checkProcessingOutcome(itemUri, directUri);
      }
     
     /**
@@ -147,14 +179,31 @@ public class MicoCamelContext {
      * @param itemUri
      */
     public void processPart(String directUri, String itemUri, String partUri) {
-        Exchange exc = createExchange(itemUri,partUri,directUri);
-
-        template.send(directUri,exc);
-        Boolean failed  = Boolean.parseBoolean( (String) exc.getProperty(Exchange.EXCEPTION_CAUGHT) );
-        if(failed){
-        	throw new MICOCamelAnalysisException((String) exc.getProperty(Exchange.EXCEPTION_HANDLED) , (String) exc.getProperty(Exchange.DUPLICATE_MESSAGE)  );
-        } 
+        Exchange inExc = createExchange(itemUri,partUri,directUri);
+        Exchange outExc = template.send(directUri,inExc);
+        checkProcessingOutcome(itemUri, directUri);
     }
+    
+    private void checkProcessingOutcome(String itemUri, String directUri) throws MICOCamelAnalysisException{
+
+    	String excId= getRouteExceptionId(itemUri,directUri);
+    	Exception e = injExceptions.get(excId);
+    	if(e!=null){
+    		if(e instanceof MICOCamelAnalysisException){
+    			log.error("The current injection of the item {} failed on the extractor {}",
+    					itemUri, ((MICOCamelAnalysisException) e).getFailingExtractor());
+    			injExceptions.remove(excId);
+    			throw (MICOCamelAnalysisException) e;
+    		}
+    		log.error("The current injection failed for an unexpected error");
+    		MICOCamelAnalysisException eOut = new MICOCamelAnalysisException("Unknown source",e.getClass().getSimpleName(),e.getMessage());
+    		eOut.setStackTrace(e.getStackTrace());
+    		injExceptions.remove(excId);
+    		throw eOut;
+    	}
+
+    }
+    
 
     /**
      * create exchange containing item and part uri of sample/test content
@@ -171,6 +220,7 @@ public class MicoCamelContext {
         Exchange exchange = endpoint.createExchange();
         Message msg = exchange.getIn();
         msg.setHeader(KEY_MICO_ITEM, itemUri);
+        msg.setHeader(KEY_STARTING_DIRECT, directUri);
 
         AnalysisRequest event = AnalysisRequest.newBuilder()
                 .setItemUri(itemUri)
@@ -194,3 +244,4 @@ public class MicoCamelContext {
     }
 
 }
+
