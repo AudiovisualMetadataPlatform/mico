@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.JndiRegistry;
@@ -51,31 +52,61 @@ public class MicoRabbitComponentTest extends TestBase {
         assertMockEndpointsSatisfied();
     }
     
+
+
     @Test(timeout=20000)
     public void testErrorSignaling() throws Exception {
     	
     	Exchange exc = createExchange();
     	
         try{
-        	template.send("direct:error",exc);	
+        	exc = template.send("direct:error",exc);	
         }
-        catch(MICOCamelAnalysisException e){
-        	Assert.assertTrue(e.getErrorMessage().contentEquals("Mock error message"));
-        	Assert.assertTrue(e.getErrorDescription().contentEquals("Mock error description"));
+        catch(Exception e){
+        	Assert.fail("Unexpected exception");
+        }
+        exc.setException(camelException);
+        
+        Assert.assertTrue("The exchange should have failed",exc.getException()!=null);
+        Exception e = exc.getException();
+        Assert.assertTrue("The exchange should have failed with a MICOCamelAnalysisException",
+        				   e instanceof MICOCamelAnalysisException);
+        Assert.assertTrue(((MICOCamelAnalysisException)e).getErrorMessage().contentEquals("Mock error message"));
+    	Assert.assertTrue(((MICOCamelAnalysisException)e).getErrorDescription().contentEquals("Mock error description"));
+    	camelException=null;
+       
+    }
+    
+    public static Exception camelException=null;
+    
+    @Test(timeout=20000)
+    public void testErrorSignalingAfterAggregate() throws Exception {
+    	
+    	Exchange inExc = createExchange();
+    	Exchange outExc = null;
+    	
+        try{
+        	outExc = template.send("direct:complex-error",inExc);	
         }
         catch(Exception e){
         	Assert.fail("Unexpected exception");
         }
         
-        Assert.assertTrue(exc.getProperty(Exchange.EXCEPTION_CAUGHT, Boolean.class));
-        Assert.assertTrue(exc.getProperty(Exchange.EXCEPTION_HANDLED, String.class).contentEquals("Mock error message"));
-        Assert.assertTrue(exc.getProperty(Exchange.DUPLICATE_MESSAGE, String.class).contentEquals("Mock error description"));
+        outExc.setException(camelException);
+        
+        Assert.assertTrue("The exchange should have failed",outExc.getException()!=null);
+        Exception e = outExc.getException();
+        Assert.assertTrue("The exchange should have failed with a MICOCamelAnalysisException",
+        				   e instanceof MICOCamelAnalysisException);
+        Assert.assertTrue(((MICOCamelAnalysisException)e).getErrorMessage().contentEquals("Mock error message"));
+    	Assert.assertTrue(((MICOCamelAnalysisException)e).getErrorDescription().contentEquals("Mock error description"));
+    	camelException=null;       
     }
     
     @Test(timeout=20000)
     public void testRouteStopsOnAnalysisException() throws Exception {
         MockEndpoint mock = getMockEndpoint("mock:error");
-        mock.expectedMinimumMessageCount(0);
+        mock.expectedMessageCount(0);
     	
     	try{
         	template.send("direct:error",createExchange());
@@ -93,13 +124,13 @@ public class MicoRabbitComponentTest extends TestBase {
     public void testStopMessageFromNoNewPartExtractor() throws Exception {
             	
     	MockEndpoint mockStop = getMockEndpoint("mock:stop");
-        mockStop.expectedMinimumMessageCount(0);
+        mockStop.expectedMessageCount(0);
         
         MockEndpoint mockNoError = getMockEndpoint("mock:no-error");
-        mockNoError.expectedMinimumMessageCount(0);
+        mockNoError.expectedMessageCount(0);
         
         MockEndpoint mockNoStop = getMockEndpoint("mock:no-stop");
-        mockNoStop.expectedMinimumMessageCount(1);
+        mockNoStop.expectedMessageCount(1);
     	
     	try{
         	template.send("direct:stop-propagation",createExchange());
@@ -182,7 +213,6 @@ public class MicoRabbitComponentTest extends TestBase {
         assertMockEndpointsSatisfied();
     }
 
-    
     @Test(timeout=10000)
     public void testParallelFlowsRoute() throws Exception {
         MockEndpoint mock1 = getMockEndpoint("mock:result_parallel_2");
@@ -239,15 +269,26 @@ public class MicoRabbitComponentTest extends TestBase {
                 JndiRegistry registry = (JndiRegistry) (
                         (PropertyPlaceholderDelegateRegistry)context.getRegistry()).getRegistry();
 
-                if(registry.lookup("simpleAggregatorStrategy") == null)
-                //and here, it is bound to the registry
-                registry.bind("simpleAggregatorStrategy", aggregatorStrategy);
+                if(registry.lookup("simpleAggregatorStrategy") == null){
+	                //and here, it is bound to the registry
+	                registry.bind("simpleAggregatorStrategy", aggregatorStrategy);
+                }
                 
-                if(registry.lookup("itemAggregatorStrategy") == null)
-                //and here, it is bound to the registry
-                registry.bind("itemAggregatorStrategy", itemAggregatorStrategy);
+                if(registry.lookup("itemAggregatorStrategy") == null){
+	                //and here, it is bound to the registry
+	                registry.bind("itemAggregatorStrategy", itemAggregatorStrategy);
+                }
                         
                 loadXmlSampleRoutes();
+                
+                onException(MICOCamelAnalysisException.class)
+                  .process(new Processor(){
+                	    public void process(Exchange exchange) throws Exception {
+                	    	log.error("Notifying exception",exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class));
+                	    	camelException = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);;
+                	    	exchange.setException(null);
+                	   }
+                }).stop();
                 
                 from("direct:a").pipeline()
                         .to("mico-comp://foo1?host=localhost&extractorId=A-B-queue")
@@ -274,6 +315,21 @@ public class MicoRabbitComponentTest extends TestBase {
                 .pipeline()
                 .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=ERROR-ERROR-queue")
                 .to("mock:error");
+                
+                from("direct:complex-error")
+                .multicast()
+                .to("direct:pipeline-to-aggregate","direct:pipeline-to-aggregate");
+                
+                from("direct:pipeline-to-aggregate")
+                .pipeline()
+                .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=FINISH1-FINISH2-queue")
+                .to("direct:pipeline-aggregate-with-errors");
+                
+                from("direct:pipeline-aggregate-with-errors")
+                .pipeline()
+                .aggregate(header("mico_item"), new ItemAggregationStrategy()).completionSize(2)
+				  .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=ERROR-ERROR-queue");
+                
                 
                 from("direct:stop-propagation")
                 .multicast()
