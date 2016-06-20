@@ -7,9 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.Message;
+import org.apache.camel.Producer;
+import org.apache.camel.ProducerTemplate;
 import org.apache.camel.impl.DefaultProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +68,21 @@ public class MicoRabbitProducer extends DefaultProducer {
     @Override
     public void process(Exchange exchange) throws Exception {
     	
+    	//be smart and do nothing with exchanges produced by yourself
+    	if(exchange.getFromEndpoint() != null){
+    		
+    		Endpoint fromEndpoint =  exchange.getFromEndpoint();
+    		
+    		if(fromEndpoint instanceof MicoRabbitEndpoint){
+    			MicoRabbitEndpoint from = (MicoRabbitEndpoint) fromEndpoint;
+    			if(from.getExtractorId().contentEquals(endpoint.getExtractorId()) &&
+    			   from.getExtractorVersion().contentEquals(endpoint.getExtractorVersion()) &&
+    			   from.getModeId().contentEquals(endpoint.getModeId())){
+    				return;
+    			}
+    		}
+    	}
+    	
     	/**
     	 * NOTE: 
     	 * - exchange.getIn contains inside its body an AnalysisRequest
@@ -107,37 +125,67 @@ public class MicoRabbitProducer extends DefaultProducer {
         AnalyseManager manager = new AnalyseManager(exchange, inEvent, channel);
         manager.sendEvent();
         if(exchange.getPattern().equals(ExchangePattern.InOut)||true){
+        	int createdOutPart = 0;
+        	String prevNewObjectURI = null;
             while (!manager.hasFinished() && !manager.hasError()) {
                 LOG.debug("..waiting for response..");
 
                 synchronized (queueId){
                     queueId.wait();
                 }
+                
+                //Here starts the horror story: 
+                
+                //For every new part BUT THE LAST ONE, trigger the next extractor in the chain
+                
+                
+                if(!manager.hasError()){
+                	
+                	String newObjectURI=manager.getNewObjectUri();
+                	
+    	            if(newObjectURI != null){
+    	            	
+    	            	if( prevNewObjectURI != null){
+    	            
+    	                	Exchange outExchange = endpoint.createExchange(exchange);
+    	                	outExchange.setFromEndpoint(endpoint);
+    	                	
+    	    	            Message outMessage = outExchange.getIn();
+    	    	            outMessage.getHeaders().putAll(exchange.getIn().getHeaders());
+    	            		outMessage.setBody(generateTemplateRequest(inEvent.getItemUri(), prevNewObjectURI).toByteArray());
+	    	            	
+    	            		//NOTE: here we produce an exchange to ourself, since we do not know which consumers are connected after us
+	    	            	outExchange.getContext().createProducerTemplate().send((String)outExchange.getProperty(Exchange.TO_ENDPOINT),outExchange);
+    	            	}
+    	            	createdOutPart= createdOutPart +1;
+    	            	prevNewObjectURI=newObjectURI;
+    	            }
+    	            
+    	        }
             }
             
             if(!manager.hasError()){
-            	//After you're done, produce an outputMessage 
-	            Message outMessage = exchange.getIn();
-	            
-	            //1. containing the correct headers
-	            outMessage.getHeaders().putAll(exchange.getIn().getHeaders());
-	
-	            //2. if any new part was produced, containing a template AnalysisRequest for the next producer
-	            String newObjectURI=manager.getNewObjectUri();
-	            if(newObjectURI != null){
-	            	outMessage.setBody(generateTemplateRequest(inEvent.getItemUri(), newObjectURI).toByteArray());
-	            }
-	            //3 else, stop the message
-	            else{
+
+                //if no part was produced
+	            if(createdOutPart == 0){
 	            	LOG.warn("No new part produced by service {}, stopping the current message routing.",queueId);
-	            	outMessage.setBody(inMessage.getBody());
-	            	exchange.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
+	            	
+		            //stop the routing of the current exchange
+		            Message outMessage = exchange.getIn();
+		            outMessage.setBody(inMessage.getBody());
+		            exchange.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
+		            return;
 	            }
+	            //else, trigger the processing of the last unprocessed part
+	            
+             	Message outMessage = exchange.getIn();
+	            outMessage.getHeaders().putAll(exchange.getIn().getHeaders());
+	            outMessage.setBody(generateTemplateRequest(inEvent.getItemUri(), prevNewObjectURI).toByteArray());
+
             }
             else{
             	exchange.getIn().setHeader("error_class",exchange.getException());
             	exchange.getIn().setBody(exchange.getException());
-//            	exchange.getOut().setBody(exchange.getException());
             	throw exchange.getException();
             }
             
