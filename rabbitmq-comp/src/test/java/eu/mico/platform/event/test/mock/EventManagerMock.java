@@ -9,11 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.github.anno4j.Transaction;
+import eu.mico.platform.event.api.AnalysisService;
+import eu.mico.platform.event.api.AnalysisServiceAnno4j;
+import eu.mico.platform.event.api.AnalysisServiceBase;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event.ErrorCodes;
@@ -31,17 +34,17 @@ public class EventManagerMock implements EventManager {
 
     private static Logger log = LoggerFactory.getLogger(EventManagerMock.class);
 
-    private Set<AnalysisService> services;
-    private PersistenceService persistenceService;
+    private Set<AnalysisServiceBase> services;
+    private PersistenceServiceAnno4j persistenceService;
     private AnalysisResponseCollector responsesCollector;
 
     @Override
-    public void registerService(AnalysisService service) throws IOException {
+    public void registerService(AnalysisServiceBase service) throws IOException {
         services.add(service);
     }
 
     @Override
-    public void unregisterService(AnalysisService service) throws IOException {
+    public void unregisterService(AnalysisServiceBase service) throws IOException {
         services.remove(service);
     }
 
@@ -60,15 +63,21 @@ public class EventManagerMock implements EventManager {
     }
 
     private void analyseItemResource(Item item, Resource resource, Map<String, String> params) throws IOException {
-        for (AnalysisService service: services) {
+        for (AnalysisServiceBase service: services) {
             if (service.getRequires().equals(resource.getSyntacticalType())) {
                 List<Resource> parts = new LinkedList<Resource>();
                 parts.add(resource);
                 log.debug("calling service {} to analyze {}...", service.getServiceID(), resource.getURI());
                 boolean success = false;
                 try {
-                    item.getObjectConnection().begin();
-                    service.call(responsesCollector, item, parts, params);
+                    if (service instanceof AnalysisServiceAnno4j) {
+                        Transaction transaction = persistenceService.getAnno4j().adoptTransaction(item.getRDFObject().getObjectConnection());
+                        transaction.begin();
+                        ((AnalysisServiceAnno4j)service).call(responsesCollector, item, parts, params, transaction);
+                    } else {
+                        item.getObjectConnection().begin();
+                        ((AnalysisService)service).call(responsesCollector, item, parts, params);
+                    }
                     success = true;
                 } catch (RepositoryException | AnalysisException | RuntimeException e) {
                     responsesCollector.sendError(item, ErrorCodes.UNEXPECTED_ERROR, e.getClass().getName() +": "+e.getMessage(),"");

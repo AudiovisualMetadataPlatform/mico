@@ -59,7 +59,7 @@ public interface EventManager {
      *
      * @param service
      */
-    public void registerService(AnalysisService service) throws IOException;
+    public void registerService(AnalysisServiceBase service) throws IOException;
 
 
     /**
@@ -67,7 +67,7 @@ public interface EventManager {
      * @param service
      * @throws IOException
      */
-    public void unregisterService(AnalysisService service) throws IOException;
+    public void unregisterService(AnalysisServiceBase service) throws IOException;
 
     /**
      * Trigger analysis of the given content item.
