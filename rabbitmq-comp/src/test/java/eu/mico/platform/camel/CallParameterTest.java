@@ -166,7 +166,7 @@ public class CallParameterTest extends TestBase {
      * @return an exchange containing item and part uri in headers
      */
     private Exchange createExchange() {
-        return createExchange(textItemUri);
+        return createExchange(textItemUri,"direct:a");
     }
 
     /**

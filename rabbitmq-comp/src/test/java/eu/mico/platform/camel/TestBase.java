@@ -1,6 +1,7 @@
 package eu.mico.platform.camel;
 
 import static eu.mico.platform.camel.MicoRabbitProducer.KEY_MICO_ITEM;
+import static eu.mico.platform.camel.MicoRabbitProducer.KEY_STARTING_DIRECT;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -41,8 +42,8 @@ public abstract class TestBase extends CamelTestSupport {
      * create exchange containing item and part uri of sample/test content
      * @return an exchange containing item and part uri in headers
      */
-    protected Exchange createExchange(String itemUri) {
-        return createExchange(itemUri, itemUri, getServiceID().stringValue());
+    protected Exchange createExchange(String itemUri, String directUri) {
+        return createExchange(itemUri, itemUri, directUri, getServiceID().stringValue());
     }
 
 
@@ -50,18 +51,19 @@ public abstract class TestBase extends CamelTestSupport {
      * create exchange containing item and part uri of sample/test content
      * @return an exchange containing item and part uri in headers
      */
-    protected Exchange createExchange(String itemUri, String partUri) {
-        return createExchange(itemUri, partUri, getServiceID().stringValue());
+    protected Exchange createExchange(String itemUri, String partUri, String directUri){
+        return createExchange(itemUri, partUri, directUri, getServiceID().stringValue());
     }
 
     /**
      * create exchange containing item and part uri of sample/test content
      * @return an exchange containing item and part uri in headers
      */
-    private Exchange createExchange(String itemUri, String partUri, String service) {
-        Exchange exchange = context.getEndpoint("direct:a").createExchange();
+    private Exchange createExchange(String itemUri, String partUri, String directUri, String service) {
+        Exchange exchange = context.getEndpoint(directUri).createExchange();
         Message msg = exchange.getIn();
         msg.setHeader(KEY_MICO_ITEM, itemUri);
+        msg.setHeader(KEY_STARTING_DIRECT, directUri);
         AnalysisRequest event = AnalysisRequest.newBuilder()
                 .setItemUri(itemUri)
                 .addPartUri(partUri)

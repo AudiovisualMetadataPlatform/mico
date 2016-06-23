@@ -84,8 +84,9 @@ public class MicoCamel {
     protected static AnalysisService extr_f12 = new DummyExtractor("FINISH1", "FINISH2","mico-extractor-test","1.0.0","FINISH1-FINISH2-queue");
     protected static AnalysisService extr_f23 = new DummyExtractor("FINISH2", "FINISH3","mico-extractor-test","1.0.0","FINISH2-FINISH3-queue");
     protected static AnalysisService extr_f34 = new DummyExtractor("FINISH3", "FINISH4","mico-extractor-test","1.0.0","FINISH3-FINISH4-queue");
-    protected static AnalysisService extr_abb = new DummyTwoPartsExtractor("A", "BB","mico-extractor-test","1.0.0","A-BB-queue");
-    protected static AnalysisService extr_bbc = new DummyExtractor("BB", "C","mico-extractor-test","1.0.0","BB-C-queue");
+    protected static AnalysisService extr_aabb = new DummyTwoPartsExtractor("AA", "BB","mico-extractor-test","1.0.0","AA-BB-queue");
+    protected static AnalysisService extr_bbcc = new DummyTwoPartsExtractor("BB", "CC","mico-extractor-test","1.0.0","BB-CC-queue");
+    protected static AnalysisService extr_ccdd = new DummyTwoPartsExtractor("CC", "DD","mico-extractor-test","1.0.0","CC-DD-queue");
     
 
     /**
@@ -169,8 +170,9 @@ public class MicoCamel {
         eventManager.registerService(extr_f23);
         eventManager.registerService(extr_f34); 
         
-        eventManager.registerService(extr_abb);
-        eventManager.registerService(extr_bbc);
+        eventManager.registerService(extr_aabb);
+        eventManager.registerService(extr_bbcc);
+        eventManager.registerService(extr_ccdd);
 
         log.info("event manager initialized: {}", eventManager.getPersistenceService().getStoragePrefix());
     }

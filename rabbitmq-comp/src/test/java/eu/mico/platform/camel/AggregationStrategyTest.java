@@ -34,10 +34,10 @@ public class AggregationStrategyTest extends TestBase {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(4);
 
-        template.send("direct:a", createExchange("item1", "part1"));
-        template.send("direct:a", createExchange("item1", "part2"));
-        template.send("direct:a", createExchange("item2", "part1"));
-        template.send("direct:a", createExchange("item2", "part2"));
+        template.send("direct:a", createExchange("item1", "part1", "direct:a"));
+        template.send("direct:a", createExchange("item1", "part2", "direct:a"));
+        template.send("direct:a", createExchange("item2", "part1", "direct:a"));
+        template.send("direct:a", createExchange("item2", "part2", "direct:a"));
         assertMockEndpointsSatisfied();
     }
 
@@ -46,12 +46,12 @@ public class AggregationStrategyTest extends TestBase {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMessageCount(3);
 
-        template.send("direct:b", createExchange("item1", "part1"));
-        template.send("direct:b", createExchange("item1", "part2"));
-        template.send("direct:b", createExchange("item2", "part1"));
-        template.send("direct:b", createExchange("item2", "part2"));
-        template.send("direct:b", createExchange("item3", "part1"));
-        template.send("direct:b", createExchange("item3", "part2"));
+        template.send("direct:b", createExchange("item1", "part1", "direct:b"));
+        template.send("direct:b", createExchange("item1", "part2", "direct:b"));
+        template.send("direct:b", createExchange("item2", "part1", "direct:b"));
+        template.send("direct:b", createExchange("item2", "part2", "direct:b"));
+        template.send("direct:b", createExchange("item3", "part1", "direct:b"));
+        template.send("direct:b", createExchange("item3", "part2", "direct:b"));
         assertMockEndpointsSatisfied();
     }
 

@@ -228,19 +228,15 @@ public class MicoRabbitComponentTest extends TestBase {
     @Test(timeout=30000)
     public void testMultipleOutputPartsRoute() throws Exception {
         
-//        from("direct:pipeline-with-multiple-outputs")
-//        .pipeline()
-//        .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=A-BB-queue")
-//        .to("mock:two-bb-parts")
-//        .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=BB-C-queue")
-//        .to("mock:two-c-parts");
-    	
     	MockEndpoint mock1 = getMockEndpoint("mock:two-bb-parts");
-        mock1.expectedMessageCount(2);
-        MockEndpoint mock2 = getMockEndpoint("mock:two-c-parts");
-        mock1.expectedMessageCount(2);
+        mock1.expectedMessageCount(8);	// NOTE: equal to the amount of DD parts created (MUST NOT be 2!)
+        MockEndpoint mock2 = getMockEndpoint("mock:four-cc-parts");
+        mock2.expectedMessageCount(8);  // NOTE: equal to the amount of DD parts created (MUST NOT be 4!)
+        MockEndpoint mock3 = getMockEndpoint("mock:eight-dd-parts");
+        mock3.expectedMessageCount(8); 
 
-        template.send("direct:pipeline-with-multiple-outputs",createExchange());
+        String directUri = "direct:pipeline-with-multiple-outputs";
+        template.send(directUri,createExchange(directUri));
         assertMockEndpointsSatisfied();
     }
 
@@ -370,10 +366,12 @@ public class MicoRabbitComponentTest extends TestBase {
                 
                 from("direct:pipeline-with-multiple-outputs")
                 .pipeline()
-                .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=A-BB-queue")
+                .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=AA-BB-queue")
                 .to("mock:two-bb-parts")
-                .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=BB-C-queue")
-                .to("mock:two-c-parts");
+                .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=BB-CC-queue")
+                .to("mock:four-cc-parts")
+                .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=CC-DD-queue")
+                .to("mock:eight-dd-parts");
 
             }
 
@@ -465,8 +463,13 @@ public class MicoRabbitComponentTest extends TestBase {
      * create exchange containing item and part uri of sample text content
      * @return an exchange containing item and part uri in headers
      */
-    private Exchange createExchange() {
-        return createExchange(textItemUri);
+    
+    private Exchange createExchange(){
+    	return createExchange(textItemUri,"direct:a");
+    }
+    
+    private Exchange createExchange(String directUri) {
+        return createExchange(textItemUri,directUri);
     }
 
     /**
