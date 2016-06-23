@@ -224,6 +224,25 @@ public class MicoRabbitComponentTest extends TestBase {
         template.send("direct:parallelFlows-mimeType=mico/test,syntacticType=C",createExchange());
         assertMockEndpointsSatisfied();
     }
+    
+    @Test(timeout=30000)
+    public void testMultipleOutputPartsRoute() throws Exception {
+        
+//        from("direct:pipeline-with-multiple-outputs")
+//        .pipeline()
+//        .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=A-BB-queue")
+//        .to("mock:two-bb-parts")
+//        .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=BB-C-queue")
+//        .to("mock:two-c-parts");
+    	
+    	MockEndpoint mock1 = getMockEndpoint("mock:two-bb-parts");
+        mock1.expectedMessageCount(2);
+        MockEndpoint mock2 = getMockEndpoint("mock:two-c-parts");
+        mock1.expectedMessageCount(2);
+
+        template.send("direct:pipeline-with-multiple-outputs",createExchange());
+        assertMockEndpointsSatisfied();
+    }
 
     /** test route defined in xml
      * @throws Exception
@@ -348,6 +367,13 @@ public class MicoRabbitComponentTest extends TestBase {
                 .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=FINISH2-FINISH3-queue")
                 .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=FINISH3-FINISH4-queue")
                 .to("mock:no-stop");
+                
+                from("direct:pipeline-with-multiple-outputs")
+                .pipeline()
+                .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=A-BB-queue")
+                .to("mock:two-bb-parts")
+                .to("mico-comp:ebox1?host=localhost&extractorId=mico-extractor-test&extractorVersion=1.0.0&modeId=BB-C-queue")
+                .to("mock:two-c-parts");
 
             }
 
