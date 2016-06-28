@@ -18,7 +18,7 @@ import eu.mico.platform.event.model.Event.AnalysisRequest;
 
 public abstract class TestBase extends CamelTestSupport {
 
-    protected static final long CONTEXT_DELAYER = 40L;
+    protected static final long CONTEXT_DELAYER = 0L;
     protected static final String SAMPLE_HTML = "sample.html";
     protected static final String SAMPLE_PNG = "sample.png";
     protected static final String SAMPLE_MP4 = "sample-video.mp4";

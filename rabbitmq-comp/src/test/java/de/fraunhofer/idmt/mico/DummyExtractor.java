@@ -156,6 +156,7 @@ public class DummyExtractor implements AnalysisService {
                 if(obj.hasAsset()){
                     InputStream is = obj.getAsset().getInputStream();
                     IOUtils.copy(is, os);
+                    is.close();
                 }
             }catch(Exception e){
                 log.warn("unable to access content part data",e);
@@ -167,6 +168,7 @@ public class DummyExtractor implements AnalysisService {
 
             resp.sendNew(item,part.getURI());
             setCalled(true);
+            resp.sendFinish(item);
         } catch (RepositoryException e) {
             throw new AnalysisException("could not access triple store");
         }

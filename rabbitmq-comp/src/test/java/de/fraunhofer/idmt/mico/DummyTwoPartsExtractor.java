@@ -157,6 +157,7 @@ public class DummyTwoPartsExtractor implements AnalysisService {
                 if(obj.hasAsset()){
                     InputStream is = obj.getAsset().getInputStream();
                     IOUtils.copy(is, os);
+                    is.close();
                 }
             }catch(Exception e){
                 log.warn("unable to access content part data",e);

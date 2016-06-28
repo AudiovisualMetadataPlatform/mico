@@ -137,12 +137,12 @@ public class MicoRabbitProducer extends DefaultProducer {
         if(exchange.getPattern().equals(ExchangePattern.InOut)||true){
         	int createdOutPart = 0;
         	String prevNewObjectURI = null;
+            synchronized (queueId){
             while (!manager.hasFinished() && !manager.hasError()) {
                 LOG.debug("..waiting for response..");
-
-                synchronized (queueId){
-                    queueId.wait();
-                }
+                queueId.notify(); //inform manager that we processed message
+                queueId.wait();   // wait for next message from manager
+                LOG.debug("..checking response..");
                 
                 //Here starts the horror story: 
                 
@@ -174,6 +174,7 @@ public class MicoRabbitProducer extends DefaultProducer {
     	            
     	        }
             }
+            }// end synch
             
             if(!manager.hasError()){
 
@@ -244,9 +245,9 @@ public class MicoRabbitProducer extends DefaultProducer {
     private class AnalyseManager extends DefaultConsumer {
         private String           queue;
         private AnalysisRequest    req;
-        private boolean finished = false;
-        private boolean hasError = false;
-        private String newObjectUri = null;
+        private volatile boolean finished = false;
+        private volatile boolean hasError = false;
+        private volatile String newObjectUri = null;
         private Exchange exchange = null;
 
         public AnalyseManager(Exchange exchange, AnalysisRequest event, Channel channel) throws IOException {
@@ -282,54 +283,58 @@ public class MicoRabbitProducer extends DefaultProducer {
             Event.AnalysisEvent response = Event.AnalysisEvent
                     .parseFrom(body);
 
-            switch (response.getType()) {
-            case PROGRESS:
-            case ERROR:
-                log.warn("Received an error response {}, generating a new MICOCamelAnalysisException with what message : {}",response.getError().getMessage(), response.getError()
-                        .getDescription());
+            synchronized (queueId) {
+                log.trace("enter synch block {}", queueId);
+                switch (response.getType()) {
+                case PROGRESS:
+                case ERROR:
+                    log.warn("Received an error response {}, generating a new MICOCamelAnalysisException with what message : {}",response.getError().getMessage(), response.getError()
+                            .getDescription());
 
-
-                hasError=true;
-                finished = true;
-                exchange.setProperty(Exchange.DUPLICATE_MESSAGE, new MICOCamelAnalysisException(queueId,
-	                       response.getError().getMessage(), 
-	                       response.getError().getDescription()));
-                exchange.setException( 
-                		new MICOCamelAnalysisException(queueId,
-                				                       response.getError().getMessage(), 
-                				                       response.getError().getDescription()));
-                exchange.getIn().setBody(new MICOCamelAnalysisException(queueId,
-                				                       response.getError().getMessage(), 
-                				                       response.getError().getDescription()));
-                exchange.getOut().setBody(new MICOCamelAnalysisException(queueId,
-	                       response.getError().getMessage(), 
-	                       response.getError().getDescription()));
-                
-                getChannel().basicAck(envelope.getDeliveryTag(), false);
-                synchronized (queueId) {
-                    queueId.notify();
+                    hasError=true;
+                    finished = true;
+                    exchange.setProperty(Exchange.DUPLICATE_MESSAGE, new MICOCamelAnalysisException(queueId,
+                            response.getError().getMessage(),
+                            response.getError().getDescription()));
+                    exchange.setException( 
+                            new MICOCamelAnalysisException(queueId,
+                                    response.getError().getMessage(),
+                                    response.getError().getDescription()));
+                    exchange.getIn().setBody(new MICOCamelAnalysisException(queueId,
+                            response.getError().getMessage(),
+                            response.getError().getDescription()));
+                    exchange.getOut().setBody(new MICOCamelAnalysisException(queueId,
+                            response.getError().getMessage(),
+                            response.getError().getDescription()));
+                    
+                    getChannel().basicAck(envelope.getDeliveryTag(), false);
+                    break;
+                case NEW_PART:
+                    newObjectUri = response.getNew().getPartUri();
+                    log.debug(
+                            "received processing result from service {} for content item {}: new object {}",
+                            response.getNew().getServiceId(), response.getNew()
+                                    .getItemUri(), newObjectUri);
+                    getChannel().basicAck(envelope.getDeliveryTag(), false);
+                    break;
+                case FINISH:
+                    // analyze process finished correctly, notify waiting
+                    // threads to continue camel route
+                    newObjectUri = null;
+                    getChannel().basicAck(envelope.getDeliveryTag(), false);
+                    finished = true;
                 }
-                break;
-            case NEW_PART:
-                newObjectUri = response.getNew().getPartUri();
-                log.debug(
-                        "received processing result from service {} for content item {}: new object {}",
-                        response.getNew().getServiceId(), response.getNew()
-                                .getItemUri(), newObjectUri);
-                getChannel().basicAck(envelope.getDeliveryTag(), false);
-                synchronized (queueId) {
-                    queueId.notify();
+                //notify producer, to process message
+                queueId.notify();
+                try {
+                    // wait for producer to process message
+                    // to prevent overriding thing with new analysis results
+                    queueId.wait(1000);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
                 }
-                break;
-            case FINISH:
-                // analyze process finished correctly, notify waiting threads to continue
-                // camel route
-            	newObjectUri = null;
-            	getChannel().basicAck(envelope.getDeliveryTag(), false);
-                finished = true;
-                synchronized (queueId) {
-                    queueId.notify();
-                }
+                log.trace("leave synch block {}", queueId);
             }
         }
 
