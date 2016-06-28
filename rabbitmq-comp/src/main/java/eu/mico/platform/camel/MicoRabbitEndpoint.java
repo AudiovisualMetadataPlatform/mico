@@ -2,6 +2,11 @@ package eu.mico.platform.camel;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.camel.Consumer;
 import org.apache.camel.Processor;
@@ -13,6 +18,8 @@ import org.apache.camel.spi.UriEndpoint;
 import org.apache.camel.spi.UriParam;
 import org.apache.camel.spi.UriPath;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
@@ -56,6 +63,10 @@ public class MicoRabbitEndpoint extends DefaultEndpoint {
     @UriParam(name="parameters")
     @Metadata(required = "false")
     private String parameters;
+    
+    @UriParam(name="inputs")
+    @Metadata(required = "false")
+    private String inputs;
 
     @UriParam(name="extractorId")
     @Metadata(required = "true")
@@ -185,6 +196,20 @@ public class MicoRabbitEndpoint extends DefaultEndpoint {
     public String getParameters() {
         return parameters;
     }
+    
+    public Map<String,String> getParametersAsMap(){
+    	ObjectMapper mapper = new ObjectMapper();    	
+        if(parameters != null && parameters.length() > 1){
+            try {
+                parameters = URLDecoder.decode(parameters,"UTF-8");
+                return mapper.readValue(parameters,
+                        new TypeReference<HashMap<String, String>>() {});
+            } catch (IOException e) {
+                return null;
+            }
+        }
+    	return null;
+    }
 
     public void setParameters(String parameters) {
         this.parameters = parameters;
@@ -196,6 +221,28 @@ public class MicoRabbitEndpoint extends DefaultEndpoint {
 
     public void setExtractorId(String extractorId) {
         this.extractorId = extractorId;
+    }
+    
+    public String getModeInputs() {
+    	return inputs;
+    }
+    
+    public Map<String,List<String>> getModeInputsAsMap(){
+    	ObjectMapper mapper = new ObjectMapper();
+    	if(inputs != null && inputs.length() > 1){
+            try {
+            	inputs = URLDecoder.decode(inputs,"UTF-8");
+                return mapper.readValue(inputs,
+                        new TypeReference<HashMap<String, ArrayList<String>>>() {});
+            } catch (IOException e) {
+                return null;
+            }
+        }
+    	return null;
+    }
+
+    public void setInputs(String modeInputs) {
+        this.inputs = modeInputs;
     }
 
 
