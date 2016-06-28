@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -40,6 +41,11 @@ public class MicoRabbitProducer extends DefaultProducer {
     private static final Logger LOG = LoggerFactory.getLogger(MicoRabbitProducer.class);
     private MicoRabbitEndpoint endpoint;
     private String queueId;
+    
+    //key = syntacticType, value = list of mime types
+    private Map<String,List<String>> modeInputs = new HashMap<String, List<String>>();
+    
+    //key = param name, value = value 
     private Map<String,String> parameters = new HashMap<String, String>();
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -47,24 +53,11 @@ public class MicoRabbitProducer extends DefaultProducer {
         super(endpoint);
         this.endpoint = endpoint;
         this.queueId = endpoint.getQueueId();
-        readParamsFromEndpoint();
+        this.parameters = endpoint.getParametersAsMap();
+        this.modeInputs = endpoint.getModeInputsAsMap();
     }
 
-    private void readParamsFromEndpoint() {
-        String paramString = endpoint.getParameters();
-        if(paramString != null && paramString.length() > 1){
-            try {
-                log.info("params         = {}",paramString);
-                paramString = URLDecoder.decode(paramString,"UTF-8");
-                log.info("params decoded = {}",paramString);
-                this.parameters = mapper.readValue(paramString,
-                        new TypeReference<HashMap<String, String>>() {});
-            } catch (IOException e) {
-                log.info("Unable to parse parameters:{} ", paramString, e);
-            }
-        }
-    }
-
+ 
     @Override
     public void process(Exchange exchange) throws Exception {
     	
