@@ -205,10 +205,10 @@ public class MicoRabbitEndpoint extends DefaultEndpoint {
                 return mapper.readValue(parameters,
                         new TypeReference<HashMap<String, String>>() {});
             } catch (IOException e) {
-                return null;
+                return new HashMap<String, String>();
             }
         }
-    	return null;
+    	return new HashMap<String, String>();
     }
 
     public void setParameters(String parameters) {
@@ -235,10 +235,10 @@ public class MicoRabbitEndpoint extends DefaultEndpoint {
                 return mapper.readValue(inputs,
                         new TypeReference<HashMap<String, ArrayList<String>>>() {});
             } catch (IOException e) {
-                return null;
+                return new HashMap<String, List<String>>();
             }
         }
-    	return null;
+    	return new HashMap<String, List<String>>();
     }
 
     public void setInputs(String modeInputs) {

@@ -19,6 +19,7 @@ import org.junit.Test;
 import de.fraunhofer.idmt.mico.DummyExtractor;
 import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
 import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
+import junit.framework.Assert;
 
 ;
 
@@ -34,7 +35,8 @@ public class InputFilteringTest extends TestBase {
     	
     	MicoRabbitEndpoint ep= context.getEndpoint("mico-comp://vbox1?host=localhost&amp;serviceId=ParamTest&amp;extractorId=parameter-selection-test&amp;extractorVersion=1.0.0&amp;modeId=ParamTest&amp;parameters={&quot;value-param-0&quot;:&quot;8000&quot;,&quot;value-param-1&quot;:&quot;8000&quot;,&quot;value-param-2&quot;:&quot;_8kHz&quot;,&quot;value-param-3&quot;:&quot;enabled&quot;,&quot;value-param-4&quot;:&quot;1&quot;,&quot;value-param-5&quot;:&quot;3,7,56&quot;}", MicoRabbitEndpoint.class);
     	assertNull(ep.getModeInputs());
-    	assertNull(ep.getModeInputsAsMap());
+    	assertNotNull(ep.getModeInputsAsMap());
+    	assertEquals(0, ep.getModeInputsAsMap().size());
     }
     
     @Test
@@ -43,6 +45,7 @@ public class InputFilteringTest extends TestBase {
     	MicoRabbitEndpoint ep= context.getEndpoint("mico-comp://vbox1?extractorId=mico-extractor-test&extractorVersion=1.0.0&host=localhost&inputs=%7B%22A%22%3A%5B%22mico%2Ftest-mime-A%22%5D%2C%22B%22%3A%5B%22mico%2Ftest-mime-B%22%5D%7D&modeId=AB-C-queue&serviceId=AB-C-queue", MicoRabbitEndpoint.class);
     	assertNotNull(ep.getModeInputs());
     	assertNotNull(ep.getModeInputsAsMap());
+    	assertEquals(2, ep.getModeInputsAsMap().size());
     }
     
     @Test
@@ -51,6 +54,8 @@ public class InputFilteringTest extends TestBase {
     	MicoRabbitEndpoint ep= context.getEndpoint("mico-comp://vbox1?extractorId=mico-extractor-test&extractorVersion=1.0.0&host=localhost&inputs=%7B%22A%22%3A%5B%22mico%2Ftest-mime-A-1%22%2C%22mico%2Ftest-mime-A-2%22%2C%22mico%2Ftest-mime-A-3%22%5D%2C%22B%22%3A%5B%22mico%2Ftest-mime-B%22%5D%7D&modeId=AB-C-queue&serviceId=AB-C-queuequeue", MicoRabbitEndpoint.class);
     	assertNotNull(ep.getModeInputs());
     	assertNotNull(ep.getModeInputsAsMap());
+    	assertEquals(2, ep.getModeInputsAsMap().size());
+    	
     	Map<String, List<String>> expectedMap = new HashMap<String,List<String>>();
          expectedMap.put("A",new ArrayList<String>());
          expectedMap.get("A").add("mico/test-mime-A-1");
