@@ -90,7 +90,8 @@ public class MICOBrokerApplication extends Application {
             eventManager.init();
             
             camelContext = new MicoCamelContext();
-            camelContext.init();
+            camelContext.init(broker.getPersistenceService());
+
             
             camelRoutes = new HashMap<Integer,MICOCamelRoute>();
 
