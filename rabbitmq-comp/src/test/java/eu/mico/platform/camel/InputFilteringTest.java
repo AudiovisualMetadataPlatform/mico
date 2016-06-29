@@ -1,6 +1,7 @@
 package eu.mico.platform.camel;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,12 +15,15 @@ import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
 import org.apache.camel.language.Bean;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.RoutesDefinition;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.fraunhofer.idmt.camel.MicoCamel;
 import de.fraunhofer.idmt.mico.DummyExtractor;
 import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
 import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
-import junit.framework.Assert;
+import eu.mico.platform.persistence.model.Item;
 
 ;
 
@@ -65,6 +69,60 @@ public class InputFilteringTest extends TestBase {
          expectedMap.get("B").add("mico/test-mime-B");
          assertEquals(expectedMap,ep.getModeInputsAsMap());
     	
+    }
+    
+    @Test
+    public void testInputIsNotFilteredIfNotDeclared() throws Exception {
+    	
+    	DummyExtractor extr1 = new DummyExtractor("video/mp4","mico:Video","parameter-selection-test","1.0.0","ParamTest");
+        micoCamel.registerService(extr1);
+        
+        Item testItem=micoCamel.createItem();
+        testItem.setSyntacticalType("mico:InvalidSyntacticalType");
+        testItem.getAsset().setFormat("mico/invalid-format");
+        
+        MockEndpoint mock = getMockEndpoint("mock:result_simpleParams");
+    	mock.reset();
+        mock.expectedMessageCount(10);
+    	for(int i=0; i<10; i++){
+    		template.send("direct:workflow-simpleParams,mimeType=video/mp4,syntacticType=mico:Video", 
+  			      createExchange(testItem.getURI().stringValue(),"direct:workflow-simpleParams,mimeType=video/mp4,syntacticType=mico:Video"));
+  	
+    	}
+    	assertMockEndpointsSatisfied();
+    	mock.reset();
+    	micoCamel.deleteContentItem(testItem.getURI().stringValue());
+    }
+    
+    @Test
+    public void testInvalidInputIsFiltered() throws Exception {
+    	
+    	DummyExtractor extr1 = new DummyExtractor("video/mp4","mico:Video","parameter-selection-test","1.0.0","ParamTest");
+        micoCamel.registerService(extr1);
+        
+        Item testItem=micoCamel.createItem();
+        testItem.setSyntacticalType("mico:InvalidSyntacticalType");
+        testItem.getAsset().setFormat("mico/invalid-format");
+        
+        MockEndpoint mockBeforeFiltering = getMockEndpoint("mock:result_inputDefinitionAndFiltering_beforeExtractor");
+        mockBeforeFiltering.reset();
+        mockBeforeFiltering.expectedMessageCount(10);
+        
+        MockEndpoint mockAfterFiltering = getMockEndpoint("mock:result_inputDefinitionAndFiltering_afterExtractor");
+    	mockAfterFiltering.reset();
+    	mockAfterFiltering.expectedMessageCount(0);
+        
+    	for(int i=0; i<10; i++){
+    		template.send("direct:aggregateComplex-mimeType=mico/test-mime-A,syntacticType=A", 
+  			      createExchange(testItem.getURI().stringValue(),"direct:aggregateComplex-mimeType=mico/test-mime-A,syntacticType=A"));
+    		template.send("direct:aggregateComplex-mimeType=mico/test-mime-B,syntacticType=B", 
+    			      createExchange(testItem.getURI().stringValue(),"direct:aggregateComplex-mimeType=mico/test-mime-B,syntacticType=B"));
+    	
+  	
+    	}
+    	
+    	assertMockEndpointsSatisfied();
+    	micoCamel.deleteContentItem(testItem.getURI().stringValue());
     }
 
 
@@ -115,6 +173,26 @@ public class InputFilteringTest extends TestBase {
             }
 
         };
+    }
+    
+    @BeforeClass
+    static public void init() throws Exception {
+
+    	if(micoCamel == null)
+    	try{
+            micoCamel = new MicoCamel();
+            micoCamel.init();
+        }catch (Exception e){
+            e.printStackTrace();
+            fail("unable to setup test env");
+        }
+   }
+    
+    @AfterClass
+    static public void cleanup() throws IOException{
+
+        micoCamel.shutdown();
+        micoCamel=null;
     }
 
 }

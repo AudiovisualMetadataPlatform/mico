@@ -1,16 +1,17 @@
 <routes xmlns='http://camel.apache.org/schema/spring'>
   <route id='workflow-inputDefinition-starting-point-for-aggregator-0-mimeType=mico/test-mime-A,syntacticType=A'>
-    <from uri='direct:aggregateComplex-mimeType=mico/test,syntacticType=A'/>
+    <from uri='direct:aggregateComplex-mimeType=mico/test-mime-A,syntacticType=A'/>
     <to uri='direct:workflow-inputDefinition-aggregator-0'/>
   </route>
   <route id='workflow-inputDefinition-starting-point-for-aggregator-0-mimeType=mico/test-mime-B,syntacticType=B'>
-    <from uri='direct:aggregateComplex-mimeType=mico/test,syntacticType=B'/>
+    <from uri='direct:aggregateComplex-mimeType=mico/test-mime-B,syntacticType=B'/>
     <to uri='direct:workflow-inputDefinition-aggregator-0'/>
   </route>
   <route id='workflow-inputDefinition-pipeline-0'>
     <from uri='direct:workflow-inputDefinition-pipeline-0'/>
     <pipeline>
       <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=AB-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=AB-C-queue&amp;inputs={&quot;A&quot;:[&quot;mico/test-mime-A-1&quot;,&quot;mico/test-mime-A-2&quot;,&quot;mico/test-mime-A-3&quot;],&quot;B&quot;:[&quot;mico/test-mime-B&quot;]}'/>
+	  <to uri="mock:result_inputDefinitionAndFiltering_afterExtractor"/>      
     </pipeline>
   </route>
   <route id='workflow-inputDefinition-aggregator-0'>
@@ -20,7 +21,7 @@
         <simple>header.mico_item</simple>
       </correlationExpression>
       <to uri='direct:workflow-inputDefinition-pipeline-0'/>
-      <to uri="mock:result_inputDefinitionAndFiltering"/>
+      <to uri="mock:result_inputDefinitionAndFiltering_beforeExtractor"/>
     </aggregate>
   </route>
 </routes>
