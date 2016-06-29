@@ -24,6 +24,8 @@ import de.fraunhofer.idmt.camel.MicoCamel;
 import de.fraunhofer.idmt.mico.DummyExtractor;
 import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
 import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
+import eu.mico.platform.event.api.EventManager;
+import eu.mico.platform.event.test.mock.EventManagerMock;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 
@@ -35,6 +37,7 @@ import eu.mico.platform.persistence.model.Part;
  */
 public class InputFilteringTest extends TestBase {
 
+	private static MicoCamelContext cc = null;
     
     @Test
     public void testReadUndefinedInputsReturnNull() throws Exception {
@@ -104,18 +107,16 @@ public class InputFilteringTest extends TestBase {
         testItem.getAsset().setFormat("mico/invalid-format");
         
         MockEndpoint mockBeforeFiltering = getMockEndpoint("mock:result_inputDefinitionAndFiltering_beforeExtractor");
-        mockBeforeFiltering.reset();
         mockBeforeFiltering.expectedMessageCount(10);
         
         MockEndpoint mockAfterFiltering = getMockEndpoint("mock:result_inputDefinitionAndFiltering_afterExtractor");
-    	mockAfterFiltering.reset();
     	mockAfterFiltering.expectedMessageCount(0);
         
     	for(int i=0; i<10; i++){
-    		template.send("direct:aggregateComplex-mimeType=mico/test-mime-A,syntacticType=A", 
-  			      createExchange(testItem.getURI().stringValue(),"direct:aggregateComplex-mimeType=mico/test-mime-A,syntacticType=A"));
-    		template.send("direct:aggregateComplex-mimeType=mico/test-mime-B,syntacticType=B", 
-    			      createExchange(testItem.getURI().stringValue(),"direct:aggregateComplex-mimeType=mico/test-mime-B,syntacticType=B"));
+    		template.send("direct:aggregateComplex-inputDefinition-mimeType=mico/test-mime-A,syntacticType=A", 
+  			      createExchange(testItem.getURI().stringValue(),"direct:aggregateComplex-inputDefinition-mimeType=mico/test-mime-A,syntacticType=A"));
+    		template.send("direct:aggregateComplex-inputDefinition-mimeType=mico/test-mime-B,syntacticType=B", 
+    			  createExchange(testItem.getURI().stringValue(),"direct:aggregateComplex-inputDefinition-mimeType=mico/test-mime-B,syntacticType=B"));
     	}
     	
     	assertMockEndpointsSatisfied();
@@ -137,20 +138,17 @@ public class InputFilteringTest extends TestBase {
 	    	
 	    	Part partA=testItem.createPart(new URIImpl("uri:test-input-processing"));
 	    	partA.setSyntacticalType("A");
-	    	partA.getAsset().setFormat("mico/test-mime-A");
+	    	partA.getAsset().setFormat("mico/test-mime-A-"+Integer.toString(mimeIdx));
 	    	
 	    	Part partB=testItem.createPart(new URIImpl("uri:test-input-processing"));
 	    	partB.setSyntacticalType("B");
-	    	partB.getAsset().setFormat("mico/test-mime-B-"+Integer.toBinaryString(mimeIdx));
-	    	
-	        testItem.setSyntacticalType("mico:InvalidSyntacticalType");
-	        testItem.getAsset().setFormat("mico/invalid-format");
+	    	partB.getAsset().setFormat("mico/test-mime-B");
 	        
 	    	for(int i=0; i<10; i++){
-	    		template.send("direct:aggregateComplex-mimeType=mico/test-mime-A,syntacticType=A", 
-	  			      createExchange(testItem.getURI().stringValue(),partA.getURI().stringValue(),"direct:aggregateComplex-mimeType=mico/test-mime-A,syntacticType=A"));
-	    		template.send("direct:aggregateComplex-mimeType=mico/test-mime-B,syntacticType=B", 
-	    			      createExchange(testItem.getURI().stringValue(),partB.getURI().stringValue(),"direct:aggregateComplex-mimeType=mico/test-mime-B,syntacticType=B"));
+	    		template.send("direct:aggregateComplex-inputDefinition-mimeType=mico/test-mime-A,syntacticType=A", 
+	  			      createExchange(testItem.getURI().stringValue(),partA.getURI().stringValue(),"direct:aggregateComplex-inputDefinition-mimeType=mico/test-mime-A,syntacticType=A"));
+	    		template.send("direct:aggregateComplex-inputDefinition-mimeType=mico/test-mime-B,syntacticType=B", 
+	    			  createExchange(testItem.getURI().stringValue(),partB.getURI().stringValue(),"direct:aggregateComplex-inputDefinition-mimeType=mico/test-mime-B,syntacticType=B"));
 	    	}
 	    	
 	    	mockBeforeFiltering.expectedMessageCount(10*mimeIdx);
@@ -218,6 +216,10 @@ public class InputFilteringTest extends TestBase {
     	try{
             micoCamel = new MicoCamel();
             micoCamel.init();
+            
+            cc = new MicoCamelContext();        	
+        	cc.init(micoCamel.getEventManager().getPersistenceService());
+            
         }catch (Exception e){
             e.printStackTrace();
             fail("unable to setup test env");

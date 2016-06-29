@@ -88,6 +88,9 @@ public class MicoCamel {
     protected static AnalysisService extr_bbcc = new DummyTwoPartsExtractor("BB", "CC","mico-extractor-test","1.0.0","BB-CC-queue");
     protected static AnalysisService extr_ccdd = new DummyTwoPartsExtractor("CC", "DD","mico-extractor-test","1.0.0","CC-DD-queue");
     
+    public EventManager getEventManager(){
+    	return eventManager;
+    }
 
     /**
      * setup test environment including mico eventManager and some registered
