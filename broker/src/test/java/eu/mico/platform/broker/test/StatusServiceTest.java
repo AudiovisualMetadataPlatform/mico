@@ -80,7 +80,7 @@ public class StatusServiceTest extends BaseBrokerTest {
 		eventManager = new EventManagerImpl(amqpHost, amqpUsr, amqpPwd, amqpVHost);
 	    eventManager.init();
 		
-    	context.init();
+    	context.init(broker.getPersistenceService());
     	wManager = new WorkflowManagementService(broker, context, routes);
     	injService = new InjectionWebService(broker, eventManager, context, routes);
     	statusService = new StatusWebService(broker);

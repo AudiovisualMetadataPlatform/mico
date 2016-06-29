@@ -187,7 +187,7 @@ public class CamelBrokerTest extends BaseBrokerTest {
         if (is == null){
             Assert.fail("sample routes not found");
         }
-        context.init();
+        context.init(broker.getPersistenceService());
         context.loadRoutes(is);
         log.info("sample routes loaded");
     }

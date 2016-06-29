@@ -56,7 +56,7 @@ import java.util.Set;
     @BeforeClass
     public static void prepare() throws ClientProtocolException, IOException {
     	
-    	context.init();
+    	context.init(broker.getPersistenceService());
         service = new WorkflowManagementService(broker,context,routes);
     }
 
