@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
 import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
 import eu.mico.platform.event.model.Event.AnalysisRequest;
+import eu.mico.platform.persistence.api.PersistenceService;
 
 public class MicoCamelContext {
 
@@ -54,11 +55,20 @@ public class MicoCamelContext {
     public static ItemAggregationStrategy itemAggregatorStrategy = new ItemAggregationStrategy();
     
     private ProducerTemplate template;
+    private static PersistenceService ps = null;
     
     private static ConcurrentHashMap<String, Exception> injExceptions = new ConcurrentHashMap<String, Exception>();
 
-    public void init(){
-        setupCamelContext();
+    public void init(PersistenceService ps){
+    	if(ps == null){
+    		throw new IllegalArgumentException("The input persistence service cannot be null");
+    	}
+    	MicoCamelContext.ps=ps;
+        setupCamelContext();        
+    }
+    
+    public static PersistenceService getPersistenceService(){
+    	return ps;
     }
 
     private void setupCamelContext() {
