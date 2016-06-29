@@ -7,6 +7,7 @@ package eu.mico.platform.anno4j.model.namespaces;
 public class MA {
 
     public final static String NS = "http://www.w3.org/ns/ma-ont#";
+    public final static String PREFIX = "ma";
 
     /**
      * Refers to ma:samplingRate. The value differs depending on usage from interger, to float, to String.
