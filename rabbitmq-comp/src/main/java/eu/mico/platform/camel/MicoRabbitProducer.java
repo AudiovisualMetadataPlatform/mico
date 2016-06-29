@@ -69,6 +69,9 @@ public class MicoRabbitProducer extends DefaultProducer {
     	
     	//if the exchange is not compatible with the declared inputs, stop immediately
     	if (checkIfExchangeIsCompatible(exchange) == false){
+        	exchange.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
+        	log.warn("Received exchange containing an invalid request {} for the extractor {}, stopping its routing",
+        			  exchange.getIn().getBody(String.class),queueId);
     		return;
     	}
     	
@@ -187,7 +190,6 @@ public class MicoRabbitProducer extends DefaultProducer {
     private boolean checkIfExchangeShouldBeForwarded(Exchange exchange){
     	//check for exchanges created by our custom endpoint: 
     	if(exchange.getFromEndpoint() != null){
-    		
     		
     		Endpoint fromEndpoint =  exchange.getFromEndpoint();
     		
