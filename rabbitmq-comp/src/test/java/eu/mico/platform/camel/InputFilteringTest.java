@@ -18,12 +18,14 @@ import org.apache.camel.model.RoutesDefinition;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openrdf.model.impl.URIImpl;
 
 import de.fraunhofer.idmt.camel.MicoCamel;
 import de.fraunhofer.idmt.mico.DummyExtractor;
 import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
 import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
 import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Part;
 
 ;
 
@@ -97,10 +99,7 @@ public class InputFilteringTest extends TestBase {
     @Test
     public void testInvalidInputIsFiltered() throws Exception {
     	
-    	DummyExtractor extr1 = new DummyExtractor("video/mp4","mico:Video","parameter-selection-test","1.0.0","ParamTest");
-        micoCamel.registerService(extr1);
-        
-        Item testItem=micoCamel.createItem();
+    	Item testItem=micoCamel.createItem();
         testItem.setSyntacticalType("mico:InvalidSyntacticalType");
         testItem.getAsset().setFormat("mico/invalid-format");
         
@@ -117,12 +116,49 @@ public class InputFilteringTest extends TestBase {
   			      createExchange(testItem.getURI().stringValue(),"direct:aggregateComplex-mimeType=mico/test-mime-A,syntacticType=A"));
     		template.send("direct:aggregateComplex-mimeType=mico/test-mime-B,syntacticType=B", 
     			      createExchange(testItem.getURI().stringValue(),"direct:aggregateComplex-mimeType=mico/test-mime-B,syntacticType=B"));
-    	
-  	
     	}
     	
     	assertMockEndpointsSatisfied();
     	micoCamel.deleteContentItem(testItem.getURI().stringValue());
+    }
+    
+    @Test
+    public void testCorrectInputIsProcessed() throws Exception {
+    	
+        MockEndpoint mockBeforeFiltering = getMockEndpoint("mock:result_inputDefinitionAndFiltering_beforeExtractor");
+        mockBeforeFiltering.reset();
+        
+        MockEndpoint mockAfterFiltering = getMockEndpoint("mock:result_inputDefinitionAndFiltering_afterExtractor");
+    	mockAfterFiltering.reset();
+    	
+    	for(int mimeIdx=1; mimeIdx<=3; mimeIdx++){
+	    	
+	    	Item testItem=micoCamel.createItem();
+	    	
+	    	Part partA=testItem.createPart(new URIImpl("uri:test-input-processing"));
+	    	partA.setSyntacticalType("A");
+	    	partA.getAsset().setFormat("mico/test-mime-A");
+	    	
+	    	Part partB=testItem.createPart(new URIImpl("uri:test-input-processing"));
+	    	partB.setSyntacticalType("B");
+	    	partB.getAsset().setFormat("mico/test-mime-B-"+Integer.toBinaryString(mimeIdx));
+	    	
+	        testItem.setSyntacticalType("mico:InvalidSyntacticalType");
+	        testItem.getAsset().setFormat("mico/invalid-format");
+	        
+	    	for(int i=0; i<10; i++){
+	    		template.send("direct:aggregateComplex-mimeType=mico/test-mime-A,syntacticType=A", 
+	  			      createExchange(testItem.getURI().stringValue(),partA.getURI().stringValue(),"direct:aggregateComplex-mimeType=mico/test-mime-A,syntacticType=A"));
+	    		template.send("direct:aggregateComplex-mimeType=mico/test-mime-B,syntacticType=B", 
+	    			      createExchange(testItem.getURI().stringValue(),partB.getURI().stringValue(),"direct:aggregateComplex-mimeType=mico/test-mime-B,syntacticType=B"));
+	    	}
+	    	
+	    	mockBeforeFiltering.expectedMessageCount(10*mimeIdx);
+	    	mockAfterFiltering.expectedMessageCount(10*mimeIdx);
+	    	
+	    	assertMockEndpointsSatisfied();
+	    	micoCamel.deleteContentItem(testItem.getURI().stringValue());
+    	}
     }
 
 
