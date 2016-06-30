@@ -16,7 +16,6 @@ package eu.mico.platform.broker.impl;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.rabbitmq.client.*;
 
@@ -39,6 +38,7 @@ import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -385,8 +386,8 @@ public class MICOBrokerImpl implements MICOBroker {
                 ServiceDescriptor svc = new ServiceDescriptor(registrationEvent);
 
                 if (dependencies.containsEdge(svc)) {
-                    log.info("- removing service {} from dependency graph", svc.getUri());
-                    dependencies.removeEdge(svc);
+                    log.info("- removing service {} from dependency graph: {}", svc.getUri(),
+                    dependencies.removeEdge(svc));
                 } else {
                     log.info("- not removing service {} from dependency graph, it does not exists", svc.getUri());
                 }
@@ -845,10 +846,14 @@ public class MICOBrokerImpl implements MICOBroker {
     		response=httpclient.execute(httpGetExtractor);
     	    int status = response.getStatusLine().getStatusCode();
     	    if(status != 200){
-    	    	response.close();
     	    	log.debug("Extractor {} not found at {}, STATUS code is {}",eId,httpGetExtractor,status);
     	    	return ExtractorStatus.UNREGISTERED;
     	    }
+            HttpEntity entity = response.getEntity();
+            if (entity != null && entity.isStreaming()){
+                // read content to avoid broken pipe on server
+                EntityUtils.toString(entity,StandardCharsets.UTF_8);
+            }
     	    response.close();
     	    
     	    //if the extractor is registered, look if it's also deployed
