@@ -424,7 +424,7 @@ public class MicoRabbitComponentTest extends TestBase {
 
         // remove test items from platform
         micoCamel.deleteContentItem(textItemUri);
-//        micoCamel.deleteContentItem(htmlItemUri);
+        micoCamel.deleteContentItem(htmlItemUri);
         micoCamel.deleteContentItem(imageItemUri);
         micoCamel.deleteContentItem(videoItemUri);
 

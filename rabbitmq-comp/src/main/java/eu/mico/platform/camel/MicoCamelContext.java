@@ -96,11 +96,10 @@ public class MicoCamelContext {
             //and here, it is bound to the registry
             registry.bind("itemAggregatorStrategy", itemAggregatorStrategy);
             
-        } catch (IllegalArgumentException | NullPointerException
-                | ClassCastException | UnsupportedOperationException e) {
-            log.warn("Unable to check camel routes to context", e);
+        }catch(javax.naming.NameAlreadyBoundException e){
+            log.info(e.getMessage());
         } catch (Exception e) {
-            log.warn("Unable to add camel routes", e);
+            log.warn("Error setting up camel context", e);
         }
     }
 
@@ -137,7 +136,6 @@ public class MicoCamelContext {
 
         context.addRouteDefinitions(defs);
         context.startAllRoutes();
-        context.setupRoutes(true);
         List<Route> routes = context.getRoutes();
         log.info("available camel Routes: {}",routes.size());
         for (Route r : routes){
@@ -164,6 +162,15 @@ public class MicoCamelContext {
 		}
 	};
 
+    public void deleteRoutes(InputStream is) throws Exception {
+        RoutesDefinition routeDefs = context.loadRoutesDefinition(is);
+        context.removeRouteDefinitions(routeDefs.getRoutes());
+        List<Route> routes = context.getRoutes();
+        log.info("available camel Routes: {}",routes.size());
+        for (Route r : routes){
+            log.info(" - id: {} descr: {}", r.getId(), r.getDescription());
+        }
+    }
     private RoutesDefinition getRoutesDefinition(String xmlRoute) throws Exception {
     	ByteArrayInputStream stream = new ByteArrayInputStream(
     			xmlRoute.getBytes(StandardCharsets.UTF_8));
