@@ -232,6 +232,7 @@ public class MicoRabbitEndpoint extends DefaultEndpoint {
     	if(inputs != null && inputs.length() > 1){
             try {
             	inputs = URLDecoder.decode(inputs,"UTF-8");
+            	inputs = inputs.replace(" ", "+");
                 return mapper.readValue(inputs,
                         new TypeReference<HashMap<String, ArrayList<String>>>() {});
             } catch (IOException e) {
