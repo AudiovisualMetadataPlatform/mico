@@ -8,33 +8,19 @@
     </encoder>
   </appender>
 
-  <logger name="org.reflections" level="INFO" additivity="false">
-    <appender-ref ref="STDOUT" />
-  </logger>
+  <logger name="org.reflections" level="INFO" />
   
-  <logger name="org.openrdf" level="INFO" additivity="false">
-    <appender-ref ref="STDOUT" />
-  </logger>
+  <logger name="org.openrdf" level="INFO" />
 
-  <logger name="org.apache.camel" level="INFO" additivity="false">
-    <appender-ref ref="STDOUT" />
-  </logger>
+  <logger name="org.apache.camel" level="INFO" />
 
-  <logger name="org.apache.commons.httpclient" level="INFO" additivity="false">
-    <appender-ref ref="STDOUT" />
-  </logger>
+  <logger name="org.apache.commons.httpclient" level="INFO" />
 
-  <logger name="eu.mico.platform.camel" level="DEBUG" additivity="false">
-    <appender-ref ref="STDOUT" />
-  </logger>
+  <logger name="eu.mico.platform.camel" level="DEBUG" />
+  <logger name="eu.mico.platform.event" level="DEBUG" />
 
-  <logger name="eu.mico.platform.event" level="DEBUG" additivity="false">
-    <appender-ref ref="STDOUT" />
-  </logger>
+  <logger name="de.fraunhofer.idmt" level="INFO" />
 
-  <logger name="de.fraunhofer.idmt" level="DEBUG" additivity="false">
-    <appender-ref ref="STDOUT" />
-  </logger>
   <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>

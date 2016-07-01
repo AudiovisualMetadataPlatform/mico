@@ -47,7 +47,7 @@ import eu.mico.platform.storage.api.StorageService;
 public class MicoCamel {
     private static Logger log = LoggerFactory.getLogger(MicoCamel.class);
 
-    protected static String testHost;
+    private String testHost;
 
     protected EventManager eventManager;
     protected Connection connection;
@@ -101,7 +101,7 @@ public class MicoCamel {
      * @throws URISyntaxException
      */
     public void init() throws IOException, TimeoutException, URISyntaxException {
-        String testHost = System.getProperty("amqp.host");
+        testHost = System.getProperty("amqp.host");
         if (testHost == null) {
         	testHost="127.0.0.1";
             log.warn("'amqp.host' environment variable not defined, using default of {}",testHost);
@@ -267,7 +267,11 @@ public class MicoCamel {
         }
        }
     
- // a mock message broker just recording service registry events to test if they worked
+    public String getTestHost() {
+        return testHost;
+    }
+
+    // a mock message broker just recording service registry events to test if they worked
     private static class MockBrokerRegisterEvents extends DefaultConsumer {
 
         private String lastService;
