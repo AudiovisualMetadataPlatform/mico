@@ -22,6 +22,7 @@ import org.openrdf.model.impl.URIImpl;
 
 import de.fraunhofer.idmt.camel.MicoCamel;
 import de.fraunhofer.idmt.mico.DummyExtractor;
+import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
 import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
 import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
 import eu.mico.platform.event.api.EventManager;
@@ -141,8 +142,8 @@ public class InputFilteringTest extends TestBase {
 	    	partA.getAsset().setFormat("mico/test-mime-A-"+Integer.toString(mimeIdx));
 	    	
 	    	Part partB=testItem.createPart(new URIImpl("uri:test-input-processing"));
-	    	partB.setSyntacticalType("B");
-	    	partB.getAsset().setFormat("mico/test-mime-B");
+	    	partB.setSyntacticalType(MMMTERMS.NS+"B");
+	    	partB.getAsset().setFormat("mico/test-mime+B");
 	        
 	    	for(int i=0; i<10; i++){
 	    		template.send("direct:aggregateComplex-inputDefinition-mimeType=mico/test-mime-A,syntacticType=A", 

@@ -11,7 +11,7 @@
     <from uri='direct:workflow-inputDefinition-pipeline-0'/>
     <pipeline>
       <to uri="mock:result_inputDefinitionAndFiltering_beforeExtractor"/>
-      <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=AB-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=AB-C-queue&amp;inputs={&quot;A&quot;:[&quot;mico/test-mime-A-1&quot;,&quot;mico/test-mime-A-2&quot;,&quot;mico/test-mime-A-3&quot;],&quot;B&quot;:[&quot;mico/test-mime-B&quot;]}'/>
+      <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=AB-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=AB-C-queue&amp;inputs={&quot;A&quot;:[&quot;mico/test-mime-A-1&quot;,&quot;mico/test-mime-A-2&quot;,&quot;mico/test-mime-A-3&quot;],&quot;mmmterms:B&quot;:[&quot;mico/test-mime+B&quot;]}'/>
 	  <to uri="mock:result_inputDefinitionAndFiltering_afterExtractor"/>      
     </pipeline>
   </route>
