@@ -34,6 +34,7 @@ import eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Resource;
+import eu.mico.platform.persistence.util.URITools;
 
 /**
  * The MicoRabbitProducer produces mico analyze events 
@@ -254,19 +255,20 @@ public class MicoRabbitProducer extends DefaultProducer {
 					
 					boolean inputIsPresent = false;
 					List<String> mimeTypeList = modeInputs.get(syntacticType);
+					syntacticType = URITools.demangleNamespaceIfKnown(syntacticType);
 					
-					log.trace("Looking for resource with syntacticType '{}' and format in '{}'",syntacticType,mimeTypeList.toString());
+					log.debug("Looking for resource with syntacticType '{}' and format in '{}'",syntacticType,mimeTypeList.toString());
 					
 					for(Resource r : inputResources.values()){
 						
 						if(r.hasAsset()){
-							log.trace("Evaluating resource with syntacticType '{}' and format '{}'",r.getSyntacticalType(),r.getAsset().getFormat());
+							log.debug("Evaluating resource with syntacticType '{}' and format '{}'",r.getSyntacticalType(),r.getAsset().getFormat());
 						}
 						else{
-							log.trace("Evaluating resource with syntacticType '{}' and no asset",r.getSyntacticalType());
+							log.debug("Evaluating resource with syntacticType '{}' and no asset",r.getSyntacticalType());
 						}
 						
-						if(syntacticType.contentEquals(r.getSyntacticalType()) && !inputIsPresent){
+						if(syntacticType.contentEquals(URITools.demangleNamespaceIfKnown(r.getSyntacticalType())) && !inputIsPresent){
 							
 							
 							//if the syntactic type is correct, and we are checking an rdf type, you found the input
@@ -280,13 +282,13 @@ public class MicoRabbitProducer extends DefaultProducer {
 							}
 							
 							if(inputIsPresent){
-								log.trace("Found input resource {} with type '{}' and format in '{}'",r.getURI(),syntacticType,mimeTypeList.toString());
+								log.debug("Found input resource {} with type '{}' and format in '{}'",r.getURI(),syntacticType,mimeTypeList.toString());
 							}
 						}
 						
 					}
 					if(!inputIsPresent){
-						log.trace("Unable to find eligible resource");
+						log.debug("Unable to find eligible resource");
 					}
 					exchangeIsCompatible = exchangeIsCompatible && inputIsPresent;
 				}
