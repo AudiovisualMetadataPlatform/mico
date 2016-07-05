@@ -22,6 +22,7 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import de.fraunhofer.idmt.camel.MicoCamel;
 import de.fraunhofer.idmt.mico.DummyExtractorComplexTest;
+import eu.mico.platform.camel.log.LoggingSentEventNotifier;
 import eu.mico.platform.persistence.model.Item;
 
 /**
@@ -30,7 +31,7 @@ import eu.mico.platform.persistence.model.Item;
  */
 public class MultithreadingTest extends TestBase {
 
-    private static final int BATCH_SIZE = 200;
+    private static final int BATCH_SIZE = 2;
     private static final int PART_REPLICAS = 5;
 
     // static variable for detecting if any exception was thrown during the
@@ -112,6 +113,12 @@ public class MultithreadingTest extends TestBase {
                                 + "&extractorId=mico-extractor-complex-test&extractorVersion=1.0.0&modeId=B2-C2-queue&inputs={\"B2\":[\"application/x-mico-rdf\"]}")
                         .to("mock:out-direct:complex-test-B2-C2");
 
+                try {
+                    context.getManagementStrategy().addEventNotifier(new LoggingSentEventNotifier());
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         };
     }
@@ -145,7 +152,7 @@ public class MultithreadingTest extends TestBase {
         checkAssumptions();
 
         // set logLevel to warn, since we are running many tests
-        changeLogConfig();
+//        changeLogConfig();
 
         createItems();
     }
@@ -164,9 +171,9 @@ public class MultithreadingTest extends TestBase {
     @Test
     public void TestA_B1() throws InterruptedException {
         MockEndpoint mock2 = getMockEndpoint("mock:in-direct:complex-test-A-B1");
-        mock2.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * PART_REPLICAS);
+        mock2.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (PART_REPLICAS+1)+BATCH_SIZE);
         MockEndpoint mock = getMockEndpoint("mock:in-direct:complex-test-B1-C1");
-        mock.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * PART_REPLICAS);
+        mock.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (PART_REPLICAS+1));
         MockEndpoint mock1 = getMockEndpoint("mock:out-direct:complex-test-B1-C1");
         mock1.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * PART_REPLICAS);
 
@@ -191,7 +198,7 @@ public class MultithreadingTest extends TestBase {
     @Test
     public void TestA_B2() throws InterruptedException {
         MockEndpoint mock = getMockEndpoint("mock:in-direct:complex-test-B2-C2");
-        mock.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * PART_REPLICAS);
+        mock.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (PART_REPLICAS+1));
         MockEndpoint mock1 = getMockEndpoint("mock:out-direct:complex-test-B2-C2");
         mock1.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * PART_REPLICAS);
 
@@ -208,13 +215,13 @@ public class MultithreadingTest extends TestBase {
     @Test
     public void TestA_B1andB2() throws InterruptedException {
         MockEndpoint mock = getMockEndpoint("mock:in-direct:complex-test-B1-C1");
-        mock.expectedMessageCount(BATCH_SIZE * 2 * PART_REPLICAS * PART_REPLICAS);
+        mock.expectedMessageCount(BATCH_SIZE * 2 * PART_REPLICAS * (PART_REPLICAS+1));
         MockEndpoint mockout = getMockEndpoint("mock:out-direct:complex-test-B1-C1");
-        mockout.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (2 * PART_REPLICAS - 1));
+        mockout.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (2 * PART_REPLICAS));
         MockEndpoint mock2 = getMockEndpoint("mock:in-direct:complex-test-B2-C2");
-        mock2.expectedMessageCount(BATCH_SIZE * 2 * PART_REPLICAS * PART_REPLICAS);
+        mock2.expectedMessageCount(BATCH_SIZE * 2 * PART_REPLICAS * (PART_REPLICAS+1));
         MockEndpoint mock2out = getMockEndpoint("mock:out-direct:complex-test-B2-C2");
-        mock2out.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (2 * PART_REPLICAS - 1));
+        mock2out.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (2 * PART_REPLICAS));
 
         for (Item i : items) {
             template.send(

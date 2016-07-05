@@ -3,6 +3,7 @@ package eu.mico.platform.camel;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +28,7 @@ import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
 import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.test.mock.EventManagerMock;
+import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 
@@ -131,19 +133,27 @@ public class InputFilteringTest extends TestBase {
         mockBeforeFiltering.reset();
         
         MockEndpoint mockAfterFiltering = getMockEndpoint("mock:result_inputDefinitionAndFiltering_afterExtractor");
-    	mockAfterFiltering.reset();
-    	
-    	for(int mimeIdx=1; mimeIdx<=3; mimeIdx++){
-	    	
-	    	Item testItem=micoCamel.createItem();
-	    	
-	    	Part partA=testItem.createPart(new URIImpl("uri:test-input-processing"));
-	    	partA.setSyntacticalType("A");
-	    	partA.getAsset().setFormat("mico/test-mime-A-"+Integer.toString(mimeIdx));
-	    	
-	    	Part partB=testItem.createPart(new URIImpl("uri:test-input-processing"));
-	    	partB.setSyntacticalType(MMMTERMS.NS+"B");
-	    	partB.getAsset().setFormat("mico/test-mime+B");
+        mockAfterFiltering.reset();
+
+        for (int mimeIdx = 1; mimeIdx <= 3; mimeIdx++) {
+
+            Item testItem = micoCamel.createItem();
+
+            Part partA = testItem.createPart(new URIImpl("uri:test-input-processing"));
+            partA.setSyntacticalType("A");
+            Asset assetA = partA.getAsset();
+            assetA.setFormat("mico/test-mime-A-" + Integer.toString(mimeIdx));
+            OutputStream outputStreamA = assetA.getOutputStream();
+            outputStreamA.write(("Initial content of " + assetA.getFormat()).getBytes());
+            outputStreamA.close();
+
+            Part partB=testItem.createPart(new URIImpl("uri:test-input-processing"));
+            partB.setSyntacticalType(MMMTERMS.NS+"B");
+            Asset assetB = partB.getAsset();
+            assetB.setFormat("mico/test-mime+B");
+            OutputStream outputStreamB = assetB.getOutputStream();
+            outputStreamB.write(("Initial content of " + assetB.getFormat()).getBytes());
+            outputStreamB.close();
 	        
 	    	for(int i=0; i<10; i++){
 	    		template.send("direct:aggregateComplex-inputDefinition-mimeType=mico/test-mime-A,syntacticType=A", 
@@ -152,7 +162,7 @@ public class InputFilteringTest extends TestBase {
 	    			  createExchange(testItem.getURI().stringValue(),partB.getURI().stringValue(),"direct:aggregateComplex-inputDefinition-mimeType=mico/test-mime-B,syntacticType=B"));
 	    	}
 	    	
-	    	mockBeforeFiltering.expectedMessageCount(10*mimeIdx);
+	    	mockBeforeFiltering.expectedMessageCount(20*mimeIdx);
 	    	mockAfterFiltering.expectedMessageCount(10*mimeIdx);
 	    	
 	    	assertMockEndpointsSatisfied();

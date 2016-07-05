@@ -48,7 +48,7 @@ public class MicoRabbitComponentTest extends TestBase {
         MockEndpoint mock = getMockEndpoint("mock:result");
         mock.expectedMinimumMessageCount(1);       
         
-        template.send("direct:a",createExchange());
+        template.send("direct:a",createExchange("direct:a"));
         assertMockEndpointsSatisfied();
     }
     
@@ -57,7 +57,7 @@ public class MicoRabbitComponentTest extends TestBase {
     @Test(timeout=20000)
     public void testErrorSignaling() throws Exception {
     	
-    	Exchange exc = createExchange();
+    	Exchange exc = createExchange("direct:error");
     	
         try{
         	exc = template.send("direct:error",exc);	
@@ -82,7 +82,7 @@ public class MicoRabbitComponentTest extends TestBase {
     @Test(timeout=20000)
     public void testErrorSignalingAfterAggregate() throws Exception {
     	
-    	Exchange inExc = createExchange();
+    	Exchange inExc = createExchange("direct:complex-error");
     	Exchange outExc = null;
     	
         try{
@@ -109,7 +109,7 @@ public class MicoRabbitComponentTest extends TestBase {
         mock.expectedMessageCount(0);
     	
     	try{
-        	template.send("direct:error",createExchange());
+        	template.send("direct:error",createExchange("direct:error"));
         }
         catch(MICOCamelAnalysisException e){
         	log.info("Correctly caught MICOCamelAnalysisException : ",e);
@@ -127,13 +127,13 @@ public class MicoRabbitComponentTest extends TestBase {
         mockStop.expectedMessageCount(0);
         
         MockEndpoint mockNoError = getMockEndpoint("mock:no-error");
-        mockNoError.expectedMessageCount(0);
+        mockNoError.expectedMessageCount(6);
         
         MockEndpoint mockNoStop = getMockEndpoint("mock:no-stop");
         mockNoStop.expectedMessageCount(1);
     	
     	try{
-        	template.send("direct:stop-propagation",createExchange());
+        	template.send("direct:stop-propagation",createExchange("direct:stop-propagation"));
         }
         catch(Exception e){
         	e.printStackTrace();
@@ -188,8 +188,8 @@ public class MicoRabbitComponentTest extends TestBase {
     public void testComplexAggregateRoute() throws Exception {
         MockEndpoint mock1 = getMockEndpoint("mock:result_aggregateComplex_1");
 
-        template.send("direct:aggregateComplex-mimeType=mico/test,syntacticType=A",createExchange());
-        template.send("direct:aggregateComplex-mimeType=mico/test,syntacticType=B",createExchange());
+        template.send("direct:aggregateComplex-mimeType=mico/test,syntacticType=A",createExchange("direct:aggregateComplex-mimeType=mico/test,syntacticType=A"));
+        template.send("direct:aggregateComplex-mimeType=mico/test,syntacticType=B",createExchange("direct:aggregateComplex-mimeType=mico/test,syntacticType=B"));
         int i = 0;
         for (Part p : textItem.getParts()){
             if ("http://example.org/services/AB-C-Service".equals(p.getSerializedBy().toString())){
@@ -206,22 +206,24 @@ public class MicoRabbitComponentTest extends TestBase {
         MockEndpoint mock1 = getMockEndpoint("mock:result_aggregateSimple_1");
         mock1.expectedMessageCount(4);
         MockEndpoint mock2 = getMockEndpoint("mock:result_aggregateSimple_2");
-        mock2.expectedMessageCount(4);
+        mock2.expectedMessageCount(8);
 
-        template.send("direct:aggregateSimple-mimeType=mico/test,syntacticType=A",createExchange());
-        template.send("direct:aggregateSimple-mimeType=mico/test,syntacticType=A",createExchange());
+        template.send("direct:aggregateSimple-mimeType=mico/test,syntacticType=A",
+       createExchange("direct:aggregateSimple-mimeType=mico/test,syntacticType=A"));
+        template.send("direct:aggregateSimple-mimeType=mico/test,syntacticType=A",
+       createExchange("direct:aggregateSimple-mimeType=mico/test,syntacticType=A"));
         assertMockEndpointsSatisfied();
     }
 
-    @Test(timeout=10000)
+    @Test(timeout=20000)
     public void testParallelFlowsRoute() throws Exception {
-        MockEndpoint mock1 = getMockEndpoint("mock:result_parallel_2");
+        MockEndpoint mock1 = getMockEndpoint("mock:result_parallel_1");
         mock1.expectedMinimumMessageCount(1);
         MockEndpoint mock2 = getMockEndpoint("mock:result_parallel_2");
         mock2.expectedMinimumMessageCount(1);
 
-        template.send("direct:parallelFlows-mimeType=mico/test,syntacticType=A",createExchange());
-        template.send("direct:parallelFlows-mimeType=mico/test,syntacticType=C",createExchange());
+        template.send("direct:parallelFlows-mimeType=mico/test,syntacticType=A",createExchange("direct:parallelFlows-mimeType=mico/test,syntacticType=A"));
+        template.send("direct:parallelFlows-mimeType=mico/test,syntacticType=C",createExchange("direct:parallelFlows-mimeType=mico/test,syntacticType=C"));
         assertMockEndpointsSatisfied();
     }
     
@@ -229,9 +231,9 @@ public class MicoRabbitComponentTest extends TestBase {
     public void testMultipleOutputPartsRoute() throws Exception {
         
     	MockEndpoint mock1 = getMockEndpoint("mock:two-bb-parts");
-        mock1.expectedMessageCount(8);	// NOTE: equal to the amount of DD parts created (MUST NOT be 2!)
+        mock1.expectedMessageCount(2+4+8);	// NOTE: equal to the amount of DD parts created (MUST NOT be 2!)
         MockEndpoint mock2 = getMockEndpoint("mock:four-cc-parts");
-        mock2.expectedMessageCount(8);  // NOTE: equal to the amount of DD parts created (MUST NOT be 4!)
+        mock2.expectedMessageCount(4+8);  // NOTE: equal to the amount of DD parts created (MUST NOT be 4!)
         MockEndpoint mock3 = getMockEndpoint("mock:eight-dd-parts");
         mock3.expectedMessageCount(8); 
 
@@ -246,17 +248,17 @@ public class MicoRabbitComponentTest extends TestBase {
     @Test(timeout=200000)
     public void testSampleSplitRoute() throws Exception {
         MockEndpoint mock2 = getMockEndpoint("mock:result_multicast_1");
-        mock2.expectedMessageCount(2);
+        mock2.expectedMessageCount(6);
         MockEndpoint mock3 = getMockEndpoint("mock:result_multicast_2");
-        mock3.expectedMessageCount(2);
+        mock3.expectedMessageCount(4);
 
-        template.send("direct:simpleMulticast-mimeType=mico/test,syntacticType=C", createExchange());
-        template.send("direct:simpleMulticast-mimeType=mico/test,syntacticType=C", createExchange());
+        template.send("direct:simpleMulticast-mimeType=mico/test,syntacticType=C", createExchange("direct:simpleMulticast-mimeType=mico/test,syntacticType=C"));
+        template.send("direct:simpleMulticast-mimeType=mico/test,syntacticType=C", createExchange("direct:simpleMulticast-mimeType=mico/test,syntacticType=C"));
         assertMockEndpointsSatisfied();
 
-        template.send("direct:mimeType=mico/test2,syntacticType=C", createExchange());
-        mock2.expectedMessageCount(3);
-        mock3.expectedMessageCount(2);
+        template.send("direct:mimeType=mico/test2,syntacticType=C", createExchange("direct:mimeType=mico/test2,syntacticType=C"));
+        mock2.expectedMessageCount(7);
+        mock3.expectedMessageCount(4);
         assertMockEndpointsSatisfied();
     }
 
@@ -265,8 +267,8 @@ public class MicoRabbitComponentTest extends TestBase {
             MockEndpoint mock2 = getMockEndpoint("mock:result_simple1");
             mock2.expectedMessageCount(2);
     
-            template.send("direct:simple1-mimeType=mico/test,syntacticType=A", createExchange());
-            template.send("direct:simple1-mimeType=mico/test,syntacticType=A", createExchange());
+            template.send("direct:simple1-mimeType=mico/test,syntacticType=A", createExchange("direct:simple1-mimeType=mico/test,syntacticType=A"));
+            template.send("direct:simple1-mimeType=mico/test,syntacticType=A", createExchange("direct:simple1-mimeType=mico/test,syntacticType=A"));
             assertMockEndpointsSatisfied();
     }
 
@@ -463,11 +465,6 @@ public class MicoRabbitComponentTest extends TestBase {
      * create exchange containing item and part uri of sample text content
      * @return an exchange containing item and part uri in headers
      */
-    
-    private Exchange createExchange(){
-    	return createExchange(textItemUri,"direct:a");
-    }
-    
     private Exchange createExchange(String directUri) {
         return createExchange(textItemUri,directUri);
     }

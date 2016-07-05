@@ -15,15 +15,27 @@
 	  <to uri="mock:result_inputDefinitionAndFiltering_afterExtractor"/>      
     </pipeline>
   </route>
-  <route id='workflow-inputDefinition-aggregator-0'>
-    <from uri='direct:workflow-inputDefinition-aggregator-0'/>
-    <aggregate strategyRef='itemAggregatorStrategy' completionSize='2'>
-      <correlationExpression>
-        <simple>header.mico_item</simple>
-      </correlationExpression>
-      <to uri='direct:workflow-inputDefinition-pipeline-0'/>
-    </aggregate>
-  </route>
+    <route id='workflow-inputDefinition-aggregator-0'>
+        <from uri='direct:workflow-inputDefinition-aggregator-0' />
+        <choice>
+            <when>
+                <simple>${header.aggegratedBy} == 'workflow-inputDefinition-aggregator-0'</simple>
+                <to uri="direct:workflow-inputDefinition-pipeline-0" />
+            </when>
+            <otherwise>
+                <aggregate strategyRef='itemAggregatorStrategy'
+                    completionSize='2'>
+                    <correlationExpression>
+                        <simple>header.mico_item</simple>
+                    </correlationExpression>
+                    <setHeader headerName="aggegratedBy">
+                        <simple>workflow-inputDefinition-aggregator-0</simple>
+                    </setHeader>
+                    <to uri='direct:workflow-inputDefinition-pipeline-0' />
+                </aggregate>
+            </otherwise>
+        </choice>
+    </route>
 </routes>
 
 

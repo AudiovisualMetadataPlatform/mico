@@ -1,26 +1,24 @@
 package eu.mico.platform.camel;
 
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Future;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.Message;
+import org.apache.camel.ProducerTemplate;
 import org.apache.camel.impl.DefaultProducer;
 import org.openrdf.model.impl.URIImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
@@ -53,7 +51,6 @@ public class MicoRabbitProducer extends DefaultProducer {
     
     //key = param name, value = value 
     private Map<String,String> parameters = new HashMap<String, String>();
-    private ObjectMapper mapper = new ObjectMapper();
 	private PersistenceService persistenceService;
 
     public MicoRabbitProducer(MicoRabbitEndpoint endpoint) {
@@ -124,19 +121,20 @@ public class MicoRabbitProducer extends DefaultProducer {
 
         AnalyseManager manager = new AnalyseManager(exchange, inEvent, channel);
         manager.sendEvent();
-        if(exchange.getPattern().equals(ExchangePattern.InOut)||true){
-            synchronized (queueId){
+        List<Future<Exchange>> pendingEvents;
+        pendingEvents= new ArrayList<Future<Exchange>>();
+        boolean newPartCreated = false; // indicates, if atleast one new part was created
+        synchronized (queueId){
             while (!manager.hasFinished() && !manager.hasError()) {
-                LOG.debug("..waiting for response..");
+                LOG.debug("..waiting for response from {}", queueId);
                 queueId.wait();   // wait for next message from manager
-                LOG.debug("..checking response..");
                 
                 //Here starts the horror story: 
                 
                 //For every new part BUT THE LAST ONE, trigger the next extractor in the chain
                 
                 String newObjectURI=null;
-                while(!manager.hasError() && (newObjectURI=manager.getNextObjectUri(false)) != null){
+                while(!manager.hasError() && (newObjectURI=manager.getNextObjectUri()) != null){
                 	
 
                     Exchange outExchange = endpoint.createExchange(exchange);
@@ -148,38 +146,38 @@ public class MicoRabbitProducer extends DefaultProducer {
 
                     //NOTE: here we produce an exchange to the very beginning of the pipeline, since we do not know which consumers are connected after us
                     //useless processing is going to be prevented by the check at the very beginning of the MicoRabbitProducer.process(...) function
-                    outExchange.getContext().createProducerTemplate().send((String) outMessage.getHeader(KEY_STARTING_DIRECT),outExchange);
+                    ProducerTemplate template = outExchange.getContext().createProducerTemplate();
+                    Future<Exchange> future = template.asyncSend((String) outMessage.getHeader(KEY_STARTING_DIRECT),outExchange);
+                    log.trace("send event for new part: {} to ",newObjectURI, outMessage.getHeader(KEY_STARTING_DIRECT));
+                    pendingEvents.add(future);
+                    newPartCreated=true;
 
                 }
-            }
-            }// end synch
-            
-            if(!manager.hasError()){
+            }// while manager not finished
+        }// end synch
+        
+        if(!manager.hasError()){
 
-                String nextObjectUri = manager.getNextObjectUri(true);
-                //if no part was produced
-	            if(nextObjectUri==null){
-	            	LOG.warn("No new part produced by service {}, stopping the current message routing.",queueId);
-	            	
-		            //stop the routing of the current exchange
-		            Message outMessage = exchange.getIn();
-		            outMessage.setBody(inMessage.getBody());
-		            exchange.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
-		            return;
-	            }
-	            //else, trigger the processing of the last unprocessed part
-	            
-             	Message outMessage = exchange.getIn();
-	            outMessage.getHeaders().putAll(exchange.getIn().getHeaders());
-                outMessage.setBody(generateTemplateRequest(inEvent.getItemUri(), nextObjectUri).toByteArray());
+            //if no part was produced
+            if(newPartCreated==false)//nextObjectUri==null){
+            {
+                LOG.info("No new part produced by service {}, stopping the current message routing.",queueId);
+            }
+            //stop the routing of the current exchange
+            Message outMessage = exchange.getIn();
+            outMessage.setBody(inMessage.getBody());
+            exchange.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
 
-            }
-            else{
-            	exchange.getIn().setHeader("error_class",exchange.getException());
-            	exchange.getIn().setBody(exchange.getException());
-            	throw exchange.getException();
-            }
-            
+        }
+        else{
+        	exchange.getIn().setHeader("error_class",exchange.getException());
+        	exchange.getIn().setBody(exchange.getException());
+        	throw exchange.getException();
+        }
+
+        //wait until processing of all new parts is finished
+        for(Future<Exchange> ex : pendingEvents){
+            ex.get();
         }
         LOG.info("extraction finished - {}",headerItemURI);
     }
@@ -432,11 +430,11 @@ public class MicoRabbitProducer extends DefaultProducer {
                 case FINISH:
                     // analyze process finished correctly, notify waiting
                     // threads to continue camel route
-                    // newObjectUri = null;
                     getChannel().basicAck(envelope.getDeliveryTag(), false);
                     finished = true;
                 }
                 //notify producer, to process message
+              log.trace("check if exchange from {} started at {} should be forwarded", exchange.getFromEndpoint(), exchange.getIn().getHeader(KEY_STARTING_DIRECT));
               synchronized (queueId) {
                 queueId.notify();
             }
@@ -481,13 +479,8 @@ public class MicoRabbitProducer extends DefaultProducer {
             return hasError;
         }
 
-        public String getNextObjectUri(boolean getLast) {
-            String uri = newObjectUris.poll();
-            if(!getLast && newObjectUris.isEmpty()){
-                newObjectUris.add(uri);
-                uri = null;
-            }
-            return uri;
+        public String getNextObjectUri() {
+            return newObjectUris.poll();
         }
 
     }
