@@ -31,7 +31,7 @@ import eu.mico.platform.persistence.model.Item;
  */
 public class MultithreadingTest extends TestBase {
 
-    private static final int BATCH_SIZE = 2;
+    private static final int BATCH_SIZE = 200;
     private static final int PART_REPLICAS = 5;
 
     // static variable for detecting if any exception was thrown during the
@@ -152,7 +152,7 @@ public class MultithreadingTest extends TestBase {
         checkAssumptions();
 
         // set logLevel to warn, since we are running many tests
-//        changeLogConfig();
+        changeLogConfig();
 
         createItems();
     }
