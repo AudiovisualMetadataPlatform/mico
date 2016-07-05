@@ -141,22 +141,19 @@ public abstract class BaseBrokerTest {
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         CloseableHttpResponse response = null;
-        try{
+        try {
             response = httpclient.execute(httpGetInfo);
             int status = response.getStatusLine().getStatusCode();
             log.info("looking for registration service at {}",httpGetInfo.toString());
-            if(status == 200){
-                HttpEntity entity = response.getEntity();
-                if (entity != null && entity.isStreaming()){
-                    // read content to avoid broken pipe on server
-                    EntityUtils.toString(entity,StandardCharsets.UTF_8);
-                }
+            if (status == 200) {
                 isRegistrationServiceAvailable = true;
-                }
+            }
         } catch (Exception ignore) {
         } finally {
-            if (response != null)
+            if (response != null){
+                readAndIgnoreResponseBody(response);
                 response.close();
+            }
         }
     }
 
@@ -361,11 +358,26 @@ public abstract class BaseBrokerTest {
 		//Execute and get the response.
 		CloseableHttpResponse response = httpclient.execute(httppost);
 		int status = response.getStatusLine().getStatusCode();
-		response.close();
+        readAndIgnoreResponseBody(response);
+        response.close();
 	    Assert.assertEquals(200, status);
 	}
-		
-	
+
+    /**
+     * workaround, to avoid broken-pipe on server when not reading body
+     *
+     * @param response
+     * @throws IOException
+     */
+    private static void readAndIgnoreResponseBody(CloseableHttpResponse response)
+            throws IOException {
+        HttpEntity entity = response.getEntity();
+        if (entity != null && entity.isStreaming()) {
+            // read content to avoid broken pipe on server
+            EntityUtils.toString(entity, StandardCharsets.UTF_8);
+        }
+    }
+
 	private static String createTestRegistrationXml( MockService s, String mimeType){
 		
 		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + 
