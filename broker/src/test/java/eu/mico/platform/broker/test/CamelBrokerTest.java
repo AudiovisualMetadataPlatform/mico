@@ -100,9 +100,9 @@ public class CamelBrokerTest extends BaseBrokerTest {
         setupMockAnalyser("B","C");
         
         MockEndpoint mock = getMockEndpoint("mock:result_aggregateSimple_1");
-        mock.expectedMessageCount(2);       
+        mock.expectedMessageCount(2);
         MockEndpoint mock2 = getMockEndpoint("mock:result_aggregateSimple_2");
-        mock.expectedMessageCount(2);       
+        mock2.expectedMessageCount(6);
 
         PersistenceService ps = broker.getPersistenceService();
         Item item = null;
@@ -125,7 +125,7 @@ public class CamelBrokerTest extends BaseBrokerTest {
 
             // each service should have added a part, so there are now four different parts
             parts = ImmutableSet.copyOf(item.getParts());
-            Assert.assertEquals(4, parts.size());
+            Assert.assertEquals(3, parts.size());
             Assert.assertThat(item.getSyntacticalType(), equalTo("A"));
             Assert.assertThat(item.getSemanticType(), equalTo("A"));
             Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("B1"))));
