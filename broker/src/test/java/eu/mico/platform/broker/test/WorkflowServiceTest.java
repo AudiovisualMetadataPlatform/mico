@@ -49,7 +49,7 @@ import java.util.Set;
 	private static final String USER="mico";
 	
     private static MicoCamelContext context = new MicoCamelContext();
-    private static Map<Integer,MICOCamelRoute> routes = new HashMap<Integer,MICOCamelRoute>();
+    private static Map<String,MICOCamelRoute> routes = new HashMap<String,MICOCamelRoute>();
     private static WorkflowManagementService service = null;
     
     
@@ -71,8 +71,8 @@ import java.util.Set;
     	
     	MockService abService = new MockService("A", "B");
     	String abWorkflow=createTestRoute(abService, "A", "mico/test");    	
-        int newId = service.addWorkflow(USER, "tw-1",abWorkflow , "[]","[]");
-        int nonExistingId = -1;
+        String newId = service.addWorkflow(USER, abWorkflow );
+        String nonExistingId = "notExistingId";
         
         assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, nonExistingId));
         assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, newId));
@@ -108,28 +108,28 @@ import java.util.Set;
     	
     	//add 100 workflows for user mico
     	for(int i=0; i<100; i++){
-    		ids.add(Integer.toString(service.addWorkflow(USER, "tw-"+1,createTestRoute(abService,"mico:Test","test/mico") , "[]","[]")));
+    		ids.add(service.addWorkflow(USER, createTestRoute(abService,"mico:Test","test/mico") ));
     	}
     	Assert.assertEquals(100,ids.size());
     	
     	
     	//add 50 workflows for user guest
     	for(int i=0; i<50; i++){
-    		ids2.add(Integer.toString(service.addWorkflow(GUEST, "tw-"+1,createTestRoute(abService,"mico:Test","test/mico") , "[]","[]")));
+    		ids2.add(service.addWorkflow(GUEST, createTestRoute(abService,"mico:Test","test/mico") ));
     	}
     	Assert.assertEquals(50,ids2.size());
     	
     	
     	try{
     	  	for(String id : ids){
-        		service.getCamelRoute(Integer.parseInt(id));
+        		service.getCamelRoute(id);
         	}
     	}catch(Exception e) {
     		Assert.fail("Unexpected exception while retrieving an existing workflow for user "+USER);
     	}
     	try{
     	  	for(String id : ids2){
-        		service.getCamelRoute(Integer.parseInt(id));
+        		service.getCamelRoute(id);
         	}
     	}catch(Exception e) {
     		Assert.fail("Unexpected exception while retrieving an existing workflow for user "+GUEST);
@@ -137,8 +137,8 @@ import java.util.Set;
     	
     	try{
     	  	for(String id : ids){
-        		service.deleteWorkflow(Integer.parseInt(id));
-        		assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, Integer.parseInt(id)));
+        		service.deleteWorkflow(id);
+        		assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, id));
         	}
     	}catch(Exception e) {
     		Assert.fail("Unexpected exception while deleting an existing workflow for user "+USER);
@@ -146,8 +146,8 @@ import java.util.Set;
     	
     	try{
     	  	for(String id : ids2){
-        		service.deleteWorkflow(Integer.parseInt(id));
-        		assertRouteStatus(RouteStatus.BROKEN,service.getStatus(GUEST, Integer.parseInt(id)));
+        		service.deleteWorkflow(id);
+        		assertRouteStatus(RouteStatus.BROKEN,service.getStatus(GUEST, id));
         	}
     	}catch(Exception e) {
     		Assert.fail("Unexpected exception while deleting an existing workflow for user "+GUEST);
@@ -164,6 +164,7 @@ import java.util.Set;
     	Assert.assertTrue(errorMessage,expected.toString().contentEquals(retrieved));
     }
     
+    private static Integer newID = 0;
     public static String createTestRoute( MockService s, String syntacticType, String mimeType){
 		
 		String startingPoint = "<route id='workflow-WORKFLOW_ID-starting-point-for-pipeline-0-mimeType="+mimeType+",syntacticType="+syntacticType+"'>" + "\n" +
@@ -183,7 +184,7 @@ import java.util.Set;
 						  "</route>";
 		
 		  
-		return ROUTE_PREAMBLE+startingPoint+pipeline+ROUTE_END;
+		return (ROUTE_PREAMBLE+startingPoint+pipeline+ROUTE_END).replace("WORKFLOW_ID", (newID++).toString());
 	}
  
 }
