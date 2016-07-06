@@ -75,19 +75,25 @@ public class WorkflowManagementService {
     	synchronized (camelRoutes) {
     		//add to memory
     		
-    		//1. verify tthat the route is correct
+    		//1. verify that the route is correct
     		MICOCamelRoute newRoute = new MICOCamelRoute().parseCamelRoute(route);
     		if (newRoute.getWorkflowId() == null ||
     			newRoute.getWorkflowId().isEmpty() ||
     			newRoute.getEntryPoints().size() == 0 ||
     			newRoute.getExtractorConfigurations().size() == 0){
-    			throw new IllegalArgumentException("The input route cannot be parced correctly, aborting");
+    			throw new IllegalArgumentException("The input route cannot be parsed correctly, aborting");
     		}
 
             String newId = newRoute.getWorkflowId();
-            camelContext.addRouteToContext(route);
-            camelRoutes.put(newId,newRoute);
             
+            MICOCamelRoute oldRoute = camelRoutes.get(newId);
+            if(oldRoute!=null){
+            	log.warn("Replacing existing route with id {}",newId);
+            	camelContext.removeRouteFromContext(oldRoute.getXmlCamelRoute());
+            }
+            
+            camelContext.addRouteToContext(route);
+            camelRoutes.put(newId,newRoute);            
             log.info("Persisted new workflow with ID {} belonging to user {}",newId,user);
 
             return newId;
@@ -103,13 +109,14 @@ public class WorkflowManagementService {
             IOException {
     	log.info("Removing workflow with ID {}",workflowId);
 
-    	
     	//delete from memory
-        String xmlRoute=getCamelRoute(workflowId);        
-    	camelContext.removeRouteFromContext(xmlRoute);
-        camelRoutes.remove(workflowId);        
-        
-        return Response.ok(ImmutableMap.of()).build();
+        String xmlRoute=getCamelRoute(workflowId);   
+        if(xmlRoute != null){
+	    	camelContext.removeRouteFromContext(xmlRoute);
+	        camelRoutes.remove(workflowId);
+	        return Response.ok(ImmutableMap.of()).build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
     
     /**
@@ -137,9 +144,14 @@ public class WorkflowManagementService {
     	
     	String status="BROKEN";
     	try{
-	        if (broker instanceof MICOBrokerImpl ){
-	        	String xmlCamelRoute=new String(getCamelRoute(workflowId));
-	        	status =  broker.getRouteStatus(xmlCamelRoute);
+	        if (broker instanceof MICOBrokerImpl){
+	        	String xmlCamelRoute=getCamelRoute(workflowId);
+	        	if(xmlCamelRoute != null){
+	        		status =  broker.getRouteStatus(xmlCamelRoute);
+	        	}
+	        	else{
+	        		log.error("No route with id {} is currently registered",workflowId);
+	        	}
 	        }
         }
     	catch(Exception e){
@@ -156,7 +168,11 @@ public class WorkflowManagementService {
     	log.info("Retrieving CamelRoute for workflow with ID {}",workflowId);
     	
     	//retrieve from memory
-    	return camelRoutes.get(workflowId).getXmlCamelRoute();
+    	MICOCamelRoute route = camelRoutes.get(workflowId);
+    	if(route != null){
+    		return route.getXmlCamelRoute();
+    	}
+    	return null ;
     }
 
 
