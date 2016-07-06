@@ -50,9 +50,9 @@ public class WorkflowManagementService {
     private MICOBroker broker;
 
     private MicoCamelContext camelContext;
-    private Map<Integer,MICOCamelRoute> camelRoutes;
+    private Map<String,MICOCamelRoute> camelRoutes;
 
-    public WorkflowManagementService(MICOBroker broker, MicoCamelContext camelContext, Map<Integer,MICOCamelRoute> camelRoutes) {
+    public WorkflowManagementService(MICOBroker broker, MicoCamelContext camelContext, Map<String,MICOCamelRoute> camelRoutes) {
         this.broker = broker;
         this.camelContext = camelContext;
         this.camelRoutes = camelRoutes;
@@ -68,25 +68,29 @@ public class WorkflowManagementService {
     @POST
     @Path("/add")
     @Produces("application/json")
-    public int addWorkflow(@FormParam("user") String user,
-    		@FormParam("workflowName") String workflowName,
-    		@FormParam("route") String route,
-    		@FormParam("links") String links, 
-    		@FormParam("nodes") String nodes)
+    public String addWorkflow(@FormParam("user") String user,
+    					   @FormParam("route") String route)
             throws RepositoryException, IOException {
         
-    	synchronized (newID) {
+    	synchronized (camelRoutes) {
     		//add to memory
-    		newID++;
-            String xmlCamelRoute = new String(route);
-            xmlCamelRoute = xmlCamelRoute.replaceAll("WORKFLOW_ID", newID.toString());
-            
-            camelContext.addRouteToContext(xmlCamelRoute);
-            camelRoutes.put(newID,new MICOCamelRoute().parseCamelRoute(xmlCamelRoute));
-            
-            log.info("Persisted new workflow with ID {} belonging to user {}",newID.toString(),user);
+    		
+    		//1. verify tthat the route is correct
+    		MICOCamelRoute newRoute = new MICOCamelRoute().parseCamelRoute(route);
+    		if (newRoute.getWorkflowId() == null ||
+    			newRoute.getWorkflowId().isEmpty() ||
+    			newRoute.getEntryPoints().size() == 0 ||
+    			newRoute.getExtractorConfigurations().size() == 0){
+    			throw new IllegalArgumentException("The input route cannot be parced correctly, aborting");
+    		}
 
-            return newID.intValue();
+            String newId = newRoute.getWorkflowId();
+            camelContext.addRouteToContext(route);
+            camelRoutes.put(newId,newRoute);
+            
+            log.info("Persisted new workflow with ID {} belonging to user {}",newId,user);
+
+            return newId;
 		}
         
     }
@@ -95,7 +99,7 @@ public class WorkflowManagementService {
     @POST
     @Path("/del/{id}")
     @Produces("application/json")
-    public Response deleteWorkflow(@PathParam("id") Integer workflowId ) throws RepositoryException,
+    public Response deleteWorkflow(@PathParam("id") String workflowId ) throws RepositoryException,
             IOException {
     	log.info("Removing workflow with ID {}",workflowId);
 
@@ -127,7 +131,7 @@ public class WorkflowManagementService {
     @Path("/status/{id}")
     @Produces("text/plain")
     public String getStatus(@QueryParam("user") String user,
-            @PathParam("id") Integer workflowId ) throws RepositoryException,
+            @PathParam("id") String workflowId ) throws RepositoryException,
             IOException {
         
     	
@@ -147,7 +151,7 @@ public class WorkflowManagementService {
     @GET
     @Path("/camel-route/{id}")
     @Produces("text/plain")
-    public String getCamelRoute(@PathParam("id") Integer workflowId ) throws RepositoryException,
+    public String getCamelRoute(@PathParam("id") String workflowId ) throws RepositoryException,
             IOException {
     	log.info("Retrieving CamelRoute for workflow with ID {}",workflowId);
     	
