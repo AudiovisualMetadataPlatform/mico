@@ -26,13 +26,16 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
 
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 
 
@@ -93,6 +96,50 @@ import java.util.Set;
         assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, nonExistingId));
     }
     
+	@Test
+	public void testReplaceExistingWorkflow() throws RepositoryException, IOException{
+		
+		MockService abService = new MockService("A", "B");
+    	MockService bcService = new MockService("B", "C");
+    	
+    	String routeAB = createTestRouteWithoutId(abService,  "A", "mico/test");
+    	String routeBC = createTestRouteWithoutId(bcService,  "B", "mico/test");
+    	
+    	service.addWorkflow(USER, routeAB);    	
+    	Assert.assertTrue(service.getCamelRoute("WORKFLOW_ID").contentEquals(routeAB));
+    	
+    	//check that we can replace routeAB with itself without the service throwing
+    	service.addWorkflow(USER, routeAB);
+    	Assert.assertTrue(service.getCamelRoute("WORKFLOW_ID").contentEquals(routeAB));
+    	
+    	//check that we can replace routeAB with routeBC without the service throwing
+    	service.addWorkflow(USER, routeBC);
+    	Assert.assertFalse(service.getCamelRoute("WORKFLOW_ID").contentEquals(routeAB));
+    	Assert.assertTrue(service.getCamelRoute("WORKFLOW_ID").contentEquals(routeBC));
+    	
+    	//check that if we replace routeBC with something not valid the service throws
+    	boolean serviceHasThrown = false;
+    	try{
+    		service.addWorkflow(USER, ROUTE_PREAMBLE+ROUTE_END);
+    	}
+    	catch(IllegalArgumentException e){
+    		serviceHasThrown = true;
+    	}
+    	Assert.assertTrue("The workflow management service should have thrown",serviceHasThrown);
+    	serviceHasThrown=false;
+    	
+    	//and that the content is unchanged
+    	Assert.assertTrue(service.getCamelRoute("WORKFLOW_ID").contentEquals(routeBC));
+    	
+    	//check that we are able to delete the route correctly
+    	Response r = service.deleteWorkflow("WORKFLOW_ID");
+    	Assert.assertEquals(Status.OK.getStatusCode(),r.getStatus());
+    	
+    	//and that a NOT_FOUND code is raised in case the route does not exist
+    	r = service.deleteWorkflow("WORKFLOW_ID");
+    	Assert.assertEquals(Status.NOT_FOUND.getStatusCode(),r.getStatus());
+    	
+	}
 
 	@Test
 	public void testAddRemoveWorkflows() throws RepositoryException, IOException{
@@ -167,11 +214,15 @@ import java.util.Set;
     private static Integer newID = 0;
     public static String createTestRoute( MockService s, String syntacticType, String mimeType){
 		
-		String startingPoint = "<route id='workflow-WORKFLOW_ID-starting-point-for-pipeline-0-mimeType="+mimeType+",syntacticType="+syntacticType+"'>" + "\n" +
-		                       	 "<from uri='direct:workflow-WORKFLOW_ID,mimeType="+mimeType+",syntacticType="+syntacticType+"'/>" +  "\n" +
-		                       	 "<to uri='direct:workflow-WORKFLOW_ID-pipeline-0'/>" + 
-		                       "</route>";
-		
+		return createTestRouteWithoutId(s,syntacticType,mimeType).replace("WORKFLOW_ID", (newID++).toString());
+	}
+    
+    public static String createTestRouteWithoutId( MockService s, String syntacticType, String mimeType){
+    	String startingPoint = "<route id='workflow-WORKFLOW_ID-starting-point-for-pipeline-0-mimeType="+mimeType+",syntacticType="+syntacticType+"'>" + "\n" +
+				              	 "<from uri='direct:workflow-WORKFLOW_ID,mimeType="+mimeType+",syntacticType="+syntacticType+"'/>" +  "\n" +
+				              	 "<to uri='direct:workflow-WORKFLOW_ID-pipeline-0'/>" + 
+				              "</route>";
+
 		String pipeline = "<route id='workflow-WORKFLOW_ID-pipeline-0'>" +
 					        "<from uri='direct:workflow-WORKFLOW_ID-pipeline-0'/>" + 
 					        "<pipeline>" +
@@ -182,9 +233,9 @@ import java.util.Set;
 						      "<to uri='mock:auto-test-route-"+s.getRequires()+"-"+s.getProvides()+"-"+mimeType+"'/>"+
 						    "</pipeline>"+
 						  "</route>";
-		
-		  
-		return (ROUTE_PREAMBLE+startingPoint+pipeline+ROUTE_END).replace("WORKFLOW_ID", (newID++).toString());
-	}
+
+
+		return (ROUTE_PREAMBLE+startingPoint+pipeline+ROUTE_END);
+    }
  
 }
