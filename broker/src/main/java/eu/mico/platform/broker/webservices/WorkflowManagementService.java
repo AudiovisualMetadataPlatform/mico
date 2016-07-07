@@ -42,6 +42,7 @@ public class WorkflowManagementService {
 
     private static Logger log = LoggerFactory.getLogger(WorkflowManagementService.class);
     private static Integer newID = -1;
+    
 
     
     @Context
@@ -51,6 +52,7 @@ public class WorkflowManagementService {
 
     private MicoCamelContext camelContext;
     private Map<String,MICOCamelRoute> camelRoutes;
+    private static Object camelLock = new Object();
 
     public WorkflowManagementService(MICOBroker broker, MicoCamelContext camelContext, Map<String,MICOCamelRoute> camelRoutes) {
         this.broker = broker;
@@ -72,7 +74,7 @@ public class WorkflowManagementService {
     					   @FormParam("route") String route)
             throws RepositoryException, IOException {
         
-    	synchronized (camelRoutes) {
+    	synchronized (camelLock) {
     		//add to memory
     		
     		//1. verify that the route is correct
@@ -107,16 +109,20 @@ public class WorkflowManagementService {
     @Produces("application/json")
     public Response deleteWorkflow(@PathParam("id") String workflowId ) throws RepositoryException,
             IOException {
-    	log.info("Removing workflow with ID {}",workflowId);
-
-    	//delete from memory
-        String xmlRoute=getCamelRoute(workflowId);   
-        if(xmlRoute != null){
-	    	camelContext.removeRouteFromContext(xmlRoute);
-	        camelRoutes.remove(workflowId);
-	        return Response.ok(ImmutableMap.of()).build();
-        }
-        return Response.status(Response.Status.NOT_FOUND).build();
+    	
+    	synchronized (camelLock) {
+    		
+	    	log.info("Removing workflow with ID {}",workflowId);
+	    	//delete from memory
+	        String xmlRoute=getCamelRoute(workflowId);   
+	        if(xmlRoute != null){
+		    	camelContext.removeRouteFromContext(xmlRoute);
+		        camelRoutes.remove(workflowId);
+		        return Response.ok(ImmutableMap.of()).build();
+	        }
+	        return Response.status(Response.Status.NOT_FOUND).build();
+        
+    	}
     }
     
     /**
@@ -141,23 +147,26 @@ public class WorkflowManagementService {
             @PathParam("id") String workflowId ) throws RepositoryException,
             IOException {
         
-    	
-    	String status="BROKEN";
-    	try{
-	        if (broker instanceof MICOBrokerImpl){
-	        	String xmlCamelRoute=getCamelRoute(workflowId);
-	        	if(xmlCamelRoute != null){
-	        		status =  broker.getRouteStatus(xmlCamelRoute);
-	        	}
-	        	else{
-	        		log.error("No route with id {} is currently registered",workflowId);
-	        	}
+    	synchronized (camelLock) {
+	    		
+	    	String status="BROKEN";
+	    	try{
+		        if (broker instanceof MICOBrokerImpl){
+		        	String xmlCamelRoute=getCamelRoute(workflowId);
+		        	if(xmlCamelRoute != null){
+		        		status =  broker.getRouteStatus(xmlCamelRoute);
+		        	}
+		        	else{
+		        		log.error("No route with id {} is currently registered",workflowId);
+		        	}
+		        }
 	        }
-        }
-    	catch(Exception e){
-    		log.error("Unable to retrieve status for workflow {}",workflowId);
+	    	catch(Exception e){
+	    		log.error("Unable to retrieve status for workflow {}",workflowId);
+	    	}
+	    	
+	        return status;
     	}
-        return status;
     }
     
     @GET
@@ -167,12 +176,16 @@ public class WorkflowManagementService {
             IOException {
     	log.info("Retrieving CamelRoute for workflow with ID {}",workflowId);
     	
-    	//retrieve from memory
-    	MICOCamelRoute route = camelRoutes.get(workflowId);
-    	if(route != null){
-    		return route.getXmlCamelRoute();
+    	synchronized (camelLock) {
+    		
+	    	//retrieve from memory
+	    	MICOCamelRoute route = camelRoutes.get(workflowId);
+	    	if(route != null){
+	    		return route.getXmlCamelRoute();
+	    	}
+	    	return null ;
+	    	
     	}
-    	return null ;
     }
 
 
