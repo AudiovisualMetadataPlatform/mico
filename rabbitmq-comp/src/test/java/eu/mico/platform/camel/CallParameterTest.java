@@ -19,7 +19,6 @@ import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.RoutesDefinition;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
 
