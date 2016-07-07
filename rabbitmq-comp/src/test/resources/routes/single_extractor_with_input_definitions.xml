@@ -19,7 +19,7 @@
         <from uri='direct:workflow-inputDefinition-aggregator-0' />
         <choice>
             <when>
-                <simple>${header.aggegratedBy} == 'workflow-inputDefinition-aggregator-0'</simple>
+                <simple>${header.skip_aggregation} == 'true'</simple>
                 <to uri="direct:workflow-inputDefinition-pipeline-0" />
             </when>
             <otherwise>

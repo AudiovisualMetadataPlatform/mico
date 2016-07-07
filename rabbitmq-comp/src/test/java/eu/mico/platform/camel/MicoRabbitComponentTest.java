@@ -203,10 +203,12 @@ public class MicoRabbitComponentTest extends TestBase {
 
     @Test(timeout=20000)
     public void testSimpleAggregateRoute() throws Exception {
+    	//TODO: check that the amount of C parts is correct 
+    	
         MockEndpoint mock1 = getMockEndpoint("mock:result_aggregateSimple_1");
-        mock1.expectedMessageCount(4);
+        mock1.expectedMessageCount(8);
         MockEndpoint mock2 = getMockEndpoint("mock:result_aggregateSimple_2");
-        mock2.expectedMessageCount(8);
+        mock2.expectedMessageCount(4);
 
         template.send("direct:aggregateSimple-mimeType=mico/test,syntacticType=A",
        createExchange("direct:aggregateSimple-mimeType=mico/test,syntacticType=A"));
