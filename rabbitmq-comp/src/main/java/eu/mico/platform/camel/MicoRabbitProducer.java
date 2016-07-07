@@ -11,7 +11,6 @@ import java.util.concurrent.Future;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
-import org.apache.camel.ExchangePattern;
 import org.apache.camel.Message;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.impl.DefaultProducer;
@@ -44,7 +43,7 @@ public class MicoRabbitProducer extends DefaultProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(MicoRabbitProducer.class);
     private MicoRabbitEndpoint endpoint;
-    private String queueId;
+    private final String queueId;
     
     //key = syntacticType, value = list of mime types
     private Map<String,List<String>> modeInputs = new HashMap<String, List<String>>();
@@ -127,7 +126,7 @@ public class MicoRabbitProducer extends DefaultProducer {
         synchronized (queueId){
             while (!manager.hasFinished() && !manager.hasError()) {
                 LOG.debug("..waiting for response from {}", queueId);
-                queueId.wait();   // wait for next message from manager
+                queueId.wait(3000);   // wait for next message from manager
                 
                 //Here starts the horror story: 
                 
@@ -434,9 +433,8 @@ public class MicoRabbitProducer extends DefaultProducer {
                     getChannel().close();
                     finished = true;
                 }
-                //notify producer, to process message
-              log.trace("check if exchange from {} started at {} should be forwarded", exchange.getFromEndpoint(), exchange.getIn().getHeader(KEY_STARTING_DIRECT));
-              synchronized (queueId) {
+            // notify producer, to process message
+            synchronized (queueId) {
                 queueId.notify();
             }
         }

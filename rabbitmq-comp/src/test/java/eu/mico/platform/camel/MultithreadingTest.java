@@ -79,7 +79,7 @@ public class MultithreadingTest extends TestBase {
 
                 from("direct:complex-test-A-B1")
                         .pipeline()
-                        .to("mock:in-direct:complex-test-A-B1")
+                        .to("mock:in-direct:complex-test-A-B1?retainLast=100")
                         .to("mico-comp:complexbox1?host="
                                 + testHost
                                 + "&extractorId=mico-extractor-complex-test&extractorVersion=1.0.0&modeId=A-B1orB2-queue&parameters={\"outputType\":\"B1\"}")
@@ -107,19 +107,19 @@ public class MultithreadingTest extends TestBase {
 
                 from("direct:complex-test-B1-C1")
                         .pipeline()
-                        .to("mock:in-direct:complex-test-B1-C1")
+                        .to("mock:in-direct:complex-test-B1-C1?retainLast=100")
                         .to("mico-comp:complexbox1?host="
                                 + testHost
                                 + "&extractorId=mico-extractor-complex-test&extractorVersion=1.0.0&modeId=B1-C1-queue&inputs={\"B1\":[\"application/x-mico-rdf\"]}")
-                        .to("mock:out-direct:complex-test-B1-C1");
+                        .to("mock:out-direct:complex-test-B1-C1?retainLast=100");
 
                 from("direct:complex-test-B2-C2")
                         .pipeline()
-                        .to("mock:in-direct:complex-test-B2-C2")
+                        .to("mock:in-direct:complex-test-B2-C2?retainLast=100")
                         .to("mico-comp:complexbox1?host="
                                 + testHost
                                 + "&extractorId=mico-extractor-complex-test&extractorVersion=1.0.0&modeId=B2-C2-queue&inputs={\"B2\":[\"application/x-mico-rdf\"]}")
-                        .to("mock:out-direct:complex-test-B2-C2");
+                        .to("mock:out-direct:complex-test-B2-C2?retainLast=100");
 
                 try {
                     context.getManagementStrategy().addEventNotifier(new LoggingSentEventNotifier());
@@ -178,11 +178,11 @@ public class MultithreadingTest extends TestBase {
 
     @Test
     public void TestA_B1() throws InterruptedException {
-        MockEndpoint mock2 = getMockEndpoint("mock:in-direct:complex-test-A-B1");
+        MockEndpoint mock2 = getMockEndpoint("mock:in-direct:complex-test-A-B1?retainLast=100");
         mock2.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (PART_REPLICAS+1)+BATCH_SIZE);
-        MockEndpoint mock = getMockEndpoint("mock:in-direct:complex-test-B1-C1");
+        MockEndpoint mock = getMockEndpoint("mock:in-direct:complex-test-B1-C1?retainLast=100");
         mock.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (PART_REPLICAS+1));
-        MockEndpoint mock1 = getMockEndpoint("mock:out-direct:complex-test-B1-C1");
+        MockEndpoint mock1 = getMockEndpoint("mock:out-direct:complex-test-B1-C1?retainLast=100");
         mock1.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * PART_REPLICAS);
 
         final String endpointUri = "direct:complex-test-A-B1";
@@ -195,9 +195,9 @@ public class MultithreadingTest extends TestBase {
 
     @Test
     public void TestA_B2() throws InterruptedException {
-        MockEndpoint mock = getMockEndpoint("mock:in-direct:complex-test-B2-C2");
+        MockEndpoint mock = getMockEndpoint("mock:in-direct:complex-test-B2-C2?retainLast=100");
         mock.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (PART_REPLICAS+1));
-        MockEndpoint mock1 = getMockEndpoint("mock:out-direct:complex-test-B2-C2");
+        MockEndpoint mock1 = getMockEndpoint("mock:out-direct:complex-test-B2-C2?retainLast=100");
         mock1.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * PART_REPLICAS);
 
         final String endpointUri = "direct:complex-test-A-B2";
@@ -210,13 +210,13 @@ public class MultithreadingTest extends TestBase {
 
     @Test
     public void TestA_B1andB2() throws InterruptedException {
-        MockEndpoint mock = getMockEndpoint("mock:in-direct:complex-test-B1-C1");
+        MockEndpoint mock = getMockEndpoint("mock:in-direct:complex-test-B1-C1?retainLast=100");
         mock.expectedMessageCount(BATCH_SIZE * 2 * PART_REPLICAS * (PART_REPLICAS+1));
-        MockEndpoint mockout = getMockEndpoint("mock:out-direct:complex-test-B1-C1");
+        MockEndpoint mockout = getMockEndpoint("mock:out-direct:complex-test-B1-C1?retainLast=100");
         mockout.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (2 * PART_REPLICAS));
-        MockEndpoint mock2 = getMockEndpoint("mock:in-direct:complex-test-B2-C2");
+        MockEndpoint mock2 = getMockEndpoint("mock:in-direct:complex-test-B2-C2?retainLast=100");
         mock2.expectedMessageCount(BATCH_SIZE * 2 * PART_REPLICAS * (PART_REPLICAS+1));
-        MockEndpoint mock2out = getMockEndpoint("mock:out-direct:complex-test-B2-C2");
+        MockEndpoint mock2out = getMockEndpoint("mock:out-direct:complex-test-B2-C2?retainLast=100");
         mock2out.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (2 * PART_REPLICAS));
 
         final String endpointUri = "direct:complex-test-A-B1andB2";
@@ -253,7 +253,7 @@ public class MultithreadingTest extends TestBase {
         List<Future<?>> tasks = new ArrayList<Future<?>>();
         for (Item i : items) {
             final String uri = i.getURI().stringValue();
-            ExecutorService executor = Executors.newFixedThreadPool(6);
+            ExecutorService executor = Executors.newFixedThreadPool(10);
             tasks.add(executor.submit(new Runnable() {
 
                 @Override
@@ -275,7 +275,9 @@ public class MultithreadingTest extends TestBase {
     }
     
     /**
-     * @param base number of parts which should have been created (without part replication)
+     * @param base number of route branches, which are used in the test <br>
+     *             <b>1</b> for test-A_B1 and test-A_B2 <br>
+     *             <b>2</b> for test-A_B1andB2 
      */
     private void checkItems(int base) {
         for (Item i : items) {
