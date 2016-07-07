@@ -431,6 +431,7 @@ public class MicoRabbitProducer extends DefaultProducer {
                     // analyze process finished correctly, notify waiting
                     // threads to continue camel route
                     getChannel().basicAck(envelope.getDeliveryTag(), false);
+                    getChannel().close();
                     finished = true;
                 }
                 //notify producer, to process message

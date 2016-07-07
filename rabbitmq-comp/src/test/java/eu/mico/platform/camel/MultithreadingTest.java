@@ -3,6 +3,11 @@ package eu.mico.platform.camel;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -17,6 +22,8 @@ import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableSet;
+
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
@@ -24,6 +31,7 @@ import de.fraunhofer.idmt.camel.MicoCamel;
 import de.fraunhofer.idmt.mico.DummyExtractorComplexTest;
 import eu.mico.platform.camel.log.LoggingSentEventNotifier;
 import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Part;
 
 /**
  * @author sld
@@ -177,22 +185,12 @@ public class MultithreadingTest extends TestBase {
         MockEndpoint mock1 = getMockEndpoint("mock:out-direct:complex-test-B1-C1");
         mock1.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * PART_REPLICAS);
 
-        for (Item i : items) {
-            final String uri = i.getURI().stringValue();
-            log.debug("send item: {}", uri);
-            new Runnable() {
+        final String endpointUri = "direct:complex-test-A-B1";
+        injectItems(endpointUri);
 
-                @Override
-                public void run() {
-                    template.send("direct:complex-test-A-B1",
-                            createExchange(uri, "direct:complex-test-A-B1"));
-                }
-            }.run();
-
-        }
+        checkItems(1);
         assertNull(camelException);
-
-        assertMockEndpointsSatisfied();
+        assertMockEndpointsSatisfied(20,TimeUnit.SECONDS);
     }
 
     @Test
@@ -202,14 +200,12 @@ public class MultithreadingTest extends TestBase {
         MockEndpoint mock1 = getMockEndpoint("mock:out-direct:complex-test-B2-C2");
         mock1.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * PART_REPLICAS);
 
-        for (Item i : items) {
-            template.send(
-                    "direct:complex-test-A-B2",
-                    createExchange(i.getURI().stringValue(),
-                            "direct:complex-test-A-B2"));
-        }
+        final String endpointUri = "direct:complex-test-A-B2";
+        injectItems(endpointUri);
+        
+        checkItems(1);
         assertNull(camelException);
-        assertMockEndpointsSatisfied();
+        assertMockEndpointsSatisfied(20,TimeUnit.SECONDS);
     }
 
     @Test
@@ -223,14 +219,12 @@ public class MultithreadingTest extends TestBase {
         MockEndpoint mock2out = getMockEndpoint("mock:out-direct:complex-test-B2-C2");
         mock2out.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (2 * PART_REPLICAS));
 
-        for (Item i : items) {
-            template.send(
-                    "direct:complex-test-A-B1andB2",
-                    createExchange(i.getURI().stringValue(),
-                            "direct:complex-test-A-B1andB2"));
-        }
+        final String endpointUri = "direct:complex-test-A-B1andB2";
+        injectItems(endpointUri);
+
+        checkItems(2);
         assertNull(camelException);
-        assertMockEndpointsSatisfied();
+        assertMockEndpointsSatisfied(20,TimeUnit.SECONDS);
     }
 
     /**
@@ -244,9 +238,62 @@ public class MultithreadingTest extends TestBase {
         for (int i = 0; i < BATCH_SIZE; i++) {
             Item item = micoCamel.createItem();
             item.setSyntacticalType("A");
+            item.setSemanticType("Item-"+String.format("%03d", i));
             items.add(item);
         }
 
+    }
+
+    /**
+     * @param endpointUri
+     * @throws InterruptedException
+     */
+    private void injectItems(final String endpointUri)
+            throws InterruptedException {
+        List<Future<?>> tasks = new ArrayList<Future<?>>();
+        for (Item i : items) {
+            final String uri = i.getURI().stringValue();
+            ExecutorService executor = Executors.newFixedThreadPool(6);
+            tasks.add(executor.submit(new Runnable() {
+
+                @Override
+                public void run() {
+                    template.send(endpointUri,
+                            createExchange(uri, endpointUri));
+                }
+            }));
+
+        }
+        //wait for all injects to finish
+        for (Future<?> t : tasks){
+            try {
+                t.get();
+            } catch (ExecutionException e) {
+                fail(e.getMessage());
+            }
+        }
+    }
+    
+    /**
+     * @param base number of parts which should have been created (without part replication)
+     */
+    private void checkItems(int base) {
+        for (Item i : items) {
+            try {
+                int expected = base
+                        * (PART_REPLICAS + PART_REPLICAS * PART_REPLICAS);
+                ImmutableSet<Part> parts = ImmutableSet.copyOf(i.getParts());
+                if (expected != parts.size()) {
+                    log.error("item {}[{}] has wrong amount of parts ({}/{})",
+                            i.getURI(), i.getSemanticType(), parts.size(),
+                            expected);
+                    fail("item with " + parts.size() + " parts should have "
+                            + expected);
+                }
+            } catch (RepositoryException e) {
+                fail("Error getting parts: " + e.getMessage());
+            }
+        }
     }
 
     /**
