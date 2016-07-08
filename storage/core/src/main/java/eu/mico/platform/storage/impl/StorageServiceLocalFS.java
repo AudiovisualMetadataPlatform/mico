@@ -59,6 +59,7 @@ public class StorageServiceLocalFS implements StorageService {
 
     private File getContentPartPath(URI contentPath) {
         String contentPathPath = contentPath.getPath();
+
         if (contentPathPath == null)    {
             throw new IllegalArgumentException("contentPath must contain path");
         }
@@ -73,11 +74,21 @@ public class StorageServiceLocalFS implements StorageService {
 
         }
 
-        String path = Paths.get(contentPathPath).normalize().toString();
-        while(path.startsWith(File.separator))
-            path = path.substring(File.separator.length());
-        if (contentPath.getPath().endsWith(File.separator) || path.isEmpty())
+        // on windows, we have to check both...
+        if (contentPathPath.endsWith(File.separator) || contentPathPath.endsWith("/"))
             return null;
+
+        String path = Paths.get(contentPathPath).normalize().toString();
+
+        while(path.startsWith(File.separator)) {
+            path = path.substring(File.separator.length());
+        }
+
+        if (path.isEmpty()) {
+            return null;
+        }
+
+
         File file = basePath.resolve(path + ".bin").normalize().toFile();
         if (!file.toPath().startsWith(basePath))
             return null;

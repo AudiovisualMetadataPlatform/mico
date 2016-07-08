@@ -65,19 +65,19 @@ public class StorageServiceLocalFSTest {
     }
 
     @Test
-    public void testWindowsPath() throws Exception {
-
-        StorageServiceLocalFS storage = new StorageServiceLocalFS(basePath);
-        URI winPath = URI.create("file:/X:/workspace/bla");
-
-        Assert.assertNull(storage.getOutputStream(winPath));
-    }
-
-    @Test
     public void testDirectoryName() throws IOException, URISyntaxException {
         StorageServiceLocalFS storage = new StorageServiceLocalFS(basePath);
         Assert.assertNull(storage.getOutputStream(new URI("test/")));
     }
+
+    @Test
+    public void testWindowsPath() throws Exception {
+
+        StorageServiceLocalFS storage = new StorageServiceLocalFS(basePath);
+        URI winPath = URI.create("file:/X:/workspace/bla");
+        Assert.assertNull(storage.getOutputStream(winPath));
+    }
+
 
     @Test
     public void testRecursiveDelete() throws IOException, URISyntaxException {
