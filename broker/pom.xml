@@ -97,6 +97,11 @@
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>
                 <artifactId>tomcat7-maven-plugin</artifactId>
+                <configuration>
+                    <url>http://mico-platform:8080/manager/text</url>
+                    <server>mico-deployment</server>
+                    <update>true</update>
+                </configuration>
             </plugin>
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
@@ -108,7 +113,7 @@
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
-                    <skip>true</skip>
+                    <skip>false</skip>
                 </configuration>
             </plugin>
         </plugins>
