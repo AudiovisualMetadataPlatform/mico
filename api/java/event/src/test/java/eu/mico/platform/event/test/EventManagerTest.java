@@ -29,6 +29,8 @@ import java.util.concurrent.TimeoutException;
 
 import javax.xml.bind.DatatypeConverter;
 
+import com.github.anno4j.Transaction;
+import eu.mico.platform.event.api.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.marmotta.platform.core.test.base.JettyMarmotta;
@@ -66,9 +68,6 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 
 import eu.mico.platform.anno4j.model.namespaces.MMM;
-import eu.mico.platform.event.api.AnalysisResponse;
-import eu.mico.platform.event.api.AnalysisService;
-import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event;
@@ -116,7 +115,7 @@ public class EventManagerTest extends BaseCommunicationTest {
     
     protected static String storageBaseUri;
     private EventManager eventMgr;
-    private AnalysisServiceMock service;
+    private AnalysisServiceBase service;
 
     private Item item;
 
@@ -233,6 +232,30 @@ public class EventManagerTest extends BaseCommunicationTest {
         BasicItemManager itemManager = new BasicItemManager(service, item);
         itemManager.processAndWait(5000); //5sec
         
+        Assert.assertTrue(itemManager.isFinished());
+        Assert.assertFalse(itemManager.isError());
+    }
+
+    /**
+     * This tests the correct handling of successful analysis requests.
+     */
+    @Test
+    public void testSuccessAnno4j() throws IOException, InterruptedException, URISyntaxException, TimeoutException, RepositoryException {
+        String syntacticalType = "text/plain";
+        service = registerAndAssertService(
+                new AnalysisServiceAnno4jMock("successTest", syntacticalType, "text/turtle"));
+
+        item = persistenceService.createItem();
+        Asset asset = item.getAsset();
+        item.setSyntacticalType(syntacticalType);
+        asset.setFormat(syntacticalType);
+        OutputStream out = asset.getOutputStream();
+        IOUtils.write("This is just some dummy text", out, "UTF-8");
+        IOUtils.closeQuietly(out);
+
+        BasicItemManager itemManager = new BasicItemManager(this.service, item);
+        itemManager.processAndWait(5000); //5sec
+
         Assert.assertTrue(itemManager.isFinished());
         Assert.assertFalse(itemManager.isError());
     }
@@ -376,9 +399,13 @@ public class EventManagerTest extends BaseCommunicationTest {
         
         BasicItemManager itemManager = new BasicItemManager(service, item);
         itemManager.processAndWait(5000); //5sec
-        
-        Assert.assertEquals(service.getCallCount(), 2); //first unsuccessful, second succeed
-        
+
+        if (service instanceof AnalysisServiceAnno4jMock) {
+            Assert.assertEquals(((AnalysisServiceAnno4jMock)service).getCallCount(), 2); //first unsuccessful, second succeed
+        } else {
+            Assert.assertEquals(((AnalysisServiceMock)service).getCallCount(), 2); //first unsuccessful, second succeed
+        }
+
         Assert.assertTrue(itemManager.isFinished());
         Assert.assertFalse(itemManager.isError());
     }
@@ -540,7 +567,7 @@ public class EventManagerTest extends BaseCommunicationTest {
         }
     }
     
-    private AnalysisServiceMock registerAndAssertService(AnalysisServiceMock mock)
+    private AnalysisServiceBase registerAndAssertService(AnalysisServiceBase mock)
             throws IOException, InterruptedException {
         eventMgr.registerService(mock);
         // give the queue some time and then test for registration success
@@ -597,7 +624,7 @@ public class EventManagerTest extends BaseCommunicationTest {
 
         private final Logger log = LoggerFactory.getLogger(getClass());
         
-        private final AnalysisService service;
+        private final AnalysisServiceBase service;
         private final Item item;
         private final String queue;
         private final String queueTag;
@@ -609,7 +636,7 @@ public class EventManagerTest extends BaseCommunicationTest {
         private final List<URI> newParts = new LinkedList<>();
 
 
-        public BasicItemManager(AnalysisService service, Item item) throws IOException {
+        public BasicItemManager(AnalysisServiceBase service, Item item) throws IOException {
             super(connection.createChannel());
             this.service = service;
             this.item = item;
@@ -740,6 +767,105 @@ public class EventManagerTest extends BaseCommunicationTest {
             return progresses;
         }
         
+    }
+
+    private static class AnalysisServiceAnno4jMock implements AnalysisServiceAnno4j {
+
+        private final String queueName;
+        private final URI serviceId;
+        private final String provides;
+        private final String extractorId;
+        private final String extractorModeId;
+        private final String extractorVersion;
+        private final String requires;
+        private int called = 0;
+
+        public AnalysisServiceAnno4jMock(String queueName, String requires, String provides) {
+
+            this.provides = provides;
+            this.requires = requires;
+            this.serviceId =  new URIImpl("http://example.org/services/"+queueName);
+            this.extractorId = queueName;
+            this.extractorModeId = "Mode-"+requires+"-"+provides;
+            this.extractorVersion = "Version";
+            this.queueName = this.extractorId+"-"+this.extractorVersion+"-"+this.extractorModeId;
+        }
+
+        @Override
+        public final URI getServiceID() {
+            return serviceId;
+        }
+
+        @Override
+        public final String getProvides() {
+            return provides;
+        }
+
+        @Override
+        public final String getRequires() {
+            return requires;
+        }
+
+        @Override
+        public final String getQueueName() {
+            return queueName;
+        }
+
+        @Override
+        public final void call(AnalysisResponse resp, Item ci, List<Resource> object, Map<String,String> params, Transaction transaction) throws AnalysisException, IOException, RepositoryException {
+            called++;
+            Assert.assertNotNull(resp);
+            Assert.assertNotNull(ci);
+            Assert.assertNotNull(object);
+            Assert.assertFalse(object.isEmpty());
+            Assert.assertNotNull(params);
+            internalCall(resp, ci, object, params);
+        }
+        /**
+         * internal method requests
+         * are forwarded after counting and parameter validation. The default
+         * implementation will call {@link AnalysisResponse#sendFinish(Item)}.
+         * Can be overridden to mock analysis services with different behaviors.
+         * @param resp
+         * @param ci
+         * @param object
+         * @param params
+         * @throws AnalysisException
+         * @throws IOException
+         * @throws RepositoryException
+         */
+        protected void internalCall(AnalysisResponse resp, Item ci, List<Resource> object, Map<String,String> params) throws AnalysisException, IOException, RepositoryException {
+            resp.sendFinish(ci);
+        }
+
+        public boolean wasCalled(){
+            return called > 0;
+        }
+
+        public int getCallCount(){
+            return called;
+        }
+
+        @Override
+        public String toString() {
+            return "AnalysisService[id="+serviceId+" | queue="+queueName+"]";
+        }
+
+        @Override
+        public String getExtractorID() {
+            return extractorId;
+        }
+
+        @Override
+        public String getExtractorModeID() {
+            return extractorModeId;
+        }
+
+        @Override
+        public String getExtractorVersion() {
+            return extractorVersion;
+        }
+
     }
     
 
