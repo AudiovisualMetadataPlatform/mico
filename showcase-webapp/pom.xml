@@ -155,6 +155,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.github.anno4j</groupId>
+            <artifactId>anno4j-core</artifactId>
+            <version>${anno4j.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>eu.mico-project.platform</groupId>
             <artifactId>fam-anno4j</artifactId>
             <version>2.0.2</version>
@@ -194,6 +200,7 @@
 
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>
+                <version>2.2</version>
                 <artifactId>tomcat7-maven-plugin</artifactId>
                 <configuration>
                     <url>http://mico-platform:8080/manager/text</url>

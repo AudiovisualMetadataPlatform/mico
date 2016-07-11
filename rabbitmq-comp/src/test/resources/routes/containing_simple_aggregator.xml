@@ -23,20 +23,32 @@
     <from uri='direct:workflow-aggregateSimple-pipeline-4'/>
     <pipeline>
       <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=A-B2-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=A-B2'/>
+      <to uri="mock:result_aggregateSimple_1" />
     </pipeline>
     <to uri='direct:workflow-aggregateSimple-aggregator-0'/>
   </route>
   <route id='workflow-aggregateSimple-aggregator-0'>
-    <from uri='direct:workflow-aggregateSimple-aggregator-0'/>
-    <aggregate strategyRef='simpleAggregatorStrategy' completionSize='1'>
-      <correlationExpression>
-        <simple>header.mico_item</simple>
-      </correlationExpression>
-      <to uri='direct:workflow-aggregateSimple-pipeline-0'/>
-      <to uri="mock:result_aggregateSimple_1"/>
-    </aggregate>
-    <to uri="mock:result_aggregateSimple_2"/>
+    <from uri='direct:workflow-aggregateSimple-aggregator-0' />
+    <choice>
+      <when>
+        <simple>${header.skip_aggregation} == 'true'</simple>
+        <to uri="log:SKIPPING_AGGREGATION, since the header was set"/>
+        <to uri="direct:workflow-aggregateSimple-pipeline-0" />
+      </when>
+      <otherwise>
+        <aggregate strategyRef='simpleAggregatorStrategy'
+          completionSize='1'>
+          <correlationExpression>
+            <simple>header.mico_item</simple>
+          </correlationExpression>
+          <setHeader headerName="aggegratedBy">
+              <simple>workflow-aggregateSimple-aggregator-0</simple>
+          </setHeader>
+          <to uri='direct:workflow-aggregateSimple-pipeline-0' />
+        </aggregate>
+        <to uri="mock:result_aggregateSimple_2" />
+      </otherwise>
+    </choice>
   </route>
-<!--   <bean id= "simpleAggregatorStrategy" class = "eu.mico.platform.camel.aggretation.SimpleAggregationStrategy"> -->
-<!--   </bean> -->
+
 </routes>

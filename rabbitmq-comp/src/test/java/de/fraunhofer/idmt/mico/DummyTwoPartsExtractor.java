@@ -34,9 +34,9 @@ import java.util.Map;
 import java.util.TimeZone;
 
 
-public class DummyExtractor implements AnalysisService {
+public class DummyTwoPartsExtractor implements AnalysisService {
 
-	private static Logger log = LoggerFactory.getLogger(DummyExtractor.class);
+	private static Logger log = LoggerFactory.getLogger(DummyTwoPartsExtractor.class);
     private boolean called = false;
     private String source, target;
     private String extractorId, version, mode;
@@ -55,10 +55,10 @@ public class DummyExtractor implements AnalysisService {
 		this.called = called;
 	}
 
-    public DummyExtractor(String source, String target) {
+    public DummyTwoPartsExtractor(String source, String target) {
         this(source, target, StringUtils.capitalize(source)+"-"+StringUtils.capitalize(target), "0.0.0", "queue");
     }
-	public DummyExtractor(String source, String target, String extractorID, String version, String mode) {
+	public DummyTwoPartsExtractor(String source, String target, String extractorID, String version, String mode) {
         this.source = source;
         this.target = target;
         this.extractorId = extractorID;
@@ -129,6 +129,7 @@ public class DummyExtractor implements AnalysisService {
         log.info("mock analysis request for content item {}, object {}", item.getURI(), obj.getURI());
         Part part = null;
         try {
+        	for(int i = 0; i<2; i++){
             ObjectConnection con = item.getObjectConnection();
             ObjectFactory factory = con.getObjectFactory();
             part = item.createPart(getServiceID());
@@ -167,8 +168,8 @@ public class DummyExtractor implements AnalysisService {
             log.info("new contentpart added: {}", part.getURI());
 
             resp.sendNew(item,part.getURI());
-            setCalled(true);
-            resp.sendFinish(item);
+        	}
+            setCalled(true);resp.sendFinish(item);
         } catch (RepositoryException e) {
             throw new AnalysisException("could not access triple store");
         }

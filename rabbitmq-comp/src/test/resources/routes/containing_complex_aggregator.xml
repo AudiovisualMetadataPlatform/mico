@@ -11,16 +11,28 @@
     <from uri='direct:workflow-aggregateComplex-pipeline-0'/>
     <pipeline>
       <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=AB-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=AB-C-queue'/>
+      <to uri="mock:result_aggregateComplex_1"/>
     </pipeline>
   </route>
   <route id='workflow-aggregateComplex-aggregator-0'>
     <from uri='direct:workflow-aggregateComplex-aggregator-0'/>
+    <choice>
+      <when>
+        <simple>${header.skip_aggregation} == 'true'</simple>
+        <to uri="log:SKIPPING_AGGREGATION, since the header was set"/>
+        <to uri="direct:workflow-aggregateComplex-pipeline-0"/>
+      </when>
+      <otherwise>
     <aggregate strategyRef='itemAggregatorStrategy' completionSize='2'>
       <correlationExpression>
         <simple>header.mico_item</simple>
       </correlationExpression>
+      <setHeader headerName="aggegratedBy">
+        <simple>workflow-aggregateComplex-aggregator-0</simple>
+      </setHeader>
       <to uri='direct:workflow-aggregateComplex-pipeline-0'/>
-      <to uri="mock:result_aggregateComplex_1"/>
     </aggregate>
+      </otherwise>
+    </choice>
   </route>
 </routes>

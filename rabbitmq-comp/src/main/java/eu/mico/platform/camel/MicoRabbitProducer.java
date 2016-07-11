@@ -1,24 +1,23 @@
 package eu.mico.platform.camel;
 
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Future;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
-import org.apache.camel.ExchangePattern;
 import org.apache.camel.Message;
-import org.apache.camel.Producer;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.impl.DefaultProducer;
+import org.openrdf.model.impl.URIImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
@@ -26,8 +25,13 @@ import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.ShutdownSignalException;
 
 import eu.mico.platform.event.model.Event;
+import eu.mico.platform.event.model.Event.AnalysisEvent.Progress;
 import eu.mico.platform.event.model.Event.AnalysisRequest;
 import eu.mico.platform.event.model.Event.AnalysisRequest.ParamEntry;
+import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Resource;
+import eu.mico.platform.persistence.util.URITools;
 
 /**
  * The MicoRabbitProducer produces mico analyze events 
@@ -39,48 +43,40 @@ public class MicoRabbitProducer extends DefaultProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(MicoRabbitProducer.class);
     private MicoRabbitEndpoint endpoint;
-    private String queueId;
+    private final String queueId;
+    
+    //key = syntacticType, value = list of mime types
+    private Map<String,List<String>> modeInputs = new HashMap<String, List<String>>();
+    
+    //key = param name, value = value 
     private Map<String,String> parameters = new HashMap<String, String>();
-    private ObjectMapper mapper = new ObjectMapper();
+	private PersistenceService persistenceService;
 
     public MicoRabbitProducer(MicoRabbitEndpoint endpoint) {
         super(endpoint);
         this.endpoint = endpoint;
         this.queueId = endpoint.getQueueId();
-        readParamsFromEndpoint();
+        this.parameters = endpoint.getParametersAsMap();
+        this.modeInputs = endpoint.getModeInputsAsMap();
+        this.persistenceService = MicoCamelContext.getPersistenceService();
     }
+    
 
-    private void readParamsFromEndpoint() {
-        String paramString = endpoint.getParameters();
-        if(paramString != null && paramString.length() > 1){
-            try {
-                log.info("params         = {}",paramString);
-                paramString = URLDecoder.decode(paramString,"UTF-8");
-                log.info("params decoded = {}",paramString);
-                this.parameters = mapper.readValue(paramString,
-                        new TypeReference<HashMap<String, String>>() {});
-            } catch (IOException e) {
-                log.info("Unable to parse parameters:{} ", paramString, e);
-            }
-        }
-    }
-
+ 
     @Override
     public void process(Exchange exchange) throws Exception {
     	
-    	//be smart and do nothing with exchanges produced by yourself
-    	if(exchange.getFromEndpoint() != null){
-    		
-    		Endpoint fromEndpoint =  exchange.getFromEndpoint();
-    		
-    		if(fromEndpoint instanceof MicoRabbitEndpoint){
-    			MicoRabbitEndpoint from = (MicoRabbitEndpoint) fromEndpoint;
-    			if(from.getExtractorId().contentEquals(endpoint.getExtractorId()) &&
-    			   from.getExtractorVersion().contentEquals(endpoint.getExtractorVersion()) &&
-    			   from.getModeId().contentEquals(endpoint.getModeId())){
-    				return;
-    			}
-    		}
+    	//if the exchange should be simply forwarded, stop immediately
+    	if (checkIfExchangeShouldBeForwarded(exchange) == true){
+    		return;
+    	}
+    	
+    	//if the exchange is not compatible with the declared inputs, stop immediately
+    	if (checkIfExchangeIsCompatible(exchange) == false){
+        	exchange.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
+        	log.warn("Received exchange containing an invalid request {} for the extractor {}, stopping its routing",
+        			  exchange.getIn().getBody(String.class),queueId);
+    		return;
     	}
     	
     	/**
@@ -124,77 +120,201 @@ public class MicoRabbitProducer extends DefaultProducer {
 
         AnalyseManager manager = new AnalyseManager(exchange, inEvent, channel);
         manager.sendEvent();
-        if(exchange.getPattern().equals(ExchangePattern.InOut)||true){
-        	int createdOutPart = 0;
-        	String prevNewObjectURI = null;
+        List<Future<Exchange>> pendingEvents;
+        pendingEvents= new ArrayList<Future<Exchange>>();
+        boolean newPartCreated = false; // indicates, if atleast one new part was created
+        synchronized (queueId){
             while (!manager.hasFinished() && !manager.hasError()) {
-                LOG.debug("..waiting for response..");
-
-                synchronized (queueId){
-                    queueId.wait();
-                }
+                LOG.debug("..waiting for response from {}", queueId);
+                queueId.wait(3000);   // wait for next message from manager
                 
                 //Here starts the horror story: 
                 
                 //For every new part BUT THE LAST ONE, trigger the next extractor in the chain
                 
-                
-                if(!manager.hasError()){
+                String newObjectURI=null;
+                while(!manager.hasError() && (newObjectURI=manager.getNextObjectUri()) != null){
                 	
-                	String newObjectURI=manager.getNewObjectUri();
-                	
-    	            if(newObjectURI != null){
-    	            	
-    	            	if( prevNewObjectURI != null){
-    	            
-    	                	Exchange outExchange = endpoint.createExchange(exchange);
-    	                	outExchange.setFromEndpoint(endpoint);
-    	                	
-    	    	            Message outMessage = outExchange.getIn();
-    	    	            outMessage.getHeaders().putAll(exchange.getIn().getHeaders());
-    	            		outMessage.setBody(generateTemplateRequest(inEvent.getItemUri(), prevNewObjectURI).toByteArray());
-	    	            	
-    	            		//NOTE: here we produce an exchange to ourself, since we do not know which consumers are connected after us
-	    	            	outExchange.getContext().createProducerTemplate().send((String)outExchange.getProperty(Exchange.TO_ENDPOINT),outExchange);
-    	            	}
-    	            	createdOutPart= createdOutPart +1;
-    	            	prevNewObjectURI=newObjectURI;
-    	            }
-    	            
-    	        }
-            }
-            
-            if(!manager.hasError()){
 
-                //if no part was produced
-	            if(createdOutPart == 0){
-	            	LOG.warn("No new part produced by service {}, stopping the current message routing.",queueId);
-	            	
-		            //stop the routing of the current exchange
-		            Message outMessage = exchange.getIn();
-		            outMessage.setBody(inMessage.getBody());
-		            exchange.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
-		            return;
-	            }
-	            //else, trigger the processing of the last unprocessed part
-	            
-             	Message outMessage = exchange.getIn();
-	            outMessage.getHeaders().putAll(exchange.getIn().getHeaders());
-	            outMessage.setBody(generateTemplateRequest(inEvent.getItemUri(), prevNewObjectURI).toByteArray());
+                    Exchange outExchange = endpoint.createExchange(exchange);
+                    outExchange.setFromEndpoint(endpoint);
 
+                    Message outMessage = outExchange.getIn();
+                    outMessage.getHeaders().putAll(exchange.getIn().getHeaders());
+                    outMessage.setHeader("skip_aggregation", "true");
+                    outMessage.setBody(generateTemplateRequest(inEvent.getItemUri(), newObjectURI).toByteArray());
+
+                    //NOTE: here we produce an exchange to the very beginning of the pipeline, since we do not know which consumers are connected after us
+                    //useless processing is going to be prevented by the check at the very beginning of the MicoRabbitProducer.process(...) function
+                    ProducerTemplate template = outExchange.getContext().createProducerTemplate();
+                    Future<Exchange> future = template.asyncSend((String) outMessage.getHeader(KEY_STARTING_DIRECT),outExchange);
+                    log.trace("send event for new part: {} to ",newObjectURI, outMessage.getHeader(KEY_STARTING_DIRECT));
+                    pendingEvents.add(future);
+                    newPartCreated=true;
+
+                }
+            }// while manager not finished
+        }// end synch
+        
+        if(!manager.hasError()){
+
+            //if no part was produced
+            if(newPartCreated==false)//nextObjectUri==null){
+            {
+                LOG.info("No new part produced by service {}, stopping the current message routing.",queueId);
             }
-            else{
-            	exchange.getIn().setHeader("error_class",exchange.getException());
-            	exchange.getIn().setBody(exchange.getException());
-            	throw exchange.getException();
-            }
-            
+            //stop the routing of the current exchange
+            Message outMessage = exchange.getIn();
+            outMessage.setBody(inMessage.getBody());
+            exchange.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
+
+        }
+        else{
+        	exchange.getIn().setHeader("error_class",exchange.getException());
+        	exchange.getIn().setBody(exchange.getException());
+        	throw exchange.getException();
+        }
+
+        //wait until processing of all new parts is finished
+        for(Future<Exchange> ex : pendingEvents){
+            ex.get();
         }
         LOG.info("extraction finished - {}",headerItemURI);
     }
 
+    private boolean checkIfExchangeShouldBeForwarded(Exchange exchange){
+    	//check for exchanges created by our custom endpoint: 
+    	if(exchange.getFromEndpoint() != null){
+    		
+    		Endpoint fromEndpoint =  exchange.getFromEndpoint();
+    		
+    		if(fromEndpoint instanceof MicoRabbitEndpoint){
+    			MicoRabbitEndpoint from = (MicoRabbitEndpoint) fromEndpoint;
+    			log.trace("Detected exchange generated by one MicoRabbitEndpoint");
+    			
+    			//if you created the exchange, unset the description
+    			if(from.getExtractorId().contentEquals(endpoint.getExtractorId()) &&
+    			   from.getExtractorVersion().contentEquals(endpoint.getExtractorVersion()) &&
+    			   from.getModeId().contentEquals(endpoint.getModeId())){
+    				log.trace("The exchange was generated by {}, unsetting the FromEndpoint description",endpoint.getEndpointUri());
+    				exchange.setFromEndpoint(null);
+    				exchange.getIn().setHeader("skip_aggregation", "false");
+    			}
+    			
+    			log.trace("Exchange forwarded to the next component(s)");
+    			//and forward to the extractors that are going to be connected later on
+    			return true;
+    		}
+    	}
+    	return false;
+    }
 
-    private AnalysisRequest generateTemplateRequest(String item, String part) {
+    private boolean checkIfExchangeIsCompatible(Exchange exchange) {
+
+    	
+    	//the check is applied only if an input description was provided during the route definition 
+    	if(modeInputs.size()>0){
+	    	try {
+	    		
+	    		//0. first of all, retrieve the persistence service
+	        	if((persistenceService=MicoCamelContext.getPersistenceService()) == null){
+	        		throw new NullPointerException("Unable to retrieve the persistence service");
+	        	}
+	    		
+	    		//1. parse the analysis request
+				AnalysisRequest inEvent=AnalysisRequest.parseFrom(exchange.getIn().getBody(byte[].class));
+				
+				String inItemURI = inEvent.getItemUri();
+				Item inItem = persistenceService.getItem(new URIImpl(inItemURI));
+				inItem.getParts();
+				
+				Map<String,Resource> inputResources=new HashMap<String,Resource>();
+				
+				//2. create a Map from resourceURI to resource 
+				List<String> partURIs = inEvent.getPartUriList();
+				for(String rURI : partURIs){
+					if(rURI.contentEquals(inItemURI)){
+						inputResources.put(rURI, inItem);
+					}
+					else{
+						inputResources.put(rURI,inItem.getPart(new URIImpl(rURI)));
+					}
+				}
+				
+				//3. assert that the size of the map and the amount of input resources are equals
+				if(inputResources.size() != modeInputs.size()){
+					log.warn("The expected amount of input part(s) should be {}, but is {}",modeInputs.size(),inputResources.size());
+					return false;
+				}
+				
+				//4. for every input SyntacticType, look if a corresponding input exists
+				boolean exchangeIsCompatible = true;
+				
+				for( String syntacticType : modeInputs.keySet()){
+					
+					boolean inputIsPresent = false;
+					List<String> mimeTypeList = modeInputs.get(syntacticType);
+					syntacticType = URITools.demangleNamespaceIfKnown(syntacticType);
+					
+					log.debug("Looking for resource with syntacticType '{}' and format in '{}'",syntacticType,mimeTypeList.toString());
+					
+					for(Resource r : inputResources.values()){
+						
+						if(r.hasAsset()){
+							log.debug("Evaluating resource with syntacticType '{}' and format '{}'",r.getSyntacticalType(),r.getAsset().getFormat());
+						}
+						else{
+							log.debug("Evaluating resource with syntacticType '{}' and no asset",r.getSyntacticalType());
+						}
+						
+						if(syntacticType.contentEquals(URITools.demangleNamespaceIfKnown(r.getSyntacticalType())) && !inputIsPresent){
+							
+							
+							//if the syntactic type is correct, and we are checking an rdf type, you found the input
+							if(contains(mimeTypeList,"application/x-mico-rdf") && mimeTypeList.size()==1){
+								inputIsPresent = true;
+							}
+							
+							//otherwise, double-check existence and format of the asset
+							if(r.hasAsset()){
+								inputIsPresent = inputIsPresent  || contains(mimeTypeList,r.getAsset().getFormat());
+							}
+							
+							if(inputIsPresent){
+								log.debug("Found input resource {} with type '{}' and format in '{}'",r.getURI(),syntacticType,mimeTypeList.toString());
+							}
+						}
+						
+					}
+					if(!inputIsPresent){
+						log.debug("Unable to find eligible resource");
+					}
+					exchangeIsCompatible = exchangeIsCompatible && inputIsPresent;
+				}
+				return exchangeIsCompatible;
+				
+			} catch (Exception e) {
+				log.error("Exception caught while processing the input exchange: ",e);
+				return true;
+			}
+    	}
+    	
+		return true;
+	}
+    
+    private boolean contains(List<String> list, String value){
+    	for(String v : list){
+    		if(v == null && value == null){
+    			return true;
+    		}
+    		if(v != null && value != null && v.contentEquals(value)){
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+
+	private AnalysisRequest generateTemplateRequest(String item, String part) {
         LOG.info("generate template of an AnalysisRequest for item {} on part {}", item, part);
         Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.newBuilder()
                 .setItemUri(item)
@@ -233,9 +353,10 @@ public class MicoRabbitProducer extends DefaultProducer {
     private class AnalyseManager extends DefaultConsumer {
         private String           queue;
         private AnalysisRequest    req;
-        private boolean finished = false;
-        private boolean hasError = false;
-        private String newObjectUri = null;
+        private volatile boolean finished = false;
+        private volatile boolean hasError = false;
+//        private volatile String newObjectUri = null;
+        private volatile ConcurrentLinkedQueue<String> newObjectUris = new ConcurrentLinkedQueue<String>();
         private Exchange exchange = null;
 
         public AnalyseManager(Exchange exchange, AnalysisRequest event, Channel channel) throws IOException {
@@ -271,53 +392,52 @@ public class MicoRabbitProducer extends DefaultProducer {
             Event.AnalysisEvent response = Event.AnalysisEvent
                     .parseFrom(body);
 
-            switch (response.getType()) {
-            case PROGRESS:
-            case ERROR:
-                log.warn("Received an error response {}, generating a new MICOCamelAnalysisException with what message : {}",response.getError().getMessage(), response.getError()
-                        .getDescription());
+                switch (response.getType()) {
+                case PROGRESS:
+                    Progress progress = response.getProgress();
+                    log.info("received progress {} for part {}",progress.getProgress(), progress.getPartUri());
+                    break;
+                case ERROR:
+                    log.warn("Received an error response {}, generating a new MICOCamelAnalysisException with what message : {}",response.getError().getMessage(), response.getError()
+                            .getDescription());
 
-
-                hasError=true;
-                finished = true;
-                exchange.setProperty(Exchange.DUPLICATE_MESSAGE, new MICOCamelAnalysisException(queueId,
-	                       response.getError().getMessage(), 
-	                       response.getError().getDescription()));
-                exchange.setException( 
-                		new MICOCamelAnalysisException(queueId,
-                				                       response.getError().getMessage(), 
-                				                       response.getError().getDescription()));
-                exchange.getIn().setBody(new MICOCamelAnalysisException(queueId,
-                				                       response.getError().getMessage(), 
-                				                       response.getError().getDescription()));
-                exchange.getOut().setBody(new MICOCamelAnalysisException(queueId,
-	                       response.getError().getMessage(), 
-	                       response.getError().getDescription()));
-                
-                getChannel().basicAck(envelope.getDeliveryTag(), false);
-                synchronized (queueId) {
-                    queueId.notify();
+                    hasError=true;
+                    finished = true;
+                    exchange.setProperty(Exchange.DUPLICATE_MESSAGE, new MICOCamelAnalysisException(queueId,
+                            response.getError().getMessage(),
+                            response.getError().getDescription()));
+                    exchange.setException( 
+                            new MICOCamelAnalysisException(queueId,
+                                    response.getError().getMessage(),
+                                    response.getError().getDescription()));
+                    exchange.getIn().setBody(new MICOCamelAnalysisException(queueId,
+                            response.getError().getMessage(),
+                            response.getError().getDescription()));
+                    exchange.getOut().setBody(new MICOCamelAnalysisException(queueId,
+                            response.getError().getMessage(),
+                            response.getError().getDescription()));
+                    
+                    getChannel().basicAck(envelope.getDeliveryTag(), false);
+                    break;
+                case NEW_PART:
+                    String newObjectUri = response.getNew().getPartUri();
+                    newObjectUris.add(newObjectUri);
+                    log.debug(
+                            "received processing result from service {} for content item {}: new object {}",
+                            response.getNew().getServiceId(), response.getNew()
+                                    .getItemUri(), newObjectUri);
+                    getChannel().basicAck(envelope.getDeliveryTag(), false);
+                    break;
+                case FINISH:
+                    // analyze process finished correctly, notify waiting
+                    // threads to continue camel route
+                    getChannel().basicAck(envelope.getDeliveryTag(), false);
+                    getChannel().close();
+                    finished = true;
                 }
-                break;
-            case NEW_PART:
-                newObjectUri = response.getNew().getPartUri();
-                log.debug(
-                        "received processing result from service {} for content item {}: new object {}",
-                        response.getNew().getServiceId(), response.getNew()
-                                .getItemUri(), newObjectUri);
-                getChannel().basicAck(envelope.getDeliveryTag(), false);
-                synchronized (queueId) {
-                    queueId.notify();
-                }
-                break;
-            case FINISH:
-                // analyze process finished correctly, notify waiting threads to continue
-                // camel route
-            	getChannel().basicAck(envelope.getDeliveryTag(), false);
-                finished = true;
-                synchronized (queueId) {
-                    queueId.notify();
-                }
+            // notify producer, to process message
+            synchronized (queueId) {
+                queueId.notify();
             }
         }
 
@@ -360,8 +480,8 @@ public class MicoRabbitProducer extends DefaultProducer {
             return hasError;
         }
 
-        public String getNewObjectUri() {
-            return newObjectUri;
+        public String getNextObjectUri() {
+            return newObjectUris.poll();
         }
 
     }

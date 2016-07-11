@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
 import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
 import eu.mico.platform.event.model.Event.AnalysisRequest;
+import eu.mico.platform.persistence.api.PersistenceService;
 
 public class MicoCamelContext {
 
@@ -54,11 +55,20 @@ public class MicoCamelContext {
     public static ItemAggregationStrategy itemAggregatorStrategy = new ItemAggregationStrategy();
     
     private ProducerTemplate template;
+    private static PersistenceService ps = null;
     
     private static ConcurrentHashMap<String, Exception> injExceptions = new ConcurrentHashMap<String, Exception>();
 
-    public void init(){
-        setupCamelContext();
+    public void init(PersistenceService ps){
+    	if(ps == null){
+    		throw new IllegalArgumentException("The input persistence service cannot be null");
+    	}
+    	MicoCamelContext.ps=ps;
+        setupCamelContext();        
+    }
+    
+    public static PersistenceService getPersistenceService(){
+    	return ps;
     }
 
     private void setupCamelContext() {
@@ -86,11 +96,10 @@ public class MicoCamelContext {
             //and here, it is bound to the registry
             registry.bind("itemAggregatorStrategy", itemAggregatorStrategy);
             
-        } catch (IllegalArgumentException | NullPointerException
-                | ClassCastException | UnsupportedOperationException e) {
-            log.warn("Unable to check camel routes to context", e);
+        }catch(javax.naming.NameAlreadyBoundException e){
+            log.info(e.getMessage());
         } catch (Exception e) {
-            log.warn("Unable to add camel routes", e);
+            log.warn("Error setting up camel context", e);
         }
     }
 
@@ -127,7 +136,6 @@ public class MicoCamelContext {
 
         context.addRouteDefinitions(defs);
         context.startAllRoutes();
-        context.setupRoutes(true);
         List<Route> routes = context.getRoutes();
         log.info("available camel Routes: {}",routes.size());
         for (Route r : routes){
@@ -154,6 +162,15 @@ public class MicoCamelContext {
 		}
 	};
 
+    public void deleteRoutes(InputStream is) throws Exception {
+        RoutesDefinition routeDefs = context.loadRoutesDefinition(is);
+        context.removeRouteDefinitions(routeDefs.getRoutes());
+        List<Route> routes = context.getRoutes();
+        log.info("available camel Routes: {}",routes.size());
+        for (Route r : routes){
+            log.info(" - id: {} descr: {}", r.getId(), r.getDescription());
+        }
+    }
     private RoutesDefinition getRoutesDefinition(String xmlRoute) throws Exception {
     	ByteArrayInputStream stream = new ByteArrayInputStream(
     			xmlRoute.getBytes(StandardCharsets.UTF_8));

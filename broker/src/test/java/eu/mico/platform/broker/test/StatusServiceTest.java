@@ -63,7 +63,7 @@ public class StatusServiceTest extends BaseBrokerTest {
 	
 	private static Logger log = LoggerFactory.getLogger(StatusServiceTest.class);
     private static MicoCamelContext context = new MicoCamelContext();
-    private static Map<Integer,MICOCamelRoute> routes = new HashMap<Integer,MICOCamelRoute>();
+    private static Map<String,MICOCamelRoute> routes = new HashMap<String,MICOCamelRoute>();
     
     private static WorkflowManagementService wManager = null;
     private static InjectionWebService injService = null;
@@ -80,7 +80,7 @@ public class StatusServiceTest extends BaseBrokerTest {
 		eventManager = new EventManagerImpl(amqpHost, amqpUsr, amqpPwd, amqpVHost);
 	    eventManager.init();
 		
-    	context.init();
+    	context.init(broker.getPersistenceService());
     	wManager = new WorkflowManagementService(broker, context, routes);
     	injService = new InjectionWebService(broker, eventManager, context, routes);
     	statusService = new StatusWebService(broker);
@@ -121,10 +121,10 @@ public class StatusServiceTest extends BaseBrokerTest {
     	String efWrongRoute=WorkflowServiceTest.createTestRoute(efWrongService,"mico:E-F", "mico/error");
     	
     	
-    	Map<String,Integer> routeIds = new HashMap<String,Integer>();
-    	routeIds.put(abFastRoute, wManager.addWorkflow(USER,  "abFastRoute" ,abFastRoute , "[]","[]"));
-    	routeIds.put(cdSlowRoute, wManager.addWorkflow(USER,  "cdSlowRoute" ,cdSlowRoute , "[]","[]"));
-    	routeIds.put(efWrongRoute, wManager.addWorkflow(USER, "efWrongRoute" ,efWrongRoute , "[]","[]"));
+    	Map<String,String> routeIds = new HashMap<String,String>();
+    	routeIds.put(abFastRoute, wManager.addWorkflow(USER,  abFastRoute ));
+    	routeIds.put(cdSlowRoute, wManager.addWorkflow(USER,  cdSlowRoute ));
+    	routeIds.put(efWrongRoute, wManager.addWorkflow(USER, efWrongRoute ));
     	
 
     	List<Item> items = new ArrayList<Item>();
@@ -240,10 +240,10 @@ public class StatusServiceTest extends BaseBrokerTest {
     	String efWrongRoute=WorkflowServiceTest.createTestRoute(efWrongService,"mico:E-F", "mico/error");
     	
     	
-    	Map<String,Integer> routeIds = new HashMap<String,Integer>();
-    	routeIds.put(abFastRoute, wManager.addWorkflow(USER,  "abFastRoute" ,abFastRoute , "[]","[]"));
-    	routeIds.put(cdSlowRoute, wManager.addWorkflow(USER,  "cdSlowRoute" ,cdSlowRoute , "[]","[]"));
-    	routeIds.put(efWrongRoute, wManager.addWorkflow(USER, "efWrongRoute" ,efWrongRoute , "[]","[]"));
+    	Map<String,String> routeIds = new HashMap<String,String>();
+    	routeIds.put(abFastRoute, wManager.addWorkflow(USER,  abFastRoute ));
+    	routeIds.put(cdSlowRoute, wManager.addWorkflow(USER,  cdSlowRoute ));
+    	routeIds.put(efWrongRoute, wManager.addWorkflow(USER, efWrongRoute ));
     	
 
     	List<Item> items = new ArrayList<Item>();
@@ -488,7 +488,7 @@ public class StatusServiceTest extends BaseBrokerTest {
          }
     }
     
-    private Item triggerRouteWithSimpleItem(String syntacticType,String mimeType,Integer routeId) throws RepositoryException, IOException, InterruptedException
+    private Item triggerRouteWithSimpleItem(String syntacticType,String mimeType,String routeId) throws RepositoryException, IOException, InterruptedException
     {
     	 PersistenceService ps = broker.getPersistenceService();
          Item item = null;

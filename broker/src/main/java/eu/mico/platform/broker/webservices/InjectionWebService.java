@@ -66,11 +66,11 @@ public class InjectionWebService {
     private MICOBroker broker;
     private EventManager eventManager;
     private MicoCamelContext camelContext;
-    private Map<Integer,MICOCamelRoute> camelRoutes;
+    private Map<String,MICOCamelRoute> camelRoutes;
 
     private final URI extratorID = new URIImpl("http://www.mico-project.eu/injection-webservice/");
 
-    public InjectionWebService(MICOBroker broker, EventManager manager, MicoCamelContext camelContext, Map<Integer,MICOCamelRoute> camelRoutes) {
+    public InjectionWebService(MICOBroker broker, EventManager manager, MicoCamelContext camelContext, Map<String,MICOCamelRoute> camelRoutes) {
         this.broker=broker;
     	this.eventManager = manager;
         this.camelContext = camelContext;
@@ -217,10 +217,14 @@ public class InjectionWebService {
      */
     @POST
     @Path("/submit")
-    public Response submitItem(@QueryParam("item") String itemURI, @QueryParam("route") Integer routeId) throws RepositoryException, IOException {
+    public Response submitItem(@QueryParam("item") String itemURI, @QueryParam("route") String routeId) throws RepositoryException, IOException {
 
     	if(itemURI == null || itemURI.isEmpty()){
     		//wrong item
+    		return Response.status(Response.Status.BAD_REQUEST).build();
+    	}
+    	if(routeId != null && routeId.isEmpty()){
+    		//wrong routeId
     		return Response.status(Response.Status.BAD_REQUEST).build();
     	}
     	

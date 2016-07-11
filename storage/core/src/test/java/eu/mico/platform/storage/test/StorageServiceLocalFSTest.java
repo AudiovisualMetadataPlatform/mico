@@ -3,7 +3,6 @@ package eu.mico.platform.storage.test;
 import eu.mico.platform.storage.impl.StorageServiceLocalFS;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -70,6 +69,15 @@ public class StorageServiceLocalFSTest {
         StorageServiceLocalFS storage = new StorageServiceLocalFS(basePath);
         Assert.assertNull(storage.getOutputStream(new URI("test/")));
     }
+
+    @Test
+    public void testWindowsPath() throws Exception {
+
+        StorageServiceLocalFS storage = new StorageServiceLocalFS(basePath);
+        URI winPath = URI.create("file:/X:/workspace/bla");
+        Assert.assertNull(storage.getOutputStream(winPath));
+    }
+
 
     @Test
     public void testRecursiveDelete() throws IOException, URISyntaxException {

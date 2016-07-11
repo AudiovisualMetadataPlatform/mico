@@ -40,6 +40,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.marmotta.platform.core.test.base.JettyMarmotta;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -56,6 +57,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.TimeoutException;
@@ -113,17 +115,16 @@ public abstract class BaseBrokerTest {
 
         // we need a Marmotta instance for testing the MicoBrokerImpl
         if (marmotta == null) {
-            marmotta = new JettyMarmotta("/marmotta", 8088
-                    );
+            marmotta = new JettyMarmotta("/marmotta", 8088);
             marmottaBaseUrl = "http://localhost:8088/marmotta";
 
             storageDir = Files.createTempDirectory("mico-event-manager-test");
             storageBaseUri = storageDir.toUri().toString();
-            
-            registrationBaseUrl = getConf("reg-api.base", "http://localhost:8030/");
+
+            registrationBaseUrl = getConf("reg-api.base", "http://localhost:8030");
 
             broker = new MICOBrokerImpl(testHost, amqpVHost, amqpUsr, amqpPwd,
-                    rabbitPort, marmottaBaseUrl, storageBaseUri,registrationBaseUrl);
+                    rabbitPort, marmottaBaseUrl, storageBaseUri, registrationBaseUrl);
         }
 
         // Now initialize RabbitMQ
@@ -134,24 +135,26 @@ public abstract class BaseBrokerTest {
         testFactory.setPassword(amqpPwd);
 
         connection = testFactory.newConnection();
-        
+
         //retrieve the status of the registration service
         HttpGet httpGetInfo = new HttpGet(((MICOBrokerImpl)broker).getRegistrationBaseUri() + "/info");
-    	
-    	CloseableHttpClient httpclient = HttpClients.createDefault();    	
-    	CloseableHttpResponse response = null;
-    	try{
-    		response = httpclient.execute(httpGetInfo);
-    		int status = response.getStatusLine().getStatusCode();
-        log.info("looking for registration service at {}",httpGetInfo.toString());
-        	if(status == 200){
-        		isRegistrationServiceAvailable = true;
-        	}
-    	}
-    	catch(Exception e){;}
-    	finally{
-    		if(response!= null) response.close();
-    	}
+
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        CloseableHttpResponse response = null;
+        try {
+            response = httpclient.execute(httpGetInfo);
+            int status = response.getStatusLine().getStatusCode();
+            log.info("looking for registration service at {}",httpGetInfo.toString());
+            if (status == 200) {
+                isRegistrationServiceAvailable = true;
+            }
+        } catch (Exception ignore) {
+        } finally {
+            if (response != null){
+                readAndIgnoreResponseBody(response);
+                response.close();
+            }
+        }
     }
 
     @AfterClass
@@ -164,8 +167,10 @@ public abstract class BaseBrokerTest {
     @Before
     public void setupTestBase() throws IOException, URISyntaxException,
             TimeoutException {
-        eventManager = new EventManagerImpl(amqpHost, amqpUsr, amqpPwd,
-                amqpVHost);
+        if (eventManager == null){
+            eventManager = new EventManagerImpl(amqpHost, amqpUsr, amqpPwd,
+                    amqpVHost);
+        }
         eventManager.init();
 
         channel = connection.createChannel();
@@ -353,11 +358,26 @@ public abstract class BaseBrokerTest {
 		//Execute and get the response.
 		CloseableHttpResponse response = httpclient.execute(httppost);
 		int status = response.getStatusLine().getStatusCode();
-		response.close();
+        readAndIgnoreResponseBody(response);
+        response.close();
 	    Assert.assertEquals(200, status);
 	}
-		
-	
+
+    /**
+     * workaround, to avoid broken-pipe on server when not reading body
+     *
+     * @param response
+     * @throws IOException
+     */
+    private static void readAndIgnoreResponseBody(CloseableHttpResponse response)
+            throws IOException {
+        HttpEntity entity = response.getEntity();
+        if (entity != null && entity.isStreaming()) {
+            // read content to avoid broken pipe on server
+            EntityUtils.toString(entity, StandardCharsets.UTF_8);
+        }
+    }
+
 	private static String createTestRegistrationXml( MockService s, String mimeType){
 		
 		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + 

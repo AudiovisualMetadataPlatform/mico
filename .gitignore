@@ -49,3 +49,4 @@ doc/
 kiwi-test.log
 maven-eclipse.xml
 broker/.externalToolBuilders
+broker/graph.png

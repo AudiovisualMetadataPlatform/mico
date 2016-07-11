@@ -16,7 +16,6 @@ package eu.mico.platform.broker.impl;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.rabbitmq.client.*;
 
@@ -39,6 +38,7 @@ import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -385,8 +386,8 @@ public class MICOBrokerImpl implements MICOBroker {
                 ServiceDescriptor svc = new ServiceDescriptor(registrationEvent);
 
                 if (dependencies.containsEdge(svc)) {
-                    log.info("- removing service {} from dependency graph", svc.getUri());
-                    dependencies.removeEdge(svc);
+                    log.info("- removing service {} from dependency graph: {}", svc.getUri(),
+                    dependencies.removeEdge(svc));
                 } else {
                     log.info("- not removing service {} from dependency graph, it does not exists", svc.getUri());
                 }
@@ -621,23 +622,59 @@ public class MICOBrokerImpl implements MICOBroker {
             URIImpl itemUri = new URIImpl(analysisResponse.getItemUri());
             URIImpl partUri = new URIImpl(analysisResponse.getPartUri());
             String serviceId = analysisResponse.getServiceId();
+            
+            boolean stateFound = false;
             try {
                 String type = getItem(itemUri)
                         .getPart(partUri).getSyntacticalType();
 
                 if (type != null) {
                     TypeDescriptor newState = dependencies.getState(type);
+                    stateFound=true; 
                     state.addState(partUri, newState);
                 } else {
                     log.warn(
-                            "Type not set for part {}, assume its type fits to produce value from service: {}.",
+                            "Syntactic type not set for part {}, assume its type fits to produce value from service: {}.",
                             partUri, serviceId);
                     state.addState(partUri, dependencies.getTargetState(new URIImpl(serviceId)));
+                    stateFound=true;
                 }
             } catch (StateNotFoundException | RepositoryException e) {
-                log.warn("unable to retrieve mimetype for {}, assume its type fits to produce value from service: {}.",
+                log.warn("Unable to route the new part {} from {} using the syntacticType, trying with the mime type ...",
                         partUri, serviceId, e);
-                state.addState(partUri, dependencies.getTargetState(new URIImpl(serviceId)));
+            }
+            
+            if(!stateFound){
+            	try {
+                    String type = null;
+                    if(getItem(itemUri).getPart(partUri).hasAsset()){
+                    	type=getItem(itemUri).getPart(partUri).getAsset().getFormat();
+                    }
+
+                    if (type != null) {
+                        TypeDescriptor newState = dependencies.getState(type);
+                        stateFound=true; 
+                        state.addState(partUri, newState);
+                    } else {
+                        log.warn(
+                                "Mime type not set for the asset of part {}, assume its type fits to produce value from service: {}.",
+                                partUri, serviceId);
+                        state.addState(partUri, dependencies.getTargetState(new URIImpl(serviceId)));
+                        stateFound=true; 
+                    }
+                } catch (StateNotFoundException | RepositoryException e) {
+                    log.warn("Unable to route the new part {} from {} using its mimeType. Assume its state is final.",
+                            partUri, serviceId, e);
+                }
+            }
+            
+            if(!stateFound){
+            	try {
+                    state.addState(partUri, dependencies.getTargetState(new URIImpl(serviceId)));
+                } catch (StateNotFoundException e) {
+                    log.warn("Unable to route the new part {} from {}, the input service is not registered. Assume its state is final.",
+                            partUri, serviceId, e);
+                }
             }
         }
 
@@ -845,10 +882,14 @@ public class MICOBrokerImpl implements MICOBroker {
     		response=httpclient.execute(httpGetExtractor);
     	    int status = response.getStatusLine().getStatusCode();
     	    if(status != 200){
-    	    	response.close();
     	    	log.debug("Extractor {} not found at {}, STATUS code is {}",eId,httpGetExtractor,status);
     	    	return ExtractorStatus.UNREGISTERED;
     	    }
+            HttpEntity entity = response.getEntity();
+            if (entity != null && entity.isStreaming()){
+                // read content to avoid broken pipe on server
+                EntityUtils.toString(entity,StandardCharsets.UTF_8);
+            }
     	    response.close();
     	    
     	    //if the extractor is registered, look if it's also deployed

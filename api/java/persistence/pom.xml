@@ -170,6 +170,11 @@
             <artifactId>mmm-anno4j</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>eu.mico-project.platform</groupId>
+            <artifactId>fam-anno4j</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
     </dependencies>
 

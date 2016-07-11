@@ -42,6 +42,7 @@ public class WorkflowManagementService {
 
     private static Logger log = LoggerFactory.getLogger(WorkflowManagementService.class);
     private static Integer newID = -1;
+    
 
     
     @Context
@@ -50,9 +51,10 @@ public class WorkflowManagementService {
     private MICOBroker broker;
 
     private MicoCamelContext camelContext;
-    private Map<Integer,MICOCamelRoute> camelRoutes;
+    private Map<String,MICOCamelRoute> camelRoutes;
+    private static Object camelLock = new Object();
 
-    public WorkflowManagementService(MICOBroker broker, MicoCamelContext camelContext, Map<Integer,MICOCamelRoute> camelRoutes) {
+    public WorkflowManagementService(MICOBroker broker, MicoCamelContext camelContext, Map<String,MICOCamelRoute> camelRoutes) {
         this.broker = broker;
         this.camelContext = camelContext;
         this.camelRoutes = camelRoutes;
@@ -68,25 +70,35 @@ public class WorkflowManagementService {
     @POST
     @Path("/add")
     @Produces("application/json")
-    public int addWorkflow(@FormParam("user") String user,
-    		@FormParam("workflowName") String workflowName,
-    		@FormParam("route") String route,
-    		@FormParam("links") String links, 
-    		@FormParam("nodes") String nodes)
+    public String addWorkflow(@FormParam("user") String user,
+    					   @FormParam("route") String route)
             throws RepositoryException, IOException {
         
-    	synchronized (newID) {
+    	synchronized (camelLock) {
     		//add to memory
-    		newID++;
-            String xmlCamelRoute = new String(route);
-            xmlCamelRoute = xmlCamelRoute.replaceAll("WORKFLOW_ID", newID.toString());
-            
-            camelContext.addRouteToContext(xmlCamelRoute);
-            camelRoutes.put(newID,new MICOCamelRoute().parseCamelRoute(xmlCamelRoute));
-            
-            log.info("Persisted new workflow with ID {} belonging to user {}",newID.toString(),user);
+    		
+    		//1. verify that the route is correct
+    		MICOCamelRoute newRoute = new MICOCamelRoute().parseCamelRoute(route);
+    		if (newRoute.getWorkflowId() == null ||
+    			newRoute.getWorkflowId().isEmpty() ||
+    			newRoute.getEntryPoints().size() == 0 ||
+    			newRoute.getExtractorConfigurations().size() == 0){
+    			throw new IllegalArgumentException("The input route cannot be parsed correctly, aborting");
+    		}
 
-            return newID.intValue();
+            String newId = newRoute.getWorkflowId();
+            
+            MICOCamelRoute oldRoute = camelRoutes.get(newId);
+            if(oldRoute!=null){
+            	log.warn("Replacing existing route with id {}",newId);
+            	camelContext.removeRouteFromContext(oldRoute.getXmlCamelRoute());
+            }
+            
+            camelContext.addRouteToContext(route);
+            camelRoutes.put(newId,newRoute);            
+            log.info("Persisted new workflow with ID {} belonging to user {}",newId,user);
+
+            return newId;
 		}
         
     }
@@ -95,17 +107,22 @@ public class WorkflowManagementService {
     @POST
     @Path("/del/{id}")
     @Produces("application/json")
-    public Response deleteWorkflow(@PathParam("id") Integer workflowId ) throws RepositoryException,
+    public Response deleteWorkflow(@PathParam("id") String workflowId ) throws RepositoryException,
             IOException {
-    	log.info("Removing workflow with ID {}",workflowId);
-
     	
-    	//delete from memory
-        String xmlRoute=getCamelRoute(workflowId);        
-    	camelContext.removeRouteFromContext(xmlRoute);
-        camelRoutes.remove(workflowId);        
+    	synchronized (camelLock) {
+    		
+	    	log.info("Removing workflow with ID {}",workflowId);
+	    	//delete from memory
+	        String xmlRoute=getCamelRoute(workflowId);   
+	        if(xmlRoute != null){
+		    	camelContext.removeRouteFromContext(xmlRoute);
+		        camelRoutes.remove(workflowId);
+		        return Response.ok(ImmutableMap.of()).build();
+	        }
+	        return Response.status(Response.Status.NOT_FOUND).build();
         
-        return Response.ok(ImmutableMap.of()).build();
+    	}
     }
     
     /**
@@ -127,32 +144,48 @@ public class WorkflowManagementService {
     @Path("/status/{id}")
     @Produces("text/plain")
     public String getStatus(@QueryParam("user") String user,
-            @PathParam("id") Integer workflowId ) throws RepositoryException,
+            @PathParam("id") String workflowId ) throws RepositoryException,
             IOException {
         
-    	
-    	String status="BROKEN";
-    	try{
-	        if (broker instanceof MICOBrokerImpl ){
-	        	String xmlCamelRoute=new String(getCamelRoute(workflowId));
-	        	status =  broker.getRouteStatus(xmlCamelRoute);
+    	synchronized (camelLock) {
+	    		
+	    	String status="BROKEN";
+	    	try{
+		        if (broker instanceof MICOBrokerImpl){
+		        	String xmlCamelRoute=getCamelRoute(workflowId);
+		        	if(xmlCamelRoute != null){
+		        		status =  broker.getRouteStatus(xmlCamelRoute);
+		        	}
+		        	else{
+		        		log.error("No route with id {} is currently registered",workflowId);
+		        	}
+		        }
 	        }
-        }
-    	catch(Exception e){
-    		log.error("Unable to retrieve status for workflow {}",workflowId);
+	    	catch(Exception e){
+	    		log.error("Unable to retrieve status for workflow {}",workflowId);
+	    	}
+	    	
+	        return status;
     	}
-        return status;
     }
     
     @GET
     @Path("/camel-route/{id}")
     @Produces("text/plain")
-    public String getCamelRoute(@PathParam("id") Integer workflowId ) throws RepositoryException,
+    public String getCamelRoute(@PathParam("id") String workflowId ) throws RepositoryException,
             IOException {
     	log.info("Retrieving CamelRoute for workflow with ID {}",workflowId);
     	
-    	//retrieve from memory
-    	return camelRoutes.get(workflowId).getXmlCamelRoute();
+    	synchronized (camelLock) {
+    		
+	    	//retrieve from memory
+	    	MICOCamelRoute route = camelRoutes.get(workflowId);
+	    	if(route != null){
+	    		return route.getXmlCamelRoute();
+	    	}
+	    	return null ;
+	    	
+    	}
     }
 
 

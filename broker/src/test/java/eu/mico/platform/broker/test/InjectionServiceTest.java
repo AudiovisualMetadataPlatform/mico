@@ -73,7 +73,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
 
 	private static Logger log = LoggerFactory.getLogger(InjectionServiceTest.class);
     private static MicoCamelContext context = new MicoCamelContext();
-    private static Map<Integer,MICOCamelRoute> routes = new HashMap<Integer,MICOCamelRoute>();
+    private static Map<String,MICOCamelRoute> routes = new HashMap<String,MICOCamelRoute>();
     
     private static WorkflowManagementService wManager = null;
     private static InjectionWebService injService = null;
@@ -85,7 +85,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
 		 eventManager = new EventManagerImpl(amqpHost, amqpUsr, amqpPwd, amqpVHost);
 	     eventManager.init();
 		
-    	context.init();
+    	context.init(broker.getPersistenceService());
     	wManager = new WorkflowManagementService(broker, context, routes);
     	injService = new InjectionWebService(broker, eventManager, context, routes);
 	}
@@ -427,13 +427,13 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	
     	//and publish them
     	
-    	Map<String,Integer> routeIds = new HashMap<String,Integer>();
+    	Map<String,String> routeIds = new HashMap<String,String>();
     	
-        routeIds.put(A_B_MICO_TEST, wManager.addWorkflow(USER, "A_B_MICO_TEST" ,A_B_MICO_TEST , "[]","[]"));
-    	routeIds.put(A_B_MICO_TEST1,wManager.addWorkflow(USER, "A_B_MICO_TEST1",A_B_MICO_TEST1, "[]","[]"));
-    	routeIds.put(A_B_MICO_TEST2,wManager.addWorkflow(USER, "A_B_MICO_TEST2",A_B_MICO_TEST2, "[]","[]"));
-    	routeIds.put(A_C_MICO_TEST, wManager.addWorkflow(USER, "A_C_MICO_TEST" ,A_C_MICO_TEST , "[]","[]"));
-    	routeIds.put(B_C_MICO_TEST, wManager.addWorkflow(USER, "B_C_MICO_TEST" ,B_C_MICO_TEST , "[]","[]"));
+        routeIds.put(A_B_MICO_TEST, wManager.addWorkflow(USER, A_B_MICO_TEST));
+    	routeIds.put(A_B_MICO_TEST1,wManager.addWorkflow(USER, A_B_MICO_TEST1));
+    	routeIds.put(A_B_MICO_TEST2,wManager.addWorkflow(USER, A_B_MICO_TEST2));
+    	routeIds.put(A_C_MICO_TEST, wManager.addWorkflow(USER, A_C_MICO_TEST ));
+    	routeIds.put(B_C_MICO_TEST, wManager.addWorkflow(USER, B_C_MICO_TEST ));
 
     	Map<String,MockEndpoint> mocks = new HashMap<String,MockEndpoint>();    	
 
@@ -566,7 +566,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	connectExtractor(abFailingService);
     	
     	String ERROR_B_MICO_FAILING_TEST =WorkflowServiceTest.createTestRoute(abFailingService, "mico:ERROR-B", "mico/error");
-    	routeIds.put(ERROR_B_MICO_FAILING_TEST, wManager.addWorkflow(USER, "ERROR_B_MICO_FAILING_TEST" ,ERROR_B_MICO_FAILING_TEST , "[]","[]"));
+    	routeIds.put(ERROR_B_MICO_FAILING_TEST, wManager.addWorkflow(USER, ERROR_B_MICO_FAILING_TEST ));
     	
     	mocks.put(ERROR_B_MICO_FAILING_TEST, getMockEndpoint("mock:auto-test-route-ERROR-B-mico/error"));
     	mocks.get(ERROR_B_MICO_FAILING_TEST).setExpectedCount(0);
@@ -587,8 +587,8 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	unregisterExtractor(bcService);
     	unregisterExtractor(abFailingService);
     	
-    	for(Integer id : routeIds.values()){
-    		wManager.deleteWorkflow(id);
+    	for(String id : routeIds.values()){
+    		wManager.deleteWorkflow(id.toString());
     	}
     }
     
@@ -616,13 +616,13 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	
     	//and publish them
     	
-    	Map<String,Integer> routeIds = new HashMap<String,Integer>();
+    	Map<String,String> routeIds = new HashMap<String,String>();
     	
-        routeIds.put(A_B_MICO_TEST, wManager.addWorkflow(USER, "A_B_MICO_TEST" ,A_B_MICO_TEST , "[]","[]"));
-    	routeIds.put(A_B_MICO_TEST1,wManager.addWorkflow(USER, "A_B_MICO_TEST1",A_B_MICO_TEST1, "[]","[]"));
-    	routeIds.put(A_B_MICO_TEST2,wManager.addWorkflow(USER, "A_B_MICO_TEST2",A_B_MICO_TEST2, "[]","[]"));
-    	routeIds.put(A_C_MICO_TEST, wManager.addWorkflow(USER, "A_C_MICO_TEST" ,A_C_MICO_TEST , "[]","[]"));
-    	routeIds.put(B_C_MICO_TEST, wManager.addWorkflow(USER, "B_C_MICO_TEST" ,B_C_MICO_TEST , "[]","[]"));
+        routeIds.put(A_B_MICO_TEST, wManager.addWorkflow(USER, A_B_MICO_TEST ));
+    	routeIds.put(A_B_MICO_TEST1,wManager.addWorkflow(USER, A_B_MICO_TEST1));
+    	routeIds.put(A_B_MICO_TEST2,wManager.addWorkflow(USER, A_B_MICO_TEST2));
+    	routeIds.put(A_C_MICO_TEST, wManager.addWorkflow(USER, A_C_MICO_TEST ));
+    	routeIds.put(B_C_MICO_TEST, wManager.addWorkflow(USER, B_C_MICO_TEST ));
 
     	Map<String,MockEndpoint> mocks = new HashMap<String,MockEndpoint>();    	
 
@@ -755,7 +755,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	connectExtractor(abFailingService);
     	
     	String ERROR_B_MICO_FAILING_TEST =WorkflowServiceTest.createTestRoute(abFailingService, "mico:ERROR-B", "mico/error");
-    	routeIds.put(ERROR_B_MICO_FAILING_TEST, wManager.addWorkflow(USER, "ERROR_B_MICO_FAILING_TEST" ,ERROR_B_MICO_FAILING_TEST , "[]","[]"));
+    	routeIds.put(ERROR_B_MICO_FAILING_TEST, wManager.addWorkflow(USER, ERROR_B_MICO_FAILING_TEST ));
     	
     	mocks.put(ERROR_B_MICO_FAILING_TEST, getMockEndpoint("mock:auto-test-route-ERROR-B-mico/error"));
     	mocks.get(ERROR_B_MICO_FAILING_TEST).setExpectedCount(0);
@@ -776,7 +776,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	unregisterExtractor(bcService);
     	unregisterExtractor(abFailingService);
     	
-    	for(Integer id : routeIds.values()){
+    	for(String id : routeIds.values()){
     		wManager.deleteWorkflow(id);
     	}    	
     }
@@ -805,13 +805,13 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	
     	//and publish them
     	
-    	Map<String,Integer> routeIds = new HashMap<String,Integer>();
+    	Map<String,String> routeIds = new HashMap<String,String>();
     	
-        routeIds.put(A_B_MICO_TEST, wManager.addWorkflow(USER, "A_B_MICO_TEST" ,A_B_MICO_TEST , "[]","[]"));
-    	routeIds.put(A_B_MICO_TEST1,wManager.addWorkflow(USER, "A_B_MICO_TEST1",A_B_MICO_TEST1, "[]","[]"));
-    	routeIds.put(A_B_MICO_TEST2,wManager.addWorkflow(USER, "A_B_MICO_TEST2",A_B_MICO_TEST2, "[]","[]"));
-    	routeIds.put(A_C_MICO_TEST, wManager.addWorkflow(USER, "A_C_MICO_TEST" ,A_C_MICO_TEST , "[]","[]"));
-    	routeIds.put(B_C_MICO_TEST, wManager.addWorkflow(USER, "B_C_MICO_TEST" ,B_C_MICO_TEST , "[]","[]"));
+        routeIds.put(A_B_MICO_TEST, wManager.addWorkflow(USER, A_B_MICO_TEST ));
+    	routeIds.put(A_B_MICO_TEST1,wManager.addWorkflow(USER, A_B_MICO_TEST1));
+    	routeIds.put(A_B_MICO_TEST2,wManager.addWorkflow(USER, A_B_MICO_TEST2));
+    	routeIds.put(A_C_MICO_TEST, wManager.addWorkflow(USER, A_C_MICO_TEST ));
+    	routeIds.put(B_C_MICO_TEST, wManager.addWorkflow(USER, B_C_MICO_TEST ));
 
     	Map<String,MockEndpoint> mocks = new HashMap<String,MockEndpoint>();    	
 
@@ -944,7 +944,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	connectExtractor(abFailingService);
     	
     	String ERROR_B_MICO_FAILING_TEST =WorkflowServiceTest.createTestRoute(abFailingService, "mico:ERROR-B", "mico/error");
-    	routeIds.put(ERROR_B_MICO_FAILING_TEST, wManager.addWorkflow(USER, "ERROR_B_MICO_FAILING_TEST" ,ERROR_B_MICO_FAILING_TEST , "[]","[]"));
+    	routeIds.put(ERROR_B_MICO_FAILING_TEST, wManager.addWorkflow(USER, ERROR_B_MICO_FAILING_TEST ));
     	
     	mocks.put(ERROR_B_MICO_FAILING_TEST, getMockEndpoint("mock:auto-test-route-ERROR-B-mico/error"));
     	mocks.get(ERROR_B_MICO_FAILING_TEST).setExpectedCount(0);
@@ -965,7 +965,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	unregisterExtractor(bcService);
     	unregisterExtractor(abFailingService);
     	
-    	for(Integer id : routeIds.values()){
+    	for(String id : routeIds.values()){
     		wManager.deleteWorkflow(id);
     	}
     }
@@ -1063,7 +1063,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
         }
     }
     
-    private Response triggerRouteWithSimpleItem(String syntacticType,String mimeType,Integer routeId) throws RepositoryException, IOException, InterruptedException
+    private Response triggerRouteWithSimpleItem(String syntacticType,String mimeType,String routeId) throws RepositoryException, IOException, InterruptedException
     {
     	 PersistenceService ps = broker.getPersistenceService();
          Item item = null;
@@ -1104,7 +1104,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
          
     }
     
-    private Response triggerRouteWithComplexItem(String syntacticType,String mimeType,Integer routeId) throws RepositoryException, IOException, InterruptedException
+    private Response triggerRouteWithComplexItem(String syntacticType,String mimeType,String routeId) throws RepositoryException, IOException, InterruptedException
     {
     	 PersistenceService ps = broker.getPersistenceService();
          Item item = null;
@@ -1149,7 +1149,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
          
     }
     
-    private Response triggerRouteWithNastyItem(String syntacticType,String mimeType,Integer routeId) throws RepositoryException, IOException, InterruptedException
+    private Response triggerRouteWithNastyItem(String syntacticType,String mimeType,String routeId) throws RepositoryException, IOException, InterruptedException
     {
     	 PersistenceService ps = broker.getPersistenceService();
          Item item = null;

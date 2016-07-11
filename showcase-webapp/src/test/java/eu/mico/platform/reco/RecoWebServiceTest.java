@@ -62,8 +62,9 @@ public class RecoWebServiceTest {
     public void testTalkanalysis() throws Exception {
 
         RestAssured.
-                when().
-                get(server.getUrl() + "reco/zoo/12345/discussion/relatedsubjects").then()
+                when()
+                .get(server.getUrl() + "reco/zoo/12345/discussion/relatedsubjects")
+                .then()
                 .assertThat()
                 .statusCode(200)
                 .body("reco_id", Matchers.equalTo("12345"))
@@ -74,4 +75,6 @@ public class RecoWebServiceTest {
                 .body("confidence", Matchers.equalTo(0.3f));
 
     }
+
+
 }

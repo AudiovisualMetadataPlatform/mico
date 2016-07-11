@@ -29,6 +29,7 @@ import com.rabbitmq.client.Envelope;
 import de.fraunhofer.idmt.mico.DummyExtractor;
 import de.fraunhofer.idmt.mico.DummyFailingExtractor;
 import de.fraunhofer.idmt.mico.DummyNoPartExtractor;
+import de.fraunhofer.idmt.mico.DummyTwoPartsExtractor;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
@@ -46,7 +47,7 @@ import eu.mico.platform.storage.api.StorageService;
 public class MicoCamel {
     private static Logger log = LoggerFactory.getLogger(MicoCamel.class);
 
-    protected static String testHost;
+    private String testHost;
 
     protected EventManager eventManager;
     protected Connection connection;
@@ -83,7 +84,13 @@ public class MicoCamel {
     protected static AnalysisService extr_f12 = new DummyExtractor("FINISH1", "FINISH2","mico-extractor-test","1.0.0","FINISH1-FINISH2-queue");
     protected static AnalysisService extr_f23 = new DummyExtractor("FINISH2", "FINISH3","mico-extractor-test","1.0.0","FINISH2-FINISH3-queue");
     protected static AnalysisService extr_f34 = new DummyExtractor("FINISH3", "FINISH4","mico-extractor-test","1.0.0","FINISH3-FINISH4-queue");
+    protected static AnalysisService extr_aabb = new DummyTwoPartsExtractor("AA", "BB","mico-extractor-test","1.0.0","AA-BB-queue");
+    protected static AnalysisService extr_bbcc = new DummyTwoPartsExtractor("BB", "CC","mico-extractor-test","1.0.0","BB-CC-queue");
+    protected static AnalysisService extr_ccdd = new DummyTwoPartsExtractor("CC", "DD","mico-extractor-test","1.0.0","CC-DD-queue");
     
+    public EventManager getEventManager(){
+    	return eventManager;
+    }
 
     /**
      * setup test environment including mico eventManager and some registered
@@ -94,7 +101,7 @@ public class MicoCamel {
      * @throws URISyntaxException
      */
     public void init() throws IOException, TimeoutException, URISyntaxException {
-        String testHost = System.getProperty("amqp.host");
+        testHost = System.getProperty("amqp.host");
         if (testHost == null) {
         	testHost="127.0.0.1";
             log.warn("'amqp.host' environment variable not defined, using default of {}",testHost);
@@ -165,6 +172,10 @@ public class MicoCamel {
         eventManager.registerService(extr_f12);
         eventManager.registerService(extr_f23);
         eventManager.registerService(extr_f34); 
+        
+        eventManager.registerService(extr_aabb);
+        eventManager.registerService(extr_bbcc);
+        eventManager.registerService(extr_ccdd);
 
         log.info("event manager initialized: {}", eventManager.getPersistenceService().getStoragePrefix());
     }
@@ -256,7 +267,11 @@ public class MicoCamel {
         }
        }
     
- // a mock message broker just recording service registry events to test if they worked
+    public String getTestHost() {
+        return testHost;
+    }
+
+    // a mock message broker just recording service registry events to test if they worked
     private static class MockBrokerRegisterEvents extends DefaultConsumer {
 
         private String lastService;

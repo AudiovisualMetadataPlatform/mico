@@ -19,7 +19,6 @@ import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.RoutesDefinition;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
 
@@ -55,7 +54,7 @@ public class CallParameterTest extends TestBase {
         micoCamel.registerService(extr1);
         MockEndpoint mock1 = getMockEndpoint("mock:result_simpleParams");
 
-        template.send("direct:workflow-simpleParams,mimeType=video/mp4,syntacticType=mico:Video",createExchange());
+        template.send("direct:workflow-simpleParams,mimeType=video/mp4,syntacticType=mico:Video",createExchange("direct:workflow-simpleParams,mimeType=video/mp4,syntacticType=mico:Video"));
 
         mock1.expectedMessageCount(1);
         assertMockEndpointsSatisfied();
@@ -165,8 +164,8 @@ public class CallParameterTest extends TestBase {
      * create exchange containing item and part uri of sample text content
      * @return an exchange containing item and part uri in headers
      */
-    private Exchange createExchange() {
-        return createExchange(textItemUri);
+    private Exchange createExchange(String directUri) {
+        return createExchange(textItemUri, directUri);
     }
 
     /**

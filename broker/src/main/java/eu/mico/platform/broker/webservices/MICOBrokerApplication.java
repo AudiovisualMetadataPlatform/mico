@@ -52,7 +52,7 @@ public class MICOBrokerApplication extends Application {
     private MICOBroker broker;
     private EventManager eventManager;
     protected MicoCamelContext camelContext;
-    protected Map<Integer,MICOCamelRoute> camelRoutes;
+    protected Map<String,MICOCamelRoute> camelRoutes;
 
 
     public MICOBrokerApplication(@Context ServletContext context) {
@@ -90,9 +90,10 @@ public class MICOBrokerApplication extends Application {
             eventManager.init();
             
             camelContext = new MicoCamelContext();
-            camelContext.init();
+            camelContext.init(broker.getPersistenceService());
+
             
-            camelRoutes = new HashMap<Integer,MICOCamelRoute>();
+            camelRoutes = new HashMap<String,MICOCamelRoute>();
 
             services = new HashSet<>();
             services.add(new StatusWebService(broker));
