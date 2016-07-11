@@ -100,9 +100,9 @@ public class CamelBrokerTest extends BaseBrokerTest {
         setupMockAnalyser("B","C");
         
         MockEndpoint mock = getMockEndpoint("mock:result_aggregateSimple_1");
-        mock.expectedMessageCount(2);
+        mock.expectedMessageCount(1);
         MockEndpoint mock2 = getMockEndpoint("mock:result_aggregateSimple_2");
-        mock2.expectedMessageCount(6);
+        mock2.expectedMessageCount(2);
 
         PersistenceService ps = broker.getPersistenceService();
         Item item = null;
