@@ -1,10 +1,12 @@
 <routes xmlns='http://camel.apache.org/schema/spring'>
   <route id='workflow-aggregateComplex-starting-point-for-aggregator-0-mimeType=mico/test,syntacticType=A'>
     <from uri='direct:aggregateComplex-mimeType=mico/test,syntacticType=A'/>
+    <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=A-B-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=A-B-queue'/>
     <to uri='direct:workflow-aggregateComplex-aggregator-0'/>
   </route>
   <route id='workflow-aggregateComplex-starting-point-for-aggregator-0-mimeType=mico/test,syntacticType=B'>
     <from uri='direct:aggregateComplex-mimeType=mico/test,syntacticType=B'/>
+    <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=B-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=B-C-queue'/>
     <to uri='direct:workflow-aggregateComplex-aggregator-0'/>
   </route>
   <route id='workflow-aggregateComplex-pipeline-0'>
@@ -18,20 +20,19 @@
     <from uri='direct:workflow-aggregateComplex-aggregator-0'/>
     <choice>
       <when>
-        <simple>${header.skip_aggregation} == 'true'</simple>
-        <to uri="log:SKIPPING_AGGREGATION, since the header was set"/>
-        <to uri="direct:workflow-aggregateComplex-pipeline-0"/>
+        <simple>${header.aggregatedByAggregator0} == 'aggregator-0'</simple>
+        <to uri='direct:workflow-aggregateComplex-pipeline-0'/>
       </when>
       <otherwise>
-    <aggregate strategyRef='itemAggregatorStrategy' completionSize='2'>
-      <correlationExpression>
-        <simple>header.mico_item</simple>
-      </correlationExpression>
-      <setHeader headerName="aggegratedBy">
-        <simple>workflow-aggregateComplex-aggregator-0</simple>
-      </setHeader>
-      <to uri='direct:workflow-aggregateComplex-pipeline-0'/>
-    </aggregate>
+        <aggregate strategyRef='itemAggregatorStrategy' completionSize='2'>
+          <correlationExpression>
+            <simple>header.mico_item</simple>
+          </correlationExpression>
+          <setHeader headerName='aggregatedByAggregator0'>
+            <simple>aggregator-0</simple>
+          </setHeader>
+          <to uri='direct:workflow-aggregateComplex-pipeline-0'/>
+        </aggregate>
       </otherwise>
     </choice>
   </route>
