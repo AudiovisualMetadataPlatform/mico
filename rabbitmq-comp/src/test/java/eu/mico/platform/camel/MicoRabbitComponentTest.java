@@ -317,6 +317,9 @@ public class MicoRabbitComponentTest extends TestBase {
             int partB=0, partC=0;
             for(Part p : parts){
                 log.trace("checking part [{}]-[{}] serialized by {} at: {}",p.getSyntacticalType(),p.getSemanticType(),p.getSerializedBy().getName(),p.getSerializedAt());
+                if(p.getSerializedBy().getName() == null){
+                    log.error("creator of part {} [{}]-[{}] serialized at: {} should not be 'null'",p.getURI(),p.getSyntacticalType(),p.getSemanticType(),p.getSerializedAt());
+                }
                 assertTrue("All created parts should have assets",p.hasAsset());
                 InputStream is = p.getAsset().getInputStream();
                 String data = IOUtils.toString(is,"UTF-8");
