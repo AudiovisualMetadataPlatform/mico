@@ -157,7 +157,7 @@ public class InjectionWebService {
 	        		}
 	        		catch( IOException | NullPointerException e) {
 	        			//thrown from the persistence if the data does not exist / the url is malformed 
-	        			throw new IllegalArgumentException("No data found at "+existingAssetLocation+" for the asset of the new item");
+	        		    throw new IllegalArgumentException("No data found at "+existingAssetLocation+" for the asset of the new item", e);
 	        		}
 	        		finally{
 	        			if(assetIS!=null){
@@ -540,7 +540,9 @@ public class InjectionWebService {
 			}
 		}
 		finally{
-			assetIS.close();
+			if(assetIS != null){
+				assetIS.close();
+			}
 			ps.deleteItem(tmpItem.getURI());
 		}
 		return mimeType;
