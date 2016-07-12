@@ -1,5 +1,8 @@
 package eu.mico.platform.camel;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.hasProperty;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -7,6 +10,7 @@ import java.io.InputStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -18,12 +22,15 @@ import org.apache.camel.language.Bean;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.RoutesDefinition;
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.Matchers;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
+
+import com.google.common.collect.ImmutableSet;
 
 import de.fraunhofer.idmt.camel.MicoCamel;
 import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
@@ -284,14 +291,54 @@ public class MicoRabbitComponentTest extends TestBase {
         assertMockEndpointsSatisfied();
     }
 
+    /**
+     * test route defined in {@link simple_pipeline.xml}
+     * 
+     * @throws Exception
+     */
     @Test(timeout = 20000)
     public void testSimpleXmlRoute() throws Exception {
             MockEndpoint mock2 = getMockEndpoint("mock:result_simple1");
             mock2.expectedMessageCount(2);
-    
-            template.send("direct:simple1-mimeType=mico/test,syntacticType=A", createExchange("direct:simple1-mimeType=mico/test,syntacticType=A"));
-            template.send("direct:simple1-mimeType=mico/test,syntacticType=A", createExchange("direct:simple1-mimeType=mico/test,syntacticType=A"));
+            Item item = micoCamel.createItem();
+            String content = "This is a sample text for testing ...";
+            String type = "text/plain";
+            micoCamel.addAsset(content.getBytes(), item, type);
+
+            template.send("direct:simple1-mimeType=mico/test,syntacticType=A", createExchange(item.getURI().toString(),"direct:simple1-mimeType=mico/test,syntacticType=A"));
+            template.send("direct:simple1-mimeType=mico/test,syntacticType=A", createExchange(item.getURI().toString(),"direct:simple1-mimeType=mico/test,syntacticType=A"));
             assertMockEndpointsSatisfied();
+
+            Set<Part> parts = ImmutableSet.copyOf(item.getParts());
+            Assert.assertEquals(4, parts.size());
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("B"))));
+            Assert.assertThat(parts, Matchers.<Part>hasItem(hasProperty("syntacticalType", equalTo("C"))));
+            
+            int partB=0, partC=0;
+            for(Part p : parts){
+                log.trace("checking part [{}]-[{}] serialized by {} at: {}",p.getSyntacticalType(),p.getSemanticType(),p.getSerializedBy().getName(),p.getSerializedAt());
+                assertTrue("All created parts should have assets",p.hasAsset());
+                InputStream is = p.getAsset().getInputStream();
+                String data = IOUtils.toString(is,"UTF-8");
+                is.close();
+                if(p.getSyntacticalType().equals("B")){
+                    partB++;
+                    assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
+                    assertFalse(data.contains("Data added by: http://example.org/services/B-C-Service"));
+                }
+                else if(p.getSyntacticalType().equals("C")){
+                    partC++;
+                    assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
+                    assertTrue(data.contains("Data added by: http://example.org/services/B-C-Service"));
+                }
+                else{
+                    fail("Part "+p.getSyntacticalType()+" - "+p.getSemanticType()+" created by "+p.getSerializedBy().getName()+" should not exist");
+                }
+            }
+            assertEquals("counted parts with syntactical type 'B'" ,2, partB);
+            assertEquals("counted parts with syntactical type 'C'" ,2, partC);
+            
+            micoCamel.deleteContentItem(item.getURI().toString());
     }
 
     @Bean(ref="splitterNewPartsBean")

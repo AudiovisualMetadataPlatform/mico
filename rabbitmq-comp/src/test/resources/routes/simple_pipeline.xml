@@ -7,7 +7,10 @@
     <from uri='direct:workflow-simple1-pipeline-0'/>
     <pipeline>
       <to uri='mico-comp:vbox1?host=localhost&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=A-B-queue'/>
-      <to uri='mico-comp:vbox1?host=localhost&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=B-C-queue'/>
+      <split>
+      <method ref="splitterNewPartsBean" method="splitMessage"/>
+        <to uri='mico-comp:vbox1?host=localhost&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=B-C-queue'/>
+      </split>
       <to uri="mock:result_simple1"/>
     </pipeline>
   </route>
