@@ -2,9 +2,11 @@ package eu.mico.platform.camel.split;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.camel.Body;
 import org.apache.camel.Header;
+import org.apache.camel.Headers;
 import org.apache.camel.Message;
 import org.apache.camel.impl.DefaultMessage;
 import org.slf4j.Logger;
@@ -28,22 +30,26 @@ public class SplitterNewParts {
      * @return a list containing each part split
      */
     public List<Message> splitMessage(@Header(value = KEY_MICO_PARTS_NEW) String[] parts,
-            @Header(value = KEY_MICO_ITEM) String itemUri,@Body byte[] body) {
+            @Body byte[] body, @Headers Map<String, Object> headers) {
 
         List<Message> answer = new ArrayList<Message>();
         try {
             if(parts != null && parts.length >0){
-                LOG.info("create messages for {} new parts",parts.length);
+                LOG.debug("create messages for {} new parts",parts.length);
                 for (String part : parts) {
                     DefaultMessage message = new DefaultMessage();
-                    message.setHeader(KEY_MICO_ITEM, itemUri);
+                    message.setHeader(KEY_MICO_ITEM, headers.get(KEY_MICO_ITEM));
                     AnalysisRequest req=AnalysisRequest.parseFrom(body);
                     req = AnalysisRequest.newBuilder(req).setPartUri(0,part).build();
                     message.setBody(req.toByteArray());
                     answer.add(message);
                 }
             }else{
-                LOG.warn("previous extractor did not create new parts");
+                //nothing to split, forward old message
+                DefaultMessage message = new DefaultMessage();
+                message.setHeaders(headers);
+                message.setBody(body);
+                answer.add(message);
             }
         } catch (InvalidProtocolBufferException e) {
             LOG.error("unable to parse event from message body",e);
