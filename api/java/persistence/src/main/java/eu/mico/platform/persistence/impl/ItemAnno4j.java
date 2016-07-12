@@ -39,6 +39,7 @@ public class ItemAnno4j extends ResourceAnno4j implements Item {
         partMMM.setSerializedAt(dateTime);
 
         Agent agent = createObject(extractorID, Agent.class);
+        agent.setName(String.valueOf(extractorID));
         partMMM.setSerializedBy(agent);
 
         this.itemMMM.addPart(partMMM);
