@@ -12,7 +12,7 @@ Package: mico-service-ocr
 Section: misc
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}, tesseract-ocr-eng
-X-Foo: libmico-api2, liblept4, libmagic1, libtesseract3, libboost-thread1.55.0, libdaemon0
+X-Foo: libmico-api3, liblept4, libmagic1, libtesseract3, libboost-thread1.55.0, libdaemon0
 Description: OCR service for the MICO platform
  This package contains a binary version of the sample OCR service implemented in C++ to use with the MICO platform.
 
