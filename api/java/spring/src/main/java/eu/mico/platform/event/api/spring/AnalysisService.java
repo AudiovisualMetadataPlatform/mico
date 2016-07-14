@@ -30,11 +30,6 @@ import java.lang.annotation.Target;
 @Component
 public @interface AnalysisService {
     /**
-     * A unique ID (URI) that identifies this service and its functionality.
-     */
-    String serviceId();
-    
-    /**
      * An ID that identifies the general functionality of this extractor
      */
     String extractorId();
@@ -59,10 +54,4 @@ public @interface AnalysisService {
      */
     String requires();
 
-    /**
-     * The queue name that should be used by the messaging infrastructure for this service. If explicitly set,
-     * this can be used to allow several services listen to the same queue and effectively implement a round-robin load
-     * balancing. If queue name is not set, the event API will choose a random queue name.
-     */
-    String queueName() default "";
 }

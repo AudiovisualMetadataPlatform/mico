@@ -69,6 +69,7 @@ import eu.mico.platform.anno4j.model.namespaces.MMM;
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
+import eu.mico.platform.event.impl.AnalysisServiceUtil;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event;
@@ -399,7 +400,7 @@ public class EventManagerTest extends BaseCommunicationTest {
                 new AnalysisServiceMock("analysisExceptionTest", syntacticalType, syntacticalPartType){
                     @Override
                     protected void internalCall(AnalysisResponse resp, Item item, List<Resource> object, Map<String, String> params) throws AnalysisException, IOException, RepositoryException {
-                        Part part = item.createPart(getServiceID());
+                        Part part = item.createPart(AnalysisServiceUtil.getServiceID(this));
                         part.setSemanticType(semanticPartType);
                         part.setSyntacticalType(syntacticalPartType);
                         resp.sendNew(item, part.getURI());
@@ -450,7 +451,7 @@ public class EventManagerTest extends BaseCommunicationTest {
                 new AnalysisServiceMock("analysisExceptionTest", syntacticalType, syntacticalPartType){
                     @Override
                     protected void internalCall(AnalysisResponse resp, Item item, List<Resource> object, Map<String, String> params) throws AnalysisException, IOException, RepositoryException {
-                        Part part = item.createPart(getServiceID());
+                        Part part = item.createPart(AnalysisServiceUtil.getServiceID(this));
                         part.setSemanticType(semanticPartType);
                         part.setSyntacticalType(syntacticalPartType);
                         throw new AnalysisException(ErrorCodes.UNEXPECTED_ERROR, "Exception to test rollback", null);
@@ -547,7 +548,7 @@ public class EventManagerTest extends BaseCommunicationTest {
         synchronized (brokerRegister) {
             brokerRegister.wait(500);
         }
-        Assert.assertEquals(mock.getServiceID().stringValue(), brokerRegister.lastService);
+        Assert.assertEquals(AnalysisServiceUtil.getServiceID(mock).stringValue(), brokerRegister.lastService);
         return mock;
     }
     
@@ -629,8 +630,8 @@ public class EventManagerTest extends BaseCommunicationTest {
             Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.newBuilder()
                     .setItemUri(item.getURI().toString())
                     .addPartUri(item.getURI().stringValue())
-                    .setServiceId(service.getServiceID().toString()).build();
-            getChannel().basicPublish("", service.getQueueName(), ciProps, analysisEvent.toByteArray());
+                    .setServiceId(AnalysisServiceUtil.getServiceID(service).toString()).build();
+            getChannel().basicPublish("", AnalysisServiceUtil.getQueueName(service), ciProps, analysisEvent.toByteArray());
             log.trace(" - sent analysis request for Item {} to {}", item.getURI(), service);
             long start = System.currentTimeMillis();
             synchronized (this) {
@@ -643,7 +644,7 @@ public class EventManagerTest extends BaseCommunicationTest {
                 }
             }
             Assert.assertTrue("No ERROR or FINISHED response for Service "
-                    + service.getServiceID() + " and Item "+ item.getURI() 
+                    + AnalysisServiceUtil.getServiceID(service) + " and Item "+ item.getURI() 
                     + "within "+maxTime+"ms!", isError() || isFinished());
             log.debug(" - analysis request for Item {} to {} finished after {}ms", 
                     item.getURI(), service, System.currentTimeMillis() - start);
@@ -766,11 +767,6 @@ public class EventManagerTest extends BaseCommunicationTest {
         }
 
         @Override
-        public final URI getServiceID() {
-            return serviceId;
-        }
-
-        @Override
         public final String getProvides() {
             return provides;
         }
@@ -778,11 +774,6 @@ public class EventManagerTest extends BaseCommunicationTest {
         @Override
         public final String getRequires() {
             return requires;
-        }
-
-        @Override
-        public final String getQueueName() {
-            return queueName;
         }
 
         @Override

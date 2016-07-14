@@ -66,7 +66,6 @@ public class DummyExtractor implements AnalysisService {
         this.mode = mode;
     }
 
-    @Override
     public URI getServiceID() {
         return new URIImpl("http://example.org/services/" + StringUtils.capitalize(source) +"-"+ StringUtils.capitalize(target) + "-Service");
     }
@@ -81,7 +80,6 @@ public class DummyExtractor implements AnalysisService {
         return source;
     }
 
-    @Override
     public String getQueueName() {
         return extractorId +"-" + version +"-"+ mode;
     }

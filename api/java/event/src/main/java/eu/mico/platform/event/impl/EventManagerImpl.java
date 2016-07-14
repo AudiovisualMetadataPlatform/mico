@@ -67,6 +67,7 @@ import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Resource;
 
+import static eu.mico.platform.event.impl.AnalysisServiceUtil.*;
 /**
  * Add file description here!
  *
@@ -208,16 +209,13 @@ public class EventManagerImpl implements EventManager {
      */
     @Override
     public void registerService(AnalysisService service) throws IOException {
-        log.info("registering new service {} with message brokers ...", service.getServiceID());
+        log.info("registering new service {} with message brokers ...", getServiceID(service));
 
         Channel chan = connection.createChannel();
 
         // first declare a new input queue for this service using the service queue name, and register a callback
-        String queueName = service.getQueueName() != null ? service.getQueueName() : UUID.randomUUID().toString();
+        String queueName = getQueueName(service);
         
-        // then override its value for compatibility with camel //TODO: remove getQueue() from the api
-        queueName = service.getExtractorID() + "-" + service.getExtractorVersion() + "-" + service.getExtractorModeID();
-
         // then create a new analysis consumer (auto-registered to its queue name)
         services.put(service, new AnalysisConsumer(service, queueName));
 
@@ -228,7 +226,7 @@ public class EventManagerImpl implements EventManager {
         Event.RegistrationEvent registrationEvent =
                 Event.RegistrationEvent.newBuilder()
                         .setType(Event.RegistrationType.REGISTER)
-                        .setServiceId(service.getServiceID().stringValue())
+                        .setServiceId(getServiceID(service).stringValue())
                         .setExtractorId(service.getExtractorID())
                         .setExtractorModeId(service.getExtractorModeID())
                         .setExtractorVersion(service.getExtractorVersion())
@@ -248,16 +246,13 @@ public class EventManagerImpl implements EventManager {
      */
     @Override
     public void unregisterService(AnalysisService service) throws IOException {
-        log.info("unregistering new service {} with message brokers ...", service.getServiceID());
+        log.info("unregistering new service {} with message brokers ...", getServiceID(service));
 
         Channel chan = connection.createChannel();
 
         // first declare a new input queue for this service using the service queue name, and register a callback
-        String queueName = service.getQueueName() != null ? service.getQueueName() : UUID.randomUUID().toString();
+        String queueName = getQueueName(service);
         
-        // then override its value for compatibility with camel //TODO: remove getQueue() from the api
-        queueName = service.getExtractorID() + "-" + service.getExtractorVersion() + "-" + service.getExtractorModeID();
-
         // then create a new analysis consumer (auto-registered to its queue name)
         services.put(service, new AnalysisConsumer(service, queueName));
 
@@ -268,7 +263,7 @@ public class EventManagerImpl implements EventManager {
         Event.RegistrationEvent registrationEvent =
                 Event.RegistrationEvent.newBuilder()
                         .setType(Event.RegistrationType.UNREGISTER)
-                        .setServiceId(service.getServiceID().stringValue())
+                        .setServiceId(getServiceID(service).stringValue())
                         .setExtractorId(service.getExtractorID())
                         .setExtractorModeId(service.getExtractorModeID())
                         .setExtractorVersion(service.getExtractorVersion())
@@ -391,17 +386,15 @@ public class EventManagerImpl implements EventManager {
 
 
             for (Map.Entry<AnalysisService, AnalysisConsumer> svc : services.entrySet()) {
-                log.info("- discover service {} ...", svc.getKey().getServiceID());
+                log.info("- discover service {} ...", getServiceID(svc.getKey()));
                 
                 //Override the queue declared by the service
-                String queueName = svc.getKey().getExtractorID() + "-" +
-                				   svc.getKey().getExtractorVersion() + "-" +
-                		           svc.getKey().getExtractorModeID();
+                String queueName = getQueueName(svc.getKey());
 
                 
                 Event.RegistrationEvent registrationEvent =
                         Event.RegistrationEvent.newBuilder()
-                                .setServiceId(svc.getKey().getServiceID().stringValue())
+                                .setServiceId(getServiceID(svc.getKey()).stringValue())
                                 .setExtractorId(svc.getKey().getExtractorID())
                                 .setExtractorModeId(svc.getKey().getExtractorModeID())
                                 .setExtractorVersion(svc.getKey().getExtractorVersion())
@@ -458,7 +451,7 @@ public class EventManagerImpl implements EventManager {
 
                 //send the finished event
                 AnalysisEvent.Finish finishMsg = AnalysisEvent.Finish.newBuilder()
-                        .setServiceId(service.getServiceID().stringValue())
+                        .setServiceId(getServiceID(service).stringValue())
                         .setItemUri(item.getURI().stringValue())
                         .build();
 
@@ -503,7 +496,7 @@ public class EventManagerImpl implements EventManager {
                 AnalysisEvent.Progress progressMsg = AnalysisEvent.Progress.newBuilder()
                         .setItemUri(item.getURI().stringValue())
                         .setPartUri(part.stringValue())
-                        .setServiceId(service.getServiceID().stringValue())
+                        .setServiceId(getServiceID(service).stringValue())
                         .setProgress(progress).build();
 
                 AnalysisEvent analysisEvent = AnalysisEvent.newBuilder()
@@ -535,7 +528,7 @@ public class EventManagerImpl implements EventManager {
                 AnalysisEvent.NewPart newPartMsg = AnalysisEvent.NewPart.newBuilder()
                         .setItemUri(item.getURI().stringValue())
                         .setPartUri(part.stringValue())
-                        .setServiceId(service.getServiceID().stringValue())
+                        .setServiceId(getServiceID(service).stringValue())
                         .build();
 
                 AnalysisEvent analysisEvent = AnalysisEvent.newBuilder()
@@ -592,7 +585,7 @@ public class EventManagerImpl implements EventManager {
                     if(errorMessage == null){
                         errorMessage = AnalysisEvent.Error.newBuilder()
                                 .setItemUri(item.getURI().stringValue())
-                                .setServiceId(service.getServiceID().stringValue())
+                                .setServiceId(getServiceID(service).stringValue())
                                 .setErrorCode(code)
                                 .setMessage(msg)
                                 .setDescription(desc).build();
@@ -653,10 +646,6 @@ public class EventManagerImpl implements EventManager {
             getChannel().basicConsume(queueName, false, this);
         }
 
-        public String getQueueName() {
-            return queueName;
-        }
-
         /**
          * Called when a <code><b>basic.deliver</b></code> is received for this consumer.
          *
@@ -704,7 +693,7 @@ public class EventManagerImpl implements EventManager {
                 } //else everything we need was correctly initialized
             }
             log.debug("> process Item {} (message: {})", item.getURI(), envelope.getDeliveryTag());
-            traceRDF(item, "before call to "+service.getServiceID());
+            traceRDF(item, "before call to "+getServiceID(service));
             boolean reEnqueue = false; //if the message should be re-enqueued
             try {
                 final List<Resource> resourceList = parseResourceList(analysisRequest.getPartUriList(), item);
@@ -730,7 +719,7 @@ public class EventManagerImpl implements EventManager {
             } catch (AnalysisException e) {
                 String errorMsg = new StringBuilder("AnalysisException while processing item ")
                         .append(analysisRequest.getItemUri()).append(" with service ")
-                        .append(service.getServiceID()).append(" (message: ")
+                        .append(getServiceID(service)).append(" (message: ")
                         .append(e.getMessage()).append(")").toString();
                 log.error(errorMsg);
                 log.debug("STACKTRACE:", e);
@@ -741,7 +730,7 @@ public class EventManagerImpl implements EventManager {
             } catch (RuntimeException e) {
                 String errorMsg = new StringBuilder("Could not analyse item with URI ")
                         .append(analysisRequest.getItemUri()).append(" with service ")
-                        .append(service.getServiceID()).append(" (exception: ")
+                        .append(getServiceID(service)).append(" (exception: ")
                         .append(e.getClass().getSimpleName()).append(" | message: ")
                         .append(e.getMessage()).append(")").toString();
                 log.error(errorMsg);
@@ -779,7 +768,7 @@ public class EventManagerImpl implements EventManager {
                                     + " has not finished for an unknown reason", "");
                         }
                     } finally {
-                        traceRDF(item, "after call to "+service.getServiceID());
+                        traceRDF(item, "after call to "+getServiceID(service));
                         getChannel().basicAck(envelope.getDeliveryTag(), false);
                         log.trace("ack message: {}[item: {}]", envelope.getDeliveryTag(),
                                 analysisRequest.getItemUri());

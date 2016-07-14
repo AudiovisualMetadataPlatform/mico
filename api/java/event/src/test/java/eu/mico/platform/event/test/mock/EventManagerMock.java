@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
+import eu.mico.platform.event.impl.AnalysisServiceUtil;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event.ErrorCodes;
 import eu.mico.platform.persistence.api.PersistenceService;
@@ -64,7 +65,7 @@ public class EventManagerMock implements EventManager {
             if (service.getRequires().equals(resource.getSyntacticalType())) {
                 List<Resource> parts = new LinkedList<Resource>();
                 parts.add(resource);
-                log.debug("calling service {} to analyze {}...", service.getServiceID(), resource.getURI());
+                log.debug("calling service {} to analyze {}...", AnalysisServiceUtil.getServiceID(service), resource.getURI());
                 boolean success = false;
                 try {
                     item.getObjectConnection().begin();
