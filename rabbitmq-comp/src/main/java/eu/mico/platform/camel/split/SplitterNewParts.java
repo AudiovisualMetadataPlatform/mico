@@ -12,14 +12,16 @@ import org.apache.camel.impl.DefaultMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-
 import eu.mico.platform.event.model.Event.AnalysisRequest;
 import static eu.mico.platform.camel.MicoRabbitProducer.*;
 
 public class SplitterNewParts {
 
     private static final Logger LOG = LoggerFactory.getLogger(SplitterNewParts.class);
+    /**
+     * A temporal ID for analysis events created by the splitter 
+     */
+    private static final String DEFAULT_SERVICE_ID = "urn:mico:default:service";
 
     /**
      * The split message method returns something that is iteratable such as a java.util.List.
@@ -33,26 +35,27 @@ public class SplitterNewParts {
             @Body byte[] body, @Headers Map<String, Object> headers) {
 
         List<Message> answer = new ArrayList<Message>();
-        try {
-            if(parts != null && parts.length >0){
-                LOG.debug("create messages for {} new parts",parts.length);
-                for (String part : parts) {
-                    DefaultMessage message = new DefaultMessage();
-                    message.setHeader(KEY_MICO_ITEM, headers.get(KEY_MICO_ITEM));
-                    AnalysisRequest req=AnalysisRequest.parseFrom(body);
-                    req = AnalysisRequest.newBuilder(req).setPartUri(0,part).build();
-                    message.setBody(req.toByteArray());
-                    answer.add(message);
-                }
-            }else{
-                //nothing to split, forward old message
+        if(parts != null && parts.length >0){
+            LOG.debug("create messages for {} new parts",parts.length);
+            for (String part : parts) {
                 DefaultMessage message = new DefaultMessage();
-                message.setHeaders(headers);
-                message.setBody(body);
+                message.setHeader(KEY_MICO_ITEM, headers.get(KEY_MICO_ITEM));
+                message.setHeader(KEY_STARTING_DIRECT, headers.get(KEY_STARTING_DIRECT));
+                AnalysisRequest req = AnalysisRequest.newBuilder()
+                .setItemUri((String) headers.get(KEY_MICO_ITEM))
+                .addPartUri(part)
+                //the {@link MicoRabbitProducer} will replace DEFAULT_SERVICE_URI with a correct URI
+                .setServiceId(DEFAULT_SERVICE_ID)
+                .build();
+                message.setBody(req.toByteArray());
                 answer.add(message);
             }
-        } catch (InvalidProtocolBufferException e) {
-            LOG.error("unable to parse event from message body",e);
+        }else{
+            //nothing to split, forward old message
+            DefaultMessage message = new DefaultMessage();
+            message.setHeaders(headers);
+            message.setBody(body);
+            answer.add(message);
         }
         return answer;
     }

@@ -3,7 +3,6 @@ package eu.mico.platform.camel;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -83,8 +82,6 @@ public class MultithreadingTest extends TestBase {
                         .to("mico-comp:complexbox1?host="
                                 + testHost
                                 + "&extractorId=mico-extractor-complex-test&extractorVersion=1.0.0&modeId=A-B1orB2-queue&parameters={\"outputType\":\"B1\"}")
-                        // here we use a POJO bean mySplitterBean to do the split of the message 
-                        // with a certain header value
                         .split().method("splitterNewPartsBean","splitMessage")
                         .multicast()
                         .to("direct:complex-test-B1-C1",
