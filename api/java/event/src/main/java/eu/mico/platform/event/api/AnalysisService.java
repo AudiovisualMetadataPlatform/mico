@@ -37,7 +37,7 @@ public interface AnalysisService {
      *
      * @return a unique ID identifying this service globally
      */
-    URI getServiceID();
+//    URI getServiceID();
     
     /**
      * Return an ID (String) that identifies this extractor
@@ -88,7 +88,8 @@ public interface AnalysisService {
      *
      * @return a string identifying the queue name this service wants to use
      */
-    String getQueueName();
+//    @Deprecated
+//    String getQueueName();
 
 
     /**

@@ -24,18 +24,20 @@ namespace mico {
 
         protected:
             mico::persistence::model::URI serviceID;
+            std::string queue;
             std::string extractorID;
             std::string extractorModeID;
             std::string extractorVersion;
             std::string provides;
             std::string requires;
-            std::string queue;
 
         public:
-            AnalysisService(const std::string serviceID, const std::string extractorID, const std::string extractorModeID, const std::string extractorVersion,
-            		        const std::string requires, const std::string provides, const std::string queue)
-                    : serviceID(serviceID), extractorID(extractorID), extractorModeID(extractorModeID), extractorVersion(extractorVersion),
-					  provides(provides), requires(requires), queue(queue) {}
+            AnalysisService(const std::string extractorID, const std::string extractorModeID, const std::string extractorVersion,
+            		        const std::string requires, const std::string provides)
+                    : serviceID("http://www.mico-project.org/services/" + extractorID + "-" + extractorVersion + "-" + extractorModeID),
+					  queue(extractorID + "-" + extractorVersion + "-" + extractorModeID),
+					  extractorID(extractorID), extractorModeID(extractorModeID), extractorVersion(extractorVersion),
+					  provides(provides), requires(requires) {}
 
 
             virtual ~AnalysisService() {}
@@ -45,7 +47,7 @@ namespace mico {
             *
             * @return a unique ID identifying this service globally
             */
-            virtual const mico::persistence::model::URI& getServiceID() const {
+            virtual const mico::persistence::model::URI& getServiceID() const final {
             	return serviceID;
             }
 
@@ -97,7 +99,7 @@ namespace mico {
             *
             * @return a string identifying the queue name this service wants to use
             */
-            virtual const std::string getQueueName() const final { return extractorID + "-" + extractorVersion + "-" + extractorModeID; }
+            virtual const std::string getQueueName() const final { return queue; }
 
 
             /**
