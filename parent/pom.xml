@@ -20,7 +20,7 @@
 
     <groupId>eu.mico-project.platform</groupId>
     <artifactId>parent</artifactId>
-    <version>3.0.0-RC2</version>
+    <version>3.0.0-SNAPSHOT</version>
 
     <name>MICO Platform: Parent</name>
     <description>Parent POM for the MICO Platform</description>
