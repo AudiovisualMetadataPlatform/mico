@@ -21,7 +21,7 @@
     <parent>
         <groupId>eu.mico-project.platform</groupId>
         <artifactId>parent</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.0.0-RC2</version>
         <relativePath>../parent</relativePath>
     </parent>
 
@@ -415,6 +415,6 @@
     </profiles>
     <scm>
         <connection>scm:git:ssh://git@bitbucket.org:mico-project/platform.git</connection>
-      <tag>HEAD</tag>
+      <tag>3.0.0-RC2</tag>
   </scm>
 </project>

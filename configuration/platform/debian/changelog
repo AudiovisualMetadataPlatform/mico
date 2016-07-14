@@ -1,4 +1,4 @@
-mico-platform (3.0.0) unstable; urgency=medium
+mico-platform (3.0.0~RC2) unstable; urgency=medium
 
   * Updated dependecy to libmico-api3
 
