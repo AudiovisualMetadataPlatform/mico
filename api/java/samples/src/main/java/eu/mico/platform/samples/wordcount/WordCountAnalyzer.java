@@ -20,6 +20,7 @@ import com.github.anno4j.model.impl.targets.SpecificResource;
 import eu.mico.platform.event.api.AnalysisResponse;
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
+import eu.mico.platform.event.impl.AnalysisServiceUtil;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.model.Asset;
@@ -71,11 +72,6 @@ public class WordCountAnalyzer implements AnalysisService {
         isodate.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    @Override
-    public URI getServiceID() {
-        return new URIImpl("http://www.mico-project.org/services/wordcount");
-    }
-    
 	@Override
 	public String getExtractorID() {
 		return "wordcount";
@@ -101,11 +97,6 @@ public class WordCountAnalyzer implements AnalysisService {
     @Override
     public String getRequires() {
         return "text/plain";
-    }
-
-    @Override
-    public String getQueueName() {
-        return "wordcount";
     }
 
     @Override
@@ -148,7 +139,7 @@ public class WordCountAnalyzer implements AnalysisService {
         log.debug("Counted {} words in {}", count, resource.getURI());
 
         // create a new part for assigning the metadata
-        Part part = item.createPart(getServiceID());
+        Part part = item.createPart(AnalysisServiceUtil.getServiceID(this));
         part.setSyntacticalType(getProvides());
 
         // create example wordcount body and setting the result of the analyzer

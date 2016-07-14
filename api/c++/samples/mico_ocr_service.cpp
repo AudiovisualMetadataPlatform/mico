@@ -83,7 +83,7 @@ public:
     * requires and provides type, and an (optional) queue name.
     */
     OCRAnalysisService(string id, string requires, string language)
-            : AnalysisService("http://www.mico-project.org/services/OCR-"+id, "OCR", id, "2.0.0",requires, "text/plain", "ocr-queue-"+id) {
+            : AnalysisService("OCR", "OCR-"+id, "2.0.0",requires, "text/plain") {
         if(api.Init(NULL, language.c_str())) {
             LOG_ERROR( "could not initialise tesseract instance" );
             throw string("could not initialise tesseract instance");
@@ -129,14 +129,18 @@ public:
         char* plainText = api.GetUTF8Text();
 
         // write plain text to a new content part
-        std::shared_ptr<Part> txtPart = item->createPart(mico::persistence::model::URI("http://dont_know_what_to_write_here"));
+        std::shared_ptr<Part> txtPart = item->createPart(getServiceID());
         std::shared_ptr<Resource> txtResource = std::dynamic_pointer_cast<Resource>(txtPart);
-        txtResource->setSyntacticalType( "text/plain" );
+        txtResource->setSyntacticalType("mico:Text");
+        txtResource->setSemanticType("Text detected inside the input image");
 
         std::shared_ptr<Asset> asset = txtResource->getAsset();
+        asset->setFormat("text/plain");
+
         std::ostream* out = asset->getOutputStream();
         *out << plainText;
         delete out;
+
 
         LOG_INFO("Sending OCR results");
         // notify broker that we created a new content part by calling functions from AnalysisResponse passed as argument
