@@ -33,6 +33,7 @@ import org.openrdf.repository.RepositoryException;
 import com.google.common.collect.ImmutableSet;
 
 import de.fraunhofer.idmt.camel.MicoCamel;
+import de.fraunhofer.idmt.mico.DummyExtractor;
 import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
 import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
 import eu.mico.platform.camel.split.SplitterNewParts;
@@ -244,6 +245,96 @@ public class MicoRabbitComponentTest extends TestBase {
         assertMockEndpointsSatisfied();
     }
 
+    /**
+     * testing complex-route.xml containing splitter, aggregator and sample extractors consuming 2 parts at once
+     * @throws Exception
+     */
+    @Test(timeout=20000)
+    public void testComplexCombinedRoute() throws Exception {
+        MockEndpoint mock1 = getMockEndpoint("mock:result_complex-route_1");
+        mock1.expectedMessageCount(1);
+
+        DummyExtractor extrBC_D = new DummyExtractor("BC","D","mico-extractor-test","1.0.0","BC-D-queue");
+        DummyExtractor extrE_F = new DummyExtractor("E","F","mico-extractor-test","1.0.0","E-F-queue");
+        micoCamel.registerService(extrBC_D);
+        micoCamel.registerService(extrE_F);
+
+        Item item = micoCamel.createItem();
+        String content = "This is a sample text for testing ...";
+        String type = "text/plain";
+        micoCamel.addAsset(content.getBytes(), item, type);
+        
+        template.send("direct:complex-route,mimeType=video/mp4,syntacticType=mico:Video",createExchange(item.getURI().toString(),"direct:complex-route,mimeType=video/mp4,syntacticType=mico:Video"));
+
+        assertMockEndpointsSatisfied();
+        
+        int partB=0, partC=0, partD=0, partE=0, partF=0;
+        Set<Part> parts = ImmutableSet.copyOf(item.getParts());
+        for(Part p : parts){
+            log.trace("checking part [{}]-[{}] serialized by {} at: {}",p.getSyntacticalType(),p.getSemanticType(),p.getSerializedBy().getName(),p.getSerializedAt());
+            if(p.getSerializedBy().getName() == null){
+                log.error("creator of part {} [{}]-[{}] serialized at: {} should not be 'null'",p.getURI(),p.getSyntacticalType(),p.getSemanticType(),p.getSerializedAt());
+            }
+            assertTrue("All created parts should have assets",p.hasAsset());
+            InputStream is = p.getAsset().getInputStream();
+            String data = IOUtils.toString(is,"UTF-8");
+            is.close();
+            if(p.getSyntacticalType().equals("B")){
+                partB++;
+                assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
+                assertFalse(data.contains("Data added by: http://example.org/services/B-C-Service"));
+                assertFalse(data.contains("Data added by: http://example.org/services/BC-D-Service"));
+                assertFalse(data.contains("Data added by: http://example.org/services/D-E-Service"));
+                assertFalse(data.contains("Data added by: http://example.org/services/E-F-Service"));
+            }
+            else if(p.getSyntacticalType().equals("C")){
+                partC++;
+                assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
+                assertTrue(data.contains("Data added by: http://example.org/services/B-C-Service"));
+                assertFalse(data.contains("Data added by: http://example.org/services/BC-D-Service"));
+                assertFalse(data.contains("Data added by: http://example.org/services/D-E-Service"));
+                assertFalse(data.contains("Data added by: http://example.org/services/E-F-Service"));
+            }
+            else if(p.getSyntacticalType().equals("D")){
+                partD++;
+                assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
+                assertTrue(data.contains("Data added by: http://example.org/services/B-C-Service"));
+                assertTrue(data.contains("Data added by: http://example.org/services/BC-D-Service"));
+                assertFalse(data.contains("Data added by: http://example.org/services/D-E-Service"));
+                assertFalse(data.contains("Data added by: http://example.org/services/E-F-Service"));
+            }
+            else if(p.getSyntacticalType().equals("E")){
+                partE++;
+                assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
+                assertTrue(data.contains("Data added by: http://example.org/services/B-C-Service"));
+                assertTrue(data.contains("Data added by: http://example.org/services/BC-D-Service"));
+                assertTrue(data.contains("Data added by: http://example.org/services/D-E-Service"));
+                assertFalse(data.contains("Data added by: http://example.org/services/E-F-Service"));
+            }
+            else if(p.getSyntacticalType().equals("F")){
+                partF++;
+                assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
+                assertTrue(data.contains("Data added by: http://example.org/services/B-C-Service"));
+                assertTrue(data.contains("Data added by: http://example.org/services/BC-D-Service"));
+                assertTrue(data.contains("Data added by: http://example.org/services/D-E-Service"));
+                assertTrue(data.contains("Data added by: http://example.org/services/E-F-Service"));
+            }
+            else{
+                fail("Part "+p.getSyntacticalType()+" - "+p.getSemanticType()+" created by "+p.getSerializedBy().getName()+" should not exist");
+            }
+        }
+        assertEquals("counted parts with syntactical type 'B'" ,1, partB);
+        assertEquals("counted parts with syntactical type 'C'" ,1, partC);
+        assertEquals("counted parts with syntactical type 'D'" ,1, partD);
+        assertEquals("counted parts with syntactical type 'E'" ,1, partE);
+        assertEquals("counted parts with syntactical type 'F'" ,1, partF);
+
+        micoCamel.deleteContentItem(item.getURI().toString());
+        micoCamel.unregisterService(extrBC_D);
+        micoCamel.unregisterService(extrE_F);
+        
+    }
+    
     @Test(timeout=20000)
     public void testParallelFlowsRoute() throws Exception {
         MockEndpoint mock1 = getMockEndpoint("mock:result_parallel_1");
@@ -469,6 +560,7 @@ public class MicoRabbitComponentTest extends TestBase {
                 ModelCamelContext context = getContext();
                 context.setDelayer(CONTEXT_DELAYER);
                 String[] testFiles = {
+                        "src/test/resources/routes/complex-route.xml",
                         "src/test/resources/routes/containing_complex_aggregator.xml",
                         "src/test/resources/routes/containing_simple_aggregator.xml",
                         "src/test/resources/routes/parallel_different_input.xml", 

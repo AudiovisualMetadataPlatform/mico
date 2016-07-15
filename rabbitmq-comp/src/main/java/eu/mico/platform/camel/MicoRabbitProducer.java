@@ -154,7 +154,7 @@ public class MicoRabbitProducer extends DefaultProducer {
         }
 
         channel.close();
-        LOG.info("extraction finished - {}",headerItemURI);
+        LOG.debug("extraction finished: {} - {}",queueId, headerItemURI);
     }
 
     private boolean checkIfExchangeShouldBeForwarded(Exchange exchange){
@@ -375,7 +375,7 @@ public class MicoRabbitProducer extends DefaultProducer {
                 switch (response.getType()) {
                 case PROGRESS:
                     Progress progress = response.getProgress();
-                    log.info("received progress {} for part {}",progress.getProgress(), progress.getPartUri());
+                    log.debug("received progress {} for part {}",progress.getProgress(), progress.getPartUri());
                     break;
                 case ERROR:
                     log.warn("Received an error response {}, generating a new MICOCamelAnalysisException with what message : {}",response.getError().getMessage(), response.getError()

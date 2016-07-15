@@ -1,0 +1,56 @@
+<routes xmlns='http://camel.apache.org/schema/spring'>
+  <route id='complex-route-starting-point-for-pipeline-0-mimeType=video/mp4,syntacticType=mico:Video'>
+    <from uri='direct:complex-route,mimeType=video/mp4,syntacticType=mico:Video'/>
+    <to uri='direct:complex-route-pipeline-0'/>
+  </route>
+  <route id='complex-route-pipeline-0'>
+    <from uri='direct:complex-route-pipeline-0'/>
+    <pipeline>
+      <split>
+        <method ref="splitterNewPartsBean" method="splitMessage"/>
+        <to uri="mico-comp:vbox1?serviceId=AudioDemux&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=A-B-queue"/>
+        <split>
+          <method ref="splitterNewPartsBean" method="splitMessage"/>
+          <multicast>
+            <to uri='direct:complex-route-aggregator-0'/>
+            <to uri='direct:complex-route-pipeline-3'/>
+          </multicast>
+        </split>
+      </split>
+    </pipeline>
+  </route>
+  <route id='complex-route-pipeline-1'>
+    <from uri='direct:complex-route-pipeline-1'/>
+    <pipeline>
+      <to uri="mico-comp:vbox1?serviceId=KaldiEnglishSpeech2Text&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=BC-D-queue&amp;parameters={&quot;part_count&quot;:&quot;2&quot;}"/>
+      <split>
+        <method ref="splitterNewPartsBean" method="splitMessage"/>
+        <to uri="mico-comp:vbox1?serviceId=kaldiXml2txt&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=D-E-queue"/>
+        <split>
+          <method ref="splitterNewPartsBean" method="splitMessage"/>
+          <to uri="mico-comp:vbox1?serviceId=RedlinkNER&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=E-F-queue"/>
+          <to uri="mock:result_complex-route_1"/>
+        </split>
+      </split>
+    </pipeline>
+  </route>
+  <route id='complex-route-pipeline-3'>
+    <from uri='direct:complex-route-pipeline-3'/>
+    <pipeline>
+      <to uri="mico-comp:vbox1?serviceId=LiumDiarization&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=B-C-queue"/>
+      <split>
+        <method ref="splitterNewPartsBean" method="splitMessage"/>
+        <to uri='direct:complex-route-aggregator-0'/>
+      </split>
+    </pipeline>
+  </route>
+  <route id='complex-route-aggregator-0'>
+    <from uri='direct:complex-route-aggregator-0'/>
+    <aggregate strategyRef='itemAggregatorStrategy' completionSize='2'>
+      <correlationExpression>
+        <simple>header.mico_item</simple>
+      </correlationExpression>
+      <to uri='direct:complex-route-pipeline-1'/>
+    </aggregate>
+  </route>
+</routes> 
