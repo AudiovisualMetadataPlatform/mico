@@ -634,10 +634,8 @@ public class MICOBrokerImpl implements MICOBroker {
                     state.addState(partUri, newState);
                 } else {
                     log.warn(
-                            "Syntactic type not set for part {}, assume its type fits to produce value from service: {}.",
+                            "Syntactic type not set for part {} from {} , trying routing with its mimetype ...",
                             partUri, serviceId);
-                    state.addState(partUri, dependencies.getTargetState(new URIImpl(serviceId)));
-                    stateFound=true;
                 }
             } catch (StateNotFoundException | RepositoryException e) {
                 log.warn("Unable to route the new part {} from {} using the syntacticType, trying with the mime type ...",
@@ -657,22 +655,12 @@ public class MICOBrokerImpl implements MICOBroker {
                         state.addState(partUri, newState);
                     } else {
                         log.warn(
-                                "Mime type not set for the asset of part {}, assume its type fits to produce value from service: {}.",
+                                "Mime type not set for the asset of part {} from {}, assume its state is final.",
                                 partUri, serviceId);
-                        state.addState(partUri, dependencies.getTargetState(new URIImpl(serviceId)));
                         stateFound=true; 
                     }
                 } catch (StateNotFoundException | RepositoryException e) {
                     log.warn("Unable to route the new part {} from {} using its mimeType. Assume its state is final.",
-                            partUri, serviceId, e);
-                }
-            }
-            
-            if(!stateFound){
-            	try {
-                    state.addState(partUri, dependencies.getTargetState(new URIImpl(serviceId)));
-                } catch (StateNotFoundException e) {
-                    log.warn("Unable to route the new part {} from {}, the input service is not registered. Assume its state is final.",
                             partUri, serviceId, e);
                 }
             }
