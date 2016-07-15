@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
 import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
+import eu.mico.platform.camel.split.SplitterNewParts;
 import eu.mico.platform.event.model.Event.AnalysisRequest;
 import eu.mico.platform.persistence.api.PersistenceService;
 
@@ -48,6 +49,9 @@ public class MicoCamelContext {
     private static Logger log = LoggerFactory.getLogger(MicoCamelContext.class);
     
     CamelContext context;
+    @Bean(ref="splitterNewPartsBean")
+    public static SplitterNewParts splitterNewParts = new SplitterNewParts();
+
     @Bean(ref="simpleAggregatorStrategy")
     public static SimpleAggregationStrategy aggregatorStrategy = new SimpleAggregationStrategy();
     
@@ -89,12 +93,13 @@ public class MicoCamelContext {
                     (PropertyPlaceholderDelegateRegistry)context.getRegistry()).getRegistry();
 
             if(registry.lookup("simpleAggregatorStrategy") == null)
-            //and here, it is bound to the registry
-            registry.bind("simpleAggregatorStrategy", aggregatorStrategy);
+                registry.bind("simpleAggregatorStrategy", aggregatorStrategy);
             
             if(registry.lookup("itemAggregatorStrategy") == null)
-            //and here, it is bound to the registry
-            registry.bind("itemAggregatorStrategy", itemAggregatorStrategy);
+                registry.bind("itemAggregatorStrategy", itemAggregatorStrategy);
+            
+            if(registry.lookup("splitterNewPartsBean") == null)
+                registry.bind("splitterNewPartsBean", splitterNewParts);
             
         }catch(javax.naming.NameAlreadyBoundException e){
             log.info(e.getMessage());

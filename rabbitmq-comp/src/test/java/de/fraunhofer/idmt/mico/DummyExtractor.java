@@ -37,6 +37,7 @@ import java.util.TimeZone;
 public class DummyExtractor implements AnalysisService {
 
 	private static Logger log = LoggerFactory.getLogger(DummyExtractor.class);
+	private static String EXPECTED_NUMBER_OF_PARTS = "part_count";
     private boolean called = false;
     private String source, target;
     private String extractorId, version, mode;
@@ -109,11 +110,11 @@ public class DummyExtractor implements AnalysisService {
             log.warn("object is null");
             return;
         }
-        if (objs.size() < 1) {
-            log.warn("object is null");
-            return;
-        }
         parameters = params;
+        String parts = params.getOrDefault(EXPECTED_NUMBER_OF_PARTS,"1");
+        if (parts != null && objs.size() != Integer.parseInt(parts)){
+            throw new AnalysisException("Number of input parts ["+objs.size()+"] is not: " + parts );
+        }
         Resource obj = objs.get(0);
         try {
             if (!obj.hasAsset()) {
@@ -124,7 +125,7 @@ public class DummyExtractor implements AnalysisService {
             log.warn("unable to acces asset info of {}", obj.getURI());
             return;
         }
-        log.info("mock analysis request for content item {}, object {}", item.getURI(), obj.getURI());
+        log.debug("mock analysis request for content item {}, object {}", item.getURI(), obj.getURI());
         Part part = null;
         try {
             ObjectConnection con = item.getObjectConnection();
@@ -151,10 +152,12 @@ public class DummyExtractor implements AnalysisService {
             OutputStream os = asset.getOutputStream();
             asset.setFormat(getProvides());
             try{
-                if(obj.hasAsset()){
-                    InputStream is = obj.getAsset().getInputStream();
+                for (Resource o : objs){
+                    if(o.hasAsset()){
+                    InputStream is = o.getAsset().getInputStream();
                     IOUtils.copy(is, os);
                     is.close();
+                    }
                 }
             }catch(Exception e){
                 log.warn("unable to access content part data",e);
@@ -170,7 +173,6 @@ public class DummyExtractor implements AnalysisService {
         } catch (RepositoryException e) {
             throw new AnalysisException("could not access triple store");
         }
-
     }
 
     public Map<String,String> getParameters() {

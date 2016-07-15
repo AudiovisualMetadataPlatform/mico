@@ -2,6 +2,7 @@ package eu.mico.platform.camel;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ import eu.mico.platform.persistence.util.URITools;
  */
 public class MicoRabbitProducer extends DefaultProducer {
     public static final String KEY_MICO_ITEM = "mico_item";
+    public static final String KEY_MICO_PARTS_NEW = "mico_parts_new";
     public static final String KEY_STARTING_DIRECT = "mico_direct";
 
     private static final Logger LOG = LoggerFactory.getLogger(MicoRabbitProducer.class);
@@ -120,54 +122,30 @@ public class MicoRabbitProducer extends DefaultProducer {
 
         AnalyseManager manager = new AnalyseManager(exchange, inEvent, channel);
         manager.sendEvent();
-        List<Future<Exchange>> pendingEvents;
-        pendingEvents= new ArrayList<Future<Exchange>>();
-        boolean newPartCreated = false; // indicates, if atleast one new part was created
-        synchronized (queueId){
+        synchronized (manager){
             while (!manager.hasFinished() && !manager.hasError()) {
                 LOG.debug("..waiting for response from {}", queueId);
-                queueId.wait(3000);   // wait for next message from manager
+                manager.wait(3000);   // wait for extractor to finish processing
                 
-                //Here starts the horror story: 
-                
-                //For every new part BUT THE LAST ONE, trigger the next extractor in the chain
-                
-                String newObjectURI=null;
-                while(!manager.hasError() && (newObjectURI=manager.getNextObjectUri()) != null){
-                	
-
-                    Exchange outExchange = endpoint.createExchange(exchange);
-                    outExchange.setFromEndpoint(endpoint);
-
-                    Message outMessage = outExchange.getIn();
-                    outMessage.getHeaders().putAll(exchange.getIn().getHeaders());
-                    outMessage.setHeader("skip_aggregation", "true");
-                    outMessage.setBody(generateTemplateRequest(inEvent.getItemUri(), newObjectURI).toByteArray());
-
-                    //NOTE: here we produce an exchange to the very beginning of the pipeline, since we do not know which consumers are connected after us
-                    //useless processing is going to be prevented by the check at the very beginning of the MicoRabbitProducer.process(...) function
-                    ProducerTemplate template = outExchange.getContext().createProducerTemplate();
-                    Future<Exchange> future = template.asyncSend((String) outMessage.getHeader(KEY_STARTING_DIRECT),outExchange);
-                    log.trace("send event for new part: {} to ",newObjectURI, outMessage.getHeader(KEY_STARTING_DIRECT));
-                    pendingEvents.add(future);
-                    newPartCreated=true;
-
-                }
             }// while manager not finished
         }// end synch
         
         if(!manager.hasError()){
 
             //if no part was produced
-            if(newPartCreated==false)//nextObjectUri==null){
+            String[] newObjectUris = manager.getNewObjectUris();
+            if(newObjectUris != null && newObjectUris.length > 0){
+                // add new parts list as header field
+                exchange.getIn().setHeader(KEY_MICO_PARTS_NEW, newObjectUris);
+            }
+            else
             {
                 LOG.info("No new part produced by service {}, stopping the current message routing.",queueId);
+                //stop the routing of the current exchange
+                Message outMessage = exchange.getIn();
+                outMessage.setBody(inMessage.getBody());
+                exchange.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
             }
-            //stop the routing of the current exchange
-            Message outMessage = exchange.getIn();
-            outMessage.setBody(inMessage.getBody());
-            exchange.setProperty(Exchange.ROUTE_STOP, Boolean.TRUE);
-
         }
         else{
         	exchange.getIn().setHeader("error_class",exchange.getException());
@@ -175,11 +153,8 @@ public class MicoRabbitProducer extends DefaultProducer {
         	throw exchange.getException();
         }
 
-        //wait until processing of all new parts is finished
-        for(Future<Exchange> ex : pendingEvents){
-            ex.get();
-        }
-        LOG.info("extraction finished - {}",headerItemURI);
+        channel.close();
+        LOG.debug("extraction finished: {} - {}",queueId, headerItemURI);
     }
 
     private boolean checkIfExchangeShouldBeForwarded(Exchange exchange){
@@ -314,15 +289,15 @@ public class MicoRabbitProducer extends DefaultProducer {
     	return false;
     }
 
-	private AnalysisRequest generateTemplateRequest(String item, String part) {
-        LOG.info("generate template of an AnalysisRequest for item {} on part {}", item, part);
-        Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.newBuilder()
-                .setItemUri(item)
-                .addPartUri(part)
-                .setServiceId(queueId).build();
-    	
-    	return analysisEvent;
-    }
+//	private AnalysisRequest generateTemplateRequest(String item, String... part) {
+//        LOG.info("generate template of an AnalysisRequest for item {} on part {}", item, part);
+//        Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.newBuilder()
+//                .setItemUri(item)
+//                .addAllPartUri(Arrays.asList(part))
+//                .setServiceId(queueId).build();
+//    	
+//    	return analysisEvent;
+//    }
     
     private AnalysisRequest generateInputRequest(AnalysisRequest oldRequest) {
         LOG.info("generate AnalysisRequest for service {} on item {} ( input resource(s): {} )", queueId, oldRequest.getItemUri(), oldRequest.getPartUriList());
@@ -355,7 +330,9 @@ public class MicoRabbitProducer extends DefaultProducer {
         private AnalysisRequest    req;
         private volatile boolean finished = false;
         private volatile boolean hasError = false;
-//        private volatile String newObjectUri = null;
+        /**
+         *  list with parts generated by called extractor
+         */
         private volatile ConcurrentLinkedQueue<String> newObjectUris = new ConcurrentLinkedQueue<String>();
         private Exchange exchange = null;
 
@@ -371,6 +348,9 @@ public class MicoRabbitProducer extends DefaultProducer {
             this.exchange = exchange;
         }
 
+        /**send analysis request to the extractor
+         * @throws IOException
+         */
         public void sendEvent() throws IOException {
             String correlationId = UUID.randomUUID().toString();
 
@@ -395,7 +375,7 @@ public class MicoRabbitProducer extends DefaultProducer {
                 switch (response.getType()) {
                 case PROGRESS:
                     Progress progress = response.getProgress();
-                    log.info("received progress {} for part {}",progress.getProgress(), progress.getPartUri());
+                    log.debug("received progress {} for part {}",progress.getProgress(), progress.getPartUri());
                     break;
                 case ERROR:
                     log.warn("Received an error response {}, generating a new MICOCamelAnalysisException with what message : {}",response.getError().getMessage(), response.getError()
@@ -418,6 +398,10 @@ public class MicoRabbitProducer extends DefaultProducer {
                             response.getError().getDescription()));
                     
                     getChannel().basicAck(envelope.getDeliveryTag(), false);
+                    // notify producer, to process message
+                    synchronized (this) {
+                        this.notify();
+                    }
                     break;
                 case NEW_PART:
                     String newObjectUri = response.getNew().getPartUri();
@@ -432,43 +416,42 @@ public class MicoRabbitProducer extends DefaultProducer {
                     // analyze process finished correctly, notify waiting
                     // threads to continue camel route
                     getChannel().basicAck(envelope.getDeliveryTag(), false);
-                    getChannel().close();
                     finished = true;
+                    // notify producer, to process message
+                    synchronized (this) {
+                        this.notify();
+                    }
                 }
-            // notify producer, to process message
-            synchronized (queueId) {
-                queueId.notify();
-            }
         }
 
         @Override
         public void handleCancel(String consumerTag) throws IOException {
-            log.info("Cancel: {}", consumerTag);
+            log.trace("Cancel: {}", consumerTag);
             super.handleCancel(consumerTag);
         }
 
         @Override
         public void handleCancelOk(String consumerTag) {
-            log.info("CancelOk: {}", consumerTag);
+            log.trace("CancelOk: {}", consumerTag);
             super.handleCancelOk(consumerTag);
         }
 
         @Override
         public void handleConsumeOk(String consumerTag) {
-            log.info("ConsumeOk: {}", consumerTag);
+            log.trace("ConsumeOk: {}", consumerTag);
             super.handleConsumeOk(consumerTag);
         }
 
         @Override
         public void handleRecoverOk(String consumerTag) {
-            log.info("RecoverOk: {}", consumerTag);
+            log.trace("RecoverOk: {}", consumerTag);
             super.handleRecoverOk(consumerTag);
         }
 
         @Override
         public void handleShutdownSignal(String consumerTag,
                 ShutdownSignalException sig) {
-            log.info("ShutdownSignal: {} for consumer {}", sig, consumerTag);
+            log.trace("ShutdownSignal: {} for consumer {}", sig, consumerTag);
             super.handleShutdownSignal(consumerTag, sig);
         }
 
@@ -480,8 +463,8 @@ public class MicoRabbitProducer extends DefaultProducer {
             return hasError;
         }
 
-        public String getNextObjectUri() {
-            return newObjectUris.poll();
+        public String[] getNewObjectUris() {
+            return newObjectUris.toArray(new String[0]);
         }
 
     }
