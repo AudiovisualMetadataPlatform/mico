@@ -475,7 +475,7 @@ public class StatusServiceTest extends BaseBrokerTest {
              item.setSyntacticalType(mimeType);
              item.getAsset().setFormat(mimeType);
 
-             injService.submitItem(item.getURI().stringValue(), null);             
+             injService.submitItem(item.getURI().stringValue(), null, null);             
              Thread.sleep(200);
              return item;
          }
@@ -498,7 +498,7 @@ public class StatusServiceTest extends BaseBrokerTest {
              item.setSyntacticalType(syntacticType);
              item.getAsset().setFormat(mimeType);
 
-             injService.submitItem(item.getURI().stringValue(), routeId);             
+             injService.submitItem(item.getURI().stringValue(), routeId, null);             
              Thread.sleep(500);
              return item;
          }

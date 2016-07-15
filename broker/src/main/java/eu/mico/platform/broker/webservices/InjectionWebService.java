@@ -217,7 +217,7 @@ public class InjectionWebService {
      */
     @POST
     @Path("/submit")
-    public Response submitItem(@QueryParam("item") String itemURI, @QueryParam("route") String routeId) throws RepositoryException, IOException {
+    public Response submitItem(@QueryParam("item") String itemURI, @QueryParam("route") String routeId, @QueryParam("notifyTo") String notificationURI) throws RepositoryException, IOException {
 
     	if(itemURI == null || itemURI.isEmpty()){
     		//wrong item
@@ -277,7 +277,7 @@ public class InjectionWebService {
     			log.info("The camel route with ID {} is currently {}, looking for compatible entry points ...",routeId,status);    	
     			//the route is up and running, proceed with the injection
     			boolean compatibleEpFound = false;
-    			MICOJobStatus jobState = new MICOJobStatus();
+    			MICOJobStatus jobState = new MICOJobStatus(itemURI, routeId, notificationURI);
     			
     			for(EntryPoint ep:route.getEntryPoints()){
     				

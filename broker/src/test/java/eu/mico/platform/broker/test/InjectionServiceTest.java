@@ -980,7 +980,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
              item.setSyntacticalType(mimeType);
              item.getAsset().setFormat(mimeType);
 
-             Response r = injService.submitItem(item.getURI().stringValue(), null);
+             Response r = injService.submitItem(item.getURI().stringValue(), null, null);
              
              Thread.sleep(1000);
              
@@ -1012,7 +1012,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
              part.setSyntacticalType(mimeType);
              part.getAsset().setFormat(mimeType);
 
-             Response r = injService.submitItem(item.getURI().stringValue(), null);
+             Response r = injService.submitItem(item.getURI().stringValue(), null, null);
              
              Thread.sleep(1000);
              
@@ -1045,7 +1045,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
     		part.setSyntacticalType(mimeType);
     		part.getAsset().setFormat(mimeType);
 
-    		Response r = injService.submitItem(item.getURI().stringValue(), null);
+    		Response r = injService.submitItem(item.getURI().stringValue(), null, null);
 
     		Thread.sleep(1000);
 
@@ -1073,7 +1073,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
              item.setSyntacticalType(syntacticType);
              item.getAsset().setFormat(mimeType);
 
-             Response r = injService.submitItem(item.getURI().stringValue(), routeId);
+             Response r = injService.submitItem(item.getURI().stringValue(), routeId, null);
              
              Thread.sleep(500);
              
@@ -1116,7 +1116,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
              part.setSyntacticalType(syntacticType);
              part.getAsset().setFormat(mimeType);
 
-             Response r = injService.submitItem(item.getURI().stringValue(), routeId);
+             Response r = injService.submitItem(item.getURI().stringValue(), routeId, null);
              
              Thread.sleep(200);
              
@@ -1164,7 +1164,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
              part.setSyntacticalType(syntacticType);
              part.getAsset().setFormat(mimeType);
 
-             Response r = injService.submitItem(item.getURI().stringValue(), routeId);
+             Response r = injService.submitItem(item.getURI().stringValue(), routeId, null);
              
              Thread.sleep(500);
              
