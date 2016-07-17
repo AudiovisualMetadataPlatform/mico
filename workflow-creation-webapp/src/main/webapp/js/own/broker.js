@@ -18,7 +18,7 @@ var Broker = new function() {
     	var r=$.ajax({
     		
     		//general configuration
-            url:  '/registration-service/info',
+            url:  '/mico-registration-service/info',
             mimeType : 'application/json',
             type: 'GET',
             
@@ -35,7 +35,7 @@ var Broker = new function() {
             	if(data.numberOfExtractors>0)
             	{
             		console.log('at least one extractor is present, proceed');
-            		retrieveExtractors('/registration-service/find/extractors/');
+            		retrieveExtractors('/mico-registration-service/find/extractors/');
             	}
             	//otherwise warn the user and proceed with dummy data
             	else{
