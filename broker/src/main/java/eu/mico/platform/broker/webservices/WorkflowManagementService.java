@@ -18,6 +18,7 @@ import eu.mico.platform.broker.impl.MICOBrokerImpl;
 import eu.mico.platform.broker.model.MICOCamelRoute;
 import eu.mico.platform.camel.MicoCamelContext;
 
+import org.codehaus.plexus.util.FileUtils;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -189,4 +193,31 @@ public class WorkflowManagementService {
     }
 
 
+    public WorkflowManagementService loadCamelRoutesFrom(String resourceDirectory){
+
+    	try {
+
+    		String resourcePath = WorkflowManagementService.class.getClassLoader().getResource(resourceDirectory).getPath();
+    		List<File> routes = FileUtils.getFiles(new File(resourcePath), "*.xml", "");
+    		log.info("routes is {}",routes);
+    		log.info("Found {} files",routes.size());
+
+    		for(File r :routes ){
+    			if( ! r.isDirectory()){
+    				
+    				log.debug("Adding file {} to the camel context ... ",r.getName());
+    				
+    				try{
+    					addWorkflow("mico", new String(Files.readAllBytes(r.toPath())));
+    				}catch(IllegalArgumentException e){
+    					log.warn("Unable to load {}",r.getName(),e);
+    				}
+    			}				
+    		}
+    	} catch (Exception e) {
+    		log.error("Unable to load predefined camel routes",e);
+    	}
+    	
+    	return this;
+    }
 }
