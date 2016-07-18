@@ -32,6 +32,7 @@ import javax.ws.rs.core.Response;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 
@@ -204,8 +205,13 @@ public class WorkflowManagementService {
     		for(File r :routes ){
     			if( ! r.isDirectory()){
     				
-    				log.debug("Adding file {} to camel context ... ",r.getName());
-    				log.warn("Preloading not implemented");
+    				log.debug("Adding file {} to the camel context ... ",r.getName());
+    				
+    				try{
+    					addWorkflow("mico", new String(Files.readAllBytes(r.toPath())));
+    				}catch(IllegalArgumentException e){
+    					log.warn("Unable to load {}",r.getName(),e);
+    				}
     			}				
     		}
     	} catch (Exception e) {
