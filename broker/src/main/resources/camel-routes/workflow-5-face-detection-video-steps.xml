@@ -1,0 +1,31 @@
+<routes xmlns='http://camel.apache.org/schema/spring'>
+  <route id='workflow-5-starting-point-for-pipeline-1-mimeType=video/mp4,syntacticType=mico:Video'>
+    <from uri='direct:workflow-5,mimeType=video/mp4,syntacticType=mico:Video'/>
+    <to uri='direct:workflow-5-pipeline-1'/>
+  </route>
+  <route id='workflow-5-starting-point-for-pipeline-1-mimeType=video/mpeg,syntacticType=mico:Video'>
+    <from uri='direct:workflow-5,mimeType=video/mpeg,syntacticType=mico:Video'/>
+    <to uri='direct:workflow-5-pipeline-1'/>
+  </route>
+  <route id='workflow-5-starting-point-for-pipeline-1-mimeType=video/avi,syntacticType=mico:Video'>
+    <from uri='direct:workflow-5,mimeType=video/avi,syntacticType=mico:Video'/>
+    <to uri='direct:workflow-5-pipeline-1'/>
+  </route>
+  <route id='workflow-5-starting-point-for-pipeline-1-mimeType=video/msvideo,syntacticType=mico:Video'>
+    <from uri='direct:workflow-5,mimeType=video/msvideo,syntacticType=mico:Video'/>
+    <to uri='direct:workflow-5-pipeline-1'/>
+  </route>
+  <route id='workflow-5-starting-point-for-pipeline-1-mimeType=video/x-msvideo,syntacticType=mico:Video'>
+    <from uri='direct:workflow-5,mimeType=video/x-msvideo,syntacticType=mico:Video'/>
+    <to uri='direct:workflow-5-pipeline-1'/>
+  </route>
+  <route id='workflow-5-pipeline-1'>
+    <from uri='direct:workflow-5-pipeline-1'/>
+    <pipeline>
+      <split>
+        <method ref="splitterNewPartsBean" method="splitMessage"/>
+        <to uri="mico-comp:vbox1?serviceId=FaceDetectionVideo&amp;extractorId=mico-extractor-ccv-facedetection&amp;extractorVersion=2.0.4&amp;modeId=FaceDetectionVideo&amp;inputs={&quot;mico:Video&quot;:[&quot;video/mp4&quot;,&quot;video/mpeg&quot;,&quot;video/avi&quot;,&quot;video/msvideo&quot;,&quot;video/x-msvideo&quot;]}"/>
+      </split>
+    </pipeline>
+  </route>
+</routes>

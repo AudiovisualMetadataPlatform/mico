@@ -1,0 +1,15 @@
+<routes xmlns='http://camel.apache.org/schema/spring'>
+  <route id='workflow-1-starting-point-for-pipeline-1-mimeType=text/plain,syntacticType=mico:Text'>
+    <from uri='direct:workflow-1,mimeType=text/plain,syntacticType=mico:Text'/>
+    <to uri='direct:workflow-1-pipeline-1'/>
+  </route>
+  <route id='workflow-1-pipeline-1'>
+    <from uri='direct:workflow-1-pipeline-1'/>
+    <pipeline>
+      <split>
+        <method ref="splitterNewPartsBean" method="splitMessage"/>
+        <to uri="mico-comp:vbox1?serviceId=RedlinkNER&amp;extractorId=mico-extractor-named-entity-recognizer&amp;extractorVersion=3.0.1-SNAPSHOT&amp;modeId=RedlinkNER&amp;inputs={&quot;mico:Text&quot;:[&quot;text/plain&quot;]}"/>
+      </split>
+    </pipeline>
+  </route>
+</routes>
