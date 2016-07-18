@@ -265,74 +265,75 @@ public class MicoRabbitComponentTest extends TestBase {
         micoCamel.addAsset(content.getBytes(), item, type);
         
         template.send("direct:complex-route,mimeType=video/mp4,syntacticType=mico:Video",createExchange(item.getURI().toString(),"direct:complex-route,mimeType=video/mp4,syntacticType=mico:Video"));
-
-        assertMockEndpointsSatisfied();
-        
-        int partB=0, partC=0, partD=0, partE=0, partF=0;
-        Set<Part> parts = ImmutableSet.copyOf(item.getParts());
-        for(Part p : parts){
-            log.trace("checking part [{}]-[{}] serialized by {} at: {}",p.getSyntacticalType(),p.getSemanticType(),p.getSerializedBy().getName(),p.getSerializedAt());
-            if(p.getSerializedBy().getName() == null){
-                log.error("creator of part {} [{}]-[{}] serialized at: {} should not be 'null'",p.getURI(),p.getSyntacticalType(),p.getSemanticType(),p.getSerializedAt());
+        try{
+            assertMockEndpointsSatisfied();
+            
+            int partB=0, partC=0, partD=0, partE=0, partF=0;
+            Set<Part> parts = ImmutableSet.copyOf(item.getParts());
+            for(Part p : parts){
+                log.trace("checking part [{}]-[{}] serialized by {} at: {}",p.getSyntacticalType(),p.getSemanticType(),p.getSerializedBy().getName(),p.getSerializedAt());
+                if(p.getSerializedBy().getName() == null){
+                    log.error("creator of part {} [{}]-[{}] serialized at: {} should not be 'null'",p.getURI(),p.getSyntacticalType(),p.getSemanticType(),p.getSerializedAt());
+                }
+                assertTrue("All created parts should have assets",p.hasAsset());
+                InputStream is = p.getAsset().getInputStream();
+                String data = IOUtils.toString(is,"UTF-8");
+                is.close();
+                if(p.getSyntacticalType().equals("B")){
+                    partB++;
+                    assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
+                    assertFalse(data.contains("Data added by: http://example.org/services/B-C-Service"));
+                    assertFalse(data.contains("Data added by: http://example.org/services/BC-D-Service"));
+                    assertFalse(data.contains("Data added by: http://example.org/services/D-E-Service"));
+                    assertFalse(data.contains("Data added by: http://example.org/services/E-F-Service"));
+                }
+                else if(p.getSyntacticalType().equals("C")){
+                    partC++;
+                    assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
+                    assertTrue(data.contains("Data added by: http://example.org/services/B-C-Service"));
+                    assertFalse(data.contains("Data added by: http://example.org/services/BC-D-Service"));
+                    assertFalse(data.contains("Data added by: http://example.org/services/D-E-Service"));
+                    assertFalse(data.contains("Data added by: http://example.org/services/E-F-Service"));
+                }
+                else if(p.getSyntacticalType().equals("D")){
+                    partD++;
+                    assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
+                    assertTrue(data.contains("Data added by: http://example.org/services/B-C-Service"));
+                    assertTrue(data.contains("Data added by: http://example.org/services/BC-D-Service"));
+                    assertFalse(data.contains("Data added by: http://example.org/services/D-E-Service"));
+                    assertFalse(data.contains("Data added by: http://example.org/services/E-F-Service"));
+                }
+                else if(p.getSyntacticalType().equals("E")){
+                    partE++;
+                    assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
+                    assertTrue(data.contains("Data added by: http://example.org/services/B-C-Service"));
+                    assertTrue(data.contains("Data added by: http://example.org/services/BC-D-Service"));
+                    assertTrue(data.contains("Data added by: http://example.org/services/D-E-Service"));
+                    assertFalse(data.contains("Data added by: http://example.org/services/E-F-Service"));
+                }
+                else if(p.getSyntacticalType().equals("F")){
+                    partF++;
+                    assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
+                    assertTrue(data.contains("Data added by: http://example.org/services/B-C-Service"));
+                    assertTrue(data.contains("Data added by: http://example.org/services/BC-D-Service"));
+                    assertTrue(data.contains("Data added by: http://example.org/services/D-E-Service"));
+                    assertTrue(data.contains("Data added by: http://example.org/services/E-F-Service"));
+                }
+                else{
+                    fail("Part "+p.getSyntacticalType()+" - "+p.getSemanticType()+" created by "+p.getSerializedBy().getName()+" should not exist");
+                }
             }
-            assertTrue("All created parts should have assets",p.hasAsset());
-            InputStream is = p.getAsset().getInputStream();
-            String data = IOUtils.toString(is,"UTF-8");
-            is.close();
-            if(p.getSyntacticalType().equals("B")){
-                partB++;
-                assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
-                assertFalse(data.contains("Data added by: http://example.org/services/B-C-Service"));
-                assertFalse(data.contains("Data added by: http://example.org/services/BC-D-Service"));
-                assertFalse(data.contains("Data added by: http://example.org/services/D-E-Service"));
-                assertFalse(data.contains("Data added by: http://example.org/services/E-F-Service"));
-            }
-            else if(p.getSyntacticalType().equals("C")){
-                partC++;
-                assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
-                assertTrue(data.contains("Data added by: http://example.org/services/B-C-Service"));
-                assertFalse(data.contains("Data added by: http://example.org/services/BC-D-Service"));
-                assertFalse(data.contains("Data added by: http://example.org/services/D-E-Service"));
-                assertFalse(data.contains("Data added by: http://example.org/services/E-F-Service"));
-            }
-            else if(p.getSyntacticalType().equals("D")){
-                partD++;
-                assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
-                assertTrue(data.contains("Data added by: http://example.org/services/B-C-Service"));
-                assertTrue(data.contains("Data added by: http://example.org/services/BC-D-Service"));
-                assertFalse(data.contains("Data added by: http://example.org/services/D-E-Service"));
-                assertFalse(data.contains("Data added by: http://example.org/services/E-F-Service"));
-            }
-            else if(p.getSyntacticalType().equals("E")){
-                partE++;
-                assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
-                assertTrue(data.contains("Data added by: http://example.org/services/B-C-Service"));
-                assertTrue(data.contains("Data added by: http://example.org/services/BC-D-Service"));
-                assertTrue(data.contains("Data added by: http://example.org/services/D-E-Service"));
-                assertFalse(data.contains("Data added by: http://example.org/services/E-F-Service"));
-            }
-            else if(p.getSyntacticalType().equals("F")){
-                partF++;
-                assertTrue(data.contains("Data added by: http://example.org/services/A-B-Service"));
-                assertTrue(data.contains("Data added by: http://example.org/services/B-C-Service"));
-                assertTrue(data.contains("Data added by: http://example.org/services/BC-D-Service"));
-                assertTrue(data.contains("Data added by: http://example.org/services/D-E-Service"));
-                assertTrue(data.contains("Data added by: http://example.org/services/E-F-Service"));
-            }
-            else{
-                fail("Part "+p.getSyntacticalType()+" - "+p.getSemanticType()+" created by "+p.getSerializedBy().getName()+" should not exist");
-            }
+            assertEquals("counted parts with syntactical type 'B'" ,1, partB);
+            assertEquals("counted parts with syntactical type 'C'" ,1, partC);
+            assertEquals("counted parts with syntactical type 'D'" ,1, partD);
+            assertEquals("counted parts with syntactical type 'E'" ,1, partE);
+            assertEquals("counted parts with syntactical type 'F'" ,1, partF);
         }
-        assertEquals("counted parts with syntactical type 'B'" ,1, partB);
-        assertEquals("counted parts with syntactical type 'C'" ,1, partC);
-        assertEquals("counted parts with syntactical type 'D'" ,1, partD);
-        assertEquals("counted parts with syntactical type 'E'" ,1, partE);
-        assertEquals("counted parts with syntactical type 'F'" ,1, partF);
-
-        micoCamel.deleteContentItem(item.getURI().toString());
-        micoCamel.unregisterService(extrBC_D);
-        micoCamel.unregisterService(extrE_F);
-        
+        finally{
+            micoCamel.deleteContentItem(item.getURI().toString());
+            micoCamel.unregisterService(extrBC_D);
+            micoCamel.unregisterService(extrE_F);
+        }
     }
     
     @Test(timeout=20000)

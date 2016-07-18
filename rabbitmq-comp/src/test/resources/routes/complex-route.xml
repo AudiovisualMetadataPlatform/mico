@@ -8,7 +8,7 @@
     <pipeline>
       <split>
         <method ref="splitterNewPartsBean" method="splitMessage"/>
-        <to uri="mico-comp:vbox1?serviceId=AudioDemux&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=A-B-queue"/>
+        <to uri="mico-comp:vbox1?host=localhost&amp;serviceId=AudioDemux&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=A-B-queue"/>
         <split>
           <method ref="splitterNewPartsBean" method="splitMessage"/>
           <multicast>
@@ -22,14 +22,15 @@
   <route id='complex-route-pipeline-1'>
     <from uri='direct:complex-route-pipeline-1'/>
     <pipeline>
-      <to uri="mico-comp:vbox1?serviceId=KaldiEnglishSpeech2Text&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=BC-D-queue&amp;parameters={&quot;part_count&quot;:&quot;2&quot;}"/>
+      <to uri="mico-comp:vbox1?host=localhost&amp;serviceId=KaldiEnglishSpeech2Text&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=BC-D-queue&amp;parameters={&quot;part_count&quot;:&quot;2&quot;}"/>
       <split>
         <method ref="splitterNewPartsBean" method="splitMessage"/>
-        <to uri="mico-comp:vbox1?serviceId=kaldiXml2txt&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=D-E-queue"/>
+        <to uri="mico-comp:vbox1?host=localhost&amp;serviceId=kaldiXml2txt&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=D-E-queue"/>
         <split>
           <method ref="splitterNewPartsBean" method="splitMessage"/>
-          <to uri="mico-comp:vbox1?serviceId=RedlinkNER&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=E-F-queue"/>
+          <to uri="mico-comp:vbox1?host=localhost&amp;serviceId=RedlinkNER&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=E-F-queue"/>
           <to uri="mock:result_complex-route_1"/>
+          <log message="COMPLEX ROUTE FINISHED: ${headers}" logName="eu.mico.platform.camel.MicoRabbitComponentTest" loggingLevel="INFO" />
         </split>
       </split>
     </pipeline>
@@ -37,7 +38,7 @@
   <route id='complex-route-pipeline-3'>
     <from uri='direct:complex-route-pipeline-3'/>
     <pipeline>
-      <to uri="mico-comp:vbox1?serviceId=LiumDiarization&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=B-C-queue"/>
+      <to uri="mico-comp:vbox1?host=localhost&amp;serviceId=LiumDiarization&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=B-C-queue"/>
       <split>
         <method ref="splitterNewPartsBean" method="splitMessage"/>
         <to uri='direct:complex-route-aggregator-0'/>

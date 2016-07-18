@@ -40,8 +40,8 @@ public class MicoRabbitEndpoint extends DefaultEndpoint {
     @UriParam(defaultValue = "10")
     private int option = 10;
 
-    @UriParam(name="host", defaultValue = "mico-platform")
-    private String host = "mico-platform";
+    @UriParam(name="host", defaultValue = "localhost")
+    private String host = "localhost";
     @UriParam(name="vhost", defaultValue = "/")
     private String virtualHost = "/";
     
