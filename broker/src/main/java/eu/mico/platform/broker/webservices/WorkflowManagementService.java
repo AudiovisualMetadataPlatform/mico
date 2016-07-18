@@ -192,7 +192,7 @@ public class WorkflowManagementService {
     }
 
 
-    public void loadCamelRouteFrom(String resourceDirectory){
+    public WorkflowManagementService loadCamelRoutesFrom(String resourceDirectory){
 
     	try {
 
@@ -211,5 +211,7 @@ public class WorkflowManagementService {
     	} catch (Exception e) {
     		log.error("Unable to load predefined camel routes",e);
     	}
+    	
+    	return this;
     }
 }
