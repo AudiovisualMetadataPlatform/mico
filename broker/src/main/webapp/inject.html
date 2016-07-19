@@ -81,8 +81,8 @@
     </p>
 
     <table>
-        <tr><th>File</th><th>MIME Type</th><th></th></tr>
-        <tr><td><input id="itemAsset" type="file" ng-file-select="itemAssetfiles = $files; itemAssetType = $files[0].type; itemAssetName = $files[0].name"></td><td><input type="text" id="itemAssetType" name="type" ng-model="itemAssetType"/></td> <td><button ng-click="createItem()">Create Item</button></td></tr>
+        <tr><th>File</th><th>Syntactic Type</th><th></th></tr>
+        <tr><td><input id="itemAsset" type="file" ng-file-select="itemAssetfiles = $files; itemAssetType = 'mico:' + ($files[0].type.split('/')[0])[0].toUpperCase() + $files[0].type.split('/')[0].substr(1); itemAssetName = $files[0].name"></td><td><input type="text" id="itemAssetType" name="type" ng-model="itemAssetType"/></td> <td><button ng-click="createItem()">Create Item</button></td></tr>
     </table>
 </div>
 
