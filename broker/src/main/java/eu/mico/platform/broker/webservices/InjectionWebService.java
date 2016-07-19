@@ -221,15 +221,19 @@ public class InjectionWebService {
 
     	if(itemURI == null || itemURI.isEmpty()){
     		//wrong item
-    		return Response.status(Response.Status.BAD_REQUEST).build();
+    		return Response.status(Response.Status.BAD_REQUEST).entity("item parameter not set").build();
     	}
     	if(routeId != null && routeId.isEmpty()){
     		//wrong routeId
-    		return Response.status(Response.Status.BAD_REQUEST).build();
+    		return Response.status(Response.Status.BAD_REQUEST).entity("route parameter not set").build();
     	}
     	
     	PersistenceService ps = eventManager.getPersistenceService();
         Item item = ps.getItem(new URIImpl(itemURI));
+        if(item == null){
+            //wrong routeId
+            return Response.status(Response.Status.BAD_REQUEST).entity("No item found with uri: " + itemURI).build();
+        }
         
         if(routeId == null){
 
@@ -245,7 +249,8 @@ public class InjectionWebService {
     		
     		if(route == null ){
     			//the route does not exist
-    			return Response.status(Response.Status.BAD_REQUEST).build();
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("No route found with id: " + routeId).build();
     		}
     		
 
@@ -256,21 +261,31 @@ public class InjectionWebService {
 
     			//the requested route cannot be started or is broken
     			log.error("The camel route with ID {} is currently {}",routeId,status);    			   
-    			return Response.status(Response.Status.BAD_REQUEST).build();
+                return Response
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity("The camel route with ID {" + routeId
+                                + "} is currently broken").build();
 
     		} 
     		else if(status.contentEquals(RouteStatus.UNAVAILABLE.toString())){
 
     			//the requested route cannot be started or is broken
     			log.error("The camel route with ID {} is currently {}",routeId,status);    			   
-    			return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
+                return Response
+                        .status(Response.Status.SERVICE_UNAVAILABLE)
+                        .entity("The camel route with ID {" + routeId
+                                + "} is currently unavailable").build();
 
     		}
     		else if(status.contentEquals(RouteStatus.RUNNABLE.toString())){
 
     			//TODO: here we should start the required extractors
     			log.warn("The camel route with ID {} is currently {}, but the auto-deployment is not implemented",routeId,status);
-    			return Response.status(Response.Status.NOT_IMPLEMENTED).build();
+                return Response
+                        .status(Response.Status.NOT_IMPLEMENTED)
+                        .entity("The camel route with ID {" + routeId
+                                + "} is runnable, but the auto-deployment is not implemented")
+                        .build();
     		}
     		else if(status.contentEquals(RouteStatus.ONLINE.toString())){
 
@@ -307,7 +322,10 @@ public class InjectionWebService {
     				return Response.ok().build();
     			}
     			log.error("Unable to retrieve an entry point compatible with the input item");
-    			return Response.status(Response.Status.BAD_REQUEST).build();
+                return Response
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity("Unable to retrieve an entry point compatible with the input item")
+                        .build();
     		}
     		else{
     			//status is not between the known ones
@@ -332,7 +350,16 @@ public class InjectionWebService {
     public Response addPart(@QueryParam("itemUri")String itemURI, @QueryParam("type") String type, @QueryParam("existingAssetLocation") String existingAssetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
         PersistenceService ps = eventManager.getPersistenceService();
 
+        if(itemURI == null || itemURI.isEmpty()){
+            //wrong item
+            return Response.status(Response.Status.BAD_REQUEST).entity("item parameter not set").build();
+        }
+
         Item item = ps.getItem(new URIImpl(itemURI));        
+        if(item == null){
+            //wrong routeId
+            return Response.status(Response.Status.BAD_REQUEST).entity("No item found with uri:" + itemURI).build();
+        }
         InputStream in = null;
     	
     	try {
