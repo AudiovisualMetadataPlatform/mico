@@ -5,7 +5,7 @@
     <parent>
         <groupId>eu.mico-project.platform</groupId>
         <artifactId>mico-platform</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.1-SNAPSHOT</version>
     </parent>
 
 
