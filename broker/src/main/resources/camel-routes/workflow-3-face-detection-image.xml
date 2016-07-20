@@ -12,7 +12,7 @@
     <pipeline>
       <split>
         <method ref="splitterNewPartsBean" method="splitMessage"/>
-        <to uri="mico-comp:vbox1?serviceId=FaceDetectionImage&amp;extractorId=mico-extractor-ccv-facedetection&amp;extractorVersion=2.0.4&amp;modeId=FaceDetectionImage&amp;inputs={&quot;mico:Image&quot;:[&quot;image/jpeg&quot;,&quot;image/png&quot;]}"/>
+        <to uri="mico-comp:vbox1?serviceId=FaceDetectionImage&amp;extractorId=mico-extractor-ccv-facedetection&amp;extractorVersion=2.1.0&amp;modeId=FaceDetectionImage&amp;inputs={&quot;mico:Image&quot;:[&quot;image/jpeg&quot;,&quot;image/png&quot;]}"/>
       </split>
     </pipeline>
   </route>

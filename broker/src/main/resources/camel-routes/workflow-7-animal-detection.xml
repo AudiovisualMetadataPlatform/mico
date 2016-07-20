@@ -8,10 +8,10 @@
     <pipeline>
       <split>
         <method ref="splitterNewPartsBean" method="splitMessage"/>
-        <to uri="mico-comp:vbox1?serviceId=HOGDetector&amp;extractorId=mico-extractor-animaldetection-hog&amp;extractorVersion=2.0.4&amp;modeId=HOGDetector&amp;inputs={&quot;mico:Image&quot;:[&quot;image/jpeg&quot;]}"/>
+        <to uri="mico-comp:vbox1?serviceId=HOGDetector&amp;extractorId=mico-extractor-animaldetection-hog&amp;extractorVersion=2.1.0&amp;modeId=HOGDetector&amp;inputs={&quot;mico:Image&quot;:[&quot;image/jpeg&quot;]}"/>
         <split>
           <method ref="splitterNewPartsBean" method="splitMessage"/>
-          <to uri="mico-comp:vbox1?serviceId=objectDetectionXml2rdf&amp;extractorId=mico-extractor-object-detection-rdf&amp;extractorVersion=3.0.0-SNAPSHOT&amp;modeId=objectDetectionXml2rdf&amp;inputs={&quot;mico:ObjectDetectionXml&quot;:[&quot;text/vnd.fhg-objectdetection+xml&quot;]}"/>
+          <to uri="mico-comp:vbox1?serviceId=objectDetectionXml2rdf&amp;extractorId=mico-extractor-object-detection-rdf&amp;extractorVersion=2.1.0&amp;modeId=objectDetectionXml2rdf&amp;inputs={&quot;mico:ObjectDetectionXml&quot;:[&quot;text/vnd.fhg-objectdetection+xml&quot;]}"/>
         </split>
       </split>
     </pipeline>
