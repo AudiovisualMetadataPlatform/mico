@@ -6,7 +6,7 @@
   <route id='workflow-4-pipeline-1'>
     <from uri='direct:workflow-4-pipeline-1'/>
     <pipeline>
-      <to uri="mico-comp:vbox1?serviceId=FaceDetectionImage&amp;extractorId=mico-extractor-ccv-facedetection&amp;extractorVersion=2.0.4&amp;modeId=FaceDetectionImage&amp;inputs={&quot;mico:Image&quot;:[&quot;image/png&quot;]}"/>
+      <to uri="mico-comp:vbox1?serviceId=FaceDetectionImage&amp;extractorId=mico-extractor-ccv-facedetection&amp;extractorVersion=2.1.0&amp;modeId=FaceDetectionImage&amp;inputs={&quot;mico:Image&quot;:[&quot;image/png&quot;]}"/>
     </pipeline>
   </route>
   <route id='workflow-4-pipeline-2'>
@@ -14,7 +14,7 @@
     <pipeline>
       <split>
         <method ref="splitterNewPartsBean" method="splitMessage"/>
-        <to uri="mico-comp:vbox1?serviceId=TVSDetection&amp;extractorId=mico-extractor-temporalvideosegmentation&amp;extractorVersion=2.0.1&amp;modeId=TVSDetection&amp;parameters={&quot;outputFormat&quot;:&quot;PNG&quot;}&amp;inputs={&quot;mico:Video&quot;:[&quot;video/mp4&quot;]}"/>
+        <to uri="mico-comp:vbox1?serviceId=TVSDetection&amp;extractorId=mico-extractor-temporalvideosegmentation&amp;extractorVersion=2.1.0&amp;modeId=TVSDetection&amp;parameters={&quot;outputFormat&quot;:&quot;PNG&quot;}&amp;inputs={&quot;mico:Video&quot;:[&quot;video/mp4&quot;]}"/>
         <split>
           <method ref="splitterNewPartsBean" method="splitMessage"/>
           <to uri='direct:workflow-4-aggregator-0'/>

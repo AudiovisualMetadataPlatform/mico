@@ -24,7 +24,7 @@
     <pipeline>
       <split>
         <method ref="splitterNewPartsBean" method="splitMessage"/>
-        <to uri="mico-comp:vbox1?serviceId=FaceDetectionVideo&amp;extractorId=mico-extractor-ccv-facedetection&amp;extractorVersion=2.0.4&amp;modeId=FaceDetectionVideo&amp;inputs={&quot;mico:Video&quot;:[&quot;video/mp4&quot;,&quot;video/mpeg&quot;,&quot;video/avi&quot;,&quot;video/msvideo&quot;,&quot;video/x-msvideo&quot;]}"/>
+        <to uri="mico-comp:vbox1?serviceId=FaceDetectionVideo&amp;extractorId=mico-extractor-ccv-facedetection&amp;extractorVersion=2.1.0&amp;modeId=FaceDetectionVideo&amp;inputs={&quot;mico:Video&quot;:[&quot;video/mp4&quot;,&quot;video/mpeg&quot;,&quot;video/avi&quot;,&quot;video/msvideo&quot;,&quot;video/x-msvideo&quot;]}"/>
       </split>
     </pipeline>
   </route>

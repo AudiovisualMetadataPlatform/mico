@@ -9,7 +9,7 @@
   <route id='workflow-6-pipeline-0'>
     <from uri='direct:workflow-6-pipeline-0'/>
     <pipeline>
-      <to uri="mico-comp:vbox1?serviceId=AudioDemux&amp;extractorId=mico-extractor-audiodemux&amp;extractorVersion=2.0.1&amp;modeId=AudioDemux&amp;parameters={&quot;freq&quot;:&quot;8000&quot;}&amp;inputs={&quot;mico:Video&quot;:[&quot;video/mp4&quot;]}"/>
+      <to uri="mico-comp:vbox1?serviceId=AudioDemux&amp;extractorId=mico-extractor-audiodemux&amp;extractorVersion=2.1.0&amp;modeId=AudioDemux&amp;parameters={&quot;freq&quot;:&quot;8000&quot;}&amp;inputs={&quot;mico:Video&quot;:[&quot;video/mp4&quot;]}"/>
       <split>
         <method ref="splitterNewPartsBean" method="splitMessage"/>
         <multicast>
@@ -22,7 +22,7 @@
   <route id='workflow-6-pipeline-1'>
     <from uri='direct:workflow-6-pipeline-1'/>
     <pipeline>
-      <to uri="mico-comp:vbox1?serviceId=KaldiEnglishSpeech2Text&amp;extractorId=mico-extractor-speech-to-text&amp;extractorVersion=2.1.1&amp;modeId=KaldiEnglishSpeech2Text&amp;inputs={&quot;mico:Audio&quot;:[&quot;audio/wav&quot;],&quot;mmmterms:DiarizationBody&quot;:[&quot;application/x-mico-rdf&quot;]}"/>
+      <to uri="mico-comp:vbox1?serviceId=KaldiEnglishSpeech2Text&amp;extractorId=mico-extractor-speech-to-text&amp;extractorVersion=2.2.0&amp;modeId=KaldiEnglishSpeech2Text&amp;inputs={&quot;mico:Audio&quot;:[&quot;audio/wav&quot;],&quot;mmmterms:DiarizationBody&quot;:[&quot;application/x-mico-rdf&quot;]}"/>
       <split>
         <method ref="splitterNewPartsBean" method="splitMessage"/>
         <multicast>
@@ -35,13 +35,13 @@
   <route id='workflow-6-pipeline-3'>
     <from uri='direct:workflow-6-pipeline-3'/>
     <pipeline>
-      <to uri="mico-comp:vbox1?serviceId=FaceDetectionImage&amp;extractorId=mico-extractor-ccv-facedetection&amp;extractorVersion=2.0.4&amp;modeId=FaceDetectionImage&amp;inputs={&quot;mico:Image&quot;:[&quot;image/png&quot;]}"/>
+      <to uri="mico-comp:vbox1?serviceId=FaceDetectionImage&amp;extractorId=mico-extractor-ccv-facedetection&amp;extractorVersion=2.1.0&amp;modeId=FaceDetectionImage&amp;inputs={&quot;mico:Image&quot;:[&quot;image/png&quot;]}"/>
     </pipeline>
   </route>
   <route id='workflow-6-pipeline-5'>
     <from uri='direct:workflow-6-pipeline-5'/>
     <pipeline>
-      <to uri="mico-comp:vbox1?serviceId=LiumDiarization&amp;extractorId=mico-extractor-diarization&amp;extractorVersion=1.1.1-SNAPSHOT&amp;modeId=LiumDiarization&amp;inputs={&quot;mico:Audio&quot;:[&quot;audio/wav&quot;]}"/>
+      <to uri="mico-comp:vbox1?serviceId=LiumDiarization&amp;extractorId=mico-extractor-diarization&amp;extractorVersion=1.2.0-SNAPSHOT&amp;modeId=LiumDiarization&amp;inputs={&quot;mico:Audio&quot;:[&quot;audio/wav&quot;]}"/>
       <split>
         <method ref="splitterNewPartsBean" method="splitMessage"/>
         <to uri='direct:workflow-6-aggregator-0'/>
@@ -51,23 +51,23 @@
   <route id='workflow-6-pipeline-6'>
     <from uri='direct:workflow-6-pipeline-6'/>
     <pipeline>
-      <to uri="mico-comp:vbox1?serviceId=kaldiXml2txt&amp;extractorId=mico-extractor-kaldi2txt&amp;extractorVersion=2.0.1-SNAPSHOT&amp;modeId=kaldiXml2txt&amp;inputs={&quot;mico:kaldiXML&quot;:[&quot;text/vnd.umu-kaldis+xml&quot;]}"/>
+      <to uri="mico-comp:vbox1?serviceId=kaldiXml2txt&amp;extractorId=mico-extractor-kaldi2txt&amp;extractorVersion=2.1.0-SNAPSHOT&amp;modeId=kaldiXml2txt&amp;inputs={&quot;mico:kaldiXML&quot;:[&quot;text/vnd.umu-kaldis+xml&quot;]}"/>
       <split>
         <method ref="splitterNewPartsBean" method="splitMessage"/>
-        <to uri="mico-comp:vbox1?serviceId=RedlinkNER&amp;extractorId=mico-extractor-named-entity-recognizer&amp;extractorVersion=3.0.1-SNAPSHOT&amp;modeId=RedlinkNER&amp;inputs={&quot;mico:Text&quot;:[&quot;text/plain&quot;]}"/>
+        <to uri="mico-comp:vbox1?serviceId=RedlinkNER&amp;extractorId=mico-extractor-named-entity-recognizer&amp;extractorVersion=3.1.0-SNAPSHOT&amp;modeId=RedlinkNER&amp;inputs={&quot;mico:Text&quot;:[&quot;text/plain&quot;]}"/>
       </split>
     </pipeline>
   </route>
   <route id='workflow-6-pipeline-7'>
     <from uri='direct:workflow-6-pipeline-7'/>
     <pipeline>
-      <to uri="mico-comp:vbox1?serviceId=kaldiXml2rdf&amp;extractorId=mico-extractor-kaldi2rdf&amp;extractorVersion=2.0.1-SNAPSHOT&amp;modeId=kaldiXml2rdf&amp;inputs={&quot;mico:kaldiXML&quot;:[&quot;text/vnd.umu-kaldis+xml&quot;]}"/>
+      <to uri="mico-comp:vbox1?serviceId=kaldiXml2rdf&amp;extractorId=mico-extractor-kaldi2rdf&amp;extractorVersion=2.1.0-SNAPSHOT&amp;modeId=kaldiXml2rdf&amp;inputs={&quot;mico:kaldiXML&quot;:[&quot;text/vnd.umu-kaldis+xml&quot;]}"/>
     </pipeline>
   </route>
   <route id='workflow-6-pipeline-8'>
     <from uri='direct:workflow-6-pipeline-8'/>
     <pipeline>
-      <to uri="mico-comp:vbox1?serviceId=TVSDetection&amp;extractorId=mico-extractor-temporalvideosegmentation&amp;extractorVersion=2.0.1&amp;modeId=TVSDetection&amp;parameters={&quot;outputFormat&quot;:&quot;PNG&quot;}&amp;inputs={&quot;mico:Video&quot;:[&quot;video/mp4&quot;]}"/>
+      <to uri="mico-comp:vbox1?serviceId=TVSDetection&amp;extractorId=mico-extractor-temporalvideosegmentation&amp;extractorVersion=2.1.0&amp;modeId=TVSDetection&amp;parameters={&quot;outputFormat&quot;:&quot;PNG&quot;}&amp;inputs={&quot;mico:Video&quot;:[&quot;video/mp4&quot;]}"/>
       <split>
         <method ref="splitterNewPartsBean" method="splitMessage"/>
         <to uri='direct:workflow-6-aggregator-1'/>
