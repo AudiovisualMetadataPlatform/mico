@@ -135,7 +135,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     	
     	//check that its status is available and equal to DONE
     	try{
-    		Thread.sleep(300);
+    		Thread.sleep(800);
     		Map<String,Object> proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
             
             boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
@@ -161,7 +161,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     	
     	//check that its status is available and equal to DONE
     	try{
-    		Thread.sleep(300);
+    		Thread.sleep(800);
     		Map<String,Object> proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
             
             boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
@@ -185,7 +185,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     	
     	//check that its status is available and equal to DONE
     	try{
-    		Thread.sleep(300);
+    		Thread.sleep(800);
     		Map<String,Object> proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
             
             boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
@@ -279,7 +279,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     	
     	//check that its status is available and equal to DONE
     	try{
-    		Thread.sleep(300);
+    		Thread.sleep(800);
     		MICOJobStatus state = broker.getMICOCamelJobStatus(new MICOJob(routeIds.get(efWrongRoute), items.get(0).getURI().stringValue()));
             
             boolean finished = state.isFinished();
@@ -303,7 +303,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     	
     	//check that its status is available and equal to DONE
     	try{
-    		Thread.sleep(300);
+    		Thread.sleep(800);
     		MICOJobStatus state = broker.getMICOCamelJobStatus(new MICOJob(routeIds.get(cdSlowRoute), items.get(0).getURI().stringValue()));
             
             boolean finished = state.isFinished();
@@ -356,7 +356,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     	
     	//check that its status is available and equal to DONE
     	try{
-    		Thread.sleep(400);
+    		Thread.sleep(1000);
     		Map<String,Object> proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
             
             boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
@@ -380,7 +380,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     	
     	//check that its status is available and equal to DONE
     	try{
-    		Thread.sleep(300);
+    		Thread.sleep(800);
     		Map<String,Object> proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
             
             boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
@@ -404,7 +404,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     	
     	//check that its status is available and equal to DONE
     	try{
-    		Thread.sleep(300);
+    		Thread.sleep(800);
     		Map<String,Object> proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
             
             boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
