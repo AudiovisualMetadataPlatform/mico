@@ -71,6 +71,8 @@ import static org.hamcrest.Matchers.hasProperty;
 
 public class InjectionServiceTest extends BaseBrokerTest {
 
+	private static final String UNKNOWN_ITEM_URI = "https://unknown.item/uri";
+	
 	private static Logger log = LoggerFactory.getLogger(InjectionServiceTest.class);
     private static MicoCamelContext context = new MicoCamelContext();
     private static Map<String,MICOCamelRoute> routes = new HashMap<String,MICOCamelRoute>();
@@ -403,6 +405,52 @@ public class InjectionServiceTest extends BaseBrokerTest {
     }
 	
 
+    @Test
+    public void testInjectionWithWrongArgs() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
+        
+        try{
+            injService.submitItem("not-an-URI", null, null);
+        }catch(IllegalArgumentException ex){
+            Assert.assertEquals("Not a valid (absolute) URI: not-an-URI", ex.getLocalizedMessage());
+        }
+        
+        Response r = null;
+        Item item = null;
+        PersistenceService ps = broker.getPersistenceService();
+        String mimeType = "mico:test-item";
+        try {
+            item = ps.createItem();
+            item.setSemanticType("Simple type "+mimeType);
+            item.setSyntacticalType(mimeType);
+
+            r = injService.submitItem(null, null, null);
+            Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),r.getStatus());
+            Assert.assertEquals("item parameter not set",r.getEntity());
+
+            r = injService.submitItem("", null, null);
+            Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),r.getStatus());
+            Assert.assertEquals("item parameter not set",r.getEntity());
+
+            r = injService.submitItem(UNKNOWN_ITEM_URI, null, null);
+            Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),r.getStatus());
+            Assert.assertEquals("No item found with uri: "+UNKNOWN_ITEM_URI,r.getEntity());
+            
+            r = injService.submitItem(UNKNOWN_ITEM_URI, "", null);
+            Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),r.getStatus());
+            Assert.assertEquals("route parameter not set",r.getEntity());
+            
+            r = injService.submitItem(item.getURI().toString(), "unknown route", null);
+            Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),r.getStatus());
+            Assert.assertEquals("No route found with id: unknown route",r.getEntity());
+            
+        }catch (Exception e){
+            log.error("Unexpected exception: " + e.getMessage());
+            if (item != null)
+                ps.deleteItem(item.getURI());
+            Assert.fail();
+        }
+
+    }
 
 	@Test
     public void testNewInjectionWithSimpleItem() throws IOException, InterruptedException, RepositoryException, URISyntaxException {

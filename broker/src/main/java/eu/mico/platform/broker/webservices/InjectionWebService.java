@@ -85,17 +85,19 @@ public class InjectionWebService {
     @POST
     @Path("/create")
     @Produces("application/json")
-    public Response createItem(@QueryParam("type") String type, @QueryParam("existingAssetLocation") String existingAssetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
+    public Response createItem(@QueryParam("type") String type, @QueryParam("mimeType") String mimeType, @QueryParam("existingAssetLocation") String existingAssetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
 
     	PersistenceService ps = eventManager.getPersistenceService();
     	InputStream in = null;
     	
     	try {
 	    	in = new BufferedInputStream(request.getInputStream());
-			String mimeType=guessMimeType(in);    	
-			if(mimeType == null ){
-				mimeType=type;
-			}
+	    	if (mimeType == null || mimeType.trim().length() == 0){
+	    	    mimeType=guessMimeType(in);    	
+	            if(mimeType == null ){
+	                mimeType=type;
+	            }
+	    	}
 	    	int bytes = in.available();
 	    	
 	
@@ -136,10 +138,13 @@ public class InjectionWebService {
 	        		InputStream assetIS = null;
 	        		try{
 	        			
-	        			mimeType = guessMimeTypeFromRemoteLocation(ps,existingAssetLocation);
-	        			if(mimeType == null ){
-	        	    		mimeType=type;
-	        	    	}
+                        if (mimeType == null) {
+                            mimeType = guessMimeTypeFromRemoteLocation(ps,
+                                    existingAssetLocation);
+                            if (mimeType == null) {
+                                mimeType = type;
+                            }
+                        }
 	        			
 	        			Item item = ps.createItem();
 	        			Asset asset = item.getAssetWithLocation(new URIImpl(existingAssetLocation));
@@ -221,15 +226,19 @@ public class InjectionWebService {
 
     	if(itemURI == null || itemURI.isEmpty()){
     		//wrong item
-    		return Response.status(Response.Status.BAD_REQUEST).build();
+    		return Response.status(Response.Status.BAD_REQUEST).entity("item parameter not set").build();
     	}
     	if(routeId != null && routeId.isEmpty()){
     		//wrong routeId
-    		return Response.status(Response.Status.BAD_REQUEST).build();
+    		return Response.status(Response.Status.BAD_REQUEST).entity("route parameter not set").build();
     	}
     	
     	PersistenceService ps = eventManager.getPersistenceService();
         Item item = ps.getItem(new URIImpl(itemURI));
+        if(item == null){
+            //wrong routeId
+            return Response.status(Response.Status.BAD_REQUEST).entity("No item found with uri: " + itemURI).build();
+        }
         
         if(routeId == null){
 
@@ -245,7 +254,8 @@ public class InjectionWebService {
     		
     		if(route == null ){
     			//the route does not exist
-    			return Response.status(Response.Status.BAD_REQUEST).build();
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("No route found with id: " + routeId).build();
     		}
     		
 
@@ -256,21 +266,31 @@ public class InjectionWebService {
 
     			//the requested route cannot be started or is broken
     			log.error("The camel route with ID {} is currently {}",routeId,status);    			   
-    			return Response.status(Response.Status.BAD_REQUEST).build();
+                return Response
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity("The camel route with ID {" + routeId
+                                + "} is currently broken").build();
 
     		} 
     		else if(status.contentEquals(RouteStatus.UNAVAILABLE.toString())){
 
     			//the requested route cannot be started or is broken
     			log.error("The camel route with ID {} is currently {}",routeId,status);    			   
-    			return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
+                return Response
+                        .status(Response.Status.SERVICE_UNAVAILABLE)
+                        .entity("The camel route with ID {" + routeId
+                                + "} is currently unavailable").build();
 
     		}
     		else if(status.contentEquals(RouteStatus.RUNNABLE.toString())){
 
     			//TODO: here we should start the required extractors
     			log.warn("The camel route with ID {} is currently {}, but the auto-deployment is not implemented",routeId,status);
-    			return Response.status(Response.Status.NOT_IMPLEMENTED).build();
+                return Response
+                        .status(Response.Status.NOT_IMPLEMENTED)
+                        .entity("The camel route with ID {" + routeId
+                                + "} is runnable, but the auto-deployment is not implemented")
+                        .build();
     		}
     		else if(status.contentEquals(RouteStatus.ONLINE.toString())){
 
@@ -307,7 +327,10 @@ public class InjectionWebService {
     				return Response.ok().build();
     			}
     			log.error("Unable to retrieve an entry point compatible with the input item");
-    			return Response.status(Response.Status.BAD_REQUEST).build();
+                return Response
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity("Unable to retrieve an entry point compatible with the input item")
+                        .build();
     		}
     		else{
     			//status is not between the known ones
@@ -329,18 +352,36 @@ public class InjectionWebService {
     @POST
     @Path("/add")
     @Produces("application/json")
-    public Response addPart(@QueryParam("itemUri")String itemURI, @QueryParam("type") String type, @QueryParam("existingAssetLocation") String existingAssetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
+    public Response addPart(@QueryParam("itemUri")String itemURI, @QueryParam("mimeType") String mimeType, @QueryParam("type") String type, @QueryParam("existingAssetLocation") String existingAssetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
         PersistenceService ps = eventManager.getPersistenceService();
 
-        Item item = ps.getItem(new URIImpl(itemURI));        
+        if(itemURI == null || itemURI.isEmpty()){
+            //wrong item
+            return Response.status(Response.Status.BAD_REQUEST).entity("item parameter not set").build();
+        }
+
+        URIImpl id = null;
+        try{
+            id = new URIImpl(itemURI);
+        }catch(IllegalArgumentException ex){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Not a valid item uri: " + itemURI).build();
+        }
+        
+        Item item = ps.getItem(id);
+        if(item == null){
+            //item not found in system
+            return Response.status(Response.Status.BAD_REQUEST).entity("No item found with uri:" + itemURI).build();
+        }
         InputStream in = null;
-    	
-    	try {
-	    	in = new BufferedInputStream(request.getInputStream());
-			String mimeType=guessMimeType(in);    	
-			if(mimeType == null ){
-				mimeType=type;
-			}
+
+        try {
+            in = new BufferedInputStream(request.getInputStream());
+            if (mimeType == null || mimeType.trim().length() == 0) {
+                mimeType = guessMimeType(in);
+                if (mimeType == null) {
+                    mimeType = type;
+                }
+            }
 	    	int bytes = in.available();
 	    	
 	
@@ -382,10 +423,13 @@ public class InjectionWebService {
 	        		InputStream assetIS = null;
 	        		try{
 	        			
-	        			mimeType = guessMimeTypeFromRemoteLocation(ps,existingAssetLocation);
-	        			if(mimeType == null ){
-	        	    		mimeType=type;
-	        	    	}
+                        if (mimeType == null || mimeType.trim().length() == 0) {
+                            mimeType = guessMimeTypeFromRemoteLocation(ps,
+                                    existingAssetLocation);
+                            if (mimeType == null) {
+                                mimeType = type;
+                            }
+                        }
 	        			
 	        			Part part = item.createPart(extratorID);
 	        			Asset asset = part.getAssetWithLocation(new URIImpl(existingAssetLocation));
