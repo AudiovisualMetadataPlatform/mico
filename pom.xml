@@ -201,7 +201,6 @@
         <module>platform-config-webapp</module>
         <module>rabbitmq-comp</module>
         <module>showcase-webapp</module>
-        <module>workflow-creation-webapp</module>
     </modules>
 
 </project>
