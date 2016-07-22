@@ -66,4 +66,12 @@
     <to uri="mock:result_aggregateSimple_2"/>
   </route>
   
+  <route id='workflow-with-error'>
+    <from uri='direct:camel_error'/>
+    <pipeline>
+      <to uri='mico-comp:vbox1?host=localhost&amp;extractorId=urn:org.example.services&amp;extractorVersion=1.0.0&amp;modeId=CAMELERRORService'/>
+    </pipeline>
+    <to uri='mock:error'/>
+  </route>
+ 
 </routes>

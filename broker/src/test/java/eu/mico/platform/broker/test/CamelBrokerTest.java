@@ -15,6 +15,7 @@ package eu.mico.platform.broker.test;
 
 import com.google.common.collect.ImmutableSet;
 
+import eu.mico.platform.camel.MICOCamelAnalysisException;
 import eu.mico.platform.camel.MicoCamelContext;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Part;
@@ -142,6 +143,23 @@ public class CamelBrokerTest extends BaseBrokerTest {
         }
     }
 
+    @Test(timeout=20000, expected=MICOCamelAnalysisException.class)
+    public void testErrorSignalingAfterAggregate() throws Exception {
+        setupMockAnalyser("CAMEL","ERROR");
+
+        // create a item with a single part of type "A"; it should walk through the registered mock services and
+        // eventually finish analysis; we simply wait until we receive an event on the output queue.
+        PersistenceService ps = broker.getPersistenceService();
+        Item item = null;
+        item = ps.createItem();
+        item.setSemanticType("A");
+        item.setSyntacticalType("A");
+        Set<Part> parts = ImmutableSet.copyOf(item.getParts());
+        Assert.assertEquals(0, parts.size());
+
+        context.processItem("direct:camel_error", item.getURI().toString());;
+
+    }
     /**
      * Resolves the {@link MockEndpoint} using a URI of the form
      * <code>mock:someName</code>, optionally creating it if it does not exist.

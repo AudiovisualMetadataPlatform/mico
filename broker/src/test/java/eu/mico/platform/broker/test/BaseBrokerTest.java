@@ -265,6 +265,10 @@ public abstract class BaseBrokerTest {
                 IOException {
             log.info("mock analysis request for [{}] on queue {}",
                     resourceList.get(0).getURI(), getQueueName());
+
+            if ("ERROR".equals(getProvides())){
+                throw new AnalysisException("This mode Fails always");
+            }
             Part c = null;
             try {
                 c = item.createPart(getServiceID());
