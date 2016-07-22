@@ -30,8 +30,7 @@ import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.Route;
 import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.impl.JndiRegistry;
-import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
+import org.apache.camel.impl.SimpleRegistry;
 import org.apache.camel.language.Bean;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.model.RoutesDefinition;
@@ -82,25 +81,19 @@ public class MicoCamelContext {
 
         log.info("adding camel stuff ...");
         try {
-            context = new DefaultCamelContext();
+            SimpleRegistry registry = new SimpleRegistry();
+
+            // add mico specific camel components to registry
+            registry.putIfAbsent("simpleAggregatorStrategy", aggregatorStrategy);
+            registry.putIfAbsent("itemAggregatorStrategy", itemAggregatorStrategy);
+            registry.putIfAbsent("splitterNewPartsBean", splitterNewParts);
+            
+            context = new DefaultCamelContext(registry);
             template = context.createProducerTemplate();
 
             context.setAutoStartup(true);
             context.start();
-            
-            
-            JndiRegistry registry = (JndiRegistry) (
-                    (PropertyPlaceholderDelegateRegistry)context.getRegistry()).getRegistry();
 
-            if(registry.lookup("simpleAggregatorStrategy") == null)
-                registry.bind("simpleAggregatorStrategy", aggregatorStrategy);
-            
-            if(registry.lookup("itemAggregatorStrategy") == null)
-                registry.bind("itemAggregatorStrategy", itemAggregatorStrategy);
-            
-            if(registry.lookup("splitterNewPartsBean") == null)
-                registry.bind("splitterNewPartsBean", splitterNewParts);
-            
         }catch(javax.naming.NameAlreadyBoundException e){
             log.info(e.getMessage());
         } catch (Exception e) {
