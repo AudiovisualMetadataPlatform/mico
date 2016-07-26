@@ -222,7 +222,14 @@ public class InjectionWebService {
      */
     @POST
     @Path("/submit")
-    public Response submitItem(@QueryParam("item") String itemURI, @QueryParam("route") String routeId, @QueryParam("notifyTo") String notificationURI) throws RepositoryException, IOException {
+    public Response submitItem(
+			@QueryParam("item") String itemURI,
+			@QueryParam("route") String routeId,
+			@QueryParam("notifyTo") String notificationURI
+	) throws RepositoryException, IOException {
+
+		StringBuilder debugResponse = new StringBuilder();
+		Formatter debugFormatter = new Formatter(debugResponse, Locale.US);
 
     	if(itemURI == null || itemURI.isEmpty()){
     		//wrong item
@@ -242,14 +249,21 @@ public class InjectionWebService {
         
         if(routeId == null){
 
+
+			// broker v2
+
         	eventManager.injectItem(item);
         	log.info("submitted item {} to every compatible extractor", item.getURI());
+			debugFormatter.format("submitted item %s to every compatible extractor\n", item.getURI());
         	return Response.ok().build();
 
         }
         else{
+
+			// broker v3
     		
-    		log.info("Retrieving CamelRoute with ID {}",routeId);
+    		log.info("Retrieving CamelRoute with ID {}\n",routeId);
+			debugFormatter.format("Retrieving CamelRoute with ID %s", routeId);
     		MICOCamelRoute route  = camelRoutes.get(routeId);
     		
     		if(route == null ){
@@ -294,7 +308,8 @@ public class InjectionWebService {
     		}
     		else if(status.contentEquals(RouteStatus.ONLINE.toString())){
 
-    			log.info("The camel route with ID {} is currently {}, looking for compatible entry points ...",routeId,status);    	
+    			log.info("The camel route with ID {} is currently {}, looking for compatible entry points ...\n",routeId,status);
+    			debugFormatter.format("The camel route with ID %s is currently %s, looking for compatible entry points ...",routeId,status);
     			//the route is up and running, proceed with the injection
     			boolean compatibleEpFound = false;
     			MICOJobStatus jobState = new MICOJobStatus(itemURI, routeId, notificationURI);
@@ -324,7 +339,9 @@ public class InjectionWebService {
     				Thread thr = new Thread(jobState);
     				thr.start();
     				broker.addMICOCamelJobStatus(new MICOJob(routeId, itemURI), jobState);
-    				return Response.ok().build();
+					String response = debugResponse.toString();
+					return Response.ok(response, MediaType.TEXT_PLAIN).build();
+
     			}
     			log.error("Unable to retrieve an entry point compatible with the input item");
                 return Response
