@@ -14,7 +14,6 @@
 package eu.mico.platform.broker.webservices;
 
 import com.google.common.collect.ImmutableMap;
-
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.impl.MICOBrokerImpl.RouteStatus;
 import eu.mico.platform.broker.model.CamelJob;
@@ -29,7 +28,6 @@ import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Resource;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.openrdf.model.URI;
@@ -44,7 +42,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -122,7 +119,13 @@ public class InjectionWebService {
 	    	    	item.setSemanticType("Item created by application/injection-webservice");
 	
 	    	    	log.info("item created {}: uploaded {} bytes", item.getURI(), bytes);
-	    	    	return Response.ok(ImmutableMap.of("itemUri", item.getURI().stringValue(), "assetLocation", item.getAsset().getLocation(), "created", item.getSerializedAt())).build();
+	    	    	return Response.ok(
+							ImmutableMap.of(
+									"itemUri", item.getURI().stringValue(),
+									"assetLocation", item.getAsset().getLocation(),
+									"created", item.getSerializedAt(),
+									"syntacticalType", type
+							)).build();
 	    		}
 	    		else {
 	    			log.error("Overriding the content of {} is forbidden", existingAssetLocation);
@@ -340,7 +343,11 @@ public class InjectionWebService {
     				thr.start();
     				broker.addMICOCamelJobStatus(new MICOJob(routeId, itemURI), jobState);
 					String response = debugResponse.toString();
-					return Response.ok(response, MediaType.TEXT_PLAIN).build();
+					return Response.ok(
+							ImmutableMap.of(
+									"DebugResponse", response
+							)
+					).build();
 
     			}
     			log.error("Unable to retrieve an entry point compatible with the input item");
@@ -421,11 +428,17 @@ public class InjectionWebService {
 	    			
 	    			part.setSyntacticalType(type);
 	    	    	part.setSemanticType("Part created by application/injection-webservice");
-	
-	    	    	log.info("item {}, part created {} : uploaded {} bytes", item.getURI(), part.getURI(), bytes);
-	    	        return Response.ok(ImmutableMap.of("itemURI", item.getURI().stringValue(),"partURI", part.getURI().stringValue(), "assetLocation", asset.getLocation(), "created", part.getSerializedAt())).build();
-	    	    	
-	    		}
+
+					log.info("item {}, part created {} : uploaded {} bytes", item.getURI(), part.getURI(), bytes);
+					return Response.ok(
+							ImmutableMap.of(
+									"itemURI", item.getURI().stringValue(),
+									"partURI", part.getURI().stringValue(),
+									"assetLocation", asset.getLocation(),
+									"created", part.getSerializedAt()
+							)).build();
+
+				}
 	    		else {
 	    			log.error("Overriding the content of {} is forbidden", existingAssetLocation);
 	    			throw new IllegalArgumentException("Overriding pre-existing content stored in "+existingAssetLocation+" is forbidden");
