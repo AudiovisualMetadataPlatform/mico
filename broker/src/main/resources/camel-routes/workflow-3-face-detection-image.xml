@@ -1,19 +1,24 @@
-<routes xmlns='http://camel.apache.org/schema/spring'>
-  <route id='workflow-3-starting-point-for-pipeline-1-mimeType=image/jpeg,syntacticType=mico:Image'>
-    <from uri='direct:workflow-3,mimeType=image/jpeg,syntacticType=mico:Image'/>
-    <to uri='direct:workflow-3-pipeline-1'/>
-  </route>
-  <route id='workflow-3-starting-point-for-pipeline-1-mimeType=image/png,syntacticType=mico:Image'>
-    <from uri='direct:workflow-3,mimeType=image/png,syntacticType=mico:Image'/>
-    <to uri='direct:workflow-3-pipeline-1'/>
-  </route>
-  <route id='workflow-3-pipeline-1'>
-    <from uri='direct:workflow-3-pipeline-1'/>
-    <pipeline>
-      <split>
-        <method ref="splitterNewPartsBean" method="splitMessage"/>
-        <to uri="mico-comp:vbox1?serviceId=FaceDetectionImage&amp;extractorId=mico-extractor-ccv-facedetection&amp;extractorVersion=2.1.0&amp;modeId=FaceDetectionImage&amp;inputs={&quot;mico:Image&quot;:[&quot;image/jpeg&quot;,&quot;image/png&quot;]}"/>
-      </split>
-    </pipeline>
-  </route>
+<routes xmlns='http://camel.apache.org/schema/spring' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring-2.17.1.xsd">
+
+
+    <description>Facedetection-Image</description>
+
+    <route id='workflow-3-starting-point-for-pipeline-1-mimeType=image/jpeg,syntacticType=mico:Image'>
+        <from uri='direct:workflow-3,mimeType=image/jpeg,syntacticType=mico:Image'/>
+        <to uri='direct:workflow-3-pipeline-1'/>
+    </route>
+    <route id='workflow-3-starting-point-for-pipeline-1-mimeType=image/png,syntacticType=mico:Image'>
+        <from uri='direct:workflow-3,mimeType=image/png,syntacticType=mico:Image'/>
+        <to uri='direct:workflow-3-pipeline-1'/>
+    </route>
+    <route id='workflow-3-pipeline-1'>
+        <from uri='direct:workflow-3-pipeline-1'/>
+        <pipeline>
+            <split>
+                <method ref="splitterNewPartsBean" method="splitMessage"/>
+                <to uri="mico-comp:vbox1?serviceId=FaceDetectionImage&amp;extractorId=mico-extractor-ccv-facedetection&amp;extractorVersion=2.1.0&amp;modeId=FaceDetectionImage&amp;inputs={&quot;mico:Image&quot;:[&quot;image/jpeg&quot;,&quot;image/png&quot;]}"/>
+            </split>
+        </pipeline>
+    </route>
 </routes>
