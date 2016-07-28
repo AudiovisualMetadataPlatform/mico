@@ -14,7 +14,6 @@
 package eu.mico.platform.broker.webservices;
 
 import com.google.common.collect.ImmutableMap;
-
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.impl.MICOBrokerImpl.RouteStatus;
 import eu.mico.platform.broker.model.CamelJob;
@@ -29,7 +28,6 @@ import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Resource;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.openrdf.model.URI;
@@ -44,7 +42,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -122,7 +119,13 @@ public class InjectionWebService {
 	    	    	item.setSemanticType("Item created by application/injection-webservice");
 	
 	    	    	log.info("item created {}: uploaded {} bytes", item.getURI(), bytes);
-	    	    	return Response.ok(ImmutableMap.of("itemUri", item.getURI().stringValue(), "assetLocation", item.getAsset().getLocation(), "created", item.getSerializedAt())).build();
+	    	    	return Response.ok(
+							ImmutableMap.of(
+									"itemUri", item.getURI().stringValue(),
+									"assetLocation", item.getAsset().getLocation(),
+									"created", item.getSerializedAt(),
+									"syntacticalType", type
+							)).build();
 	    		}
 	    		else {
 	    			log.error("Overriding the content of {} is forbidden", existingAssetLocation);
@@ -222,7 +225,13 @@ public class InjectionWebService {
      */
     @POST
     @Path("/submit")
-    public Response submitItem(@QueryParam("item") String itemURI, @QueryParam("route") String routeId, @QueryParam("notifyTo") String notificationURI) throws RepositoryException, IOException {
+    @Produces("text/plain")
+    public Response submitItem(
+			@QueryParam("item") String itemURI,
+			@QueryParam("route") String routeId,
+			@QueryParam("notifyTo") String notificationURI
+	) throws RepositoryException, IOException {
+
 
     	if(itemURI == null || itemURI.isEmpty()){
     		//wrong item
@@ -242,14 +251,19 @@ public class InjectionWebService {
         
         if(routeId == null){
 
+
+			// broker v2
+
         	eventManager.injectItem(item);
-        	log.info("submitted item {} to every compatible extractor", item.getURI());
-        	return Response.ok().build();
+        	log.debug("submitted item {} to every compatible extractor", item.getURI());
+        	return Response.ok("submitted item to every compatible extractor\n").build();
 
         }
         else{
+
+			// broker v3
     		
-    		log.info("Retrieving CamelRoute with ID {}",routeId);
+    		log.debug("Retrieving CamelRoute with ID {}",routeId);
     		MICOCamelRoute route  = camelRoutes.get(routeId);
     		
     		if(route == null ){
@@ -285,7 +299,7 @@ public class InjectionWebService {
     		else if(status.contentEquals(RouteStatus.RUNNABLE.toString())){
 
     			//TODO: here we should start the required extractors
-    			log.warn("The camel route with ID {} is currently {}, but the auto-deployment is not implemented",routeId,status);
+    			log.warn("The camel route with ID {} is currently {}, but the auto-startup is not implemented",routeId,status);
                 return Response
                         .status(Response.Status.NOT_IMPLEMENTED)
                         .entity("The camel route with ID {" + routeId
@@ -294,7 +308,7 @@ public class InjectionWebService {
     		}
     		else if(status.contentEquals(RouteStatus.ONLINE.toString())){
 
-    			log.info("The camel route with ID {} is currently {}, looking for compatible entry points ...",routeId,status);    	
+    			log.debug("The camel route with ID {} is currently {}, looking for compatible entry points ...",routeId,status);
     			//the route is up and running, proceed with the injection
     			boolean compatibleEpFound = false;
     			MICOJobStatus jobState = new MICOJobStatus(itemURI, routeId, notificationURI);
@@ -324,8 +338,10 @@ public class InjectionWebService {
     				Thread thr = new Thread(jobState);
     				thr.start();
     				broker.addMICOCamelJobStatus(new MICOJob(routeId, itemURI), jobState);
-    				return Response.ok().build();
+    				
+    				return Response.ok("Start process item with route " + routeId).build();
     			}
+    			
     			log.error("Unable to retrieve an entry point compatible with the input item");
                 return Response
                         .status(Response.Status.BAD_REQUEST)
@@ -404,11 +420,17 @@ public class InjectionWebService {
 	    			
 	    			part.setSyntacticalType(type);
 	    	    	part.setSemanticType("Part created by application/injection-webservice");
-	
-	    	    	log.info("item {}, part created {} : uploaded {} bytes", item.getURI(), part.getURI(), bytes);
-	    	        return Response.ok(ImmutableMap.of("itemURI", item.getURI().stringValue(),"partURI", part.getURI().stringValue(), "assetLocation", asset.getLocation(), "created", part.getSerializedAt())).build();
-	    	    	
-	    		}
+
+					log.info("item {}, part created {} : uploaded {} bytes", item.getURI(), part.getURI(), bytes);
+					return Response.ok(
+							ImmutableMap.of(
+									"itemURI", item.getURI().stringValue(),
+									"partURI", part.getURI().stringValue(),
+									"assetLocation", asset.getLocation(),
+									"created", part.getSerializedAt()
+							)).build();
+
+				}
 	    		else {
 	    			log.error("Overriding the content of {} is forbidden", existingAssetLocation);
 	    			throw new IllegalArgumentException("Overriding pre-existing content stored in "+existingAssetLocation+" is forbidden");

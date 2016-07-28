@@ -78,6 +78,26 @@ brokerApp.controller("InjectItemCtrl", function($scope,$http,$upload) {
     $scope.itemAssetLocation
     $scope.itemCreated
 
+    $scope.workflowDescriptions = [];
+
+     $http.get("workflow/routes").success(function(data) {
+
+         var response = [];
+
+         /** TODO Change Webservice to return "meaningful" data, to avoid the following...." */
+         var workflowIds = Object.keys(data);
+         for (var i=0; i< workflowIds.length; i++)  {
+             response.push(
+                 {id: workflowIds[i], description: data[workflowIds[i]]}
+             )
+
+         }
+
+         $scope.workflowDescriptions=response;
+        });
+
+
+
     $scope.createItem = function() {
 
         var file = $scope.itemAssetfiles[0];
@@ -98,6 +118,23 @@ brokerApp.controller("InjectItemCtrl", function($scope,$http,$upload) {
 
     $scope.submitItem = function() {
         $http.post("inject/submit?item=" + $scope.itemUri).success(function() {
+            $scope.state = "Submitted";
+        });
+    };
+
+
+    $scope.submitItem3 = function() {
+
+        var routeId = document.getElementById("workflowSelector").value;
+
+        var injectUrl = "inject/submit?item=" + $scope.itemUri
+            + "&route=" + routeId;
+
+        console.log("Calling: " + injectUrl);
+
+        $http.post(
+            injectUrl
+        ).success(function() {
             $scope.state = "Submitted";
         });
     };
