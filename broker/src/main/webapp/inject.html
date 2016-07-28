@@ -86,6 +86,8 @@
     </table>
 </div>
 
+
+
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;" ng-show="itemUri">
     <h3>Item Created</h3>
 
@@ -106,15 +108,34 @@
     </table>
 </div>
 
-
 <div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;" ng-show="itemUri && state != 'Submitted'">
-    <h3>Submit Item</h3>
+    <h3>Submit Item (broker v2)</h3>
     <p>
         Clicking on "Submit" will trigger analysis for the item and its asset.
     </p>
 
     <button ng-click="submitItem()">Submit</button>
 </div>
+
+
+
+<div class="container-fluid" style="margin-top: 10px; margin-bottom: 10px;" ng-show="itemUri && state != 'Submitted'">
+    <h3>Submit Item (broker v3)</h3>
+    <p>
+        Please Choose workflow:
+    </p>
+    <select id="workflowSelector">
+        <option ng-repeat="workflow in workflowDescriptions" value="{{workflow.id}}">{{workflow.description}}</option>
+    </select>
+
+    <p>
+        Clicking on "Submit" will trigger analysis for the item and its asset using the given workflow.
+    </p>
+
+    <button ng-click="submitItem3()">Submit</button>
+</div>
+
+
 
 <div class="container-fluid" ng-show="itemUri">
     <a href="index.html">Back to Overview</a><span ng-show="state != 'Submitted'"> (cancel inject)</span> <br>
