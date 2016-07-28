@@ -1,20 +1,21 @@
 package eu.mico.platform.broker.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-
-import org.apache.commons.lang3.StringEscapeUtils;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.*;
 
 public class MICOCamelRoute {
 	
@@ -86,6 +87,7 @@ public class MICOCamelRoute {
 	private ArrayList<EntryPoint> ePoints= new ArrayList<EntryPoint>();
 	private String workflowId = null;
 	private String xmlCamelRoute = null;
+	private String workflowDescription = null;
 	
 	
 	/*
@@ -109,6 +111,7 @@ public class MICOCamelRoute {
 	public List<EntryPoint> getEntryPoints(){
 		return new ArrayList<EntryPoint>(ePoints);
 	}
+
 	
 	/*
 	 * Retrieves the identified extractor configurations 
@@ -130,8 +133,18 @@ public class MICOCamelRoute {
 	public String getXmlCamelRoute(){
 		return xmlCamelRoute;
 	}
-	
-	
+
+	/**
+	 * Human readable description of current workflow.
+	 * @return Description or "(no description specified)"
+     */
+	public String getWorkflowDescription() {
+		if (workflowDescription == null)	{
+			return "(no description specified)";
+		}
+		return workflowDescription;
+	}
+
 	//------------------------- private members below this line  -------------------------
 	
 	private final static String EXTRACTOR_ID_PREFIX="extractorId=";
@@ -153,10 +166,14 @@ public class MICOCamelRoute {
 	private void parseExtractorConfigurations(String xmlCamelRoute){
 		log.info("Retrieving route extractor configurations ... ");
 		checkNonEmptyString("xmlCamelRoute",xmlCamelRoute);
-		
-    	//Split the route in separate lines
+
+		workflowDescription = parseWorkflowDescription(xmlCamelRoute);
+
+
+        //Split the route in separate lines
     	String[] lines = xmlCamelRoute.split("\n");
-    	
+
+
     	//For every line
     	for(String line : lines){
     		//if the line describes a extractor
@@ -223,10 +240,45 @@ public class MICOCamelRoute {
     		}
     	}
 	}
-	
-	
-	
-	private final static String PIPELINE_STARTING_POINT_PATTERN="-starting-point-for";
+
+    /**
+     * Returns content of <description></description> tag.
+     * @param xmlCamelRoute Input XML String
+     * @return description or null if description not found or parsing error
+     */
+    public static String parseWorkflowDescription(String xmlCamelRoute) {
+
+        if (xmlCamelRoute == null)  {
+            throw new IllegalArgumentException("xmlCamelRoute must not be null");
+        }
+
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(new ByteArrayInputStream(xmlCamelRoute.getBytes("UTF-8")));
+
+            NodeList workflowDescriptionNodes = doc.getElementsByTagName("description");
+            if (workflowDescriptionNodes.getLength() == 0) {
+
+                log.info("No workflow description found");
+                return null;
+
+            } else
+            {
+                if (workflowDescriptionNodes.getLength() > 1) {
+                    log.info("More than one workflow description found, taking first one");
+                }
+
+                return workflowDescriptionNodes.item(0).getTextContent();
+            }
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            log.warn("Error getting workflow description:", e.toString());
+            return null;
+        }
+    }
+
+
+    private final static String PIPELINE_STARTING_POINT_PATTERN="-starting-point-for";
 	private final static String PIPELINE_ROUTE_STARTING_TOKEN="<route id='workflow-";
 	private final static String DATA_MIME_TYPE_PREFIX="mimeType=";
 	private final static String DATA_SYNTACTIC_TYPE_PREFIX="syntacticType=";
