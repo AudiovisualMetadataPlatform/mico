@@ -81,8 +81,9 @@
         <tr>
             <th>State</th>
             <td>
-                <div style="background-color: #006318; color: lightgreen; text-align: center;" ng-show="itemData.finished == 'true'">Finished</div>
-                <div style="background-color: darkred; color: lightcoral; text-align: center;" ng-show="itemData.finished == 'false'">In Progress</div>
+                <div style="background-color: yellow;  color: lightcoral; text-align: center;" ng-show="itemData.finished == 'false'">In Progress</div>
+                <div style="background-color: #006318; color: lightgreen; text-align: center;" ng-show="itemData.finished == 'true' && itemData.hasError == 'false'">Finished</div>
+                <div style="background-color: darkred; color: lightcoral; text-align: center;" ng-show="itemData.finished == 'true' && itemData.hasError == 'true'" title="{{itemData.error}}">Failed</div>
             </td>
         </tr>
         <tr><th>Created</th><td>{{itemData.serializedAt}}</td></tr>
