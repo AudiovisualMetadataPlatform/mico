@@ -225,14 +225,13 @@ public class InjectionWebService {
      */
     @POST
     @Path("/submit")
+    @Produces("text/plain")
     public Response submitItem(
 			@QueryParam("item") String itemURI,
 			@QueryParam("route") String routeId,
 			@QueryParam("notifyTo") String notificationURI
 	) throws RepositoryException, IOException {
 
-		StringBuilder debugResponse = new StringBuilder();
-		Formatter debugFormatter = new Formatter(debugResponse, Locale.US);
 
     	if(itemURI == null || itemURI.isEmpty()){
     		//wrong item
@@ -256,17 +255,15 @@ public class InjectionWebService {
 			// broker v2
 
         	eventManager.injectItem(item);
-        	log.info("submitted item {} to every compatible extractor", item.getURI());
-			debugFormatter.format("submitted item %s to every compatible extractor\n", item.getURI());
-        	return Response.ok().build();
+        	log.debug("submitted item {} to every compatible extractor", item.getURI());
+        	return Response.ok("submitted item to every compatible extractor\n").build();
 
         }
         else{
 
 			// broker v3
     		
-    		log.info("Retrieving CamelRoute with ID {}\n",routeId);
-			debugFormatter.format("Retrieving CamelRoute with ID %s", routeId);
+    		log.debug("Retrieving CamelRoute with ID {}",routeId);
     		MICOCamelRoute route  = camelRoutes.get(routeId);
     		
     		if(route == null ){
@@ -302,7 +299,7 @@ public class InjectionWebService {
     		else if(status.contentEquals(RouteStatus.RUNNABLE.toString())){
 
     			//TODO: here we should start the required extractors
-    			log.warn("The camel route with ID {} is currently {}, but the auto-deployment is not implemented",routeId,status);
+    			log.warn("The camel route with ID {} is currently {}, but the auto-startup is not implemented",routeId,status);
                 return Response
                         .status(Response.Status.NOT_IMPLEMENTED)
                         .entity("The camel route with ID {" + routeId
@@ -311,8 +308,7 @@ public class InjectionWebService {
     		}
     		else if(status.contentEquals(RouteStatus.ONLINE.toString())){
 
-    			log.info("The camel route with ID {} is currently {}, looking for compatible entry points ...\n",routeId,status);
-    			debugFormatter.format("The camel route with ID %s is currently %s, looking for compatible entry points ...",routeId,status);
+    			log.debug("The camel route with ID {} is currently {}, looking for compatible entry points ...",routeId,status);
     			//the route is up and running, proceed with the injection
     			boolean compatibleEpFound = false;
     			MICOJobStatus jobState = new MICOJobStatus(itemURI, routeId, notificationURI);
@@ -342,14 +338,10 @@ public class InjectionWebService {
     				Thread thr = new Thread(jobState);
     				thr.start();
     				broker.addMICOCamelJobStatus(new MICOJob(routeId, itemURI), jobState);
-					String response = debugResponse.toString();
-					return Response.ok(
-							ImmutableMap.of(
-									"DebugResponse", response
-							)
-					).build();
-
+    				
+    				return Response.ok("Start process item with route " + routeId).build();
     			}
+    			
     			log.error("Unable to retrieve an entry point compatible with the input item");
                 return Response
                         .status(Response.Status.BAD_REQUEST)
