@@ -49,10 +49,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This is a sample analyzer demonstrating how to use the MICO Java Client API to implement analyzers. It takes
+ * This is a sample analyzer demonstrating how to use the MICO Java Client API to implement anno4j employing analyzers. It takes
  * a plain text as input and generates a word count as output, using an RDF property to attach to a new content part.
- *
- * @author Sebastian Schaffert (sschaffert@apache.org)
  */
 public class WordCountAnalyzerAnno4j implements AnalysisServiceAnno4j {
     
@@ -146,6 +144,7 @@ public class WordCountAnalyzerAnno4j implements AnalysisServiceAnno4j {
         try {
             // create example wordcount body and setting the result of the analyzer#
             WordCountBody wordCountBody = anno4j.createObject(WordCountBody.class);
+            wordCountBody.setCount(count);
             part.setBody(wordCountBody);
 
             // create the target and set a reference to the part/item on which the body refers to
