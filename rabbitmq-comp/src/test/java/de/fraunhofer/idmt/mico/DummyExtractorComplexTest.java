@@ -70,7 +70,6 @@ public class DummyExtractorComplexTest implements AnalysisService {
         this.mode = mode;
     }
 
-    @Override
     public URI getServiceID() {
         return new URIImpl("http://example.org/services/" + getQueueName());
     }
@@ -85,7 +84,6 @@ public class DummyExtractorComplexTest implements AnalysisService {
         return source;
     }
 
-    @Override
     public String getQueueName() {
         return extractorId + "-" + version + "-" + mode;
     }

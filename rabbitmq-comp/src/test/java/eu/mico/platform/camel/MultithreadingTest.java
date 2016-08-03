@@ -7,7 +7,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -83,6 +82,7 @@ public class MultithreadingTest extends TestBase {
                         .to("mico-comp:complexbox1?host="
                                 + testHost
                                 + "&extractorId=mico-extractor-complex-test&extractorVersion=1.0.0&modeId=A-B1orB2-queue&parameters={\"outputType\":\"B1\"}")
+                        .split().method("splitterNewPartsBean","splitMessage")
                         .multicast()
                         .to("direct:complex-test-B1-C1",
                                 "direct:complex-test-B2-C2");
@@ -92,6 +92,7 @@ public class MultithreadingTest extends TestBase {
                         .to("mico-comp:complexbox1?host="
                                 + testHost
                                 + "&extractorId=mico-extractor-complex-test&extractorVersion=1.0.0&modeId=A-B1orB2-queue&parameters={\"outputType\":\"B2\"}")
+                        .split().method("splitterNewPartsBean","splitMessage")
                         .multicast()
                         .to("direct:complex-test-B1-C1",
                                 "direct:complex-test-B2-C2");
@@ -101,6 +102,7 @@ public class MultithreadingTest extends TestBase {
                         .to("mico-comp:complexbox1?host="
                                 + testHost
                                 + "&extractorId=mico-extractor-complex-test&extractorVersion=1.0.0&modeId=A-B1orB2-queue&parameters={\"outputType\":\"B1;B2\"}")
+                        .split().method("splitterNewPartsBean","splitMessage")
                         .multicast()
                         .to("direct:complex-test-B1-C1",
                                 "direct:complex-test-B2-C2");
@@ -111,6 +113,7 @@ public class MultithreadingTest extends TestBase {
                         .to("mico-comp:complexbox1?host="
                                 + testHost
                                 + "&extractorId=mico-extractor-complex-test&extractorVersion=1.0.0&modeId=B1-C1-queue&inputs={\"B1\":[\"application/x-mico-rdf\"]}")
+                        .split().method("splitterNewPartsBean","splitMessage")
                         .to("mock:out-direct:complex-test-B1-C1?retainLast=100");
 
                 from("direct:complex-test-B2-C2")
@@ -119,6 +122,7 @@ public class MultithreadingTest extends TestBase {
                         .to("mico-comp:complexbox1?host="
                                 + testHost
                                 + "&extractorId=mico-extractor-complex-test&extractorVersion=1.0.0&modeId=B2-C2-queue&inputs={\"B2\":[\"application/x-mico-rdf\"]}")
+                        .split().method("splitterNewPartsBean","splitMessage")
                         .to("mock:out-direct:complex-test-B2-C2?retainLast=100");
 
                 try {
@@ -179,52 +183,52 @@ public class MultithreadingTest extends TestBase {
     @Test
     public void TestA_B1() throws InterruptedException {
         MockEndpoint mock2 = getMockEndpoint("mock:in-direct:complex-test-A-B1?retainLast=100");
-        mock2.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (PART_REPLICAS+1)+BATCH_SIZE);
+        mock2.expectedMessageCount(BATCH_SIZE);
         MockEndpoint mock = getMockEndpoint("mock:in-direct:complex-test-B1-C1?retainLast=100");
-        mock.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (PART_REPLICAS+1));
+        mock.expectedMessageCount(BATCH_SIZE * PART_REPLICAS);
         MockEndpoint mock1 = getMockEndpoint("mock:out-direct:complex-test-B1-C1?retainLast=100");
         mock1.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * PART_REPLICAS);
 
         final String endpointUri = "direct:complex-test-A-B1";
         injectItems(endpointUri);
 
-        checkItems(1);
+        checkItems(true, false);
         assertNull(camelException);
-        assertMockEndpointsSatisfied(20,TimeUnit.SECONDS);
+        assertMockEndpointsSatisfied();
     }
 
     @Test
     public void TestA_B2() throws InterruptedException {
         MockEndpoint mock = getMockEndpoint("mock:in-direct:complex-test-B2-C2?retainLast=100");
-        mock.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (PART_REPLICAS+1));
+        mock.expectedMessageCount(BATCH_SIZE * PART_REPLICAS);
         MockEndpoint mock1 = getMockEndpoint("mock:out-direct:complex-test-B2-C2?retainLast=100");
         mock1.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * PART_REPLICAS);
 
         final String endpointUri = "direct:complex-test-A-B2";
         injectItems(endpointUri);
         
-        checkItems(1);
+        checkItems(false, true);
         assertNull(camelException);
-        assertMockEndpointsSatisfied(20,TimeUnit.SECONDS);
+        assertMockEndpointsSatisfied();
     }
 
     @Test
     public void TestA_B1andB2() throws InterruptedException {
         MockEndpoint mock = getMockEndpoint("mock:in-direct:complex-test-B1-C1?retainLast=100");
-        mock.expectedMessageCount(BATCH_SIZE * 2 * PART_REPLICAS * (PART_REPLICAS+1));
+        mock.expectedMessageCount(BATCH_SIZE * 2 * PART_REPLICAS );
         MockEndpoint mockout = getMockEndpoint("mock:out-direct:complex-test-B1-C1?retainLast=100");
-        mockout.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (2 * PART_REPLICAS));
+        mockout.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * PART_REPLICAS);
         MockEndpoint mock2 = getMockEndpoint("mock:in-direct:complex-test-B2-C2?retainLast=100");
-        mock2.expectedMessageCount(BATCH_SIZE * 2 * PART_REPLICAS * (PART_REPLICAS+1));
+        mock2.expectedMessageCount(BATCH_SIZE * 2 * PART_REPLICAS);
         MockEndpoint mock2out = getMockEndpoint("mock:out-direct:complex-test-B2-C2?retainLast=100");
-        mock2out.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * (2 * PART_REPLICAS));
+        mock2out.expectedMessageCount(BATCH_SIZE * PART_REPLICAS * PART_REPLICAS);
 
         final String endpointUri = "direct:complex-test-A-B1andB2";
         injectItems(endpointUri);
 
-        checkItems(2);
+        checkItems(true, true);
         assertNull(camelException);
-        assertMockEndpointsSatisfied(20,TimeUnit.SECONDS);
+        assertMockEndpointsSatisfied();
     }
 
     /**
@@ -279,9 +283,10 @@ public class MultithreadingTest extends TestBase {
      *             <b>1</b> for test-A_B1 and test-A_B2 <br>
      *             <b>2</b> for test-A_B1andB2 
      */
-    private void checkItems(int base) {
+    private void checkItems(boolean enableA, boolean enableB) {
         for (Item i : items) {
             try {
+                int base = enableA && enableB ? 2 :1;
                 int expected = base
                         * (PART_REPLICAS + PART_REPLICAS * PART_REPLICAS);
                 ImmutableSet<Part> parts = ImmutableSet.copyOf(i.getParts());
@@ -291,6 +296,44 @@ public class MultithreadingTest extends TestBase {
                             expected);
                     fail("item with " + parts.size() + " parts should have "
                             + expected);
+                }
+                int partB1 = 0, partB2 = 0,partC1 = 0, partC2 = 0;
+                for(Part part : parts){
+                    if(part.getSyntacticalType().startsWith("B1")){
+                        assertEquals("B1", part.getSyntacticalType());
+                        partB1++;
+                    }else if(part.getSyntacticalType().startsWith("B2")){
+                        assertEquals("B2", part.getSyntacticalType());
+                        partB2++;
+                    }else if(part.getSyntacticalType().startsWith("C1")){
+                        assertEquals("C1", part.getSyntacticalType());
+                        partC1++;
+                    }else{ //must be C2
+                        assertEquals("C2", part.getSyntacticalType());
+                        partC2++;
+                    }
+                    if(part.getSemanticType().startsWith("mico-extractor-complex-test-1.0.0-A-B1orB2-queue")){
+                        assertEquals("mico-extractor-complex-test-1.0.0-A-B1orB2-queue", part.getSemanticType());
+                    }else if(part.getSemanticType().startsWith("mico-extractor-complex-test-1.0.0-B1-C1-queue")){
+                        assertEquals("mico-extractor-complex-test-1.0.0-B1-C1-queue", part.getSemanticType());
+                    }else{ 
+                        assertEquals("mico-extractor-complex-test-1.0.0-B2-C2-queue", part.getSemanticType());
+                    }
+                }
+
+                if (enableA){
+                    assertEquals(PART_REPLICAS, partB1);
+                    assertEquals(PART_REPLICAS*PART_REPLICAS, partC1);
+                }else{
+                    assertEquals(0, partB1);
+                    assertEquals(0, partC1);
+                }
+                if (enableB){
+                    assertEquals(PART_REPLICAS, partB2);
+                    assertEquals(PART_REPLICAS*PART_REPLICAS, partC2);
+                }else{
+                    assertEquals(0, partB2);
+                    assertEquals(0, partC2);
                 }
             } catch (RepositoryException e) {
                 fail("Error getting parts: " + e.getMessage());

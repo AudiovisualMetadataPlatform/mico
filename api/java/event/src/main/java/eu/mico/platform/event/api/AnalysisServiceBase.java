@@ -1,7 +1,5 @@
 package eu.mico.platform.event.api;
 
-import org.openrdf.model.URI;
-
 /**
  * Interface for common methods of AnalysisService and AnalysisServiceAnno4j
  */
@@ -11,7 +9,7 @@ public interface AnalysisServiceBase {
      *
      * @return a unique ID identifying this service globally
      */
-    URI getServiceID();
+//    URI getServiceID();
 
     /**
      * Return an ID (String) that identifies this extractor
@@ -59,5 +57,5 @@ public interface AnalysisServiceBase {
      *
      * @return a string identifying the queue name this service wants to use
      */
-    String getQueueName();
+//    String getQueueName();
 }

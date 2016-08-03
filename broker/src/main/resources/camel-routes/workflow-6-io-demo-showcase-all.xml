@@ -1,0 +1,99 @@
+<routes xmlns='http://camel.apache.org/schema/spring' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring-2.17.1.xsd">
+
+    <description>IO-demo-Showcase-All</description>
+
+    <route id='workflow-6-starting-point-for-multicast-2-mimeType=video/mp4,syntacticType=mico:Video'>
+        <from uri='direct:workflow-6,mimeType=video/mp4,syntacticType=mico:Video'/>
+        <multicast>
+            <to uri='direct:workflow-6-pipeline-0'/>
+            <to uri='direct:workflow-6-pipeline-8'/>
+        </multicast>
+    </route>
+    <route id='workflow-6-pipeline-0'>
+        <from uri='direct:workflow-6-pipeline-0'/>
+        <pipeline>
+            <to uri="mico-comp:vbox1?serviceId=AudioDemux&amp;extractorId=mico-extractor-audiodemux&amp;extractorVersion=2.1.0&amp;modeId=AudioDemux&amp;parameters={&quot;freq&quot;:&quot;8000&quot;}&amp;inputs={&quot;mico:Video&quot;:[&quot;video/mp4&quot;]}"/>
+            <split>
+                <method ref="splitterNewPartsBean" method="splitMessage"/>
+                <multicast>
+                    <to uri='direct:workflow-6-aggregator-0'/>
+                    <to uri='direct:workflow-6-pipeline-5'/>
+                </multicast>
+            </split>
+        </pipeline>
+    </route>
+    <route id='workflow-6-pipeline-1'>
+        <from uri='direct:workflow-6-pipeline-1'/>
+        <pipeline>
+            <to uri="mico-comp:vbox1?serviceId=KaldiEnglishSpeech2Text&amp;extractorId=mico-extractor-speech-to-text&amp;extractorVersion=2.2.0&amp;modeId=KaldiEnglishSpeech2Text&amp;inputs={&quot;mico:Audio&quot;:[&quot;audio/wav&quot;],&quot;mmmterms:DiarizationBody&quot;:[&quot;application/x-mico-rdf&quot;]}"/>
+            <split>
+                <method ref="splitterNewPartsBean" method="splitMessage"/>
+                <multicast>
+                    <to uri='direct:workflow-6-pipeline-6'/>
+                    <to uri='direct:workflow-6-pipeline-7'/>
+                </multicast>
+            </split>
+        </pipeline>
+    </route>
+    <route id='workflow-6-pipeline-3'>
+        <from uri='direct:workflow-6-pipeline-3'/>
+        <pipeline>
+            <to uri="mico-comp:vbox1?serviceId=FaceDetectionImage&amp;extractorId=mico-extractor-ccv-facedetection&amp;extractorVersion=2.1.0&amp;modeId=FaceDetectionImage&amp;inputs={&quot;mico:Image&quot;:[&quot;image/png&quot;]}"/>
+        </pipeline>
+    </route>
+    <route id='workflow-6-pipeline-5'>
+        <from uri='direct:workflow-6-pipeline-5'/>
+        <pipeline>
+            <to uri="mico-comp:vbox1?serviceId=LiumDiarization&amp;extractorId=mico-extractor-diarization&amp;extractorVersion=1.2.0&amp;modeId=LiumDiarization&amp;inputs={&quot;mico:Audio&quot;:[&quot;audio/wav&quot;]}"/>
+            <split>
+                <method ref="splitterNewPartsBean" method="splitMessage"/>
+                <to uri='direct:workflow-6-aggregator-0'/>
+            </split>
+        </pipeline>
+    </route>
+    <route id='workflow-6-pipeline-6'>
+        <from uri='direct:workflow-6-pipeline-6'/>
+        <pipeline>
+            <to uri="mico-comp:vbox1?serviceId=kaldiXml2txt&amp;extractorId=mico-extractor-kaldi2txt&amp;extractorVersion=2.1.0&amp;modeId=kaldiXml2txt&amp;inputs={&quot;mico:kaldiXML&quot;:[&quot;text/vnd.umu-kaldis+xml&quot;]}"/>
+            <split>
+                <method ref="splitterNewPartsBean" method="splitMessage"/>
+                <to uri="mico-comp:vbox1?serviceId=RedlinkNER&amp;extractorId=mico-extractor-named-entity-recognizer&amp;extractorVersion=3.1.0&amp;modeId=RedlinkNER&amp;inputs={&quot;mico:Text&quot;:[&quot;text/plain&quot;]}"/>
+            </split>
+        </pipeline>
+    </route>
+    <route id='workflow-6-pipeline-7'>
+        <from uri='direct:workflow-6-pipeline-7'/>
+        <pipeline>
+            <to uri="mico-comp:vbox1?serviceId=kaldiXml2rdf&amp;extractorId=mico-extractor-kaldi2rdf&amp;extractorVersion=2.1.0&amp;modeId=kaldiXml2rdf&amp;inputs={&quot;mico:kaldiXML&quot;:[&quot;text/vnd.umu-kaldis+xml&quot;]}"/>
+        </pipeline>
+    </route>
+    <route id='workflow-6-pipeline-8'>
+        <from uri='direct:workflow-6-pipeline-8'/>
+        <pipeline>
+            <to uri="mico-comp:vbox1?serviceId=TVSDetection&amp;extractorId=mico-extractor-temporalvideosegmentation&amp;extractorVersion=2.1.0&amp;modeId=TVSDetection&amp;parameters={&quot;outputFormat&quot;:&quot;PNG&quot;}&amp;inputs={&quot;mico:Video&quot;:[&quot;video/mp4&quot;]}"/>
+            <split>
+                <method ref="splitterNewPartsBean" method="splitMessage"/>
+                <to uri='direct:workflow-6-aggregator-1'/>
+            </split>
+        </pipeline>
+    </route>
+    <route id='workflow-6-aggregator-0'>
+        <from uri='direct:workflow-6-aggregator-0'/>
+        <aggregate strategyRef='itemAggregatorStrategy' completionSize='2'>
+            <correlationExpression>
+                <simple>header.mico_item</simple>
+            </correlationExpression>
+            <to uri='direct:workflow-6-pipeline-1'/>
+        </aggregate>
+    </route>
+    <route id='workflow-6-aggregator-1'>
+        <from uri='direct:workflow-6-aggregator-1'/>
+        <aggregate strategyRef='simpleAggregatorStrategy' completionSize='1'>
+            <correlationExpression>
+                <simple>header.mico_item</simple>
+            </correlationExpression>
+            <to uri='direct:workflow-6-pipeline-3'/>
+        </aggregate>
+    </route>
+</routes>

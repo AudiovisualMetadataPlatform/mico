@@ -81,7 +81,9 @@ public class StatusWebService {
             Attributes atts = mf.getMainAttributes();
             info = atts.getValue("Implementation-Title") + " ("+ atts.getValue("Implementation-Version")+")"
                     + "\nGit-Revision: " + atts.getValue("Git-Revision")
-                    + "\nGit-Branch: " + atts.getValue("Git-Branch")
+                    + (atts.getValue("Git-Branch") != "UNKNOWN" ? 
+                            "\nGit-Branch: " + atts.getValue("Git-Branch")
+                            : "\nGit-Tag: "  + atts.getValue("Git-Tag"))
                     + "\nbuild on: " + atts.getValue("Build-Time");
         }catch(IOException e){
             info = "<unknown>";

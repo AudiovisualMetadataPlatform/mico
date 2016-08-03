@@ -1,3 +1,9 @@
+mico-rabbitmq (3.0.0) unstable; urgency=low
+
+  * Platform version bump
+
+ -- Horst Stadler <horst.stadler@salzburgresearch.at>  Wed, 20 Jul 2016 14:36:49 +0200
+
 mico-rabbitmq (2.0.0) unstable; urgency=medium
 
   * Platform version bump

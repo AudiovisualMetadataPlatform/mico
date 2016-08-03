@@ -15,8 +15,10 @@ package eu.mico.platform.event.api.spring;
 
 import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
+import eu.mico.platform.event.impl.AnalysisServiceUtil;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.persistence.api.PersistenceService;
+
 import org.openrdf.model.impl.URIImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,11 +91,9 @@ public class PlatformConfiguration implements ApplicationContextAware{
             if(Arrays.asList(extractorClass.getInterfaces()).contains(Analyser.class)) {
                 eu.mico.platform.event.api.spring.AnalysisService annotation = extractorClass.getAnnotation(eu.mico.platform.event.api.spring.AnalysisService.class);
 
-                logger.info("Subscribing " + extractorClass + " (" + annotation.serviceId() + "," + annotation.requires() + "," + annotation.provides() + "  OR  "+
-                                                                     annotation.extractorId() + "," + annotation.extractorModeId() + "," + annotation.extractorVersion()+") to MICO platform");
-                String queueName = annotation.queueName().isEmpty() ? null : annotation.queueName();
+                logger.info("Subscribing " + extractorClass + " (" + annotation.extractorId() + "," + annotation.extractorModeId() + "," + annotation.extractorVersion()+") to MICO platform");
 
-                AnalysisService analysisService = new AnalyserProxy(new URIImpl(annotation.serviceId()),annotation.extractorId(),annotation.extractorModeId(),annotation.extractorVersion(),annotation.provides(), annotation.requires(), queueName, (Analyser) extractor);
+                AnalysisService analysisService = new AnalyserProxy(annotation.extractorId(),annotation.extractorModeId(),annotation.extractorVersion(),annotation.provides(), annotation.requires(), (Analyser) extractor);
 
                 eventManager.registerService(analysisService);
                 analysisServices.add(analysisService);
@@ -117,7 +117,7 @@ public class PlatformConfiguration implements ApplicationContextAware{
         }
 
         for(eu.mico.platform.event.api.AnalysisService analysisService : analysisServices) {
-            logger.info("Unsubscribe extractor " + analysisService.getServiceID().toString() + " at MICO platform");
+            logger.info("Unsubscribe extractor " + AnalysisServiceUtil.getServiceID(analysisService).toString() + " at MICO platform");
             eventManager.unregisterService(analysisService);
         }
 

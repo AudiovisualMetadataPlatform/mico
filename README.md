@@ -202,3 +202,77 @@ To create a complete API documentation of the MICO Platform API in the api/c++/d
 To install the C++ libraries and headers to the predefined prefix, run
 
     make install
+    
+    
+    
+# Using a MICO Platform instance
+
+If a platform instance is running, several analysis chain can be triggered depending on the availability of extractors and workflows, using both a WEB interface and a REST api. 
+
+Example calls to the REST api are going to be provided via using curl.
+
+## Workflow setup
+
+Analysis chains can be enabled by navigating to `<mico-platform-host>:8080/mico-configuration/`, and starting the desired configuration. 
+
+After setting up the extractor, their connections are displayed in `<mico-platform-host>:8080/broker/`
+
+## Default workflows 
+
+Default workflows to be pre-loaded by the broker can be placed inside `platform/broker/src/main/resources/camel-routes/`. The currently available ones are:
+
+| ID  | Name          
+| --- | ------------- 
+| 1   | Serengeti-RedlinkNER (text)
+| 2   | Kaldi Speech2Text (video,NER)
+| 3   | Face detection (image)
+| 4   | Face detection (video-keyframes)
+| 5   | Face detection (video-steps)
+| 6   | IO-demo showcase all (video)
+| 7   | Animal detection (image)
+
+## Item creation and injection
+
+Item creation and injection is provided via WEB graphical interface and via REST api.
+
+### WEB interface (Broker v2)
+
+The WEB interface for item injection can be found at `<mico-platform-host>:8080/broker/inject.html`.
+
+The interface provides a user-friendly method for injecting single files to the platform: Select your file after clicking on the "Choose File" button, then on "Create item", and then on the "Submit" one.
+
+The item is going to be broadcasted to every available extractors, and then analyzed by the ones able to process the uploaded file, according to the graph displayed in `<mico-platform-host>:8080/broker/`
+
+
+### REST api
+
+#### **Item creation**
+
+An Item can be created out of a single file with a POST to `/broker/inject/create`:
+
+    curl -X POST --data-binary @<path/to/binary/file> <mico-platform-host>:8080/broker/inject/create
+
+The POST is going to return a json object containing a field named <itemUri>. 
+
+It is also possible to create composite items consisting of several parts, e.g. as follows:
+
+    curl -X POST <mico-platform-host>:8080/broker/inject/create?type=<itemSyntacticType>
+    curl -X POST --data-binary @<path/to/first/part>  <mico-platform-host>:8080/broker/inject/add?itemUri=<itemUri>&type=<firstPartSyntacticTye>
+    curl -X POST --data-binary @<path/to/second/part> <mico-platform-host>:8080/broker/inject/add?itemUri=<itemUri>&type=<secondPartSyntacticTye>
+
+Where <itemSyntacticType> is a string, e.g. with value "mico:CompositeItem"
+
+#### **Item injection (Broker v2)**
+
+The value of the field <itemUri> retrieved after the item creation can be used for injecting the content to the platform by calling
+
+    curl -X POST -v <mico-platform-host>:8080/broker/inject/submit?item=<itemUri>
+
+#### **Item injection (Broker v3)**
+
+The value of the field <itemUri> retrieved after the item creation can be used for injecting the content to the platform by calling
+
+    curl -X POST -v <mico-platform-host>:8080/broker/inject/submit?item=<itemUri>&route=<routeId>
+
+The value of <routeId> should be picked from the [table above](#default-workflows)
+

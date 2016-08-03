@@ -2,9 +2,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,13 +13,49 @@
  */
 package eu.mico.platform.event.impl;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeoutException;
+
 import com.github.anno4j.Anno4j;
 import com.github.anno4j.Transaction;
-import com.github.anno4j.model.namespaces.OADM;
-import com.rabbitmq.client.*;
-import com.rabbitmq.client.AMQP.BasicProperties;
-import eu.mico.platform.anno4j.model.namespaces.MMM;
 import eu.mico.platform.event.api.*;
+import org.openrdf.model.Model;
+import org.openrdf.model.Statement;
+import org.openrdf.model.URI;
+import org.openrdf.model.impl.TreeModel;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.model.vocabulary.RDF;
+import org.openrdf.model.vocabulary.RDFS;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.UnknownTransactionStateException;
+import org.openrdf.repository.object.ObjectConnection;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFHandlerException;
+import org.openrdf.rio.Rio;
+import org.openrdf.rio.helpers.RDFHandlerBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.github.anno4j.model.namespaces.OADM;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
+import com.rabbitmq.client.RpcClient;
+
+import eu.mico.platform.anno4j.model.namespaces.MMM;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.event.model.Event.AnalysisEvent;
@@ -30,30 +66,8 @@ import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Resource;
-import org.openrdf.model.Model;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.TreeModel;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.object.ObjectConnection;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.Rio;
-import org.openrdf.rio.helpers.RDFHandlerBase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.URISyntaxException;
-import java.util.*;
-import java.util.concurrent.TimeoutException;
-
+import static eu.mico.platform.event.impl.AnalysisServiceUtil.*;
 /**
  * Add file description here!
  *
@@ -121,8 +135,8 @@ public class EventManagerImpl implements EventManager {
         factory.setPort(amqpPort);
         factory.setUsername(amqpUser);
         factory.setPassword(amqpPassword);
-
-        if (amqpVHost != null) {
+        
+        if(amqpVHost != null){
             factory.setVirtualHost(amqpVHost);
         }
 
@@ -154,13 +168,13 @@ public class EventManagerImpl implements EventManager {
             config = Event.ConfigurationEvent.parseFrom(configClient.primitiveCall(Event.ConfigurationDiscoverEvent.newBuilder().build().toByteArray()));
         } finally {
             try { //do not fail in close operations
-                if (configClient != null) {
+                if(configClient != null) {
                     configClient.close();
                 }
-                if (configChannel != null) {
+                if(configChannel != null){
                     configChannel.close();
                 }
-            } catch (IOException e) {/*ignore*/}
+            } catch(IOException e) {/*ignore*/}
         }
 
         log.info("Got Marmotta base URI: {}", config.getMarmottaBaseUri());
@@ -195,16 +209,13 @@ public class EventManagerImpl implements EventManager {
      */
     @Override
     public void registerService(AnalysisServiceBase service) throws IOException {
-        log.info("registering new service {} with message brokers ...", service.getServiceID());
+        log.info("registering new service {} with message brokers ...", getServiceID(service));
 
         Channel chan = connection.createChannel();
 
         // first declare a new input queue for this service using the service queue name, and register a callback
-        String queueName = service.getQueueName() != null ? service.getQueueName() : UUID.randomUUID().toString();
-
-        // then override its value for compatibility with camel //TODO: remove getQueue() from the api
-        queueName = service.getExtractorID() + "-" + service.getExtractorVersion() + "-" + service.getExtractorModeID();
-
+        String queueName = getQueueName(service);
+        
         // then create a new analysis consumer (auto-registered to its queue name)
         services.put(service, new AnalysisConsumer(service, queueName));
 
@@ -215,7 +226,7 @@ public class EventManagerImpl implements EventManager {
         Event.RegistrationEvent registrationEvent =
                 Event.RegistrationEvent.newBuilder()
                         .setType(Event.RegistrationType.REGISTER)
-                        .setServiceId(service.getServiceID().stringValue())
+                        .setServiceId(getServiceID(service).stringValue())
                         .setExtractorId(service.getExtractorID())
                         .setExtractorModeId(service.getExtractorModeID())
                         .setExtractorVersion(service.getExtractorVersion())
@@ -235,16 +246,13 @@ public class EventManagerImpl implements EventManager {
      */
     @Override
     public void unregisterService(AnalysisServiceBase service) throws IOException {
-        log.info("unregistering new service {} with message brokers ...", service.getServiceID());
+        log.info("unregistering new service {} with message brokers ...", getServiceID(service));
 
         Channel chan = connection.createChannel();
 
         // first declare a new input queue for this service using the service queue name, and register a callback
-        String queueName = service.getQueueName() != null ? service.getQueueName() : UUID.randomUUID().toString();
-
-        // then override its value for compatibility with camel //TODO: remove getQueue() from the api
-        queueName = service.getExtractorID() + "-" + service.getExtractorVersion() + "-" + service.getExtractorModeID();
-
+        String queueName = getQueueName(service);
+        
         // then create a new analysis consumer (auto-registered to its queue name)
         services.put(service, new AnalysisConsumer(service, queueName));
 
@@ -255,7 +263,7 @@ public class EventManagerImpl implements EventManager {
         Event.RegistrationEvent registrationEvent =
                 Event.RegistrationEvent.newBuilder()
                         .setType(Event.RegistrationType.UNREGISTER)
-                        .setServiceId(service.getServiceID().stringValue())
+                        .setServiceId(getServiceID(service).stringValue())
                         .setExtractorId(service.getExtractorID())
                         .setExtractorModeId(service.getExtractorModeID())
                         .setExtractorVersion(service.getExtractorVersion())
@@ -279,21 +287,21 @@ public class EventManagerImpl implements EventManager {
     public void injectItem(Item item) throws IOException {
         ObjectConnection con = item.getObjectConnection();
         try {
-            if (con.isActive()) {
+            if(con.isActive()){
                 con.commit(); //commit the current state of the item before notifying the broker
                 con.begin();
             }
         } catch (RepositoryException e) {
-            throw new IOException("Unable to commit Item data before inject", e);
+            throw new IOException("Unable to commit Item data before inject",e);
         } //else  auto commit ... nothing to do 
         traceRDF(item, "injected");
         Channel chan = connection.createChannel();
         chan.basicPublish("", EventManager.QUEUE_CONTENT_INPUT, null, Event.ItemEvent.newBuilder().setItemUri(item.getURI().stringValue()).build().toByteArray());
         chan.close();
     }
-
+    
     private void traceRDF(Item item, String taskName) {
-        if (!log.isTraceEnabled()) {
+        if(!log.isTraceEnabled()){
             return;
         }
         //we copy all statements to a TreeModel as this one sorts them by SPO
@@ -311,41 +319,40 @@ public class EventManagerImpl implements EventManager {
         RepositoryConnection con = item.getObjectConnection();
         boolean startedTransaction = false;
         try {
-            if (!con.isActive()) {
+            if(!con.isActive()){
                 con.begin();
                 startedTransaction = true;
             }
-            con.exportStatements(null, null, null, true, new RDFHandlerBase() {
+            con.exportStatements(null, null, null, true, new RDFHandlerBase(){
                 @Override
                 public void handleStatement(Statement st) {
                     model.add(st);
                 }
             });
         } catch (RDFHandlerException | RepositoryException e) {
-            log.trace("Unable to LOG RDF for task " + taskName + " because " + e.getMessage(), e);
+            log.trace("Unable to LOG RDF for task "+taskName+" because "+ e.getMessage(), e);
         } finally {
-            if (startedTransaction) {
+            if(startedTransaction){
                 try {
                     con.rollback();
                 } catch (RepositoryException e) {/* ignore */}
             }
         }
-        try (StringWriter rdfOut = new StringWriter()) {
+        try (StringWriter rdfOut = new StringWriter()){
             Rio.write(model, rdfOut, RDFFormat.TURTLE);
-            log.debug("--- START {} RDF item: {} ---\n{}\n--- END {} RDF ---",
-                    taskName, item.getURI(), rdfOut.toString(), taskName);
+            log.debug("--- START {} RDF item: {} ---\n{}\n--- END {} RDF ---", 
+                    taskName,item.getURI(),rdfOut.toString(),taskName);
         } catch (RDFHandlerException e) {
-            log.trace("Unable to serialize RDF for task " + taskName + " because " + e.getMessage(), e);
+            log.trace("Unable to serialize RDF for task "+taskName+" because "+ e.getMessage(), e);
         } catch (IOException e) {
-            log.trace("Unable to print serialized RDF for task " + taskName + " because " + e.getMessage(), e);
+            log.trace("Unable to print serialized RDF for task "+taskName+" because "+ e.getMessage(), e);
         }
     }
-
     /**
      * A consumer reacting to service discovery requests. Upon initialisation, it creates its own queue and binds it to
      * the service discovery exchange. Upon a discovery event, it simply sends back its list of services to the replyTo
      * queue provided in the discovery request.
-     *
+     * 
      * TODO: currently this is unused by this implementation ... should we remove this cass?
      */
     private class DiscoveryConsumer extends DefaultConsumer {
@@ -375,20 +382,19 @@ public class EventManagerImpl implements EventManager {
                     .Builder()
                     .correlationId(properties.getCorrelationId())
                     .build();
+            
 
 
             for (Map.Entry<AnalysisServiceBase, AnalysisConsumer> svc : services.entrySet()) {
-                log.info("- discover service {} ...", svc.getKey().getServiceID());
-
+                log.info("- discover service {} ...", getServiceID(svc.getKey()));
+                
                 //Override the queue declared by the service
-                String queueName = svc.getKey().getExtractorID() + "-" +
-                        svc.getKey().getExtractorVersion() + "-" +
-                        svc.getKey().getExtractorModeID();
+                String queueName = getQueueName(svc.getKey());
 
-
+                
                 Event.RegistrationEvent registrationEvent =
                         Event.RegistrationEvent.newBuilder()
-                                .setServiceId(svc.getKey().getServiceID().stringValue())
+                                .setServiceId(getServiceID(svc.getKey()).stringValue())
                                 .setExtractorId(svc.getKey().getExtractorID())
                                 .setExtractorModeId(svc.getKey().getExtractorModeID())
                                 .setExtractorVersion(svc.getKey().getExtractorVersion())
@@ -427,25 +433,25 @@ public class EventManagerImpl implements EventManager {
 
             @Override
             public void sendFinish(Item item) throws IOException, RepositoryException {
-                if (item == null) {
+                if(item == null){
                     throw new NullPointerException("The parsed Item MUST NOT be NULL!");
                 }
-                if (isFinished() | isError()) {
+                if(isFinished() | isError()){
                     throw new IllegalStateException("Unable to send finished as this AnalysisResponse is already in " +
-                            (isError() ? "an error" : "a finished") + "  state");
+                            (isError() ? "an error" : "a finished") +"  state");
                 }
                 // NOTE: This does NOT close or rollback the connection in case
                 //       of an IOException. It is expected that the AnalysisService
                 //       does deal with IOExceptions and try sendError
                 ObjectConnection con = item.getObjectConnection();
                 //first commit the RDF data to the RDF repository
-                if (con.isActive()) {
+                if(con.isActive()){
                     con.commit();
                 } //else no transaction active we do not need to commit
 
                 //send the finished event
                 AnalysisEvent.Finish finishMsg = AnalysisEvent.Finish.newBuilder()
-                        .setServiceId(service.getServiceID().stringValue())
+                        .setServiceId(getServiceID(service).stringValue())
                         .setItemUri(item.getURI().stringValue())
                         .build();
 
@@ -455,26 +461,26 @@ public class EventManagerImpl implements EventManager {
                         .build();
 
                 getChannel().basicPublish("", properties.getReplyTo(), replyProps, analysisEvent.toByteArray());
-                finished = true;
+                finished=true;
                 //after finishing a response we need to close the connection as
                 //the analysis service MUST NOT modify the Item after sending a
                 //finished event!
                 try { //
-                    con.close();
-                } catch (RepositoryException e) {/* do not fail on closing connections */}
+                    con.close(); 
+                } catch(RepositoryException e){/* do not fail on closing connections */}
             }
 
             @Override
             public void sendProgress(Item item, URI part, float progress) throws IOException {
-                if (item == null) {
+                if(item == null){
                     throw new NullPointerException("The parsed Item MUST NOT be NULL!");
                 }
-                if (part == null) {
+                if(part == null){
                     throw new NullPointerException("The parsed part URI MUST NOT be NULL!");
                 }
-                if (isFinished() | isError()) {
+                if(isFinished() | isError()){
                     throw new IllegalStateException("Unable to send progress as this AnalysisResponse is already in " +
-                            (isError() ? "an error" : "a finished") + "  state");
+                            (isError() ? "an error" : "a finished") +"  state");
                 }
                 long current = System.currentTimeMillis();
                 if (current < progressDeltaMS + progressSentMS) {
@@ -490,7 +496,7 @@ public class EventManagerImpl implements EventManager {
                 AnalysisEvent.Progress progressMsg = AnalysisEvent.Progress.newBuilder()
                         .setItemUri(item.getURI().stringValue())
                         .setPartUri(part.stringValue())
-                        .setServiceId(service.getServiceID().stringValue())
+                        .setServiceId(getServiceID(service).stringValue())
                         .setProgress(progress).build();
 
                 AnalysisEvent analysisEvent = AnalysisEvent.newBuilder()
@@ -504,25 +510,25 @@ public class EventManagerImpl implements EventManager {
 
             @Override
             public void sendNew(Item item, URI part) throws IOException, RepositoryException {
-                if (item == null) {
+                if(item == null){
                     throw new NullPointerException("The parsed Item MUST NOT be NULL!");
                 }
-                if (part == null) {
+                if(part == null){
                     throw new NullPointerException("The parsed part URI MUST NOT be NULL!");
                 }
-                if (isFinished() | isError()) {
+                if(isFinished() | isError()){
                     throw new IllegalStateException("Unable to send progress as this AnalysisResponse is already in " +
-                            (isError() ? "an error" : "a finished") + "  state");
+                            (isError() ? "an error" : "a finished") +"  state");
                 }
                 ObjectConnection con = item.getObjectConnection();
-                if (con.isActive()) {
+                if(con.isActive()){
                     con.commit(); //save the current state
                     con.begin(); //start a new transaction
                 }  //else no transaction active we do not need to commit
                 AnalysisEvent.NewPart newPartMsg = AnalysisEvent.NewPart.newBuilder()
                         .setItemUri(item.getURI().stringValue())
                         .setPartUri(part.stringValue())
-                        .setServiceId(service.getServiceID().stringValue())
+                        .setServiceId(getServiceID(service).stringValue())
                         .build();
 
                 AnalysisEvent analysisEvent = AnalysisEvent.newBuilder()
@@ -532,55 +538,54 @@ public class EventManagerImpl implements EventManager {
 
                 getChannel().basicPublish("", properties.getReplyTo(), replyProps, analysisEvent.toByteArray());
                 hasNew = true;
-                log.debug(" - sentNew [service: {} | item: {} | part: {}]", service, item.getURI(), part);
+                log.debug(" - sentNew [service: {} | item: {} | part: {}]",service, item.getURI(), part);
             }
 
             @Override
             public void sendError(Item item, AnalysisException e) throws IOException {
-                if (e != null) {
+                if(e != null){
                     sendError(item, e.getCode(), e.getMessage(), e.getCause());
                 } else {
-                    sendError(item, ErrorCodes.UNEXPECTED_ERROR, "", "");
+                    sendError(item, ErrorCodes.UNEXPECTED_ERROR, "","");
                 }
             }
-
+            
             @Override
             public void sendError(Item item, ErrorCodes code, String msg, Throwable t) throws IOException {
-                if (t != null) {
+                if(t != null){
                     StringWriter writer = new StringWriter();
                     t.printStackTrace(new PrintWriter(writer));
                     sendError(item, code, msg, writer.toString());
                 } else {
-                    sendError(item, code, msg, "");
+                    sendError(item, code, msg,"");
                 }
             }
-
             @Override
             public void sendError(Item item, ErrorCodes code, String msg, String desc) throws IOException {
-                if (sentError) { //ignore additional errors if already in an error state
+                if(sentError){ //ignore additional errors if already in an error state
                     return;
                 }
-                if (item == null) {
+                if(item == null){
                     throw new NullPointerException("The parsed Item MUST NOT be NULL!");
                 }
                 ObjectConnection con = item.getObjectConnection();
                 try {
                     try {
-                        if (con.isActive()) {
+                        if(con.isActive()){
                             con.rollback();
                         }
-                    } catch (RepositoryException e) {
+                    } catch(RepositoryException e){
                         //we MUST NOT Fail if we can't rollback as we need to send the error response!
                         //actually getting RepositoryExceptions from the connection might be the
                         //reason why the caller has called sendError() in the first place
                         log.warn("Unable to rollback transaction for Item {} after Error[code: {}, msg: {}] - reason: {}",
                                 item.getURI(), code, msg, e.getMessage());
-                        log.debug("TACKTRACE: ", e);
+                        log.debug("TACKTRACE: ",e);
                     }
-                    if (errorMessage == null) {
+                    if(errorMessage == null){
                         errorMessage = AnalysisEvent.Error.newBuilder()
                                 .setItemUri(item.getURI().stringValue())
-                                .setServiceId(service.getServiceID().stringValue())
+                                .setServiceId(getServiceID(service).stringValue())
                                 .setErrorCode(code)
                                 .setMessage(msg)
                                 .setDescription(desc).build();
@@ -590,7 +595,7 @@ public class EventManagerImpl implements EventManager {
                             .setError(errorMessage).build();
                     getChannel().basicPublish("", properties.getReplyTo(), replyProps, event.toByteArray());
                     sentError = true;
-                    log.debug(" - sentError [service: {} | item: {} | code: {}]", service, item.getURI(),
+                    log.debug(" - sentError [service: {} | item: {} | code: {}]",service, item.getURI(), 
                             errorMessage.getErrorCode());
                 } finally {
                     //after an error the connection is no longer needed so close it
@@ -601,10 +606,10 @@ public class EventManagerImpl implements EventManager {
             }
 
             @Override
-            public boolean hasNew() {
+            public boolean hasNew(){
                 return hasNew;
             }
-
+            
             @Override
             public boolean isFinished() {
                 return finished;
@@ -614,7 +619,6 @@ public class EventManagerImpl implements EventManager {
             public boolean isError() {
                 return errorMessage != null;
             }
-
             /**
              * If an error message was successfully sent. NOTE: In difference to
              * {@link #isError()} this will only return <code>true</code> if
@@ -624,7 +628,7 @@ public class EventManagerImpl implements EventManager {
              * {@link #sendError(Item, ErrorCodes, String, String)} was called.
              * @return only <code>true</code> if an error message was successfully sent
              */
-            boolean sentError() {
+            boolean sentError(){
                 return sentError;
             }
         }
@@ -640,10 +644,6 @@ public class EventManagerImpl implements EventManager {
 
             getChannel().queueDeclare(queueName, true, false, true, null);
             getChannel().basicConsume(queueName, false, this);
-        }
-
-        public String getQueueName() {
-            return queueName;
         }
 
         /**
@@ -667,22 +667,30 @@ public class EventManagerImpl implements EventManager {
                     .correlationId(properties.getCorrelationId())
                     .build();
 
-            AnalysisResponseImpl response = new AnalysisResponseImpl(properties, replyProps);
-            final URI itemUri = new URIImpl(analysisRequest.getItemUri());
+            ObjectConnection con = null;
             Item item = null;
+            AnalysisResponseImpl response = null;
+
             try {
+                //(1) get the item of the Event from the persistenceService
+                final URI itemUri = new URIImpl(analysisRequest.getItemUri());
                 item = persistenceService.getItem(itemUri);
-            } catch (RepositoryException e) {
+                //NOTE: The persistenceService creates a new connection for every 
+                //    requested Item. This is not perfect, but works for now
+                con = item.getRDFObject().getObjectConnection();
+                response = new AnalysisResponseImpl(properties, replyProps);
+            } catch (RepositoryException e){
                 log.warn("RepositoryException while creating Item {} on "
-                                + "RepositoryService (message: {})",
+                        + "RepositoryService (message: {})", 
                         analysisRequest.getItemUri(), e.getMessage());
             } finally {
                 if (item == null || response == null) {
                     requeue(envelope, analysisRequest);
                     return; //stop here
-                }
+                } //else everything we need was correctly initialized
             }
-
+            log.debug("> process Item {} (message: {})", item.getURI(), envelope.getDeliveryTag());
+            traceRDF(item, "before call to "+getServiceID(service));
             boolean reEnqueue = false; //if the message should be re-enqueued
             try {
                 final List<Resource> resourceList = parseResourceList(analysisRequest.getPartUriList(), item);
@@ -694,46 +702,45 @@ public class EventManagerImpl implements EventManager {
                 } else {
                     executeExtractor(envelope, resourceList, params, response, item, (AnalysisService) service);
                 }
-
-                if (!response.isFinished() && !response.isError()) {
+                if(!response.isFinished() && !response.isError()){
                     //the lazy AnalysisService implementor was not calling
                     //response.sendFinish(item) ... so lets help him out
                     // ... but not without complaining!
                     log.info("AnalysisService {} has not sent a finished message "
-                                    + "for Item {}. Please adapt the implementation to "
-                                    + "that finished events are sent. Until than the "
-                                    + "EventManager will care about sending the finished "
-                                    + "event on behalf of the AnalysisService",
+                            + "for Item {}. Please adapt the implementation to "
+                            + "that finished events are sent. Until than the "
+                            + "EventManager will care about sending the finished "
+                            + "event on behalf of the AnalysisService",
                             service.getClass().getName(), analysisRequest.getItemUri());
                     response.sendFinish(item);
                 }
             } catch (AnalysisException e) {
                 String errorMsg = new StringBuilder("AnalysisException while processing item ")
                         .append(analysisRequest.getItemUri()).append(" with service ")
-                        .append(service.getServiceID()).append(" (message: ")
+                        .append(getServiceID(service)).append(" (message: ")
                         .append(e.getMessage()).append(")").toString();
                 log.error(errorMsg);
                 log.debug("STACKTRACE:", e);
                 //for those errors we do not want to try again
-                if (!response.sentError()) { //so just check if no error was sent yet
+                if(!response.sentError()){ //so just check if no error was sent yet
                     response.sendError(item, e);
                 } //else an error message was already sent
             } catch (RuntimeException e) {
                 String errorMsg = new StringBuilder("Could not analyse item with URI ")
                         .append(analysisRequest.getItemUri()).append(" with service ")
-                        .append(service.getServiceID()).append(" (exception: ")
+                        .append(getServiceID(service)).append(" (exception: ")
                         .append(e.getClass().getSimpleName()).append(" | message: ")
                         .append(e.getMessage()).append(")").toString();
                 log.error(errorMsg);
                 log.debug("STACKTRACE:", e);
                 //for those errors we do not want to try again
-                if (!response.sentError()) { //so just check if no error was sent yet
+                if(!response.sentError()){ //so just check if no error was sent yet
                     response.sendError(item, ErrorCodes.UNEXPECTED_ERROR, errorMsg, e);
                 } //else an error message was already sent
             } catch (RepositoryException e) {
                 log.warn("Encountered error while reading/writing to RDF repository while processing "
                         + "Item {} (message: {})", analysisRequest.getItemUri(), e.getMessage());
-                log.debug("STACKTRACE:", e);
+                log.debug("STACKTRACE:",e);
                 //for RepositoryExceptions we actually would like to try again.
                 //however we can only to this if we have not sent any messages
                 //to the broker
@@ -743,21 +750,21 @@ public class EventManagerImpl implements EventManager {
                     requeue(envelope, analysisRequest);
                 } else { //we need to ack the message ...
                     try { // ... but first check if we might also need to send an error
-                        if (!response.isFinished() && !response.sentError()) {
-                            //somehow no response was sent up to now ...
-                            if (!response.isError()) {
+                        if(!response.isFinished() && !response.sentError()){
+                            //somehow now response was sent up to now ...
+                            if(!response.isError()){
                                 // ... this can happen in case of an Error (e.g. OutOfMemoryError)
                                 log.warn("Analysis request for service {} and item {} (message:{}) "
-                                                + "terminated unfinished and without an error. EventManager "
-                                                + "will sent an Error message", service,
+                                        + "terminated unfinished and without an error. EventManager "
+                                        + "will sent an Error message", service,
                                         item.getURI(), envelope.getDeliveryTag());
                             } //else error was raised but not sent (because of an IOException)
                             response.sendError(item, ErrorCodes.UNEXPECTED_ERROR,
-                                    "Analyze process of " + service.getClass().getName()
-                                            + " has not finished for an unknown reason", "");
+                                    "Analyze process of " + service.getClass().getName() 
+                                    + " has not finished for an unknown reason", "");
                         }
                     } finally {
-                        traceRDF(item, "after call to " + service.getServiceID());
+                        traceRDF(item, "after call to "+getServiceID(service));
                         getChannel().basicAck(envelope.getDeliveryTag(), false);
                         log.trace("ack message: {}[item: {}]", envelope.getDeliveryTag(),
                                 analysisRequest.getItemUri());
@@ -772,7 +779,7 @@ public class EventManagerImpl implements EventManager {
             transaction.begin();
 
             log.debug("> process Item {} (message: {})", item.getURI(), envelope.getDeliveryTag());
-            traceRDF(item, "before call to " + service.getServiceID());
+            traceRDF(item, "before call to " + getServiceID(service));
 
             log.debug(" - call {} with Item {}", service.getClass().getName(), item.getURI());
             service.call(response, item, resourceList, params, transaction);
@@ -791,7 +798,7 @@ public class EventManagerImpl implements EventManager {
             } //else everything we need was correctly initialized
 
             log.debug("> process Item {} (message: {})", item.getURI(), envelope.getDeliveryTag());
-            traceRDF(item, "before call to " + service.getServiceID());
+            traceRDF(item, "before call to " + getServiceID(service));
 
             con.begin(); //start a transaction on the connection
             log.debug(" - call {} with Item {}", service.getClass().getName(), item.getURI());

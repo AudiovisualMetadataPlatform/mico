@@ -31,10 +31,6 @@ import java.io.IOException;
 public class AnalyserProxy implements AnalysisService {
 
     /**
-     * A unique ID (URI) that identifies this service and its functionality.
-     */
-    private URI serviceId;
-    /**
      * ID that identifies the general functionality of this extractor.
      */
     private String extractorId;
@@ -55,32 +51,19 @@ public class AnalyserProxy implements AnalysisService {
      */
     private String requires;
     /**
-     * The queue name that should be used by the messaging infrastructure for this service. If explicitly set,
-     * this can be used to allow several services listen to the same queue and effectively implement a round-robin load
-     * balancing. If queue name is not set, the event API will choose a random queue name.
-     */
-    private String queueName;
-    /**
      * Implementation of the analysis task
      */
     private Analyser analyser;
 
     private Logger logger = LoggerFactory.getLogger(AnalyserProxy.class);
 
-    public AnalyserProxy(URI serviceId, String extractorId, String extractorModeId, String extractorVersion, String provides, String requires, String queueName, Analyser analyser) {
-        this.serviceId = serviceId;
+    public AnalyserProxy(String extractorId, String extractorModeId, String extractorVersion, String provides, String requires, Analyser analyser) {
         this.extractorId = extractorId;
         this.extractorModeId = extractorModeId;
         this.extractorVersion = extractorVersion;
         this.provides = provides;
         this.requires = requires;
-        this.queueName = queueName;
         this.analyser = analyser;
-    }
-
-    @Override
-    public URI getServiceID() {
-        return serviceId;
     }
 
     @Override
@@ -91,11 +74,6 @@ public class AnalyserProxy implements AnalysisService {
     @Override
     public String getRequires() {
         return requires;
-    }
-
-    @Override
-    public String getQueueName() {
-        return queueName;
     }
 
     @Override

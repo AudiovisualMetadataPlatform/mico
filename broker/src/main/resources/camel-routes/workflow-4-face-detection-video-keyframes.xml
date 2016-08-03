@@ -1,0 +1,38 @@
+<routes xmlns='http://camel.apache.org/schema/spring' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring-2.17.1.xsd">
+
+    <description>Facedetection-Videokeyframes</description>
+
+    <route id='workflow-4-starting-point-for-pipeline-2-mimeType=video/mp4,syntacticType=mico:Video'>
+        <from uri='direct:workflow-4,mimeType=video/mp4,syntacticType=mico:Video'/>
+        <to uri='direct:workflow-4-pipeline-2'/>
+    </route>
+    <route id='workflow-4-pipeline-1'>
+        <from uri='direct:workflow-4-pipeline-1'/>
+        <pipeline>
+            <to uri="mico-comp:vbox1?serviceId=FaceDetectionImage&amp;extractorId=mico-extractor-ccv-facedetection&amp;extractorVersion=2.1.0&amp;modeId=FaceDetectionImage&amp;inputs={&quot;mico:Image&quot;:[&quot;image/png&quot;]}"/>
+        </pipeline>
+    </route>
+    <route id='workflow-4-pipeline-2'>
+        <from uri='direct:workflow-4-pipeline-2'/>
+        <pipeline>
+            <split>
+                <method ref="splitterNewPartsBean" method="splitMessage"/>
+                <to uri="mico-comp:vbox1?serviceId=TVSDetection&amp;extractorId=mico-extractor-temporalvideosegmentation&amp;extractorVersion=2.1.0&amp;modeId=TVSDetection&amp;parameters={&quot;outputFormat&quot;:&quot;PNG&quot;}&amp;inputs={&quot;mico:Video&quot;:[&quot;video/mp4&quot;]}"/>
+                <split>
+                    <method ref="splitterNewPartsBean" method="splitMessage"/>
+                    <to uri='direct:workflow-4-aggregator-0'/>
+                </split>
+            </split>
+        </pipeline>
+    </route>
+    <route id='workflow-4-aggregator-0'>
+        <from uri='direct:workflow-4-aggregator-0'/>
+        <aggregate strategyRef='simpleAggregatorStrategy' completionSize='1'>
+            <correlationExpression>
+                <simple>header.mico_item</simple>
+            </correlationExpression>
+            <to uri='direct:workflow-4-pipeline-1'/>
+        </aggregate>
+    </route>
+</routes>

@@ -1,37 +1,44 @@
 <routes xmlns='http://camel.apache.org/schema/spring'>
   <route id='workflow-aggregateComplex-starting-point-for-aggregator-0-mimeType=mico/test,syntacticType=A'>
     <from uri='direct:aggregateComplex-mimeType=mico/test,syntacticType=A'/>
-    <to uri='direct:workflow-aggregateComplex-aggregator-0'/>
+    <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=A-B-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=A-B-queue'/>
+    <split><method ref="splitterNewPartsBean" method="splitMessage"/>
+      <to uri='direct:workflow-aggregateComplex-aggregator-0'/>
+    </split>
   </route>
   <route id='workflow-aggregateComplex-starting-point-for-aggregator-0-mimeType=mico/test,syntacticType=B'>
     <from uri='direct:aggregateComplex-mimeType=mico/test,syntacticType=B'/>
-    <to uri='direct:workflow-aggregateComplex-aggregator-0'/>
+    <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=B-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=B-C-queue'/>
+      <split><method ref="splitterNewPartsBean" method="splitMessage"/>
+        <to uri='direct:workflow-aggregateComplex-aggregator-0'/>
+      </split>
   </route>
   <route id='workflow-aggregateComplex-pipeline-0'>
     <from uri='direct:workflow-aggregateComplex-pipeline-0'/>
     <pipeline>
-      <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=AB-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=AB-C-queue'/>
-      <to uri="mock:result_aggregateComplex_1"/>
+      <to uri='mico-comp:vbox1?host=localhost&amp;serviceId=AB-C-queue&amp;extractorId=mico-extractor-test&amp;extractorVersion=1.0.0&amp;modeId=AB-C-queue&amp;parameters={&quot;part_count&quot;:&quot;2&quot;}'/>
+      <split><method ref="splitterNewPartsBean" method="splitMessage"/>
+        <to uri="mock:result_aggregateComplex_1"/>
+      </split>
     </pipeline>
   </route>
   <route id='workflow-aggregateComplex-aggregator-0'>
     <from uri='direct:workflow-aggregateComplex-aggregator-0'/>
     <choice>
       <when>
-        <simple>${header.skip_aggregation} == 'true'</simple>
-        <to uri="log:SKIPPING_AGGREGATION, since the header was set"/>
-        <to uri="direct:workflow-aggregateComplex-pipeline-0"/>
+        <simple>${header.aggregatedByAggregator0} == 'aggregator-0'</simple>
+        <to uri='direct:workflow-aggregateComplex-pipeline-0'/>
       </when>
       <otherwise>
-    <aggregate strategyRef='itemAggregatorStrategy' completionSize='2'>
-      <correlationExpression>
-        <simple>header.mico_item</simple>
-      </correlationExpression>
-      <setHeader headerName="aggegratedBy">
-        <simple>workflow-aggregateComplex-aggregator-0</simple>
-      </setHeader>
-      <to uri='direct:workflow-aggregateComplex-pipeline-0'/>
-    </aggregate>
+        <aggregate strategyRef='itemAggregatorStrategy' completionSize='2'>
+          <correlationExpression>
+            <simple>header.mico_item</simple>
+          </correlationExpression>
+          <setHeader headerName='aggregatedByAggregator0'>
+            <simple>aggregator-0</simple>
+          </setHeader>
+          <to uri='direct:workflow-aggregateComplex-pipeline-0'/>
+        </aggregate>
       </otherwise>
     </choice>
   </route>

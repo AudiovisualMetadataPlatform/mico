@@ -14,7 +14,6 @@
 package eu.mico.platform.broker.webservices;
 
 import com.google.common.collect.ImmutableMap;
-
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.impl.MICOBrokerImpl.RouteStatus;
 import eu.mico.platform.broker.model.CamelJob;
@@ -29,7 +28,6 @@ import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Resource;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.openrdf.model.URI;
@@ -44,7 +42,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -85,17 +82,19 @@ public class InjectionWebService {
     @POST
     @Path("/create")
     @Produces("application/json")
-    public Response createItem(@QueryParam("type") String type, @QueryParam("existingAssetLocation") String existingAssetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
+    public Response createItem(@QueryParam("type") String type, @QueryParam("mimeType") String mimeType, @QueryParam("existingAssetLocation") String existingAssetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
 
     	PersistenceService ps = eventManager.getPersistenceService();
     	InputStream in = null;
     	
     	try {
 	    	in = new BufferedInputStream(request.getInputStream());
-			String mimeType=guessMimeType(in);    	
-			if(mimeType == null ){
-				mimeType=type;
-			}
+	    	if (mimeType == null || mimeType.trim().length() == 0){
+	    	    mimeType=guessMimeType(in);    	
+	            if(mimeType == null ){
+	                mimeType=type;
+	            }
+	    	}
 	    	int bytes = in.available();
 	    	
 	
@@ -120,7 +119,13 @@ public class InjectionWebService {
 	    	    	item.setSemanticType("Item created by application/injection-webservice");
 	
 	    	    	log.info("item created {}: uploaded {} bytes", item.getURI(), bytes);
-	    	    	return Response.ok(ImmutableMap.of("itemUri", item.getURI().stringValue(), "assetLocation", item.getAsset().getLocation(), "created", item.getSerializedAt())).build();
+	    	    	return Response.ok(
+							ImmutableMap.of(
+									"itemUri", item.getURI().stringValue(),
+									"assetLocation", item.getAsset().getLocation(),
+									"created", item.getSerializedAt(),
+									"syntacticalType", type
+							)).build();
 	    		}
 	    		else {
 	    			log.error("Overriding the content of {} is forbidden", existingAssetLocation);
@@ -136,10 +141,13 @@ public class InjectionWebService {
 	        		InputStream assetIS = null;
 	        		try{
 	        			
-	        			mimeType = guessMimeTypeFromRemoteLocation(ps,existingAssetLocation);
-	        			if(mimeType == null ){
-	        	    		mimeType=type;
-	        	    	}
+                        if (mimeType == null) {
+                            mimeType = guessMimeTypeFromRemoteLocation(ps,
+                                    existingAssetLocation);
+                            if (mimeType == null) {
+                                mimeType = type;
+                            }
+                        }
 	        			
 	        			Item item = ps.createItem();
 	        			Asset asset = item.getAssetWithLocation(new URIImpl(existingAssetLocation));
@@ -157,7 +165,7 @@ public class InjectionWebService {
 	        		}
 	        		catch( IOException | NullPointerException e) {
 	        			//thrown from the persistence if the data does not exist / the url is malformed 
-	        			throw new IllegalArgumentException("No data found at "+existingAssetLocation+" for the asset of the new item");
+	        		    throw new IllegalArgumentException("No data found at "+existingAssetLocation+" for the asset of the new item", e);
 	        		}
 	        		finally{
 	        			if(assetIS!=null){
@@ -217,35 +225,51 @@ public class InjectionWebService {
      */
     @POST
     @Path("/submit")
-    public Response submitItem(@QueryParam("item") String itemURI, @QueryParam("route") String routeId) throws RepositoryException, IOException {
+    @Produces("text/plain")
+    public Response submitItem(
+			@QueryParam("item") String itemURI,
+			@QueryParam("route") String routeId,
+			@QueryParam("notifyTo") String notificationURI
+	) throws RepositoryException, IOException {
+
 
     	if(itemURI == null || itemURI.isEmpty()){
     		//wrong item
-    		return Response.status(Response.Status.BAD_REQUEST).build();
+    		return Response.status(Response.Status.BAD_REQUEST).entity("item parameter not set").build();
     	}
     	if(routeId != null && routeId.isEmpty()){
     		//wrong routeId
-    		return Response.status(Response.Status.BAD_REQUEST).build();
+    		return Response.status(Response.Status.BAD_REQUEST).entity("route parameter not set").build();
     	}
     	
     	PersistenceService ps = eventManager.getPersistenceService();
         Item item = ps.getItem(new URIImpl(itemURI));
+        if(item == null){
+            //wrong routeId
+            return Response.status(Response.Status.BAD_REQUEST).entity("No item found with uri: " + itemURI).build();
+        }
         
         if(routeId == null){
 
+
+			// broker v2
+
         	eventManager.injectItem(item);
-        	log.info("submitted item {} to every compatible extractor", item.getURI());
-        	return Response.ok().build();
+        	log.debug("submitted item {} to every compatible extractor", item.getURI());
+        	return Response.ok("submitted item to every compatible extractor\n").build();
 
         }
         else{
+
+			// broker v3
     		
-    		log.info("Retrieving CamelRoute with ID {}",routeId);
+    		log.debug("Retrieving CamelRoute with ID {}",routeId);
     		MICOCamelRoute route  = camelRoutes.get(routeId);
     		
     		if(route == null ){
     			//the route does not exist
-    			return Response.status(Response.Status.BAD_REQUEST).build();
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("No route found with id: " + routeId).build();
     		}
     		
 
@@ -256,28 +280,38 @@ public class InjectionWebService {
 
     			//the requested route cannot be started or is broken
     			log.error("The camel route with ID {} is currently {}",routeId,status);    			   
-    			return Response.status(Response.Status.BAD_REQUEST).build();
+                return Response
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity("The camel route with ID {" + routeId
+                                + "} is currently broken").build();
 
     		} 
     		else if(status.contentEquals(RouteStatus.UNAVAILABLE.toString())){
 
     			//the requested route cannot be started or is broken
     			log.error("The camel route with ID {} is currently {}",routeId,status);    			   
-    			return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
+                return Response
+                        .status(Response.Status.SERVICE_UNAVAILABLE)
+                        .entity("The camel route with ID {" + routeId
+                                + "} is currently unavailable").build();
 
     		}
     		else if(status.contentEquals(RouteStatus.RUNNABLE.toString())){
 
     			//TODO: here we should start the required extractors
-    			log.warn("The camel route with ID {} is currently {}, but the auto-deployment is not implemented",routeId,status);
-    			return Response.status(Response.Status.NOT_IMPLEMENTED).build();
+    			log.warn("The camel route with ID {} is currently {}, but the auto-startup is not implemented",routeId,status);
+                return Response
+                        .status(Response.Status.NOT_IMPLEMENTED)
+                        .entity("The camel route with ID {" + routeId
+                                + "} is runnable, but the auto-deployment is not implemented")
+                        .build();
     		}
     		else if(status.contentEquals(RouteStatus.ONLINE.toString())){
 
-    			log.info("The camel route with ID {} is currently {}, looking for compatible entry points ...",routeId,status);    	
+    			log.debug("The camel route with ID {} is currently {}, looking for compatible entry points ...",routeId,status);
     			//the route is up and running, proceed with the injection
     			boolean compatibleEpFound = false;
-    			MICOJobStatus jobState = new MICOJobStatus();
+    			MICOJobStatus jobState = new MICOJobStatus(itemURI, routeId, notificationURI);
     			
     			for(EntryPoint ep:route.getEntryPoints()){
     				
@@ -304,10 +338,15 @@ public class InjectionWebService {
     				Thread thr = new Thread(jobState);
     				thr.start();
     				broker.addMICOCamelJobStatus(new MICOJob(routeId, itemURI), jobState);
-    				return Response.ok().build();
+    				
+    				return Response.ok("Start process item with route " + routeId).build();
     			}
+    			
     			log.error("Unable to retrieve an entry point compatible with the input item");
-    			return Response.status(Response.Status.BAD_REQUEST).build();
+                return Response
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity("Unable to retrieve an entry point compatible with the input item")
+                        .build();
     		}
     		else{
     			//status is not between the known ones
@@ -329,18 +368,36 @@ public class InjectionWebService {
     @POST
     @Path("/add")
     @Produces("application/json")
-    public Response addPart(@QueryParam("itemUri")String itemURI, @QueryParam("type") String type, @QueryParam("existingAssetLocation") String existingAssetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
+    public Response addPart(@QueryParam("itemUri")String itemURI, @QueryParam("mimeType") String mimeType, @QueryParam("type") String type, @QueryParam("existingAssetLocation") String existingAssetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
         PersistenceService ps = eventManager.getPersistenceService();
 
-        Item item = ps.getItem(new URIImpl(itemURI));        
+        if(itemURI == null || itemURI.isEmpty()){
+            //wrong item
+            return Response.status(Response.Status.BAD_REQUEST).entity("item parameter not set").build();
+        }
+
+        URIImpl id = null;
+        try{
+            id = new URIImpl(itemURI);
+        }catch(IllegalArgumentException ex){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Not a valid item uri: " + itemURI).build();
+        }
+        
+        Item item = ps.getItem(id);
+        if(item == null){
+            //item not found in system
+            return Response.status(Response.Status.BAD_REQUEST).entity("No item found with uri:" + itemURI).build();
+        }
         InputStream in = null;
-    	
-    	try {
-	    	in = new BufferedInputStream(request.getInputStream());
-			String mimeType=guessMimeType(in);    	
-			if(mimeType == null ){
-				mimeType=type;
-			}
+
+        try {
+            in = new BufferedInputStream(request.getInputStream());
+            if (mimeType == null || mimeType.trim().length() == 0) {
+                mimeType = guessMimeType(in);
+                if (mimeType == null) {
+                    mimeType = type;
+                }
+            }
 	    	int bytes = in.available();
 	    	
 	
@@ -363,11 +420,17 @@ public class InjectionWebService {
 	    			
 	    			part.setSyntacticalType(type);
 	    	    	part.setSemanticType("Part created by application/injection-webservice");
-	
-	    	    	log.info("item {}, part created {} : uploaded {} bytes", item.getURI(), part.getURI(), bytes);
-	    	        return Response.ok(ImmutableMap.of("itemURI", item.getURI().stringValue(),"partURI", part.getURI().stringValue(), "assetLocation", asset.getLocation(), "created", part.getSerializedAt())).build();
-	    	    	
-	    		}
+
+					log.info("item {}, part created {} : uploaded {} bytes", item.getURI(), part.getURI(), bytes);
+					return Response.ok(
+							ImmutableMap.of(
+									"itemURI", item.getURI().stringValue(),
+									"partURI", part.getURI().stringValue(),
+									"assetLocation", asset.getLocation(),
+									"created", part.getSerializedAt()
+							)).build();
+
+				}
 	    		else {
 	    			log.error("Overriding the content of {} is forbidden", existingAssetLocation);
 	    			throw new IllegalArgumentException("Overriding pre-existing content stored in "+existingAssetLocation+" is forbidden");
@@ -382,10 +445,13 @@ public class InjectionWebService {
 	        		InputStream assetIS = null;
 	        		try{
 	        			
-	        			mimeType = guessMimeTypeFromRemoteLocation(ps,existingAssetLocation);
-	        			if(mimeType == null ){
-	        	    		mimeType=type;
-	        	    	}
+                        if (mimeType == null || mimeType.trim().length() == 0) {
+                            mimeType = guessMimeTypeFromRemoteLocation(ps,
+                                    existingAssetLocation);
+                            if (mimeType == null) {
+                                mimeType = type;
+                            }
+                        }
 	        			
 	        			Part part = item.createPart(extratorID);
 	        			Asset asset = part.getAssetWithLocation(new URIImpl(existingAssetLocation));
@@ -540,7 +606,9 @@ public class InjectionWebService {
 			}
 		}
 		finally{
-			assetIS.close();
+			if(assetIS != null){
+				assetIS.close();
+			}
 			ps.deleteItem(tmpItem.getURI());
 		}
 		return mimeType;

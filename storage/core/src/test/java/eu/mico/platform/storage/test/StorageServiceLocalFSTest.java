@@ -73,9 +73,11 @@ public class StorageServiceLocalFSTest {
     @Test
     public void testWindowsPath() throws Exception {
 
-        StorageServiceLocalFS storage = new StorageServiceLocalFS(basePath);
-        URI winPath = URI.create("file:/X:/workspace/bla");
-        Assert.assertNull(storage.getOutputStream(winPath));
+        if (System.getProperty("os.name").contains("indows")) {
+            StorageServiceLocalFS storage = new StorageServiceLocalFS(basePath);
+            URI winPath = URI.create("file:/X:/workspace/bla");
+            Assert.assertNull(storage.getOutputStream(winPath));
+        }
     }
 
 

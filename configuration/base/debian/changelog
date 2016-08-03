@@ -1,3 +1,9 @@
+mico-base (3.0.0) unstable; urgency=low
+
+  * Platform version bump
+
+ -- Horst Stadler <horst.stadler@salzburgresearch.at>  Wed, 20 Jul 2016 14:32:26 +0200
+
 mico-base (2.0.0) unstable; urgency=low
 
   * Platform version bump

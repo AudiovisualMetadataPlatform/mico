@@ -236,7 +236,6 @@ public abstract class BaseBrokerTest {
             this.createAsset = createAsset;
         }
 
-        @Override
         public URI getServiceID() {
             return new URIImpl("urn:org.example.services-1.0.0-"
                     + StringUtils.capitalize(source)
@@ -253,7 +252,6 @@ public abstract class BaseBrokerTest {
             return source;
         }
 
-        @Override
         public String getQueueName() {
             return getExtractorID()+"-"+getExtractorVersion() + "-" + getExtractorModeID();
         }
@@ -267,6 +265,10 @@ public abstract class BaseBrokerTest {
                 IOException {
             log.info("mock analysis request for [{}] on queue {}",
                     resourceList.get(0).getURI(), getQueueName());
+
+            if ("ERROR".equals(getProvides())){
+                throw new AnalysisException("This mode Fails always");
+            }
             Part c = null;
             try {
                 c = item.createPart(getServiceID());
