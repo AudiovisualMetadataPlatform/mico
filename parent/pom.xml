@@ -20,7 +20,7 @@
 
     <groupId>eu.mico-project.platform</groupId>
     <artifactId>parent</artifactId>
-    <version>3.0.1-SNAPSHOT</version>
+    <version>3.0.2-SNAPSHOT</version>
 
     <name>MICO Platform: Parent</name>
     <description>Parent POM for the MICO Platform</description>
@@ -58,7 +58,7 @@
         <hamcrest.version>1.3</hamcrest.version>
         <restassured.version>2.3.4</restassured.version>
         <sparqlmm.version>1.0</sparqlmm.version>
-        <camel.version>2.17.1</camel.version>
+        <camel.version>2.17.2</camel.version>
         <surefire.version>2.19.1</surefire.version>
     </properties>
 

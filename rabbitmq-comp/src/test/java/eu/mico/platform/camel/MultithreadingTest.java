@@ -12,6 +12,9 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.impl.JndiRegistry;
+import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
+import org.apache.camel.language.Bean;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assume;
@@ -29,6 +32,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
 import de.fraunhofer.idmt.camel.MicoCamel;
 import de.fraunhofer.idmt.mico.DummyExtractorComplexTest;
 import eu.mico.platform.camel.log.LoggingSentEventNotifier;
+import eu.mico.platform.camel.split.SplitterNewParts;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 
@@ -56,11 +60,21 @@ public class MultithreadingTest extends TestBase {
     private static MicoCamelContext cc = null;
     private static String testHost;
 
+    @Bean(ref="splitterNewPartsBean")
+    public static SplitterNewParts splitterNewParts = new SplitterNewParts();
+
+
     @Override
     protected RouteBuilder createRouteBuilder() throws Exception {
         return new RouteBuilder() {
             public void configure() {
+                JndiRegistry registry = (JndiRegistry) (
+                        (PropertyPlaceholderDelegateRegistry)context.getRegistry()).getRegistry();
 
+                if(registry.lookup("splitterNewPartsBean") == null){
+                    registry.bind("splitterNewPartsBean", splitterNewParts);
+                }
+                
                 onException(MICOCamelAnalysisException.class)
                         .process(new Processor() {
                             public void process(Exchange exchange)

@@ -1,3 +1,9 @@
+libmico-api (3.0.1) unstable; urgency=low
+
+  * version bump for whole platform - no changes to C++ API
+
+ -- Horst Stadler <horst.stadler@salzburgresearch.at>  Fri, 05 Aug 2016 10:24:38 +0200
+
 libmico-api (3.0.0) unstable; urgency=medium
 
   * Switched to new event api
