@@ -99,13 +99,17 @@ public class RecoWebService {
     @Path("/piosimplereco")
     @Produces("text/plain")
     public Response getSimpleReco(
-            @QueryParam("userId") final String userId,
+            @QueryParam("itemId") final String itemId,
             @QueryParam("length") final String length
     ) {
 
+        log.info("/piosimplereco called:");
+        log.info("itemId", itemId);
+        log.info("length", length);
+
         try {
             URI recopath = new URI(DockerConf.PIO_RECO_API.toString() + "/queries.json");
-            String data = "{ \"user\": \"" + userId + "\", \"num\": " + length + " }";
+            String data = "{ \"item\": \"" + itemId + "\", \"num\": " + length + " }";
             String response = RecoUtils.forwardPOST(recopath, data);
             return Response.ok(response).build();
 
