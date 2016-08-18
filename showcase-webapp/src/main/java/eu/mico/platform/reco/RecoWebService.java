@@ -85,7 +85,7 @@ public class RecoWebService {
     public Response getPioEvents() {
 
         try {
-            URI eventspath = new URI(DockerConf.PIO_EVENT_API.toString() + "/events.json?accessKey=micoaccesskey&limit=30000");
+            URI eventspath = new URI(DockerConf.PIO_EVENT_API.toString() + "/events.json?accessKey=micoaccesskey&limit=300");
             String response = RecoUtils.forwardGET(eventspath);
             return Response.ok(response).build();
 
