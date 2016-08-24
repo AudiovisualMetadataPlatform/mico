@@ -182,4 +182,24 @@ public class RecoWebService {
         return Response.ok(returnValue.toString()).build();
     }
 
+
+
+    @GET
+    @Path("/zoo/{subject_id}/is_debated")
+    @Produces("application/json")
+    public Response isDebatedSubjects(@PathParam("subject_id") String subject_id) {
+
+        double debatedScore = Math.random();
+        double threshold = 0.7;
+
+        JsonObject returnValue = Json.createObjectBuilder()
+                .add("reco_id", subject_id)
+                .add("is_debated", debatedScore > threshold)
+                .add("score", debatedScore)
+                .add("comment", "Random Score")
+                .build();
+
+        return Response.ok(returnValue.toString()).build();
+    }
+
 }
