@@ -58,7 +58,10 @@ public class Mockups {
 
     public static BrokerServices mockBroker() throws IOException {
         BrokerServices brokerSvc = Mockito.mock(BrokerServices.class);
-        Mockito.when(brokerSvc.getItemData(org.mockito.Matchers.<String>any())).thenReturn(new ItemData(Collections.singletonMap("finished", (Object) "true")));
+        eu.mico.platform.zooniverse.util.Item itemStatus = new eu.mico.platform.zooniverse.util.Item();
+        itemStatus.setFinished("true");
+
+        Mockito.when(brokerSvc.getItem(org.mockito.Matchers.<String>any())).thenReturn(itemStatus);
         Mockito.when(brokerSvc.getServices()).thenReturn(Collections.singletonList(Collections.singletonMap("uri", "http://www.mico-project.eu/services/ner-text")));
         return brokerSvc;
     }

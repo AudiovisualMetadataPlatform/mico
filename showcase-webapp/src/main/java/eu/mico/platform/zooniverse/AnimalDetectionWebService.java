@@ -23,6 +23,7 @@ import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.zooniverse.util.BrokerException;
 import eu.mico.platform.zooniverse.util.BrokerServices;
 import eu.mico.platform.zooniverse.util.ItemData;
 import org.apache.commons.io.IOUtils;
@@ -107,7 +108,7 @@ public class AnimalDetectionWebService {
 
     @PUT
     @Produces("application/json")
-    public Response sendURLs(@QueryParam("url") final java.net.URI imageUrl) {
+    public Response sendURLs(@QueryParam("url") final java.net.URI imageUrl, @QueryParam("mode") final String mode) {
         try {
             final HttpGet request = new HttpGet(imageUrl);
             return httpClient.execute(request, new ResponseHandler<Response>() {
@@ -126,7 +127,7 @@ public class AnimalDetectionWebService {
 
                         if (type.toString().equalsIgnoreCase("image/jpeg")) {
                             try (InputStream is = httpResponse.getEntity().getContent()) {
-                                return uploadImage(type, is);
+                                return uploadImage(type, is, mode);
                             }
                         } else if (type != null) {
                             throw new ClientProtocolException(String.format("Invalid MIME type %s of remote resource %s", type.toString(), imageUrl));
@@ -152,11 +153,19 @@ public class AnimalDetectionWebService {
     @POST
     @Consumes("image/*")
     @Produces("application/json")
-    public Response uploadImage(@HeaderParam(HttpHeaders.CONTENT_TYPE) MediaType type, @Context InputStream postBody) {
+    public Response uploadImage(@HeaderParam(HttpHeaders.CONTENT_TYPE) MediaType type, @Context InputStream postBody, @QueryParam("mode") String mode) {
         if (type == null || postBody == null) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("ContentType and postBody required!")
                     .build();
+        }
+        int routeId;
+        if (mode != null && mode.trim().equalsIgnoreCase("yolo")) {
+            mode = "yolo";
+            routeId = 8;
+        } else {
+            mode = "dpm";
+            routeId = 9;
         }
         try {
             final Item item = persistenceService.createItem();
@@ -177,16 +186,18 @@ public class AnimalDetectionWebService {
                 postBody.close();
             }
 
-            eventManager.injectItem(item);
+            String itemId = item.getURI().getLocalName();
+            brokerSvc.submitItem(itemId, routeId);
+            //eventManager.injectItem(item);
             Map<String, Object> rspEntity = new HashMap<>();
-            rspEntity.put("id", item.getURI().getLocalName());
+            rspEntity.put("id", itemId);
             rspEntity.put("status", "submitted");
 
             return Response.status(Response.Status.CREATED)
                     .entity(rspEntity)
                     .link(java.net.URI.create(item.getURI().stringValue()), "contentItem")
                     .build();
-        } catch (RepositoryException | IOException e) {
+        } catch (RepositoryException | IOException | BrokerException e) {
             log.error("Could not create ContentItem");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
@@ -209,8 +220,8 @@ public class AnimalDetectionWebService {
 
 
         //test if it is still in progress
-        final ItemData itemData = brokerSvc.getItemData(itemId);
-        if (itemData != null && !itemData.hasFinished()) {
+        final eu.mico.platform.zooniverse.util.Item itemStatus = brokerSvc.getItem(itemId);
+        if (itemStatus != null && !itemStatus.hasFinished()) {
             return Response.status(Response.Status.ACCEPTED)
                     .entity(ImmutableMap.of("id", itemId, "status", "inProgress"))
                     .build();

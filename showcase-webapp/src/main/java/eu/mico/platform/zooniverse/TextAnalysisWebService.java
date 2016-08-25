@@ -121,8 +121,8 @@ public class TextAnalysisWebService {
 
 
         //test if it is still in progress
-        final ItemData itemData = brokerSvc.getItemData(itemURI);
-        if (itemData != null && !itemData.hasFinished()) {
+        final eu.mico.platform.zooniverse.util.Item itemStatus = brokerSvc.getItem(itemURI);
+        if (itemStatus != null && !itemStatus.hasFinished()) {
             return Response.status(Response.Status.ACCEPTED)
                     .entity(ImmutableMap.of("id",itemURI,"status","inProgress"))
                     .build();

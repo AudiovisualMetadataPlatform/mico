@@ -255,6 +255,17 @@
                                             </mapper>
                                             <conffile>true</conffile>
                                         </data>
+                                        <data>
+                                            <src>src/deb/resources/mico-demo-media.xml.tmpl</src>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/etc/tomcat7/Catalina/localhost</prefix>
+                                                <user>root</user>
+                                                <group>root</group>
+                                            </mapper>
+                                            <conffile>true</conffile>
+                                        </data>
                                     </dataSet>
                                 </configuration>
                             </execution>
