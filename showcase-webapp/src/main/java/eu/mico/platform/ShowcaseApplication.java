@@ -13,6 +13,7 @@
  */
 package eu.mico.platform;
 
+import com.sun.corba.se.pept.broker.Broker;
 import eu.mico.platform.demo.ContentWebService;
 import eu.mico.platform.demo.DemoWebService;
 import eu.mico.platform.demo.DownloadWebService;
@@ -30,8 +31,10 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
 
@@ -56,6 +59,11 @@ public class ShowcaseApplication extends Application {
         String marmottaBaseUri = context.getInitParameter("mico.marmottaBaseUri") != null ? context.getInitParameter("mico.marmottaBaseUri") : "http://" + host + ":8080/marmotta";
         while (marmottaBaseUri.endsWith("/")) {
             marmottaBaseUri = marmottaBaseUri.substring(0, marmottaBaseUri.length() - 1);
+        }
+        String mediaDirectory = context.getInitParameter("mico-demo.mediaDirectory") != null ? context.getInitParameter("mico-demo.mediaDirectory") : "/tmp/mico-demo-media";
+        String mediaUrl = context.getInitParameter("mico-demo.mediaUrl") != null ? context.getInitParameter("mico-demo.mediaUrl") : "http://" + host + ":8080/mico-demo-media";
+        while (mediaUrl.endsWith("/")) {
+            mediaUrl = mediaUrl.substring(0, mediaUrl.length() - 1);
         }
 
         if ("localhost".equals(host)) {
@@ -85,7 +93,7 @@ public class ShowcaseApplication extends Application {
             services.add(new TextAnalysisWebService(manager, marmottaBaseUri, brokerServices));
 
             //Demo
-            services.add(new DownloadWebService(manager));
+            services.add(new DownloadWebService(manager, marmottaBaseUri, mediaDirectory, mediaUrl));
             services.add(new ContentWebService(manager, marmottaBaseUri));
             services.add(new DemoWebService(manager, marmottaBaseUri, brokerServices));
 
