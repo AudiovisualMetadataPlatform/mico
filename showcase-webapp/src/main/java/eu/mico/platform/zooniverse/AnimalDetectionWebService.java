@@ -182,7 +182,7 @@ public class AnimalDetectionWebService {
 
             item.setSemanticType("application/animaldetection-endpoint");
             String assetType = String.format("%s/%s", type.getType(), type.getSubtype());
-            item.setSyntacticalType(assetType);
+            item.setSyntacticalType("mico:Image");
 
             Asset asset = item.getAsset();
             try (OutputStream outputStream = asset.getOutputStream()) {
