@@ -160,13 +160,23 @@ public class AnimalDetectionWebService {
                     .build();
         }
         int routeId;
-        if (mode != null && mode.trim().equalsIgnoreCase("yolo")) {
+        if (mode == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Missing parameter 'mode' in URL query.")
+                    .build();
+        }
+        else if (mode.trim().equalsIgnoreCase("yolo")) {
             mode = "yolo";
             routeId = 8;
-        } else {
+        } else  if (mode.trim().equalsIgnoreCase("dpm")){
             mode = "dpm";
             routeId = 9;
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Parameter 'mode' needs to be 'yolo' or 'dpm'.")
+                    .build();
         }
+
         try {
             final Item item = persistenceService.createItem();
 
@@ -192,6 +202,7 @@ public class AnimalDetectionWebService {
             Map<String, Object> rspEntity = new HashMap<>();
             rspEntity.put("id", itemId);
             rspEntity.put("status", "submitted");
+            rspEntity.put("mode", mode);
 
             return Response.status(Response.Status.CREATED)
                     .entity(rspEntity)
