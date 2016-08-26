@@ -78,6 +78,7 @@ public class ShowcaseApplication extends Application {
 
         try {
             manager = new EventManagerImpl(host, user, pass);
+            Thread.sleep(20 * 1000);                 //Give the broker a chance to start up.
             manager.init();
 
             BrokerServices brokerServices = new BrokerServices(brokerBaseUri, marmottaBaseUri);
@@ -106,6 +107,10 @@ public class ShowcaseApplication extends Application {
         } catch (TimeoutException ex) {
             log.error("could not fetch Marmotta and storage configuration, request timed out (message: {})", ex.getMessage());
             log.debug("Exception:", ex);
+        } catch (InterruptedException ex) {
+            log.error("wait for broker got interrupted (message: {})", ex.getMessage());
+            log.debug("Exception:", ex);
+            Thread.currentThread().interrupt();
         }
     }
 
