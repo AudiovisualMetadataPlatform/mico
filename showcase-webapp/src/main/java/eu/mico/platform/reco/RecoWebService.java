@@ -85,7 +85,7 @@ public class RecoWebService {
     public Response getPioEvents() {
 
         try {
-            URI eventspath = new URI(DockerConf.PIO_EVENT_API.toString() + "/events.json?accessKey=micoaccesskey&limit=30000");
+            URI eventspath = new URI(DockerConf.PIO_EVENT_API.toString() + "/events.json?accessKey=micoaccesskey&limit=300");
             String response = RecoUtils.forwardGET(eventspath);
             return Response.ok(response).build();
 
@@ -99,13 +99,17 @@ public class RecoWebService {
     @Path("/piosimplereco")
     @Produces("text/plain")
     public Response getSimpleReco(
-            @QueryParam("userId") final String userId,
+            @QueryParam("itemId") final String itemId,
             @QueryParam("length") final String length
     ) {
 
+        log.info("/piosimplereco called:");
+        log.info("itemId", itemId);
+        log.info("length", length);
+
         try {
             URI recopath = new URI(DockerConf.PIO_RECO_API.toString() + "/queries.json");
-            String data = "{ \"user\": \"" + userId + "\", \"num\": " + length + " }";
+            String data = "{ \"item\": \"" + itemId + "\", \"num\": " + length + " }";
             String response = RecoUtils.forwardPOST(recopath, data);
             return Response.ok(response).build();
 
@@ -174,6 +178,26 @@ public class RecoWebService {
                 .add("confidence", 0.3)
                 .build();
 
+
+        return Response.ok(returnValue.toString()).build();
+    }
+
+
+
+    @GET
+    @Path("/zoo/{subject_id}/is_debated")
+    @Produces("application/json")
+    public Response isDebatedSubjects(@PathParam("subject_id") String subject_id) {
+
+        double debatedScore = Math.random();
+        double threshold = 0.7;
+
+        JsonObject returnValue = Json.createObjectBuilder()
+                .add("reco_id", subject_id)
+                .add("is_debated", debatedScore > threshold)
+                .add("score", debatedScore)
+                .add("comment", "Random Score")
+                .build();
 
         return Response.ok(returnValue.toString()).build();
     }

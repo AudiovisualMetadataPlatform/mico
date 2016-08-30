@@ -2,6 +2,7 @@ package eu.mico.platform.demo;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import eu.mico.platform.zooniverse.util.BrokerException;
 import eu.mico.platform.zooniverse.util.BrokerServices;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
@@ -130,7 +131,7 @@ public class DemoWebService {
 
             //test if it is still in progress
             long start = System.currentTimeMillis();
-            ItemData itemData;
+            eu.mico.platform.zooniverse.util.Item itemStatus;
             do {
                 Thread.sleep(timestep);
 
@@ -138,15 +139,15 @@ public class DemoWebService {
                     return Response.status(408).entity("Image took to long to compute").build();
                 }
 
-                itemData = brokerSvc.getItemData(ci.getURI().stringValue());
-            } while(itemData == null || !itemData.hasFinished());
+                itemStatus = brokerSvc.getItem(ci.getURI().stringValue());
+            } while(itemStatus == null || !itemStatus.hasFinished());
 
             Object result = createImageResult(ci);
 
             return Response.status(Response.Status.CREATED)
                     .entity(ImmutableMap.of("id", ci.getURI(), "uri", ci.getURI().stringValue(), "result", result, "status", "done"))
                     .build();
-        } catch (RepositoryException | IOException e) {
+        } catch (RepositoryException | IOException | BrokerException e) {
             log.error("Could not create Item");
             throw new Exception(e);
         } catch (InterruptedException e) {
@@ -340,13 +341,13 @@ public class DemoWebService {
 
         try {
             //test if it is still in progress
-            ItemData itemData = brokerSvc.getItemData(contentItemUri.stringValue());
-            if (itemData != null && !itemData.hasFinished()) {
+            eu.mico.platform.zooniverse.util.Item itemStatus = brokerSvc.getItem(contentItemUri.stringValue());
+            if (itemStatus != null && !itemStatus.hasFinished()) {
                 return Response.status(Response.Status.ACCEPTED)
                         .entity(ImmutableMap.of("uri", uriString, "status", "inProgress"))
                         .build();
             }
-        } catch (IOException e) {
+        } catch (IOException | BrokerException e) {
             log.error("Error getting status of item {} from broker: {}", contentItemUri.stringValue(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
@@ -382,13 +383,13 @@ public class DemoWebService {
 
         try {
             //test if it is still in progress
-            ItemData itemData = brokerSvc.getItemData(contentItemUri.stringValue());
-            if (itemData != null && !itemData.hasFinished()) {
+            eu.mico.platform.zooniverse.util.Item itemStatus = brokerSvc.getItem(contentItemUri.stringValue());
+            if (itemStatus != null && !itemStatus.hasFinished()) {
                 return Response.status(Response.Status.ACCEPTED)
                         .entity(ImmutableMap.of("uri", uriString, "status", "inProgress"))
                         .build();
             }
-        } catch (IOException e) {
+        } catch (IOException | BrokerException e) {
             log.error("Error getting status of item {} from broker: {}", contentItemUri.stringValue(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }

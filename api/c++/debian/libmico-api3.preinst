@@ -12,7 +12,7 @@ set -e
 # the debian-policy package
 
 case "$1" in
-    install|abort-upgrade)
+    install|upgrade)
 
     if [ ! -f "/etc/ld.so.conf.d/mico-java.conf" ]; then
         if /usr/bin/dpkg -s openjdk-8-jre-headless 1>/dev/null; then
@@ -33,7 +33,7 @@ case "$1" in
 
     ;;
 
-     upgrade)
+     abort-upgrade)
     ;;
 
     *)
