@@ -52,6 +52,8 @@ public class MMM {
 
     public final static String EXTRACTOR = NS + "Extractor";
 
+    public final static String EXTRACTOR_INSTACE = NS + "ExtractorInstance";
+
     public final static String MODE = NS + "Mode";
 
     public final static String IO_DATA = NS + "IOData";
@@ -66,6 +68,8 @@ public class MMM {
 
     public final static String MIME_TYPE = NS + "MimeType";
 
+    public final static String PARAM = NS + "Param";
+
     public final static String HAS_MIME_TYPE = NS + "hasMimeType";
 
     public final static String HAS_SYNTACTIC_TYPE = NS + "hasSyntacticType";
@@ -73,6 +77,8 @@ public class MMM {
     public final static String HAS_SEMANTIC_DATA_TYPE = NS + "hasSemanticType";
 
     public final static String HAS_MODE = NS + "hasMode";
+
+    public final static String HAS_PARAM = NS + "hasParam";
 
     public final static String HAS_INPUT_DATA = NS + "hasInputData";
 

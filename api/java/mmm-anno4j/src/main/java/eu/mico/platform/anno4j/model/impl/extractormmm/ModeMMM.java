@@ -52,4 +52,12 @@ public interface ModeMMM extends ResourceObject {
     Set<OutputMMM> getOutput();
 
     void addOutput(OutputMMM output);
+
+    @Iri(MMM.HAS_PARAM)
+    void setParams(Set<ParamMMM> params);
+
+    @Iri(MMM.HAS_PARAM)
+    Set<ParamMMM> getParams();
+
+    void addParam(ParamMMM param);
 }
