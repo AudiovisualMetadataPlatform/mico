@@ -30,7 +30,7 @@ import static junit.framework.Assert.assertNotNull;
 
 public class NERQuery {
 
-    private static final String endpointUrl = "http://mico-platform/SPARQL";
+    private static final String endpointUrl = "http://mico-platform:8080/marmotta/sparql/";
     private static Logger log = Logger.getAnonymousLogger();
 
 
@@ -139,6 +139,7 @@ public class NERQuery {
     private static MICOQueryHelper getMicoQueryHelper() throws RepositoryException, RepositoryConfigException {
         Anno4j anno4j = new Anno4j();
         Repository micoSparqlEndpoint = new SPARQLRepository(endpointUrl);
+        micoSparqlEndpoint.initialize();
         anno4j.setRepository(micoSparqlEndpoint);
         return new MICOQueryHelper(anno4j);
     }
