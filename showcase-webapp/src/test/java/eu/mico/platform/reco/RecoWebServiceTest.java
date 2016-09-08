@@ -76,5 +76,21 @@ public class RecoWebServiceTest {
 
     }
 
+    @Test
+    public void testIsDebated() throws Exception {
+
+        RestAssured.
+                when()
+                .get(server.getUrl() + "reco/zoo/12345/is_debated")
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .body("reco_id", Matchers.equalTo("12345"))
+                .body("score", Matchers.greaterThanOrEqualTo(0f))
+                .body("score", Matchers.lessThan(1f));
+
+
+    }
+
 
 }

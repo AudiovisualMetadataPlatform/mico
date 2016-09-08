@@ -1,0 +1,26 @@
+<routes xmlns='http://camel.apache.org/schema/spring'>
+  
+  <description>animal-detection-yolo</description>
+  
+  <route id='workflow-8-starting-point-for-pipeline-1-mimeType=image/jpeg,syntacticType=mico:Image'>
+    <from uri='direct:workflow-8,mimeType=image/jpeg,syntacticType=mico:Image'/>
+    <to uri='direct:workflow-8-pipeline-1'/>
+  </route>
+  <route id='workflow-8-starting-point-for-pipeline-1-mimeType=image/png,syntacticType=mico:Image'>
+    <from uri='direct:workflow-8,mimeType=image/png,syntacticType=mico:Image'/>
+    <to uri='direct:workflow-8-pipeline-1'/>
+  </route>
+  <route id='workflow-8-pipeline-1'>
+    <from uri='direct:workflow-8-pipeline-1'/>
+    <pipeline>
+      <split>
+        <method method='splitMessage' ref='splitterNewPartsBean'/>
+        <to uri='mico-comp:vbox1?serviceId=YoloDetector&amp;extractorId=mico-extractor-animaldetection-yolo&amp;extractorVersion=1.0.1&amp;modeId=YoloDetector&amp;inputs={&quot;mico:Image&quot;:[&quot;image/jpeg&quot;,&quot;image/png&quot;]}'/>
+        <split>
+          <method method='splitMessage' ref='splitterNewPartsBean'/>
+          <to uri='mico-comp:vbox1?serviceId=objectDetectionXml2rdf&amp;extractorId=mico-extractor-object-detection-rdf&amp;extractorVersion=2.1.0&amp;modeId=objectDetectionXml2rdf&amp;inputs={&quot;mico:ObjectDetectionXml&quot;:[&quot;text/vnd.fhg-objectdetection+xml&quot;]}'/>
+        </split>
+      </split>
+    </pipeline>
+  </route>
+</routes>

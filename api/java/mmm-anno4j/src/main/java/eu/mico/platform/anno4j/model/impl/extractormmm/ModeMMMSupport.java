@@ -4,6 +4,7 @@ import com.github.anno4j.annotations.Partial;
 import com.github.anno4j.model.impl.ResourceObjectSupport;
 
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Support class for the ModeMMM class, adding functionality.
@@ -27,5 +28,17 @@ public abstract class ModeMMMSupport extends ResourceObjectSupport implements Mo
         }
 
         this.getInput().add(input);
+    }
+
+    @Override
+    public void addParam(ParamMMM param) {
+        Set<ParamMMM> params = new HashSet<ParamMMM>();
+
+        if(this.getParams() != null) {
+            params.addAll(this.getParams());
+        }
+
+        params.add(param);
+        this.setParams(params);
     }
 }
