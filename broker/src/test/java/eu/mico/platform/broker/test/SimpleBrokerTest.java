@@ -34,6 +34,9 @@ import java.nio.file.Files;
  */
 public class SimpleBrokerTest extends BaseBrokerTest {
 
+    // NOTE: Do not run this test against a platform with an active configuration,
+    // as the dependency counts will be wrong
+
     private static final String TMP_FOLDER = "target/tmp/";
     private static final String TEST_PNG = TMP_FOLDER + "test.png";
 
