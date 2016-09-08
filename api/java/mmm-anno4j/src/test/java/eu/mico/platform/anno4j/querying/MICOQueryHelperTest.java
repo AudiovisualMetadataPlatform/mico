@@ -93,7 +93,7 @@ public class MICOQueryHelperTest {
 
         MICOQueryHelper helper = new MICOQueryHelper(this.anno4j);
 
-        List<PartMMM> result = helper.getPartsBySourceName(asset.getResourceAsString());
+        List<PartMMM> result = helper.getPartsBySourceNameOfAsset(asset.getResourceAsString());
 
         assertEquals(2, result.size());
 
@@ -129,7 +129,7 @@ public class MICOQueryHelperTest {
 
         MICOQueryHelper helper = new MICOQueryHelper(this.anno4j);
 
-        List<PartMMM> result = helper.getPartsBySourceLocation(asset.getLocation());
+        List<PartMMM> result = helper.getPartsBySourceLocationOfAsset(asset.getLocation());
 
         assertEquals(2, result.size());
 
