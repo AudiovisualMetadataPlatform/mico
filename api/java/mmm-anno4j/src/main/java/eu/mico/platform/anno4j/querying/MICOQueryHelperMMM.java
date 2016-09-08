@@ -1,7 +1,6 @@
 package eu.mico.platform.anno4j.querying;
 
 import com.github.anno4j.Anno4j;
-import com.github.anno4j.model.Annotation;
 import com.github.anno4j.model.namespaces.DCTERMS;
 import com.github.anno4j.querying.QueryService;
 import eu.mico.platform.anno4j.model.PartMMM;
@@ -16,7 +15,7 @@ import java.util.List;
 /**
  * Class with some predefined queries for the set Anno4j object.
  */
-public class MICOQueryHelper {
+public class MICOQueryHelperMMM {
 
     /**
      * Selector type restriction
@@ -38,7 +37,7 @@ public class MICOQueryHelper {
      */
     private Anno4j anno4j;
 
-    public MICOQueryHelper(Anno4j anno4j) {
+    public MICOQueryHelperMMM(Anno4j anno4j) {
         this.anno4j = anno4j;
     }
 
@@ -110,7 +109,7 @@ public class MICOQueryHelper {
     /**
      * @param type The type of the body as String, i.e. "mico:AVQBody"
      */
-    public MICOQueryHelper filterBodyType(String type) {
+    public MICOQueryHelperMMM filterBodyType(String type) {
         this.bodyTypeRestriction = "[is-a "+ type + "]";
         return this;
     }
@@ -118,7 +117,7 @@ public class MICOQueryHelper {
     /**
      * @param type The type of the selector as String, i.e. "oa:FragmentSelector"
      */
-    public MICOQueryHelper filterSelectorType(String type) {
+    public MICOQueryHelperMMM filterSelectorType(String type) {
         this.selectorTypeRestriction  = "[is-a "+ type + "]";
         return this;
     }
@@ -126,7 +125,7 @@ public class MICOQueryHelper {
     /**
      * @param type The type of the target as String, i.e. "mico:IntialTarget"
      */
-    public MICOQueryHelper filterTargetType(String type) {
+    public MICOQueryHelperMMM filterTargetType(String type) {
         this.targetTypeRestriction = "[is-a "+ type + "]";
         return this;
     }

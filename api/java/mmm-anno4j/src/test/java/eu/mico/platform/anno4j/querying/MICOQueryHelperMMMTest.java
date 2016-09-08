@@ -20,9 +20,9 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 /**
- * Test suite for the MICOQueryHelper class.
+ * Test suite for the MICOQueryHelperMMM class.
  */
-public class MICOQueryHelperTest {
+public class MICOQueryHelperMMMTest {
 
     private Anno4j anno4j;
     private QueryService queryService;
@@ -55,7 +55,7 @@ public class MICOQueryHelperTest {
         item.addPart(part1);
         item.addPart(part2);
 
-        MICOQueryHelper helper = new MICOQueryHelper(this.anno4j);
+        MICOQueryHelperMMM helper = new MICOQueryHelperMMM(this.anno4j);
 
         List<PartMMM> result = helper.getPartsOfItem(item.getResourceAsString());
 
@@ -91,7 +91,7 @@ public class MICOQueryHelperTest {
         item.addPart(part1);
         item.addPart(part2);
 
-        MICOQueryHelper helper = new MICOQueryHelper(this.anno4j);
+        MICOQueryHelperMMM helper = new MICOQueryHelperMMM(this.anno4j);
 
         List<PartMMM> result = helper.getPartsBySourceNameOfAsset(asset.getResourceAsString());
 
@@ -127,7 +127,7 @@ public class MICOQueryHelperTest {
         item.addPart(part1);
         item.addPart(part2);
 
-        MICOQueryHelper helper = new MICOQueryHelper(this.anno4j);
+        MICOQueryHelperMMM helper = new MICOQueryHelperMMM(this.anno4j);
 
         List<PartMMM> result = helper.getPartsBySourceLocationOfAsset(asset.getLocation());
 
