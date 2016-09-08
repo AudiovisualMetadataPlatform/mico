@@ -177,6 +177,11 @@
             <artifactId>javax.json</artifactId>
             <version>1.0</version>
         </dependency>
+        <dependency>
+            <groupId>eu.mico-project.platform</groupId>
+            <artifactId>mmm-anno4j</artifactId>
+            <version>3.0.3-SNAPSHOT</version>
+        </dependency>
 
 
     </dependencies>

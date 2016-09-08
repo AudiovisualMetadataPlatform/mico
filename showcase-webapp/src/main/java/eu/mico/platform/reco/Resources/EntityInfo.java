@@ -26,4 +26,11 @@ public class EntityInfo {
     }
 
 
+    @Override
+    public String toString() {
+        return "EntityInfo{" +
+                "reference=" + reference +
+                ", label='" + label + '\'' +
+                '}';
+    }
 }

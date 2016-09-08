@@ -2,14 +2,14 @@ package eu.mico.platform.reco.Resources;
 
 import com.github.anno4j.Anno4j;
 import com.github.anno4j.model.Annotation;
+import com.github.anno4j.model.Target;
 import com.github.anno4j.model.impl.selector.FragmentSelector;
 import com.github.anno4j.model.impl.targets.SpecificResource;
+import eu.mico.platform.anno4j.model.PartMMM;
 import eu.mico.platform.anno4j.model.fam.LinkedEntityBody;
 import eu.mico.platform.anno4j.model.impl.bodymmm.SpeechToTextBodyMMM;
 import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
-
-
-import eu.mico.platform.anno4j.querying.MICOQueryHelper;
+import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
 import org.apache.marmotta.ldpath.parser.ParseException;
 import org.openrdf.OpenRDFException;
 import org.openrdf.repository.Repository;
@@ -19,10 +19,7 @@ import org.openrdf.repository.object.LangString;
 import org.openrdf.repository.sparql.SPARQLRepository;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static junit.framework.Assert.assertNotNull;
@@ -30,7 +27,7 @@ import static junit.framework.Assert.assertNotNull;
 
 public class NERQuery {
 
-    private static final String endpointUrl = "http://mico-platform:8080/marmotta/sparql/";
+    private static final String endpointUrl = "http://mico-platform:8080/marmotta/sparql/select";
     private static Logger log = Logger.getAnonymousLogger();
 
 
@@ -38,38 +35,58 @@ public class NERQuery {
      * Returns the results, the kaldi2rdf extractor stored to Marmotta for a given contentItem
      *
      * @param contentItem URI of the uploaded contentItem
+     * @param mqh         Initialized {@link MICOQueryHelperMMM }
      * @return eu.mico.platform.recommendation.Transcript object (this is just a hack, will be changed later)
      */
-    public static Transcript getTranscript(String contentItem) {
+    public static Transcript getTranscript(String contentItem, MICOQueryHelperMMM mqh) {
 
 
-        List<Annotation> annos;
+        List<PartMMM> partMMMList;
         Transcript transcript = new Transcript();
 
         try {
-            MICOQueryHelper mqh = getMicoQueryHelper();
 
-            annos = mqh
+            partMMMList = mqh
                     //TODO: Bug report. Anno4j's EvalQuery does not print error message, if angle brackets are omitted,
                     //TODO: but silently ignores filter
                     .filterBodyType("<" + MMMTERMS.STT_BODY_MICO + ">")
-                    .getAnnotationsOfContentItem(contentItem)
+                    .getPartsOfItem(contentItem)
             ;
 
-            assertNotNull(annos);
-            log.info("# of annotations: " + annos.size());
+            assertNotNull(partMMMList);
+            log.info("# of parts: " + partMMMList.size());
 
 
-            for (Annotation an : annos) {
-                SpeechToTextBodyMMM b = (SpeechToTextBodyMMM) an.getBody();
+            for (PartMMM partMMM : partMMMList) {
+
+                SpeechToTextBodyMMM b = (SpeechToTextBodyMMM) partMMM.getBody();
                 LangString speechValue = b.getValue();
 
-                SpecificResource sr = (SpecificResource) an.getTarget();
-                FragmentSelector fr = (FragmentSelector) sr.getSelector();
+                Set<Target> targetSet = partMMM.getTarget();
 
-                String timeCode = fr.getValue();
+                String timeCode = "<No Timecode>";
 
-                transcript.transcript.add(new Line(timeCode, speechValue));
+                for (Target target : targetSet) {
+
+                    SpecificResource sr = (SpecificResource) target;
+                    if (sr == null) {
+                        log.warning("SpecificResource is null");
+                        break;
+                    }
+
+                    FragmentSelector fr = (FragmentSelector) sr.getSelector();
+
+                    if (null == fr) {
+                        log.warning("FragmentSelector null");
+                    } else {
+                        timeCode = fr.getValue();
+                    }
+
+
+                }
+
+                transcript.add(new Line(timeCode, speechValue));
+
             }
         } catch (OpenRDFException | ParseException e) {
             log.warning(MessageFormat.format("Query failed: {0}", e.getMessage()));
@@ -84,7 +101,7 @@ public class NERQuery {
      * Returns the results, the ner-text extractor stored to Marmotta for a given contentItem
      *
      * @param identifier URI of the uploaded contentItem or source name
-     * @param searchBy specifies whether to search by source name (i.e., file name) or content item ID
+     * @param searchBy   specifies whether to search by source name (i.e., file name) or content item ID
      * @return Entity -> eu.mico.platform.recommendation.EntityInfo mappings. (this is just a hack, will be changed later)
      */
     public static Map<String, EntityInfo> getLinkedEntities(String identifier, DataField searchBy) {
@@ -95,22 +112,21 @@ public class NERQuery {
 
         Map<String, EntityInfo> entities = new HashMap<>();
 
-        List<Annotation> annos;
+        List<PartMMM> annos;
 
         try {
 
-
-            MICOQueryHelper mqh = getMicoQueryHelper();
+            MICOQueryHelperMMM mqh = getMicoQueryHelper();
 
             mqh = mqh.filterBodyType("<http://vocab.fusepool.info/fam#LinkedEntity>");
 
-            switch (searchBy)   {
+            switch (searchBy) {
                 case CONTENTITEM:
-                    annos = mqh.getAnnotationsOfContentItem(identifier);
+                    annos = mqh.getPartsOfItem(identifier);
                     break;
                 case SOURCE:
                 default:
-                    annos = mqh.getAnnotationsBySourceName(identifier);
+                    annos = mqh.getPartsBySourceNameOfAsset(identifier);
                     break;
             }
 
@@ -136,11 +152,11 @@ public class NERQuery {
         return entities;
     }
 
-    private static MICOQueryHelper getMicoQueryHelper() throws RepositoryException, RepositoryConfigException {
+    public static MICOQueryHelperMMM getMicoQueryHelper() throws RepositoryException, RepositoryConfigException {
         Anno4j anno4j = new Anno4j();
         Repository micoSparqlEndpoint = new SPARQLRepository(endpointUrl);
         micoSparqlEndpoint.initialize();
         anno4j.setRepository(micoSparqlEndpoint);
-        return new MICOQueryHelper(anno4j);
+        return new MICOQueryHelperMMM(anno4j);
     }
 }

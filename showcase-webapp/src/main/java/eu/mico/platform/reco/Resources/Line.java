@@ -17,6 +17,11 @@ public class Line {
 
     @Override
     public String toString() {
+
+        if (langstring == null) {
+            langstring = new LangString("Unknown");
+        }
+
         return MessageFormat.format("[{0}] - {1}@{2}", timecode, langstring.toString(), langstring.getLang());
     }
 }
