@@ -5,6 +5,7 @@ import com.github.anno4j.model.Annotation;
 import com.github.anno4j.model.Target;
 import com.github.anno4j.model.impl.selector.FragmentSelector;
 import com.github.anno4j.model.impl.targets.SpecificResource;
+import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.anno4j.model.PartMMM;
 import eu.mico.platform.anno4j.model.fam.LinkedEntityBody;
 import eu.mico.platform.anno4j.model.impl.bodymmm.SpeechToTextBodyMMM;
@@ -32,26 +33,41 @@ public class NERQuery {
 
 
     /**
-     * Returns the results, the kaldi2rdf extractor stored to Marmotta for a given contentItem
+     * Returns the results, the kaldi2rdf extractor stored to Marmotta for a given identifier
      *
-     * @param contentItem URI of the uploaded contentItem
+     * @param identifier URI of the uploaded identifier
+     * @param searchBy   specifies whether to search by source name (i.e., file name) or content item ID
      * @param mqh         Initialized {@link MICOQueryHelperMMM }
      * @return eu.mico.platform.recommendation.Transcript object (this is just a hack, will be changed later)
      */
-    public static Transcript getTranscript(String contentItem, MICOQueryHelperMMM mqh) {
+    public static Transcript getTranscript(String identifier, DataField searchBy, MICOQueryHelperMMM mqh) {
 
 
-        List<PartMMM> partMMMList;
+        List<PartMMM> partMMMList = null;
         Transcript transcript = new Transcript();
 
         try {
 
-            partMMMList = mqh
-                    //TODO: Bug report. Anno4j's EvalQuery does not print error message, if angle brackets are omitted,
-                    //TODO: but silently ignores filter
-                    .filterBodyType("<" + MMMTERMS.STT_BODY_MICO + ">")
-                    .getPartsOfItem(contentItem)
-            ;
+            switch (searchBy) {
+                case CONTENTITEM:
+                    partMMMList = mqh
+                            //TODO: Bug report. Anno4j's EvalQuery does not print error message, if angle brackets are omitted,
+                            //TODO: but silently ignores filter
+                            .filterBodyType("<" + MMMTERMS.STT_BODY_MICO + ">")
+                            .getPartsOfItem(identifier)
+                    ;
+                    break;
+
+
+                case SOURCE:
+                    partMMMList = mqh
+                            .filterBodyType("<" + MMMTERMS.STT_BODY_MICO + ">")
+                            .getPartsBySourceNameOfAsset(identifier)
+                    ;
+                    break;
+            }
+
+
 
             assertNotNull(partMMMList);
             log.info("# of parts: " + partMMMList.size());
@@ -151,6 +167,32 @@ public class NERQuery {
 
         return entities;
     }
+
+
+
+    public static List<String> getItemsByFormat(String format, MICOQueryHelperMMM mqh) {
+
+        List<String> retList = new ArrayList<>();
+
+        try {
+            List<ItemMMM> items = mqh.getItemsByFormat(format) ;
+
+            for (ItemMMM item: items)   {
+                retList.add(item.getResourceAsString());
+            }
+
+
+
+
+        } catch (OpenRDFException | ParseException e) {
+            e.printStackTrace();
+
+        }
+
+        return retList;
+
+    }
+
 
     public static MICOQueryHelperMMM getMicoQueryHelper() throws RepositoryException, RepositoryConfigException {
         Anno4j anno4j = new Anno4j();

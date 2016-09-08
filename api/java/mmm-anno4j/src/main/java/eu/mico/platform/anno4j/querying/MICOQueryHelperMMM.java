@@ -1,14 +1,17 @@
 package eu.mico.platform.anno4j.querying;
 
 import com.github.anno4j.Anno4j;
+import com.github.anno4j.model.namespaces.DC;
 import com.github.anno4j.model.namespaces.DCTERMS;
 import com.github.anno4j.querying.QueryService;
+import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.anno4j.model.PartMMM;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
 import org.apache.marmotta.ldpath.parser.ParseException;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryConfigException;
 
 import java.util.List;
 
@@ -83,6 +86,25 @@ public class MICOQueryHelperMMM {
 
         return qs.execute(PartMMM.class);
     }
+
+
+
+    public List<ItemMMM> getItemsByFormat(String format) throws RepositoryConfigException, RepositoryException, ParseException, MalformedQueryException, QueryEvaluationException {
+
+
+        QueryService qs = anno4j.createQueryService()
+                .addPrefix(MMM.PREFIX, MMM.NS)
+                .addPrefix(DCTERMS.PREFIX, DCTERMS.NS)
+                .addPrefix(DC.PREFIX, DC.NS)
+                .addCriteria("mmm:hasAsset/dc:format", format);
+
+        processTypeRestriction(qs);
+
+        return qs.execute(ItemMMM.class);
+
+    }
+
+
 
     /**
      * Queries those PartMMM objects that are added to an item, whose AssetMMM has the given physical location.
