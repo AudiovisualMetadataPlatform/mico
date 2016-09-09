@@ -1,10 +1,8 @@
 package eu.mico.platform.persistence.test;
 
-import com.github.anno4j.Anno4j;
 import com.github.anno4j.model.Target;
 import com.github.anno4j.model.impl.targets.SpecificResource;
 import com.github.anno4j.querying.QueryService;
-
 import eu.mico.platform.anno4j.model.AssetMMM;
 import eu.mico.platform.anno4j.model.PartMMM;
 import eu.mico.platform.anno4j.model.impl.bodymmm.SpeechToTextBodyMMM;
@@ -13,22 +11,16 @@ import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
-
-import org.apache.hadoop.util.IdGenerator;
 import org.apache.marmotta.ldpath.parser.ParseException;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openrdf.idGenerator.IDGenerator;
-import org.openrdf.model.Statement;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.RepositoryResult;
 import org.openrdf.repository.object.ObjectConnection;
 import org.openrdf.repository.object.ObjectFactory;
 import org.slf4j.Logger;
@@ -200,5 +192,4 @@ public class PartAnno4jTest {
         }
         Assert.assertEquals(1, num);
     }
-
 }

@@ -1,12 +1,8 @@
 package eu.mico.platform.anno4j.model;
 
-import com.github.anno4j.model.Annotation;
-import com.github.anno4j.model.Body;
-import com.github.anno4j.model.Target;
-import com.github.anno4j.model.impl.ResourceObject;
+import com.github.anno4j.model.*;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
 import org.openrdf.annotations.Iri;
-import org.openrdf.repository.object.RDFObject;
 
 import java.util.Set;
 
@@ -15,7 +11,7 @@ import java.util.Set;
  * result of an Item and its extraction chain.
  */
 @Iri(MMM.PART)
-public interface PartMMM extends Annotation, ResourceMMM {
+public interface PartMMM extends ResourceMMM {
 
     /**
      * Gets http:www.w3.org/ns/oa#hasBody relationship.
@@ -23,7 +19,6 @@ public interface PartMMM extends Annotation, ResourceMMM {
      * @return Value of http:www.w3.org/ns/oa#hasBody.
      */
     @Iri(MMM.HAS_BODY)
-    @Override
     Body getBody();
 
     /**
@@ -32,7 +27,6 @@ public interface PartMMM extends Annotation, ResourceMMM {
      * @param body New value of http:www.w3.org/ns/oa#hasBody.
      */
     @Iri(MMM.HAS_BODY)
-    @Override
     void setBody(Body body);
 
     /**
@@ -41,7 +35,6 @@ public interface PartMMM extends Annotation, ResourceMMM {
      * @return Values of http:www.w3.org/ns/oa#hasTarget.
      */
     @Iri(MMM.HAS_TARGET)
-    @Override
     Set<Target> getTarget();
 
     /**
@@ -50,7 +43,6 @@ public interface PartMMM extends Annotation, ResourceMMM {
      * @param targets New value of http:www.w3.org/ns/oa#hasTarget.
      */
     @Iri(MMM.HAS_TARGET)
-    @Override
     void setTarget(Set<Target> targets);
 
     /**
@@ -81,6 +73,45 @@ public interface PartMMM extends Annotation, ResourceMMM {
      *
      * @param target New http:www.w3.org/ns/oa#hasTarget relationship.
      */
-    @Override
     void addTarget(Target target);
+
+    @Iri("http://www.w3.org/ns/oa#motivatedBy")
+    Motivation getMotivatedBy();
+
+    @Iri("http://www.w3.org/ns/oa#motivatedBy")
+    void setMotivatedBy(Motivation var1);
+
+    @Iri("http://www.w3.org/ns/oa#serializedBy")
+    Agent getSerializedBy();
+
+    @Iri("http://www.w3.org/ns/oa#serializedBy")
+    void setSerializedBy(Agent var1);
+
+    @Iri("http://www.w3.org/ns/oa#annotatedBy")
+    Agent getAnnotatedBy();
+
+    @Iri("http://www.w3.org/ns/oa#annotatedBy")
+    void setAnnotatedBy(Agent var1);
+
+    @Iri("http://www.w3.org/ns/oa#serializedAt")
+    String getSerializedAt();
+
+    @Iri("http://www.w3.org/ns/oa#serializedAt")
+    void setSerializedAt(String var1);
+
+    void setSerializedAt(int var1, int var2, int var3, int var4, int var5, int var6);
+
+    @Iri("http://www.w3.org/ns/oa#annotatedAt")
+    String getAnnotatedAt();
+
+    @Iri("http://www.w3.org/ns/oa#annotatedAt")
+    void setAnnotatedAt(String var1);
+
+    void setAnnotatedAt(int var1, int var2, int var3, int var4, int var5, int var6);
+
+    @Iri("http://www.w3.org/ns/oa#annotatesdAt")
+    String getAnnotatedAts();
+
+    @Iri("http://www.w3.org/ns/oa#annotatesdAt")
+    void setAnnotatedAts(String var1);
 }
