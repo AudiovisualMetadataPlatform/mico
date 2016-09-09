@@ -1,6 +1,7 @@
 package eu.mico.platform.anno4j.model;
 
 import com.github.anno4j.model.*;
+import com.github.anno4j.model.namespaces.OADM;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
 import org.openrdf.annotations.Iri;
 
@@ -75,43 +76,37 @@ public interface PartMMM extends ResourceMMM {
      */
     void addTarget(Target target);
 
-    @Iri("http://www.w3.org/ns/oa#motivatedBy")
+    @Iri(OADM.MOTIVATED_BY)
     Motivation getMotivatedBy();
 
-    @Iri("http://www.w3.org/ns/oa#motivatedBy")
+    @Iri(OADM.MOTIVATED_BY)
     void setMotivatedBy(Motivation var1);
 
-    @Iri("http://www.w3.org/ns/oa#serializedBy")
+    @Iri(OADM.SERIALIZED_BY)
     Agent getSerializedBy();
 
-    @Iri("http://www.w3.org/ns/oa#serializedBy")
+    @Iri(OADM.SERIALIZED_BY)
     void setSerializedBy(Agent var1);
 
-    @Iri("http://www.w3.org/ns/oa#annotatedBy")
+    @Iri(OADM.ANNOTATED_BY)
     Agent getAnnotatedBy();
 
-    @Iri("http://www.w3.org/ns/oa#annotatedBy")
+    @Iri(OADM.ANNOTATED_BY)
     void setAnnotatedBy(Agent var1);
 
-    @Iri("http://www.w3.org/ns/oa#serializedAt")
+    @Iri(OADM.SERIALIZED_AT)
     String getSerializedAt();
 
-    @Iri("http://www.w3.org/ns/oa#serializedAt")
+    @Iri(OADM.SERIALIZED_AT)
     void setSerializedAt(String var1);
 
     void setSerializedAt(int var1, int var2, int var3, int var4, int var5, int var6);
 
-    @Iri("http://www.w3.org/ns/oa#annotatedAt")
+    @Iri(OADM.ANNOTATED_AT)
     String getAnnotatedAt();
 
-    @Iri("http://www.w3.org/ns/oa#annotatedAt")
+    @Iri(OADM.ANNOTATED_AT)
     void setAnnotatedAt(String var1);
 
     void setAnnotatedAt(int var1, int var2, int var3, int var4, int var5, int var6);
-
-    @Iri("http://www.w3.org/ns/oa#annotatesdAt")
-    String getAnnotatedAts();
-
-    @Iri("http://www.w3.org/ns/oa#annotatesdAt")
-    void setAnnotatedAts(String var1);
 }
