@@ -6,6 +6,9 @@ import eu.mico.platform.event.api.AnalysisService;
 
 public class AnalysisServiceUtil {
 
+    private AnalysisServiceUtil(){
+        // this class has no instance
+    }
 
     public static URI getServiceID(AnalysisService service) {
         return new URIImpl("http://www.mico-project.org/services/"
