@@ -80,7 +80,7 @@ public class MICOQueryHelperMMM {
         QueryService qs = anno4j.createQueryService()
                 .addPrefix(MMM.PREFIX, MMM.NS)
                 .addPrefix(DCTERMS.PREFIX, DCTERMS.NS)
-                .addCriteria("^mmm:hasPart/mmm:hasAsset", sourceName);
+                .addCriteria("^mmm:hasPart/mmm:hasAsset/mmm:hasName", sourceName);
 
         processTypeRestriction(qs);
 
