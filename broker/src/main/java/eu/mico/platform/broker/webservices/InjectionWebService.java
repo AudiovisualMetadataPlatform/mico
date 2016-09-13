@@ -82,11 +82,18 @@ public class InjectionWebService {
     @POST
     @Path("/create")
     @Produces("application/json")
-    public Response createItem(@QueryParam("type") String type, @QueryParam("mimeType") String mimeType, @QueryParam("existingAssetLocation") String existingAssetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
+    public Response createItem(
+            @QueryParam("type") String type,
+            @QueryParam("name") String name,
+            @QueryParam("mimeType") String mimeType,
+            @QueryParam("existingAssetLocation") String existingAssetLocation,
+            @Context HttpServletRequest request
+    ) throws RepositoryException, IOException {
 
     	PersistenceService ps = eventManager.getPersistenceService();
     	InputStream in = null;
-    	
+
+
     	try {
 	    	in = new BufferedInputStream(request.getInputStream());
 	    	if (mimeType == null || mimeType.trim().length() == 0){
@@ -111,12 +118,20 @@ public class InjectionWebService {
 	    			bytes = IOUtils.copy(in, out);
 	    			out.close();
 	    			asset.setFormat(mimeType);
+
+                    if (name == null || name.isEmpty()) {
+                        name = asset.getLocation().toString();
+                    }
+                    asset.setName(name);
+
 	    			if(type == null || type.isEmpty()){
 	    				type=guessSyntacticTypeFromMimeType(mimeType);
 	    			}
 	    			
 	    			item.setSyntacticalType(type);
 	    	    	item.setSemanticType("Item created by application/injection-webservice");
+
+
 	
 	    	    	log.info("item created {}: uploaded {} bytes", item.getURI(), bytes);
 	    	    	return Response.ok(
@@ -124,14 +139,14 @@ public class InjectionWebService {
 									"itemUri", item.getURI().stringValue(),
 									"assetLocation", item.getAsset().getLocation(),
 									"created", item.getSerializedAt(),
-									"syntacticalType", type
+									"syntacticalType", type,
+									"assetName", name
 							)).build();
 	    		}
 	    		else {
 	    			log.error("Overriding the content of {} is forbidden", existingAssetLocation);
 	    			throw new IllegalArgumentException("Overriding pre-existing content stored in "+existingAssetLocation+" is forbidden");
 	    		}
-	
 	
 	    	}
 	    	else{
@@ -151,13 +166,21 @@ public class InjectionWebService {
 	        			
 	        			Item item = ps.createItem();
 	        			Asset asset = item.getAssetWithLocation(new URIImpl(existingAssetLocation));
-	        			asset.setFormat(mimeType);	 
+	        			asset.setFormat(mimeType);
+
+                        if (name == null || name.isEmpty()) {
+                            name = asset.getLocation().toString();
+                        }
+                        asset.setName(name);
+
+
 		    			if(type == null || type.isEmpty()){
 		    				type=guessSyntacticTypeFromMimeType(mimeType);
 		    			}
 	        			
 	        			item.setSyntacticalType(type);
 		    	    	item.setSemanticType("Item created by application/injection-webservice from a pre-existing asset");
+
 		    	    	
 		    	    	log.info("item created {}", item.getURI());
 		    	    	return Response.ok(ImmutableMap.of("itemUri", item.getURI().stringValue(), "assetLocation", item.getAsset().getLocation(), "created", item.getSerializedAt())).build();

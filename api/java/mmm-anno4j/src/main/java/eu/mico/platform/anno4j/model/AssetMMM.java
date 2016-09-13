@@ -43,4 +43,21 @@ public interface AssetMMM extends ResourceObject {
      */
     @Iri(DC.FORMAT)
     void setFormat(String format);
+
+    /**
+     * Get this Asset's filename, so the name of the ingested multimedia file.
+     *
+     * @return  The name of this Asset.
+     */
+    @Iri(MMM.HAS_NAME)
+    String getName();
+
+    /**
+     * Set this Asset's name, so the name of the ingested multimedia file.
+     *
+     * @param name  The name of this Asset.
+     */
+    @Iri(MMM.HAS_NAME)
+    void setName(String name);
+
 }

@@ -53,6 +53,16 @@ public class AssetAnno4j implements Asset {
         return storageService.getInputStream(getAssetPath());
     }
 
+    @Override
+    public String getName() {
+        return this.assetMMM.getName();
+    }
+
+    @Override
+    public void setName(String name) {
+        this.assetMMM.setName(name);
+    }
+
     private java.net.URI getAssetPath() {
         try {
             String path = this.assetMMM.getLocation();

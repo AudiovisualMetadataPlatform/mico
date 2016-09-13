@@ -17,6 +17,10 @@ public interface Asset {
 
     String getFormat();
 
+    String getName();
+
+    void setName(String name);
+
     void setFormat(String format);
 
     /**
@@ -32,4 +36,6 @@ public interface Asset {
      * @return
      */
     InputStream getInputStream() throws IOException;
+
+
 }
