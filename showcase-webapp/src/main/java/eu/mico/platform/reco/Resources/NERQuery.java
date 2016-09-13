@@ -37,7 +37,7 @@ public class NERQuery {
      *
      * @param identifier URI of the uploaded identifier
      * @param searchBy   specifies whether to search by source name (i.e., file name) or content item ID
-     * @param mqh         Initialized {@link MICOQueryHelperMMM }
+     * @param mqh        Initialized {@link MICOQueryHelperMMM }
      * @return eu.mico.platform.recommendation.Transcript object (this is just a hack, will be changed later)
      */
     public static Transcript getTranscript(String identifier, DataField searchBy, MICOQueryHelperMMM mqh) {
@@ -66,7 +66,6 @@ public class NERQuery {
                     ;
                     break;
             }
-
 
 
             assertNotNull(partMMMList);
@@ -169,19 +168,16 @@ public class NERQuery {
     }
 
 
-
     public static List<String> getItemsByFormat(String format, MICOQueryHelperMMM mqh) {
 
         List<String> retList = new ArrayList<>();
 
         try {
-            List<ItemMMM> items = mqh.getItemsByFormat(format) ;
+            List<ItemMMM> items = mqh.getItemsByFormat(format);
 
-            for (ItemMMM item: items)   {
+            for (ItemMMM item : items) {
                 retList.add(item.getResourceAsString());
             }
-
-
 
 
         } catch (OpenRDFException | ParseException e) {

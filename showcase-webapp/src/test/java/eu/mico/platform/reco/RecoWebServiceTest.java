@@ -89,8 +89,6 @@ public class RecoWebServiceTest {
                 .body("score", Matchers.greaterThanOrEqualTo(0f))
                 .body("score", Matchers.lessThan(1f));
 
-
     }
-
 
 }

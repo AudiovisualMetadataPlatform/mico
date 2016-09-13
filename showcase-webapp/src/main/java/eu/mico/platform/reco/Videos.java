@@ -26,7 +26,8 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 public class Videos {
     @GET
-    public Response getVideos() {
+    @Path("/default")
+    public Response getDefaultVideos() {
 
 
         //set defaults
@@ -54,6 +55,31 @@ public class Videos {
 
         return Response.ok(response.toString()).build();
     }
+
+
+    @GET
+    @Path("/analyzed")
+    public Response getAvailableVideos() {
+
+
+
+        JsonArrayBuilder responseFileListBuilder = Json.createArrayBuilder();
+
+        responseFileListBuilder.add("Bla");
+
+        JsonObject response = Json.createObjectBuilder()
+                .add("filenames", responseFileListBuilder.build())
+                .build();
+
+        //TODO continue here
+
+
+
+        return Response.ok(response.toString()).build();
+    }
+
+
+
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
