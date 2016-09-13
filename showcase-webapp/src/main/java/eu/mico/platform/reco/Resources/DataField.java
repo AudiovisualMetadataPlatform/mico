@@ -14,6 +14,6 @@ package eu.mico.platform.reco.Resources;
  * limitations under the License.
  */
 public enum DataField {
-    SOURCE,
+    NAME,
     CONTENTITEM
 }

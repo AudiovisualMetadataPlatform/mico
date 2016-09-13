@@ -1,10 +1,10 @@
 package eu.mico.platform.reco.Resources;
 
 import com.github.anno4j.Anno4j;
-import com.github.anno4j.model.Annotation;
 import com.github.anno4j.model.Target;
 import com.github.anno4j.model.impl.selector.FragmentSelector;
 import com.github.anno4j.model.impl.targets.SpecificResource;
+import eu.mico.platform.anno4j.model.AssetMMM;
 import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.anno4j.model.PartMMM;
 import eu.mico.platform.anno4j.model.fam.LinkedEntityBody;
@@ -59,7 +59,7 @@ public class NERQuery {
                     break;
 
 
-                case SOURCE:
+                case NAME:
                     partMMMList = mqh
                             .filterBodyType("<" + MMMTERMS.STT_BODY_MICO + ">")
                             .getPartsBySourceNameOfAsset(identifier)
@@ -92,7 +92,7 @@ public class NERQuery {
                     FragmentSelector fr = (FragmentSelector) sr.getSelector();
 
                     if (null == fr) {
-                        log.warning("FragmentSelector null");
+                        log.warning("FragmentSelector is null");
                     } else {
                         timeCode = fr.getValue();
                     }
@@ -139,7 +139,7 @@ public class NERQuery {
                 case CONTENTITEM:
                     annos = mqh.getPartsOfItem(identifier);
                     break;
-                case SOURCE:
+                case NAME:
                 default:
                     annos = mqh.getPartsBySourceNameOfAsset(identifier);
                     break;
@@ -149,7 +149,7 @@ public class NERQuery {
             assertNotNull(annos);
             log.info("# of annotations: " + annos.size());
 
-            for (Annotation an : annos) {
+            for (PartMMM an : annos) {
                 LinkedEntityBody b = (LinkedEntityBody) an.getBody();
 
                 if (ignoredNERResources.contains(b.getEntity().toString())) {
@@ -177,6 +177,33 @@ public class NERQuery {
 
             for (ItemMMM item : items) {
                 retList.add(item.getResourceAsString());
+            }
+
+
+        } catch (OpenRDFException | ParseException e) {
+            e.printStackTrace();
+
+        }
+
+        return retList;
+
+    }
+
+
+    public static List<String> getFileNamesByFormat(String format, MICOQueryHelperMMM mqh) {
+
+        List<String> retList = new ArrayList<>();
+
+        try {
+            List<ItemMMM> items = mqh.getItemsByFormat(format);
+
+            for (ItemMMM item : items) {
+                AssetMMM asset = item.getAsset();
+                if (asset != null) {
+                    retList.add(
+                            asset.getName()
+                    );
+                }
             }
 
 

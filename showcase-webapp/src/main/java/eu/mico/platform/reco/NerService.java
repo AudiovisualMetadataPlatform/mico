@@ -51,7 +51,7 @@ public class NerService {
 
 //        String source = "p720 - Agricoltura ecologica Greenpeace in dirigibile sopra Milano.mp4";
 
-        Map<String, EntityInfo> linkedEntitites = NERQuery.getLinkedEntities(source, DataField.SOURCE);
+        Map<String, EntityInfo> linkedEntitites = NERQuery.getLinkedEntities(source, DataField.NAME);
 
         assert linkedEntitites != null;
 

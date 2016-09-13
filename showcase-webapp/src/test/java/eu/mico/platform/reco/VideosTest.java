@@ -1,13 +1,10 @@
 package eu.mico.platform.reco;
 
-import com.github.anno4j.Anno4j;
-import com.github.anno4j.querying.QueryService;
 import com.jayway.restassured.RestAssured;
 import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
 import eu.mico.platform.reco.Resources.NERQuery;
 import eu.mico.platform.testutils.TestServer;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
@@ -37,25 +34,16 @@ public class VideosTest {
 
 
     static private TestServer server;
-    private MICOQueryHelperMMM mqh;
+    private static MICOQueryHelperMMM mqh;
 
 
-    @Before
-    public void setUp() throws Exception {
-        Anno4j anno4j = new Anno4j();
-        QueryService queryService = anno4j.createQueryService();
-        queryService.addPrefix("mmm", "http://www.mico-project.eu/ns/mmm/2.0/schema#");
 
-        mqh = new MICOQueryHelperMMM(anno4j);
-
-
-    }
 
     @BeforeClass
     public static void init() throws Exception {
 
-
-        Videos videoService = new Videos();
+        mqh = NERQuery.getMicoQueryHelper();
+        Videos videoService = new Videos(mqh);
 
 
         //init server
@@ -95,6 +83,8 @@ public class VideosTest {
 
         List<String> fileList = from(json).get("filenames");
 
+
+
         Assert.assertTrue(fileList.size() > 0);
     }
 
@@ -122,16 +112,5 @@ public class VideosTest {
 
     }
 
-    @Test
-    public void testGetVideos() throws Exception {
 
-
-
-        List<String> items = NERQuery.getItemsByFormat("video/mp4", mqh);
-
-        for (String s: items)   {
-            System.out.println(s);
-        }
-
-    }
 }

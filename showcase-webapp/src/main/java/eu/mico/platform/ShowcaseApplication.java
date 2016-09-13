@@ -13,6 +13,7 @@
  */
 package eu.mico.platform;
 
+import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
 import eu.mico.platform.demo.ContentWebService;
 import eu.mico.platform.demo.DemoWebService;
 import eu.mico.platform.demo.DownloadWebService;
@@ -21,22 +22,23 @@ import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.reco.EchoService;
 import eu.mico.platform.reco.NerService;
 import eu.mico.platform.reco.RecoWebService;
+import eu.mico.platform.reco.Resources.NERQuery;
 import eu.mico.platform.reco.Videos;
 import eu.mico.platform.zooniverse.AnimalDetectionWebService;
 import eu.mico.platform.zooniverse.TextAnalysisWebService;
 import eu.mico.platform.zooniverse.util.BrokerServices;
 import org.codehaus.plexus.util.FileUtils;
+import org.openrdf.OpenRDFException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 public class ShowcaseApplication extends Application {
@@ -61,6 +63,8 @@ public class ShowcaseApplication extends Application {
         while (marmottaBaseUri.endsWith("/")) {
             marmottaBaseUri = marmottaBaseUri.substring(0, marmottaBaseUri.length() - 1);
         }
+
+
         String mediaDirectory = context.getInitParameter("mico-demo.mediaDirectory") != null ? context.getInitParameter("mico-demo.mediaDirectory") : "/tmp/mico-demo-media";
         String mediaUrl = context.getInitParameter("mico-demo.mediaUrl") != null ? context.getInitParameter("mico-demo.mediaUrl") : "http://" + host + ":8080/mico-demo-media";
         while (mediaUrl.endsWith("/")) {
@@ -86,10 +90,12 @@ public class ShowcaseApplication extends Application {
 
             services = new HashSet<>();
 
+            MICOQueryHelperMMM mqh = NERQuery.getMicoQueryHelper();
+
             //WP5
             services.add(new RecoWebService(manager, marmottaBaseUri));
             services.add(new EchoService());
-            services.add(new Videos());
+            services.add(new Videos(mqh));
             services.add(new NerService());
 
             // Zooniverse
@@ -114,6 +120,9 @@ public class ShowcaseApplication extends Application {
             log.error("wait for broker got interrupted (message: {})", ex.getMessage());
             log.debug("Exception:", ex);
             Thread.currentThread().interrupt();
+        } catch (OpenRDFException ex) {
+            log.error("could not initialize Anno4j (message: {})", ex.getMessage());
+            log.debug("Exception:", ex);
         }
     }
 

@@ -99,4 +99,21 @@ public class NERQueryTest {
         Assert.assertEquals("Test", transcript.getTranscript().get(1).langstring.toString());
 
     }
+
+    @Test
+    public void testGetVideos() throws Exception {
+
+        MICOQueryHelperMMM mqh = NERQuery.getMicoQueryHelper();
+        List<String> item_uris = NERQuery.getFileNamesByFormat("video/mp4", mqh);
+
+
+
+        Assert.assertNotNull(item_uris);
+        Assert.assertTrue(item_uris.size() > 0);
+
+        for (String s: item_uris)   {
+            System.out.println(s);
+        }
+
+    }
 }

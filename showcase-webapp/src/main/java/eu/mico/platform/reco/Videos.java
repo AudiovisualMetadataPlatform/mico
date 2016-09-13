@@ -1,5 +1,8 @@
 package eu.mico.platform.reco;
 
+import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
+import eu.mico.platform.reco.Resources.NERQuery;
+
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
@@ -25,6 +28,12 @@ import java.util.List;
 @Path("/videos")
 @Produces(MediaType.APPLICATION_JSON)
 public class Videos {
+    private final MICOQueryHelperMMM mqh;
+
+    public Videos(MICOQueryHelperMMM micoQueryHelperMMM) {
+        this.mqh = micoQueryHelperMMM;
+    }
+
     @GET
     @Path("/default")
     public Response getDefaultVideos() {
@@ -62,23 +71,22 @@ public class Videos {
     public Response getAvailableVideos() {
 
 
-
         JsonArrayBuilder responseFileListBuilder = Json.createArrayBuilder();
 
-        responseFileListBuilder.add("Bla");
+        List<String> fileNames = NERQuery.getFileNamesByFormat("video/mp4", mqh);
+
+        for (String filename: fileNames) {
+            responseFileListBuilder.add(filename);
+        }
 
         JsonObject response = Json.createObjectBuilder()
                 .add("filenames", responseFileListBuilder.build())
                 .build();
 
-        //TODO continue here
-
 
 
         return Response.ok(response.toString()).build();
     }
-
-
 
 
     @POST
