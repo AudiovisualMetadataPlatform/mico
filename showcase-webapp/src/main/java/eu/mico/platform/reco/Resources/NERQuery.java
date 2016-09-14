@@ -119,7 +119,7 @@ public class NERQuery {
      * @param searchBy   specifies whether to search by source name (i.e., file name) or content item ID
      * @return Entity -> eu.mico.platform.recommendation.EntityInfo mappings. (this is just a hack, will be changed later)
      */
-    public static Map<String, EntityInfo> getLinkedEntities(String identifier, DataField searchBy) {
+    public static Map<String, EntityInfo> getLinkedEntities(String identifier, DataField searchBy, MICOQueryHelperMMM mqh) {
 
         List<String> ignoredNERResources = new ArrayList<>();
         ignoredNERResources.add("http://dbpedia.org/resource/Logical_conjunction");
@@ -130,8 +130,6 @@ public class NERQuery {
         List<PartMMM> annos;
 
         try {
-
-            MICOQueryHelperMMM mqh = getMicoQueryHelper();
 
             mqh = mqh.filterBodyType("<http://vocab.fusepool.info/fam#LinkedEntity>");
 
@@ -144,7 +142,6 @@ public class NERQuery {
                     annos = mqh.getPartsByAssetName(identifier);
                     break;
             }
-
 
             assertNotNull(annos);
             log.info("# of annotations: " + annos.size());

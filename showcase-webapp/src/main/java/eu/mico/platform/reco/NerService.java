@@ -48,7 +48,7 @@ public class NerService {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    @Path("analyzed/{source}/entities")
+    @Path("{source}/entities")
     public Response getLinkedEntities(@PathParam("source") String source) {
 
         ObjectMapper mapper = new ObjectMapper();
@@ -58,7 +58,7 @@ public class NerService {
 
 //        String source = "p720 - Agricoltura ecologica Greenpeace in dirigibile sopra Milano.mp4";
 
-        Map<String, EntityInfo> linkedEntitites = NERQuery.getLinkedEntities(source, DataField.NAME);
+        Map<String, EntityInfo> linkedEntitites = NERQuery.getLinkedEntities(source, DataField.NAME, mqh);
 
         assert linkedEntitites != null;
 
@@ -75,7 +75,7 @@ public class NerService {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    @Path("analyzed/{source}/transcript")
+    @Path("{source}/transcript")
     public Response getTranscript(@PathParam("source") String source) {
 
         Transcript transcript = NERQuery.getTranscript(source, DataField.NAME, mqh);

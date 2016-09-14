@@ -2,7 +2,7 @@ package eu.mico.platform.reco;
 
 import com.jayway.restassured.RestAssured;
 import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
-import eu.mico.platform.reco.Resources.NERQuery;
+import eu.mico.platform.testutils.MqhMocks;
 import eu.mico.platform.testutils.TestServer;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -42,7 +42,7 @@ public class VideoServiceTest {
     @BeforeClass
     public static void init() throws Exception {
 
-        mqh = NERQuery.getMicoQueryHelper();
+        mqh = MqhMocks.mockMicoQueryHelper();
         Videos videoService = new Videos(mqh);
 
 

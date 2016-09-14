@@ -2,10 +2,13 @@ package eu.mico.platform.reco;
 
 import com.jayway.restassured.RestAssured;
 import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
-import eu.mico.platform.reco.Resources.NERQuery;
+import eu.mico.platform.testutils.MqhMocks;
 import eu.mico.platform.testutils.TestServer;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static com.jayway.restassured.path.json.JsonPath.from;
 
 /**
  * ...
@@ -19,11 +22,9 @@ public class NerServiceTest {
     @BeforeClass
     public static void init() throws Exception {
 
-        MICOQueryHelperMMM mqh = NERQuery.getMicoQueryHelper();
+        MICOQueryHelperMMM mqh = MqhMocks.mockMicoQueryHelper();
 
-        NerService nerTestService = new NerService(
-                mqh
-        );
+        NerService nerTestService = new NerService(mqh);
 
         //init server
         server = new TestServer();
@@ -34,10 +35,6 @@ public class NerServiceTest {
 
     }
 
-    @Test
-    public void getLinkedEntities() throws Exception {
-
-    }
 
     @Test
     public void getTranscript() throws Exception {
@@ -45,12 +42,11 @@ public class NerServiceTest {
         String filename = "p360 - GREENPEACE THE OCEAN.mp4";
 
         String json = RestAssured.
-                given().log().all().
                 when().
-                get(server.getUrl() + "analyzed/" + filename + "/transcript")
+                get(server.getUrl() + "ner/" + filename + "/transcript")
                 .body().asString();
 
-        System.out.println(json);
+        Assert.assertEquals("label", from(json).get("transcript[0].text"));
 
 
     }
