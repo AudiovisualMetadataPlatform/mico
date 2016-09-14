@@ -511,6 +511,14 @@ namespace mico {
                 if(!ec) {
                     intermediateReceiveBuffer.insert(intermediateReceiveBuffer.end(),recv_buf,recv_buf+bytes_received);
 
+                    // TODO: THIS IS A REALLY BAD AND NASTY THING I DID HERE. It's delaying the message processing for each
+                    // incoming package by 10 milliseconds in order to create a virtual thread safetly when registering callbacks
+                    // once this even loop in a different thread is running already. See also:
+                    //
+                    // https://github.com/CopernicaMarketingSoftware/AMQP-CPP/issues/90
+                    //
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
                     size_t bytes_processed =
                         connection->parse(&intermediateReceiveBuffer[0], intermediateReceiveBuffer.size());
 

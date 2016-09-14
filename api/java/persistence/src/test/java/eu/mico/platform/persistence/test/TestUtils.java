@@ -1,7 +1,7 @@
 package eu.mico.platform.persistence.test;
 
-import java.io.PrintWriter;
-
+import com.github.anno4j.model.namespaces.OADM;
+import eu.mico.platform.anno4j.model.namespaces.MMM;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.impl.TreeModel;
@@ -14,10 +14,6 @@ import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.RDFHandlerBase;
 import org.slf4j.Logger;
-
-import com.github.anno4j.model.namespaces.OADM;
-
-import eu.mico.platform.anno4j.model.namespaces.MMM;
 
 public class TestUtils {
     

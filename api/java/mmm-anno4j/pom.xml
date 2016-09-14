@@ -5,7 +5,7 @@
     <parent>
         <groupId>eu.mico-project.platform</groupId>
         <artifactId>parent</artifactId>
-        <version>3.0.2-SNAPSHOT</version>
+        <version>3.0.3-SNAPSHOT</version>
         <relativePath>../../../parent</relativePath>
     </parent>
 
@@ -61,6 +61,29 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+              <groupId>com.github.tkurz.sesame</groupId>
+              <artifactId>vocab-builder-maven-plugin</artifactId>
+              <version>1.4</version>
+              <executions>
+                <execution>
+                  <id>generate-micoMMM-vocabularies</id>
+                  <phase>generate-sources</phase>
+                  <goals>
+                    <goal>generate</goal>
+                  </goals>
+                </execution>
+              </executions>
+              <configuration>
+                <packageName>eu.mico.platform.anno4j.model.namespaces.gen</packageName>
+                <vocabularies>
+                  <vocabulary>
+                    <className>MA</className>
+                    <url>http://www.w3.org/ns/ma-ont.ttl</url>
+                  </vocabulary>
+                </vocabularies>
+              </configuration>
             </plugin>
         </plugins>
         <resources>

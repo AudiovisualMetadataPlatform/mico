@@ -41,6 +41,15 @@ EOF
 	sed "s|%HOSTNAME%|$HOSTNAME|g; s|%MICO_USER%|$MICO_USER|g; s|%MICO_PASS%|$MICO_PASS|g" \
             /etc/tomcat7/Catalina/localhost/showcase-webapp.xml.tmpl >> /etc/tomcat7/Catalina/localhost/showcase-webapp.xml
 
+        cat >/etc/tomcat7/Catalina/localhost/mico-demo-media.xml <<EOF
+<!-- ATTENTION: This is a generated file
+     ALL CHANGES HERE WILL BE LOST
+     edit mico-demo-media.xml.tmpl and run dpkg-reconfigure mico-showcase-webapp to update
+-->
+EOF
+	sed "s|%HOSTNAME%|$HOSTNAME|g; s|%MICO_USER%|$MICO_USER|g; s|%MICO_PASS%|$MICO_PASS|g" \
+            /etc/tomcat7/Catalina/localhost/mico-demo-media.xml.tmpl >> /etc/tomcat7/Catalina/localhost/mico-demo-media.xml
+
         service tomcat7 status 1>/dev/null && service tomcat7 restart
     ;;
 

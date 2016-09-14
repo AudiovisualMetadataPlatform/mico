@@ -27,7 +27,7 @@ import com.github.anno4j.model.namespaces.RDF;
 import com.google.common.collect.ImmutableMap;
 
 import eu.mico.platform.anno4j.model.namespaces.FAM;
-import eu.mico.platform.anno4j.model.namespaces.MA;
+import eu.mico.platform.anno4j.model.namespaces.gen.MA;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
 import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
 
@@ -50,7 +50,7 @@ public class URITools {
   		Map<String,String> map = new HashMap<String,String>();
   		map.put(MMMTERMS.NS, MMMTERMS.PREFIX);
   		map.put(MMM.NS, MMM.PREFIX);
-  		map.put(MA.NS, MA.PREFIX);
+  		map.put(MA.NAMESPACE, MA.PREFIX);
   		map.put(FAM.NS, FAM.PREFIX);
   		
   		map.put(DC.NS,DC.PREFIX);
