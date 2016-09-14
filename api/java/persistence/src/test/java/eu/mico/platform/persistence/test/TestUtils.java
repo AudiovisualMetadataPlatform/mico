@@ -57,13 +57,11 @@ public class TestUtils {
             }
         }
         log.debug("--- START generated RDF ---");
-        PrintWriter out = new PrintWriter(System.out);
         try {
-            Rio.write(model, out, RDFFormat.TURTLE);
+            Rio.write(model, System.out, RDFFormat.TURTLE);
         } catch (RDFHandlerException e) {
             throw new RuntimeException(e);
         }
-        out.close();
         log.debug("--- END generated RDF ---");
     }
 }
