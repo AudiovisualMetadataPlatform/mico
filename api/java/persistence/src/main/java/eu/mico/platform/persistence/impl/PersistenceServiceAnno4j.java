@@ -53,9 +53,10 @@ public class PersistenceServiceAnno4j implements PersistenceService {
 
     private final StorageService storage;
     private final java.net.URI sparqlBaseURI;
-    private final Anno4j anno4j;
-    private final String storagePrefix;
 
+    private final Anno4j anno4j;
+
+    private final String storagePrefix;
     public PersistenceServiceAnno4j(java.net.URI sparqlBaseURI, java.net.URI storageHost) {
         log.info("Sparql service URI : {}", sparqlBaseURI);
         this.sparqlBaseURI = sparqlBaseURI.normalize();
@@ -91,6 +92,10 @@ public class PersistenceServiceAnno4j implements PersistenceService {
         } catch (RepositoryException | RepositoryConfigException e) {
             throw new IllegalStateException("Couldn't instantiate Anno4j");
         }
+    }
+
+    public Anno4j getAnno4j() {
+        return anno4j;
     }
 
     /**

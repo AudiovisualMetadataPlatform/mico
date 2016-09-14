@@ -1,6 +1,7 @@
 package eu.mico.platform.anno4j.model.impl.targetmmm;
 
 import com.github.anno4j.annotations.Partial;
+import com.github.anno4j.model.impl.ResourceObjectSupport;
 import com.github.anno4j.model.impl.targets.SpecificResourceSupport;
 import org.apache.commons.io.IOUtils;
 import org.openrdf.rio.*;

@@ -1,7 +1,7 @@
 package eu.mico.platform.anno4j.model.impl.bodymmm;
 
 import eu.mico.platform.anno4j.model.BodyMMM;
-import eu.mico.platform.anno4j.model.namespaces.MA;
+import eu.mico.platform.anno4j.model.namespaces.gen.MA;
 import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
 import org.openrdf.annotations.Iri;
 
@@ -12,9 +12,9 @@ import org.openrdf.annotations.Iri;
 @Iri(MMMTERMS.AUDIO_DEMUX_BODY)
 public interface AudioDemuxBodyMMM extends BodyMMM {
 
-    @Iri(MA.SAMPLING_RATE)
+    @Iri(MA.SAMPLING_RATE_STRING)
     void setFrameRate(String framerate);
 
-    @Iri(MA.SAMPLING_RATE)
+    @Iri(MA.SAMPLING_RATE_STRING)
     String getFrameRate();
 }

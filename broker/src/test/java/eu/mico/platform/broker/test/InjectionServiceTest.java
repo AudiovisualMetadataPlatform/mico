@@ -1061,7 +1061,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
              part.getAsset().setFormat(mimeType);
 
              Response r = injService.submitItem(item.getURI().stringValue(), null, null);
-             
+
              Thread.sleep(1000);
              
              Assert.assertEquals("The response should have been [OK]", 
@@ -1213,7 +1213,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
              part.getAsset().setFormat(mimeType);
 
              Response r = injService.submitItem(item.getURI().stringValue(), routeId, null);
-             
+
              Thread.sleep(500);
              
              if(r.getStatus()==Status.OK.getStatusCode() && !mimeType.contentEquals("mico/error")){

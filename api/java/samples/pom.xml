@@ -156,14 +156,14 @@
                   <snapshotExpand>true</snapshotExpand>
                   <snapshotEnv>buildNumber</snapshotEnv>
                   <attach>false</attach>
-  
+
                   <name>${project.artifactId}</name>
                   <deb>${project.build.directory}/[[name]]_[[version]]_all.deb</deb>
                   <changesOut>${project.build.directory}/[[name]]_[[version]]_all.changes</changesOut>
-  
+
                   <keyring>~/.gnupg/secring.gpg</keyring>
                   <key>AD261C57</key>
-  
+
                   <dataSet>
                     <data>
                       <src>${project.build.directory}/${project.build.finalName}.jar</src>
@@ -187,7 +187,7 @@
                       </mapper>
                     </data>
                   </dataSet>
-  
+
                 </configuration>
               </execution>
             </executions>
