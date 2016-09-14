@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
+import com.github.anno4j.Anno4j;
+import com.github.anno4j.Transaction;
+import eu.mico.platform.event.api.*;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
@@ -53,9 +56,6 @@ import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.RpcClient;
 
 import eu.mico.platform.anno4j.model.namespaces.MMM;
-import eu.mico.platform.event.api.AnalysisResponse;
-import eu.mico.platform.event.api.AnalysisService;
-import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.event.model.Event.AnalysisEvent;
@@ -89,12 +89,12 @@ public class EventManagerImpl implements EventManager {
     private java.net.URI marmottaBaseUri;
     private java.net.URI storageBaseUri;
 
-    private PersistenceService persistenceService;
+    private PersistenceServiceAnno4j persistenceService;
 
     private Connection connection;
     private Channel registryChannel;
 
-    private Map<AnalysisService, AnalysisConsumer> services;
+    private Map<AnalysisServiceBase, AnalysisConsumer> services;
 
     private DiscoveryConsumer discovery; //TODO: do we need this in the EventManagerImpl?
 
@@ -188,7 +188,7 @@ public class EventManagerImpl implements EventManager {
      */
     @Override
     public void shutdown() throws IOException {
-        for (Map.Entry<AnalysisService, AnalysisConsumer> svc : services.entrySet()) {
+        for (Map.Entry<AnalysisServiceBase, AnalysisConsumer> svc : services.entrySet()) {
             unregisterService(svc.getKey());
             svc.getValue().getChannel().close();
         }
@@ -208,7 +208,7 @@ public class EventManagerImpl implements EventManager {
      * @param service
      */
     @Override
-    public void registerService(AnalysisService service) throws IOException {
+    public void registerService(AnalysisServiceBase service) throws IOException {
         log.info("registering new service {} with message brokers ...", getServiceID(service));
 
         Channel chan = connection.createChannel();
@@ -245,7 +245,7 @@ public class EventManagerImpl implements EventManager {
      * @param service
      */
     @Override
-    public void unregisterService(AnalysisService service) throws IOException {
+    public void unregisterService(AnalysisServiceBase service) throws IOException {
         log.info("unregistering new service {} with message brokers ...", getServiceID(service));
 
         Channel chan = connection.createChannel();
@@ -385,7 +385,7 @@ public class EventManagerImpl implements EventManager {
             
 
 
-            for (Map.Entry<AnalysisService, AnalysisConsumer> svc : services.entrySet()) {
+            for (Map.Entry<AnalysisServiceBase, AnalysisConsumer> svc : services.entrySet()) {
                 log.info("- discover service {} ...", getServiceID(svc.getKey()));
                 
                 //Override the queue declared by the service
@@ -633,10 +633,10 @@ public class EventManagerImpl implements EventManager {
             }
         }
 
-        private AnalysisService service;
+        private AnalysisServiceBase service;
         private String queueName;
 
-        public AnalysisConsumer(AnalysisService service, String queueName) throws IOException {
+        public AnalysisConsumer(AnalysisServiceBase service, String queueName) throws IOException {
             super(connection.createChannel());
 
             this.service = service;
@@ -683,12 +683,9 @@ public class EventManagerImpl implements EventManager {
                 log.warn("RepositoryException while creating Item {} on "
                         + "RepositoryService (message: {})", 
                         analysisRequest.getItemUri(), e.getMessage());
-            } finally { //make sure we have everything we need to continue
-                if(item == null || con == null || response == null){ //nope ... re-queue
-                    log.info("Requeue message: {}[item: {}]", envelope.getDeliveryTag(),
-                            analysisRequest.getItemUri());
-                    log.trace(" - item: {} | con: {} | response: {}", item, con, response); 
-                    getChannel().basicNack(envelope.getDeliveryTag(), false, true);
+            } finally {
+                if (item == null || response == null) {
+                    requeue(envelope, analysisRequest);
                     return; //stop here
                 } //else everything we need was correctly initialized
             }
@@ -697,13 +694,14 @@ public class EventManagerImpl implements EventManager {
             boolean reEnqueue = false; //if the message should be re-enqueued
             try {
                 final List<Resource> resourceList = parseResourceList(analysisRequest.getPartUriList(), item);
-                final Map<String, String> params = new HashMap<String, String>();
-                for (ParamEntry entry : analysisRequest.getParamsList()) {
-                    params.put(entry.getKey(), entry.getValue());
+                final Map<String, String> params = parseParams(analysisRequest);
+
+                // Call relevant extractor execution
+                if (service instanceof AnalysisServiceAnno4j) {
+                    executeAnno4jExtractor(envelope, resourceList, params, response, item, (AnalysisServiceAnno4j) service);
+                } else {
+                    executeExtractor(envelope, resourceList, params, response, item, (AnalysisService) service);
                 }
-                con.begin(); //start a transaction on the connection
-                log.debug(" - call {} with Item {}", service.getClass().getName(), item.getURI());
-                service.call(response, item, resourceList, params);
                 if(!response.isFinished() && !response.isError()){
                     //the lazy AnalysisService implementor was not calling
                     //response.sendFinish(item) ... so lets help him out
@@ -748,10 +746,8 @@ public class EventManagerImpl implements EventManager {
                 //to the broker
                 reEnqueue = !response.sentError() && !response.isFinished() && !response.hasNew();
             } finally { //make sure we come to a clean end whatever happend ...
-                if(reEnqueue){
-                    log.info("Requeue message: {}[item: {}]", envelope.getDeliveryTag(),
-                            analysisRequest.getItemUri());
-                    getChannel().basicNack(envelope.getDeliveryTag(), false, true);
+                if (reEnqueue) {
+                    requeue(envelope, analysisRequest);
                 } else { //we need to ack the message ...
                     try { // ... but first check if we might also need to send an error
                         if(!response.isFinished() && !response.sentError()){
@@ -777,17 +773,65 @@ public class EventManagerImpl implements EventManager {
             }
         }
 
+        private void executeAnno4jExtractor(Envelope envelope, List<Resource> resourceList, Map<String, String> params, AnalysisResponseImpl response, Item item, AnalysisServiceAnno4j service) throws RepositoryException, IOException, AnalysisException {
+            Anno4j anno4j = persistenceService.getAnno4j();
+            Transaction transaction = anno4j.adoptTransaction(item.getRDFObject().getObjectConnection());
+            transaction.begin();
+
+            log.debug("> process Item {} (message: {})", item.getURI(), envelope.getDeliveryTag());
+            traceRDF(item, "before call to " + getServiceID(service));
+
+            log.debug(" - call {} with Item {}", service.getClass().getName(), item.getURI());
+            service.call(response, item, resourceList, params, transaction);
+
+            // Transaction will be committed by the sendFinished method
+
+        }
+
+        private void executeExtractor(Envelope envelope, List<Resource> resourceList, Map<String, String> params, AnalysisResponseImpl response, Item item, AnalysisService service) throws IOException, AnalysisException, RepositoryException {
+
+            // legacy implementation of non-anno4j extractors
+            ObjectConnection con = item.getRDFObject().getObjectConnection();
+            //make sure we have everything we need to continue
+            if (con == null) { //nope ... re-queue
+                throw new RepositoryException("Couldn't get object connection from item.");
+            } //else everything we need was correctly initialized
+
+            log.debug("> process Item {} (message: {})", item.getURI(), envelope.getDeliveryTag());
+            traceRDF(item, "before call to " + getServiceID(service));
+
+            con.begin(); //start a transaction on the connection
+            log.debug(" - call {} with Item {}", service.getClass().getName(), item.getURI());
+            service.call(response, item, resourceList, params);
+
+            // Connection will be committed by the sendFinished method
+        }
+
+        private Map<String, String> parseParams(Event.AnalysisRequest analysisRequest) {
+            final Map<String, String> params = new HashMap<>();
+            for (ParamEntry entry : analysisRequest.getParamsList()) {
+                params.put(entry.getKey(), entry.getValue());
+            }
+            return params;
+        }
+
+        private void requeue(Envelope envelope, Event.AnalysisRequest analysisRequest) throws IOException {
+            log.info("Requeue message: {}[item: {}]", envelope.getDeliveryTag(),
+                    analysisRequest.getItemUri());
+            getChannel().basicNack(envelope.getDeliveryTag(), false, true);
+        }
+
         private List<Resource> parseResourceList(List<String> resourceUriList, Item item) throws RepositoryException {
-            List<Resource> parts = new ArrayList<>();
+            List<Resource> resources = new ArrayList<>();
 
             for (String resourceUri : resourceUriList) {
                 if (item.getURI().toString().equals(resourceUri)) {
-                    parts.add(item);
+                    resources.add(item);
                 } else {
-                    parts.add(item.getPart(new URIImpl(resourceUri)));
+                    resources.add(item.getPart(new URIImpl(resourceUri)));
                 }
             }
-            return parts;
+            return resources;
         }
     }
 }
