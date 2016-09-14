@@ -49,7 +49,6 @@ public class MICOQueryHelperMMM {
      *
      * @param contentItemId The id (url) of the content item.
      * @return List of annotations related to the given content item.
-     *
      * @throws RepositoryException
      * @throws QueryEvaluationException
      * @throws MalformedQueryException
@@ -70,7 +69,6 @@ public class MICOQueryHelperMMM {
      *
      * @param sourceName The name of the injected source.
      * @return List of parts related to the specific source name.
-     *
      * @throws RepositoryException
      * @throws QueryEvaluationException
      * @throws MalformedQueryException
@@ -80,13 +78,34 @@ public class MICOQueryHelperMMM {
         QueryService qs = anno4j.createQueryService()
                 .addPrefix(MMM.PREFIX, MMM.NS)
                 .addPrefix(DCTERMS.PREFIX, DCTERMS.NS)
-                .addCriteria("^mmm:hasPart/mmm:hasAsset/mmm:hasName", sourceName);
+                .addCriteria("^mmm:hasPart/mmm:hasAsset", sourceName);
 
         processTypeRestriction(qs);
 
         return qs.execute(PartMMM.class);
     }
 
+    /**
+     * Queries those PartMMM objects that are added to an item, whose AssetMMM has the given associated name
+     * (e.g., the file name).
+     *
+     * @param name The name of the injected source.
+     * @return List of parts related to the specific source name.
+     * @throws RepositoryException
+     * @throws QueryEvaluationException
+     * @throws MalformedQueryException
+     * @throws ParseException
+     */
+    public List<PartMMM> getPartsByAssetName(String name) throws RepositoryException, QueryEvaluationException, MalformedQueryException, ParseException {
+        QueryService qs = anno4j.createQueryService()
+                .addPrefix(MMM.PREFIX, MMM.NS)
+                .addPrefix(DCTERMS.PREFIX, DCTERMS.NS)
+                .addCriteria("^mmm:hasPart/mmm:hasAsset/mmm:hasName", name);
+
+        processTypeRestriction(qs);
+
+        return qs.execute(PartMMM.class);
+    }
 
 
     public List<ItemMMM> getItemsByFormat(String format) throws RepositoryConfigException, RepositoryException, ParseException, MalformedQueryException, QueryEvaluationException {
@@ -105,13 +124,11 @@ public class MICOQueryHelperMMM {
     }
 
 
-
     /**
      * Queries those PartMMM objects that are added to an item, whose AssetMMM has the given physical location.
      *
      * @param location The name of the injected source.
      * @return List of parts related to the specific source name.
-     *
      * @throws RepositoryException
      * @throws QueryEvaluationException
      * @throws MalformedQueryException
@@ -132,7 +149,7 @@ public class MICOQueryHelperMMM {
      * @param type The type of the body as String, i.e. "mico:AVQBody"
      */
     public MICOQueryHelperMMM filterBodyType(String type) {
-        this.bodyTypeRestriction = "[is-a "+ type + "]";
+        this.bodyTypeRestriction = "[is-a " + type + "]";
         return this;
     }
 
@@ -140,7 +157,7 @@ public class MICOQueryHelperMMM {
      * @param type The type of the selector as String, i.e. "oa:FragmentSelector"
      */
     public MICOQueryHelperMMM filterSelectorType(String type) {
-        this.selectorTypeRestriction  = "[is-a "+ type + "]";
+        this.selectorTypeRestriction = "[is-a " + type + "]";
         return this;
     }
 
@@ -148,7 +165,7 @@ public class MICOQueryHelperMMM {
      * @param type The type of the target as String, i.e. "mico:IntialTarget"
      */
     public MICOQueryHelperMMM filterTargetType(String type) {
-        this.targetTypeRestriction = "[is-a "+ type + "]";
+        this.targetTypeRestriction = "[is-a " + type + "]";
         return this;
     }
 
@@ -158,16 +175,16 @@ public class MICOQueryHelperMMM {
      * @param qs The anno4j QueryService object
      */
     private void processTypeRestriction(QueryService qs) {
-        if(selectorTypeRestriction != null) {
+        if (selectorTypeRestriction != null) {
 
             qs.addCriteria("oa:hasTarget/oa:hasSelector" + selectorTypeRestriction);
         }
 
-        if(bodyTypeRestriction != null) {
+        if (bodyTypeRestriction != null) {
             qs.addCriteria("oa:hasBody" + bodyTypeRestriction);
         }
 
-        if(targetTypeRestriction != null) {
+        if (targetTypeRestriction != null) {
             qs.addCriteria("oa:hasTarget" + targetTypeRestriction);
         }
     }

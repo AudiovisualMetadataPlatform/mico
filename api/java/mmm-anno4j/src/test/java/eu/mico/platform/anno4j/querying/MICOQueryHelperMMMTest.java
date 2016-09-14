@@ -66,6 +66,48 @@ public class MICOQueryHelperMMMTest {
         assertTrue(body1Value.equals("body1") && body2Value.equals("body2") || body1Value.equals("body2") && body2Value.equals("body1"));
     }
 
+
+    @Test
+    public void testGetPartsByName() throws RepositoryException, IllegalAccessException, InstantiationException, QueryEvaluationException, MalformedQueryException, ParseException {
+        ItemMMM item = this.anno4j.createObject(ItemMMM.class);
+
+        final String filename = "filename";
+
+        AssetMMM asset = this.anno4j.createObject(AssetMMM.class);
+        asset.setFormat("mp3");
+        asset.setLocation("someLocation");
+        asset.setName("filename");
+
+        item.setAsset(asset);
+
+        // Create part 1
+        PartMMM part1 = this.anno4j.createObject(PartMMM.class);
+        TestBody body1 = this.anno4j.createObject(TestBody.class);
+        body1.setValue("body1");
+        part1.setBody(body1);
+
+        // Create part 2
+        PartMMM part2 = this.anno4j.createObject(PartMMM.class);
+        TestBody body2 = this.anno4j.createObject(TestBody.class);
+        body2.setValue("body2");
+        part2.setBody(body2);
+
+        item.addPart(part1);
+        item.addPart(part2);
+
+        MICOQueryHelperMMM helper = new MICOQueryHelperMMM(this.anno4j);
+
+        List<PartMMM> result = helper.getPartsByAssetName(filename);
+
+        assertEquals(2, result.size());
+
+        String body1Value = ((TestBody)result.get(0).getBody()).getValue();
+        String body2Value = ((TestBody)result.get(1).getBody()).getValue();
+        assertTrue(body1Value.equals("body1") && body2Value.equals("body2") || body1Value.equals("body2") && body2Value.equals("body1"));
+    }
+
+
+
     @Test
     public void testGetPartsBySourceName() throws RepositoryException, IllegalAccessException, InstantiationException, QueryEvaluationException, MalformedQueryException, ParseException {
         ItemMMM item = this.anno4j.createObject(ItemMMM.class);
