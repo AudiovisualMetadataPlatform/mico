@@ -1,8 +1,10 @@
 package eu.mico.platform.reco;
 
+import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
 import eu.mico.platform.reco.Resources.DataField;
 import eu.mico.platform.reco.Resources.EntityInfo;
 import eu.mico.platform.reco.Resources.NERQuery;
+import eu.mico.platform.reco.Resources.Transcript;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.GET;
@@ -38,11 +40,16 @@ public class NerService {
 
 
     private static final Logger log = Logger.getAnonymousLogger();
+    private static MICOQueryHelperMMM mqh;
+
+    public NerService(MICOQueryHelperMMM micoQueryHelperMMM) {
+        mqh = micoQueryHelperMMM;
+    }
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    @Path("/entities/{source}")
-    public Response getRequest(@PathParam("source") String source) {
+    @Path("analyzed/{source}/entities")
+    public Response getLinkedEntities(@PathParam("source") String source) {
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -65,5 +72,24 @@ public class NerService {
         return Response.ok(response).build();
 
     }
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("analyzed/{source}/transcript")
+    public Response getTranscript(@PathParam("source") String source) {
+
+        Transcript transcript = NERQuery.getTranscript(source, DataField.NAME, mqh);
+        Response response;
+
+        if (transcript == null) {
+            response = Response.serverError().build();
+        } else {
+            response = Response.ok(transcript.toJson()).build();
+        }
+
+        return response;
+
+    }
+
 
 }

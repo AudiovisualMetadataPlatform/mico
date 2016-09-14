@@ -30,7 +30,7 @@ import static com.jayway.restassured.path.json.JsonPath.from;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class VideosTest {
+public class VideoServiceTest {
 
 
     static private TestServer server;

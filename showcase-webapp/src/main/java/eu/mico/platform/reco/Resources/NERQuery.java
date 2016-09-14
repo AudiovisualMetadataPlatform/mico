@@ -62,7 +62,7 @@ public class NERQuery {
                 case NAME:
                     partMMMList = mqh
                             .filterBodyType("<" + MMMTERMS.STT_BODY_MICO + ">")
-                            .getPartsBySourceNameOfAsset(identifier)
+                            .getPartsByAssetName(identifier)
                     ;
                     break;
             }
@@ -141,7 +141,7 @@ public class NERQuery {
                     break;
                 case NAME:
                 default:
-                    annos = mqh.getPartsBySourceNameOfAsset(identifier);
+                    annos = mqh.getPartsByAssetName(identifier);
                     break;
             }
 

@@ -96,7 +96,7 @@ public class ShowcaseApplication extends Application {
             services.add(new RecoWebService(manager, marmottaBaseUri));
             services.add(new EchoService());
             services.add(new Videos(mqh));
-            services.add(new NerService());
+            services.add(new NerService(mqh));
 
             // Zooniverse
             services.add(new AnimalDetectionWebService(manager, marmottaBaseUri, brokerServices));
