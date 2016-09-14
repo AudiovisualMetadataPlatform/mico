@@ -163,7 +163,7 @@
         <dependency>
             <groupId>eu.mico-project.platform</groupId>
             <artifactId>fam-anno4j</artifactId>
-            <version>${project.version}</version>
+            <version>2.0.2</version>
         </dependency>
 
         <dependency>

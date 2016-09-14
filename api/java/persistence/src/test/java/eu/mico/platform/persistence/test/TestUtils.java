@@ -1,7 +1,7 @@
 package eu.mico.platform.persistence.test;
 
-import com.github.anno4j.model.namespaces.OADM;
-import eu.mico.platform.anno4j.model.namespaces.MMM;
+import java.io.PrintWriter;
+
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.impl.TreeModel;
@@ -14,6 +14,10 @@ import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.Rio;
 import org.openrdf.rio.helpers.RDFHandlerBase;
 import org.slf4j.Logger;
+
+import com.github.anno4j.model.namespaces.OADM;
+
+import eu.mico.platform.anno4j.model.namespaces.MMM;
 
 public class TestUtils {
     
@@ -53,11 +57,13 @@ public class TestUtils {
             }
         }
         log.debug("--- START generated RDF ---");
+        PrintWriter out = new PrintWriter(System.out);
         try {
-            Rio.write(model, System.out, RDFFormat.TURTLE);
+            Rio.write(model, out, RDFFormat.TURTLE);
         } catch (RDFHandlerException e) {
             throw new RuntimeException(e);
         }
+        out.close();
         log.debug("--- END generated RDF ---");
     }
 }
