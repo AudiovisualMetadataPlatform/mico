@@ -334,10 +334,10 @@ public class AnimalDetectionWebService {
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX oa: <http://www.w3.org/ns/oa#>\n" +
                 "PREFIX mmt: <http://www.mico-project.eu/ns/mmmterms/2.0/schema#>\n" +
-                "SELECT ?animal ?region ?confidence ?version WHERE {\n" +
+                "SELECT DISTINCT ?animal ?region ?confidence ?version WHERE {\n" +
                     "<%s> mmm:hasPart ?annot .\n" +
                     "?annot mmm:hasBody ?body .\n" +
-                    "?annot mmm:hasTarget ?tgt .\n" +
+                    "{ ?annot oa:hasTarget ?tgt } UNION { ?annot mmm:hasTarget ?tgt }.\n" +
                     "?tgt  oa:hasSelector ?fs .\n" +
                     "?body rdf:value ?animal .\n" +
                     "?body a mmt:AnimalDetectionBody.\n" + //why is an annotation a body? and why a string!!
