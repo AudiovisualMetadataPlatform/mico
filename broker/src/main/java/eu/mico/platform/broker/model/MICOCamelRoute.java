@@ -98,7 +98,7 @@ public class MICOCamelRoute {
      *  
 	 */
 	public MICOCamelRoute parseCamelRoute(String xmlCamelRoute){
-		log.info("Retrieving camel route configuration out of:\n{}",xmlCamelRoute);
+		log.debug("Retrieving camel route configuration out of:\n{}",xmlCamelRoute);
 		parseExtractorConfigurations(xmlCamelRoute);
 		parseEntryPoints(xmlCamelRoute);
 		this.xmlCamelRoute= xmlCamelRoute;
