@@ -5,7 +5,6 @@ import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.zooniverse.util.BrokerServices;
-import eu.mico.platform.zooniverse.util.ItemData;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -21,7 +20,7 @@ import org.openrdf.repository.object.ObjectConnection;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collections;
+import java.util.*;
 
 import static org.mockito.Matchers.anyObject;
 
@@ -61,8 +60,22 @@ public class Mockups {
         eu.mico.platform.zooniverse.util.Item itemStatus = new eu.mico.platform.zooniverse.util.Item();
         itemStatus.setFinished("true");
 
+
+        Map<String, String> serviceMap = new HashMap<>();
+        serviceMap.put("calls", "0");
+        serviceMap.put("provides", "application/x-mico-rdf");
+        serviceMap.put("name", "mico-extractor-named-entity-recognizer-3.1.0-RedlinkNER");
+        serviceMap.put("language", "Java");
+        serviceMap.put("time", "2016-09-08T15:07:46.922Z");
+        serviceMap.put("uri", "http://www.mico-project.org/services/mico-extractor-named-entity-recognizer-3.1.0-RedlinkNER");
+        serviceMap.put("requires", "text/plain");
+
+
         Mockito.when(brokerSvc.getItem(org.mockito.Matchers.<String>any())).thenReturn(itemStatus);
-        Mockito.when(brokerSvc.getServices()).thenReturn(Collections.singletonList(Collections.singletonMap("uri", "http://www.mico-project.eu/services/ner-text")));
+        Mockito.when(brokerSvc.getServices()).thenReturn(
+                Collections.singletonList(
+                        Collections.unmodifiableMap(serviceMap)
+                ));
         return brokerSvc;
     }
 
