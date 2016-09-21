@@ -447,8 +447,8 @@ public class InjectionWebService {
 					log.info("item {}, part created {} : uploaded {} bytes", item.getURI(), part.getURI(), bytes);
 					return Response.ok(
 							ImmutableMap.of(
-									"itemURI", item.getURI().stringValue(),
-									"partURI", part.getURI().stringValue(),
+									"itemUri", item.getURI().stringValue(),
+									"partUri", part.getURI().stringValue(),
 									"assetLocation", asset.getLocation(),
 									"created", part.getSerializedAt()
 							)).build();
