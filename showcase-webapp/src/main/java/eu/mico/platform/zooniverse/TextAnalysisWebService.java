@@ -8,10 +8,8 @@ import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.zooniverse.model.TextAnalysisInput;
 import eu.mico.platform.zooniverse.model.TextAnalysisOutput;
 import eu.mico.platform.zooniverse.util.BrokerServices;
-import eu.mico.platform.zooniverse.util.ItemData;
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.Literal;
-import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.BindingSet;
@@ -57,7 +55,10 @@ public class TextAnalysisWebService {
         this.brokerSvc = broker;
     }
 
-    private static final String ExtractorURI = "http://www.mico-project.eu/services/ner-text";
+    private static final String ExtractorID = "mico-extractor-named-entity-recognizer";
+    private static final String ExtractorModeID = "RedlinkNER";
+    private static final String ExtractorVersion = "3.1.0";
+
 
     @POST
     @Consumes("application/json")
@@ -67,14 +68,14 @@ public class TextAnalysisWebService {
         boolean extractorRunning = false;
 
         for(Map<String, String>service : this.brokerSvc.getServices()) {
-            if(service.containsKey("uri") && service.get("uri").equals(ExtractorURI)) {
+            if(service.containsKey("name") && checkExtractorName(service.get("name"), false)) {
                 extractorRunning = true;
                 break;
             }
         }
 
         if(!extractorRunning) return Response.status(Response.Status.SERVICE_UNAVAILABLE)
-                .entity(String.format("Extractor '%s' currently not active",ExtractorURI))
+                .entity(String.format("Extractor '%s'-'%s' currently not active", ExtractorID, ExtractorModeID))
                 .build();
 
         try {
@@ -102,6 +103,34 @@ public class TextAnalysisWebService {
             log.error("Could not create ContentItem");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build();
         }
+    }
+
+    /** Returns true, if given string matches the extractor specs given in `ExtractorID`,
+     * `ExtractorModeID` and `ExtractorVersion`.
+     * If checkVersion=False, the version number is ignored, still it is checked whether it is in the
+     * x.y.z format.
+     * @param extractorName To-be checked extractorName
+     * @param checkVersion If false, only the format of the version will be checked, not the number itself.
+     * @return True, if extractorName is the one required by this class.
+     */
+    static boolean checkExtractorName(String extractorName, Boolean checkVersion) {
+
+
+        if (checkVersion) {
+
+            String expectedName = ExtractorID + "-" + ExtractorVersion + "-" + ExtractorModeID;
+            return extractorName.equals(expectedName);
+        } else {
+            String versionRegex = "\\d\\.\\d\\.\\d";
+
+            return
+                    extractorName.startsWith(ExtractorID) &&
+                            extractorName.endsWith(ExtractorModeID) &&
+                            extractorName.substring(
+                                    ExtractorID.length() + 1, ExtractorID.length() + ExtractorVersion.length() + 1
+                            ).matches(versionRegex);
+        }
+
     }
 
     @GET
