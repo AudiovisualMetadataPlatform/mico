@@ -1,19 +1,11 @@
 package eu.mico.platform.testutils;
 
-import com.github.anno4j.model.Target;
-import com.github.anno4j.model.impl.selector.FragmentSelector;
-import com.github.anno4j.model.impl.targets.SpecificResource;
-import eu.mico.platform.anno4j.model.AssetMMM;
-import eu.mico.platform.anno4j.model.ItemMMM;
-import eu.mico.platform.anno4j.model.PartMMM;
-import eu.mico.platform.anno4j.model.impl.bodymmm.SpeechToTextBodyMMM;
-import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.zooniverse.util.BrokerServices;
-import org.apache.marmotta.ldpath.parser.ParseException;
+import eu.mico.platform.zooniverse.util.ItemData;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -24,8 +16,6 @@ import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.config.RepositoryConfigException;
-import org.openrdf.repository.object.LangString;
 import org.openrdf.repository.object.ObjectConnection;
 
 import java.io.ByteArrayOutputStream;
@@ -34,9 +24,6 @@ import java.io.OutputStream;
 import java.util.*;
 
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,7 +46,6 @@ public class Mockups {
     private static String itemUrlString = "http://mico-platform.salzburgresearch.at:8080/marmotta/" + localName;
 
 
-
     public static EventManager mockEvenmanager(RepositoryConnection repositoryConnection) throws RepositoryException, IOException, QueryEvaluationException, MalformedQueryException {
 
         connection = repositoryConnection;
@@ -75,8 +61,22 @@ public class Mockups {
         eu.mico.platform.zooniverse.util.Item itemStatus = new eu.mico.platform.zooniverse.util.Item();
         itemStatus.setFinished("true");
 
-        when(brokerSvc.getItem(org.mockito.Matchers.<String>any())).thenReturn(itemStatus);
-        when(brokerSvc.getServices()).thenReturn(Collections.singletonList(Collections.singletonMap("uri", "http://www.mico-project.eu/services/ner-text")));
+
+        Map<String, String> serviceMap = new HashMap<>();
+        serviceMap.put("calls", "0");
+        serviceMap.put("provides", "application/x-mico-rdf");
+        serviceMap.put("name", "mico-extractor-named-entity-recognizer-3.1.0-RedlinkNER");
+        serviceMap.put("language", "Java");
+        serviceMap.put("time", "2016-09-08T15:07:46.922Z");
+        serviceMap.put("uri", "http://www.mico-project.org/services/mico-extractor-named-entity-recognizer-3.1.0-RedlinkNER");
+        serviceMap.put("requires", "text/plain");
+
+
+        Mockito.when(brokerSvc.getItem(org.mockito.Matchers.<String>any())).thenReturn(itemStatus);
+        Mockito.when(brokerSvc.getServices()).thenReturn(
+                Collections.singletonList(
+                        Collections.unmodifiableMap(serviceMap)
+                ));
         return brokerSvc;
     }
 

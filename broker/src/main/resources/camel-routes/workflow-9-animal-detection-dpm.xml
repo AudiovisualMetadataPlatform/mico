@@ -15,7 +15,7 @@
     <pipeline>
       <split>
         <method method='splitMessage' ref='splitterNewPartsBean'/>
-        <to uri='mico-comp:vbox1?serviceId=DPMDetector&amp;extractorId=mico-extractor-animaldetection-dpm&amp;extractorVersion=1.0.1&amp;modeId=DPMDetector&amp;inputs={&quot;mico:Image&quot;:[&quot;image/jpeg&quot;,&quot;image/png&quot;]}'/>
+        <to uri='mico-comp:vbox1?serviceId=DPMDetector&amp;extractorId=mico-extractor-animaldetection-dpm&amp;extractorVersion=1.0.2&amp;modeId=DPMDetector&amp;inputs={&quot;mico:Image&quot;:[&quot;image/jpeg&quot;,&quot;image/png&quot;]}'/>
         <split>
           <method method='splitMessage' ref='splitterNewPartsBean'/>
           <to uri='mico-comp:vbox1?serviceId=objectDetectionXml2rdf&amp;extractorId=mico-extractor-object-detection-rdf&amp;extractorVersion=2.1.0&amp;modeId=objectDetectionXml2rdf&amp;inputs={&quot;mico:ObjectDetectionXml&quot;:[&quot;text/vnd.fhg-objectdetection+xml&quot;]}'/>

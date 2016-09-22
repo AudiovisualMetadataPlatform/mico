@@ -43,6 +43,7 @@ public class WorkflowManagementService {
 
     private static Logger log = LoggerFactory.getLogger(WorkflowManagementService.class);
     private static Integer newID = -1;
+    private static final String DEFAULT_ROUTES_PATH = "/usr/shae/mico/camel-routes/";
     
 
     
@@ -217,10 +218,23 @@ public class WorkflowManagementService {
 
     	try {
 
-    		String resourcePath = WorkflowManagementService.class.getClassLoader().getResource(resourceDirectory).getPath();
-    		List<File> routes = FileUtils.getFiles(new File(resourcePath), "*.xml", "");
-    		log.info("routes is {}",routes);
-    		log.info("Found {} files",routes.size());
+        String resourcePath = WorkflowManagementService.class.getClassLoader().getResource(resourceDirectory).getPath();
+        List<File> routes = null;
+        // first try to load from mico-default-routes package (/usr/share/mico/camel-routes)
+        try{
+          File routesDir = new File(DEFAULT_ROUTES_PATH);
+          if (routesDir.exists()){
+            routes = FileUtils.getFiles(routesDir, "*.xml", "");
+          }
+        }catch(IOException e){
+          log.warn("Unable to load default-routes: " + e.getMessage());
+        }
+        if (routes == null || routes.size() == 0) {
+          // load packaged routes, if no default-routes are installed
+          routes = FileUtils.getFiles(new File(resourcePath), "*.xml", "");
+        }
+        log.info("routes is {}", routes);
+        log.info("Found {} files", routes.size());
 
     		for(File r :routes ){
     			if( ! r.isDirectory()){
@@ -229,8 +243,8 @@ public class WorkflowManagementService {
     				
     				try{
     					addWorkflow("mico", new String(Files.readAllBytes(r.toPath())));
-    				}catch(IllegalArgumentException e){
-    					log.warn("Unable to load {}",r.getName(),e);
+    				}catch(IllegalArgumentException | IOException | RepositoryException e){
+    					log.warn("Unable to add route [{}]",r.getName(),e);
     				}
     			}				
     		}
