@@ -20,7 +20,7 @@
     <parent>
         <groupId>eu.mico-project.platform</groupId>
         <artifactId>parent</artifactId>
-        <version>3.0.3-SNAPSHOT</version>
+        <version>3.0.3-RC3</version>
         <relativePath>../../../parent</relativePath>
     </parent>
 
@@ -35,12 +35,12 @@
         <dependency>
             <groupId>eu.mico-project.platform</groupId>
             <artifactId>event</artifactId>
-            <version>3.0.3-SNAPSHOT</version>
+            <version>3.0.3-RC3</version>
         </dependency>
         <dependency>
             <groupId>eu.mico-project.platform</groupId>
             <artifactId>persistence</artifactId>
-            <version>3.0.3-SNAPSHOT</version>
+            <version>3.0.3-RC3</version>
             <exclusions>
                 <exclusion>
                     <artifactId>logback-core</artifactId>
