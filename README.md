@@ -266,13 +266,20 @@ Where <itemSyntacticType> is a string, e.g. with value "mico:CompositeItem"
 
 The value of the field <itemUri> retrieved after the item creation can be used for injecting the content to the platform by calling
 
-    curl -X POST -v <mico-platform-host>:8080/broker/inject/submit?item=<itemUri>
+    curl -X POST <mico-platform-host>:8080/broker/inject/submit?item=<itemUri>
 
 #### **Item injection (Broker v3)**
 
 The value of the field <itemUri> retrieved after the item creation can be used for injecting the content to the platform by calling
 
-    curl -X POST -v <mico-platform-host>:8080/broker/inject/submit?item=<itemUri>&route=<routeId>
+    curl -X POST <mico-platform-host>:8080/broker/inject/submit?item=<itemUri>&route=<routeId>
 
-The value of <routeId> should be picked from the [table above](#default-workflows)
+The value of <routeId> should be picked from the [table above](#default-workflows). <br>
+An updated list of available routes can be retrieved from the workflow service
 
+    curl <mico-platform-host>:8080/broker/workflow/routes
+
+
+#### **Item status request**
+
+    curl <mico-platform-host>:8080/broker/status/items?uri=<itemUri>&parts=<true|false>
