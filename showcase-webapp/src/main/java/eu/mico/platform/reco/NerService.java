@@ -7,10 +7,7 @@ import eu.mico.platform.reco.Resources.NERQuery;
 import eu.mico.platform.reco.Resources.Transcript;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -49,7 +46,7 @@ public class NerService {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Path("{source}/entities")
-    public Response getLinkedEntities(@PathParam("source") String source) {
+    public Response getLinkedEntities(@PathParam("source") String source, @QueryParam("querytype") String queryType) {
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -58,8 +55,13 @@ public class NerService {
 
 //        String source = "p720 - Agricoltura ecologica Greenpeace in dirigibile sopra Milano.mp4";
 
-        Map<String, EntityInfo> linkedEntitites = NERQuery.getLinkedEntities(source, DataField.NAME, mqh);
-
+        Map<String, EntityInfo> linkedEntitites = null;
+        if (queryType != null && queryType.equals("id")) {
+            linkedEntitites = NERQuery.getLinkedEntities(source, DataField.CONTENTITEM, mqh);
+        }
+        else {
+            linkedEntitites = NERQuery.getLinkedEntities(source, DataField.NAME, mqh);
+        }
         assert linkedEntitites != null;
 
         String response = "";
