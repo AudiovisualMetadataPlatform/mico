@@ -39,7 +39,7 @@
         <spring.version>4.1.1.RELEASE</spring.version>
         
         <jetty.version>9.2.1.v20140609</jetty.version>
-        <sesame.version>2.7.13</sesame.version>
+        <sesame.version>2.7.16</sesame.version>
         <javaee.port>8081</javaee.port>
         <marmotta.version>3.4.0-SNAPSHOT</marmotta.version>
         <marmotta.context>/marmotta</marmotta.context>
