@@ -5,6 +5,7 @@ import com.jayway.restassured.RestAssured;
 import eu.mico.platform.testutils.TestServer;
 import org.hamcrest.Matchers;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openrdf.repository.Repository;
@@ -80,6 +81,19 @@ public class TextAnalysisWebServiceTest {
                 assertThat()
                 .body("id", Matchers.equalTo(localName))
                 .body("status", Matchers.equalTo("submitted"));
+
+    }
+
+    @Test
+    public void testCheckExtractorName() throws Exception {
+
+        final String testName = "mico-extractor-named-entity-recognizer-3.1.0-RedlinkNER";
+        final String testName_wrongversion = "mico-extractor-named-entity-recognizer-3.8.0-RedlinkNER";
+
+        Assert.assertTrue(TextAnalysisWebService.checkExtractorName(testName, false));
+        Assert.assertTrue(TextAnalysisWebService.checkExtractorName(testName_wrongversion, false));
+        Assert.assertTrue(TextAnalysisWebService.checkExtractorName(testName, true));
+        Assert.assertFalse(TextAnalysisWebService.checkExtractorName(testName_wrongversion, true));
 
     }
 

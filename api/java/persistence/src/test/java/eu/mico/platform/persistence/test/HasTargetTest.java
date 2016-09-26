@@ -11,7 +11,7 @@ import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import org.apache.marmotta.ldpath.parser.ParseException;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.openrdf.idGenerator.IDGenerator;
@@ -47,6 +47,7 @@ public class HasTargetTest {
     }
 
     @Test
+    @Ignore
     public void testCreate() throws RepositoryException, IllegalAccessException, InstantiationException, ParseException, MalformedQueryException, QueryEvaluationException, InterruptedException {
         Item item = persistenceService.createItem();
         Part part = item.createPart(new URIImpl("http://test.org"));
