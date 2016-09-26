@@ -39,6 +39,7 @@ public class AssetMMMTest {
         AssetMMM goodAsset = this.anno4j.createObject(AssetMMM.class);
         goodAsset.setFormat("text/plain");
         goodAsset.setLocation("http://example.com/goodAsset");
+        goodAsset.setName("goodAsset");
         partWithFittingAsset.setAsset(goodAsset);
 
         // Create a Part that does not fit requirements
@@ -46,6 +47,7 @@ public class AssetMMMTest {
         AssetMMM badAsset = this.anno4j.createObject(AssetMMM.class);
         badAsset.setFormat("video/mp4");
         badAsset.setLocation("http://example.com/badAsset");
+        badAsset.setName("badAsset");
         partWithoutFittingAsset.setAsset(badAsset);
 
         item.addPart(partWithFittingAsset);
@@ -61,5 +63,6 @@ public class AssetMMMTest {
         AssetMMM result = results.get(0);
         assertEquals("text/plain", result.getFormat());
         assertEquals("http://example.com/goodAsset", result.getLocation());
+        assertEquals("goodAsset", result.getName());
     }
 }

@@ -146,6 +146,7 @@ public class PartAnno4jTest {
     @Test
     public void getAssetTest() throws RepositoryException, QueryEvaluationException {
         String format = "image/png";
+        String name = "assetName";
 
         assertEquals(0, con.getObjects(AssetMMM.class).asList().size());
 
@@ -158,11 +159,14 @@ public class PartAnno4jTest {
         assertNotNull(asset);
         assertNotNull(asset.getLocation());
         assertNull(asset.getFormat());
+        assertNull(asset.getName());
 
         asset.setFormat(format);
+        asset.setName(name);
 
         AssetMMM assetMMM = con.getObject(PartMMM.class, part.getURI()).getAsset();
         assertEquals(format, assetMMM.getFormat());
+        assertEquals(name, assetMMM.getName());
     }
     
     @Test
