@@ -15,10 +15,7 @@ package eu.mico.platform.broker.test;
 
 import eu.mico.platform.broker.webservices.SwingImageCreator;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.awt.*;
 import java.io.File;
@@ -43,6 +40,10 @@ public class SimpleBrokerTest extends BaseBrokerTest {
     @BeforeClass
     public static void prepare() throws IOException{
         Files.createDirectories(new File(TMP_FOLDER).toPath());
+
+        Assume.assumeTrue("Broker already contains nodes, " +
+                "tests are probably run against a productive mico instance",
+                broker.getDependencies().vertexSet().size() == 0);
     }
 
     @AfterClass
@@ -59,6 +60,8 @@ public class SimpleBrokerTest extends BaseBrokerTest {
 
     @Test
     public void testInit() throws IOException, InterruptedException, URISyntaxException {
+
+
 
         setupMockAnalyser("A","B");
         setupMockAnalyser("B","C");
