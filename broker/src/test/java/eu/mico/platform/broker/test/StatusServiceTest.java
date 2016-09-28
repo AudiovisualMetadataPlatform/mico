@@ -13,6 +13,9 @@
  */
 package eu.mico.platform.broker.test;
 
+import com.rabbitmq.client.ConsumerCancelledException;
+import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.ShutdownSignalException;
 import eu.mico.platform.broker.model.MICOCamelRoute;
 import eu.mico.platform.broker.model.MICOJob;
 import eu.mico.platform.broker.model.MICOJobStatus;
@@ -28,29 +31,14 @@ import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.AnalysisException;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Item;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.rabbitmq.client.ConsumerCancelledException;
-import com.rabbitmq.client.QueueingConsumer;
-import com.rabbitmq.client.ShutdownSignalException;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeoutException;
 
 
@@ -101,7 +89,7 @@ public class StatusServiceTest extends BaseBrokerTest {
 	}
 
     @Test
-    public void testStatusWithNewdInjection() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
+    public void testStatusWithNewInjection() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
        
     	Assume.assumeTrue(isRegistrationServiceAvailable);
     	
@@ -220,7 +208,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     }
     
     @Test
-    public void testStatusBackendWithNewdInjection() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
+    public void testStatusBackendWithNewInjection() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
        
     	Assume.assumeTrue(isRegistrationServiceAvailable);
     	
