@@ -48,10 +48,10 @@ public class Logs {
                 StringBuilder response = new StringBuilder();
 
                 for (int i = 0; i < 500; i++) {
-                    response.append(rlfr.readLine()).append("\n");
+                    response.insert(0, rlfr.readLine() + "\n");
                 }
 
-                return Response.ok(response.reverse().toString()).build();
+                return Response.ok(response.toString()).build();
 
 
             } catch (IOException e) {
