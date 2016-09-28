@@ -11,9 +11,7 @@ import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import org.apache.marmotta.ldpath.parser.ParseException;
 import org.junit.BeforeClass;
-import org.junit.*;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.Test;
 import org.openrdf.idGenerator.IDGenerator;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.MalformedQueryException;
@@ -22,7 +20,6 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.object.ObjectConnection;
 
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
@@ -30,14 +27,7 @@ import static junit.framework.TestCase.assertEquals;
 /**
  * Created by weissger on 08.09.16.
  */
-@RunWith(Parameterized.class)
 public class HasTargetTest {
-
-    // Empty parameters for multiple runs of testCreate()
-    @Parameterized.Parameters
-    public static List<Object[]> data() {
-        return Arrays.asList(new Object[5][0]);
-    }
 
     private static PersistenceService persistenceService;
 
@@ -47,7 +37,6 @@ public class HasTargetTest {
     }
 
     @Test
-    @Ignore
     public void testCreate() throws RepositoryException, IllegalAccessException, InstantiationException, ParseException, MalformedQueryException, QueryEvaluationException, InterruptedException {
         Item item = persistenceService.createItem();
         Part part = item.createPart(new URIImpl("http://test.org"));

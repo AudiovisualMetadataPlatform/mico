@@ -115,7 +115,8 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	MockService acService = new MockServiceInjTest("A", "C");
     	MockService bcService = new MockServiceInjTest("B", "C");
     	
-    	
+    	Thread.sleep(2000);
+
     	//connect A-B extractors 
 
     	connectExtractor(abService);	//produces 1 'B' part
@@ -123,15 +124,18 @@ public class InjectionServiceTest extends BaseBrokerTest {
     	connectExtractor(abService2);	//produces 1 'B' part
     	connectExtractor(acService);	//produces 1 'C' part
     	connectExtractor(bcService);	//produces 1 'B' part
-    	
+
+		Thread.sleep(2000);
     	
     	//broadcast a simple item with mimeType 'A'
     	
     	Item processedItem = broadcastSimpleItem("A");
     	
     	//and check that all extractors were triggered
-    	Assert.assertNotNull("Unable to retrieve an item from the persistence service",processedItem); 
-    	
+    	Assert.assertNotNull("Unable to retrieve an item from the persistence service",processedItem);
+
+		Thread.sleep(2000);
+
     	//total parts are 3 'b' (A-B) + 1 'c' (A->C) + 3x1 'c' (B-C)
     	Assert.assertEquals(7, ImmutableSet.copyOf(processedItem.getParts()).size());
     	

@@ -43,7 +43,7 @@ public class WorkflowManagementService {
 
     private static Logger log = LoggerFactory.getLogger(WorkflowManagementService.class);
     private static Integer newID = -1;
-    private static final String DEFAULT_ROUTES_PATH = "/usr/shae/mico/camel-routes/";
+    private static final String DEFAULT_ROUTES_PATH = "/usr/share/mico/camel-routes/";
     
 
     
