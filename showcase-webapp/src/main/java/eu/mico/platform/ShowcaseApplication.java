@@ -19,11 +19,8 @@ import eu.mico.platform.demo.DemoWebService;
 import eu.mico.platform.demo.DownloadWebService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
-import eu.mico.platform.reco.EchoService;
-import eu.mico.platform.reco.NerService;
-import eu.mico.platform.reco.RecoWebService;
+import eu.mico.platform.reco.*;
 import eu.mico.platform.reco.Resources.NERQuery;
-import eu.mico.platform.reco.Videos;
 import eu.mico.platform.zooniverse.AnimalDetectionWebService;
 import eu.mico.platform.zooniverse.TextAnalysisWebService;
 import eu.mico.platform.zooniverse.util.BrokerServices;
@@ -106,6 +103,9 @@ public class ShowcaseApplication extends Application {
             services.add(new DownloadWebService(manager, marmottaBaseUri, mediaDirectory, mediaUrl));
             services.add(new ContentWebService(manager, marmottaBaseUri));
             services.add(new DemoWebService(manager, marmottaBaseUri, brokerServices));
+
+            //Stuff
+            services.add(new Logs());
 
         } catch (IOException ex) {
             log.error("could not initialise MICO broker, services not available (message: {})", ex.getMessage());
