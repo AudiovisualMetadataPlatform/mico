@@ -123,7 +123,12 @@ public class EventManagerTest extends BaseCommunicationTest {
         testFactory.setUsername(amqpUsr);
         testFactory.setPassword(amqpPwd);
 
-        connection = testFactory.newConnection();
+        try {
+            connection = testFactory.newConnection();
+        }
+        catch (java.net.ConnectException e) {
+            Assume.assumeTrue("Unable to connect to RabbitMQ: " + e.getMessage(), false);
+        }
 
         Channel initChannel = connection.createChannel();
         try {
