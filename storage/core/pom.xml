@@ -20,7 +20,7 @@
     <parent>
         <groupId>eu.mico-project.platform</groupId>
         <artifactId>parent</artifactId>
-        <version>3.0.3-SNAPSHOT</version>
+        <version>3.0.3</version>
         <relativePath>../../parent</relativePath>
     </parent>
 
@@ -28,7 +28,7 @@
 
     <name>MICO Platform: Storage Core</name>
     <packaging>jar</packaging>
-    <version>3.0.3-SNAPSHOT</version>
+    <version>3.0.3</version>
 
     <build>
         <plugins>
