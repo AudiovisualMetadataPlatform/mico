@@ -5,7 +5,6 @@ import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.zooniverse.util.BrokerServices;
-import eu.mico.platform.zooniverse.util.ItemData;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -21,7 +20,9 @@ import org.openrdf.repository.object.ObjectConnection;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.Matchers.anyObject;
 
@@ -52,7 +53,7 @@ public class Mockups {
 
         EventManager eventManager = Mockito.mock(EventManager.class);
         PersistenceService persistenceService = mockPersistenceService();
-        when(eventManager.getPersistenceService()).thenReturn(persistenceService);
+        Mockito.when(eventManager.getPersistenceService()).thenReturn(persistenceService);
         return eventManager;
     }
 
@@ -83,7 +84,7 @@ public class Mockups {
     private static Asset mockAsset() throws IOException {
         OutputStream os = new ByteArrayOutputStream();
         Asset a = Mockito.mock(Asset.class);
-        when(a.getOutputStream()).thenReturn(os);
+        Mockito.when(a.getOutputStream()).thenReturn(os);
         return a;
     }
 
@@ -91,8 +92,8 @@ public class Mockups {
     private static PersistenceService mockPersistenceService() throws RepositoryException, IOException, QueryEvaluationException, MalformedQueryException {
         PersistenceService persistenceService = Mockito.mock(PersistenceService.class);
         Item item = mockCreateItem();
-        when(persistenceService.createItem()).thenReturn(item);
-        when(persistenceService.getItem(org.mockito.Matchers.<URI>any())).thenAnswer(new Answer<Item>() {
+        Mockito.when(persistenceService.createItem()).thenReturn(item);
+        Mockito.when(persistenceService.getItem(org.mockito.Matchers.<URI>any())).thenAnswer(new Answer<Item>() {
             @Override
             public Item answer(InvocationOnMock invocationOnMock) throws Throwable {
                 URI uri = (URI) invocationOnMock.getArguments()[0];
@@ -104,27 +105,27 @@ public class Mockups {
 
     private static Item mockItem(URI uri) throws RepositoryException, IOException, MalformedQueryException, QueryEvaluationException {
         Item item = Mockito.mock(Item.class);
-        when(item.getURI()).thenReturn(uri);
+        Mockito.when(item.getURI()).thenReturn(uri);
         ObjectConnection connection = mockObjectConnection();
-        when(item.getObjectConnection()).thenReturn(connection);
+        Mockito.when(item.getObjectConnection()).thenReturn(connection);
         return item;
     }
 
     private static Item mockCreateItem() throws RepositoryException, IOException {
         URI uri = Mockito.mock(URI.class);
         Asset a = mockAsset();
-        when(uri.stringValue()).thenReturn(itemUrlString);
-        when(uri.getLocalName()).thenReturn(localName);
+        Mockito.when(uri.stringValue()).thenReturn(itemUrlString);
+        Mockito.when(uri.getLocalName()).thenReturn(localName);
         Item item = Mockito.mock(Item.class);
-        when(item.getURI()).thenReturn(uri);
-        when(item.getAsset()).thenReturn(a);
+        Mockito.when(item.getURI()).thenReturn(uri);
+        Mockito.when(item.getAsset()).thenReturn(a);
         return item;
     }
 
 
     private static ObjectConnection mockObjectConnection() throws RepositoryException, MalformedQueryException, QueryEvaluationException {
         ObjectConnection rep = Mockito.mock(ObjectConnection.class);
-        when(rep.prepareTupleQuery(anyObject())).thenAnswer(new Answer<TupleQuery>() {
+        Mockito.when(rep.prepareTupleQuery(anyObject())).thenAnswer(new Answer<TupleQuery>() {
             @Override
             public TupleQuery answer(InvocationOnMock invocationOnMock) throws Throwable {
                 return connection.prepareTupleQuery(QueryLanguage.SPARQL, (String) invocationOnMock.getArguments()[0]);

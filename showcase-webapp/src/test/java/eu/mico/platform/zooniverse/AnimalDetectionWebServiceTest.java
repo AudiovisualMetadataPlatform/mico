@@ -63,7 +63,7 @@ public class AnimalDetectionWebServiceTest {
     public static void shutdown() throws Exception {
         server.stop();
         connection.close();
-        repository.shutDown();
+        //repository.shutDown();
     }
 
     @Test
