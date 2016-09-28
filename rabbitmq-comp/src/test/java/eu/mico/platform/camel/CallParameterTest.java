@@ -1,14 +1,10 @@
 package eu.mico.platform.camel;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-
+import de.fraunhofer.idmt.camel.MicoCamel;
+import de.fraunhofer.idmt.mico.DummyExtractor;
+import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
+import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
+import eu.mico.platform.persistence.model.Item;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -18,15 +14,19 @@ import org.apache.camel.language.Bean;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.model.RoutesDefinition;
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openrdf.repository.RepositoryException;
 
-import de.fraunhofer.idmt.camel.MicoCamel;
-import de.fraunhofer.idmt.mico.DummyExtractor;
-import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
-import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
-import eu.mico.platform.persistence.model.Item;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
 
 /**
  * @author sld
@@ -120,17 +120,23 @@ public class CallParameterTest extends TestBase {
             createTextItem();
         }catch (Exception e){
             e.printStackTrace();
-            fail("unable to setup test env");
+
+            Assume.assumeTrue("Unable to setup test environment" +
+                    "tests are probably run against a productive mico instance", false);
+
         }
    }
     
     @AfterClass
     static public void cleanup() throws IOException{
-        // remove test items from platform
-        micoCamel.deleteContentItem(textItemUri);
 
-        micoCamel.shutdown();
-        micoCamel=null;
+        if (micoCamel != null) {
+            // remove test items from platform
+            micoCamel.deleteContentItem(textItemUri);
+
+            micoCamel.shutdown();
+            micoCamel = null;
+        }
     }
     
     /**

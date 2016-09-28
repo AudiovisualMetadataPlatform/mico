@@ -13,34 +13,33 @@
  */
 package eu.mico.platform.event.test;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeoutException;
-
-import javax.xml.bind.DatatypeConverter;
-
 import com.github.anno4j.Transaction;
+import com.github.anno4j.model.namespaces.OADM;
+import com.rabbitmq.client.*;
+import com.rabbitmq.client.AMQP.BasicProperties;
+import eu.mico.platform.anno4j.model.namespaces.MMM;
 import eu.mico.platform.event.api.*;
+import eu.mico.platform.event.impl.AnalysisServiceUtil;
+import eu.mico.platform.event.impl.EventManagerImpl;
+import eu.mico.platform.event.model.AnalysisException;
+import eu.mico.platform.event.model.Event;
+import eu.mico.platform.event.model.Event.AnalysisEvent.Error;
+import eu.mico.platform.event.model.Event.AnalysisEvent.Finish;
+import eu.mico.platform.event.model.Event.AnalysisEvent.NewPart;
+import eu.mico.platform.event.model.Event.AnalysisRequest;
+import eu.mico.platform.event.model.Event.ErrorCodes;
+import eu.mico.platform.persistence.api.PersistenceService;
+import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
+import eu.mico.platform.persistence.model.Asset;
+import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Part;
+import eu.mico.platform.persistence.model.Resource;
+import eu.mico.platform.storage.api.StorageService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.marmotta.platform.core.test.base.JettyMarmotta;
 import org.apache.marmotta.platform.sparql.webservices.SparqlWebService;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
@@ -58,32 +57,16 @@ import org.openrdf.rio.helpers.RDFHandlerBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.anno4j.model.namespaces.OADM;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
-
-import eu.mico.platform.anno4j.model.namespaces.MMM;
-import eu.mico.platform.event.impl.AnalysisServiceUtil;
-import eu.mico.platform.event.impl.EventManagerImpl;
-import eu.mico.platform.event.model.AnalysisException;
-import eu.mico.platform.event.model.Event;
-import eu.mico.platform.event.model.Event.AnalysisEvent.Error;
-import eu.mico.platform.event.model.Event.AnalysisEvent.Finish;
-import eu.mico.platform.event.model.Event.AnalysisEvent.NewPart;
-import eu.mico.platform.event.model.Event.AnalysisRequest;
-import eu.mico.platform.event.model.Event.ErrorCodes;
-import eu.mico.platform.persistence.api.PersistenceService;
-import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
-import eu.mico.platform.persistence.model.Asset;
-import eu.mico.platform.persistence.model.Item;
-import eu.mico.platform.persistence.model.Part;
-import eu.mico.platform.persistence.model.Resource;
-import eu.mico.platform.storage.api.StorageService;
+import javax.xml.bind.DatatypeConverter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Tests the {@link EventManagerImpl}. 
@@ -153,8 +136,16 @@ public class EventManagerTest extends BaseCommunicationTest {
             initChannel.queueDeclare(EventManager.QUEUE_PART_OUTPUT, true, false, false, null);
             // create the configuration queue with a defined name
             initChannel.queueDeclare(EventManager.QUEUE_CONFIG_REQUEST, false, true, false, null);
-        } finally {
-            initChannel.close();
+        }
+
+        finally {
+            try {
+                initChannel.close();
+            }
+            catch(AlreadyClosedException e) {
+                Assume.assumeTrue("Config_request channel locked"  +
+                        "tests are probably run against a productive mico instance", false);
+            }
         }
         
         registrationChannel = connection.createChannel();
