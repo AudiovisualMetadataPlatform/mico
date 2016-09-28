@@ -1,7 +1,27 @@
 package eu.mico.platform.camel;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.hasProperty;
+import com.google.common.collect.ImmutableSet;
+import de.fraunhofer.idmt.camel.MicoCamel;
+import de.fraunhofer.idmt.mico.DummyExtractor;
+import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
+import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
+import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
+import eu.mico.platform.persistence.model.Asset;
+import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Part;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.impl.JndiRegistry;
+import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
+import org.apache.camel.language.Bean;
+import org.apache.camel.model.ModelCamelContext;
+import org.apache.camel.model.RoutesDefinition;
+import org.hamcrest.Matchers;
+import org.junit.AfterClass;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.openrdf.model.impl.URIImpl;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,32 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.impl.JndiRegistry;
-import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
-import org.apache.camel.language.Bean;
-import org.apache.camel.model.ModelCamelContext;
-import org.apache.camel.model.RoutesDefinition;
-import org.hamcrest.Matchers;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.openrdf.model.impl.URIImpl;
-
-import com.google.common.collect.ImmutableSet;
-
-import de.fraunhofer.idmt.camel.MicoCamel;
-import de.fraunhofer.idmt.mico.DummyExtractor;
-import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
-import eu.mico.platform.camel.aggretation.ItemAggregationStrategy;
-import eu.mico.platform.camel.aggretation.SimpleAggregationStrategy;
-import eu.mico.platform.event.api.EventManager;
-import eu.mico.platform.event.test.mock.EventManagerMock;
-import eu.mico.platform.persistence.model.Asset;
-import eu.mico.platform.persistence.model.Item;
-import eu.mico.platform.persistence.model.Part;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.hasProperty;
 
 ;
 
@@ -279,15 +275,20 @@ public class InputFilteringTest extends TestBase {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                fail("unable to setup test env");
+
+                Assume.assumeTrue("Unable to setup test environment" +
+                        "tests are probably run against a productive mico instance", false);
+
             }
     }
 
     @AfterClass
     static public void cleanup() throws IOException {
 
-        micoCamel.shutdown();
-        micoCamel = null;
+        if (micoCamel != null) {
+            micoCamel.shutdown();
+            micoCamel = null;
+        }
     }
 
 }
