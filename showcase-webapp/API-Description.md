@@ -22,6 +22,12 @@
 
 
 
+## WP5-NER ##
+
+- *GET* [/ner/{source}/entities?querytype=id](/ner/{source}/entities?querytype=id)
+- *GET* [/ner/{source}/entities?querytype=name](/ner/{source}entities?querytype=name)
+- *GET* [/ner/{source}/transcript](/ner/{source}/transcript)
+
 
 ## Text Analysis ##
 

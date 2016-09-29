@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>MarkdownPad Document</title>
+<title>API-Description</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <style type="text/css">
 /* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
@@ -301,13 +301,19 @@ img {
 <li><em>GET</em> <a href="reco/piosimplereco?itemId={ItemID}&amp;length={maxitems}">/reco/piosimplereco?itemId={ItemID}&amp;length={maxitems}</a></li>
 <li><em>POST</em> /reco/createentity</li>
 <li><em>GET</em> <a href="reco/zoo/{subject_id}/discussion/relatedsubjects">/reco/zoo/{subject_id}/discussion/relatedsubjects</a></li>
-<li><em>GET</em> <a href="reco/zoo/{subject_id}/is_debated">/reco/zoo/{subjectid}/is_debated</a></li>
+<li><em>GET</em> <a href="reco/zoo/{subject_id}/is_debated">/reco/zoo/{subject_id}/is_debated</a></li>
 </ul>
 <h2>Video Analysis</h2>
 <ul>
 <li><em>POST</em> /videos</li>
 <li><em>GET</em> <a href="videos/default">/videos/default</a></li>
 <li><em>GET</em> <a href="videos/analyzed">/videos/analyzed</a></li>
+</ul>
+<h2>WP5-NER</h2>
+<ul>
+<li><em>GET</em> <a href="/ner/{source}/entities?querytype=id">/ner/{source}/entities?querytype=id</a></li>
+<li><em>GET</em> <a href="/ner/{source}entities?querytype=name">/ner/{source}/entities?querytype=name</a></li>
+<li><em>GET</em> <a href="/ner/{source}/transcript">/ner/{source}/transcript</a></li>
 </ul>
 <h2>Text Analysis</h2>
 <ul>
