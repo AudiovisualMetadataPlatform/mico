@@ -123,8 +123,13 @@ public abstract class BaseBrokerTest {
 
             registrationBaseUrl = getConf("reg-api.base", "http://localhost:8030");
 
-            broker = new MICOBrokerImpl(testHost, amqpVHost, amqpUsr, amqpPwd,
-                    rabbitPort, marmottaBaseUrl, storageBaseUri, registrationBaseUrl);
+            try {
+                broker = new MICOBrokerImpl(testHost, amqpVHost, amqpUsr, amqpPwd,
+                        rabbitPort, marmottaBaseUrl, storageBaseUri, registrationBaseUrl);
+            }
+            catch(java.net.ConnectException e) {
+                Assume.assumeTrue("Unable to connect to MicoBroker: " + e.getMessage(), false);
+            }
         }
 
         // Now initialize RabbitMQ
@@ -134,7 +139,12 @@ public abstract class BaseBrokerTest {
         testFactory.setUsername(amqpUsr);
         testFactory.setPassword(amqpPwd);
 
-        connection = testFactory.newConnection();
+        try {
+            connection = testFactory.newConnection();
+        }
+        catch(java.net.ConnectException e) {
+            Assume.assumeTrue("Unable to connect to RabbitMQ: " + e.getMessage(), false);
+        }
 
         //retrieve the status of the registration service
         HttpGet httpGetInfo = new HttpGet(((MICOBrokerImpl)broker).getRegistrationBaseUri() + "/info");
