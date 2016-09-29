@@ -25,14 +25,13 @@ import static org.junit.Assert.*;
 public class MICOQueryHelperMMMTest {
 
     private Anno4j anno4j;
-    private QueryService queryService;
 
     private final static String TEST_BODY_IRI = "http://example.org/testbody";
 
     @Before
     public void setUp() throws Exception {
         this.anno4j = new Anno4j();
-        queryService = anno4j.createQueryService();
+        QueryService queryService = anno4j.createQueryService();
         queryService.addPrefix("mmm", "http://www.mico-project.eu/ns/mmm/2.0/schema#");
     }
 
