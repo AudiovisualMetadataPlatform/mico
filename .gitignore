@@ -50,3 +50,4 @@ kiwi-test.log
 maven-eclipse.xml
 broker/.externalToolBuilders
 broker/graph.png
+/api/java/event/src/main/java/eu/mico/platform/event/model/Event.java

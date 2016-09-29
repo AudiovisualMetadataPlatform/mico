@@ -50,21 +50,22 @@ public class NerService {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        System.out.println("Processing request...");
-        System.out.println(source);
+        log.info("Processing request...");
+        log.info(source);
 
-//        String source = "p720 - Agricoltura ecologica Greenpeace in dirigibile sopra Milano.mp4";
-
-        Map<String, EntityInfo> linkedEntitites = null;
+        Map<String, EntityInfo> linkedEntitites;
         if (queryType != null && queryType.equals("id")) {
             linkedEntitites = NERQuery.getLinkedEntities(source, DataField.CONTENTITEM, mqh);
+        }
+        else if(source.startsWith("MP#")) {
+            linkedEntitites = NERQuery.getLinkedEntities(source.substring(3), DataField.CONTENTITEM, mqh);
         }
         else {
             linkedEntitites = NERQuery.getLinkedEntities(source, DataField.NAME, mqh);
         }
         assert linkedEntitites != null;
 
-        String response = "";
+        String response;
         try {
             response = mapper.writeValueAsString(linkedEntitites.values());
         } catch (IOException e) {
