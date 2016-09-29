@@ -81,7 +81,7 @@ public class MqhMocks {
 
         PartMMM retPart = Mockito.mock(PartMMM.class);
 
-        SpeechToTextBodyMMM speechToTextBodyMMMMock = preparteSttBody();
+        SpeechToTextBodyMMM speechToTextBodyMMMMock = prepareSttBody();
         SpecificResource mockSr = prepareSpecificResource();
 
         Set<Target> targetSet = new HashSet<>();
@@ -104,7 +104,7 @@ public class MqhMocks {
 
     }
 
-    private static SpeechToTextBodyMMM preparteSttBody() {
+    private static SpeechToTextBodyMMM prepareSttBody() {
         SpeechToTextBodyMMM speechToTextBodyMMMMock = mock(SpeechToTextBodyMMM.class);
         when(speechToTextBodyMMMMock.getValue()).thenReturn(new LangString("label", "locale"));
 

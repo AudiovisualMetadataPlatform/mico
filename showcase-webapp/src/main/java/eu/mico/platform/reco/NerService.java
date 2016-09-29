@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 
 //Under the pillow: https://jersey.java.net/documentation/latest/user-guide.html
 
-@Path("ner")
+@Path("/ner")
 public class NerService {
 
 
