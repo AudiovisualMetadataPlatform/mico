@@ -76,7 +76,10 @@ public class Videos {
         List<String> fileNames = NERQuery.getFileNamesByFormat("video/mp4", mqh);
 
         for (String filename : fileNames) {
-            responseFileListBuilder.add(filename);
+            if (filename != null) {
+                responseFileListBuilder.add(filename);
+            }
+
         }
 
         JsonObject response = Json.createObjectBuilder()
