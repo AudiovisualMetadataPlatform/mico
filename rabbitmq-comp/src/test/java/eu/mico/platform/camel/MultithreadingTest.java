@@ -158,7 +158,11 @@ public class MultithreadingTest extends TestBase {
             } catch (AlreadyClosedException e) {
                 Assume.assumeTrue("Config_request channel locked" +
                         "tests are probably run against a productive mico instance", false);
-            } catch (Exception e) {
+            } catch (java.net.ConnectException e) {
+                Assume.assumeTrue("Unable to setup test environment: " +
+                        e.getMessage(), false);
+            }
+            catch (Exception e) {
                 e.printStackTrace();
                 fail("unable to setup test env: " + e.getMessage());
             }
