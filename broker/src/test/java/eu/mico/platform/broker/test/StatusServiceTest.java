@@ -53,6 +53,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
+import javax.ws.rs.NotFoundException;
+
 
 /**
  * Minimal test. Inject items and see if their statuses are correctly retrieven
@@ -356,9 +358,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     	
     	//check that its status is available and equal to DONE
     	try{
-    		Thread.sleep(1000);
-    		Map<String,Object> proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
-            
+            Map<String, Object> proprs = getStatus(items);
             boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
             boolean hasError = Boolean.parseBoolean(((String)proprs.get("hasError")));
             
@@ -380,8 +380,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     	
     	//check that its status is available and equal to DONE
     	try{
-    		Thread.sleep(800);
-    		Map<String,Object> proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
+            Map<String, Object> proprs = getStatus(items);
             
             boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
             boolean hasError = Boolean.parseBoolean(((String)proprs.get("hasError")));
@@ -404,13 +403,12 @@ public class StatusServiceTest extends BaseBrokerTest {
     	
     	//check that its status is available and equal to DONE
     	try{
-    		Thread.sleep(800);
-    		Map<String,Object> proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
+            Map<String, Object> proprs = getStatus(items);
             
             boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
             boolean hasError = Boolean.parseBoolean(((String)proprs.get("hasError")));
             
-            Assert.assertFalse("The item should still be in progress finished",finished);
+            Assert.assertFalse("The item should still be in progress",finished);
             Assert.assertFalse("The item should have no error reported",hasError);
             
             Thread.sleep(2000); // same as the mock 
@@ -434,6 +432,32 @@ public class StatusServiceTest extends BaseBrokerTest {
     	 
         
 
+    }
+
+    private Map<String, Object> getStatus(List<Item> items)
+            throws InterruptedException, RepositoryException {
+        Map<String,Object> proprs = null;
+        for( int i =0;i<5;i++){
+            Thread.sleep(i*300);
+            try{
+            List<Map<String, Object>> itemStats = statusService.getItems(
+                    items.get(0).getURI().stringValue(), false, 0, 0);
+            if (itemStats == null || itemStats.size() == 0) {
+                log.debug("wait for item processing ....");
+                continue;
+            }
+            proprs = itemStats.get(0);
+            }catch(NotFoundException e){
+                if(i==4){
+                    e.printStackTrace();
+                    Assert.fail("item injection failed");
+                }else{
+                    log.debug("wait for item inject to finish ....");
+                }
+                continue;
+            }
+        }
+        return proprs;
     }
     
     public static class MockSlowServiceInjTest extends MockServiceInjTest{

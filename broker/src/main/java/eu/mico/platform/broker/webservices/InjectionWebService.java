@@ -14,8 +14,10 @@
 package eu.mico.platform.broker.webservices;
 
 import com.google.common.collect.ImmutableMap;
+
 import eu.mico.platform.broker.api.MICOBroker;
-import eu.mico.platform.broker.impl.MICOBrokerImpl.RouteStatus;
+import eu.mico.platform.broker.api.MICOBroker.WorkflowStatus;
+import eu.mico.platform.broker.api.rest.WorkflowInfo;
 import eu.mico.platform.broker.model.CamelJob;
 import eu.mico.platform.broker.model.MICOCamelRoute;
 import eu.mico.platform.broker.model.MICOCamelRoute.EntryPoint;
@@ -28,6 +30,7 @@ import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Resource;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.openrdf.model.URI;
@@ -42,6 +45,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -97,24 +101,24 @@ public class InjectionWebService {
     	try {
 	    	in = new BufferedInputStream(request.getInputStream());
 	    	if (mimeType == null || mimeType.trim().length() == 0){
-	    	    mimeType=guessMimeType(in);    	
+	    	    mimeType=guessMimeType(in);
 	            if(mimeType == null ){
 	                mimeType=type;
 	            }
 	    	}
 	    	int bytes = in.available();
-	    	
+	    	log.info("available bytes from upload: {}",bytes);
 	
 	    	if(bytes > 0){
 	    		
 	    		log.info("Creating item with new asset");
 	    		Asset asset = null;
-	    		if(existingAssetLocation == null || existingAssetLocation.isEmpty()){	    			
+	    		if(existingAssetLocation == null || existingAssetLocation.isEmpty()){
 	    			
 	    			Item item = ps.createItem();
 	    			asset = item.getAsset();
 	
-	    			OutputStream out = asset.getOutputStream();		        
+	    			OutputStream out = asset.getOutputStream();
 	    			bytes = IOUtils.copy(in, out);
 	    			out.close();
 	    			asset.setFormat(mimeType);
@@ -298,85 +302,97 @@ public class InjectionWebService {
 
 
     		//check route status
-    		String status = broker.getRouteStatus(camelRoutes.get(routeId).getXmlCamelRoute());
-    		if(status.contentEquals(RouteStatus.BROKEN.toString())){
+    		WorkflowInfo routeStatus = broker.getRouteStatus(camelRoutes.get(routeId).getXmlCamelRoute());
+    		WorkflowStatus status = routeStatus.getState();
+            switch (status) {
+            case BROKEN:
 
-    			//the requested route cannot be started or is broken
-    			log.error("The camel route with ID {} is currently {}",routeId,status);    			   
+                // the requested route cannot be started or is broken
+                log.error("The camel route with ID {} is currently {}",
+                        routeId, status);
                 return Response
                         .status(Response.Status.BAD_REQUEST)
                         .entity("The camel route with ID {" + routeId
                                 + "} is currently broken").build();
 
-    		} 
-    		else if(status.contentEquals(RouteStatus.UNAVAILABLE.toString())){
+            case UNAVAILABLE:
 
-    			//the requested route cannot be started or is broken
-    			log.error("The camel route with ID {} is currently {}",routeId,status);    			   
+                // the requested route cannot be started or is broken
+                log.error("The camel route with ID {} is currently {}",
+                        routeId, status);
                 return Response
                         .status(Response.Status.SERVICE_UNAVAILABLE)
                         .entity("The camel route with ID {" + routeId
                                 + "} is currently unavailable").build();
 
-    		}
-    		else if(status.contentEquals(RouteStatus.RUNNABLE.toString())){
+            case RUNNABLE:
 
-    			//TODO: here we should start the required extractors
-    			log.warn("The camel route with ID {} is currently {}, but the auto-startup is not implemented",routeId,status);
+                // TODO: here we should start the required extractors
+                log.warn(
+                        "The camel route with ID {} is currently {}, but the auto-startup is not implemented",
+                        routeId, status);
                 return Response
                         .status(Response.Status.NOT_IMPLEMENTED)
-                        .entity("The camel route with ID {" + routeId
+                        .entity("The camel route with ID {"
+                                + routeId
                                 + "} is runnable, but the auto-deployment is not implemented")
                         .build();
-    		}
-    		else if(status.contentEquals(RouteStatus.ONLINE.toString())){
+            case ONLINE:
 
-    			log.debug("The camel route with ID {} is currently {}, looking for compatible entry points ...",routeId,status);
-    			//the route is up and running, proceed with the injection
-    			boolean compatibleEpFound = false;
-    			MICOJobStatus jobState = new MICOJobStatus(itemURI, routeId, notificationURI);
-    			
-    			for(EntryPoint ep:route.getEntryPoints()){
-    				
-    				boolean epCompatible = false;
-    				
-    				//check if the entry point is compatible or not
-    				epCompatible = epCompatible || isCompatible(item, ep);
-    				if(isCompatible(item,ep)){
-    					jobState.addCamelJob(new CamelJob(itemURI, ep.getDirectUri(), camelContext));
-					}
-    				
-    				for(Part p : item.getParts()){
-    					epCompatible = epCompatible || isCompatible(p, ep);
-    					
-    					if(isCompatible(p,ep)){
-    						jobState.addCamelJob(new CamelJob(itemURI, p.getURI().stringValue(), ep.getDirectUri(), camelContext));
-    					}
-    				}
-    				
-    				compatibleEpFound = compatibleEpFound || epCompatible;
+                log.debug(
+                        "The camel route with ID {} is currently {}, looking for compatible entry points ...",
+                        routeId, status);
+                // the route is up and running, proceed with the injection
+                boolean compatibleEpFound = false;
+                MICOJobStatus jobState = new MICOJobStatus(itemURI, routeId,
+                        notificationURI);
 
-    			}
-    			if(compatibleEpFound){
-    				Thread thr = new Thread(jobState);
-    				thr.start();
-    				broker.addMICOCamelJobStatus(new MICOJob(routeId, itemURI), jobState);
-    				
-    				return Response.ok("Start process item with route " + routeId).build();
-    			}
-    			
-    			log.error("Unable to retrieve an entry point compatible with the input item");
+                for (EntryPoint ep : route.getEntryPoints()) {
+
+                    boolean epCompatible = false;
+
+                    // check if the entry point is compatible or not
+                    epCompatible = epCompatible || isCompatible(item, ep);
+                    if (isCompatible(item, ep)) {
+                        jobState.addCamelJob(new CamelJob(itemURI, ep
+                                .getDirectUri(), camelContext));
+                    }
+
+                    for (Part p : item.getParts()) {
+                        epCompatible = epCompatible || isCompatible(p, ep);
+
+                        if (isCompatible(p, ep)) {
+                            jobState.addCamelJob(new CamelJob(itemURI, p
+                                    .getURI().stringValue(), ep.getDirectUri(),
+                                    camelContext));
+                        }
+                    }
+
+                    compatibleEpFound = compatibleEpFound || epCompatible;
+
+                }
+                if (compatibleEpFound) {
+                    Thread thr = new Thread(jobState);
+                    thr.start();
+                    broker.addMICOCamelJobStatus(new MICOJob(routeId, itemURI),
+                            jobState);
+
+                    return Response.ok(
+                            "Start process item with route " + routeId).build();
+                }
+
+                log.error("Unable to retrieve an entry point compatible with the input item");
                 return Response
                         .status(Response.Status.BAD_REQUEST)
                         .entity("Unable to retrieve an entry point compatible with the input item")
                         .build();
-    		}
-    		else{
-    			//status is not between the known ones
-    			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-    		}
+            default: {
+                // status is not between the known ones
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            }
+            }
         }
-
 
         
     }
