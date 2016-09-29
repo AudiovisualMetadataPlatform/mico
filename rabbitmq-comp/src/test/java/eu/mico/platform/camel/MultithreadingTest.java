@@ -1,5 +1,31 @@
 package eu.mico.platform.camel;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.impl.JndiRegistry;
+import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
+import org.apache.camel.language.Bean;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.openrdf.repository.RepositoryException;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableSet;
+
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
@@ -151,7 +177,6 @@ public class MultithreadingTest extends TestBase {
                 micoCamel.init();
                 micoCamel.registerService(extractorA, extractorB1, extractorB2,
                         extractorB2B);
-
                 testHost = micoCamel.getTestHost();
                 cc = new MicoCamelContext();
                 cc.init(micoCamel.getEventManager().getPersistenceService());
@@ -265,9 +290,6 @@ public class MultithreadingTest extends TestBase {
     private static void createItems() throws RepositoryException {
         for (int i = 0; i < BATCH_SIZE; i++) {
             Item item = micoCamel.createItem();
-
-            Assert.assertNotNull(item);
-
             item.setSyntacticalType("A");
             item.setSemanticType("Item-"+String.format("%03d", i));
             items.add(item);
@@ -305,7 +327,11 @@ public class MultithreadingTest extends TestBase {
         }
     }
     
-
+    /**
+     * @param base number of route branches, which are used in the test <br>
+     *             <b>1</b> for test-A_B1 and test-A_B2 <br>
+     *             <b>2</b> for test-A_B1andB2 
+     */
     private void checkItems(boolean enableA, boolean enableB) {
         for (Item i : items) {
             try {
