@@ -1,31 +1,6 @@
 package de.fraunhofer.idmt.camel;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeoutException;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.directory.api.util.DummySSLSocketFactory;
-import org.apache.marmotta.platform.core.test.base.JettyMarmotta;
-import org.apache.marmotta.platform.sparql.webservices.SparqlWebService;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.repository.RepositoryException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
-
+import com.rabbitmq.client.*;
 import de.fraunhofer.idmt.mico.DummyExtractor;
 import de.fraunhofer.idmt.mico.DummyFailingExtractor;
 import de.fraunhofer.idmt.mico.DummyNoPartExtractor;
@@ -34,15 +9,28 @@ import eu.mico.platform.event.api.AnalysisService;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.event.impl.EventManagerImpl;
 import eu.mico.platform.event.model.Event;
-import eu.mico.platform.event.test.mock.EventManagerMock;
-import eu.mico.platform.camel.TestBase;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
 import eu.mico.platform.persistence.model.Asset;
-import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Item;
+import eu.mico.platform.persistence.model.Part;
 import eu.mico.platform.persistence.model.Resource;
 import eu.mico.platform.storage.api.StorageService;
+import org.apache.commons.io.FileUtils;
+import org.apache.marmotta.platform.core.test.base.JettyMarmotta;
+import org.apache.marmotta.platform.sparql.webservices.SparqlWebService;
+import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.repository.RepositoryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.TimeoutException;
 
 public class MicoCamel {
     private static Logger log = LoggerFactory.getLogger(MicoCamel.class);
@@ -182,7 +170,7 @@ public class MicoCamel {
 
     public Item createItem() throws RepositoryException {
         if (eventManager == null) {
-            log.warn("Init mico camel befor calling: 'createItem(..)'");
+            log.error("Init mico camel befor calling: 'createItem(..)'");
             return null;
         }
         PersistenceService svc = eventManager.getPersistenceService();
@@ -191,6 +179,12 @@ public class MicoCamel {
     }
 
     public void deleteContentItem(String item) {
+
+        if (eventManager == null) {
+            log.error("Eventmanager is null, unable to delete anything.");
+            return;
+        }
+
         PersistenceService svc = eventManager.getPersistenceService();
         try {
             svc.deleteItem(new URIImpl(item));
@@ -235,7 +229,9 @@ public class MicoCamel {
      */
     public void shutdown() throws IOException {
         
-        eventManager.shutdown();
+        if (eventManager != null) {
+            eventManager.shutdown();
+        }
         
         if(registrationChannel != null){
             registrationChannel.close();

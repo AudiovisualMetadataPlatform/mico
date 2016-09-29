@@ -1,22 +1,24 @@
 package eu.mico.platform.anno4j.querying;
 
 import com.github.anno4j.Anno4j;
-import com.github.anno4j.model.Annotation;
+import com.github.anno4j.model.namespaces.DC;
 import com.github.anno4j.model.namespaces.DCTERMS;
 import com.github.anno4j.querying.QueryService;
+import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.anno4j.model.PartMMM;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
 import org.apache.marmotta.ldpath.parser.ParseException;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.config.RepositoryConfigException;
 
 import java.util.List;
 
 /**
  * Class with some predefined queries for the set Anno4j object.
  */
-public class MICOQueryHelper {
+public class MICOQueryHelperMMM {
 
     /**
      * Selector type restriction
@@ -38,7 +40,7 @@ public class MICOQueryHelper {
      */
     private Anno4j anno4j;
 
-    public MICOQueryHelper(Anno4j anno4j) {
+    public MICOQueryHelperMMM(Anno4j anno4j) {
         this.anno4j = anno4j;
     }
 
@@ -47,7 +49,6 @@ public class MICOQueryHelper {
      *
      * @param contentItemId The id (url) of the content item.
      * @return List of annotations related to the given content item.
-     *
      * @throws RepositoryException
      * @throws QueryEvaluationException
      * @throws MalformedQueryException
@@ -68,7 +69,6 @@ public class MICOQueryHelper {
      *
      * @param sourceName The name of the injected source.
      * @return List of parts related to the specific source name.
-     *
      * @throws RepositoryException
      * @throws QueryEvaluationException
      * @throws MalformedQueryException
@@ -86,11 +86,49 @@ public class MICOQueryHelper {
     }
 
     /**
+     * Queries those PartMMM objects that are added to an item, whose AssetMMM has the given associated name
+     * (e.g., the file name).
+     *
+     * @param name The name of the injected source.
+     * @return List of parts related to the specific source name.
+     * @throws RepositoryException
+     * @throws QueryEvaluationException
+     * @throws MalformedQueryException
+     * @throws ParseException
+     */
+    public List<PartMMM> getPartsByAssetName(String name) throws RepositoryException, QueryEvaluationException, MalformedQueryException, ParseException {
+        QueryService qs = anno4j.createQueryService()
+                .addPrefix(MMM.PREFIX, MMM.NS)
+                .addPrefix(DCTERMS.PREFIX, DCTERMS.NS)
+                .addCriteria("^mmm:hasPart/mmm:hasAsset/mmm:hasName", name);
+
+        processTypeRestriction(qs);
+
+        return qs.execute(PartMMM.class);
+    }
+
+
+    public List<ItemMMM> getItemsByFormat(String format) throws RepositoryConfigException, RepositoryException, ParseException, MalformedQueryException, QueryEvaluationException {
+
+
+        QueryService qs = anno4j.createQueryService()
+                .addPrefix(MMM.PREFIX, MMM.NS)
+                .addPrefix(DCTERMS.PREFIX, DCTERMS.NS)
+                .addPrefix(DC.PREFIX, DC.NS)
+                .addCriteria("mmm:hasAsset/dc:format", format);
+
+        processTypeRestriction(qs);
+
+        return qs.execute(ItemMMM.class);
+
+    }
+
+
+    /**
      * Queries those PartMMM objects that are added to an item, whose AssetMMM has the given physical location.
      *
      * @param location The name of the injected source.
      * @return List of parts related to the specific source name.
-     *
      * @throws RepositoryException
      * @throws QueryEvaluationException
      * @throws MalformedQueryException
@@ -110,24 +148,24 @@ public class MICOQueryHelper {
     /**
      * @param type The type of the body as String, i.e. "mico:AVQBody"
      */
-    public MICOQueryHelper filterBodyType(String type) {
-        this.bodyTypeRestriction = "[is-a "+ type + "]";
+    public MICOQueryHelperMMM filterBodyType(String type) {
+        this.bodyTypeRestriction = "[is-a " + type + "]";
         return this;
     }
 
     /**
      * @param type The type of the selector as String, i.e. "oa:FragmentSelector"
      */
-    public MICOQueryHelper filterSelectorType(String type) {
-        this.selectorTypeRestriction  = "[is-a "+ type + "]";
+    public MICOQueryHelperMMM filterSelectorType(String type) {
+        this.selectorTypeRestriction = "[is-a " + type + "]";
         return this;
     }
 
     /**
      * @param type The type of the target as String, i.e. "mico:IntialTarget"
      */
-    public MICOQueryHelper filterTargetType(String type) {
-        this.targetTypeRestriction = "[is-a "+ type + "]";
+    public MICOQueryHelperMMM filterTargetType(String type) {
+        this.targetTypeRestriction = "[is-a " + type + "]";
         return this;
     }
 
@@ -137,16 +175,16 @@ public class MICOQueryHelper {
      * @param qs The anno4j QueryService object
      */
     private void processTypeRestriction(QueryService qs) {
-        if(selectorTypeRestriction != null) {
+        if (selectorTypeRestriction != null) {
 
             qs.addCriteria("oa:hasTarget/oa:hasSelector" + selectorTypeRestriction);
         }
 
-        if(bodyTypeRestriction != null) {
+        if (bodyTypeRestriction != null) {
             qs.addCriteria("oa:hasBody" + bodyTypeRestriction);
         }
 
-        if(targetTypeRestriction != null) {
+        if (targetTypeRestriction != null) {
             qs.addCriteria("oa:hasTarget" + targetTypeRestriction);
         }
     }

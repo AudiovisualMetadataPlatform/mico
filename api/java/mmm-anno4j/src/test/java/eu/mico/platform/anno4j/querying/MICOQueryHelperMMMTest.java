@@ -20,19 +20,18 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 /**
- * Test suite for the MICOQueryHelper class.
+ * Test suite for the MICOQueryHelperMMM class.
  */
-public class MICOQueryHelperTest {
+public class MICOQueryHelperMMMTest {
 
     private Anno4j anno4j;
-    private QueryService queryService;
 
     private final static String TEST_BODY_IRI = "http://example.org/testbody";
 
     @Before
     public void setUp() throws Exception {
         this.anno4j = new Anno4j();
-        queryService = anno4j.createQueryService();
+        QueryService queryService = anno4j.createQueryService();
         queryService.addPrefix("mmm", "http://www.mico-project.eu/ns/mmm/2.0/schema#");
     }
 
@@ -55,7 +54,7 @@ public class MICOQueryHelperTest {
         item.addPart(part1);
         item.addPart(part2);
 
-        MICOQueryHelper helper = new MICOQueryHelper(this.anno4j);
+        MICOQueryHelperMMM helper = new MICOQueryHelperMMM(this.anno4j);
 
         List<PartMMM> result = helper.getPartsOfItem(item.getResourceAsString());
 
@@ -65,6 +64,48 @@ public class MICOQueryHelperTest {
         String body2Value = ((TestBody)result.get(1).getBody()).getValue();
         assertTrue(body1Value.equals("body1") && body2Value.equals("body2") || body1Value.equals("body2") && body2Value.equals("body1"));
     }
+
+
+    @Test
+    public void testGetPartsByName() throws RepositoryException, IllegalAccessException, InstantiationException, QueryEvaluationException, MalformedQueryException, ParseException {
+        ItemMMM item = this.anno4j.createObject(ItemMMM.class);
+
+        final String filename = "filename";
+
+        AssetMMM asset = this.anno4j.createObject(AssetMMM.class);
+        asset.setFormat("mp3");
+        asset.setLocation("someLocation");
+        asset.setName("filename");
+
+        item.setAsset(asset);
+
+        // Create part 1
+        PartMMM part1 = this.anno4j.createObject(PartMMM.class);
+        TestBody body1 = this.anno4j.createObject(TestBody.class);
+        body1.setValue("body1");
+        part1.setBody(body1);
+
+        // Create part 2
+        PartMMM part2 = this.anno4j.createObject(PartMMM.class);
+        TestBody body2 = this.anno4j.createObject(TestBody.class);
+        body2.setValue("body2");
+        part2.setBody(body2);
+
+        item.addPart(part1);
+        item.addPart(part2);
+
+        MICOQueryHelperMMM helper = new MICOQueryHelperMMM(this.anno4j);
+
+        List<PartMMM> result = helper.getPartsByAssetName(filename);
+
+        assertEquals(2, result.size());
+
+        String body1Value = ((TestBody)result.get(0).getBody()).getValue();
+        String body2Value = ((TestBody)result.get(1).getBody()).getValue();
+        assertTrue(body1Value.equals("body1") && body2Value.equals("body2") || body1Value.equals("body2") && body2Value.equals("body1"));
+    }
+
+
 
     @Test
     public void testGetPartsBySourceName() throws RepositoryException, IllegalAccessException, InstantiationException, QueryEvaluationException, MalformedQueryException, ParseException {
@@ -91,7 +132,7 @@ public class MICOQueryHelperTest {
         item.addPart(part1);
         item.addPart(part2);
 
-        MICOQueryHelper helper = new MICOQueryHelper(this.anno4j);
+        MICOQueryHelperMMM helper = new MICOQueryHelperMMM(this.anno4j);
 
         List<PartMMM> result = helper.getPartsBySourceNameOfAsset(asset.getResourceAsString());
 
@@ -127,7 +168,7 @@ public class MICOQueryHelperTest {
         item.addPart(part1);
         item.addPart(part2);
 
-        MICOQueryHelper helper = new MICOQueryHelper(this.anno4j);
+        MICOQueryHelperMMM helper = new MICOQueryHelperMMM(this.anno4j);
 
         List<PartMMM> result = helper.getPartsBySourceLocationOfAsset(asset.getLocation());
 

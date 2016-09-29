@@ -28,7 +28,7 @@
 
     <name>MICO Platform: Storage Core</name>
     <packaging>jar</packaging>
-    <version>3.0.4-SNAPSHOT</version>
+
 
     <build>
         <plugins>

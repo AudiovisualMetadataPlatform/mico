@@ -4,10 +4,7 @@ import com.google.common.io.Resources;
 import com.jayway.restassured.RestAssured;
 import eu.mico.platform.testutils.TestServer;
 import org.hamcrest.Matchers;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -67,7 +64,7 @@ public class TextAnalysisWebServiceTest {
     public static void shutdown() throws Exception {
         server.stop();
         connection.close();
-        repository.shutDown();
+        //repository.shutDown();
     }
 
     @Test
