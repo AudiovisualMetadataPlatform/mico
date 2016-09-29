@@ -13,6 +13,7 @@
  */
 package eu.mico.platform.broker.api;
 
+import eu.mico.platform.broker.api.rest.WorkflowInfo;
 import eu.mico.platform.broker.model.MICOJobStatus;
 import eu.mico.platform.broker.model.v2.ServiceGraph;
 import eu.mico.platform.broker.model.MICOJob;
@@ -26,13 +27,53 @@ import java.util.Map;
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
 public interface MICOBroker {
+    /**
+    * The value can be: <br>
+    * <b>ONLINE</b> - (all extractors registred and connected <br>
+    * <b>RUNNABLE</b> - (all extractors registered, but at least one is not connected.
+    * The missing extractors can still be started by the broker <br>
+    * <b>UNAVAILABLE</b> - all extractors registered, but at least one is deployed <br>
+    * <b>BROKEN</b> - at least one extractor is not registered anymore <br>
+    */
+    public enum WorkflowStatus{
+    	ONLINE, RUNNABLE, UNAVAILABLE, BROKEN, PROCESSING;
+    	
+    	@Override
+    	  public String toString() {
+    	    switch(this) {
+    	      case ONLINE:      return "ONLINE";
+    	      case RUNNABLE:    return "RUNNABLE";
+    	      case UNAVAILABLE: return "UNAVAILABLE";
+    	      case BROKEN:      return "BROKEN";
+    	      default: throw new IllegalArgumentException();
+    	    }
+    	  }
+    	
+    }
+
+    public enum ExtractorStatus{
+    	CONNECTED, DEPLOYED, NOT_DEPLOYED, UNREGISTERED;
+    	
+    	@Override
+    	  public String toString() {
+    	    switch(this) {
+    	      case CONNECTED:    return "CONNECTED";
+              case DEPLOYED:     return "DEPLOYED";
+              case NOT_DEPLOYED: return "NOT_DEPLOYED";
+    	      case UNREGISTERED: return "UNREGISTERED";
+    	      default: throw new IllegalArgumentException();
+    	    }
+    	  }
+    	
+    }
+
     ServiceGraph getDependencies();
 
     Map<String, ItemState> getStates();
 
     PersistenceService getPersistenceService();
 
-    String getRouteStatus(String camelRoute);
+    WorkflowInfo getRouteStatus(String camelRoute);
 
     
     void addMICOCamelJobStatus(MICOJob job,MICOJobStatus jobState);
