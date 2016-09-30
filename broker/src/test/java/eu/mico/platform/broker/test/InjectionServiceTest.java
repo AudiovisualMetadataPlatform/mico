@@ -15,20 +15,12 @@ package eu.mico.platform.broker.test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.filter.log.ResponseLoggingFilter;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-
-import static com.jayway.restassured.RestAssured.given;
-
 import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.ShutdownSignalException;
 
 import eu.mico.platform.broker.model.MICOCamelRoute;
 import eu.mico.platform.broker.webservices.InjectionWebService;
-import eu.mico.platform.broker.webservices.StatusWebService;
 import eu.mico.platform.broker.webservices.WorkflowManagementService;
 import eu.mico.platform.camel.MicoCamelContext;
 import eu.mico.platform.event.api.AnalysisResponse;
@@ -56,9 +48,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -91,45 +81,15 @@ public class InjectionServiceTest extends BaseBrokerTest {
     private static InjectionWebService injService = null;
     private static final String USER = "INJECTION-TEST-USER-"+UUID.randomUUID().toString();
 	
-    private static RequestSpecification spec;
-
-    private static MicoCamelContext camelContext;
-
-    private static HashMap<String, MICOCamelRoute> camelRoutes;
-
-    private static HashSet<Object> services;
-    
-    @BeforeClass
-    public static void initSpec(){
-        spec = new RequestSpecBuilder()
-                .setContentType(ContentType.JSON)
-                .setBaseUri("http://localhost:8088/broker/")
-                .addFilter(new ResponseLoggingFilter())//log request and response for better debugging. You can also only log if a requests fails.
-                .build();
-    }
-        
-    @BeforeClass
-    public static void init() throws IOException, TimeoutException,
-            URISyntaxException {
-
-        eventManager = new EventManagerImpl(amqpHost, amqpUsr, amqpPwd, amqpVHost);
-        eventManager.init();
-
-        context.init(broker.getPersistenceService());
-        wManager = new WorkflowManagementService(broker, context, routes);
-        injService = new InjectionWebService(broker, eventManager, context, routes);
-        
-        camelContext = new MicoCamelContext();
-        camelContext.init(broker.getPersistenceService());
-
-        
-        camelRoutes = new HashMap<String,MICOCamelRoute>();
-
-        services = new HashSet<>();
-        services.add(new StatusWebService(broker));
-        services.add(new InjectionWebService(broker, eventManager, camelContext, Collections.unmodifiableMap(camelRoutes)));
-        services.add(new WorkflowManagementService(broker, camelContext, camelRoutes).loadCamelRoutesFrom("camel-routes"));
-
+	@BeforeClass 
+	public static void init() throws IOException, TimeoutException, URISyntaxException{
+		
+		 eventManager = new EventManagerImpl(amqpHost, amqpUsr, amqpPwd, amqpVHost);
+	     eventManager.init();
+		
+    	context.init(broker.getPersistenceService());
+    	wManager = new WorkflowManagementService(broker, context, routes);
+    	injService = new InjectionWebService(broker, eventManager, context, routes);
 	}
 	
 	@After
@@ -145,39 +105,6 @@ public class InjectionServiceTest extends BaseBrokerTest {
 	    }
 	}
 	
-    /**
-     * create one item with one asset in one step
-     */
-    @Test
-    public void testItemCreationOneStep() {
-        given().spec(spec).content("Test data for one-step creation".getBytes())
-                .when().post("inject/create?type=mico:Text")
-                .then()
-                .statusCode(200);
-
-    }
-
-    /**
-     * create an item with one asset in a part (two requests)
-     */
-    @Test
-    public void testItemCreationTwoStep() {
-        String itemUri = given().spec(spec).param("type", "mico:Text")
-                .post("inject/create")
-                .then()
-                .statusCode(200)
-                .extract().jsonPath().get("itemUri");
-
-        log.debug("created ITEM_URI = {}", itemUri);
-
-        given().spec(spec)
-        .param("type", "mico:Text")
-        .param("itemUri", itemUri)
-        .content("Test data for two-step creation")
-        .when()
-        .post("inject/add?").then().statusCode(200);
-    }
-    
 	@Test
     public void testOldInjectionWithSimpleItem() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
     	
