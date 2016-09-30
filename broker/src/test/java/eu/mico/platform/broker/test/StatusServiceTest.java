@@ -385,40 +385,7 @@ public class StatusServiceTest extends BaseBrokerTest {
     		ps.deleteItem(items.get(0).getURI());
     		items.remove(0);
     	}
-    	
-    	//call C-D (the slow one )
-    	items.add(broadcastSimpleItem("C"));
-    	
-    	//check that its status is available and equal to DONE
-    	try{
-            Map<String, Object> proprs = getStatus(items);
-            
-            boolean finished = Boolean.parseBoolean(((String)proprs.get("finished")));
-            boolean hasError = Boolean.parseBoolean(((String)proprs.get("hasError")));
-            
-            Assert.assertFalse("The item should still be in progress",finished);
-            Assert.assertFalse("The item should have no error reported",hasError);
-            
-            Thread.sleep(2000); // same as the mock 
-    		proprs = statusService.getItems(items.get(0).getURI().stringValue(),false,0,0).get(0);
-            
-            finished = Boolean.parseBoolean(((String)proprs.get("finished")));
-            hasError = Boolean.parseBoolean(((String)proprs.get("hasError")));
-            
-            Assert.assertTrue("The item should have finished",finished);
-            Assert.assertFalse("The item should have no error reported",hasError);
-            
-    	}
-    	catch(Exception e){
-    		e.printStackTrace();
-    		Assert.fail();
-    	}
-    	finally{
-    		ps.deleteItem(items.get(0).getURI());
-    		items.remove(0);
-    	}
-    	 
-        
+
 
     }
 
