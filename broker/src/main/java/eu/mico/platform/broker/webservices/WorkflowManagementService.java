@@ -14,10 +14,13 @@
 package eu.mico.platform.broker.webservices;
 
 import com.google.common.collect.ImmutableMap;
+
 import eu.mico.platform.broker.api.MICOBroker;
+import eu.mico.platform.broker.api.rest.WorkflowInfo;
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
 import eu.mico.platform.broker.model.MICOCamelRoute;
 import eu.mico.platform.camel.MicoCamelContext;
+
 import org.codehaus.plexus.util.FileUtils;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
@@ -27,6 +30,7 @@ import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -130,7 +134,7 @@ public class WorkflowManagementService {
 	@GET
 	@Path("/routes")
 	@Produces("application/json")
-	public Response getStatus() throws RepositoryException,
+	public Response getWorkflows() throws RepositoryException,
 			IOException {
 
 		synchronized (camelLock) {
@@ -179,7 +183,9 @@ public class WorkflowManagementService {
 		        if (broker instanceof MICOBrokerImpl){
 		        	String xmlCamelRoute=getCamelRoute(workflowId);
 		        	if(xmlCamelRoute != null){
-		        		status =  broker.getRouteStatus(xmlCamelRoute);
+		        		WorkflowInfo wfi = broker.getRouteStatus(xmlCamelRoute);
+		        		log.debug("status of route {}", wfi.toString());
+                        status =  wfi.getState().name();
 		        	}
 		        	else{
 		        		log.error("No route with id {} is currently registered",workflowId);
@@ -187,7 +193,7 @@ public class WorkflowManagementService {
 		        }
 	        }
 	    	catch(Exception e){
-	    		log.error("Unable to retrieve status for workflow {}",workflowId);
+	    		log.error("Unable to retrieve status for workflow {}:{}",workflowId,e.getMessage());
 	    	}
 	    	
 	        return status;

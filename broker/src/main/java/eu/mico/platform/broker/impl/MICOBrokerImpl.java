@@ -21,6 +21,8 @@ import com.rabbitmq.client.*;
 
 import eu.mico.platform.broker.api.ItemState;
 import eu.mico.platform.broker.api.MICOBroker;
+import eu.mico.platform.broker.api.rest.ExtractorInfo;
+import eu.mico.platform.broker.api.rest.WorkflowInfo;
 import eu.mico.platform.broker.exception.StateNotFoundException;
 import eu.mico.platform.broker.model.*;
 import eu.mico.platform.broker.model.v2.BrokerV2ItemState;
@@ -760,51 +762,34 @@ public class MICOBrokerImpl implements MICOBroker {
     
     //---- route status retrieval
     
-    //
-    public enum RouteStatus{
-    	ONLINE, RUNNABLE, UNAVAILABLE, BROKEN;
-    	
-    	@Override
-    	  public String toString() {
-    	    switch(this) {
-    	      case ONLINE:      return "ONLINE";
-    	      case RUNNABLE:    return "RUNNABLE";
-    	      case UNAVAILABLE: return "UNAVAILABLE";
-    	      case BROKEN:      return "BROKEN";
-    	      default: throw new IllegalArgumentException();
-    	    }
-    	  }
-    	
-    };
-    
-    public String getRouteStatus(String xmlCamelRoute) {
+    public WorkflowInfo getRouteStatus(String xmlCamelRoute) {
     	try {
 	    	//1. Parse the route
 	    	MICOCamelRoute route = new MICOCamelRoute();
 	    	route.parseCamelRoute(xmlCamelRoute);
 	    	
 	    	//2. Retrieve its status
-	    	RouteStatus status = 	getRouteStatus(route);    	
-	
+	    	return getRouteStatus(route);
+	    	
 	    	//3. Return its string value    	
-	    	return status.toString();
+	    	
     	}
     	catch (Exception e){
     		//Handle any kind of exception by return BROKEN
-    		log.error("Unable to retrieve route status, returning {}",RouteStatus.BROKEN.toString());
+    		log.error("Unable to retrieve route status, returning {}",WorkflowStatus.BROKEN.toString());
     		e.printStackTrace();
-    		return RouteStatus.BROKEN.toString();
+    		return new WorkflowInfo(WorkflowStatus.BROKEN);
     	}
     	
     }
     
-    public RouteStatus getRouteStatus(MICOCamelRoute route) throws ClientProtocolException, IOException{
+    public WorkflowInfo getRouteStatus(MICOCamelRoute route) throws ClientProtocolException, IOException{
     	
     	List<MICOCamelRoute.ExtractorConfiguration> extractors=route.getExtractorConfigurations();
     	
     	if(extractors == null || extractors.isEmpty()){
-    		log.error("Critical: no extractors could be parsed from the camel route, returning {}",RouteStatus.BROKEN.toString());
-    		return RouteStatus.BROKEN;
+    		log.error("Critical: no extractors could be parsed from the camel route, returning {}",WorkflowStatus.BROKEN.toString());
+    		return new WorkflowInfo(WorkflowStatus.BROKEN);
     	}
     	
     	//for every extractor configuration, retrieve its status
@@ -812,32 +797,34 @@ public class MICOBrokerImpl implements MICOBroker {
     	HashMap<MICOCamelRoute.ExtractorConfiguration,ExtractorStatus> eStatus = 
     			new HashMap<MICOCamelRoute.ExtractorConfiguration,ExtractorStatus> ();
     	
+        WorkflowInfo routeInfo = new WorkflowInfo(WorkflowStatus.ONLINE);
     	for( MICOCamelRoute.ExtractorConfiguration extractor : extractors){
-    		eStatus.put(extractor, getExtractorStatus(extractor));
+    		ExtractorStatus extractorStatus = getExtractorStatus(extractor);
+            eStatus.put(extractor, extractorStatus);
+            routeInfo.addExtractor(new ExtractorInfo(extractor, extractorStatus));
     	}
     	
     	//then iterate among the statuses
-    	RouteStatus routeStatus = RouteStatus.ONLINE;
     	for(ExtractorStatus status : eStatus.values()){
-    		switch(routeStatus){
+    		switch(routeInfo.getState()){
 	    		case ONLINE: 
 	    			switch(status){
-		    			case DEPLOYED:     routeStatus=RouteStatus.RUNNABLE;    break;
-		    			case NOT_DEPLOYED: routeStatus=RouteStatus.UNAVAILABLE; break;
-		    			case UNREGISTERED: return RouteStatus.BROKEN;
+		    			case DEPLOYED:     routeInfo.setState(WorkflowStatus.RUNNABLE);    break;
+		    			case NOT_DEPLOYED: routeInfo.setState(WorkflowStatus.UNAVAILABLE); break;
+		    			case UNREGISTERED: routeInfo.setState(WorkflowStatus.BROKEN);
 		    			default: break;
 	    			}break;
 	    			
 	    		case RUNNABLE:
 	    			switch(status){
-		    			case NOT_DEPLOYED: routeStatus=RouteStatus.UNAVAILABLE; break;
-		    			case UNREGISTERED: return RouteStatus.BROKEN;
+		    			case NOT_DEPLOYED: routeInfo.setState(WorkflowStatus.UNAVAILABLE); break;
+		    			case UNREGISTERED: routeInfo.setState(WorkflowStatus.BROKEN);
 		    			default: break;
 	    			}break;
 	    			
 	    		case UNAVAILABLE:
 	    			switch(status){
-	    			case UNREGISTERED: return RouteStatus.BROKEN;
+	    			case UNREGISTERED: routeInfo.setState(WorkflowStatus.BROKEN);
 	    			default: break;
 				}break;
 	    		default:
@@ -846,7 +833,7 @@ public class MICOBrokerImpl implements MICOBroker {
 	    		}
     	}
 
-    	return routeStatus;
+    	return routeInfo;
     }
     
     private ExtractorStatus getExtractorStatus(MICOCamelRoute.ExtractorConfiguration e) throws ClientProtocolException, IOException{ 
@@ -934,22 +921,7 @@ public class MICOBrokerImpl implements MICOBroker {
     
     public String getRegistrationBaseUri() {
 		return registrationBaseUri;
-	}
-
-	public enum ExtractorStatus{
-    	CONNECTED, DEPLOYED, NOT_DEPLOYED, UNREGISTERED;
-    	
-    	@Override
-    	  public String toString() {
-    	    switch(this) {
-    	      case CONNECTED:    return "CONNECTED";
-    	      case DEPLOYED:     return "DEPLOYED";
-    	      case UNREGISTERED: return "UNREGISTERED";
-    	      default: throw new IllegalArgumentException();
-    	    }
-    	  }
-    	
-    };
+	};
     
     
 

@@ -20,8 +20,10 @@
         </encoder>
     </appender>
 
-    <logger name="eu.mico" level="DEBUG" />
-    <logger name="com.github.anno4j" level="DEBUG" />
+    <logger name="eu.mico" level="WARN" />
+    <logger name="com.github.anno4j" level="WARN" />
+    <logger name="org.apache" level="WARN"/>
+    <logger name="httpclient" level="WARN"/>
 
     <root level="WARN">
         <appender-ref ref="STDOUT" />

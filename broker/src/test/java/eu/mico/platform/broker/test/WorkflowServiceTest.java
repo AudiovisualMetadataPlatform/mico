@@ -14,7 +14,7 @@
 package eu.mico.platform.broker.test;
 
 
-import eu.mico.platform.broker.impl.MICOBrokerImpl.RouteStatus;
+import eu.mico.platform.broker.api.MICOBroker.WorkflowStatus;
 import eu.mico.platform.broker.model.MICOCamelRoute;
 import eu.mico.platform.broker.webservices.WorkflowManagementService;
 import eu.mico.platform.camel.MicoCamelContext;
@@ -77,23 +77,23 @@ import javax.ws.rs.core.Response.Status;
         String newId = service.addWorkflow(USER, abWorkflow );
         String nonExistingId = "notExistingId";
         
-        assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, nonExistingId));
-        assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, newId));
+        assertRouteStatus(WorkflowStatus.BROKEN,service.getStatus(USER, nonExistingId));
+        assertRouteStatus(WorkflowStatus.BROKEN,service.getStatus(USER, newId));
         
         registerExtractor(abService,"mico/test");
-        assertRouteStatus(RouteStatus.UNAVAILABLE,service.getStatus(USER, newId));
+        assertRouteStatus(WorkflowStatus.UNAVAILABLE,service.getStatus(USER, newId));
         
         connectExtractor(abService);        
-        assertRouteStatus(RouteStatus.ONLINE,service.getStatus(USER, newId));
+        assertRouteStatus(WorkflowStatus.ONLINE,service.getStatus(USER, newId));
         
         disconnectExtractor(abService);
-        assertRouteStatus(RouteStatus.UNAVAILABLE,service.getStatus(USER, newId));
+        assertRouteStatus(WorkflowStatus.UNAVAILABLE,service.getStatus(USER, newId));
         
         unregisterExtractor(abService);
-        assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, newId));
+        assertRouteStatus(WorkflowStatus.BROKEN,service.getStatus(USER, newId));
         
         service.deleteWorkflow(newId);
-        assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, nonExistingId));
+        assertRouteStatus(WorkflowStatus.BROKEN,service.getStatus(USER, nonExistingId));
     }
     
 	@Test
@@ -185,7 +185,7 @@ import javax.ws.rs.core.Response.Status;
     	try{
     	  	for(String id : ids){
         		service.deleteWorkflow(id);
-        		assertRouteStatus(RouteStatus.BROKEN,service.getStatus(USER, id));
+        		assertRouteStatus(WorkflowStatus.BROKEN,service.getStatus(USER, id));
         	}
     	}catch(Exception e) {
     		Assert.fail("Unexpected exception while deleting an existing workflow for user "+USER);
@@ -194,7 +194,7 @@ import javax.ws.rs.core.Response.Status;
     	try{
     	  	for(String id : ids2){
         		service.deleteWorkflow(id);
-        		assertRouteStatus(RouteStatus.BROKEN,service.getStatus(GUEST, id));
+        		assertRouteStatus(WorkflowStatus.BROKEN,service.getStatus(GUEST, id));
         	}
     	}catch(Exception e) {
     		Assert.fail("Unexpected exception while deleting an existing workflow for user "+GUEST);
@@ -205,7 +205,7 @@ import javax.ws.rs.core.Response.Status;
     
     // ------------------------ HELPER UTILITIES -------------------- //
     
-    public static void assertRouteStatus(RouteStatus expected,  String retrieved){
+    public static void assertRouteStatus(WorkflowStatus expected,  String retrieved){
     	String errorMessage =  "Expected route status was " + expected.toString() +
                                ", but is "+retrieved;
     	Assert.assertTrue(errorMessage,expected.toString().contentEquals(retrieved));
