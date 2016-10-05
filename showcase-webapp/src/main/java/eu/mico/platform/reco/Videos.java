@@ -9,6 +9,7 @@ import javax.json.JsonObject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -68,12 +69,20 @@ public class Videos {
 
     @GET
     @Path("/analyzed")
-    public Response getAvailableVideos() {
+    public Response getAnalyzedVideos() {
 
 
         JsonArrayBuilder responseFileListBuilder = Json.createArrayBuilder();
 
-        List<String> fileNames = NERQuery.getFileNamesByFormat("video/mp4", mqh);
+
+
+        List<String> fileNames_mp4 = NERQuery.getFileNamesByFormat("video/mp4", mqh);
+        List<String> fileNames_quicktime = NERQuery.getFileNamesByFormat("video/quicktime", mqh);
+
+        List<String> fileNames = new ArrayList<>();
+        fileNames.addAll(fileNames_mp4);
+        fileNames.addAll(fileNames_quicktime);
+
 
         for (String filename : fileNames) {
             if (filename != null) {
