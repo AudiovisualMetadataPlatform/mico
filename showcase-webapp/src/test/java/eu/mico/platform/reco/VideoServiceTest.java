@@ -68,7 +68,7 @@ public class VideoServiceTest {
 
         List<String> fileList = from(json).get("filenames");
 
-        Assert.assertTrue(fileList.size() == 6);
+        Assert.assertEquals(9, fileList.size());
     }
 
 
@@ -82,8 +82,6 @@ public class VideoServiceTest {
                 .body().asString();
 
         List<String> fileList = from(json).get("filenames");
-
-
 
         Assert.assertTrue(fileList.size() > 0);
     }

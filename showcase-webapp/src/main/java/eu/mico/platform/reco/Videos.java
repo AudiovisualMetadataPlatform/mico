@@ -9,9 +9,7 @@ import javax.json.JsonObject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,12 +40,16 @@ public class Videos {
 
         //set defaults
         String[] _availableFiles = {
+                "sep30.mp4",
+                "history.mp4",
+                "mohamed.mp4",
                 "p360 - GREENPEACE THE OCEAN.mp4",
                 "p720 - Agricoltura ecologica Greenpeace in dirigibile sopra Milano.mp4",
                 "p720 - Detox presente par Michel Genet, directeur de Greenpeace Belgique.mp4",
                 "p720 - p720 - Greenpeace Year in Pictures 2011.mp4",
                 "p720 - p720 - HTCs Comma, Flash on Mobile Devices, Greenpeace, The Oona and much more iPhone Life Magazine.mp4",
                 "p720 - GREENPEACE DEFORESTATION.mp4"};
+
         List<String> availableFiles = Arrays.asList(_availableFiles);
 
 
@@ -79,7 +81,7 @@ public class Videos {
         List<String> fileNames_mp4 = NERQuery.getFileNamesByFormat("video/mp4", mqh);
         List<String> fileNames_quicktime = NERQuery.getFileNamesByFormat("video/quicktime", mqh);
 
-        List<String> fileNames = new ArrayList<>();
+        Set<String> fileNames = new LinkedHashSet<>();
         fileNames.addAll(fileNames_mp4);
         fileNames.addAll(fileNames_quicktime);
 
