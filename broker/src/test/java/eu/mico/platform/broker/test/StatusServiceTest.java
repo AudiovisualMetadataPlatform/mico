@@ -36,12 +36,11 @@ import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.NotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
-
-import javax.ws.rs.NotFoundException;
 
 
 /**
@@ -309,8 +308,8 @@ public class StatusServiceTest extends BaseBrokerTest {
             finished = state.isFinished();
             hasError = state.hasError();
             
-            Assert.assertTrue("The item should have finished",finished);
-            Assert.assertFalse("The item should have no error reported",hasError);
+            Assert.assertTrue("The item should have finished", finished);
+            Assert.assertFalse("The item should have no error reported", hasError);
             
     	}
     	catch(Exception e){
