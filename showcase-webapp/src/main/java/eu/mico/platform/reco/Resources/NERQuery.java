@@ -19,7 +19,6 @@ import org.openrdf.repository.config.RepositoryConfigException;
 import org.openrdf.repository.object.LangString;
 import org.openrdf.repository.sparql.SPARQLRepository;
 
-import java.net.URI;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.logging.Logger;
@@ -202,7 +201,6 @@ public class NERQuery {
                     String fileName = asset.getName();
                     String itemUri = item.toString();
 
-
                     String id, prefix;
 
                     if (itemUri.startsWith(marmotta_base)) {
@@ -211,20 +209,26 @@ public class NERQuery {
 
                     } else {
 
-                        URI identifier = URI.create(itemUri);
+                        int splitPoint = itemUri.lastIndexOf("/") + 1;
 
-                        prefix = identifier.getScheme() + "://" + identifier.getAuthority();
-                        id = identifier.getPath();
+                        prefix = itemUri.substring(0, splitPoint);
+                        id = itemUri.substring(splitPoint);
                     }
 
-                    retList.add(
-                            new ItemDescription(fileName, id, prefix)
-                    );
+                    try {
+                        //noinspection ResultOfMethodCallIgnored
+                        UUID.fromString(id);
 
+                        retList.add(
+                                new ItemDescription(fileName, id, prefix)
+                        );
+
+                    } catch (IllegalArgumentException e) {
+
+                        log.warning("Unable to parse item " + itemUri);
+                    }
                 }
             }
-
-
         } catch (OpenRDFException | ParseException e) {
             e.printStackTrace();
 
