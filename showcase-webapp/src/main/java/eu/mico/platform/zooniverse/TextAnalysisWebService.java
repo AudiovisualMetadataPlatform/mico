@@ -1,6 +1,7 @@
 package eu.mico.platform.zooniverse;
 
 import com.google.common.collect.ImmutableMap;
+
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
@@ -8,6 +9,7 @@ import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.zooniverse.model.TextAnalysisInput;
 import eu.mico.platform.zooniverse.model.TextAnalysisOutput;
 import eu.mico.platform.zooniverse.util.BrokerServices;
+
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
@@ -22,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormatSymbols;
@@ -58,6 +61,7 @@ public class TextAnalysisWebService {
     private static final String ExtractorID = "mico-extractor-named-entity-recognizer";
     private static final String ExtractorModeID = "RedlinkNER";
     private static final String ExtractorVersion = "3.1.0";
+    private static final int REDLINK_NER_ROUTE_ID = 1;
 
 
     @POST
@@ -93,7 +97,8 @@ public class TextAnalysisWebService {
                 throw e;
             }
 
-            eventManager.injectItem(item);
+            String itemId = item.getURI().getLocalName();
+            brokerSvc.submitItem(itemId,REDLINK_NER_ROUTE_ID);
 
             return Response.status(Response.Status.CREATED)
                     .entity(ImmutableMap.of("id",item.getURI().getLocalName(),"status","submitted"))
