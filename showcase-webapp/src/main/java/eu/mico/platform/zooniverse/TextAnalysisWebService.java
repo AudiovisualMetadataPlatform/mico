@@ -7,6 +7,7 @@ import eu.mico.platform.persistence.model.Asset;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.zooniverse.model.TextAnalysisInput;
 import eu.mico.platform.zooniverse.model.TextAnalysisOutput;
+import eu.mico.platform.zooniverse.util.BrokerException;
 import eu.mico.platform.zooniverse.util.BrokerServices;
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.Literal;
@@ -156,7 +157,17 @@ public class TextAnalysisWebService {
 
 
         //test if it is still in progress
-        final eu.mico.platform.zooniverse.util.Item itemStatus = brokerSvc.getItem(itemURI);
+        eu.mico.platform.zooniverse.util.Item itemStatus;
+        try {
+            itemStatus = brokerSvc.getItem(itemURI);
+        }
+        catch (BrokerException e) {
+            log.warn("Unable to retrieve item status: " + e.getMessage());
+            itemStatus = null;
+            // We continue, assuming that this item can be in marmotta without the broker
+            // knowing about it, e.g. because it is imported externally or the broker was restarted
+            // in the meantime
+        }
         if (itemStatus != null && !itemStatus.hasFinished()) {
             return Response.status(Response.Status.ACCEPTED)
                     .entity(ImmutableMap.of("id",itemURI,"status","inProgress"))
@@ -166,6 +177,11 @@ public class TextAnalysisWebService {
         final TextAnalysisOutput out;
         try {
             out = getTextResult(itemURI, item);
+
+            if (itemStatus == null) {
+                out.status = "unknown";
+            }
+
             item.getObjectConnection().close();
 
             if(out == null) {

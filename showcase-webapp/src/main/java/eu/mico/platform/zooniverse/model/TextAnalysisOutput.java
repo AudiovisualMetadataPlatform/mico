@@ -1,7 +1,5 @@
 package eu.mico.platform.zooniverse.model;
 
-import eu.mico.platform.persistence.model.Item;
-
 import java.util.List;
 
 /**
@@ -12,7 +10,7 @@ import java.util.List;
 public class TextAnalysisOutput {
 
     public String id;
-    public final String status = "finished";
+    public String status = "finished";
 
     public Object sentiment;
     public List topics;
