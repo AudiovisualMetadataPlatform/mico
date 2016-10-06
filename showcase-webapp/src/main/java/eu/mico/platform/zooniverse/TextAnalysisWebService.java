@@ -1,7 +1,6 @@
 package eu.mico.platform.zooniverse;
 
 import com.google.common.collect.ImmutableMap;
-
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
@@ -9,7 +8,6 @@ import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.zooniverse.model.TextAnalysisInput;
 import eu.mico.platform.zooniverse.model.TextAnalysisOutput;
 import eu.mico.platform.zooniverse.util.BrokerServices;
-
 import org.apache.commons.io.IOUtils;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
@@ -24,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormatSymbols;
@@ -145,7 +142,11 @@ public class TextAnalysisWebService {
 
         final Item item;
         try {
-            item = persistenceService.getItem(new URIImpl(this.marmottaBaseUri + "/" + itemURI));
+            if (itemURI.startsWith("http://")) {
+                item = persistenceService.getItem(new URIImpl(itemURI));
+            } else {
+                item = persistenceService.getItem(new URIImpl(this.marmottaBaseUri + "/" + itemURI));
+            }
             if (item == null)
                 return Response.status(Response.Status.NOT_FOUND).entity(String.format("Could not find ContentItem '%s'", itemURI)).build();
         } catch (RepositoryException e) {
