@@ -1,18 +1,23 @@
 package eu.mico.platform.reco;
 
+import com.github.anno4j.Anno4j;
 import com.jayway.restassured.RestAssured;
 import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
-import eu.mico.platform.testutils.MqhMocks;
+import eu.mico.platform.testutils.Mockups;
 import eu.mico.platform.testutils.TestServer;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 import static com.jayway.restassured.path.json.JsonPath.from;
@@ -37,25 +42,40 @@ public class VideoServiceTest {
     private static MICOQueryHelperMMM mqh;
 
 
+    private static Repository repository;
+
+    private static RepositoryConnection connection;
 
 
     @BeforeClass
     public static void init() throws Exception {
 
-        mqh = MqhMocks.mockMicoQueryHelper();
-        Videos videoService = new Videos(mqh);
 
+        //init in memory repository
+        repository = Mockups.initializeRepository("reco/videokaldiner.ttl");
+        connection = repository.getConnection();
+
+        Anno4j anno4j = new Anno4j();
+        anno4j.setRepository(repository);
+        mqh = new MICOQueryHelperMMM(anno4j);
+
+        Videos videoService = new Videos(mqh);
 
         //init server
         server = new TestServer();
-
         server.addWebservice(videoService);
-
         server.start();
 
 
+    }
+
+    @AfterClass
+    public static void tearDown() throws Exception {
+
+        connection.close();
 
     }
+
 
     @Test
     public void testGetDefaultVideos() throws IOException, RepositoryException {
@@ -86,6 +106,28 @@ public class VideoServiceTest {
         Assert.assertTrue(fileList.size() > 0);
     }
 
+
+    @Test
+    public void testGetAnalyzedVideosV2() throws IOException, RepositoryException {
+
+        String json = RestAssured.
+                given().log().all().
+                when().
+                get(server.getUrl() + "videos/v2/analyzed")
+                .body().asString();
+
+        List<HashMap> videoList = from(json).get("analyzedVideos");
+
+        Assert.assertNotNull(videoList);
+
+        Assert.assertEquals(1, videoList.size());
+
+        HashMap videoItem = videoList.get(0);
+
+        Assert.assertEquals("p360 - Today in History for September 22nd.webm.mp4", videoItem.get("filename"));
+        Assert.assertEquals("http://demo2.mico-project.eu:8080/marmotta/", videoItem.get("prefix"));
+        Assert.assertEquals("84fd3c97-3805-41de-9e26-f5fd87e68d50", videoItem.get("id"));
+    }
 
 
     @Test
