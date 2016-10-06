@@ -19,6 +19,7 @@ import org.openrdf.repository.config.RepositoryConfigException;
 import org.openrdf.repository.object.LangString;
 import org.openrdf.repository.sparql.SPARQLRepository;
 
+import java.net.URI;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.logging.Logger;
@@ -29,6 +30,7 @@ import static junit.framework.Assert.assertNotNull;
 public class NERQuery {
 
     private static final String endpointUrl = "http://mico-platform:8080/marmotta/sparql/select";
+    private static final String marmotta_base = "http://mico-platform:8080/marmotta/";
     private static Logger log = Logger.getAnonymousLogger();
 
 
@@ -186,6 +188,51 @@ public class NERQuery {
 
     }
 
+    public static List<ItemDescription> getItemDescriptionByFormat(String format, MICOQueryHelperMMM mqh) {
+
+        List<ItemDescription> retList = new ArrayList<>();
+
+        try {
+            List<ItemMMM> items = mqh.getItemsByFormat(format);
+
+            for (ItemMMM item : items) {
+                AssetMMM asset = item.getAsset();
+                if (asset != null) {
+
+                    String fileName = asset.getName();
+                    String itemUri = item.toString();
+
+
+                    String id, prefix;
+
+                    if (itemUri.startsWith(marmotta_base)) {
+                        id = itemUri.substring(marmotta_base.length());
+                        prefix = marmotta_base;
+
+                    } else {
+
+                        URI identifier = URI.create(itemUri);
+
+                        prefix = identifier.getScheme() + "://" + identifier.getAuthority();
+                        id = identifier.getPath();
+                    }
+
+                    retList.add(
+                            new ItemDescription(fileName, id, prefix)
+                    );
+
+                }
+            }
+
+
+        } catch (OpenRDFException | ParseException e) {
+            e.printStackTrace();
+
+        }
+
+        return retList;
+
+    }
 
     public static List<String> getFileNamesByFormat(String format, MICOQueryHelperMMM mqh) {
 
@@ -213,12 +260,61 @@ public class NERQuery {
 
     }
 
-
     public static MICOQueryHelperMMM getMicoQueryHelper() throws RepositoryException, RepositoryConfigException {
         Anno4j anno4j = new Anno4j();
         Repository micoSparqlEndpoint = new SPARQLRepository(endpointUrl);
         micoSparqlEndpoint.initialize();
         anno4j.setRepository(micoSparqlEndpoint);
         return new MICOQueryHelperMMM(anno4j);
+    }
+
+
+    public static class ItemDescription {
+        private String filename;
+        private String id;
+        private String prefix;
+
+        ItemDescription(String filename, String id, String prefix) {
+            this.filename = filename;
+
+            this.id = id;
+            this.prefix = prefix;
+        }
+
+        public String getFilename() {
+            if (filename == null) {
+                return "";
+            }
+            return filename;
+        }
+
+        public String getId() {
+            if (id == null) {
+                return "";
+            }
+            return id;
+        }
+
+        public String getPrefix() {
+            if (prefix == null) {
+                return "";
+            }
+            return prefix;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ItemDescription that = (ItemDescription) o;
+            return Objects.equals(filename, that.filename) &&
+                    Objects.equals(id, that.id) &&
+                    Objects.equals(prefix, that.prefix);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(filename, id, prefix);
+        }
     }
 }

@@ -6,10 +6,14 @@ import eu.mico.platform.reco.Resources.NERQuery;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -70,12 +74,49 @@ public class Videos {
 
 
     @GET
+    @Path("/v2/analyzed/")
+    public Response getAnalyzedVideos2() {
+
+
+
+        JsonArrayBuilder itemDescriptionArray = Json.createArrayBuilder();
+
+        List<NERQuery.ItemDescription> fileNames_mp4 = NERQuery.getItemDescriptionByFormat("video/mp4", mqh);
+        List<NERQuery.ItemDescription> fileNames_quicktime = NERQuery.getItemDescriptionByFormat("video/quicktime", mqh);
+
+        Set<NERQuery.ItemDescription> itemDescriptions = new LinkedHashSet<>();
+        itemDescriptions.addAll(fileNames_mp4);
+        itemDescriptions.addAll(fileNames_quicktime);
+
+        for (NERQuery.ItemDescription itemDescription : itemDescriptions) {
+
+            JsonObjectBuilder descriptionObject = Json.createObjectBuilder();
+
+            if (itemDescription != null) {
+                descriptionObject.add("filename", itemDescription.getFilename());
+                descriptionObject.add("prefix", itemDescription.getPrefix());
+                descriptionObject.add("id", itemDescription.getId());
+            }
+
+            itemDescriptionArray.add(descriptionObject);
+
+        }
+
+        JsonObject response = Json.createObjectBuilder()
+                .add("analyzedVideos", itemDescriptionArray.build())
+                .build();
+
+
+        return Response.ok(response.toString()).build();
+    }
+
+
+    @GET
     @Path("/analyzed")
     public Response getAnalyzedVideos() {
 
 
         JsonArrayBuilder responseFileListBuilder = Json.createArrayBuilder();
-
 
 
         List<String> fileNames_mp4 = NERQuery.getFileNamesByFormat("video/mp4", mqh);
