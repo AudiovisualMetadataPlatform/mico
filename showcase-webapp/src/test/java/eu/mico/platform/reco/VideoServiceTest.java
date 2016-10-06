@@ -81,7 +81,7 @@ public class VideoServiceTest {
     public void testGetDefaultVideos() throws IOException, RepositoryException {
 
         String json = RestAssured.
-                given().log().all().
+                given().
                 when().
                 get(server.getUrl() + "videos/default")
                 .body().asString();
@@ -96,7 +96,7 @@ public class VideoServiceTest {
     public void testGetAnalyzedVideos() throws IOException, RepositoryException {
 
         String json = RestAssured.
-                given().log().all().
+                given().
                 when().
                 get(server.getUrl() + "videos/analyzed")
                 .body().asString();
@@ -111,7 +111,7 @@ public class VideoServiceTest {
     public void testGetAnalyzedVideosV2() throws IOException, RepositoryException {
 
         String json = RestAssured.
-                given().log().all().
+                given().
                 when().
                 get(server.getUrl() + "videos/v2/analyzed")
                 .body().asString();
