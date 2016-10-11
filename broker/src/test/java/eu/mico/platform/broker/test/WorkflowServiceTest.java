@@ -67,13 +67,13 @@ import javax.ws.rs.core.Response.Status;
     // ------------------------Tests below this line -------------------- //
     
 
-	@Test
+    @Test
     public void testGetWorkflowStatus() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
-    	
-    	Assume.assumeTrue(isRegistrationServiceAvailable);
-    	
-    	MockService abService = new MockService("A", "B");
-    	String abWorkflow=createTestRoute(abService, "A", "mico/test");    	
+        
+        Assume.assumeTrue(isRegistrationServiceAvailable);
+        
+        MockService abService = new MockService("A", "B");
+        String abWorkflow=createTestRoute(abService, "A", "mico/test");
         String newId = service.addWorkflow(USER, abWorkflow );
         String nonExistingId = "notExistingId";
         
@@ -94,6 +94,56 @@ import javax.ws.rs.core.Response.Status;
         
         service.deleteWorkflow(newId);
         assertRouteStatus(WorkflowStatus.BROKEN,service.getStatus(USER, nonExistingId));
+    }
+    
+
+    @Test
+    public void testGetWorkflowStatusExtractorUpdate() throws IOException, InterruptedException, RepositoryException, URISyntaxException {
+        
+        Assume.assumeTrue(isRegistrationServiceAvailable);
+        
+        MockService abService = new MockService("A", "B","1.1.0");
+        String abWorkflow=createTestRoute(abService, "A", "mico/test");
+        String wfId = service.addWorkflow(USER, abWorkflow );
+        MockService abService_new = new MockService("A", "B","1.1.1");
+        MockService abService_old = new MockService("A", "B","1.0.0");
+
+        // no suitable extractor known --> BROKEN
+        assertRouteStatus(WorkflowStatus.BROKEN,service.getStatus(USER, wfId));
+        
+        // extractor is known, but not connected --> UNAVAILABLE
+        registerExtractor(abService,"mico/test");
+        assertRouteStatus(WorkflowStatus.UNAVAILABLE,service.getStatus(USER, wfId));
+
+        // extractor is known and connected --> ONLINE
+        connectExtractor(abService);        
+        assertRouteStatus(WorkflowStatus.ONLINE,service.getStatus(USER, wfId));
+        
+        // after disconnect --> UNAVAILABLE again
+        disconnectExtractor(abService);
+        assertRouteStatus(WorkflowStatus.UNAVAILABLE,service.getStatus(USER, wfId));
+        
+        registerExtractor(abService_new,"mico/test");
+        assertRouteStatus(WorkflowStatus.UNAVAILABLE,service.getStatus(USER, wfId));
+        
+        connectExtractor(abService_new);        
+        assertRouteStatus(WorkflowStatus.ONLINE,service.getStatus(USER, wfId));
+        
+        // after disconnect --> UNAVAILABLE again
+        disconnectExtractor(abService_new);
+        assertRouteStatus(WorkflowStatus.UNAVAILABLE,service.getStatus(USER, wfId));
+
+        // connected version is lower than required --> unavailable 
+        connectExtractor(abService_old);
+        assertRouteStatus(WorkflowStatus.UNAVAILABLE,service.getStatus(USER, wfId));
+        disconnectExtractor(abService_old);
+
+        unregisterExtractor(abService_new);
+        unregisterExtractor(abService);
+        unregisterExtractor(abService_old);
+        assertRouteStatus(WorkflowStatus.BROKEN,service.getStatus(USER, wfId));
+        
+        service.deleteWorkflow(wfId);
     }
     
 	@Test
