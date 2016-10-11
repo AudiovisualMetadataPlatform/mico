@@ -1,8 +1,11 @@
 package eu.mico.platform.event.impl;
 
 import eu.mico.platform.event.api.AnalysisServiceBase;
+import eu.mico.platform.event.api.VersionUtil;
+
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
+
 import eu.mico.platform.event.api.AnalysisService;
 
 public class AnalysisServiceUtil {
@@ -18,7 +21,7 @@ public class AnalysisServiceUtil {
 
     public static  String getQueueName(AnalysisServiceBase service) {
         return service.getExtractorID() 
-                + "-" + service.getExtractorVersion()
+                + "-" + VersionUtil.stripPatchVersion(service.getExtractorVersion())
                 + "-" + service.getExtractorModeID();
     }
 }

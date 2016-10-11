@@ -784,8 +784,8 @@ public class EventManagerTest extends BaseCommunicationTest {
             this.serviceId =  new URIImpl("http://example.org/services/"+queueName);
             this.extractorId = queueName;
             this.extractorModeId = "Mode-"+requires+"-"+provides;
-            this.extractorVersion = "Version";
-            this.queueName = this.extractorId+"-"+this.extractorVersion+"-"+this.extractorModeId;
+            this.extractorVersion = "0.0.0";
+            this.queueName = AnalysisServiceUtil.getQueueName(this);
         }
 
         @Override
@@ -874,8 +874,8 @@ public class EventManagerTest extends BaseCommunicationTest {
             this.serviceId =  new URIImpl("http://example.org/services/"+queueName);
             this.extractorId = queueName;
             this.extractorModeId = "Mode-"+requires+"-"+provides;
-            this.extractorVersion = "Version";
-            this.queueName = this.extractorId+"-"+this.extractorVersion+"-"+this.extractorModeId;
+            this.extractorVersion = "0.0.0";
+            this.queueName = AnalysisServiceUtil.getQueueName(this);
         }
 
         @Override

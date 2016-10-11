@@ -48,6 +48,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.zafarkhaja</groupId>
+            <artifactId>java-semver</artifactId>
+            <version>0.9.0</version>
+        </dependency>
+
         <!-- JUnit Testing Libraries -->
         <dependency>
             <groupId>junit</groupId>
