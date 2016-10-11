@@ -33,6 +33,7 @@ import eu.mico.platform.broker.model.v2.Transition;
 import eu.mico.platform.broker.model.v2.TypeDescriptor;
 import eu.mico.platform.broker.util.RabbitMQUtils;
 import eu.mico.platform.event.api.EventManager;
+import eu.mico.platform.event.api.VersionUtil;
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
@@ -804,7 +805,7 @@ public class MICOBrokerImpl implements MICOBroker {
             routeInfo.addExtractor(new ExtractorInfo(extractor, extractorStatus));
     	}
     	
-    	//then iterate among the statuses
+    	//then iterate among the extractor states
     	for(ExtractorStatus status : eStatus.values()){
     		switch(routeInfo.getState()){
 	    		case ONLINE: 
@@ -899,11 +900,12 @@ public class MICOBrokerImpl implements MICOBroker {
             
             //finally, check it the extractor is connected
             List<ServiceDescriptor> svc=dependencies.getServices();
-            for(ServiceDescriptor s : svc){
-            	if(s.getExtractorId().contentEquals(eId) &&s.getExtractorModeId().contentEquals(eMode) && s.getExtractorVersion().contentEquals(eVersion)){
-            		response.close();
-            		return outputStatus=ExtractorStatus.CONNECTED;
-            	}
+            for (ServiceDescriptor s : svc) {
+                if (s.getExtractorId().contentEquals(eId)
+                        && s.getExtractorModeId().contentEquals(eMode)
+                        && checkExtractorVersionString(eVersion, s)) {
+                    outputStatus = ExtractorStatus.CONNECTED;
+                }
             }
     	}
     	catch(Exception exc){;}
@@ -916,6 +918,11 @@ public class MICOBrokerImpl implements MICOBroker {
   
 
     	return outputStatus;
+    }
+
+    private boolean checkExtractorVersionString(String requiredVersion, ServiceDescriptor s) {
+//        return s.getExtractorVersion().contentEquals(requiredVersion);
+        return VersionUtil.checkVersion(requiredVersion, s.getExtractorVersion());
     };
 
     
