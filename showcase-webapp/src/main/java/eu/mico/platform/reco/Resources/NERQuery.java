@@ -264,7 +264,7 @@ public class NERQuery {
 
     }
 
-    public static MICOQueryHelperMMM getMicoQueryHelper() throws RepositoryException, RepositoryConfigException {
+    public static MICOQueryHelperMMM createMicoQueryHelper() throws RepositoryException, RepositoryConfigException {
         Anno4j anno4j = new Anno4j();
         Repository micoSparqlEndpoint = new SPARQLRepository(endpointUrl);
         micoSparqlEndpoint.initialize();

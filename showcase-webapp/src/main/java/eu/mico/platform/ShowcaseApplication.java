@@ -13,7 +13,6 @@
  */
 package eu.mico.platform;
 
-import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
 import eu.mico.platform.demo.ContentWebService;
 import eu.mico.platform.demo.DemoWebService;
 import eu.mico.platform.demo.DownloadWebService;
@@ -87,13 +86,12 @@ public class ShowcaseApplication extends Application {
 
             services = new HashSet<>();
 
-            MICOQueryHelperMMM mqh = NERQuery.getMicoQueryHelper();
 
             //WP5
             services.add(new RecoWebService(manager, marmottaBaseUri));
             services.add(new EchoService());
-            services.add(new Videos(mqh));
-            services.add(new NerService(mqh));
+            services.add(new Videos(NERQuery.createMicoQueryHelper()));
+            services.add(new NerService(NERQuery.createMicoQueryHelper()));
 
             // Zooniverse
             services.add(new AnimalDetectionWebService(manager, marmottaBaseUri, brokerServices));
