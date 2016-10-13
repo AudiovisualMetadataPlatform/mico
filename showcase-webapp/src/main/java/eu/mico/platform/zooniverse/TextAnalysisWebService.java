@@ -65,7 +65,7 @@ public class TextAnalysisWebService {
     @POST
     @Consumes("application/json")
     @Produces("application/json")
-    public Response uploadImage(TextAnalysisInput input) throws  IOException{
+    public Response uploadComment(TextAnalysisInput input) throws  IOException{
 
         boolean extractorRunning = false;
 
@@ -83,7 +83,7 @@ public class TextAnalysisWebService {
         try {
             final Item item = persistenceService.createItem();
             item.setSemanticType("application/textanalysis-endpoint");
-            item.setSyntacticalType("text/plain");
+            item.setSyntacticalType("mico:Text");
 
             Asset asset = item.getAsset();
             try (OutputStream outputStream = asset.getOutputStream()) {
