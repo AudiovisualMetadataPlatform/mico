@@ -170,22 +170,25 @@ public class MICOQueryHelperMMM {
     }
 
     /**
-     * Checks if type restrictions were set and adds them to the QueryService object.
+     * Checks if type restrictions were set, adds them to the QueryService object and clears them for
+     * further queries with the same mqh object.
      *
      * @param qs The anno4j QueryService object
      */
     private void processTypeRestriction(QueryService qs) {
         if (selectorTypeRestriction != null) {
-
             qs.addCriteria("oa:hasTarget/oa:hasSelector" + selectorTypeRestriction);
+            selectorTypeRestriction = null;
         }
 
         if (bodyTypeRestriction != null) {
             qs.addCriteria("oa:hasBody" + bodyTypeRestriction);
+            bodyTypeRestriction = null;
         }
 
         if (targetTypeRestriction != null) {
             qs.addCriteria("oa:hasTarget" + targetTypeRestriction);
+            targetTypeRestriction = null;
         }
     }
 }
