@@ -10,6 +10,23 @@ public class EntityInfo {
     private String label;
 
 
+    public EntityInfo(LinkedEntityBody b) {
+
+        String uriString = b.getEntity().getResource().toString();
+        try {
+            uriString = b.getEntity().getResource().toString();
+
+            // remove invisible control characters
+            uriString = uriString.replaceAll("\\p{C}", "");
+
+            this.reference = URI.create(uriString);
+        } catch (IllegalArgumentException e) {
+            this.reference = URI.create("http://dbpedia.org/page/Illegal_URI");
+        }
+        this.label = b.getEntity().toString();
+
+    }
+
     public URI getReference() {
         return reference;
     }
@@ -17,14 +34,6 @@ public class EntityInfo {
     public String getLabel() {
         return label;
     }
-
-    public EntityInfo(LinkedEntityBody b) {
-
-        this.reference = URI.create(b.getEntity().getResource().toString());
-        this.label = b.getEntity().toString();
-
-    }
-
 
     @Override
     public String toString() {
