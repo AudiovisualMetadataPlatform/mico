@@ -117,6 +117,85 @@
                     <skip>false</skip>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.jsondoc</groupId>
+                <artifactId>jsondoc-maven-plugin</artifactId>
+                <dependencies>
+                  <dependency>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>javax.servlet-api</artifactId>
+                    <version>3.0.1</version>
+                  </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>generate-jsondoc</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <version>${project.version}</version>
+                            <basePath>http://mico-platform:8080/${project.artifactId}</basePath>
+                            <packages>
+                                <package>eu.mico.platform.broker.webservices</package>
+                                <package>eu.mico.platform.broker.api.rest</package>
+                            </packages>
+                            <outputFile>${project.build.directory}/jsondoc-ui/jsondoc.json</outputFile>
+<!--                             <scanner>org.jsondoc.springmvc.scanner.Spring4JSONDocScanner</scanner> -->
+                            <scanner>org.jsondoc.core.scanner.DefaultJSONDocScanner</scanner>
+                            <playgroundEnabled>true</playgroundEnabled>
+                            <displayMethodAs>URI</displayMethodAs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.9</version>
+               <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.jsondoc</groupId>
+                                    <artifactId>jsondoc-ui</artifactId>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/jsondoc-ui</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <version>1.5.3</version>
+                <executions>                
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includes>
+                        <include>${project.build.directory}/jsondoc-ui/jsondoc-ui.html</include>
+                    </includes>
+                    <token>'_JSONDOC_OFFLINE_PLACEHOLDER_'</token> <!-- Do not change this value! -->
+                    <valueFile>${project.build.directory}/jsondoc-ui/jsondoc.json</valueFile>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -174,6 +253,11 @@
         <dependency>
           <groupId>org.jsondoc</groupId>
           <artifactId>jsondoc-core</artifactId>
+          <version>1.2.16</version>
+        </dependency>
+        <dependency>
+          <groupId>org.jsondoc</groupId>
+          <artifactId>jsondoc-ui</artifactId>
           <version>1.2.16</version>
         </dependency>
 

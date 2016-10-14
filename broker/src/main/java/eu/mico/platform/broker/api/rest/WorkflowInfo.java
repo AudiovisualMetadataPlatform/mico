@@ -5,19 +5,21 @@ import java.util.List;
 
 import org.jsondoc.core.annotation.ApiObject;
 
-import eu.mico.platform.broker.api.MICOBroker.ExtractorStatus;
 import eu.mico.platform.broker.api.MICOBroker.WorkflowStatus;
 
 @ApiObject
 public class WorkflowInfo {
 
-public WorkflowInfo(WorkflowStatus wState) {
+public WorkflowInfo(WorkflowStatus wState, String wId, String wDesc) {
+        id = wId;
+        description = wDesc;
         state = wState;
         extractors = new ArrayList<ExtractorInfo>();
     }
 
+private String id;
+private String description;
 private List<ExtractorInfo> extractors;
-
 private WorkflowStatus state;
 
 public boolean addExtractor(ExtractorInfo eInfo) {
@@ -48,6 +50,22 @@ private String extractorsString(){
        sb.append(ei.getName()).append("(").append(ei.getState()).append(")"); 
     }
     return sb.toString();
+}
+
+public String getId() {
+    return id;
+}
+
+public void setId(String id) {
+    this.id = id;
+}
+
+public String getDescription() {
+    return description;
+}
+
+public void setDescription(String description) {
+    this.description = description;
 }
 
 }

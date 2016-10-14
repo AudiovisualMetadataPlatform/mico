@@ -29,42 +29,73 @@ import java.util.Map;
 public interface MICOBroker {
     /**
     * The value can be: <br>
-    * <b>ONLINE</b> - (all extractors registred and connected <br>
+    * <b>ONLINE</b> - (all extractors registered and connected <br>
     * <b>RUNNABLE</b> - (all extractors registered, but at least one is not connected.
     * The missing extractors can still be started by the broker <br>
     * <b>UNAVAILABLE</b> - all extractors registered, but at least one is deployed <br>
     * <b>BROKEN</b> - at least one extractor is not registered anymore <br>
     */
-    public enum WorkflowStatus{
-    	ONLINE, RUNNABLE, UNAVAILABLE, BROKEN, PROCESSING;
-    	
-    	@Override
-    	  public String toString() {
-    	    switch(this) {
-    	      case ONLINE:      return "ONLINE";
-    	      case RUNNABLE:    return "RUNNABLE";
-    	      case UNAVAILABLE: return "UNAVAILABLE";
-    	      case BROKEN:      return "BROKEN";
-    	      default: throw new IllegalArgumentException();
-    	    }
-    	  }
-    	
+    public enum WorkflowStatus {
+        ONLINE, RUNNABLE, UNAVAILABLE, BROKEN, PROCESSING;
+
+        @Override
+        public String toString() {
+            switch (this) {
+            case ONLINE:       return "ONLINE";
+            case RUNNABLE:     return "RUNNABLE";
+            case UNAVAILABLE:  return "UNAVAILABLE";
+            case BROKEN:       return "BROKEN";
+            default:
+                throw new IllegalArgumentException();
+            }
+        }
+
     }
 
-    public enum ExtractorStatus{
-    	CONNECTED, DEPLOYED, NOT_DEPLOYED, UNREGISTERED;
-    	
-    	@Override
-    	  public String toString() {
-    	    switch(this) {
-    	      case CONNECTED:    return "CONNECTED";
-              case DEPLOYED:     return "DEPLOYED";
-              case NOT_DEPLOYED: return "NOT_DEPLOYED";
-    	      case UNREGISTERED: return "UNREGISTERED";
-    	      default: throw new IllegalArgumentException();
-    	    }
-    	  }
-    	
+    /**
+    *
+    * possible status values are: <br>
+    * <dl>
+    * <dt>CONNECTED</dt> <dd>a running instance is connected </dd>
+    * <dt>DEPLOYED</dt>  <dd>the extractor is registered but no running instance is connected</dd>
+    *                    <dd>(The missing extractors can probably be started by the broker) </dd>
+    * <dt>NOT_DEPLOYED</dt> <dd> the extractor is registered but no running instance is connected and the broker is not able to start one </dd>
+    * <dt>UNREGISTERED</dt> <dd> an extractor with this id and version is not registered (unknown) to the system </dd>
+    * </dl>
+    */
+    public enum ExtractorStatus {
+        /**
+         * a running instance is connected
+         */
+        CONNECTED,
+        /**
+         * the extractor is registered but no running instance is connected <br>
+         * (The missing extractors can probably be started by the broker)
+         */
+        DEPLOYED,
+        /**
+         * the extractor is registered but no running instance is connected and
+         * the broker is not able to start one
+         */
+        NOT_DEPLOYED,
+        /**
+         * an extractor with this id and version is not registered (unknown) to
+         * the system
+         */
+        UNREGISTERED;
+
+        @Override
+        public String toString() {
+          switch (this) {
+            case CONNECTED:     return "CONNECTED";
+            case DEPLOYED:      return "DEPLOYED";
+            case NOT_DEPLOYED:  return "NOT_DEPLOYED";
+            case UNREGISTERED:  return "UNREGISTERED";
+            default:
+                throw new IllegalArgumentException();
+          }
+        }
+
     }
 
     ServiceGraph getDependencies();

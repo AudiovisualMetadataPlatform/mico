@@ -33,6 +33,7 @@ import eu.mico.platform.persistence.model.Resource;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
+import org.jsondoc.core.annotation.Api;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -323,7 +324,7 @@ public class InjectionWebService {
                 return Response
                         .status(Response.Status.SERVICE_UNAVAILABLE)
                         .entity("The camel route with ID {" + routeId
-                                + "} is currently unavailable").build();
+                                + "} is currently unavailable. \n" + routeStatus.toString()).build();
 
             case RUNNABLE:
 
