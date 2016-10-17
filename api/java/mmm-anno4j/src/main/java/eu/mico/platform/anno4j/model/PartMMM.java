@@ -1,10 +1,15 @@
 package eu.mico.platform.anno4j.model;
 
+import com.github.anno4j.model.Agent;
 import com.github.anno4j.model.Annotation;
 import com.github.anno4j.model.Body;
 import com.github.anno4j.model.Target;
+import com.github.anno4j.model.namespaces.OADM;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
 import org.openrdf.annotations.Iri;
+import org.openrdf.annotations.Precedes;
+import org.openrdf.annotations.Sparql;
+
 import java.util.Set;
 
 /**
@@ -80,4 +85,8 @@ public interface PartMMM extends Annotation, ResourceMMM {
      */
     @Override
     void addTarget(Target target);
+
+    @Sparql("SELECT ?agent WHERE { $this <"+ OADM.SERIALIZED_BY + "> ?agent }")
+    @Override
+    Agent getSerializedBy();
 }

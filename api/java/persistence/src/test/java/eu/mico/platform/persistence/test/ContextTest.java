@@ -1,6 +1,7 @@
 package eu.mico.platform.persistence.test;
 
 import com.github.anno4j.querying.QueryService;
+import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.anno4j.model.PartMMM;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.impl.PersistenceServiceAnno4j;
@@ -8,13 +9,14 @@ import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Part;
 import org.apache.marmotta.ldpath.parser.ParseException;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -32,7 +34,7 @@ public class ContextTest {
         persistenceService = new PersistenceServiceAnno4j();
 
         // Do something like this to connect the Test to a outside marmotta
-//        persistenceService = new PersistenceServiceAnno4j(new URI("http://mico-platform:8080/marmotta"), new URI("hdfs://mico-platform/"));
+//        persistenceService = new PersistenceServiceAnno4j(new java.net.URI("http://mico-platform:8080/marmotta"), new java.net.URI("hdfs://mico-platform/"));
     }
 
     @Test
@@ -57,3 +59,4 @@ public class ContextTest {
         assertEquals(2, result2.size());
     }
 }
+
