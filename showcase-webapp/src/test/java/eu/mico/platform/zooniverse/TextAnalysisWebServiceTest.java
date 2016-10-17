@@ -1,21 +1,16 @@
 package eu.mico.platform.zooniverse;
 
-import com.google.common.io.Resources;
 import com.jayway.restassured.RestAssured;
+import eu.mico.platform.testutils.Mockups;
 import eu.mico.platform.testutils.TestServer;
 import org.hamcrest.Matchers;
 import org.junit.*;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.sail.memory.MemoryStore;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
-import java.net.URL;
 
 import static eu.mico.platform.testutils.Mockups.mockBroker;
 import static eu.mico.platform.testutils.Mockups.mockEvenmanager;
@@ -41,7 +36,7 @@ public class TextAnalysisWebServiceTest {
     public static void init() throws Exception {
 
         //init in memory repository
-        repository = initializeRepository();
+        repository = Mockups.initializeRepository("text_analysis/mico-export-20160523.ttl");
         connection = repository.getConnection();
 
 
@@ -107,21 +102,5 @@ public class TextAnalysisWebServiceTest {
                 .body("status", Matchers.equalTo("finished"));
     }
 
-
-    private static Repository initializeRepository() throws RepositoryException, IOException, RDFParseException {
-
-        Repository repository = new SailRepository(new MemoryStore());
-        repository.initialize();
-
-        //import file
-        URL file = Resources.getResource("text_analysis/mico-export-20160523.ttl");
-
-        RepositoryConnection c = repository.getConnection();
-
-        repository.getConnection().add(file.openStream(), "http://mico-platform:8080/marmotta", RDFFormat.TURTLE);
-        c.close();
-
-        return repository;
-    }
 
 }

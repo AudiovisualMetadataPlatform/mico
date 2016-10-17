@@ -16,6 +16,7 @@ package eu.mico.platform.broker.webservices;
 import com.google.common.collect.ImmutableMap;
 
 import eu.mico.platform.broker.api.MICOBroker;
+import eu.mico.platform.broker.api.MICOBroker.WorkflowStatus;
 import eu.mico.platform.broker.api.rest.WorkflowInfo;
 import eu.mico.platform.broker.impl.MICOBrokerImpl;
 import eu.mico.platform.broker.model.MICOCamelRoute;
@@ -34,6 +35,8 @@ import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -153,7 +156,34 @@ public class WorkflowManagementService {
 
 	}
 
-    
+    @GET
+    @Path("/routesInfo")
+    @Produces("application/json")
+    public List<WorkflowInfo> getWorkflowInfos() throws RepositoryException,
+            IOException {
+
+        synchronized (camelLock) {
+
+            ArrayList<WorkflowInfo> response = new ArrayList<WorkflowInfo>();
+
+            for (String key : camelRoutes.keySet()) {
+                response.add(getStatusInfo(null, camelRoutes.get(key)
+                        .getWorkflowId()));
+            }
+
+            response.sort(new Comparator<WorkflowInfo>() {
+
+                @Override
+                public int compare(WorkflowInfo o1, WorkflowInfo o2) {
+                    return o1.getId().compareTo(o2.getId());
+                }
+            });
+            return response;
+
+        }
+
+    }
+
     /**
      * return status of specific workflow The returned status can be one of the
      * following:
@@ -200,6 +230,35 @@ public class WorkflowManagementService {
     	}
     }
     
+    @GET
+    @Path("/statusInfo/{id}")
+    @Produces("application/json")
+    public WorkflowInfo getStatusInfo(@QueryParam("user") String user,
+            @PathParam("id") String workflowId ) throws RepositoryException,
+            IOException {
+        
+        synchronized (camelLock) {
+                
+            try{
+                if (broker instanceof MICOBrokerImpl){
+                    String xmlCamelRoute=getCamelRoute(workflowId);
+                    if(xmlCamelRoute != null){
+                        WorkflowInfo wfi = broker.getRouteStatus(xmlCamelRoute);
+                        log.debug("status of route {}", wfi.toString());
+                        return  wfi;
+                    }
+                    else{
+                        log.error("No route with id {} is currently registered",workflowId);
+                    }
+                }
+            }
+            catch(Exception e){
+                log.error("Unable to retrieve status for workflow {}:{}",workflowId,e.getMessage());
+            }
+        }
+        return new WorkflowInfo(WorkflowStatus.BROKEN,workflowId,"---");
+    }
+
     @GET
     @Path("/camel-route/{id}")
     @Produces("text/plain")

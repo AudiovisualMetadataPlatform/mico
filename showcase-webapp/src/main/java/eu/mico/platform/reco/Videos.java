@@ -77,8 +77,6 @@ public class Videos {
     @Path("/v2/analyzed/")
     public Response getAnalyzedVideos2() {
 
-
-
         JsonArrayBuilder itemDescriptionArray = Json.createArrayBuilder();
 
         List<NERQuery.ItemDescription> fileNames_mp4 = NERQuery.getItemDescriptionByFormat("video/mp4", mqh);

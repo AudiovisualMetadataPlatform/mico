@@ -1,5 +1,6 @@
 package eu.mico.platform.testutils;
 
+import com.google.common.io.Resources;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Asset;
@@ -13,13 +14,19 @@ import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.object.ObjectConnection;
+import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFParseException;
+import org.openrdf.sail.memory.MemoryStore;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -136,4 +143,19 @@ public class Mockups {
     }
 
 
+    public static Repository initializeRepository(String turtleFile) throws RepositoryException, IOException, RDFParseException {
+
+        Repository repository = new SailRepository(new MemoryStore());
+        repository.initialize();
+
+        //import file
+        URL file = Resources.getResource(turtleFile);
+
+        RepositoryConnection c = repository.getConnection();
+
+        repository.getConnection().add(file.openStream(), "http://mico-platform:8080/marmotta", RDFFormat.TURTLE);
+        c.close();
+
+        return repository;
+    }
 }

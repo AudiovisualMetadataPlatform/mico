@@ -24,6 +24,7 @@ import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.persistence.model.Resource;
 
 import org.apache.commons.io.IOUtils;
+import org.jsondoc.core.annotation.Api;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -52,6 +53,7 @@ import java.util.jar.Manifest;
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
+@Api(name = "injection services", description = "Methods for injecting new items", group = "broker")
 @Path("/status")
 public class StatusWebService {
 
