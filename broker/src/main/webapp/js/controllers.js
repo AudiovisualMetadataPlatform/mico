@@ -77,7 +77,10 @@ brokerApp.controller("InjectItemCtrl", function($scope,$http,$upload) {
     $scope.state = "Created";
     $scope.itemAssetLocation
     $scope.itemCreated
-
+    $scope.alerts = [
+//                     { type: 'danger', msg: 'Oh snap! Change a few things up and try submitting again.' },
+//                     { type: 'success', msg: 'Well done! You successfully read this important alert message.' }
+                   ];
     $scope.workflowDescriptions = [];
 
      $http.get("workflow/routes").success(function(data) {
@@ -134,8 +137,19 @@ brokerApp.controller("InjectItemCtrl", function($scope,$http,$upload) {
 
         $http.post(
             injectUrl
-        ).success(function() {
+        ).success(function(msg) {
             $scope.state = "Submitted";
+            $scope.addAlert('success',msg.message);
+        }).error(function(msg){
+            $scope.addAlert('danger',msg.message);
         });
     };
+
+    $scope.addAlert = function(t, msg) {
+        $scope.alerts.push({type: t, msg: msg});
+      };
+
+    $scope.closeAlert = function(index) {
+        $scope.alerts.splice(index, 1);
+      };
 });
