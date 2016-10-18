@@ -34,7 +34,6 @@ public class MICOQueryHelperMMM {
      * Target type restriction
      */
     private String targetTypeRestriction;
-
     /**
      * A configured instance of anno4j
      */
@@ -42,6 +41,15 @@ public class MICOQueryHelperMMM {
 
     public MICOQueryHelperMMM(Anno4j anno4j) {
         this.anno4j = anno4j;
+    }
+
+    /**
+     * Returns the anno4j instance used by this class
+     *
+     * @return anno4j instance
+     */
+    public Anno4j getAnno4j() {
+        return anno4j;
     }
 
     /**
