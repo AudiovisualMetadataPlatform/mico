@@ -100,11 +100,16 @@ public class EntitySearchTest {
                 .body().asString();
 
 
-        /*List<HashMap> videoList = from(json).get("relatedItems");
+        HashMap<String, List<String>> videoList = from(json).get("relatedItems");
 
-        Assert.assertNotNull(videoList);
-        Assert.assertEquals(2, videoList.size());
-*/
+        System.out.println(json);
+
+        Assert.assertEquals("file2.mp4", videoList.get("http://dbpedia.org/resource/Emperor").get(0));
+
+        //test for resource with parantheses
+        Assert.assertEquals("file2.mp4", videoList.get("http://dbpedia.org/resource/Command_(military_formation)").get(0));
+
+
     }
 
 

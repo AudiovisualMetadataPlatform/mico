@@ -211,7 +211,7 @@ public class Videos {
                     final AssetMMM asset = item.getAsset();
                     if (asset != null) {
                         final String name = asset.getName();
-                        if (!name.equals(sourceName)) {
+                        if (name != null && !name.equals(sourceName)) {
                             relatedItemsForEntityJson.add(name);
                         }
                     }
@@ -235,12 +235,16 @@ public class Videos {
 
     private List<ItemMMM> getItemsWithEntityAnnotation(String searchEntity) throws OpenRDFException, ParseException {
 
+        // anno4j does not escape strings before throwing it into a regex. Using Pattern.quote(searchEntity) does not seem
+        // to work with the marmotta regexp implementation, so we do it manually and hope for the best
+        searchEntity = searchEntity.replace("(", "\\(");
+        searchEntity = searchEntity.replace(")", "\\)");
+
         QueryService qs = mqh.getAnno4j().createQueryService()
                 .addPrefix(MMM.PREFIX, MMM.NS)
                 .addPrefix("fusepool", "http://vocab.fusepool.info/fam#")
                 .addPrefix(DCTERMS.PREFIX, DCTERMS.NS)
                 .addCriteria("mmm:hasPart/mmm:hasBody/fusepool:entity-reference", searchEntity);
-
 
         return qs.execute(ItemMMM.class);
 
