@@ -20,6 +20,7 @@
 - *GET* [/videos/default](videos/default)
 - *GET* [/videos/analyzed](videos/analyzed)
 - *GET* [/videos/entities/{entity}](videos/entities/{entity})
+- *GET* [/videos/related/{filename}](videos/related/{filename})
 
 
 
