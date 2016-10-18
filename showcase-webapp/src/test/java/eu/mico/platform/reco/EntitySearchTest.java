@@ -88,4 +88,24 @@ public class EntitySearchTest {
     }
 
 
+
+    @Test
+    public void testGetRelated() throws Exception {
+
+        final String fileName = "file1.mp4";
+        String json = RestAssured.
+                given().
+                when().
+                get(server.getUrl() + "videos/related/" + fileName)
+                .body().asString();
+
+
+        /*List<HashMap> videoList = from(json).get("relatedItems");
+
+        Assert.assertNotNull(videoList);
+        Assert.assertEquals(2, videoList.size());
+*/
+    }
+
+
 }

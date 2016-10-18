@@ -118,7 +118,7 @@ public class NERQuery {
      *
      * @param identifier URI of the uploaded contentItem or source name
      * @param searchBy   specifies whether to search by source name (i.e., file name) or content item ID
-     * @return Entity -> eu.mico.platform.recommendation.EntityInfo mappings. (this is just a hack, will be changed later)
+     * @return Entity -> eu.mico.platform.recommendation.EntityInfo mappings.
      */
     public static Map<String, EntityInfo> getLinkedEntities(String identifier, DataField searchBy, MICOQueryHelperMMM mqh) {
 

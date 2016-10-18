@@ -20,7 +20,7 @@
 <http://demo2.mico-project.eu:8080/marmotta/61585820-b22a-46f3-a6ee-ed493311f578> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasAsset> <http://demo2.mico-project.eu:8080/marmotta/a177c8dc-1303-4c83-a06a-828e5ce5c2b6> .
 
 <http://demo2.mico-project.eu:8080/marmotta/a177c8dc-1303-4c83-a06a-828e5ce5c2b6> dc:format "video/mp4" ;
-	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasName> "urn:eu.mico-project:storage.location:61585820-b22a-46f3-a6ee-ed493311f578/a177c8dc-1303-4c83-a06a-828e5ce5c2b6" .
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasName> "file2.mp4" .
 
 <http://demo2.mico-project.eu:8080/marmotta/61585820-b22a-46f3-a6ee-ed493311f578> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "mico:Video" ;
 	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Item created by application/injection-webservice" .
@@ -333,11 +333,6 @@ later gi"""^^xsd:string ;
 
 <http://demo2.mico-project.eu:8080/marmotta/db285a83-a1f2-456b-b626-c521b8e8d3d2> oa:hasSource <http://demo2.mico-project.eu:8080/marmotta/7bfddb44-36ed-4461-9e78-1daca2917361> .
 
-<http://demo2.mico-project.eu:8080/marmotta/efd45bf1-7cc0-410d-983b-837cb7e020f9> a <http://vocab.fusepool.info/fam#LinkedEntity> ;
-	<http://vocab.fusepool.info/fam#entity-label> "later"@en ;
-	<http://vocab.fusepool.info/fam#entity-reference> <http://dbpedia.org/resource/Soviet_invasion_of_Poland> ;
-	<http://vocab.fusepool.info/fam#entity-type> <http://dbpedia.org/ontology/MilitaryConflict> ;
-	<http://vocab.fusepool.info/fam#confidence> "1"^^xsd:double .
 
 <http://demo2.mico-project.eu:8080/marmotta/3a483dab-712b-4424-926c-a64020dc5765> a <http://www.mico-project.eu/ns/mmm/2.0/schema#Part> ;
 	oa:serializedAt "2016-09-22 09:14:15.235"^^xsd:string ;
@@ -11659,7 +11654,7 @@ earth"""^^xsd:string ;
 <http://demo2.mico-project.eu:8080/marmotta/c9e54133-56dc-4d2f-b6f6-6d60ad0828b5> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasAsset> <http://demo2.mico-project.eu:8080/marmotta/d84a89be-3190-4909-bbff-9ba0a7ca81c8> .
 
 <http://demo2.mico-project.eu:8080/marmotta/d84a89be-3190-4909-bbff-9ba0a7ca81c8> dc:format "video/mp4" ;
-	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasName> "urn:eu.mico-project:storage.location:c9e54133-56dc-4d2f-b6f6-6d60ad0828b5/d84a89be-3190-4909-bbff-9ba0a7ca81c8" .
+	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasName> "file1.mp4" .
 
 <http://demo2.mico-project.eu:8080/marmotta/c9e54133-56dc-4d2f-b6f6-6d60ad0828b5> <http://www.mico-project.eu/ns/mmm/2.0/schema#hasSyntacticalType> "mico:Video" ;
 	<http://www.mico-project.eu/ns/mmm/2.0/schema#hasSemanticType> "Item created by application/injection-webservice" .

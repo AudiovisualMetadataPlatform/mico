@@ -2,9 +2,12 @@ package eu.mico.platform.reco;
 
 import com.github.anno4j.model.namespaces.DCTERMS;
 import com.github.anno4j.querying.QueryService;
+import eu.mico.platform.anno4j.model.AssetMMM;
 import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
 import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
+import eu.mico.platform.reco.Resources.DataField;
+import eu.mico.platform.reco.Resources.EntityInfo;
 import eu.mico.platform.reco.Resources.NERQuery;
 import org.apache.marmotta.ldpath.parser.ParseException;
 import org.openrdf.OpenRDFException;
@@ -16,10 +19,8 @@ import javax.json.JsonObjectBuilder;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,6 +38,7 @@ import java.util.Set;
 @Path("/videos")
 @Produces(MediaType.APPLICATION_JSON)
 public class Videos {
+    private static final Logger log = Logger.getAnonymousLogger();
     private final MICOQueryHelperMMM mqh;
 
     public Videos(MICOQueryHelperMMM micoQueryHelperMMM) {
@@ -154,17 +156,9 @@ public class Videos {
 
         final String searchEntity = "http://dbpedia.org/resource/" + entity;
 
-
         List<ItemMMM> items;
         try {
-            QueryService qs = mqh.getAnno4j().createQueryService()
-                    .addPrefix(MMM.PREFIX, MMM.NS)
-                    .addPrefix("fusepool", "http://vocab.fusepool.info/fam#")
-                    .addPrefix(DCTERMS.PREFIX, DCTERMS.NS)
-                    .addCriteria("mmm:hasPart/mmm:hasBody/fusepool:entity-reference", searchEntity);
-
-
-            items = qs.execute(ItemMMM.class);
+            items = getItemsWithEntityAnnotation(searchEntity);
 
         } catch (OpenRDFException | ParseException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -173,23 +167,83 @@ public class Videos {
         JsonArrayBuilder resultList = Json.createArrayBuilder();
 
         for (ItemMMM item : items) {
-
             JsonObject resultItem = Json.createObjectBuilder()
                     .add("sourceName", item.getAsset().getName())
                     .add("itemId", item.toString())
                     .build();
-
             resultList.add(resultItem);
-
         }
-
 
         JsonObject response = Json.createObjectBuilder()
                 .add("videos", resultList.build())
                 .build();
 
+        return Response.ok(response.toString()).build();
+    }
+
+
+    @GET
+    @Path("/related/{sourceName}")
+    public Response getRelatedVideos(@PathParam("sourceName") String sourceName) {
+
+
+        Map<String, EntityInfo> linkedEntities = NERQuery.getLinkedEntities(sourceName, DataField.NAME, mqh);
+
+        if (linkedEntities == null) {
+            return Response.serverError().build();
+        }
+
+
+        JsonObjectBuilder resultSet = Json.createObjectBuilder();
+        Set<String> linkedEntitySet = linkedEntities.keySet();
+
+        for (String entity : linkedEntitySet) {
+
+            JsonArrayBuilder relatedItemsForEntityJson = Json.createArrayBuilder();
+
+            try {
+                List<ItemMMM> relatedItemsForEntity = getItemsWithEntityAnnotation(entity);
+                for (ItemMMM item : relatedItemsForEntity) {
+                    if (item == null) {
+                        continue;
+                    }
+
+                    final AssetMMM asset = item.getAsset();
+                    if (asset != null) {
+                        final String name = asset.getName();
+                        if (!name.equals(sourceName)) {
+                            relatedItemsForEntityJson.add(name);
+                        }
+                    }
+                }
+
+            } catch (OpenRDFException | ParseException e) {
+                e.printStackTrace();
+            }
+
+            resultSet.add(entity, relatedItemsForEntityJson);
+
+        }
+
+        JsonObject response = Json.createObjectBuilder().add("relatedItems", resultSet.build()).build();
+
 
         return Response.ok(response.toString()).build();
+
+    }
+
+
+    private List<ItemMMM> getItemsWithEntityAnnotation(String searchEntity) throws OpenRDFException, ParseException {
+
+        QueryService qs = mqh.getAnno4j().createQueryService()
+                .addPrefix(MMM.PREFIX, MMM.NS)
+                .addPrefix("fusepool", "http://vocab.fusepool.info/fam#")
+                .addPrefix(DCTERMS.PREFIX, DCTERMS.NS)
+                .addCriteria("mmm:hasPart/mmm:hasBody/fusepool:entity-reference", searchEntity);
+
+
+        return qs.execute(ItemMMM.class);
+
     }
 
 
