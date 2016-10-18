@@ -17,6 +17,7 @@ import com.google.common.collect.ImmutableMap;
 
 import eu.mico.platform.broker.api.MICOBroker;
 import eu.mico.platform.broker.api.MICOBroker.WorkflowStatus;
+import eu.mico.platform.broker.api.rest.InjectResponse;
 import eu.mico.platform.broker.api.rest.WorkflowInfo;
 import eu.mico.platform.broker.model.CamelJob;
 import eu.mico.platform.broker.model.MICOCamelRoute;
@@ -33,6 +34,7 @@ import eu.mico.platform.persistence.model.Resource;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
+import org.jsondoc.core.annotation.Api;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -44,6 +46,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import java.io.BufferedInputStream;
@@ -57,6 +60,7 @@ import java.util.*;
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
+@Api(name = "injection services", description = "Methods for injecting new items", group = "broker")
 @Path("/inject")
 public class InjectionWebService {
 
@@ -252,7 +256,7 @@ public class InjectionWebService {
      */
     @POST
     @Path("/submit")
-    @Produces("text/plain")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response submitItem(
 			@QueryParam("item") String itemURI,
 			@QueryParam("route") String routeId,
@@ -262,18 +266,18 @@ public class InjectionWebService {
 
     	if(itemURI == null || itemURI.isEmpty()){
     		//wrong item
-    		return Response.status(Response.Status.BAD_REQUEST).entity("item parameter not set").build();
+            return createResponse(Response.Status.BAD_REQUEST, "item parameter not set");
     	}
     	if(routeId != null && routeId.isEmpty()){
     		//wrong routeId
-    		return Response.status(Response.Status.BAD_REQUEST).entity("route parameter not set").build();
+    	    return createResponse(Response.Status.BAD_REQUEST, "route parameter not set");
     	}
     	
     	PersistenceService ps = eventManager.getPersistenceService();
         Item item = ps.getItem(new URIImpl(itemURI));
         if(item == null){
             //wrong routeId
-            return Response.status(Response.Status.BAD_REQUEST).entity("No item found with uri: " + itemURI).build();
+            return createResponse(Response.Status.BAD_REQUEST, "No item found with uri: " + itemURI);
         }
         
         if(routeId == null){
@@ -295,35 +299,34 @@ public class InjectionWebService {
     		
     		if(route == null ){
     			//the route does not exist
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("No route found with id: " + routeId).build();
+    		    return createResponse(Response.Status.BAD_REQUEST, "No route found with id: " + routeId);
     		}
     		
 
 
     		//check route status
-    		WorkflowInfo routeStatus = broker.getRouteStatus(camelRoutes.get(routeId).getXmlCamelRoute());
-    		WorkflowStatus status = routeStatus.getState();
+            WorkflowInfo routeStatus = broker.getRouteStatus(camelRoutes.get(routeId).getXmlCamelRoute());
+            WorkflowStatus status = routeStatus.getState();
+            String name = routeStatus.getDescription();
+
             switch (status) {
             case BROKEN:
 
                 // the requested route cannot be started or is broken
                 log.error("The camel route with ID {} is currently {}",
                         routeId, status);
-                return Response
-                        .status(Response.Status.BAD_REQUEST)
-                        .entity("The camel route with ID {" + routeId
-                                + "} is currently broken").build();
+                return createResponse(Response.Status.BAD_REQUEST,
+                        "The camel route " + name + " with ID {" + routeId
+                                + "} is currently broken", routeStatus);
 
             case UNAVAILABLE:
 
                 // the requested route cannot be started or is broken
-                log.error("The camel route with ID {} is currently {}",
+                log.warn("The camel route with ID {} is currently {}",
                         routeId, status);
-                return Response
-                        .status(Response.Status.SERVICE_UNAVAILABLE)
-                        .entity("The camel route with ID {" + routeId
-                                + "} is currently unavailable").build();
+                return createResponse(Response.Status.SERVICE_UNAVAILABLE,
+                        "The camel route " + name + " with ID {" + routeId
+                                + "} is currently unavailable.", routeStatus);
 
             case RUNNABLE:
 
@@ -331,12 +334,9 @@ public class InjectionWebService {
                 log.warn(
                         "The camel route with ID {} is currently {}, but the auto-startup is not implemented",
                         routeId, status);
-                return Response
-                        .status(Response.Status.NOT_IMPLEMENTED)
-                        .entity("The camel route with ID {"
-                                + routeId
-                                + "} is runnable, but the auto-deployment is not implemented")
-                        .build();
+                return createResponse(Response.Status.NOT_IMPLEMENTED,
+                        "The camel route " + name + " with ID {" + routeId
+                        + "} is runnable, but the auto-deployment is not implemented", routeStatus);
             case ONLINE:
 
                 log.debug(
@@ -377,15 +377,15 @@ public class InjectionWebService {
                     broker.addMICOCamelJobStatus(new MICOJob(routeId, itemURI),
                             jobState);
 
-                    return Response.ok(
-                            "Start process item with route " + routeId).build();
+                    return createResponse(Response.Status.OK,
+                            "Start process item with route " + routeId, routeStatus);
                 }
 
                 log.error("Unable to retrieve an entry point compatible with the input item");
-                return Response
-                        .status(Response.Status.BAD_REQUEST)
-                        .entity("Unable to retrieve an entry point compatible with the input item")
-                        .build();
+                return createResponse(
+                        Response.Status.BAD_REQUEST,
+                        "The camel route " + name + " with ID {" + routeId
+                        + "} has no entry points compatible with the input item", routeStatus);
             default: {
                 // status is not between the known ones
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -395,6 +395,14 @@ public class InjectionWebService {
         }
 
         
+    }
+
+    private Response createResponse(Status status, String message) {
+        return Response.status(status).entity(new InjectResponse(message)).build();
+    }
+
+    private Response createResponse(Status status, String message, WorkflowInfo wi) {
+        return Response.status(status).entity(new InjectResponse(message, wi)).build();
     }
 
 

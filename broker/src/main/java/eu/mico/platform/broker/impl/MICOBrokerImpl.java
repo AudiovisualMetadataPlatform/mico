@@ -763,24 +763,22 @@ public class MICOBrokerImpl implements MICOBroker {
     //---- route status retrieval
     
     public WorkflowInfo getRouteStatus(String xmlCamelRoute) {
-    	try {
-	    	//1. Parse the route
-	    	MICOCamelRoute route = new MICOCamelRoute();
-	    	route.parseCamelRoute(xmlCamelRoute);
-	    	
-	    	//2. Retrieve its status
-	    	return getRouteStatus(route);
-	    	
-	    	//3. Return its string value    	
-	    	
-    	}
-    	catch (Exception e){
-    		//Handle any kind of exception by return BROKEN
-    		log.error("Unable to retrieve route status, returning {}",WorkflowStatus.BROKEN.toString());
-    		e.printStackTrace();
-    		return new WorkflowInfo(WorkflowStatus.BROKEN);
-    	}
-    	
+        MICOCamelRoute route = new MICOCamelRoute();
+        try {
+            // 1. Parse the route
+            route.parseCamelRoute(xmlCamelRoute);
+
+            // 2. Retrieve its status
+            return getRouteStatus(route);
+
+        }
+        catch (Exception e){
+            //Handle any kind of exception by return BROKEN
+            log.error("Unable to retrieve route status, returning {}",WorkflowStatus.BROKEN.toString());
+            e.printStackTrace();
+            return new WorkflowInfo(WorkflowStatus.BROKEN, route.getWorkflowId(), route.getWorkflowDescription());
+        }
+
     }
     
     public WorkflowInfo getRouteStatus(MICOCamelRoute route) throws ClientProtocolException, IOException{
@@ -789,7 +787,7 @@ public class MICOBrokerImpl implements MICOBroker {
     	
     	if(extractors == null || extractors.isEmpty()){
     		log.error("Critical: no extractors could be parsed from the camel route, returning {}",WorkflowStatus.BROKEN.toString());
-    		return new WorkflowInfo(WorkflowStatus.BROKEN);
+    		return new WorkflowInfo(WorkflowStatus.BROKEN, route.getWorkflowId(), route.getWorkflowDescription());
     	}
     	
     	//for every extractor configuration, retrieve its status
@@ -797,7 +795,7 @@ public class MICOBrokerImpl implements MICOBroker {
     	HashMap<MICOCamelRoute.ExtractorConfiguration,ExtractorStatus> eStatus = 
     			new HashMap<MICOCamelRoute.ExtractorConfiguration,ExtractorStatus> ();
     	
-        WorkflowInfo routeInfo = new WorkflowInfo(WorkflowStatus.ONLINE);
+        WorkflowInfo routeInfo = new WorkflowInfo(WorkflowStatus.ONLINE, route.getWorkflowId(), route.getWorkflowDescription());
     	for( MICOCamelRoute.ExtractorConfiguration extractor : extractors){
     		ExtractorStatus extractorStatus = getExtractorStatus(extractor);
             eStatus.put(extractor, extractorStatus);

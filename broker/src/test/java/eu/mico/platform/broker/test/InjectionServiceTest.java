@@ -19,6 +19,7 @@ import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.ShutdownSignalException;
 
+import eu.mico.platform.broker.api.rest.InjectResponse;
 import eu.mico.platform.broker.model.MICOCamelRoute;
 import eu.mico.platform.broker.webservices.InjectionWebService;
 import eu.mico.platform.broker.webservices.WorkflowManagementService;
@@ -419,6 +420,7 @@ public class InjectionServiceTest extends BaseBrokerTest {
         }
         
         Response r = null;
+        InjectResponse info = null;
         Item item = null;
         PersistenceService ps = broker.getPersistenceService();
         String mimeType = "mico:test-item";
@@ -428,24 +430,29 @@ public class InjectionServiceTest extends BaseBrokerTest {
             item.setSyntacticalType(mimeType);
 
             r = injService.submitItem(null, null, null);
+            info = (InjectResponse) r.getEntity();
             Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),r.getStatus());
-            Assert.assertEquals("item parameter not set",r.getEntity());
+            Assert.assertEquals("item parameter not set",info.getMessage());
 
             r = injService.submitItem("", null, null);
+            info = (InjectResponse) r.getEntity();
             Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),r.getStatus());
-            Assert.assertEquals("item parameter not set",r.getEntity());
+            Assert.assertEquals("item parameter not set",info.getMessage());
 
             r = injService.submitItem(UNKNOWN_ITEM_URI, null, null);
+            info = (InjectResponse) r.getEntity();
             Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),r.getStatus());
-            Assert.assertEquals("No item found with uri: "+UNKNOWN_ITEM_URI,r.getEntity());
+            Assert.assertEquals("No item found with uri: "+UNKNOWN_ITEM_URI,info.getMessage());
             
             r = injService.submitItem(UNKNOWN_ITEM_URI, "", null);
+            info = (InjectResponse) r.getEntity();
             Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),r.getStatus());
-            Assert.assertEquals("route parameter not set",r.getEntity());
+            Assert.assertEquals("route parameter not set",info.getMessage());
             
             r = injService.submitItem(item.getURI().toString(), "unknown route", null);
+            info = (InjectResponse) r.getEntity();
             Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),r.getStatus());
-            Assert.assertEquals("No route found with id: unknown route",r.getEntity());
+            Assert.assertEquals("No route found with id: unknown route",info.getMessage());
             
         }catch (Exception e){
             log.error("Unexpected exception: " + e.getMessage());
