@@ -5,7 +5,10 @@ import com.jayway.restassured.RestAssured;
 import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
 import eu.mico.platform.testutils.Mockups;
 import eu.mico.platform.testutils.TestServer;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 
@@ -36,6 +39,7 @@ public class EntitySearchTest {
     private static Repository repository;
 
     private static RepositoryConnection connection;
+    private static Anno4j anno4j;
 
 
     @BeforeClass
@@ -46,7 +50,7 @@ public class EntitySearchTest {
         repository = Mockups.initializeRepository("reco/twovideos.ttl");
         connection = repository.getConnection();
 
-        Anno4j anno4j = new Anno4j();
+        anno4j = new Anno4j();
         anno4j.setRepository(repository);
         mqh = new MICOQueryHelperMMM(anno4j);
 
@@ -70,9 +74,6 @@ public class EntitySearchTest {
     @Test
     public void testGetByEntity() throws Exception {
 
-        // todo: implement
-        Assume.assumeTrue(false);
-
         String json = RestAssured.
                 given().
                 when().
@@ -83,7 +84,6 @@ public class EntitySearchTest {
 
         Assert.assertNotNull(videoList);
         Assert.assertEquals(2, videoList.size());
-
 
     }
 

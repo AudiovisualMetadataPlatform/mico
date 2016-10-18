@@ -1,7 +1,13 @@
 package eu.mico.platform.reco;
 
+import com.github.anno4j.model.namespaces.DCTERMS;
+import com.github.anno4j.querying.QueryService;
+import eu.mico.platform.anno4j.model.ItemMMM;
+import eu.mico.platform.anno4j.model.namespaces.MMM;
 import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
 import eu.mico.platform.reco.Resources.NERQuery;
+import org.apache.marmotta.ldpath.parser.ParseException;
+import org.openrdf.OpenRDFException;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -134,6 +140,52 @@ public class Videos {
 
         JsonObject response = Json.createObjectBuilder()
                 .add("filenames", responseFileListBuilder.build())
+                .build();
+
+
+        return Response.ok(response.toString()).build();
+    }
+
+
+    @GET
+    @Path("/entities/{entity}")
+    public Response getEntities(@PathParam("entity") String entity) {
+
+
+        final String searchEntity = "http://dbpedia.org/resource/" + entity;
+
+
+        List<ItemMMM> items;
+        try {
+            QueryService qs = mqh.getAnno4j().createQueryService()
+                    .addPrefix(MMM.PREFIX, MMM.NS)
+                    .addPrefix("fusepool", "http://vocab.fusepool.info/fam#")
+                    .addPrefix(DCTERMS.PREFIX, DCTERMS.NS)
+                    .addCriteria("mmm:hasPart/mmm:hasBody/fusepool:entity-reference", searchEntity);
+
+
+            items = qs.execute(ItemMMM.class);
+
+        } catch (OpenRDFException | ParseException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
+
+        JsonArrayBuilder resultList = Json.createArrayBuilder();
+
+        for (ItemMMM item : items) {
+
+            JsonObject resultItem = Json.createObjectBuilder()
+                    .add("sourceName", item.getAsset().getName())
+                    .add("itemId", item.toString())
+                    .build();
+
+            resultList.add(resultItem);
+
+        }
+
+
+        JsonObject response = Json.createObjectBuilder()
+                .add("videos", resultList.build())
                 .build();
 
 

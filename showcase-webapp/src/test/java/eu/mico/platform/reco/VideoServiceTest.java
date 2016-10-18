@@ -149,7 +149,6 @@ public class VideoServiceTest {
                 .when().post(server.getUrl() + "videos").then()
                 .statusCode(201);
 
-
     }
 
 
