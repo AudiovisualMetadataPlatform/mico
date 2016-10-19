@@ -135,6 +135,8 @@ namespace mico {
             void doConnect();            //!< internal method called when TCP connection is established
             void doRead();               //!< internal method for reading data from network
 
+            std::string stripPatchVersion(std::string ver); //!< internal method for version conversion, e.g. from 3.0.0-SNAPSHOT to 3.0
+
             ConfigurationClient *configurationClient = NULL; //<! configuration service
 
             AMQPCPPOnCloseBugfix amqpWorkaround;

@@ -19,6 +19,7 @@
 #include <google/protobuf/stubs/common.h>
 #include "Logging.hpp"
 #include "Uri.hpp"
+#include <regex>
 
 
 using std::string;
@@ -671,7 +672,11 @@ namespace mico {
             LOG_INFO ("registering analysis service %s in thread %s...", service->getServiceID().stringValue().c_str(), ss.str().c_str());
 
             boost::uuids::uuid UUID = rnd_gen();
-            std::string queue = service->getQueueName() != "" ? service->getQueueName() : boost::uuids::to_string(UUID);
+
+            std::string queue = service->getExtractorID() + "-" +
+                                stripPatchVersion(service->getExtractorVersion()) + "-" +
+                                service->getExtractorModeID();
+
 
             services[service] = new AnalysisConsumer(getPersistenceService(), *service, queue, new AMQP::Channel(connection));
 
@@ -746,6 +751,31 @@ namespace mico {
 
             AMQP::Envelope data(buffer, contentEvent.ByteSize());
             this->channel->publish("", QUEUE_CONTENT_INPUT, data);
+        }
+
+        /**
+         *  Given a string of format major_version.minor_version.patch_version, e.g. "3.0.0-SNAPSHOT"
+         *  returns a string of the format major_version.minor_version, e.g. "3.0"
+         */
+        std::string EventManager::stripPatchVersion(std::string version){
+
+          std::string result;
+          try {
+            std::regex re("([0-9]+\\.[0-9]+)\\.[0-9]+.*");
+            std::smatch match;
+            if (std::regex_search(version, match, re) && match.size() > 1) {
+              result = match.str(1);
+            } else {
+              std::string msg =  "The input version \""+version+"\" is not formatted as MAJ.MIN.PATCH";
+              LOG_ERROR(msg.c_str());
+              throw std::runtime_error(msg);
+            }
+          } catch (std::regex_error& e) {
+            LOG_ERROR(e.what());
+            throw e;
+          }
+          return result;
+
         }
     }
 }
