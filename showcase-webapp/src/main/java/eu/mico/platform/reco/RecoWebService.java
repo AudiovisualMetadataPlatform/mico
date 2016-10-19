@@ -9,6 +9,9 @@ import eu.mico.platform.reco.model.RequestBody;
 import io.prediction.Event;
 import io.prediction.EventClient;
 import org.joda.time.DateTime;
+import org.jsondoc.core.annotation.Api;
+import org.jsondoc.core.annotation.ApiMethod;
+import org.jsondoc.core.pojo.ApiVerb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +25,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.ExecutionException;
 
+
+@Api(name = "Prediction IO Access", description = "Methods for querying prediction.io", group = "reco")
 @Path("/reco")
 public class RecoWebService {
 
@@ -46,6 +51,14 @@ public class RecoWebService {
         return Response.ok("{\"status\":\"Trallala\"}").build();
     }
 
+
+
+    @ApiMethod(
+            path = "/reco/dockerstatus",
+            verb = ApiVerb.GET,
+            description = "Determines whether docker is running on the system",
+            produces = {MediaType.APPLICATION_JSON}
+    )
     @GET
     @Path("/dockerstatus")
     @Produces("text/plain")
@@ -66,6 +79,14 @@ public class RecoWebService {
                 .build();
     }
 
+
+
+    @ApiMethod(
+            path = "/reco/piostatus",
+            verb = ApiVerb.GET,
+            description = "Determines whether prediction.io is running on the system",
+            produces = {MediaType.APPLICATION_JSON}
+    )
     @GET
     @Path("/piostatus")
     @Produces("text/plain")
@@ -78,6 +99,14 @@ public class RecoWebService {
             return Response.ok(e.getMessage()).build();
         }
     }
+
+
+    @ApiMethod(
+            path = "/reco/pioevents",
+            verb = ApiVerb.GET,
+            description = "Outpúts all events stored by the current prediction.io instance",
+            produces = {MediaType.APPLICATION_JSON}
+    )
 
     @GET
     @Path("/pioevents")
@@ -94,6 +123,13 @@ public class RecoWebService {
         }
     }
 
+
+    @ApiMethod(
+            path = "/reco/piosimplereco",
+            verb = ApiVerb.GET,
+            description = "Returns $length recommendtion for give $itemId",
+            produces = {MediaType.APPLICATION_JSON}
+    )
 
     @GET
     @Path("/piosimplereco")
@@ -119,6 +155,13 @@ public class RecoWebService {
     }
 
 
+
+    @ApiMethod(
+            path = "/reco/createentity",
+            verb = ApiVerb.POST,
+            description = "Adds new event to prediction.io",
+            produces = {MediaType.APPLICATION_JSON}
+    )
     @POST
     @Path("/createentity")
     @Produces("text/plain")
@@ -162,8 +205,15 @@ public class RecoWebService {
                 .build();
 
     }
-    
-    
+
+
+
+    @ApiMethod(
+            path = "/reco/zoo/{subject_id}/discussion/relatedsubjects",
+            verb = ApiVerb.GET,
+            description = "Returns relöated subjects for a given $subject_id",
+            produces = {MediaType.APPLICATION_JSON}
+    )
     @GET
     @Path("/zoo/{subject_id}/discussion/relatedsubjects")
     @Produces("application/json")
@@ -183,7 +233,12 @@ public class RecoWebService {
     }
 
 
-
+    @ApiMethod(
+            path = "/reco//zoo/{subject_id}/is_debated",
+            verb = ApiVerb.GET,
+            description = "Returns whether a given subject is debated by its users",
+            produces = {MediaType.APPLICATION_JSON}
+    )
     @GET
     @Path("/zoo/{subject_id}/is_debated")
     @Produces("application/json")

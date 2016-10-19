@@ -6,6 +6,9 @@ import eu.mico.platform.reco.Resources.EntityInfo;
 import eu.mico.platform.reco.Resources.NERQuery;
 import eu.mico.platform.reco.Resources.Transcript;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jsondoc.core.annotation.Api;
+import org.jsondoc.core.annotation.ApiMethod;
+import org.jsondoc.core.pojo.ApiVerb;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -32,6 +35,7 @@ import java.util.logging.Logger;
 
 //Under the pillow: https://jersey.java.net/documentation/latest/user-guide.html
 
+@Api(name = "NER services", description = "Methods for querying kaldi and ner results", group = "reco")
 @Path("/ner")
 public class NerService {
 
@@ -43,6 +47,14 @@ public class NerService {
         mqh = micoQueryHelperMMM;
     }
 
+
+
+    @ApiMethod(
+            path = "/ner/{source}/entities}",
+            verb = ApiVerb.GET,
+            description = "Get linked entities for given source",
+            produces = {MediaType.APPLICATION_JSON}
+    )
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Path("{source}/entities")
@@ -76,6 +88,14 @@ public class NerService {
 
     }
 
+
+
+    @ApiMethod(
+            path = "/ner/{source}/transcript}",
+            verb = ApiVerb.GET,
+            description = "Get Kaldi results for given source",
+            produces = {MediaType.APPLICATION_JSON}
+    )
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Path("{source}/transcript")

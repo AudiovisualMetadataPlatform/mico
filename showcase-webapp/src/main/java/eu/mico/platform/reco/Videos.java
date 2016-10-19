@@ -10,6 +10,9 @@ import eu.mico.platform.reco.Resources.DataField;
 import eu.mico.platform.reco.Resources.EntityInfo;
 import eu.mico.platform.reco.Resources.NERQuery;
 import org.apache.marmotta.ldpath.parser.ParseException;
+import org.jsondoc.core.annotation.Api;
+import org.jsondoc.core.annotation.ApiMethod;
+import org.jsondoc.core.pojo.ApiVerb;
 import org.openrdf.OpenRDFException;
 
 import javax.json.Json;
@@ -35,6 +38,9 @@ import java.util.logging.Logger;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
+@Api(name = "Video services", description = "Methods for querying (mostly) videos", group = "reco")
 @Path("/videos")
 @Produces(MediaType.APPLICATION_JSON)
 public class Videos {
@@ -45,6 +51,12 @@ public class Videos {
         this.mqh = micoQueryHelperMMM;
     }
 
+    @ApiMethod(
+            path = "/default",
+            verb = ApiVerb.GET,
+            description = "Get a list of default filenames",
+            produces = {MediaType.APPLICATION_JSON}
+    )
     @GET
     @Path("/default")
     public Response getDefaultVideos() {
@@ -81,6 +93,12 @@ public class Videos {
     }
 
 
+    @ApiMethod(
+            path = "/v2/analyzed",
+            verb = ApiVerb.GET,
+            description = "Get a list of annotated videos",
+            produces = {MediaType.APPLICATION_JSON}
+    )
     @GET
     @Path("/v2/analyzed/")
     public Response getAnalyzedVideos2() {
@@ -117,6 +135,12 @@ public class Videos {
     }
 
 
+    @ApiMethod(
+            path = "/analyzed",
+            verb = ApiVerb.GET,
+            description = "Gets a list of annotated videos",
+            produces = {MediaType.APPLICATION_JSON}
+    )
     @GET
     @Path("/analyzed")
     public Response getAnalyzedVideos() {
@@ -149,6 +173,12 @@ public class Videos {
     }
 
 
+    @ApiMethod(
+            path = "/entities/{entity}",
+            verb = ApiVerb.GET,
+            description = "Gets annotations for a given video",
+            produces = {MediaType.APPLICATION_JSON}
+    )
     @GET
     @Path("/entities/{entity}")
     public Response getEntities(@PathParam("entity") String entity) {
@@ -182,6 +212,12 @@ public class Videos {
     }
 
 
+    @ApiMethod(
+            path = "/related/{source}",
+            verb = ApiVerb.GET,
+            description = "Gets semantically related item for a given sourcename",
+            produces = {MediaType.APPLICATION_JSON}
+    )
     @GET
     @Path("/related/{sourceName}")
     public Response getRelatedVideos(@PathParam("sourceName") String sourceName) {
@@ -251,6 +287,11 @@ public class Videos {
     }
 
 
+    @ApiMethod(
+            verb = ApiVerb.POST,
+            description = "Sets default video filelist",
+            produces = {MediaType.APPLICATION_JSON}
+    )
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response setVideos() {
