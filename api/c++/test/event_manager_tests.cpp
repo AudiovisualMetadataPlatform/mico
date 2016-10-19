@@ -17,6 +17,8 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <chrono>
+#include <thread>
 
 #include "EventManager.hpp"
 #include "SPARQLUtil.hpp"
@@ -57,7 +59,7 @@ public:
 	bool called;
 
 	MockAnalyser(string requires, string provides) 
-    : AnalysisService("TestService-"+provides+"-"+requires,"TestMode" , "TestVersion", requires, provides) {}
+    : AnalysisService("TestService-"+provides+"-"+requires,"TestMode" , "1.0.0-TestVersion", requires, provides) {}
 
 
     /**
@@ -92,6 +94,9 @@ TEST_F(EventManagerTest,registerService) {
 	eventManager->registerService(s_bc);
 	eventManager->registerService(s_ac);
 	
+	std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(5000));
+
+
 	eventManager->unregisterService(s_ab);
 	eventManager->unregisterService(s_bc);
 	eventManager->unregisterService(s_ac);
