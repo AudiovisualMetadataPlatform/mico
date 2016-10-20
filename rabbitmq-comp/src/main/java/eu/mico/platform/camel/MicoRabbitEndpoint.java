@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
+import eu.mico.platform.event.api.VersionUtil;
+
 /**
  * Represents a MicoRabbit endpoint.
  */
@@ -174,7 +176,8 @@ public class MicoRabbitEndpoint extends DefaultEndpoint {
      * each extractor service has is own id, in rabbitmq this id is used a routing key
      */
     public String getQueueId() {
-        return getExtractorId() + "-" +getExtractorVersion()+ "-" + getModeId();
+        String version = VersionUtil.stripPatchVersion(getExtractorVersion());
+        return getExtractorId() + "-" + version + "-" + getModeId();
     }
 
     public String getModeId() {

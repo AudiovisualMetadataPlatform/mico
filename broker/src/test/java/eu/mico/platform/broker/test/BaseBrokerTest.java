@@ -233,6 +233,7 @@ public abstract class BaseBrokerTest {
 
     protected static class MockService implements AnalysisService {
 
+        private String version = "1.0.0";
         private boolean createAsset = false;
         private String source, target;
 
@@ -241,13 +242,22 @@ public abstract class BaseBrokerTest {
         }
 
         public MockService(String source, String target, boolean createAsset) {
+            this(source,target,"1.0.0",createAsset);
+        }
+
+        public MockService(String source, String target, String version) {
+            this(source,target,version,false);
+        }
+
+        public MockService(String source, String target, String version, boolean createAsset) {
             this.source = source;
             this.target = target;
+            this.version= version;
             this.createAsset = createAsset;
         }
 
         public URI getServiceID() {
-            return new URIImpl("urn:org.example.services-1.0.0-"
+            return new URIImpl("urn:org.example.services-" + version + "-"
                     + StringUtils.capitalize(source)
                     + StringUtils.capitalize(target) + "Service");
         }
@@ -312,7 +322,7 @@ public abstract class BaseBrokerTest {
 
 		@Override
 		public String getExtractorVersion() {
-			return "1.0.0";
+			return version;
 		}
 
     }
