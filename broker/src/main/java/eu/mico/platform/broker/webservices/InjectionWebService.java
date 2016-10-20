@@ -35,6 +35,11 @@ import eu.mico.platform.persistence.model.Resource;
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.jsondoc.core.annotation.Api;
+import org.jsondoc.core.annotation.ApiMethod;
+import org.jsondoc.core.annotation.ApiQueryParam;
+import org.jsondoc.core.annotation.ApiResponseObject;
+import org.jsondoc.core.annotation.ApiVersion;
+import org.jsondoc.core.pojo.ApiVerb;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -61,6 +66,7 @@ import java.util.*;
  * @author Sebastian Schaffert (sschaffert@apache.org)
  */
 @Api(name = "injection services", description = "Methods for injecting new items", group = "broker")
+@ApiVersion(since = "1.0")
 @Path("/inject")
 public class InjectionWebService {
 
@@ -87,13 +93,24 @@ public class InjectionWebService {
      *
      * @return
      */
+    @ApiMethod(
+            path = "/inject/create",
+            verb = ApiVerb.POST,
+            description = "Create a new item and return its URI in the 'uri' field of the JSON response",
+            produces = { MediaType.APPLICATION_JSON },
+            responsestatuscode = "201 - Created"
+    )
     @POST
     @Path("/create")
     @Produces("application/json")
     public Response createItem(
+            @ApiQueryParam(name="type", description="syntactic type")
             @QueryParam("type") String type,
+            @ApiQueryParam(name="name", description="display name of the item")
             @QueryParam("name") String name,
+            @ApiQueryParam(name="mimeType", description="mime-type of the binary data")
             @QueryParam("mimeType") String mimeType,
+            @ApiQueryParam(name="existingAssetLocation", description="")
             @QueryParam("existingAssetLocation") String existingAssetLocation,
             @Context HttpServletRequest request
     ) throws RepositoryException, IOException {
@@ -228,6 +245,13 @@ public class InjectionWebService {
     	}
     }
 
+    @ApiMethod(
+            path = "/inject/items",
+            verb = ApiVerb.GET,
+            description = "Create a new item and return its URI in the 'uri' field of the JSON response",
+            produces = { MediaType.APPLICATION_JSON },
+            responsestatuscode = "201 - Created"
+    )
     @GET
     @Path("/items")
     @Produces("application/json")
@@ -254,6 +278,12 @@ public class InjectionWebService {
      *
      * @return
      */
+    @ApiMethod(
+            path = "/inject/submit",
+            verb = ApiVerb.POST,
+            description = "Submit the item for analysis by notifying the broker to process it with a given workflow.",
+            produces = { MediaType.APPLICATION_JSON }
+    )
     @POST
     @Path("/submit")
     @Produces(MediaType.APPLICATION_JSON)
@@ -412,10 +442,24 @@ public class InjectionWebService {
      *
      * @return
      */
+    @ApiMethod(
+            path = "add",
+            verb = ApiVerb.POST,
+            description = "Add a new content part to the item using the request body as content. Return the URI of the new part in the 'uri' field of the JSON response",
+            produces = { MediaType.APPLICATION_JSON }
+    )
     @POST
     @Path("/add")
     @Produces("application/json")
-    public Response addPart(@QueryParam("itemUri")String itemURI, @QueryParam("mimeType") String mimeType, @QueryParam("type") String type, @QueryParam("existingAssetLocation") String existingAssetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
+    public Response addPart(
+            @ApiQueryParam(name="itemUri", description="uri of the item, the new part should belong to")
+            @QueryParam("itemUri")String itemURI, 
+            @ApiQueryParam(name="mimeType", description="mime-type of binary content")
+            @QueryParam("mimeType") String mimeType, 
+            @ApiQueryParam(name="type", description="syntactic type")
+            @QueryParam("type") String type, 
+            @ApiQueryParam(name="existingAssetLocation", description="uri of the item")
+            @QueryParam("existingAssetLocation") String existingAssetLocation, @Context HttpServletRequest request) throws RepositoryException, IOException {
         PersistenceService ps = eventManager.getPersistenceService();
 
         if(itemURI == null || itemURI.isEmpty()){
