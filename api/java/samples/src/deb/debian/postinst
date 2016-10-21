@@ -18,50 +18,9 @@ set -e
 NAME="mico-extractor-wordcount"
 GROUP="mico"
 USER="mico"
+REGISTRATION_FILE="/usr/share/mico/extractor-registrations/$NAME.registration.xml"
 DATADIR=/var/lib/mico-extractor-wordcount
-DEFAULT=/etc/default/mico-extractor-wordcount
 
-case "$1" in
-    configure)
-
-    # Source debconf library.
-    . /usr/share/debconf/confmodule
-
-    db_get mico-base/username
-    MICO_USERNAME="$RET"
-
-    db_get mico-base/password
-    MICO_PASSWORD="$RET"
-
-    db_get mico-marmotta/host-name
-    MICO_HOSTNAME="$RET"
-
-    db_stop
-
-    cat > $DEFAULT <<EOF
-MICO_USERNAME="$MICO_USERNAME"
-MICO_PASSWORD="$MICO_PASSWORD"
-MICO_HOSTNAME="$MICO_HOSTNAME"
-EOF
-    
-    # shamelessly copied from debian mysql-server package...
-    if ! getent group $GROUP >/dev/null ; then
-            # Adding system group
-            addgroup --system $GROUP >/dev/null
-    fi
-
-    # creating user if he isn't already there
-    if ! getent passwd $USER >/dev/null ; then
-            # Adding system user
-            adduser \
-        --system \
-        --disabled-login \
-        --ingroup $GROUP \
-        --home $DATADIR \
-        --gecos "mico" \
-        --shell /bin/false \
-        $USER  >/dev/null
-    fi
 
     mkdir -p /var/log/$NAME
     mkdir -p $DATADIR
@@ -69,6 +28,16 @@ EOF
 
     chown $USER:$GROUP -R /var/log/$NAME
     chown $USER:$GROUP -R /var/lib/$NAME
+
+    #######################################
+    # register extractor on mico platform #
+    # Source debconf library.
+    . /usr/share/debconf/confmodule
+
+    db_get mico-extractor-registration/registration-url
+    REG_SVC="$RET"
+
+    /usr/bin/mico-extractor-registration "$REG_SVC" "$REGISTRATION_FILE"
 
     db_stop
 
