@@ -39,6 +39,6 @@
 			</annotatedProperty>
 		</output>
 	</mode>
-<!--	<deployedAt>127.0.0.1</deployedAt> -->
+	<deployedAt>{"extractorId":"mico-extractor-wordcount","ip":"localhost","port":"8080"}</deployedAt>
 	<isSingleton>false</isSingleton>
 </extractorSpecification>
