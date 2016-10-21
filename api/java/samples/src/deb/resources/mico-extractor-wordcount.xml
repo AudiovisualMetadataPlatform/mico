@@ -3,7 +3,7 @@
 <extractorSpecification xsi:noNamespaceSchemaLocation="micoRegistration.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<name>Word Count extractor</name>
 	<version>${project.version}</version>
-	<id>mico_wordcount_service</id>
+	<id>mico-extractor-wordcount</id>
 	<mode>
 		<id>WC-txt</id>
 		<description>Sample WORD COUNTER for TXT text files</description>
@@ -39,6 +39,6 @@
 			</annotatedProperty>
 		</output>
 	</mode>
-	<deployedAt>127.0.0.1</deployedAt>
+<!--	<deployedAt>127.0.0.1</deployedAt> -->
 	<isSingleton>false</isSingleton>
 </extractorSpecification>

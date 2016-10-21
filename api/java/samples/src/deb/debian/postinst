@@ -21,6 +21,8 @@ USER="mico"
 REGISTRATION_FILE="/usr/share/mico/extractor-registrations/$NAME.registration.xml"
 DATADIR=/var/lib/mico-extractor-wordcount
 
+case "$1" in
+    configure)
 
     mkdir -p /var/log/$NAME
     mkdir -p $DATADIR

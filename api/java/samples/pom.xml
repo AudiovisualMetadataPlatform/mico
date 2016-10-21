@@ -28,7 +28,8 @@
     <name>MICO Platform: Samples</name>
 
     <properties>
-        <mainClass>eu.mico.platform.samples.wordcount.WordCountAnalyzer</mainClass>
+        <mainClass>eu.mico.platform.samples.wordcount.WordCountAnalyzerDaemon</mainClass>
+        <deb.registration.install.path>/usr/share/mico/extractor-registrations/</deb.registration.install.path>
     </properties>
 
     <dependencies>
@@ -63,6 +64,11 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>commons-daemon</groupId>
+          <artifactId>commons-daemon</artifactId>
+          <version>1.0.15</version>
         </dependency>
     </dependencies>
 
@@ -186,6 +192,20 @@
                         <filemode>0755</filemode>
                       </mapper>
                     </data>
+                    <data>
+                      <src>
+                        ${project.build.directory}/deb/resources/${project.artifactId}.xml
+                      </src>
+                      <dst>${project.artifactId}.registration.xml</dst>
+                      <type>file</type>
+                      <conffile>true</conffile>
+                      <mapper>
+                        <type>perm</type>
+                        <prefix>${deb.registration.install.path}</prefix>
+                        <filemode>0644</filemode>
+                      </mapper>
+                    </data>
+
                   </dataSet>
 
                 </configuration>
