@@ -1,20 +1,25 @@
 package eu.mico.platform.reco;
 
 import com.github.anno4j.Anno4j;
+import com.github.anno4j.model.namespaces.DCTERMS;
+import com.github.anno4j.model.namespaces.OADM;
+import com.github.anno4j.querying.QueryService;
 import com.jayway.restassured.RestAssured;
+import eu.mico.platform.anno4j.model.ItemMMM;
+import eu.mico.platform.anno4j.model.namespaces.MMM;
+import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
 import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
+import eu.mico.platform.reco.Resources.AnimalInfo;
 import eu.mico.platform.testutils.Mockups;
 import eu.mico.platform.testutils.TestServer;
 import org.hamcrest.Matchers;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,12 +44,13 @@ public class RecoWebServiceTest {
     private static Repository repository;
 
     private static RepositoryConnection connection;
+    private ZooReco zooReco;
 
     @BeforeClass
     public static void init() throws Exception {
 
         //init in memory repository
-        repository = Mockups.initializeRepository("reco/videokaldiner.ttl");
+        repository = Mockups.initializeRepository("reco/zooniverse.ttl");
         connection = repository.getConnection();
 
         Anno4j anno4j = new Anno4j();
@@ -99,6 +105,29 @@ public class RecoWebServiceTest {
     }
 
     @Test
+    public void name() throws Exception {
+
+        QueryService qs = mqh.getAnno4j().createQueryService()
+                .addPrefix(MMM.PREFIX, MMM.NS)
+                .addPrefix(MMMTERMS.PREFIX, MMMTERMS.NS)
+                .addPrefix(DCTERMS.PREFIX, DCTERMS.NS)
+                .addPrefix(OADM.PREFIX, OADM.NS)
+                .addCriteria("mmm:hasPart/oa:hasBody[is-a mmmterms:AnimalDetectionBody]/rdf:value", "gazelle");
+
+
+        List<ItemMMM> retList = qs.execute(ItemMMM.class);
+
+        System.out.println(retList.size());
+
+        for (ItemMMM item : retList) {
+            System.out.println(item.toString());
+
+        }
+
+
+    }
+
+    @Test
     @Ignore
     public void testIsDebated() throws Exception {
 
@@ -113,5 +142,26 @@ public class RecoWebServiceTest {
                 .body("score", Matchers.lessThan(1f));
 
     }
+
+    @Before
+    public void setUp() throws Exception {
+
+        zooReco = new ZooReco(mqh);
+
+    }
+
+    @Test
+    public void testGetAnimal() throws Exception {
+
+        String host = "http://demo1.mico-project.eu:8080/marmotta/";
+        String item = "61af22c9-a8e0-44b9-82c0-c3248f1aa046";
+
+        List<AnimalInfo> animalInfos = zooReco.getDetectedAnimals(host + item, mqh);
+
+        Assert.assertEquals(1, animalInfos.size());
+        Assert.assertEquals("gazelle", animalInfos.get(0).getSpecies());
+
+    }
+
 
 }

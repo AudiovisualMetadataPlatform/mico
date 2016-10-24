@@ -1,7 +1,16 @@
 package eu.mico.platform.reco;
 
+import com.github.anno4j.model.namespaces.DCTERMS;
+import com.github.anno4j.querying.QueryService;
+import eu.mico.platform.anno4j.model.impl.bodymmm.AnimalDetectionBodyMMM;
+import eu.mico.platform.anno4j.model.namespaces.MMM;
 import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
 import eu.mico.platform.reco.Resources.*;
+import org.apache.marmotta.ldpath.parser.ParseException;
+import org.openrdf.OpenRDFException;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.repository.RepositoryException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +41,34 @@ public class ZooReco {
 
     public ZooReco(MICOQueryHelperMMM mqh) {
         this.mqh = mqh;
+    }
+
+    List<AnimalInfo> getDetectedAnimals(String itemId, MICOQueryHelperMMM mqh) {
+
+        List<AnimalInfo> retList = new ArrayList<>();
+
+        QueryService qs;
+        try {
+            qs = mqh.getAnno4j().createQueryService()
+                    .addPrefix(MMM.PREFIX, MMM.NS)
+                    .addPrefix("fusepool", "http://vocab.fusepool.info/fam#")
+                    .addPrefix(DCTERMS.PREFIX, DCTERMS.NS)
+                    .addCriteria("^mmm:hasBody/^mmm:hasPart", itemId);
+
+
+            List<AnimalDetectionBodyMMM> adbs = qs.execute(AnimalDetectionBodyMMM.class);
+
+            for (AnimalDetectionBodyMMM adbMMM: adbs) {
+                AnimalInfo ai = new AnimalInfo(adbMMM.getValue(), adbMMM.getConfidence());
+                retList.add(ai);
+            }
+
+
+        } catch (ParseException | OpenRDFException e) {
+            e.printStackTrace();
+        }
+
+        return retList;
     }
 
     public double getDebatedScore(String subject_id) {
@@ -89,10 +126,6 @@ public class ZooReco {
 
     private List<String> getChatTranscript(String subject_id) {
         return new ArrayList<>();
-    }
-
-    private List<AnimalInfo> getDetectedAnimals(String itemId, MICOQueryHelperMMM mqh) {
-        throw new RuntimeException("Not implemented, yet");
     }
 
     private List<String> getChatAnalysisItems(String subject_id) {
