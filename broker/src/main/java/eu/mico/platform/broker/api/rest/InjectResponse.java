@@ -5,7 +5,7 @@ import org.jsondoc.core.annotation.ApiObjectField;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-@ApiObject
+@ApiObject(name="InjectResponse",description="general information about inject status")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class InjectResponse {
 
