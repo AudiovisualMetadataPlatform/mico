@@ -4,7 +4,7 @@ import eu.mico.platform.anno4j.model.fam.LinkedEntityBody;
 
 import java.net.URI;
 
-public class EntityInfo {
+public class EntityInfo extends SimpleExtractionResult {
 
     private URI reference;
     private String label;
@@ -31,6 +31,8 @@ public class EntityInfo {
         return reference;
     }
 
+
+    @Override
     public String getLabel() {
         return label;
     }

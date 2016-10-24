@@ -1,15 +1,20 @@
 package eu.mico.platform.reco;
 
+import com.github.anno4j.Anno4j;
 import com.jayway.restassured.RestAssured;
+import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
+import eu.mico.platform.testutils.Mockups;
 import eu.mico.platform.testutils.TestServer;
 import org.hamcrest.Matchers;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 import java.io.IOException;
-
-import static eu.mico.platform.testutils.Mockups.mockEvenmanager;
 
 /**
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,16 +33,27 @@ public class RecoWebServiceTest {
 
 
     static private TestServer server;
+    private static MICOQueryHelperMMM mqh;
 
+
+    private static Repository repository;
+
+    private static RepositoryConnection connection;
 
     @BeforeClass
     public static void init() throws Exception {
 
+        //init in memory repository
+        repository = Mockups.initializeRepository("reco/videokaldiner.ttl");
+        connection = repository.getConnection();
 
-        RecoWebService recoWebService = new RecoWebService(
-                mockEvenmanager(null),
-                "http://mico-platform:8080/marmotta"
-        );
+        Anno4j anno4j = new Anno4j();
+        anno4j.setRepository(repository);
+        mqh = new MICOQueryHelperMMM(anno4j);
+
+
+        RecoWebService recoWebService = new RecoWebService(mqh);
+
 
         //init server
         server = new TestServer();
@@ -45,6 +61,12 @@ public class RecoWebServiceTest {
         server.addWebservice(recoWebService);
 
         server.start();
+    }
+
+    @AfterClass
+    public static void tearDown() throws Exception {
+        connection.close();
+
     }
 
     @Test
@@ -77,6 +99,7 @@ public class RecoWebServiceTest {
     }
 
     @Test
+    @Ignore
     public void testIsDebated() throws Exception {
 
         RestAssured.

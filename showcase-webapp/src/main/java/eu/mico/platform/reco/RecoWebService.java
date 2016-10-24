@@ -2,6 +2,7 @@ package eu.mico.platform.reco;
 
 
 import com.google.common.collect.ImmutableMap;
+import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
 import eu.mico.platform.event.api.EventManager;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.reco.model.PioEventData;
@@ -31,16 +32,10 @@ import java.util.concurrent.ExecutionException;
 public class RecoWebService {
 
     private static final Logger log = LoggerFactory.getLogger(RecoWebService.class);
+    private MICOQueryHelperMMM mqh;
 
-    private final EventManager eventManager;
-    private final String marmottaBaseUri;
-    private final PersistenceService persistenceService;
-
-
-    public RecoWebService(EventManager eventManager, String marmottaBaseUri) {
-        this.eventManager = eventManager;
-        this.marmottaBaseUri = marmottaBaseUri;
-        this.persistenceService = eventManager.getPersistenceService();
+    public RecoWebService(MICOQueryHelperMMM micoQueryHelper) {
+        this.mqh = micoQueryHelper;
     }
 
 
@@ -50,7 +45,6 @@ public class RecoWebService {
     public Response getTestResponse() {
         return Response.ok("{\"status\":\"Trallala\"}").build();
     }
-
 
 
     @ApiMethod(
@@ -78,7 +72,6 @@ public class RecoWebService {
                 .entity(ImmutableMap.of("docker_running", dockerRunning, "calls", docker_cmd))
                 .build();
     }
-
 
 
     @ApiMethod(
@@ -155,7 +148,6 @@ public class RecoWebService {
     }
 
 
-
     @ApiMethod(
             path = "/reco/createentity",
             verb = ApiVerb.POST,
@@ -186,7 +178,6 @@ public class RecoWebService {
                 .targetEntityType(eventData.targetEntityType);
 
 
-
         EventClient ec = new EventClient("micoaccesskey", DockerConf.PIO_EVENT_API.toString());
         String eventId;
         try {
@@ -205,7 +196,6 @@ public class RecoWebService {
                 .build();
 
     }
-
 
 
     @ApiMethod(
@@ -244,7 +234,11 @@ public class RecoWebService {
     @Produces("application/json")
     public Response isDebatedSubjects(@PathParam("subject_id") String subject_id) {
 
-        double debatedScore = Math.random();
+
+        ZooReco zooReco = new ZooReco(mqh);
+
+
+        double debatedScore = zooReco.getDebatedScore(subject_id);
         double threshold = 0.7;
 
         JsonObject returnValue = Json.createObjectBuilder()
