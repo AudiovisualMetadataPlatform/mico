@@ -14,9 +14,21 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+EXTRACTOR_ID=mico-extractor-wordcount
 
 case "$1" in
     remove|upgrade|deconfigure)
+
+        . /usr/share/debconf/confmodule
+
+        db_get mico-extractor-registration/registration-url
+        REG_SVC="$RET"
+
+        #un-register
+        /usr/bin/mico-extractor-registration "$REG_SVC" "$EXTRACTOR_ID" "--remove" || echo "WARN: un-registration of $EXTRACTOR_ID failed"
+
+        db_stop
+
     ;;
 
     failed-upgrade)

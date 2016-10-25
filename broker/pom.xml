@@ -145,7 +145,7 @@
                             <outputFile>${project.build.directory}/jsondoc-ui/jsondoc.json</outputFile>
 <!--                             <scanner>org.jsondoc.springmvc.scanner.Spring4JSONDocScanner</scanner> -->
                             <scanner>org.jsondoc.core.scanner.DefaultJSONDocScanner</scanner>
-                            <playgroundEnabled>true</playgroundEnabled>
+                            <playgroundEnabled>false</playgroundEnabled>
                             <displayMethodAs>METHOD</displayMethodAs>
                         </configuration>
                     </execution>
