@@ -11,7 +11,7 @@ import java.util.Set;
  * There, an extractor is the instance that creates metadata towards a given multimedia item.
  */
 @Iri(MMM.EXTRACTOR)
-public interface ExtractorMMM extends Software{
+public interface ExtractorMMM extends Software {
 
     @Iri(MMM.HAS_NAME)
     void setName(String name);
