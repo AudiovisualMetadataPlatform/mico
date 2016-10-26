@@ -11,7 +11,7 @@
 - *GET* [/reco/piosimplereco?itemId={ItemID}&length={maxitems}](reco/piosimplereco?itemId={ItemID}&length={maxitems})
 - *POST* /reco/createentity
 - *GET* [/reco/zoo/{subject_id}/discussion/relatedsubjects](reco/zoo/{subject_id}/discussion/relatedsubjects)
-- *GET* [/reco/zoo/{subject_id}/is_debated](reco/zoo/{subject_id}/is_debated)
+- *GET* [/reco/zoo/{subject_item}/is_debated?chatItem={chat_Item}](reco/zoo/http:%2F%2Fdemo1.mico-project.eu:8080%2marmotta%261af22c9-a8e0-44b9-82c0-c3248f1aa046/is_debated?chatItem=http:%2F%2Fdemo1.mico-project.eu:8080%2Fmarmotta%2Fbac38e61-257b-417e-b2aa-3e1835aa59d2)
 
 
 ## Video Analysis ##

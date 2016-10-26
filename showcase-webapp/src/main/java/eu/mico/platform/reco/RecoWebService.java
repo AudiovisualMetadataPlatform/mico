@@ -3,8 +3,6 @@ package eu.mico.platform.reco;
 
 import com.google.common.collect.ImmutableMap;
 import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
-import eu.mico.platform.event.api.EventManager;
-import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.reco.model.PioEventData;
 import eu.mico.platform.reco.model.RequestBody;
 import io.prediction.Event;
@@ -12,6 +10,8 @@ import io.prediction.EventClient;
 import org.joda.time.DateTime;
 import org.jsondoc.core.annotation.Api;
 import org.jsondoc.core.annotation.ApiMethod;
+import org.jsondoc.core.annotation.ApiPathParam;
+import org.jsondoc.core.annotation.ApiQueryParam;
 import org.jsondoc.core.pojo.ApiVerb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -225,7 +225,6 @@ public class RecoWebService {
     }
 
 
-
     @GET
     @Path("/zoo/{subject_id}/is_debated2")
     @Produces("application/json")
@@ -249,22 +248,35 @@ public class RecoWebService {
     }
 
 
-
     @ApiMethod(
             path = "/reco/zoo/{subject_item}/is_debated",
             verb = ApiVerb.GET,
             description = "Returns whether a given subject (represented as an Item) is debated by its users",
             produces = {MediaType.APPLICATION_JSON}
     )
+
     @GET
     @Path("/zoo/{subject_item}/is_debated")
     @Produces("application/json")
-    public Response isDebatedSubjects2(@PathParam("subject_item") String subject_item, @QueryParam("chatItem") List<String> chatItems) {
+    public Response isDebatedSubjects2(
+            @ApiPathParam(
+                name = "subject_item",
+                description = "Item-Uri corresponding with the analyzed subject image"
+            )
+            @PathParam("subject_item") String subject_item,
+
+            @ApiQueryParam(
+                    name = "chatItem",
+                    description = "Item-Uris (please escape the slashes with %2F) corresponding with talk entries to the queried subject. " +
+                            "Several talk-entries are allowed by passing several chatItem=..."
+
+            )
+            @QueryParam("chatItem") List<String> chatItems) {
 
         //TODO: find out when it is (not) happening automatically
         subject_item = subject_item.replace("%2F", "/");
         List<String> escapedItems = new ArrayList<>();
-        for (String item: chatItems) {
+        for (String item : chatItems) {
             escapedItems.add(item.replace("%2F", "/"));
         }
 
