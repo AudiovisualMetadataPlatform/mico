@@ -45,6 +45,7 @@ public interface MICOBroker {
             case RUNNABLE:     return "RUNNABLE";
             case UNAVAILABLE:  return "UNAVAILABLE";
             case BROKEN:       return "BROKEN";
+            case PROCESSING:   return "PROCESSING";
             default:
                 throw new IllegalArgumentException();
             }

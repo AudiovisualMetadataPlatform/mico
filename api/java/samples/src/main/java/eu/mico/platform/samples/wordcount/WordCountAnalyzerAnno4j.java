@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.text.DateFormatSymbols;
@@ -44,6 +45,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TimeZone;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
@@ -66,19 +68,19 @@ public class WordCountAnalyzerAnno4j implements AnalysisServiceAnno4j {
     
 	@Override
 	public String getExtractorID() {
-		return "wordcountanno4j";
+		return getRegistrationProperties("extractorId");
 	}
 
 
 	@Override
 	public String getExtractorModeID() {
-		return  "regex";
+		return  "WC-txt";
 	}
 
 
 	@Override
 	public String getExtractorVersion() {
-		return "2.0.0";
+		return getRegistrationProperties("extractorVersion");
 	}
  
     @Override
@@ -89,6 +91,17 @@ public class WordCountAnalyzerAnno4j implements AnalysisServiceAnno4j {
     @Override
     public String getRequires() {
         return "text/plain";
+    }
+
+    private String getRegistrationProperties(String propName){
+      InputStream in = this.getClass().getClassLoader().getResourceAsStream("registration.properties");
+      Properties props = new Properties();
+      try {
+        props.load(in);
+      } catch (IOException e) {
+        log.error("Error reading registration properties", e);
+      }
+      return props.getProperty(propName);
     }
 
     @Override

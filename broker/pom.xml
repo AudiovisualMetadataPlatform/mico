@@ -120,6 +120,7 @@
             <plugin>
                 <groupId>org.jsondoc</groupId>
                 <artifactId>jsondoc-maven-plugin</artifactId>
+                <version>1.2.16</version>
                 <dependencies>
                   <dependency>
                     <groupId>javax.servlet</groupId>
@@ -145,7 +146,7 @@
 <!--                             <scanner>org.jsondoc.springmvc.scanner.Spring4JSONDocScanner</scanner> -->
                             <scanner>org.jsondoc.core.scanner.DefaultJSONDocScanner</scanner>
                             <playgroundEnabled>true</playgroundEnabled>
-                            <displayMethodAs>URI</displayMethodAs>
+                            <displayMethodAs>METHOD</displayMethodAs>
                         </configuration>
                     </execution>
                 </executions>
@@ -153,7 +154,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.9</version>
                <executions>
                     <execution>
                         <id>unpack</id>

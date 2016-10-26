@@ -289,16 +289,6 @@ public class MicoRabbitProducer extends DefaultProducer {
     	return false;
     }
 
-//	private AnalysisRequest generateTemplateRequest(String item, String... part) {
-//        LOG.info("generate template of an AnalysisRequest for item {} on part {}", item, part);
-//        Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.newBuilder()
-//                .setItemUri(item)
-//                .addAllPartUri(Arrays.asList(part))
-//                .setServiceId(queueId).build();
-//    	
-//    	return analysisEvent;
-//    }
-    
     private AnalysisRequest generateInputRequest(AnalysisRequest oldRequest) {
         LOG.info("generate AnalysisRequest for service {} on item {} ( input resource(s): {} )", queueId, oldRequest.getItemUri(), oldRequest.getPartUriList());
         Event.AnalysisRequest analysisEvent = Event.AnalysisRequest.newBuilder()

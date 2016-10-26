@@ -1,17 +1,22 @@
 package eu.mico.platform.broker.api.rest;
 
 import org.jsondoc.core.annotation.ApiObject;
+import org.jsondoc.core.annotation.ApiObjectField;
 
 import eu.mico.platform.broker.api.MICOBroker.ExtractorStatus;
 import eu.mico.platform.broker.model.MICOCamelRoute.ExtractorConfiguration;
 
-@ApiObject
+@ApiObject(description="general information about an extractor service")
 public class ExtractorInfo {
 
-private String name;
-private String version;
-private String mode;
-private ExtractorStatus state = null;
+    @ApiObjectField(description="unique name of extractor service")
+    private String name;
+    @ApiObjectField(description="version of extractor service")
+    private String version;
+    @ApiObjectField(description="process configuration of extractor service ")
+    private String mode;
+    @ApiObjectField(description="current status of extractor service")
+    private ExtractorStatus state = null;
 
 
 

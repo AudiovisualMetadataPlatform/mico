@@ -15,16 +15,15 @@ package eu.mico.platform.persistence.impl;
 
 import com.github.anno4j.Anno4j;
 import com.github.anno4j.querying.QueryService;
-
 import eu.mico.platform.anno4j.model.ItemMMM;
 import eu.mico.platform.persistence.api.PersistenceService;
 import eu.mico.platform.persistence.model.Item;
 import eu.mico.platform.storage.api.StorageService;
 import eu.mico.platform.storage.impl.StorageServiceBuilder;
-
+import org.apache.marmotta.ldpath.parser.ParseException;
+import org.openrdf.OpenRDFException;
 import org.openrdf.idGenerator.IDGenerator;
 import org.openrdf.model.URI;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.config.RepositoryConfigException;
 import org.openrdf.repository.object.ObjectConnection;
@@ -178,8 +177,15 @@ public class PersistenceServiceAnno4j implements PersistenceService {
      */
     @Override
     public Iterable<? extends Item> getItems() throws RepositoryException {
+
+        QueryService qs = anno4j.createQueryService();
+        List<ItemMMM> itemsMMM = null;
         List<ItemAnno4j> itemsAnno4j = new ArrayList<>();
-        List<ItemMMM> itemsMMM = anno4j.findAll(ItemMMM.class);
+        try {
+            itemsMMM = qs.execute(ItemMMM.class);
+        } catch (ParseException | OpenRDFException e) {
+            return itemsAnno4j;
+        }
 
         for (ItemMMM itemMMM : itemsMMM) {
             itemsAnno4j.add(new ItemAnno4j(itemMMM, this));

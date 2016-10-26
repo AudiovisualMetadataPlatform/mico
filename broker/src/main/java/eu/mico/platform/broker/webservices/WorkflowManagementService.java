@@ -23,6 +23,13 @@ import eu.mico.platform.broker.model.MICOCamelRoute;
 import eu.mico.platform.camel.MicoCamelContext;
 
 import org.codehaus.plexus.util.FileUtils;
+import org.jsondoc.core.annotation.Api;
+import org.jsondoc.core.annotation.ApiMethod;
+import org.jsondoc.core.annotation.ApiPathParam;
+import org.jsondoc.core.annotation.ApiResponseObject;
+import org.jsondoc.core.annotation.ApiVersion;
+import org.jsondoc.core.pojo.ApiStage;
+import org.jsondoc.core.pojo.ApiVerb;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import java.io.File;
@@ -45,6 +53,8 @@ import java.util.Map;
  *
  * @author Marcel Sieland
  */
+@Api(name = "workflow services", description = "Methods for workflow management", group = "broker")
+@ApiVersion(since = "3.0")
 @Path("/workflow")
 public class WorkflowManagementService {
 
@@ -76,6 +86,12 @@ public class WorkflowManagementService {
      *
      * @return
      */
+    @ApiMethod(verb = ApiVerb.POST,
+            path = "/workflow/add",
+            description = "add all routes of a new workflow",
+            produces = { MediaType.APPLICATION_JSON},
+            consumes = { MediaType.APPLICATION_JSON}
+    )
     @POST
     @Path("/add")
     @Produces("application/json")
@@ -111,7 +127,11 @@ public class WorkflowManagementService {
 		}
         
     }
-
+    @ApiMethod(verb = ApiVerb.POST,
+            path = "/workflow/del/{id}",
+            description = "remove workflow with given id",
+            produces = { MediaType.APPLICATION_JSON}
+    )
     //TODO: with @delete the ui gets a 403 forbidden error, and this method is not triggered. check why
     @POST
     @Path("/del/{id}")
@@ -134,7 +154,12 @@ public class WorkflowManagementService {
     	}
     }
 
-	@GET
+    @ApiMethod(
+            path = "/workflow/routes",
+            description = "returns a list with route ids and their description",
+            produces = { MediaType.APPLICATION_JSON}
+    )
+    @GET
 	@Path("/routes")
 	@Produces("application/json")
 	public Response getWorkflows() throws RepositoryException,
@@ -156,10 +181,15 @@ public class WorkflowManagementService {
 
 	}
 
+    @ApiMethod(
+            path = "/workflow/routesInfo",
+            description = "returns a list with all routes and their current status",
+            produces = { MediaType.APPLICATION_JSON}
+    )
     @GET
     @Path("/routesInfo")
     @Produces("application/json")
-    public List<WorkflowInfo> getWorkflowInfos() throws RepositoryException,
+    public @ApiResponseObject List<WorkflowInfo> getWorkflowInfos() throws RepositoryException,
             IOException {
 
         synchronized (camelLock) {
@@ -185,7 +215,7 @@ public class WorkflowManagementService {
     }
 
     /**
-     * return status of specific workflow The returned status can be one of the
+     * return status of specific workflow. The returned status can be one of the
      * following:
      * 
      * The value can be: <br>
@@ -199,10 +229,18 @@ public class WorkflowManagementService {
      * @param workflowId
      * @return
      */
+    @ApiMethod(
+            path = "/workflow/status/{id}",
+            description = "return status of specific workflow.",
+            produces = { MediaType.TEXT_PLAIN},
+            stage = ApiStage.DEPRECATED
+    )
     @GET
     @Path("/status/{id}")
     @Produces("text/plain")
+    @Deprecated()
     public String getStatus(@QueryParam("user") String user,
+            @ApiPathParam(name = "id", description = "id of the workflow")
             @PathParam("id") String workflowId ) throws RepositoryException,
             IOException {
         
@@ -230,10 +268,16 @@ public class WorkflowManagementService {
     	}
     }
     
+    @ApiMethod(
+            path = "/workflow/statusInfo/{id}",
+            description = "return extended information about status of specific workflow.",
+            produces = { MediaType.APPLICATION_JSON}
+    )
     @GET
     @Path("/statusInfo/{id}")
     @Produces("application/json")
-    public WorkflowInfo getStatusInfo(@QueryParam("user") String user,
+    public @ApiResponseObject WorkflowInfo getStatusInfo(@QueryParam("user") String user,
+            @ApiPathParam(name = "id", description = "id of the workflow")
             @PathParam("id") String workflowId ) throws RepositoryException,
             IOException {
         
@@ -259,6 +303,11 @@ public class WorkflowManagementService {
         return new WorkflowInfo(WorkflowStatus.BROKEN,workflowId,"---");
     }
 
+    @ApiMethod(
+            path = "/workflow/camel-route/{id}",
+            description = "return xml representation of specific workflow.",
+            produces = { MediaType.TEXT_XML}
+    )
     @GET
     @Path("/camel-route/{id}")
     @Produces("text/plain")

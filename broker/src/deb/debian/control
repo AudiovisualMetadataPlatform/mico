@@ -5,6 +5,6 @@ Homepage: https://bitbucket.org/mico-project/platform
 Package: [[name]]
 Architecture: all
 Version: [[version]]
-Depends: tomcat7 (>= 7.0.52), java8-runtime-headless, mico-rabbitmq, mico-marmotta, mico-persistence, mico-default-routes (>=0.9.4)
+Depends: tomcat7 (>= 7.0.52), java8-runtime-headless, mico-rabbitmq, mico-marmotta, mico-persistence, mico-default-camel-routes (>=0.9.4)
 Description: MICO Broker
  This package contains the distribution of the MICO Broker Web Application.
