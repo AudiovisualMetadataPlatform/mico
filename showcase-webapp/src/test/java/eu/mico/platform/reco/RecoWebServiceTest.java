@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.jayway.restassured.path.json.JsonPath.from;
+
 /**
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,16 +132,21 @@ public class RecoWebServiceTest {
     }
 
     @Test
-    public void testIsDebated2() throws Exception {
+    public void testIsDebated_with_bogus_items() throws Exception {
 
+        String subject = "12345";
 
         String json = RestAssured.
                 given().
                 when()
-                .get(server.getUrl() + "reco/zoo/12345/is_debated2?chatItem=uno&chatItem=due&chatItem=tres")
+                .get(server.getUrl() + "reco/zoo/" + subject + "/is_debated2?chatItem=uno&chatItem=due&chatItem=tres")
                 .body().asString();
 
-        System.out.println(json);
+        String reco_id = from(json).get("reco_id");
+        Float score = from(json).get("score");
+
+        Assert.assertEquals(subject, reco_id);
+        Assert.assertEquals(0.0d, score.doubleValue(), 0.001d);
 
 
     }
