@@ -2,15 +2,13 @@ package eu.mico.platform.reco;
 
 import com.github.anno4j.model.namespaces.DCTERMS;
 import com.github.anno4j.querying.QueryService;
+import eu.mico.platform.anno4j.model.fam.SentimentBody;
 import eu.mico.platform.anno4j.model.impl.bodymmm.AnimalDetectionBodyMMM;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
 import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
 import eu.mico.platform.reco.Resources.*;
 import org.apache.marmotta.ldpath.parser.ParseException;
 import org.openrdf.OpenRDFException;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.repository.RepositoryException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +56,7 @@ public class ZooReco {
 
             List<AnimalDetectionBodyMMM> adbs = qs.execute(AnimalDetectionBodyMMM.class);
 
-            for (AnimalDetectionBodyMMM adbMMM: adbs) {
+            for (AnimalDetectionBodyMMM adbMMM : adbs) {
                 AnimalInfo ai = new AnimalInfo(adbMMM.getValue(), adbMMM.getConfidence());
                 retList.add(ai);
             }
@@ -78,7 +76,7 @@ public class ZooReco {
 
         List<String> chatTranscript = getChatTranscript(subject_id);
 
-        SentimentResult sentiment = getChatSentiment(subject_id);
+        SentimentResult sentiment = getChatSentiment(chatAnalysisItems);
 
         List<EntityInfo> linkedEntities = new ArrayList<>();
         List<AnimalInfo> detectedAnimals = new ArrayList<>();
@@ -86,11 +84,11 @@ public class ZooReco {
         for (String itemId : chatAnalysisItems) {
             Map<String, EntityInfo> currentEntities = NERQuery.getLinkedEntities(itemId, DataField.CONTENTITEM, mqh);
 
-
             if (currentEntities != null) {
                 List<EntityInfo> currentEntityList = (List<EntityInfo>) currentEntities.values();
                 linkedEntities.addAll(currentEntityList);
             }
+
         }
 
         for (String itemId : animalDetectionItems) {
@@ -120,8 +118,52 @@ public class ZooReco {
 
     }
 
-    private SentimentResult getChatSentiment(String subject_id) {
-        return SentimentResult.POSITIVE;
+    /**
+     * Retrieves sentiment values of all items in itemIdList and returns SentimentResult based on their median.
+     *
+     * @param itemIdList List of items with sentiment annotation
+     * @return SentimentResult based on median, Sentiment.NEUTRAL if nothing was found
+     */
+    SentimentResult getChatSentiment(List<String> itemIdList) {
+
+        double[] sentimentList = new double[itemIdList.size()];
+        int i = 0;
+        QueryService qs;
+
+        for (String itemId : itemIdList) {
+
+            try {
+                qs = mqh.getAnno4j().createQueryService()
+                        .addPrefix(MMM.PREFIX, MMM.NS)
+                        .addPrefix("fusepool", "http://vocab.fusepool.info/fam#")
+                        .addPrefix(DCTERMS.PREFIX, DCTERMS.NS)
+                        .addCriteria("^mmm:hasBody/^mmm:hasPart", itemId);
+
+
+                List<SentimentBody> sentiments = qs.execute(SentimentBody.class);
+
+                for (SentimentBody sb : sentiments) {
+                    sentimentList[i] = sb.getSentiment();
+                }
+
+
+            } catch (ParseException | OpenRDFException e) {
+                e.printStackTrace();
+            }
+
+            i++;
+
+        }
+
+        double medianSentiment = RecoUtils.getMedian(sentimentList);
+
+        if (medianSentiment > 0) {
+            return SentimentResult.POSITIVE;
+        } else if (medianSentiment < 0) {
+            return SentimentResult.NEGATIVE;
+        } else {
+            return SentimentResult.NEUTRAL;
+        }
     }
 
     private List<String> getChatTranscript(String subject_id) {

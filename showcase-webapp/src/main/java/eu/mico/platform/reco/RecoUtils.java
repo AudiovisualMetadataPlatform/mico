@@ -13,9 +13,7 @@ import org.apache.http.impl.client.HttpClients;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -112,6 +110,27 @@ public class RecoUtils {
 
         set1.retainAll(set2);
         return set1.size();
+
+    }
+
+    public static double getMedian(double... d) {
+
+
+        Arrays.sort(d);
+        int length = d.length;
+
+        double median = 0;
+
+        if (length % 2 == 1) {
+            median = d[(length - 1) / 2];
+        } else {
+            double s1 = d[length / 2];
+            double s2 = d[length / 2 - 1];
+
+            median = (s1 + s2) / 2;
+        }
+
+        return median;
 
     }
 }

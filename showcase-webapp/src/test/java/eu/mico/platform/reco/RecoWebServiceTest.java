@@ -10,6 +10,7 @@ import eu.mico.platform.anno4j.model.namespaces.MMM;
 import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
 import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
 import eu.mico.platform.reco.Resources.AnimalInfo;
+import eu.mico.platform.reco.Resources.SentimentResult;
 import eu.mico.platform.testutils.Mockups;
 import eu.mico.platform.testutils.TestServer;
 import org.hamcrest.Matchers;
@@ -19,6 +20,7 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -164,4 +166,32 @@ public class RecoWebServiceTest {
     }
 
 
+    @Test
+    public void testGetSentiment() throws Exception {
+
+        String host = "http://demo1.mico-project.eu:8080/marmotta/";
+        String item = "23f2e15e-9d4c-4313-ade3-813ec0b48c0b";
+
+        List<String> itemList = new ArrayList<>();
+        itemList.add(host + item);
+
+        SentimentResult sentiment = zooReco.getChatSentiment(itemList);
+        Assert.assertEquals(SentimentResult.POSITIVE, sentiment);
+
+    }
+
+
+    @Test
+    public void testGetSentiment_invalidItem() throws Exception {
+
+        String host = "http://demo1.mico-project.eu:8080/marmotta/";
+        String item = "23f2e15e-9d4c-1234-ade3-813ec0b48c0b";
+
+        List<String> itemList = new ArrayList<>();
+        itemList.add(host + item);
+
+        SentimentResult sentiment = zooReco.getChatSentiment(itemList);
+        Assert.assertEquals(SentimentResult.NEUTRAL, sentiment);
+
+    }
 }
