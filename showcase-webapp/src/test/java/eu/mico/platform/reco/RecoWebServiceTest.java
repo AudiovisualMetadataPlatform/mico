@@ -139,7 +139,7 @@ public class RecoWebServiceTest {
         String json = RestAssured.
                 given().
                 when()
-                .get(server.getUrl() + "reco/zoo/" + subject + "/is_debated2?chatItem=uno&chatItem=due&chatItem=tres")
+                .get(server.getUrl() + "reco/zoo/" + subject + "/is_debated?chatItem=uno&chatItem=due&chatItem=tres")
                 .body().asString();
 
         String reco_id = from(json).get("reco_id");
@@ -153,15 +153,14 @@ public class RecoWebServiceTest {
     @Test
     public void testIsDebated_valid_items() throws Exception {
 
-        String subject = "http://demo1.mico-project.eu:8080/marmotta/fead87fb-d196-4802-a68d-98f56283be7a";
+        String subject = "http://demo1.mico-project.eu:8080/marmotta/61af22c9-a8e0-44b9-82c0-c3248f1aa046";
         String subject_escaped = subject.replace("/", "%2F");
-        String chat_escaped = "http://demo1.mico-project.eu:8080/marmotta/bac38e61-257b-417e-b2aa-3e1835aa59d2".replace("/", "%2F");;
-
+        String chat_escaped = "http://demo1.mico-project.eu:8080/marmotta/bac38e61-257b-417e-b2aa-3e1835aa59d2".replace("/", "%2F");
 
         String json = RestAssured.
                 given().
                 when()
-                .get(server.getUrl() + "reco/zoo/" + subject_escaped + "/is_debated2?chatItem=" + chat_escaped + "&chatItem=" + chat_escaped)
+                .get(server.getUrl() + "reco/zoo/" + subject_escaped + "/is_debated?chatItem=" + chat_escaped + "&chatItem=" + chat_escaped)
                 .body().asString();
 
 
@@ -171,25 +170,9 @@ public class RecoWebServiceTest {
         Float score = from(json).get("score");
 
         Assert.assertEquals(subject, reco_id);
-        Assert.assertEquals(0.8d, score.doubleValue(), 0.001d);
+        Assert.assertEquals(0.2d, score.doubleValue(), 0.001d);
     }
 
-
-    @Test
-    @Ignore
-    public void testIsDebated() throws Exception {
-
-        RestAssured.
-                when()
-                .get(server.getUrl() + "reco/zoo/12345/is_debated")
-                .then()
-                .assertThat()
-                .statusCode(200)
-                .body("reco_id", Matchers.equalTo("12345"))
-                .body("score", Matchers.greaterThanOrEqualTo(0f))
-                .body("score", Matchers.lessThan(1f));
-
-    }
 
 
     @Before

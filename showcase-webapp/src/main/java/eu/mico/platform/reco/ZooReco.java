@@ -32,7 +32,7 @@ public class ZooReco {
     private static final int CHAT_LENGTH_THRESHOLD = 5;
     private static final double CHAT_LENGTH_PENALTY = 0.3;
     private static final double SENTIMENT_PENALTY = 0.3;
-    private static final double TALKED_ABOUT_PENALTY = 0.2;
+    private static final double TALKED_ABOUT_PENALTY = 0.1;
 
 
     private MICOQueryHelperMMM mqh;
@@ -173,7 +173,7 @@ public class ZooReco {
 
         int overlappingCount = RecoUtils.countOverlappingEntites(linkedEntities, detectedAnimals);
 
-        score += TALKED_ABOUT_PENALTY * (linkedEntities.size() - overlappingCount);
+        score += TALKED_ABOUT_PENALTY * (linkedEntities.stream().distinct().count() - overlappingCount);
 
         if (chatItems.size() > CHAT_LENGTH_THRESHOLD) {
             score += CHAT_LENGTH_PENALTY;

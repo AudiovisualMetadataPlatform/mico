@@ -225,14 +225,9 @@ public class RecoWebService {
     }
 
 
-    @ApiMethod(
-            path = "/reco//zoo/{subject_id}/is_debated",
-            verb = ApiVerb.GET,
-            description = "Returns whether a given subject is debated by its users",
-            produces = {MediaType.APPLICATION_JSON}
-    )
+
     @GET
-    @Path("/zoo/{subject_id}/is_debated")
+    @Path("/zoo/{subject_id}/is_debated2")
     @Produces("application/json")
     public Response isDebatedSubjects(@PathParam("subject_id") String subject_id) {
 
@@ -255,8 +250,14 @@ public class RecoWebService {
 
 
 
+    @ApiMethod(
+            path = "/reco/zoo/{subject_item}/is_debated",
+            verb = ApiVerb.GET,
+            description = "Returns whether a given subject (represented as an Item) is debated by its users",
+            produces = {MediaType.APPLICATION_JSON}
+    )
     @GET
-    @Path("/zoo/{subject_item}/is_debated2")
+    @Path("/zoo/{subject_item}/is_debated")
     @Produces("application/json")
     public Response isDebatedSubjects2(@PathParam("subject_item") String subject_item, @QueryParam("chatItem") List<String> chatItems) {
 

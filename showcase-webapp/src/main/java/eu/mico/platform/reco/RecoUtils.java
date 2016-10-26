@@ -13,7 +13,10 @@ import org.apache.http.impl.client.HttpClients;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -102,7 +105,8 @@ public class RecoUtils {
         Set<String> set2 = new HashSet<>();
 
         for (SimpleExtractionResult ser : list1) {
-            set1.add(ser.getLabel());
+            //strip fusepool namespace
+            set1.add(ser.getLabel().substring(ser.getLabel().lastIndexOf("#") + 1));
         }
         for (SimpleExtractionResult ser : list2) {
             set2.add(ser.getLabel());
