@@ -1,15 +1,29 @@
 package eu.mico.platform.reco;
 
+import com.github.anno4j.Anno4j;
+import com.github.anno4j.model.namespaces.DCTERMS;
+import com.github.anno4j.model.namespaces.OADM;
+import com.github.anno4j.querying.QueryService;
 import com.jayway.restassured.RestAssured;
+import eu.mico.platform.anno4j.model.ItemMMM;
+import eu.mico.platform.anno4j.model.namespaces.MMM;
+import eu.mico.platform.anno4j.model.namespaces.MMMTERMS;
+import eu.mico.platform.anno4j.querying.MICOQueryHelperMMM;
+import eu.mico.platform.reco.Resources.AnimalInfo;
+import eu.mico.platform.reco.Resources.SentimentResult;
+import eu.mico.platform.testutils.Mockups;
 import eu.mico.platform.testutils.TestServer;
 import org.hamcrest.Matchers;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-import static eu.mico.platform.testutils.Mockups.mockEvenmanager;
+import static com.jayway.restassured.path.json.JsonPath.from;
 
 /**
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,16 +42,28 @@ public class RecoWebServiceTest {
 
 
     static private TestServer server;
+    private static MICOQueryHelperMMM mqh;
 
+
+    private static Repository repository;
+
+    private static RepositoryConnection connection;
+    private ZooReco zooReco;
 
     @BeforeClass
     public static void init() throws Exception {
 
+        //init in memory repository
+        repository = Mockups.initializeRepository("reco/zooniverse.ttl");
+        connection = repository.getConnection();
 
-        RecoWebService recoWebService = new RecoWebService(
-                mockEvenmanager(null),
-                "http://mico-platform:8080/marmotta"
-        );
+        Anno4j anno4j = new Anno4j();
+        anno4j.setRepository(repository);
+        mqh = new MICOQueryHelperMMM(anno4j);
+
+
+        RecoWebService recoWebService = new RecoWebService(mqh);
+
 
         //init server
         server = new TestServer();
@@ -45,6 +71,12 @@ public class RecoWebServiceTest {
         server.addWebservice(recoWebService);
 
         server.start();
+    }
+
+    @AfterClass
+    public static void tearDown() throws Exception {
+        connection.close();
+
     }
 
     @Test
@@ -77,18 +109,119 @@ public class RecoWebServiceTest {
     }
 
     @Test
-    public void testIsDebated() throws Exception {
+    public void name() throws Exception {
 
-        RestAssured.
-                when()
-                .get(server.getUrl() + "reco/zoo/12345/is_debated")
-                .then()
-                .assertThat()
-                .statusCode(200)
-                .body("reco_id", Matchers.equalTo("12345"))
-                .body("score", Matchers.greaterThanOrEqualTo(0f))
-                .body("score", Matchers.lessThan(1f));
+        QueryService qs = mqh.getAnno4j().createQueryService()
+                .addPrefix(MMM.PREFIX, MMM.NS)
+                .addPrefix(MMMTERMS.PREFIX, MMMTERMS.NS)
+                .addPrefix(DCTERMS.PREFIX, DCTERMS.NS)
+                .addPrefix(OADM.PREFIX, OADM.NS)
+                .addCriteria("mmm:hasPart/oa:hasBody[is-a mmmterms:AnimalDetectionBody]/rdf:value", "gazelle");
+
+
+        List<ItemMMM> retList = qs.execute(ItemMMM.class);
+
+        System.out.println(retList.size());
+
+        for (ItemMMM item : retList) {
+            System.out.println(item.toString());
+
+        }
+
 
     }
 
+    @Test
+    public void testIsDebated_with_bogus_items() throws Exception {
+
+        String subject = "12345";
+
+        String json = RestAssured.
+                given().
+                when()
+                .get(server.getUrl() + "reco/zoo/" + subject + "/is_debated?chatItem=uno&chatItem=due&chatItem=tres")
+                .body().asString();
+
+        String reco_id = from(json).get("reco_id");
+        Float score = from(json).get("score");
+
+        Assert.assertEquals(subject, reco_id);
+        Assert.assertEquals(0.0d, score.doubleValue(), 0.001d);
+    }
+
+
+    @Test
+    public void testIsDebated_valid_items() throws Exception {
+
+        String subject = "http://demo1.mico-project.eu:8080/marmotta/61af22c9-a8e0-44b9-82c0-c3248f1aa046";
+        String subject_escaped = subject.replace("/", "%2F");
+        String chat_escaped = "http://demo1.mico-project.eu:8080/marmotta/bac38e61-257b-417e-b2aa-3e1835aa59d2".replace("/", "%2F");
+
+        String json = RestAssured.
+                given().
+                when()
+                .get(server.getUrl() + "reco/zoo/" + subject_escaped + "/is_debated?chatItem=" + chat_escaped + "&chatItem=" + chat_escaped)
+                .body().asString();
+
+
+        System.out.println(json);
+
+        String reco_id = from(json).get("reco_id");
+        Float score = from(json).get("score");
+
+        Assert.assertEquals(subject, reco_id);
+        Assert.assertEquals(0.2d, score.doubleValue(), 0.001d);
+    }
+
+
+
+    @Before
+    public void setUp() throws Exception {
+
+        zooReco = new ZooReco(mqh);
+
+    }
+
+    @Test
+    public void testGetAnimal() throws Exception {
+
+        String host = "http://demo1.mico-project.eu:8080/marmotta/";
+        String item = "61af22c9-a8e0-44b9-82c0-c3248f1aa046";
+
+        List<AnimalInfo> animalInfos = zooReco.getDetectedAnimals(host + item, mqh);
+
+        Assert.assertEquals(1, animalInfos.size());
+        Assert.assertEquals("gazelle", animalInfos.get(0).getSpecies());
+
+    }
+
+
+    @Test
+    public void testGetSentiment() throws Exception {
+
+        String host = "http://demo1.mico-project.eu:8080/marmotta/";
+        String item = "23f2e15e-9d4c-4313-ade3-813ec0b48c0b";
+
+        List<String> itemList = new ArrayList<>();
+        itemList.add(host + item);
+
+        SentimentResult sentiment = zooReco.getChatSentiment(itemList);
+        Assert.assertEquals(SentimentResult.POSITIVE, sentiment);
+
+    }
+
+
+    @Test
+    public void testGetSentiment_invalidItem() throws Exception {
+
+        String host = "http://demo1.mico-project.eu:8080/marmotta/";
+        String item = "23f2e15e-9d4c-1234-ade3-813ec0b48c0b";
+
+        List<String> itemList = new ArrayList<>();
+        itemList.add(host + item);
+
+        SentimentResult sentiment = zooReco.getChatSentiment(itemList);
+        Assert.assertEquals(SentimentResult.NEUTRAL, sentiment);
+
+    }
 }

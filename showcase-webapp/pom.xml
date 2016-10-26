@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -188,6 +189,16 @@
             <artifactId>log4j-over-slf4j</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.jsondoc</groupId>
+            <artifactId>jsondoc-ui</artifactId>
+            <version>1.2.16</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jsondoc</groupId>
+            <artifactId>jsondoc-core</artifactId>
+            <version>1.2.16</version>
+        </dependency>
 
     </dependencies>
 
@@ -218,6 +229,34 @@
                     <update>true</update>
                     <skip>false</skip>
                 </configuration>
+            </plugin>
+
+
+            <plugin>
+                <groupId>org.jsondoc</groupId>
+                <artifactId>jsondoc-maven-plugin</artifactId>
+                <version>1.2.16</version>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>javax.servlet-api</artifactId>
+                        <version>3.0.1</version>
+                    </dependency>
+                </dependencies>
+
+                <configuration>
+                    <version>${project.version}</version>
+                    <basePath>http://mico-platform:8080/showcase-webapp</basePath>
+                    <packages>
+                        <package>eu.mico.platform.reco</package>
+                    </packages>
+                    <outputFile>${project.build.directory}/jsondoc-ui/showcase.json</outputFile>
+                    <scanner>org.jsondoc.core.scanner.DefaultJSONDocScanner</scanner>
+                    <playgroundEnabled>false</playgroundEnabled>
+                    <displayMethodAs>URI</displayMethodAs>
+                </configuration>
+
             </plugin>
         </plugins>
     </build>
@@ -284,5 +323,7 @@
                 </plugins>
             </build>
         </profile>
+
+
     </profiles>
 </project>

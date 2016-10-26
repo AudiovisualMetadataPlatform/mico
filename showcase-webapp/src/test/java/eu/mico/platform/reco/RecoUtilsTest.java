@@ -37,4 +37,19 @@ public class RecoUtilsTest {
         Assert.assertNotNull(RecoUtils.getDockerCmd(psaux));
     }
 
+    @Test
+    public void testMedian() throws Exception {
+
+        double med = RecoUtils.getMedian(25d);
+        Assert.assertEquals(25, med, 0.01d);
+
+
+        med = RecoUtils.getMedian(0d, 1d, -1d);
+        Assert.assertEquals(0, med, 0.01d);
+
+        med = RecoUtils.getMedian(1.0, 2.0, 3.0, 4.0);
+        Assert.assertEquals(2.5, med, 0.01d);
+
+
+    }
 }

@@ -88,7 +88,7 @@ public class ShowcaseApplication extends Application {
 
 
             //WP5
-            services.add(new RecoWebService(manager, marmottaBaseUri));
+            services.add(new RecoWebService(NERQuery.createMicoQueryHelper()));
             services.add(new EchoService());
             services.add(new Videos(NERQuery.createMicoQueryHelper()));
             services.add(new NerService(NERQuery.createMicoQueryHelper()));

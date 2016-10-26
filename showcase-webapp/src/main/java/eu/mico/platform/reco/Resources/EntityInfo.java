@@ -4,7 +4,7 @@ import eu.mico.platform.anno4j.model.fam.LinkedEntityBody;
 
 import java.net.URI;
 
-public class EntityInfo {
+public class EntityInfo extends SimpleExtractionResult {
 
     private URI reference;
     private String label;
@@ -31,8 +31,29 @@ public class EntityInfo {
         return reference;
     }
 
+
+    @Override
     public String getLabel() {
         return label;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        EntityInfo that = (EntityInfo) o;
+
+        if (!reference.equals(that.reference)) return false;
+        return label != null ? label.equals(that.label) : that.label == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = reference.hashCode();
+        result = 31 * result + (label != null ? label.hashCode() : 0);
+        return result;
     }
 
     @Override

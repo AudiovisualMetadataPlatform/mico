@@ -1,5 +1,6 @@
 package eu.mico.platform.reco;
 
+import eu.mico.platform.reco.Resources.SimpleExtractionResult;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -12,6 +13,10 @@ import org.apache.http.impl.client.HttpClients;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -89,6 +94,47 @@ public class RecoUtils {
         } else {
             throw new IOException("Invalid response");
         }
+
+    }
+
+    public static int countOverlappingEntites(
+            List<? extends SimpleExtractionResult> list1,
+            List<? extends SimpleExtractionResult> list2) {
+
+        Set<String> set1 = new HashSet<>();
+        Set<String> set2 = new HashSet<>();
+
+        for (SimpleExtractionResult ser : list1) {
+            //strip fusepool namespace
+            set1.add(ser.getLabel().substring(ser.getLabel().lastIndexOf("#") + 1));
+        }
+        for (SimpleExtractionResult ser : list2) {
+            set2.add(ser.getLabel());
+        }
+
+        set1.retainAll(set2);
+        return set1.size();
+
+    }
+
+    public static double getMedian(double... d) {
+
+
+        Arrays.sort(d);
+        int length = d.length;
+
+        double median = 0;
+
+        if (length % 2 == 1) {
+            median = d[(length - 1) / 2];
+        } else {
+            double s1 = d[length / 2];
+            double s2 = d[length / 2 - 1];
+
+            median = (s1 + s2) / 2;
+        }
+
+        return median;
 
     }
 }
