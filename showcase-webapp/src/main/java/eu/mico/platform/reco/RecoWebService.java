@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 
@@ -250,5 +251,29 @@ public class RecoWebService {
 
         return Response.ok(returnValue.toString()).build();
     }
+
+
+
+    @GET
+    @Path("/zoo/{subject_item}/is_debated2")
+    @Produces("application/json")
+    public Response isDebatedSubjects2(@PathParam("subject_item") String subject_item, @QueryParam("chatItem") List<String> chatItems) {
+
+
+        String bla = "";
+
+        for (String chatItem: chatItems) {
+            bla += chatItem + "   :-)    ";
+        }
+
+        JsonObject returnValue = Json.createObjectBuilder()
+                .add("chat_size", chatItems.size())
+                .add("input_subject", subject_item)
+                .add("chats", bla)
+                .build();
+
+        return Response.ok(returnValue.toString()).build();
+    }
+
 
 }

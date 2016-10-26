@@ -130,6 +130,22 @@ public class RecoWebServiceTest {
     }
 
     @Test
+    public void testIsDebated2() throws Exception {
+
+
+        String json = RestAssured.
+                given().
+                when()
+                .get(server.getUrl() + "reco/zoo/12345/is_debated2?chatItem=uno&chatItem=due&chatItem=tres")
+                .body().asString();
+
+        System.out.println(json);
+
+
+    }
+
+
+    @Test
     @Ignore
     public void testIsDebated() throws Exception {
 
@@ -144,6 +160,7 @@ public class RecoWebServiceTest {
                 .body("score", Matchers.lessThan(1f));
 
     }
+
 
     @Before
     public void setUp() throws Exception {

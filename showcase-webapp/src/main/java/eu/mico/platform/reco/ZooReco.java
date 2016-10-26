@@ -69,6 +69,9 @@ public class ZooReco {
         return retList;
     }
 
+
+    //TODO: item - subject-id-Mapping
+
     public double getDebatedScore(String subject_id) {
 
         List<String> animalDetectionItems = getAnimalDetectionItems(subject_id);
