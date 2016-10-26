@@ -147,8 +147,31 @@ public class RecoWebServiceTest {
 
         Assert.assertEquals(subject, reco_id);
         Assert.assertEquals(0.0d, score.doubleValue(), 0.001d);
+    }
 
 
+    @Test
+    public void testIsDebated_valid_items() throws Exception {
+
+        String subject = "http://demo1.mico-project.eu:8080/marmotta/fead87fb-d196-4802-a68d-98f56283be7a";
+        String subject_escaped = subject.replace("/", "%2F");
+        String chat_escaped = "http://demo1.mico-project.eu:8080/marmotta/bac38e61-257b-417e-b2aa-3e1835aa59d2".replace("/", "%2F");;
+
+
+        String json = RestAssured.
+                given().
+                when()
+                .get(server.getUrl() + "reco/zoo/" + subject_escaped + "/is_debated2?chatItem=" + chat_escaped + "&chatItem=" + chat_escaped)
+                .body().asString();
+
+
+        System.out.println(json);
+
+        String reco_id = from(json).get("reco_id");
+        Float score = from(json).get("score");
+
+        Assert.assertEquals(subject, reco_id);
+        Assert.assertEquals(0.8d, score.doubleValue(), 0.001d);
     }
 
 

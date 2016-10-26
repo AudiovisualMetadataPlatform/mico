@@ -76,7 +76,6 @@ public class ZooReco {
 
         List<String> animalDetectionItems = getAnimalDetectionItems(subject_id);
         List<String> chatAnalysisItems = getChatAnalysisItems(subject_id);
-        List<String> chatTranscript = getChatTranscript(subject_id);
 
         return getDebatedScore(animalDetectionItems.get(0), chatAnalysisItems);
 
@@ -146,7 +145,6 @@ public class ZooReco {
 
     public double getDebatedScore(String subject_item, List<String> chatItems) {
 
-
         SentimentResult sentiment = getChatSentiment(chatItems);
 
         List<EntityInfo> linkedEntities = new ArrayList<>();
@@ -156,10 +154,13 @@ public class ZooReco {
             Map<String, EntityInfo> currentEntities = NERQuery.getLinkedEntities(itemId, DataField.CONTENTITEM, mqh);
 
             if (currentEntities != null && currentEntities.size() > 0) {
-                List<EntityInfo> currentEntityList = (List<EntityInfo>) currentEntities.values();
+                //List<EntityInfo> currentEntityList = (List<EntityInfo>) currentEntities.values();
+                List<EntityInfo> currentEntityList = new ArrayList<>();
+                for (EntityInfo ei: currentEntities.values()) {
+                    currentEntityList.add(ei);
+                }
                 linkedEntities.addAll(currentEntityList);
             }
-
         }
 
         List<AnimalInfo> currentAnimals = getDetectedAnimals(subject_item, mqh);

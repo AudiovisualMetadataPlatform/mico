@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -259,9 +260,16 @@ public class RecoWebService {
     @Produces("application/json")
     public Response isDebatedSubjects2(@PathParam("subject_item") String subject_item, @QueryParam("chatItem") List<String> chatItems) {
 
+        //TODO: find out when it is (not) happening automatically
+        subject_item = subject_item.replace("%2F", "/");
+        List<String> escapedItems = new ArrayList<>();
+        for (String item: chatItems) {
+            escapedItems.add(item.replace("%2F", "/"));
+        }
+
 
         ZooReco zooReco = new ZooReco(mqh);
-        double debatedScore = zooReco.getDebatedScore(subject_item, chatItems);
+        double debatedScore = zooReco.getDebatedScore(subject_item, escapedItems);
 
         double threshold = 0.7;
 
