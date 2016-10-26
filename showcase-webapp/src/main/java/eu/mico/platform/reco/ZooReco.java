@@ -29,7 +29,7 @@ import java.util.Map;
  */
 public class ZooReco {
 
-    private static final int CHAT_LENGTH_THRESHOLD = 3;
+    private static final int CHAT_LENGTH_THRESHOLD = 5;
     private static final double CHAT_LENGTH_PENALTY = 0.3;
     private static final double SENTIMENT_PENALTY = 0.3;
     private static final double TALKED_ABOUT_PENALTY = 0.2;
@@ -76,48 +76,10 @@ public class ZooReco {
 
         List<String> animalDetectionItems = getAnimalDetectionItems(subject_id);
         List<String> chatAnalysisItems = getChatAnalysisItems(subject_id);
-
         List<String> chatTranscript = getChatTranscript(subject_id);
 
-        SentimentResult sentiment = getChatSentiment(chatAnalysisItems);
+        return getDebatedScore(animalDetectionItems.get(0), chatAnalysisItems);
 
-        List<EntityInfo> linkedEntities = new ArrayList<>();
-        List<AnimalInfo> detectedAnimals = new ArrayList<>();
-
-        for (String itemId : chatAnalysisItems) {
-            Map<String, EntityInfo> currentEntities = NERQuery.getLinkedEntities(itemId, DataField.CONTENTITEM, mqh);
-
-            if (currentEntities != null) {
-                List<EntityInfo> currentEntityList = (List<EntityInfo>) currentEntities.values();
-                linkedEntities.addAll(currentEntityList);
-            }
-
-        }
-
-        for (String itemId : animalDetectionItems) {
-            List<AnimalInfo> currentAnimals = getDetectedAnimals(itemId, mqh);
-            if (currentAnimals != null) {
-                detectedAnimals.addAll(currentAnimals);
-            }
-        }
-
-
-        double score = 0;
-
-        int overlappingCount = RecoUtils.countOverlappingEntites(linkedEntities, detectedAnimals);
-
-        score += TALKED_ABOUT_PENALTY * (linkedEntities.size() - overlappingCount);
-
-        if (chatTranscript.size() > CHAT_LENGTH_THRESHOLD) {
-            score += CHAT_LENGTH_PENALTY;
-        }
-
-        if (sentiment == SentimentResult.NEGATIVE) {
-            score += SENTIMENT_PENALTY;
-        }
-
-
-        return score;
 
     }
 
@@ -170,7 +132,7 @@ public class ZooReco {
     }
 
     private List<String> getChatTranscript(String subject_id) {
-        return new ArrayList<>();
+        throw new RuntimeException("Not implemented, yet");
     }
 
     private List<String> getChatAnalysisItems(String subject_id) {
@@ -180,5 +142,47 @@ public class ZooReco {
     private List<String> getAnimalDetectionItems(String subject_id) {
         throw new RuntimeException("Not implemented, yet");
 
+    }
+
+    public double getDebatedScore(String subject_item, List<String> chatItems) {
+
+
+        SentimentResult sentiment = getChatSentiment(chatItems);
+
+        List<EntityInfo> linkedEntities = new ArrayList<>();
+        List<AnimalInfo> detectedAnimals = new ArrayList<>();
+
+        for (String itemId : chatItems) {
+            Map<String, EntityInfo> currentEntities = NERQuery.getLinkedEntities(itemId, DataField.CONTENTITEM, mqh);
+
+            if (currentEntities != null && currentEntities.size() > 0) {
+                List<EntityInfo> currentEntityList = (List<EntityInfo>) currentEntities.values();
+                linkedEntities.addAll(currentEntityList);
+            }
+
+        }
+
+        List<AnimalInfo> currentAnimals = getDetectedAnimals(subject_item, mqh);
+        if (currentAnimals != null) {
+            detectedAnimals.addAll(currentAnimals);
+        }
+
+
+        double score = 0;
+
+        int overlappingCount = RecoUtils.countOverlappingEntites(linkedEntities, detectedAnimals);
+
+        score += TALKED_ABOUT_PENALTY * (linkedEntities.size() - overlappingCount);
+
+        if (chatItems.size() > CHAT_LENGTH_THRESHOLD) {
+            score += CHAT_LENGTH_PENALTY;
+        }
+
+        if (sentiment == SentimentResult.NEGATIVE) {
+            score += SENTIMENT_PENALTY;
+        }
+
+
+        return score;
     }
 }

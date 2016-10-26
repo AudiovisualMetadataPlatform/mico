@@ -260,18 +260,18 @@ public class RecoWebService {
     public Response isDebatedSubjects2(@PathParam("subject_item") String subject_item, @QueryParam("chatItem") List<String> chatItems) {
 
 
-        String bla = "";
+        ZooReco zooReco = new ZooReco(mqh);
+        double debatedScore = zooReco.getDebatedScore(subject_item, chatItems);
 
-        for (String chatItem: chatItems) {
-            bla += chatItem + "   :-)    ";
-        }
+        double threshold = 0.7;
 
         JsonObject returnValue = Json.createObjectBuilder()
+                .add("reco_id", subject_item)
+                .add("is_debated", debatedScore > threshold)
+                .add("score", debatedScore)
+                .add("comment", "Calculated Score")
                 .add("chat_size", chatItems.size())
-                .add("input_subject", subject_item)
-                .add("chats", bla)
                 .build();
-
         return Response.ok(returnValue.toString()).build();
     }
 
