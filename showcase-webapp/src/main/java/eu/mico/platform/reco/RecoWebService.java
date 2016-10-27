@@ -267,14 +267,16 @@ public class RecoWebService {
 
             @ApiQueryParam(
                     name = "chatItem",
-                    description = "Item-Uris (please escape the slashes with %2F) corresponding with talk entries to the queried subject. " +
+                    description = "Item-Uris (please pseudo-escape the slashes with !S) corresponding with talk entries to the queried subject. " +
                             "Several talk-entries are allowed by passing several chatItem=..."
 
             )
             @QueryParam("chatItem") List<String> chatItems) {
 
-        //TODO: find out when it is (not) happening automatically
+        // Lesson learned: tomcat (and apache) do not allow escaped forward slashes in the path for security reason.
+        // we only expect Mico-ItemID's so this !S escaping is ugly, but shouldn't be critical.
         subject_item = subject_item.replace("%2F", "/");
+        subject_item = subject_item.replace("!S", "/");
         List<String> escapedItems = new ArrayList<>();
         for (String item : chatItems) {
             escapedItems.add(item.replace("%2F", "/"));

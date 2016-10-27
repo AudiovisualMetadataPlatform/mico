@@ -13,6 +13,7 @@ import org.openrdf.OpenRDFException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +29,9 @@ import java.util.Map;
  * limitations under the License.
  */
 public class ZooReco {
+
+
+    private static Logger log = Logger.getAnonymousLogger();
 
     private static final int CHAT_LENGTH_THRESHOLD = 5;
     private static final double CHAT_LENGTH_PENALTY = 0.3;
@@ -55,6 +59,8 @@ public class ZooReco {
 
 
             List<AnimalDetectionBodyMMM> adbs = qs.execute(AnimalDetectionBodyMMM.class);
+
+            log.info("# of animal annotations: " + adbs.size());
 
             for (AnimalDetectionBodyMMM adbMMM : adbs) {
                 AnimalInfo ai = new AnimalInfo(adbMMM.getValue(), adbMMM.getConfidence());
