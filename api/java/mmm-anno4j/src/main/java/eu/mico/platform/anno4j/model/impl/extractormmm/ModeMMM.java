@@ -1,6 +1,7 @@
 package eu.mico.platform.anno4j.model.impl.extractormmm;
 
 import com.github.anno4j.model.impl.ResourceObject;
+import com.github.anno4j.model.impl.agent.Software;
 import eu.mico.platform.anno4j.model.namespaces.MMM;
 import org.openrdf.annotations.Iri;
 
@@ -11,7 +12,7 @@ import java.util.Set;
  * A ModeMMM is the combination of a setting of an extractor and its parameters.
  */
 @Iri(MMM.MODE)
-public interface ModeMMM extends ResourceObject {
+public interface ModeMMM extends Software {
 
     @Iri(MMM.HAS_CONFIG_SCHEMA_URI)
     void setConfigSchemaUri(String schema);

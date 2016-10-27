@@ -25,7 +25,10 @@ import eu.mico.platform.persistence.model.Resource;
 
 import org.apache.commons.io.IOUtils;
 import org.jsondoc.core.annotation.Api;
+import org.jsondoc.core.annotation.ApiAuthNone;
+import org.jsondoc.core.annotation.ApiMethod;
 import org.jsondoc.core.annotation.ApiVersion;
+import org.jsondoc.core.pojo.ApiVerb;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -56,6 +59,7 @@ import java.util.jar.Manifest;
  */
 @Api(name = "item status services", description = "Methods for checking status of items", group = "broker")
 @ApiVersion(since = "1.0")
+@ApiAuthNone
 @Path("/status")
 public class StatusWebService {
 
@@ -72,6 +76,13 @@ public class StatusWebService {
         this.broker = broker;
     }
 
+    @ApiMethod(
+            path = "/status/info",
+            verb = ApiVerb.GET,
+            description = "retrieve general information about the service as plain text",
+            produces = { MediaType.TEXT_PLAIN},
+            responsestatuscode = "200 - OK"
+    )
     @GET
     @Path("/info")
     @Produces("text/plain")
@@ -95,6 +106,13 @@ public class StatusWebService {
         return Response.ok(info).build();
     }
 
+    @ApiMethod(
+            path = "/status/info",
+            verb = ApiVerb.GET,
+            description = "retrieve general information about the service in machine readable format from META-INF/MANIFEST.MF",
+            produces = { MediaType.APPLICATION_JSON },
+            responsestatuscode = "200 - OK"
+    )
     @GET
     @Path("/info")
     @Produces("application/json")
@@ -111,6 +129,13 @@ public class StatusWebService {
         }
     }
 
+    @ApiMethod(
+            path = "/status/dependencies",
+            verb = ApiVerb.GET,
+            description = "generate a connection diagram for all running extraction services",
+            produces= {"image/png"},
+            responsestatuscode = "200 - OK"
+    )
     @GET
     @Path("/dependencies")
     @Produces("image/png")
@@ -125,6 +150,13 @@ public class StatusWebService {
     }
 
 
+    @ApiMethod(
+            path = "/status/services",
+            verb = ApiVerb.GET,
+            description = "retrieve a list of currently connected services",
+            produces = { MediaType.APPLICATION_JSON },
+            responsestatuscode = "200 - OK"
+    )
     @GET
     @Path("/services")
     @Produces("application/json")
@@ -145,6 +177,13 @@ public class StatusWebService {
     }
 
 
+    @ApiMethod(
+            path = "/status/items",
+            verb = ApiVerb.GET,
+            description = "retrieve a list of items known to the platform service",
+            produces = { MediaType.APPLICATION_JSON },
+            responsestatuscode = "200 - OK"
+    )
     @GET
     @Path("/items")
     @Produces("application/json")
@@ -264,6 +303,13 @@ public class StatusWebService {
     }
 
 
+    @ApiMethod(
+            path = "/status/download",
+            verb = ApiVerb.GET,
+            description = "retrieve the binary asset of an item or a part ",
+            produces = { "IMAGE/*","VIDEO/*",MediaType.WILDCARD, MediaType.APPLICATION_OCTET_STREAM },
+            responsestatuscode = "200 - OK"
+    )
     @GET
     @Path("/download")
     public Response downloadPart(@QueryParam("itemUri") String itemUri, @QueryParam("partUri") String partUri) throws RepositoryException {

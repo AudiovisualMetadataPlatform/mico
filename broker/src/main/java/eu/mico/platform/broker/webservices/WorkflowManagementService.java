@@ -59,7 +59,6 @@ import java.util.Map;
 public class WorkflowManagementService {
 
     private static Logger log = LoggerFactory.getLogger(WorkflowManagementService.class);
-    private static Integer newID = -1;
     private static final String DEFAULT_ROUTES_PATH = "/usr/share/mico/camel-routes/";
     
 
@@ -90,7 +89,7 @@ public class WorkflowManagementService {
             path = "/workflow/add",
             description = "add all routes of a new workflow",
             produces = { MediaType.APPLICATION_JSON},
-            consumes = { MediaType.APPLICATION_JSON}
+            consumes = { MediaType.APPLICATION_XML}
     )
     @POST
     @Path("/add")
@@ -127,6 +126,7 @@ public class WorkflowManagementService {
 		}
         
     }
+    
     @ApiMethod(verb = ApiVerb.POST,
             path = "/workflow/del/{id}",
             description = "remove workflow with given id",

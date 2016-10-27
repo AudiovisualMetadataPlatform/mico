@@ -40,6 +40,7 @@ import org.jsondoc.core.annotation.ApiQueryParam;
 import org.jsondoc.core.annotation.ApiResponseObject;
 import org.jsondoc.core.annotation.ApiVersion;
 import org.jsondoc.core.pojo.ApiVerb;
+import org.jsondoc.core.pojo.ApiVisibility;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
@@ -97,6 +98,7 @@ public class InjectionWebService {
             path = "/inject/create",
             verb = ApiVerb.POST,
             description = "Create a new item and return its URI in the 'uri' field of the JSON response",
+            consumes = MediaType.WILDCARD,
             produces = { MediaType.APPLICATION_JSON },
             responsestatuscode = "201 - Created"
     )
@@ -248,14 +250,18 @@ public class InjectionWebService {
     @ApiMethod(
             path = "/inject/items",
             verb = ApiVerb.GET,
-            description = "Create a new item and return its URI in the 'uri' field of the JSON response",
+            description = "retrieve information about injected items",
             produces = { MediaType.APPLICATION_JSON },
-            responsestatuscode = "201 - Created"
+            responsestatuscode = "200 - OK"
     )
     @GET
     @Path("/items")
     @Produces("application/json")
-    public List<Map<String, Object>> getItems(@QueryParam("uri") String itemUri, @QueryParam("parts") boolean showParts) throws RepositoryException {
+    public List<Map<String, Object>> getItems(
+            @ApiQueryParam(name="uri", description="uri of a specific item", required=false)
+            @QueryParam("uri") String itemUri,
+            @ApiQueryParam(name="parts", description="if 'true' the response will contain detailed information about all parts of the item", allowedvalues={"true" ,"false"}, required=false)
+            @QueryParam("parts") boolean showParts) throws RepositoryException {
         PersistenceService ps = eventManager.getPersistenceService();
 
         List<Map<String, Object>> result = new ArrayList<>();
@@ -282,15 +288,20 @@ public class InjectionWebService {
             path = "/inject/submit",
             verb = ApiVerb.POST,
             description = "Submit the item for analysis by notifying the broker to process it with a given workflow.",
+            consumes = "-",
             produces = { MediaType.APPLICATION_JSON }
     )
+    @ApiResponseObject(clazz= InjectResponse.class)
     @POST
     @Path("/submit")
     @Produces(MediaType.APPLICATION_JSON)
     public Response submitItem(
-			@QueryParam("item") String itemURI,
-			@QueryParam("route") String routeId,
-			@QueryParam("notifyTo") String notificationURI
+            @ApiQueryParam(name="item", description="uri of the item to be analyzed", required=true)
+            @QueryParam("item") String itemURI,
+            @ApiQueryParam(name="route", description="id of the route to analyze the item with", required=true)
+            @QueryParam("route") String routeId,
+            @ApiQueryParam(name="notifyTo", description="URL to be called, when analysis process finished", required=false)
+            @QueryParam("notifyTo") String notificationURI
 	) throws RepositoryException, IOException {
 
 
@@ -443,9 +454,10 @@ public class InjectionWebService {
      * @return
      */
     @ApiMethod(
-            path = "add",
+            path = "/inject/add",
             verb = ApiVerb.POST,
             description = "Add a new content part to the item using the request body as content. Return the URI of the new part in the 'uri' field of the JSON response",
+            consumes = MediaType.WILDCARD,
             produces = { MediaType.APPLICATION_JSON }
     )
     @POST
