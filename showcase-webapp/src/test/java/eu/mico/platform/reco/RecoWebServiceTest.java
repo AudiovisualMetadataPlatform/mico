@@ -131,6 +131,22 @@ public class RecoWebServiceTest {
 
     }
 
+
+    @Test
+    public void testIsDebated_without_chat() throws Exception {
+
+        String subject = "12345";
+
+        String json = RestAssured.
+                given().
+                when()
+                .get(server.getUrl() + "reco/zoo/" + subject + "/is_debated")
+                .body().asString();
+
+        Float score = from(json).get("score");
+        Assert.assertEquals(0.0d, score.doubleValue(), 0.001d);
+    }
+
     @Test
     public void testIsDebated_with_bogus_items() throws Exception {
 

@@ -145,7 +145,11 @@ public class ZooReco {
 
     public double getDebatedScore(String subject_item, List<String> chatItems) {
 
-        SentimentResult sentiment = getChatSentiment(chatItems);
+        SentimentResult sentiment = SentimentResult.NEUTRAL;
+        if (chatItems.size() > 0) {
+            sentiment = getChatSentiment(chatItems);
+        }
+
 
         List<EntityInfo> linkedEntities = new ArrayList<>();
         List<AnimalInfo> detectedAnimals = new ArrayList<>();
