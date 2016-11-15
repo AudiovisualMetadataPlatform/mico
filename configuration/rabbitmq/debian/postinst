@@ -40,10 +40,36 @@ case "$1" in
 		echo "enabling RabbitMQ management plugins ..."
 		rabbitmq-plugins enable rabbitmq_management rabbitmq_management_visualiser
 
-		service rabbitmq-server reload
+		# flag to restart rabbit_mq
+		rabbit_changed=true
+
 	else
 		echo "MICO user exists."
 	fi
+
+    #if there is no config file existing
+    echo "Setting up custom config file ..."
+    if [ ! -f /etc/rabbitmq/rabbitmq.config ]; then
+        #add our values inside
+        echo "["  > /etc/rabbitmq/rabbitmq.config
+        echo " {rabbit, "  >> /etc/rabbitmq/rabbitmq.config
+        echo "  ["  >> /etc/rabbitmq/rabbitmq.config
+        echo "   %% disable default AMQP heartbeat"  >> /etc/rabbitmq/rabbitmq.config
+        echo "   {heartbeat, 0}"  >> /etc/rabbitmq/rabbitmq.config
+        echo "  ]}"  >> /etc/rabbitmq/rabbitmq.config
+        echo " ]."  >> /etc/rabbitmq/rabbitmq.config
+
+        # flag to restart rabbit_mq
+        rabbit_changed=true
+    else
+        echo "/etc/rabbitmq/rabbitmq.conf exists, and was not modified"
+        cat /etc/rabbitmq/rabbitmq.config
+    fi
+
+    if [ "$rabbit_changed" = 'true' ]; then
+        echo 'restart rabbitmq'
+        service rabbitmq-server restart
+    fi
 
     ;;
 
