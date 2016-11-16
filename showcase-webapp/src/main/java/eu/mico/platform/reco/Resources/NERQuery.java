@@ -42,8 +42,6 @@ import static junit.framework.Assert.assertNotNull;
 
 public class NERQuery {
 
-    private static final String endpointUrl = "http://mico-platform:8080/marmotta/sparql/select";
-    private static final String marmotta_base = "http://mico-platform:8080/marmotta/";
     private static Logger log = Logger.getAnonymousLogger();
 
 
@@ -217,17 +215,12 @@ public class NERQuery {
 
                     String id, prefix;
 
-                    if (itemUri.startsWith(marmotta_base)) {
-                        id = itemUri.substring(marmotta_base.length());
-                        prefix = marmotta_base;
 
-                    } else {
+                    int splitPoint = itemUri.lastIndexOf("/") + 1;
 
-                        int splitPoint = itemUri.lastIndexOf("/") + 1;
+                    prefix = itemUri.substring(0, splitPoint);
+                    id = itemUri.substring(splitPoint);
 
-                        prefix = itemUri.substring(0, splitPoint);
-                        id = itemUri.substring(splitPoint);
-                    }
 
                     try {
                         //noinspection ResultOfMethodCallIgnored
@@ -278,7 +271,19 @@ public class NERQuery {
 
     }
 
-    public static MICOQueryHelperMMM createMicoQueryHelper() throws RepositoryException, RepositoryConfigException {
+    public static MICOQueryHelperMMM createMicoQueryHelper(String marmottaBaseUri) throws RepositoryException, RepositoryConfigException {
+
+        String marmotta_base;
+        String endpointUrl;
+
+        marmotta_base = marmottaBaseUri;
+        if (marmotta_base.endsWith("/")) {
+            endpointUrl = marmottaBaseUri + "sparql/select";
+        } else {
+            endpointUrl = marmottaBaseUri + "/sparql/select";
+        }
+
+
         Anno4j anno4j = new Anno4j();
         Repository micoSparqlEndpoint = new SPARQLRepository(endpointUrl);
         micoSparqlEndpoint.initialize();

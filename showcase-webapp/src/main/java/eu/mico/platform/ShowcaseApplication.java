@@ -88,10 +88,10 @@ public class ShowcaseApplication extends Application {
 
 
             //WP5
-            services.add(new RecoWebService(NERQuery.createMicoQueryHelper()));
+            services.add(new RecoWebService(NERQuery.createMicoQueryHelper(marmottaBaseUri)));
             services.add(new EchoService());
-            services.add(new Videos(NERQuery.createMicoQueryHelper()));
-            services.add(new NerService(NERQuery.createMicoQueryHelper()));
+            services.add(new Videos(NERQuery.createMicoQueryHelper(marmottaBaseUri)));
+            services.add(new NerService(NERQuery.createMicoQueryHelper(marmottaBaseUri)));
 
             // Zooniverse
             services.add(new AnimalDetectionWebService(manager, marmottaBaseUri, brokerServices));
