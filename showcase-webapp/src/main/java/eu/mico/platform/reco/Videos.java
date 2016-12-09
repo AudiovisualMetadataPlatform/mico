@@ -45,9 +45,11 @@ import java.util.logging.Logger;
 public class Videos {
     private static final Logger log = Logger.getAnonymousLogger();
     private final MICOQueryHelperMMM mqh;
+    private final String marmottaBaseUri;
 
-    public Videos(MICOQueryHelperMMM micoQueryHelperMMM) {
+    public Videos(MICOQueryHelperMMM micoQueryHelperMMM, String marmottaBaseUri) {
         this.mqh = micoQueryHelperMMM;
+        this.marmottaBaseUri = marmottaBaseUri;
     }
 
     @ApiMethod(
@@ -221,8 +223,14 @@ public class Videos {
     @Path("/related/{sourceName}")
     public Response getRelatedVideos(@PathParam("sourceName") String sourceName) {
 
+        Map<String, EntityInfo> linkedEntities;
+        if (RecoUtils.isUUID(sourceName)) {
+            linkedEntities = NERQuery.getLinkedEntities(marmottaBaseUri + sourceName, DataField.CONTENTITEM, mqh);
+        }
+        else {
+            linkedEntities = NERQuery.getLinkedEntities(sourceName, DataField.NAME, mqh);
+        }
 
-        Map<String, EntityInfo> linkedEntities = NERQuery.getLinkedEntities(sourceName, DataField.NAME, mqh);
 
         if (linkedEntities == null) {
             return Response.serverError().build();

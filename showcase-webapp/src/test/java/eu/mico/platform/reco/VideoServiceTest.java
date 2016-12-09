@@ -60,7 +60,7 @@ public class VideoServiceTest {
         anno4j.setRepository(repository);
         mqh = new MICOQueryHelperMMM(anno4j);
 
-        Videos videoService = new Videos(mqh);
+        Videos videoService = new Videos(mqh, "http://localhost/marmotta/");
 
         //init server
         server = new TestServer();

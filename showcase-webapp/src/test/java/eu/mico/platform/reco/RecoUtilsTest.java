@@ -17,6 +17,9 @@ package eu.mico.platform.reco;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RecoUtilsTest {
     @Test
     public void testGrepper() throws Exception {
@@ -50,6 +53,30 @@ public class RecoUtilsTest {
 
         med = RecoUtils.getMedian(1.0, 2.0, 3.0, 4.0);
         Assert.assertEquals(2.5, med, 0.01d);
+
+
+    }
+
+    @Test
+    public void testIsUUID() throws Exception {
+
+        List<String> MICOuuids = new ArrayList<>();
+
+        MICOuuids.add("4cd8a00b-1136-400c-a3a9-28016d51ce6c");
+        MICOuuids.add("2954e208-7262-4db0-b21d-43a2d5e59fa3");
+        MICOuuids.add("2c880b35-6f91-4713-9a5c-946e6673250e");
+        MICOuuids.add("1daff3aa-b50b-4bcb-a548-87587f9b7ba0");
+        MICOuuids.add("9614fa03-84aa-4aa9-9776-96121f8d80e5");
+        MICOuuids.add("646a1d8c-f207-41bf-bf92-4976df1b333e");
+        MICOuuids.add("88356965-714f-41bd-881a-41bc3959b213");
+        MICOuuids.add("87597d7e-aa59-4350-b4c3-f84566d535e2");
+        MICOuuids.add("456d9b81-5f40-41cc-91bb-ac715bcc1f8f");
+        MICOuuids.add("98c5c164-4a3f-4023-921d-a72c14d67806");
+
+
+        for (String uuid: MICOuuids) {
+            Assert.assertTrue("Testing " + uuid, RecoUtils.isUUID(uuid));
+        }
 
 
     }

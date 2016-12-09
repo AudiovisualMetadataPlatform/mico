@@ -55,7 +55,7 @@ public class EntitySearchTest {
         anno4j.setRepository(repository);
         mqh = new MICOQueryHelperMMM(anno4j);
 
-        Videos videoService = new Videos(mqh);
+        Videos videoService = new Videos(mqh, "http://demo2.mico-project.eu:8080/marmotta/");
 
         //init server
         server = new TestServer();
@@ -98,6 +98,29 @@ public class EntitySearchTest {
                 given().
                 when().
                 get(server.getUrl() + "videos/related/" + fileName)
+                .body().asString();
+
+
+        HashMap<String, List<String>> videoList = from(json).get("relatedItems");
+
+        System.out.println(json);
+
+        Assert.assertEquals("file2.mp4", videoList.get("http://dbpedia.org/resource/Emperor").get(0));
+
+        //test for resource with parantheses
+        Assert.assertEquals("file2.mp4", videoList.get("http://dbpedia.org/resource/Command_(military_formation)").get(0));
+
+
+    }
+
+    @Test
+    public void testGetRelated_uuid() throws Exception {
+
+        final String uuid = "c9e54133-56dc-4d2f-b6f6-6d60ad0828b5";
+        String json = RestAssured.
+                given().
+                when().
+                get(server.getUrl() + "videos/related/" + uuid)
                 .body().asString();
 
 

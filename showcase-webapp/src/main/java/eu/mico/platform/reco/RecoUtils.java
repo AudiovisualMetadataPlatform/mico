@@ -138,4 +138,16 @@ public class RecoUtils {
         return median;
 
     }
+
+
+    public static boolean isUUID(String testString) {
+        if (testString == null) {
+            throw new IllegalArgumentException("testString must not be null");
+        }
+
+        String  regex = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
+        return testString.matches(regex);
+
+
+    }
 }
