@@ -89,7 +89,7 @@ public class VideoServiceTest {
 
         List<String> fileList = from(json).get("filenames");
 
-        Assert.assertEquals(9, fileList.size());
+        Assert.assertEquals(10, fileList.size());
     }
 
 

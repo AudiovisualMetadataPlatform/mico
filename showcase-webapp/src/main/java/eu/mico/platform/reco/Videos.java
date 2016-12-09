@@ -72,6 +72,7 @@ public class Videos {
                 "p720 - Agricoltura ecologica Greenpeace in dirigibile sopra Milano.mp4",
                 "p720 - Detox presente par Michel Genet, directeur de Greenpeace Belgique.mp4",
                 "p720 - p720 - Greenpeace Year in Pictures 2011.mp4",
+                "09121712.mp4",
                 "p720 - p720 - HTCs Comma, Flash on Mobile Devices, Greenpeace, The Oona and much more iPhone Life Magazine.mp4",
                 "p720 - GREENPEACE DEFORESTATION.mp4"};
 
@@ -225,7 +226,11 @@ public class Videos {
 
         Map<String, EntityInfo> linkedEntities;
         if (RecoUtils.isUUID(sourceName)) {
-            linkedEntities = NERQuery.getLinkedEntities(marmottaBaseUri + sourceName, DataField.CONTENTITEM, mqh);
+            String fillslash = "/";
+            if (marmottaBaseUri.endsWith("/")) {
+                fillslash = "";
+            }
+            linkedEntities = NERQuery.getLinkedEntities(marmottaBaseUri + fillslash + sourceName, DataField.CONTENTITEM, mqh);
         }
         else {
             linkedEntities = NERQuery.getLinkedEntities(sourceName, DataField.NAME, mqh);
