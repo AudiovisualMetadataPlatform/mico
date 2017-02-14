@@ -62,30 +62,8 @@
         <surefire.version>2.19.1</surefire.version>
     </properties>
 
-    <distributionManagement>
-        <repository>
-            <id>mico</id>
-            <url>http://mvn.mico-project.eu/content/repositories/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>mico</id>
-            <url>http://mvn.mico-project.eu/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <repositories>
-        <!--
-            If you need any additional repository, file an issue in
-            https://issues.mico-project.eu/browse/FRAMEWORK
-            to have it added to the MICO Maven Proxy
-        -->
-        <repository>
-            <id>mico.public</id>
-            <name>MICO Maven Proxy</name>
-            <url>http://mvn.mico-project.eu/content/groups/public/</url>
-            <releases><enabled>true</enabled></releases>
-            <snapshots><enabled>true</enabled></snapshots>
-        </repository>
         <repository>
             <id>ossrh-release</id>
             <name>oss-sonatype releases</name>
@@ -103,16 +81,17 @@
                 <updatePolicy>daily</updatePolicy>
             </snapshots>
         </repository>
+        <repository>
+            <id>apache-snapshots</id>
+            <name>apache-snapshots</name>
+            <url>https://repository.apache.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+        </repository>
+
     </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>mico.public</id>
-            <name>MICO Maven Proxy</name>
-            <url>http://mvn.mico-project.eu/content/groups/public/</url>
-            <releases><enabled>true</enabled></releases>
-            <snapshots><enabled>true</enabled></snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 
     <build>
         <pluginManagement>
