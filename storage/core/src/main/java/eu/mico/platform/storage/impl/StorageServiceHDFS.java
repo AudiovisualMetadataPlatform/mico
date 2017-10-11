@@ -21,8 +21,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.HashMap;
-import java.util.UUID;
-
 import org.apache.commons.io.input.ProxyInputStream;
 import org.apache.commons.io.output.ProxyOutputStream;
 import org.apache.hadoop.conf.Configuration;
@@ -47,7 +45,16 @@ public class StorageServiceHDFS implements StorageService {
 
 
         hdfsConfig = new Configuration();
+        
+        //set where to look for the namenode
         hdfsConfig.set("fs.defaultFS", defaultFS);
+        
+        //resolve slave data nodes based on the hostname they are bound to, 
+        //not on their IP (which could be part of an unreachable private network)
+        hdfsConfig.set("dfs.client.use.datanode.hostname", "true");
+        
+        //always read data from the websocket provided by the data node
+        hdfsConfig.set("dfs.client.read.shortcircuit", "false");
 
         String path = basePath;
         if (path == null || path.isEmpty()) {
