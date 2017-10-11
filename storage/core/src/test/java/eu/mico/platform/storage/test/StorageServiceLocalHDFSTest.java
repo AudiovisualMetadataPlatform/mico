@@ -35,7 +35,7 @@ import java.net.URISyntaxException;
  * @author Horst Stadler (horst.stadler@salzburgresearch.at)
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class StorageServiceHDFSTest {
+public class StorageServiceLocalHDFSTest {
 
     final static String host = "localhost";
     static URI contentId = null;
