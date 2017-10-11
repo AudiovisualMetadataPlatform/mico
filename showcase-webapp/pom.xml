@@ -177,7 +177,7 @@
         <dependency>
             <groupId>eu.mico-project.platform</groupId>
             <artifactId>fam-anno4j</artifactId>
-            <version>2.0.2</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
