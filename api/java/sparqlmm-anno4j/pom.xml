@@ -104,7 +104,7 @@
                 <artifactId>maven-plugin-plugin</artifactId>
                 <version>3.2</version>
                 <configuration>
-                    <goalPrefix>sparqlmm</goalPrefix>
+                    <goalPrefix>sparqlmm-anno4j</goalPrefix>
                 </configuration>
                 <executions>
                     <execution>
