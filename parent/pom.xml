@@ -61,14 +61,6 @@
     </properties>
 
     <distributionManagement>
-        <repository>
-            <id>mico</id>
-            <url>http://mvn.mico-project.eu/content/repositories/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>mico</id>
-            <url>http://mvn.mico-project.eu/content/repositories/snapshots/</url>
-        </snapshotRepository>
     </distributionManagement>
 
     <repositories>
@@ -77,13 +69,6 @@
             https://issues.mico-project.eu/browse/FRAMEWORK
             to have it added to the MICO Maven Proxy
         -->
-        <repository>
-            <id>mico.public</id>
-            <name>MICO Maven Proxy</name>
-            <url>http://mvn.mico-project.eu/content/groups/public/</url>
-            <releases><enabled>true</enabled></releases>
-            <snapshots><enabled>true</enabled></snapshots>
-        </repository>
         <repository>
             <id>ossrh-release</id>
             <name>oss-sonatype releases</name>
@@ -103,13 +88,6 @@
         </repository>
     </repositories>
     <pluginRepositories>
-        <pluginRepository>
-            <id>mico.public</id>
-            <name>MICO Maven Proxy</name>
-            <url>http://mvn.mico-project.eu/content/groups/public/</url>
-            <releases><enabled>true</enabled></releases>
-            <snapshots><enabled>true</enabled></snapshots>
-        </pluginRepository>
     </pluginRepositories>
 
     <build>
