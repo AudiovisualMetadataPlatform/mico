@@ -18,23 +18,44 @@
 
 namespace mico {
     namespace io {
-        HDFSStreambuf::HDFSStreambuf(const char* path, FileMode mode, const char* address, uint16_t port, int bufsize)
+        hdfsFS createHdfsFileSystem(const char *host, uint16_t port){
+            
+            //Set Hostname and port of the HDFS name node
+            struct hdfsBuilder *builder = hdfsNewBuilder();
+            
+            if (port == 0) {
+                port = HDFS_DEFAULT_PORT;
+            }
+            std::string nameNodeHostName = "hdfs://" + std::string(host) + ":" + std::to_string(port);
+            hdfsBuilderConfSetStr(builder, "fs.defaultFS", nameNodeHostName.c_str());
+            hdfsBuilderSetNameNode(builder, nameNodeHostName.c_str());
+
+            //Resolve slave data nodes based on the hostname they are bound to,
+            //not on ther IPs (which could be part of an unreachable private network)
+            hdfsBuilderConfSetStr(builder, "dfs.client.use.datanode.hostname", "true");
+
+            //always read data from the websocket provided by the data node
+            hdfsBuilderConfSetStr(builder, "dfs.client.read.shortcircuit", "false");
+
+            hdfsBuilderSetForceNewInstance(builder);
+	    hdfsFS fs = hdfsBuilderConnect(builder);
+            hdfsFreeBuilder(builder);
+            return fs;
+        }
+    }
+}
+
+namespace mico {
+    namespace io {
+        HDFSStreambuf::HDFSStreambuf(const char* path, FileMode mode, const char* host, uint16_t port, int bufsize)
             : buffer_size(bufsize)
         {
             buffer = (char*)malloc(buffer_size * sizeof(char));
             if (buffer == NULL) {
                 return;
             }
-
-            //Connect to HDFS
-            struct hdfsBuilder *builder = hdfsNewBuilder();
-            hdfsBuilderSetNameNode(builder, address);
-            if (port == 0) {
-                port = HDFS_DEFAULT_PORT;
-            }
-            hdfsBuilderSetNameNodePort(builder, port);
-            fs = hdfsBuilderConnect(builder);
-            hdfsFreeBuilder(builder);
+            
+            fs=createHdfsFileSystem(host,port);
 
             //Open file
             switch(mode) {
@@ -193,16 +214,9 @@ namespace mico {
             return 0;
         }
 
-        int removeHdfsFile(const char* path, const char* address, uint16_t port) {
+        int removeHdfsFile(const char* path, const char* host, uint16_t port) {
             //Connect to HDFS
-            struct hdfsBuilder *builder = hdfsNewBuilder();
-            hdfsBuilderSetNameNode(builder, address);
-            if (port == 0) {
-                port = HDFS_DEFAULT_PORT;
-            }
-            hdfsBuilderSetNameNodePort(builder, port);
-            hdfsFS fs = hdfsBuilderConnect(builder);
-            hdfsFreeBuilder(builder);
+            hdfsFS fs = createHdfsFileSystem(host,port);
 
             int status = hdfsDelete(fs, path, 0);
 
