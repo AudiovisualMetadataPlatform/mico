@@ -125,4 +125,7 @@ public class MMMTERMS {
 
     public final static String MEDIA_INFO_BODY = NS + "MediaInfoBody";
 
+    public final static String ASSET_EXPORT_BODY = NS + "AssetExportBody";
+    
+    public final static String MICRO_FORMATS_BODY = NS + "MicroFormatsBody";
 }
