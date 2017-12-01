@@ -50,19 +50,29 @@ case "$1" in
         db_get mico-marmotta/host-name
         HOSTNAME="$RET"
 
+        db_get mico-marmotta/database-host
+        POSTGRESQL_HOST="$RET"
+        POSTGRESQL_PORT=5432
+
+        case $POSTGRESQL_HOST in
+          *":"*) POSTGRESQL_PORT="$(echo ${POSTGRESQL_HOST} | cut -d: -f2)"
+                 POSTGRESQL_HOST="$(echo ${POSTGRESQL_HOST} | cut -d: -f1)"
+        esac
+
         if [ "$CREATE_DATABASE" = "true" ] && ! exists_pg_database $DB_NAME; then
             sudo -u postgres /usr/bin/psql postgres -c "CREATE USER $DB_USER PASSWORD '$DB_PASS'" >/dev/null 2>&1
             sudo -u postgres /usr/bin/psql postgres -c "CREATE DATABASE $DB_NAME OWNER $DB_USER" >/dev/null 2>&1
 
-            cat >/var/lib/marmotta/system-config.properties <<EOF
+        fi
+
+        cat >/var/lib/marmotta/system-config.properties <<EOF
 database.type = postgres
-database.url = jdbc:postgresql://localhost:5432/$DB_NAME?prepareThreshold=3
+database.url = jdbc:postgresql://${POSTGRESQL_HOST}:${POSTGRESQL_PORT}/$DB_NAME?prepareThreshold=3
 database.user = $DB_USER
 database.password = $DB_PASS
 kiwi.host = http://$HOSTNAME:8080/marmotta/
 kiwi.context = http://$HOSTNAME:8080/marmotta/
 EOF
-        fi
 
         MIN_SHARED_BUFFERS=$((256 * 1024 * 1024))
         SHARED_BUFFERS=$(pg_conftool -s get shared_buffers |numfmt --from=iec --suffix=B)

@@ -7,11 +7,14 @@ db_version 2.0
 
 db_settitle mico-marmotta/title
 
+db_set mico-marmotta/host-name "$(/bin/hostname -f)"
+db_input critical mico-marmotta/host-name || true
+
+db_set mico-marmotta/database-host "$(/bin/hostname -f):5432"
+db_input critical mico-marmotta/database-host || true
+
 db_input critical mico-marmotta/database-name || true
 
 db_input critical mico-marmotta/create-database || true
-
-db_set mico-marmotta/host-name "$(/bin/hostname -f)"
-db_input critical mico-marmotta/host-name || true
 
 db_go || true

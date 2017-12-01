@@ -10,6 +10,12 @@ Description: Name of PostgreSQL database to use for Marmotta:
  to automatically create it (select "Yes" in the respective question). Marmotta will automatically create its tables
  when starting up.
 
+Template: mico-marmotta/database-host
+Type: string
+Description: PostgreSQL server host name:
+ Provide the host name or IP address (and optionally the port) of the PostgreSQL server to be used by 
+ Apache Marmotta to store its data.
+
 Template: mico-marmotta/create-database
 Type: boolean
 Default: true
