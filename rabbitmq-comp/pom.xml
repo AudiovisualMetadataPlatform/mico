@@ -177,17 +177,4 @@
     </plugins>
   </build>
 
-  <repositories>
-    <repository>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <id>mico.public</id>
-      <name>MICO Maven Proxy</name>
-      <url>http://mvn.mico-project.eu/content/groups/public/</url>
-    </repository>
-  </repositories>
 </project>
