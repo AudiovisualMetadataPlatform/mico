@@ -39,14 +39,14 @@
         <jetty.version>9.2.1.v20140609</jetty.version>
         <sesame.version>2.7.16</sesame.version>
         <javaee.port>8081</javaee.port>
-        <marmotta.version>3.4.0-SNAPSHOT</marmotta.version>
+        <marmotta.version>3.4.0</marmotta.version>
         <marmotta.context>/marmotta</marmotta.context>
         <marmotta.home>${project.build.directory}${file.separator}marmotta</marmotta.home>
         
         <resteasy.version>3.0.8.Final</resteasy.version>
         <jackson.version>1.9.13</jackson.version>
         
-        <sparqlmm.version>1.0</sparqlmm.version>
+        <sparqlmm.version>2.0</sparqlmm.version>
         <anno4j.version>2.2.0.MICO</anno4j.version>
         
         <slf4j.version>1.7.7</slf4j.version>
@@ -343,7 +343,17 @@
                 <artifactId>kiwi-caching-hazelcast</artifactId>
                 <version>${marmotta.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.apache.marmotta</groupId>
+                <artifactId>ldpath-core</artifactId>
+                <version>${marmotta.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.marmotta</groupId>
+                <artifactId>ldpath-backend-sesame</artifactId>
+                <version>${marmotta.version}</version>
+            </dependency>
+ 
             <!-- Sesame -->
             <dependency>
                 <groupId>org.openrdf.sesame</groupId>
