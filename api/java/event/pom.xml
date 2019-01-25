@@ -160,6 +160,10 @@
                                 <goals>
                                     <goal>javadoc</goal>
                                 </goals>
+                                <configuration>
+                                   <!-- Deactivate DocLint errors with Java 8 (see http://openjdk.java.net/jeps/172 )-->
+                                  <doclint>none</doclint>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

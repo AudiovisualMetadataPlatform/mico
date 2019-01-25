@@ -108,9 +108,6 @@
               <artifactId>maven-source-plugin</artifactId>
             </plugin>
             <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
                     <skip>false</skip>
