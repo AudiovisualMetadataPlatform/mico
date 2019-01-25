@@ -23,8 +23,8 @@
 
     <logger name="org.reflections" level="ERROR" />
 
-    <logger name="eu.mico" level="DEBUG" />
-    <logger name="eu.mico.plattorm.persistence" level="TRACE" />
+    <logger name="eu.mico" level="INFO" />
+    <logger name="eu.mico.plattorm.persistence" level="INFO" />
 
     <root level="WARN">
         <appender-ref ref="STDOUT" />

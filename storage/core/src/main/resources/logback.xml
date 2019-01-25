@@ -18,8 +18,8 @@
         </encoder>
     </appender>
 
-    <logger name="eu.mico" level="DEBUG" />
-    <logger name="com.github.anno4j" level="DEBUG" />
+    <logger name="eu.mico" level="INFO" />
+    <logger name="com.github.anno4j" level="INFO" />
 
     <root level="WARN">
         <appender-ref ref="STDOUT" />

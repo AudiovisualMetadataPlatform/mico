@@ -20,8 +20,8 @@
 
     <logger name="org.reflections" level="ERROR" />
     <logger name="com.github.anno4j" level="INFO" />
-    <logger name="eu.mico" level="DEBUG" />
-    <logger name="eu.mico.platform.event" level="TRACE"/>
+    <logger name="eu.mico" level="INFO" />
+    <logger name="eu.mico.platform.event" level="INFO"/>
 
     <root level="WARN">
         <appender-ref ref="STDOUT" />

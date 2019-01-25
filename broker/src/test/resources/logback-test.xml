@@ -26,7 +26,7 @@
     <logger name="httpclient.wire.header" level="INFO"/>
     <logger name="org.xml" level="WARN" />
     <logger name="eu.mico" level="INFO" />
-    <logger name="eu.mico.platform.broker" level="TRACE" />
+    <logger name="eu.mico.platform.broker" level="INFO" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />
