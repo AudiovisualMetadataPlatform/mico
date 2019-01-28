@@ -44,6 +44,8 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
@@ -164,6 +166,32 @@ public class MicoRabbitComponentTest extends TestBase {
     /**
      * @throws Exception
      */
+    @Test(timeout = 8000)
+    public void testUnknownQueue() throws Exception {
+      MockEndpoint mockStop = getMockEndpoint("mock:unknown");
+      mockStop.expectedMessageCount(0);
+
+      try {
+        Future<Exchange> outExcAsync = null;
+        outExcAsync = template.asyncSend("direct:unknown", createExchange("direct:unknown"));
+        Exception exception = outExcAsync.get(5, TimeUnit.SECONDS).getException();
+        Assert.assertNotNull(exception);
+
+        Exchange outExc = null;
+        outExc = template.send("direct:unknown", createExchange("direct:unknown"));
+        exception = outExc.getException();
+
+        Assert.assertNotNull(exception);
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+        Assert.fail("Unexpected exception - " + e.getClass());
+      }
+
+      // check that processing was stopped after unknown queue
+      assertMockEndpointsSatisfied();
+    }
+
     @Ignore // ignored, because a mico_wordcount and mico_ocr_service must be connected to run this test
     @Test(timeout=60000)
     public void testImageRoute() throws Exception {
@@ -488,6 +516,15 @@ public class MicoRabbitComponentTest extends TestBase {
                 	   }
                 }).stop();
                 
+                // route to test extractor with non existing rabbitmq queue
+                from("direct:unknown")
+                .pipeline()
+                .multicast().stopOnException() // stop all multicast messages, on first error 
+                .to("mico-comp://foo1?host=localhost&extractorId=A-B&extractorVersion=0.0.0&modeId=queue","mico-comp://foo1?host=localhost&extractorId=unknown")
+                .aggregate(header("mico_item"), new ItemAggregationStrategy()).completionSize(2)
+                .to("mock:unknown");
+
+
                 from("direct:a").pipeline()
                         .to("mico-comp://foo1?host=localhost&extractorId=A-B-queue")
                         .to("mico-comp://foo2?host=localhost&extractorId=B-text/plain-queue")

@@ -16,18 +16,15 @@ package eu.mico.platform.camel;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Future;
 
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
-import org.apache.camel.ProducerTemplate;
 import org.apache.camel.impl.DefaultProducer;
 import org.openrdf.model.impl.URIImpl;
 import org.slf4j.Logger;
@@ -37,7 +34,9 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
+import com.rabbitmq.client.ReturnListener;
 import com.rabbitmq.client.ShutdownSignalException;
+import com.rabbitmq.client.AMQP.BasicProperties;
 
 import eu.mico.platform.event.model.Event;
 import eu.mico.platform.event.model.Event.AnalysisEvent.Progress;
@@ -329,7 +328,7 @@ public class MicoRabbitProducer extends DefaultProducer {
      * analysis events to appropriate analyzers as found in the dependency graph. A thread loop waits and only terminates
      * once all service requests are finished. In this case, the manager sends a content event response to the output queue
      */
-    private class AnalyseManager extends DefaultConsumer {
+    private class AnalyseManager extends DefaultConsumer implements ReturnListener {
         private String           queue;
         private AnalysisRequest    req;
         private volatile boolean finished = false;
@@ -349,6 +348,8 @@ public class MicoRabbitProducer extends DefaultProducer {
             log.debug("listen on queue {} for result. ",queue);
             getChannel().basicConsume(queue, false, this);
             getChannel().confirmSelect();
+            getChannel().addReturnListener(this);
+
             this.exchange = exchange;
         }
 
@@ -359,12 +360,31 @@ public class MicoRabbitProducer extends DefaultProducer {
             String correlationId = UUID.randomUUID().toString();
 
             AMQP.BasicProperties ciProps = new AMQP.BasicProperties.Builder()
-                    .correlationId(correlationId).replyTo(queue).build();
+                    .correlationId(correlationId).replyTo(queue).deliveryMode(2).build();
 
-            getChannel().basicPublish("", req.getServiceId(), ciProps,
+            getChannel().basicPublish("", req.getServiceId(), true, ciProps,
                     req.toByteArray());
 
         }
+
+        /**
+         * mark exchange as failed
+         */
+        @Override
+        public void handleReturn(int replyCode, String replyText, String exchange, String routingKey,
+            BasicProperties properties, byte[] body) throws IOException {
+          log.warn("could not send message with replyCode [{}], replyText [{}], exchange [{}], routingKey [{}], properties  [{}]", replyCode, replyText, exchange, routingKey, properties);
+          hasError=true;
+          finished = true;
+          MICOCamelAnalysisException analysisException = new MICOCamelAnalysisException(queueId,
+                  "Unable to route message with key "+ routingKey,
+                  "");
+          this.exchange.setProperty(Exchange.DUPLICATE_MESSAGE, analysisException);
+          this.exchange.setException(analysisException);
+          this.exchange.getIn().setBody(analysisException);
+          this.exchange.getOut().setBody(analysisException);
+        }
+
 
         /**
          * Handle response of a service with an analysis event in the replyto queue
@@ -387,19 +407,14 @@ public class MicoRabbitProducer extends DefaultProducer {
 
                     hasError=true;
                     finished = true;
-                    exchange.setProperty(Exchange.DUPLICATE_MESSAGE, new MICOCamelAnalysisException(queueId,
-                            response.getError().getMessage(),
-                            response.getError().getDescription()));
-                    exchange.setException( 
-                            new MICOCamelAnalysisException(queueId,
-                                    response.getError().getMessage(),
-                                    response.getError().getDescription()));
-                    exchange.getIn().setBody(new MICOCamelAnalysisException(queueId,
-                            response.getError().getMessage(),
-                            response.getError().getDescription()));
-                    exchange.getOut().setBody(new MICOCamelAnalysisException(queueId,
-                            response.getError().getMessage(),
-                            response.getError().getDescription()));
+                    MICOCamelAnalysisException analysisException = new MICOCamelAnalysisException(queueId,
+                        response.getError().getMessage(),
+                        response.getError().getDescription());
+
+                    exchange.setProperty(Exchange.DUPLICATE_MESSAGE, analysisException);
+                    exchange.setException(analysisException);
+                    exchange.getIn().setBody(analysisException);
+                    exchange.getOut().setBody(analysisException);
                     
                     getChannel().basicAck(envelope.getDeliveryTag(), false);
                     // notify producer, to process message
