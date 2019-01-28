@@ -9,6 +9,11 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -194,19 +199,27 @@ public class StorageServiceHDFSTest {
     }
 	
 	
-	//utils to check if the remote test host is reachable
-	private boolean isRemoteHostReachable() {
-        try {
-            final FileSystem fs = getHdfsHostedAt(host);
-            fs.getStatus();
-            fs.close();
-            log.info("Performing test for HDFS host '{}'",host);
-            return true;
-        } catch (Exception ex) {
-        	log.warn("The HDFS host '{}' is not reachable",host);
-            return false;
+  // utils to check if the remote test host is reachable
+  private boolean isRemoteHostReachable() {
+    try {
+      ExecutorService executor = Executors.newCachedThreadPool();
+      Callable<Boolean> task = new Callable<Boolean>() {
+        public Boolean call() throws Exception {
+          final FileSystem fs = getHdfsHostedAt(host);
+          fs.getStatus();
+          fs.close();
+          log.info("Performing test for HDFS host '{}'", host);
+          return true;
         }
+      };
+      Future<Boolean> future = executor.submit(task);
+      return future.get(5, TimeUnit.SECONDS);
     }
+    catch (Exception ex) {
+      log.warn("The HDFS host '{}' is not reachable ({})", host, ex.getClass().getSimpleName());
+      return false;
+    }
+  }
 	
 	private FileSystem getHdfsHostedAt(String host) throws IOException {
         Configuration hdfsConfig = new Configuration();
