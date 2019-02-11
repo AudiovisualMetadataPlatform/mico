@@ -19,7 +19,7 @@
     <parent>
         <groupId>eu.mico-project.platform</groupId>
         <artifactId>mico-platform</artifactId>
-        <version>3.1.1-SNAPSHOT</version>
+        <version>3.1.1</version>
         <relativePath>..</relativePath>
     </parent>
 
